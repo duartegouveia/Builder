@@ -57,7 +57,7 @@ interface NodeEditorProps {
 
 const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoot = false }) => {
   
-  // -- Handlers for Children --
+  // -- Handlers --
   
   const addChild = () => {
     if (!node.children) return;
@@ -85,21 +85,14 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
     if (newType === node.type) return;
     
     // If switching to TEXT, clear children. If switching from TEXT, init children.
-    // If switching between operators, try to preserve children if possible, 
-    // but enforcing min/max limits might be complex. For now, let's just reset or adapt.
-    // The original app creates a NEW builder inside the content area.
-    
     const newNode = createNode(newType);
     
-    // Optional: Preserve children if moving between compatible operators
+    // Preserve children if moving between compatible operators
     if (node.children && newNode.children) {
-        // basic preservation
         newNode.children = [...node.children];
     }
-    // If strictly changing structure (e.g. to Text), we lose children.
     
-    // Enforce limits immediately? 
-    // The original code initializes with min lines.
+    // Enforce limits
     if (newNode.children) {
          const min = newNode.minChildren ?? 0;
          while (newNode.children.length < min) {
@@ -113,36 +106,44 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
     onChange(newNode);
   };
 
+  const renderTypeSelector = () => (
+    <Popover>
+      <PopoverTrigger asChild>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="h-8 w-8 p-0 shrink-0 font-bold bg-muted hover:bg-muted/80 text-muted-foreground mr-2"
+          >
+              <ChevronRight className="h-4 w-4" />
+          </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-1" align="start">
+          <div className="grid gap-1">
+              {Object.entries(OPERATOR_CONFIG).map(([key, conf]) => (
+                  <Button 
+                      key={key} 
+                      variant="ghost" 
+                      className="justify-start h-8 px-2 text-sm"
+                      onClick={() => handleTypeChange(key as NodeType)}
+                  >
+                      {conf.label}
+                  </Button>
+              ))}
+          </div>
+      </PopoverContent>
+   </Popover>
+  );
+
   // -- Render Logic --
 
-  // 1. Empty State (Placeholder)
+  // 1. Empty State
   if (node.type === 'EMPTY') {
     return (
-      <div className="flex items-center gap-3 w-full p-2 border border-dashed border-muted-foreground/30 rounded-md bg-muted/20">
-         <Popover>
-            <PopoverTrigger asChild>
-                <Button variant="secondary" size="sm" className="h-8 w-8 p-0 shrink-0 font-bold bg-muted hover:bg-muted/80 text-muted-foreground">
-                    <ChevronRight className="h-4 w-4" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-1" align="start">
-                <div className="grid gap-1">
-                    {Object.entries(OPERATOR_CONFIG).map(([key, conf]) => (
-                        <Button 
-                            key={key} 
-                            variant="ghost" 
-                            className="justify-start h-8 px-2 text-sm"
-                            onClick={() => handleTypeChange(key as NodeType)}
-                        >
-                            {conf.label}
-                        </Button>
-                    ))}
-                </div>
-            </PopoverContent>
-         </Popover>
-         <span className="text-sm text-muted-foreground italic">Select an operation...</span>
+      <div className="flex items-center w-full p-2 border border-dashed border-muted-foreground/30 rounded-md bg-muted/20">
+         {renderTypeSelector()}
+         <span className="text-sm text-muted-foreground italic flex-1">Select an operation...</span>
          {onRemove && (
-             <Button variant="ghost" size="icon" className="ml-auto h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onRemove}>
+             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onRemove}>
                  <X className="h-4 w-4" />
              </Button>
          )}
@@ -153,18 +154,21 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   // 2. Text Node
   if (node.type === 'TEXT') {
       return (
-          <div className="flex items-center gap-3 w-full p-2 border rounded-md bg-background shadow-sm">
-             <div className="h-8 w-8 flex items-center justify-center bg-blue-100 text-blue-700 rounded font-bold text-xs shrink-0">
-                 Tx
+          <div className="flex items-center w-full p-2 border rounded-md bg-background shadow-sm">
+             {renderTypeSelector()}
+             <div className="flex-1 flex items-center gap-2">
+                 <div className="h-8 w-8 flex items-center justify-center bg-blue-100 text-blue-700 rounded font-bold text-xs shrink-0">
+                     Tx
+                 </div>
+                 <Input 
+                    value={node.textValue} 
+                    onChange={(e) => onChange({ ...node, textValue: e.target.value })}
+                    placeholder="Enter text..."
+                    className="flex-1 h-9 border-transparent focus:border-input bg-transparent"
+                 />
              </div>
-             <Input 
-                value={node.textValue} 
-                onChange={(e) => onChange({ ...node, textValue: e.target.value })}
-                placeholder="Enter text..."
-                className="flex-1 h-9 border-transparent focus:border-input bg-transparent"
-             />
              {onRemove && (
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onRemove}>
+                 <Button variant="ghost" size="icon" className="ml-2 h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onRemove}>
                      <X className="h-4 w-4" />
                  </Button>
              )}
@@ -172,71 +176,91 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 3. Operator Node (Recursive)
+  // 3. Operator Node
   const config = OPERATOR_CONFIG[node.type];
   const canAdd = node.maxChildren == null || (node.children?.length ?? 0) < node.maxChildren;
   const canRemove = node.minChildren == null || (node.children?.length ?? 0) > node.minChildren;
 
   return (
-    <div className={cn("w-full border rounded-lg overflow-hidden bg-card shadow-sm", isRoot ? "ring-1 ring-border" : "")}>
-        <div className="flex">
-            {/* Operator Column */}
-            <div className="w-12 bg-muted/30 border-r flex flex-col items-center justify-center relative">
-                 <div className="absolute inset-y-0 left-0 w-1 bg-primary/10" />
-                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider rotate-[-90deg] whitespace-nowrap">
-                     {config.label}
-                 </span>
-            </div>
-            
-            {/* Lines Column */}
-            <div className="flex-1 flex flex-col min-w-0">
-                <div className="flex flex-col">
-                    <AnimatePresence initial={false}>
-                        {node.children?.map((child, index) => (
-                            <motion.div 
-                                key={child.id}
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="border-b last:border-b-0 p-2 hover:bg-muted/5 transition-colors flex gap-3 items-start group"
-                            >
-                                <div className="flex-1 min-w-0">
-                                    <NodeEditor 
-                                        node={child} 
-                                        onChange={(updated) => updateChild(index, updated)} 
-                                        onRemove={() => removeChild(index)}
-                                    />
-                                </div>
-                                {!isRoot && canRemove && (
-                                     <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        onClick={() => removeChild(index)}
-                                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                )}
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+    <div className={cn("w-full flex items-start gap-2", isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : "")}>
+        {!isRoot && (
+           <div className="mt-2">
+             {renderTypeSelector()}
+           </div>
+        )}
+        
+        <div className={cn("flex-1 border rounded-lg overflow-hidden bg-card shadow-sm", !isRoot && "border-l-4 border-l-primary/20")}>
+            <div className="flex">
+                {/* Operator Column */}
+                <div className="w-12 bg-muted/30 border-r flex flex-col items-center justify-center relative">
+                     <div className="absolute inset-y-0 left-0 w-1 bg-primary/10" />
+                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider rotate-[-90deg] whitespace-nowrap">
+                         {config.label}
+                     </span>
                 </div>
-
-                {/* Add Button Area */}
-                {canAdd && (
-                    <div className="p-2 flex justify-center border-t bg-muted/5 mt-[5px]">
-                        <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-full shadow-sm hover:scale-110 transition-transform bg-background"
-                            onClick={addChild}
-                        >
-                            <Plus className="h-4 w-4 text-primary" />
-                        </Button>
+                
+                {/* Lines Column */}
+                <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex flex-col">
+                        <AnimatePresence initial={false}>
+                            {node.children?.map((child, index) => (
+                                <motion.div 
+                                    key={child.id}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="border-b last:border-b-0 p-2 hover:bg-muted/5 transition-colors flex gap-3 items-start group"
+                                >
+                                    <div className="flex-1 min-w-0">
+                                        <NodeEditor 
+                                            node={child} 
+                                            onChange={(updated) => updateChild(index, updated)} 
+                                            onRemove={() => removeChild(index)}
+                                        />
+                                    </div>
+                                    {/* Only show remove button for children, root node management is up to parent container if needed */}
+                                    {canRemove && (
+                                         <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={() => removeChild(index)}
+                                            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity mt-2"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
                     </div>
-                )}
+
+                    {/* Add Button Area */}
+                    {canAdd && (
+                        <div className="p-2 flex justify-center border-t bg-muted/5 mt-[5px]">
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full shadow-sm hover:scale-110 transition-transform bg-background"
+                                onClick={addChild}
+                            >
+                                <Plus className="h-4 w-4 text-primary" />
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
+        
+        {/* If it's root, we might want a reset or something, but usually root doesn't have the > button unless we wrap it specifically. 
+            The requirement says "when choosing an option... replacement should not eliminate > button".
+            
+            Wait, if I put the > button to the LEFT of the main block, it solves it.
+        */}
+        {isRoot && (
+           <div className="absolute top-2 right-2">
+              {/* Optional actions for root */}
+           </div>
+        )}
     </div>
   );
 };
@@ -309,7 +333,9 @@ function Section({ title, node, onChange }: { title: string, node: LogicNode, on
     return (
         <section className="space-y-4">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider text-center">{title}</h2>
-            <NodeEditor node={node} onChange={onChange} isRoot={true} />
+            <div className="bg-muted/5 p-2 rounded-lg">
+                <NodeEditor node={node} onChange={onChange} isRoot={true} />
+            </div>
         </section>
     );
 }
