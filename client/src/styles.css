@@ -737,7 +737,7 @@ textarea.input.has-scroll {
 }
 
 .logic-label-cell {
-  background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
+  background: var(--slate-100);
   display: flex;
   align-items: center;
   justify-content: center;
