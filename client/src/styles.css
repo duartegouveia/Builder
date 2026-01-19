@@ -576,12 +576,13 @@ textarea.input {
 
 .logic-operator-column {
   width: 56px;
+  min-width: 56px;
   background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-4) var(--space-2);
+  justify-content: center;
   position: relative;
 }
 
@@ -602,8 +603,8 @@ textarea.input {
   color: var(--slate-500);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  transform: rotate(-90deg);
   white-space: nowrap;
+  text-align: center;
 }
 
 .logic-children-column {
