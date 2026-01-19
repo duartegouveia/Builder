@@ -595,7 +595,7 @@ textarea.input {
   left: 0;
   width: 4px;
   background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-600) 100%);
-  border-radius: 0 2px 2px 0;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 
 .logic-operator-label {
