@@ -4,12 +4,12 @@ import "./index.css";
 
 const OPERATOR_CONFIG = {
   'TEXT': { label: 'Text' },
-  'AND': { label: 'AND', min: 0, max: null },
-  'OR': { label: 'OR', min: 0, max: null },
-  'XOR': { label: 'XOR', min: 2, max: 2 },
-  'IMP': { label: '⇒', min: 2, max: 2 },
-  'BIC': { label: '⇔', min: 2, max: 2 },
-  'NOT': { label: 'NOT', min: 1, max: 1 },
+  'AND': { label: 'AND' },
+  'OR': { label: 'OR' },
+  'XOR': { label: 'XOR' },
+  'IMP': { label: '⇒' },
+  'BIC': { label: '⇔' },
+  'NOT': { label: 'NOT' },
 };
 
 const ICONS = {
@@ -18,18 +18,52 @@ const ICONS = {
   CHEVRON_RIGHT: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m9 18 6-6-6-6"/></svg>`,
 };
 
+// --- Configuration Logic ---
+
+const CONFIG_RULES = {
+    // Determine min/max children based on node type
+    getConstraints: (type) => {
+        switch(type) {
+            case 'AND':
+            case 'OR':
+                return { min: 0, max: null };
+            case 'XOR':
+            case 'IMP':
+            case 'BIC':
+                return { min: 2, max: 2 };
+            case 'NOT':
+                return { min: 1, max: 1 };
+            case 'TEXT':
+                return { min: 0, max: 0 };
+            default:
+                return { min: 0, max: null };
+        }
+    },
+    
+    // Determine allowed options in popup based on parent type and hierarchy path
+    getOptions: (parentType, path) => {
+        const allOps = Object.keys(OPERATOR_CONFIG);
+        
+        // Example dynamic logic:
+        // You can use parentType or path to filter allOps
+        // e.g., if (parentType === 'AND') return ['OR', 'NOT', 'TEXT'];
+        
+        return allOps;
+    }
+};
+
 // --- Helper Functions ---
 const DEFAULT_TYPE = Object.keys(OPERATOR_CONFIG)[0];
 
 const createNode = (type) => {
-  const config = OPERATOR_CONFIG[type];
+  const constraints = CONFIG_RULES.getConstraints(type);
   const node = {
     id: Math.random().toString(36).substr(2, 9),
     type,
     children: type === 'TEXT' ? undefined : [],
     textValue: type === 'TEXT' ? '' : undefined,
-    minChildren: config?.min ?? null,
-    maxChildren: config?.max ?? null,
+    minChildren: constraints.min,
+    maxChildren: constraints.max,
   };
 
   if (node.children && node.minChildren && node.minChildren > 0) {
@@ -82,12 +116,12 @@ function createElement(tag, className = "", innerHTML = "") {
   return el;
 }
 
-function renderNode(node, onChange, onRemove, isRoot = false) {
+function renderNode(node, onChange, onRemove, isRoot = false, path = []) {
   // 1. Empty State
   if (node.type === 'EMPTY') {
     const container = createElement('div', 'flex items-center w-full p-2 border border-dashed border-muted-foreground/30 rounded-md bg-muted/20');
     
-    const selector = renderTypeSelector(node, onChange);
+    const selector = renderTypeSelector(node, onChange, path);
     container.appendChild(selector);
     
     const label = createElement('span', 'text-sm text-muted-foreground italic flex-1 ml-2', 'Select an operation...');
@@ -105,7 +139,7 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
   if (node.type === 'TEXT') {
     const container = createElement('div', 'flex items-center w-full p-2 border rounded-md bg-background shadow-sm');
     
-    container.appendChild(renderTypeSelector(node, onChange));
+    container.appendChild(renderTypeSelector(node, onChange, path));
     
     const wrapper = createElement('div', 'flex-1 flex items-center gap-2 ml-2');
     const icon = createElement('div', 'h-8 w-8 flex items-center justify-center bg-blue-100 text-blue-700 rounded font-bold text-xs shrink-0', 'Tx');
@@ -129,14 +163,15 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
 
   // 3. Operator Node
   const config = OPERATOR_CONFIG[node.type];
-  const canAdd = node.maxChildren == null || (node.children?.length ?? 0) < node.maxChildren;
-  const canRemove = node.minChildren == null || (node.children?.length ?? 0) > node.minChildren;
+  const constraints = CONFIG_RULES.getConstraints(node.type);
+  const canAdd = constraints.max === null || (node.children?.length ?? 0) < constraints.max;
+  const canRemove = constraints.min === null || (node.children?.length ?? 0) > constraints.min;
 
   const container = createElement('div', `w-full flex items-start gap-2 ${isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : ""}`);
 
   if (!isRoot) {
     const selectorContainer = createElement('div', 'mt-2');
-    selectorContainer.appendChild(renderTypeSelector(node, onChange));
+    selectorContainer.appendChild(renderTypeSelector(node, onChange, path));
     container.appendChild(selectorContainer);
   }
 
@@ -180,7 +215,9 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
              onChange({ ...node, children: newChildren });
         };
         
-        childContent.appendChild(renderNode(child, updateChild, canRemove ? removeChild : undefined));
+        // Pass updated path
+        const childPath = [...path, node];
+        childContent.appendChild(renderNode(child, updateChild, canRemove ? removeChild : undefined, false, childPath));
         childWrapper.appendChild(childContent);
         childrenContainer.appendChild(childWrapper);
     });
@@ -276,17 +313,26 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
   return container;
 }
 
-function renderTypeSelector(node, onChange) {
+function renderTypeSelector(node, onChange, path) {
     const wrapper = createElement('div', 'relative inline-block');
     
+    // Determine parent type from path (last element is parent)
+    const parentNode = path.length > 0 ? path[path.length - 1] : null;
+    const parentType = parentNode ? parentNode.type : null;
+    
+    const allowedOptions = CONFIG_RULES.getOptions(parentType, path);
+
     // Trigger Button
     const trigger = createElement('button', 'h-8 w-8 p-0 shrink-0 font-bold bg-muted hover:bg-muted/80 text-muted-foreground rounded-md flex items-center justify-center transition-colors', ICONS.CHEVRON_RIGHT);
     
     // Dropdown Content (We create it but don't append it to wrapper yet)
     const dropdown = createElement('div', 'fixed w-32 p-1 rounded-md border bg-popover text-popover-foreground shadow-md z-[9999] hidden flex flex-col gap-1 bg-white dark:bg-zinc-950');
     
-    // Generate Options
-    Object.entries(OPERATOR_CONFIG).forEach(([key, conf]) => {
+    // Generate Options based on allowedOptions
+    allowedOptions.forEach(key => {
+        const conf = OPERATOR_CONFIG[key];
+        if (!conf) return; // Skip if config missing
+        
         const isSelected = key === node.type;
         const optionBtn = createElement('button', `w-full text-left px-2 py-1.5 text-xs rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors ${isSelected ? 'bg-accent font-medium text-accent-foreground' : ''}`, conf.label);
 
@@ -305,17 +351,23 @@ function renderTypeSelector(node, onChange) {
                 newNode.children = [...node.children];
             }
 
-            // Enforce limits
+            // Enforce limits from CONFIG_RULES
+            const constraints = CONFIG_RULES.getConstraints(newType);
+
             if (newNode.children) {
-                 const min = newNode.minChildren ?? 0;
+                 const min = constraints.min ?? 0;
                  while (newNode.children.length < min) {
                      newNode.children.push(createNode(DEFAULT_TYPE));
                  }
-                 if (newNode.maxChildren != null && newNode.children.length > newNode.maxChildren) {
-                     newNode.children = newNode.children.slice(0, newNode.maxChildren);
+                 if (constraints.max != null && newNode.children.length > constraints.max) {
+                     newNode.children = newNode.children.slice(0, constraints.max);
                  }
             }
             
+            // Update node constraints properties too (optional if we always use rules)
+            newNode.minChildren = constraints.min;
+            newNode.maxChildren = constraints.max;
+
             onChange(newNode);
         };
         dropdown.appendChild(optionBtn);
