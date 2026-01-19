@@ -19,18 +19,23 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: Vanilla JavaScript (no frameworks)
-- **Routing**: Hash-based routing in main.js
+- **Framework**: None - plain HTML, vanilla JavaScript, standard CSS
+- **Routing**: Multi-page architecture with separate HTML files
 - **State Management**: Plain JavaScript objects with render functions
 - **Styling**: Standard CSS with custom design tokens defined in CSS variables
 - **Build Tool**: Vite
 
-The frontend is located in `client/src/` with:
-- `main.js` - Application entry point with hash-based router
-- `pages/experiment-calc.js` - Error Propagator page module
-- `pages/logic-builder.js` - Logic Builder page module
+The frontend uses separate HTML files:
+- `client/index.html` - Error Propagator page (serves at /)
+- `client/logic.html` - Logic Builder page (serves at /logic.html)
+
+JavaScript files in `client/src/`:
+- `experiment-calc.js` - Error Propagator interactivity
+- `logic-builder.js` - Logic Builder interactivity  
 - `lib/error-utils.js` - Error propagation calculations using mathjs
 - `styles.css` - All application styles
+
+Navigation uses standard anchor links between pages (no SPA, no hash routing).
 
 ### Backend Architecture
 - **Framework**: Express.js
@@ -63,11 +68,11 @@ The backend is located in `server/` with:
 
 ## Routing
 
-The application uses hash-based routing:
-- `#` or empty hash - Error Propagator (homepage)
-- `#logic` - Logic Builder
+The application uses multi-page routing with separate HTML files:
+- `/` - Error Propagator (index.html)
+- `/logic.html` - Logic Builder (logic.html)
 
-Navigation is done via anchor tags with hash hrefs (e.g., `<a href="#logic">`).
+Navigation uses standard anchor links between HTML pages (e.g., `<a href="/logic.html">`).
 
 ## External Dependencies
 
