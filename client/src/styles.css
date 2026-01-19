@@ -746,16 +746,17 @@ textarea.input.has-scroll {
 }
 
 .logic-row-grid.has-separator .logic-label-cell {
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 0;
+  position: absolute;
+  left: 0;
+  width: 56px;
+  height: auto;
+  background: transparent;
+  border-right: none;
+  z-index: 2;
 }
 
 .logic-row-grid.has-separator .logic-label-cell .logic-operator-label {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
+  transform: translateX(0);
 }
 
 .logic-content-cell {
