@@ -705,7 +705,7 @@ textarea.input.has-scroll {
 }
 
 .logic-content-cell {
-  padding: 5px var(--space-4);
+  padding: 3px var(--space-4);
   transition: background var(--transition-fast);
 }
 

@@ -7,8 +7,8 @@ const OPERATOR_CONFIG = {
   'TEXT': { label: 'Text' },
   'MULTILINE': { label: 'Multiline Text' },
   'BOOLEAN': { label: 'Boolean' },
-  'AND': { label: 'AND', min: 2, max: null },
-  'OR': { label: 'OR', min: 2, max: null },
+  'AND': { label: 'AND', min: null, max: null, default: 2 },
+  'OR': { label: 'OR', min: null, max: null, default: 2 },
   'XOR': { label: 'XOR', min: 2, max: 2 },
   'IMP': { label: '=>', min: 2, max: 2 },
   'BIC': { label: '<=>', min: 2, max: 2 },
@@ -67,8 +67,9 @@ function createNodeData(type) {
     maxChildren: config?.max ?? null,
   };
 
-  if (node.children && node.minChildren && node.minChildren > 0) {
-    for (let i = 0; i < node.minChildren; i++) {
+  const defaultCount = config?.default ?? node.minChildren ?? 0;
+  if (node.children && defaultCount > 0) {
+    for (let i = 0; i < defaultCount; i++) {
       node.children.push(createNodeData('VARIABLE'));
     }
   }
@@ -77,17 +78,7 @@ function createNodeData(type) {
 }
 
 function createInitialNodeData(type) {
-  const node = createNodeData(type);
-  let min = node.minChildren ?? 0;
-  if ((type === 'AND' || type === 'OR') && min < 2) {
-    min = 2;
-  }
-  if (node.children) {
-    while (node.children.length < min) {
-      node.children.push(createNodeData('VARIABLE'));
-    }
-  }
-  return node;
+  return createNodeData(type);
 }
 
 function registerNode(builderKey, nodeData) {
@@ -467,8 +458,9 @@ function handleNodeTypeChange(builderKey, nodeId, newType) {
   }
   
   if (newNodeData.children) {
-    const min = newNodeData.minChildren ?? 0;
-    while (newNodeData.children.length < min) {
+    const config = OPERATOR_CONFIG[newType];
+    const defaultCount = config?.default ?? newNodeData.minChildren ?? 0;
+    while (newNodeData.children.length < defaultCount) {
       newNodeData.children.push(createNodeData('VARIABLE'));
     }
     if (newNodeData.maxChildren != null && newNodeData.children.length > newNodeData.maxChildren) {
