@@ -609,7 +609,9 @@ function handleAddChild(builderKey, nodeId) {
     }
   }
   
-  updateLabelPositions(rowsContainer);
+  requestAnimationFrame(() => {
+    updateLabelPositions(rowsContainer);
+  });
   updateAddButton(addArea, nodeData, builderKey);
   
   if (builderKey === 'dynamic') updateEvaluation();
@@ -681,7 +683,9 @@ function handleRemoveChild(builderKey, parentId, childIndex) {
     updateRemoveButtons(rowsContainer, parentData, builderKey);
   }
   
-  updateLabelPositions(rowsContainer);
+  requestAnimationFrame(() => {
+    updateLabelPositions(rowsContainer);
+  });
   
   updateAddButton(addArea, parentData, builderKey);
   
