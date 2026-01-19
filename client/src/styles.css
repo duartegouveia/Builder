@@ -654,10 +654,13 @@ textarea.input.has-scroll {
 }
 
 .logic-add-area {
-  padding: 10px var(--space-4);
   display: flex;
   justify-content: center;
   background: transparent;
+}
+
+.logic-add-area:has(.add-child-btn) {
+  padding: 10px var(--space-4);
   border-top: 1px solid var(--border-light);
 }
 
