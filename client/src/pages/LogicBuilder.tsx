@@ -181,7 +181,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
     <div className={cn("w-full border rounded-lg overflow-hidden bg-card shadow-sm", isRoot ? "ring-1 ring-border" : "")}>
         <div className="flex">
             {/* Operator Column */}
-            <div className="w-12 bg-muted/30 border-r flex flex-col items-center justify-center relative py-4">
+            <div className="w-12 bg-muted/30 border-r flex flex-col items-center justify-center relative">
                  <div className="absolute inset-y-0 left-0 w-1 bg-primary/10" />
                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider rotate-[-90deg] whitespace-nowrap">
                      {config.label}
@@ -198,7 +198,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="border-b last:border-b-0 p-3 hover:bg-muted/5 transition-colors flex gap-3 items-start group"
+                                className="border-b last:border-b-0 p-2 hover:bg-muted/5 transition-colors flex gap-3 items-start group"
                             >
                                 <div className="flex-1 min-w-0">
                                     <NodeEditor 
