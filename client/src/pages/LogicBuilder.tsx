@@ -3,7 +3,7 @@ import { Plus, X, ChevronRight, Check, Download, ArrowLeftRight, ArrowUpDown } f
 
 // --- Types ---
 
-export type NodeType = 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'BOOLEAN' | 'EMPTY';
+export type NodeType = 'VARIABLE' | 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'BOOLEAN' | 'EMPTY';
 
 export interface LogicNode {
   id: string;
@@ -19,6 +19,7 @@ export interface LogicNode {
 // --- Constants ---
 
 const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?: number | null }> = {
+  'VARIABLE': { label: 'Variable' },
   'TEXT': { label: 'Text' },
   'MULTILINE': { label: 'Multiline Text' },
   'BOOLEAN': { label: 'Boolean' },
@@ -36,7 +37,7 @@ const extractVariables = (node: LogicNode): string[] => {
   const vars = new Set<string>();
   
   const traverse = (n: LogicNode) => {
-    if ((n.type === 'TEXT' || n.type === 'MULTILINE') && n.textValue) {
+    if ((n.type === 'TEXT' || n.type === 'MULTILINE' || n.type === 'VARIABLE') && n.textValue) {
       vars.add(n.textValue);
     }
     if (n.children) {
@@ -49,7 +50,7 @@ const extractVariables = (node: LogicNode): string[] => {
 };
 
 const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolean => {
-  if (node.type === 'TEXT' || node.type === 'MULTILINE') {
+  if (node.type === 'TEXT' || node.type === 'MULTILINE' || node.type === 'VARIABLE') {
     return values[node.textValue || ''] || false;
   }
   
@@ -84,7 +85,7 @@ const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolea
 
 const createNode = (type: NodeType): LogicNode => {
   const config = OPERATOR_CONFIG[type];
-  const isTextType = type === 'TEXT' || type === 'MULTILINE';
+  const isTextType = type === 'TEXT' || type === 'MULTILINE' || type === 'VARIABLE';
   const isBooleanType = type === 'BOOLEAN';
   const isLeafType = isTextType || isBooleanType;
   const node: LogicNode = {
@@ -302,6 +303,31 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
          )}
       </div>
     );
+  }
+
+  // 1b. Variable Node
+  if (node.type === 'VARIABLE') {
+      return (
+          <div className="logic-text-node">
+             {renderTypeSelector()}
+             <div className="flex-1 flex items-center gap-2">
+                 <div className="logic-text-badge">Var</div>
+                 <input 
+                    type="text"
+                    value={node.textValue} 
+                    onChange={(e) => onChange({ ...node, textValue: e.target.value })}
+                    placeholder="Variable name..."
+                    className="input"
+                    style={{ width: 200, borderColor: 'transparent', backgroundColor: 'transparent' }}
+                 />
+             </div>
+             {onRemove && (
+                 <button className="btn btn-ghost btn-icon-sm text-muted-foreground ml-2" onClick={onRemove}>
+                     <X style={{ width: 16, height: 16 }} />
+                 </button>
+             )}
+          </div>
+      );
   }
 
   // 2. Text Node
