@@ -722,7 +722,7 @@ textarea.input.has-scroll {
 
 .logic-label-cell {
   position: absolute;
-  left: 0;
+  left: 5px;
   width: 56px;
   display: flex;
   align-items: center;
