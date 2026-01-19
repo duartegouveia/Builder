@@ -316,13 +316,18 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
 
   // 3. Operator Node
   const config = OPERATOR_CONFIG[node.type];
-  const canAdd = node.maxChildren == null || (node.children?.length ?? 0) < node.maxChildren;
-  const canRemove = node.minChildren == null || (node.children?.length ?? 0) > node.minChildren;
+  
+  // Robust check using config directly to avoid stale state issues
+  const minChildren = node.minChildren ?? config.min ?? 0;
+  const maxChildren = node.maxChildren ?? config.max ?? null;
+
+  const canAdd = maxChildren == null || (node.children?.length ?? 0) < maxChildren;
+  const canRemove = minChildren == null || (node.children?.length ?? 0) > minChildren;
 
   // Horizontal Mode Check for specific operators (min=max=2 or 3)
   const isHorizontalMode = 
-      node.minChildren === node.maxChildren && 
-      (node.minChildren === 2 || node.minChildren === 3);
+      minChildren === maxChildren && 
+      (minChildren === 2 || minChildren === 3);
 
   if (isHorizontalMode) {
       return (
