@@ -55,7 +55,10 @@ function createNode(type) {
 
 function createInitialNode(type) {
   const node = createNode(type);
-  const min = node.minChildren ?? (type === 'AND' || type === 'OR' ? 2 : 0);
+  let min = node.minChildren ?? 0;
+  if ((type === 'AND' || type === 'OR') && min < 2) {
+    min = 2;
+  }
   if (node.children) {
     while (node.children.length < min) {
       node.children.push(createNode('VARIABLE'));
@@ -258,18 +261,18 @@ function renderNodeHtml(node, builderKey, isRoot = false, canRemove = true, pare
   const canRemoveChildren = minChildren == null || (node.children?.length ?? 0) > minChildren;
   const childCount = node.children?.length ?? 0;
 
-  const renderConnectorLines = () => {
+  const renderOperatorLabels = () => {
     if (childCount === 0) {
-      return '';
+      return `<span class="logic-operator-label">${config.label}</span>`;
     }
     if (childCount === 1) {
-      return '<div class="logic-connector-single"></div>';
+      return `<div class="logic-label-single"><span class="logic-operator-label">${config.label}</span></div>`;
     }
-    const lines = [];
+    const labels = [];
     for (let i = 0; i < childCount - 1; i++) {
-      lines.push(`<div class="logic-connector-line" data-line-index="${i}"></div>`);
+      labels.push(`<div class="logic-label-between"><span class="logic-operator-label">${config.label}</span></div>`);
     }
-    return `<div class="logic-connector-lines" data-child-count="${childCount}">${lines.join('')}</div>`;
+    return `<div class="logic-labels-container" data-label-count="${childCount - 1}">${labels.join('')}</div>`;
   };
 
   return `
@@ -278,8 +281,7 @@ function renderNodeHtml(node, builderKey, isRoot = false, canRemove = true, pare
       <div class="logic-operator-container" data-child-count="${childCount}">
         <div class="flex">
           <div class="logic-operator-column" data-child-count="${childCount}">
-            <span class="logic-operator-label">${config.label}</span>
-            ${renderConnectorLines()}
+            ${renderOperatorLabels()}
           </div>
           
           <div class="logic-children-column">
