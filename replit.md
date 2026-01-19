@@ -7,46 +7,47 @@ Error Propagator is a scientific web application designed for experimental error
 1. **Experiment Calculator** - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
 2. **Logic Builder** - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.)
 
-The application follows a full-stack TypeScript architecture with a React frontend and Express backend.
+The application uses vanilla JavaScript for the frontend and Express.js for the backend.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+- No TypeScript - plain JavaScript only
+- No React or frontend frameworks - vanilla JS with DOM manipulation
+- No Tailwind CSS - standard CSS only
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React with TypeScript
-- **Routing**: Wouter (lightweight React router)
-- **State Management**: TanStack React Query for server state
-- **Styling**: Tailwind CSS v4 with custom design tokens defined in CSS variables
-- **UI Components**: Shadcn/ui component library with Radix UI primitives
-- **Build Tool**: Vite with custom plugins for Replit integration
+- **Framework**: Vanilla JavaScript (no frameworks)
+- **Routing**: Hash-based routing in main.js
+- **State Management**: Plain JavaScript objects with render functions
+- **Styling**: Standard CSS with custom design tokens defined in CSS variables
+- **Build Tool**: Vite
 
 The frontend is located in `client/src/` with:
-- `pages/` - Route components (ExperimentCalc, LogicBuilder)
-- `components/ui/` - Reusable UI components from shadcn
-- `lib/` - Utilities including error propagation calculations using mathjs
-- `hooks/` - Custom React hooks
+- `main.js` - Application entry point with hash-based router
+- `pages/experiment-calc.js` - Error Propagator page module
+- `pages/logic-builder.js` - Logic Builder page module
+- `lib/error-utils.js` - Error propagation calculations using mathjs
+- `styles.css` - All application styles
 
 ### Backend Architecture
-- **Framework**: Express.js with TypeScript
+- **Framework**: Express.js
 - **Server**: Node.js HTTP server
 - **API Pattern**: RESTful routes prefixed with `/api`
 - **Development**: Vite dev server middleware for HMR
 
 The backend is located in `server/` with:
-- `index.ts` - Server entry point with middleware setup
-- `routes.ts` - API route registration
-- `storage.ts` - Data access layer with interface abstraction
-- `vite.ts` - Development server integration
+- `index.js` - Server entry point with middleware setup
+- `routes.js` - API route registration
+- `storage.js` - In-memory data storage
+- `vite.js` - Development server integration
+- `static.js` - Static file serving for production
 
 ### Data Storage
-- **ORM**: Drizzle ORM with PostgreSQL dialect
-- **Database**: PostgreSQL (via Neon serverless driver)
-- **Schema**: Defined in `shared/schema.ts` using Drizzle table definitions
-- **Validation**: Zod schemas generated from Drizzle schemas via drizzle-zod
-- **Current Storage**: In-memory storage implementation (MemStorage) with interface ready for database migration
+- **Current Storage**: In-memory storage implementation (MemStorage)
+- **Database Ready**: Drizzle ORM with PostgreSQL dialect available for migration
 
 ### Build System
 - **Client Build**: Vite produces static assets to `dist/public/`
@@ -54,33 +55,25 @@ The backend is located in `server/` with:
 - **Scripts**: 
   - `npm run dev` - Development server with hot reload
   - `npm run build` - Production build
-  - `npm run db:push` - Push schema changes to database
 
 ### Path Aliases
 - `@/*` - Maps to `client/src/*`
 - `@shared/*` - Maps to `shared/*`
 - `@assets` - Maps to `attached_assets/`
 
-## External Dependencies
+## Routing
 
-### Database
-- **Neon Serverless** (`@neondatabase/serverless`) - PostgreSQL database driver optimized for serverless environments
-- **Drizzle ORM** - Type-safe SQL query builder and ORM
-- **connect-pg-simple** - PostgreSQL session store for Express sessions
+The application uses hash-based routing:
+- `#` or empty hash - Error Propagator (homepage)
+- `#logic` - Logic Builder
+
+Navigation is done via anchor tags with hash hrefs (e.g., `<a href="#logic">`).
+
+## External Dependencies
 
 ### Scientific Computing
 - **mathjs** - Mathematical expression parsing, evaluation, and symbolic differentiation for error propagation calculations
 
-### UI Libraries
-- **Radix UI** - Comprehensive set of accessible UI primitives
-- **shadcn/ui** - Pre-styled component library built on Radix
-- **Lucide React** - Icon library
-- **cmdk** - Command menu component
-
 ### Development Tools
 - **Vite** - Frontend build tool and dev server
 - **esbuild** - Fast JavaScript bundler for server code
-- **tsx** - TypeScript execution for Node.js
-
-### Environment Requirements
-- `DATABASE_URL` - PostgreSQL connection string (required for database operations)
