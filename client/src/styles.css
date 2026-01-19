@@ -779,6 +779,10 @@ textarea.input.has-scroll {
   border-top: 1px solid var(--border-light);
 }
 
+.add-child-btn {
+  border-radius: var(--radius-full);
+}
+
 /* Horizontal Layout */
 .logic-horizontal {
   flex: 1;
