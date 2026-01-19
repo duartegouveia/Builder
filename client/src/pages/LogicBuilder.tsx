@@ -345,16 +345,16 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   const renderChildren = () => {
     if (isHorizontalMode) {
          return (
-             <div className="flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row flex-wrap md:flex-nowrap items-center gap-4 overflow-x-auto min-h-[100px] relative group/hz">
-                {/* Toggle button for horizontal mode - appears on hover */}
+             <div className="flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row flex-wrap md:flex-nowrap items-center gap-4 overflow-x-auto min-h-[60px] relative">
+                {/* Toggle button for horizontal mode - always visible but discrete */}
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
-                    className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover/hz:opacity-60 hover:!opacity-100 transition-opacity z-10"
+                    className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-40 hover:opacity-100 transition-opacity z-10 bg-background border-muted"
                     onClick={toggleLayout}
-                    title="Switch to Vertical Layout"
+                    title="Mudar para Layout Vertical"
                 >
-                    <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                    <ArrowUpDown className="h-3 w-3" />
                 </Button>
                 
                 {node.children?.map((child, index) => (
@@ -380,7 +380,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
             <div className="flex-1 border rounded-lg overflow-hidden bg-card shadow-sm">
                 <div className="flex">
                     {/* Operator Column */}
-                    <div className="w-12 bg-muted/30 border-r flex flex-col items-center py-2 relative group/op-col">
+                    <div className="w-12 bg-muted/30 border-r flex flex-col items-center py-2 relative">
                          <div className="absolute inset-y-0 left-0 w-1 bg-primary/10" />
                          
                          {/* Centered Label */}
@@ -390,16 +390,16 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                             </span>
                          </div>
                          
-                         {/* Toggle Button at Bottom */}
-                         <div className="mt-auto pt-2 opacity-0 group-hover/op-col:opacity-100 transition-opacity">
+                         {/* Toggle Button at Bottom - always visible but discrete */}
+                         <div className="mt-auto pt-2">
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="icon"
-                                className="h-6 w-6 rounded-full"
+                                className="h-6 w-6 rounded-full opacity-40 hover:opacity-100 transition-opacity bg-background border-muted"
                                 onClick={toggleLayout}
-                                title="Switch to Horizontal Layout"
+                                title="Mudar para Layout Horizontal"
                             >
-                                <ArrowLeftRight className="h-3 w-3 text-muted-foreground" />
+                                <ArrowLeftRight className="h-3 w-3" />
                             </Button>
                          </div>
                     </div>
