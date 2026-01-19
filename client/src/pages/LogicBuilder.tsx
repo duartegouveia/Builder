@@ -325,8 +325,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     value={node.textValue} 
                     onChange={(e) => onChange({ ...node, textValue: e.target.value })}
                     placeholder="Variable name..."
-                    className="input"
-                    style={{ width: 200, borderColor: 'transparent', backgroundColor: 'transparent' }}
+                    className="input-inline flex-1"
                  />
              </div>
              {onRemove && (
@@ -350,8 +349,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     value={node.integerValue} 
                     onChange={(e) => onChange({ ...node, integerValue: e.target.value })}
                     placeholder="Enter integer..."
-                    className="input"
-                    style={{ width: 150, borderColor: 'transparent', backgroundColor: 'transparent' }}
+                    className="input-inline flex-1"
                  />
              </div>
              {onRemove && (
@@ -375,8 +373,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     value={node.floatValue} 
                     onChange={(e) => onChange({ ...node, floatValue: e.target.value })}
                     placeholder="Enter float..."
-                    className="input"
-                    style={{ width: 150, borderColor: 'transparent', backgroundColor: 'transparent' }}
+                    className="input-inline flex-1"
                  />
              </div>
              {onRemove && (
@@ -400,8 +397,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     value={node.textValue} 
                     onChange={(e) => onChange({ ...node, textValue: e.target.value })}
                     placeholder="Enter text..."
-                    className="input flex-1"
-                    style={{ borderColor: 'transparent', backgroundColor: 'transparent' }}
+                    className="input-inline flex-1"
                  />
              </div>
              {onRemove && (
@@ -416,16 +412,15 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   // 2b. Multiline Text Node
   if (node.type === 'MULTILINE') {
       return (
-          <div className="logic-text-node" style={{ alignItems: 'flex-start' }}>
+          <div className="logic-text-node items-start">
              {renderTypeSelector()}
              <div className="flex-1 flex items-start gap-2">
-                 <div className="logic-text-badge" style={{ whiteSpace: 'pre-line', lineHeight: 1.2, padding: '4px 6px', height: 'auto' }}>abc{'\n'}abc</div>
+                 <div className="logic-text-badge-multiline">abc{'\n'}abc</div>
                  <textarea 
                     value={node.textValue} 
                     onChange={(e) => onChange({ ...node, textValue: e.target.value })}
                     placeholder="Enter multiline text..."
-                    className="input flex-1"
-                    style={{ borderColor: 'transparent', backgroundColor: 'transparent', minHeight: 60, resize: 'vertical' }}
+                    className="textarea-inline flex-1"
                  />
              </div>
              {onRemove && (
@@ -449,9 +444,8 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                         type="checkbox"
                         checked={node.booleanValue || false}
                         onChange={(e) => onChange({ ...node, booleanValue: e.target.checked })}
-                        style={{ width: 18, height: 18, cursor: 'pointer' }}
                      />
-                     <span className="font-mono font-bold" style={{ color: node.booleanValue ? 'var(--green-700)' : 'var(--red-700)' }}>
+                     <span className={`font-mono font-bold ${node.booleanValue ? 'text-success' : 'text-error'}`}>
                         {node.booleanValue ? '1' : '0'}
                      </span>
                  </label>
