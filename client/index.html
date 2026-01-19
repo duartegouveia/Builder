@@ -107,6 +107,132 @@
     </div>
   </div>
 
+  <!-- Templates for Logic Builder -->
+  <template id="tpl-type-selector">
+    <div class="popover-container">
+      <button class="btn btn-secondary btn-icon-sm font-bold mr-2 popover-trigger" style="flex-shrink: 0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <div class="popover-content">
+        <div class="flex flex-col gap-1" style="min-width: 160px;">
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="VARIABLE" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Variable</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="INTEGER" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Integer</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="FLOAT" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Float</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="TEXT" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Text</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="MULTILINE" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Multiline Text</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="BOOLEAN" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Boolean</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="AND" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">AND</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="OR" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">OR</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="XOR" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">XOR</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="IMP" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&rArr;</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="BIC" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&hArr;</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="NOT" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">NOT</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-remove-btn">
+    <button class="btn btn-ghost btn-icon-sm text-muted-foreground remove-child-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </template>
+
+  <template id="tpl-add-btn">
+    <button class="btn btn-outline btn-icon-sm rounded-full shadow-sm add-child-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+    </button>
+  </template>
+
+  <template id="tpl-node-empty">
+    <div class="logic-empty" data-node-type="EMPTY">
+      <span class="text-sm text-muted-foreground italic flex-1">Select an operation...</span>
+    </div>
+  </template>
+
+  <template id="tpl-node-variable">
+    <div class="logic-text-node" data-node-type="VARIABLE">
+      <div class="flex-1 flex items-center gap-2">
+        <div class="logic-text-badge">Var</div>
+        <input type="text" placeholder="Variable name..." class="input-inline flex-1 node-text-input" data-field="textValue">
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-node-integer">
+    <div class="logic-text-node" data-node-type="INTEGER">
+      <div class="flex-1 flex items-center gap-2">
+        <div class="logic-text-badge">123</div>
+        <input type="text" placeholder="Enter integer..." class="input-inline flex-1 node-text-input" data-field="integerValue">
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-node-float">
+    <div class="logic-text-node" data-node-type="FLOAT">
+      <div class="flex-1 flex items-center gap-2">
+        <div class="logic-text-badge">8.9</div>
+        <input type="text" placeholder="Enter float..." class="input-inline flex-1 node-text-input" data-field="floatValue">
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-node-text">
+    <div class="logic-text-node" data-node-type="TEXT">
+      <div class="flex-1 flex items-center gap-2">
+        <div class="logic-text-badge">abc</div>
+        <input type="text" placeholder="Enter text..." class="input-inline flex-1 node-text-input" data-field="textValue">
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-node-multiline">
+    <div class="logic-text-node items-start" data-node-type="MULTILINE">
+      <div class="flex-1 flex items-start gap-2">
+        <div class="logic-text-badge-multiline">abc<br>abc</div>
+        <textarea placeholder="Enter multiline text..." class="textarea-inline flex-1 node-textarea-input" data-field="textValue"></textarea>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-node-boolean">
+    <div class="logic-text-node" data-node-type="BOOLEAN">
+      <div class="flex-1 flex items-center gap-3">
+        <div class="logic-text-badge">01</div>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" class="node-checkbox-input">
+          <span class="font-mono font-bold bool-label text-error">0</span>
+        </label>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-node-operator">
+    <div class="logic-node" data-node-type="OPERATOR">
+      <div class="logic-operator-container">
+        <div class="logic-rows-container"></div>
+        <div class="logic-add-area"></div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-row-grid">
+    <div class="logic-row-grid">
+      <div class="logic-label-cell">
+        <span class="logic-operator-label"></span>
+      </div>
+      <div class="logic-content-cell"></div>
+    </div>
+  </template>
+
+  <template id="tpl-variable-btn">
+    <button class="logic-variable-btn toggle-var-btn">
+      <span class="font-mono font-bold var-name"></span>
+      <div class="var-separator"></div>
+      <span class="font-bold text-xs var-value"></span>
+    </button>
+  </template>
+
   <script type="module" src="/src/logic-builder.js"></script>
 </body>
 </html>
