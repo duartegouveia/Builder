@@ -46,7 +46,7 @@ function createNode(type) {
 
   if (node.children && node.minChildren && node.minChildren > 0) {
     for (let i = 0; i < node.minChildren; i++) {
-      node.children.push(createNode('EMPTY'));
+      node.children.push(createNode('VARIABLE'));
     }
   }
 
@@ -58,7 +58,7 @@ function createInitialNode(type) {
   const min = node.minChildren ?? (type === 'AND' || type === 'OR' ? 2 : 0);
   if (node.children) {
     while (node.children.length < min) {
-      node.children.push(createNode('EMPTY'));
+      node.children.push(createNode('VARIABLE'));
     }
   }
   return node;
@@ -393,7 +393,7 @@ function handleNodeTypeChange(builderKey, nodeId, newType) {
 function handleAddChild(builderKey, nodeId) {
   state.builders[builderKey] = updateNodeInTree(state.builders[builderKey], nodeId, node => {
     if (!node.children) return node;
-    return { ...node, children: [...node.children, createNode('EMPTY')] };
+    return { ...node, children: [...node.children, createNode('VARIABLE')] };
   });
   renderBuilder(builderKey);
 }
