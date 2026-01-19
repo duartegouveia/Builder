@@ -36,7 +36,7 @@ const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?
 
 const createNode = (type: NodeType): LogicNode => {
   const config = OPERATOR_CONFIG[type];
-  return {
+  const node: LogicNode = {
     id: Math.random().toString(36).substr(2, 9),
     type,
     children: type === 'TEXT' ? undefined : [],
@@ -44,6 +44,15 @@ const createNode = (type: NodeType): LogicNode => {
     minChildren: config?.min ?? null,
     maxChildren: config?.max ?? null,
   };
+
+  // Auto-fill min children
+  if (node.children && node.minChildren && node.minChildren > 0) {
+      for (let i = 0; i < node.minChildren; i++) {
+          node.children.push(createNode('EMPTY'));
+      }
+  }
+
+  return node;
 };
 
 // --- Components ---
