@@ -3,7 +3,7 @@ import { Plus, X, ChevronRight, Check, Download, ArrowLeftRight, ArrowUpDown } f
 
 // --- Types ---
 
-export type NodeType = 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'EMPTY';
+export type NodeType = 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'EMPTY';
 
 export interface LogicNode {
   id: string;
@@ -19,6 +19,7 @@ export interface LogicNode {
 
 const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?: number | null }> = {
   'TEXT': { label: 'Text' },
+  'MULTILINE': { label: 'Multiline Text' },
   'AND': { label: 'AND', min: 0, max: null },
   'OR': { label: 'OR', min: 0, max: null },
   'XOR': { label: 'XOR', min: 2, max: 2 },
@@ -33,7 +34,7 @@ const extractVariables = (node: LogicNode): string[] => {
   const vars = new Set<string>();
   
   const traverse = (n: LogicNode) => {
-    if (n.type === 'TEXT' && n.textValue) {
+    if ((n.type === 'TEXT' || n.type === 'MULTILINE') && n.textValue) {
       vars.add(n.textValue);
     }
     if (n.children) {
@@ -46,7 +47,7 @@ const extractVariables = (node: LogicNode): string[] => {
 };
 
 const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolean => {
-  if (node.type === 'TEXT') {
+  if (node.type === 'TEXT' || node.type === 'MULTILINE') {
     return values[node.textValue || ''] || false;
   }
   
@@ -77,11 +78,12 @@ const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolea
 
 const createNode = (type: NodeType): LogicNode => {
   const config = OPERATOR_CONFIG[type];
+  const isTextType = type === 'TEXT' || type === 'MULTILINE';
   const node: LogicNode = {
     id: Math.random().toString(36).substr(2, 9),
     type,
-    children: type === 'TEXT' ? undefined : [],
-    textValue: type === 'TEXT' ? '' : undefined,
+    children: isTextType ? undefined : [],
+    textValue: isTextType ? '' : undefined,
     minChildren: config?.min ?? null,
     maxChildren: config?.max ?? null,
   };
@@ -307,6 +309,30 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     placeholder="Enter text..."
                     className="input flex-1"
                     style={{ borderColor: 'transparent', backgroundColor: 'transparent' }}
+                 />
+             </div>
+             {onRemove && (
+                 <button className="btn btn-ghost btn-icon-sm text-muted-foreground ml-2" onClick={onRemove}>
+                     <X style={{ width: 16, height: 16 }} />
+                 </button>
+             )}
+          </div>
+      );
+  }
+
+  // 2b. Multiline Text Node
+  if (node.type === 'MULTILINE') {
+      return (
+          <div className="logic-text-node" style={{ alignItems: 'flex-start' }}>
+             {renderTypeSelector()}
+             <div className="flex-1 flex items-start gap-2">
+                 <div className="logic-text-badge" style={{ whiteSpace: 'pre-line', lineHeight: 1.2, padding: '4px 6px', height: 'auto' }}>abc{'\n'}abc</div>
+                 <textarea 
+                    value={node.textValue} 
+                    onChange={(e) => onChange({ ...node, textValue: e.target.value })}
+                    placeholder="Enter multiline text..."
+                    className="input flex-1"
+                    style={{ borderColor: 'transparent', backgroundColor: 'transparent', minHeight: 60, resize: 'vertical' }}
                  />
              </div>
              {onRemove && (
