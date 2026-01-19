@@ -193,54 +193,46 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
   // Setup ResizeObserver for Case >= 2
   if (childCount >= 2) {
       const updateLabels = () => {
+          // Check if opCol is still in DOM (it might be detached if re-rendered quickly)
+          if (!opCol.isConnected) return;
+
           // Remove existing absolute labels (keep accent)
           // Note: Accent is first child.
+          // We start removing from the end until we only have the accent left.
           while (opCol.children.length > 1) {
               opCol.removeChild(opCol.lastChild);
           }
 
           const children = Array.from(childrenContainer.children);
+          const opRect = opCol.getBoundingClientRect();
+
           // We need labels between child i and child i+1
-          // i goes from 0 to length - 2
           for (let i = 0; i < children.length - 1; i++) {
               const child = children[i];
-              // Position is bottom of current child relative to container
-              // Since childrenContainer is top aligned with opCol
-              const y = child.offsetTop + child.offsetHeight;
+              const childRect = child.getBoundingClientRect();
               
-              const label = createElement('span', 'absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none bg-muted/30 px-1', config.label);
-              label.style.top = `${y}px`;
+              // Calculate Y relative to opCol
+              // We want the label centered on the bottom edge of the child
+              const relativeY = childRect.bottom - opRect.top;
               
-              // To improve visibility over the border line, maybe add a small background or border?
-              // The user said "aligned with the passage".
-              // Let's add a small background to the label so it covers the border line visually if needed, 
-              // or just sits on top.
-              // I added bg-muted/30 to match column background to mask lines if any? 
-              // Actually opCol has bg-muted/30.
-              // Let's just place it.
+              const label = createElement('span', 'absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none bg-muted/30 px-1 rounded-sm z-10', config.label);
+              label.style.top = `${relativeY}px`;
               
               opCol.appendChild(label);
           }
       };
 
-      // Observe the children container for size changes
-      // We also need to observe individual children if their content changes but not container width?
-      // observing childrenContainer with box: 'border-box' should catch height changes of children affecting container height.
-      // But we need the positions of internal boundaries.
-      // It's safer to observe the container.
-      
+      // Observe both container and children for robust updates
       const observer = new ResizeObserver(() => {
-          // Use requestAnimationFrame to avoid loop limit errors and ensure layout is done
           requestAnimationFrame(updateLabels);
       });
       
       observer.observe(childrenContainer);
+      // Also observe children to catch height changes
+      Array.from(childrenContainer.children).forEach(child => observer.observe(child));
       
-      // Cleanup observer when element is removed?
-      // In this simple Vanilla implementation, we don't have a component unmount lifecycle.
-      // But since we replace innerHTML of root on render(), the DOM nodes are garbage collected.
-      // The observer should be GC'd too if the target node is GC'd. 
-      // (JS WeakRefs logic applies to observers usually).
+      // Initial update
+      requestAnimationFrame(updateLabels);
   }
 
 
