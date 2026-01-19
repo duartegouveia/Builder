@@ -144,7 +144,7 @@ function buildLeafNodeDOM(nodeData, builderKey, canRemove, parentId, childIndex)
     const checkbox = nodeEl.querySelector('input[type="checkbox"]');
     const label = nodeEl.querySelector('.bool-label');
     checkbox.checked = nodeData.booleanValue || false;
-    label.textContent = nodeData.booleanValue ? '1' : '0';
+    label.textContent = nodeData.booleanValue ? '1=True' : '0=False';
     label.classList.toggle('text-success', nodeData.booleanValue);
     label.classList.toggle('text-error', !nodeData.booleanValue);
   }
@@ -690,7 +690,7 @@ function setupEventDelegation() {
         }
         const label = checkbox.closest('label')?.querySelector('.bool-label');
         if (label) {
-          label.textContent = checkbox.checked ? '1' : '0';
+          label.textContent = checkbox.checked ? '1=True' : '0=False';
           label.classList.toggle('text-success', checkbox.checked);
           label.classList.toggle('text-error', !checkbox.checked);
         }
