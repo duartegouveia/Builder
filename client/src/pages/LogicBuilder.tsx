@@ -224,7 +224,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                                         <NodeEditor 
                                             node={child} 
                                             onChange={(updated) => updateChild(index, updated)} 
-                                            onRemove={() => removeChild(index)}
+                                            onRemove={canRemove ? () => removeChild(index) : undefined}
                                         />
                                     </div>
                                     {/* Only show remove button for children, root node management is up to parent container if needed */}
