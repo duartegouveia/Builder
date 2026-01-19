@@ -781,6 +781,8 @@ textarea.input.has-scroll {
 
 .add-child-btn {
   border-radius: var(--radius-full);
+  position: relative;
+  top: -1px;
 }
 
 /* Horizontal Layout */
