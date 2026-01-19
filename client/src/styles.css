@@ -684,7 +684,7 @@ textarea.input.has-scroll {
   color: var(--slate-500);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--slate-100);
+  background: transparent;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 }
@@ -744,12 +744,15 @@ textarea.input.has-scroll {
 
 .logic-row-grid.has-separator .logic-label-cell {
   align-items: flex-end;
+  justify-content: center;
   padding-bottom: 0;
 }
 
 .logic-row-grid.has-separator .logic-label-cell .logic-operator-label {
-  position: relative;
-  transform: translateY(50%);
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
   z-index: 2;
 }
 
