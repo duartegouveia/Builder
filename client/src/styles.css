@@ -611,7 +611,6 @@ textarea.input.has-scroll {
   opacity: 1;
 }
 
-.logic-operator-container[data-child-count="1"] .layout-toggle-btn,
 .logic-operator-container[data-child-count="2"] .layout-toggle-btn,
 .logic-operator-container[data-child-count="3"] .layout-toggle-btn {
   display: flex;
