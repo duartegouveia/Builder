@@ -1132,6 +1132,11 @@ input[type="checkbox"] {
   position: relative;
 }
 
+.popover-trigger {
+  position: relative;
+  top: 1px;
+}
+
 .popover-container:has(.popover-content.show) {
   z-index: 9999;
 }
