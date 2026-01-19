@@ -404,7 +404,14 @@ function renderSection(title, node, builderKey) {
 }
 
 function render() {
-  const root = document.getElementById('root');
+  let root = document.getElementById('logic-builder-app');
+  
+  if (!root) {
+      root = document.createElement('div');
+      root.id = 'logic-builder-app';
+      document.body.appendChild(root);
+  }
+
   root.innerHTML = '';
   
   const main = createElement('div', 'min-h-screen bg-background p-4 md:p-8 font-sans');
