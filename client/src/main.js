@@ -67,7 +67,7 @@ function extractJSONFromDOM(element) {
     if (kind === 'TEXT') {
         const input = nodeEl.querySelector('input');
         if (input) {
-            result.text = input.value;
+            result.items = [input.value];
         }
     } else {
         // Find children
