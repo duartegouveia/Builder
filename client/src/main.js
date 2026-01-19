@@ -151,16 +151,14 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
 
   const childCount = node.children ? node.children.length : 0;
 
-  if (childCount < 2) {
-      // Case 0 or 1: Center, no rotation
+  if (childCount === 0) {
+      // Case 0: Center, no rotation (in empty box)
       opCol.classList.add('items-center', 'justify-center');
       const label = createElement('span', 'text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none', config.label);
       opCol.appendChild(label);
   } else {
-      // Case >= 2: Labels at junctions
-      // We will add labels dynamically
-      // But we need the children to be rendered first and sized.
-      // We'll setup the observer after building the full structure.
+      // Case >= 1: Dynamic Labels
+      // We will add labels dynamically via ResizeObserver
   }
   
   // Children Column
@@ -190,8 +188,8 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
   
   childrenCol.appendChild(childrenContainer);
 
-  // Setup ResizeObserver for Case >= 2
-  if (childCount >= 2) {
+  // Setup ResizeObserver for Case >= 1
+  if (childCount >= 1) {
       const updateLabels = () => {
           // Check if opCol is still in DOM (it might be detached if re-rendered quickly)
           if (!opCol.isConnected) return;
@@ -206,19 +204,32 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
           const children = Array.from(childrenContainer.children);
           const opRect = opCol.getBoundingClientRect();
 
-          // We need labels between child i and child i+1
-          for (let i = 0; i < children.length - 1; i++) {
-              const child = children[i];
-              const childRect = child.getBoundingClientRect();
-              
-              // Calculate Y relative to opCol
-              // We want the label centered on the bottom edge of the child
-              const relativeY = childRect.bottom - opRect.top;
-              
-              const label = createElement('span', 'absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none bg-muted/30 px-1 rounded-sm z-10', config.label);
-              label.style.top = `${relativeY}px`;
-              
-              opCol.appendChild(label);
+          if (children.length === 1) {
+             // Case 1: Center on the single child
+             const child = children[0];
+             const childRect = child.getBoundingClientRect();
+             // Calculate Y center of the child relative to opCol top
+             const relativeY = (childRect.top + childRect.height / 2) - opRect.top;
+             
+             const label = createElement('span', 'absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none px-1 rounded-sm z-10', config.label);
+             label.style.top = `${relativeY}px`;
+             opCol.appendChild(label);
+          } else {
+             // Case >= 2: Labels at junctions
+             // We need labels between child i and child i+1
+             for (let i = 0; i < children.length - 1; i++) {
+                 const child = children[i];
+                 const childRect = child.getBoundingClientRect();
+                 
+                 // Calculate Y relative to opCol
+                 // We want the label centered on the bottom edge of the child
+                 const relativeY = childRect.bottom - opRect.top;
+                 
+                 const label = createElement('span', 'absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none bg-muted/30 px-1 rounded-sm z-10', config.label);
+                 label.style.top = `${relativeY}px`;
+                 
+                 opCol.appendChild(label);
+             }
           }
       };
 
