@@ -634,14 +634,15 @@ textarea.input.has-scroll {
 
 .logic-operator-container.is-horizontal .logic-rows-container {
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: stretch;
 }
 
 .logic-operator-container.is-horizontal .logic-row-grid {
   display: block;
-  flex: 1;
-  min-width: 120px;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .logic-operator-container.is-horizontal .logic-label-cell {
@@ -650,6 +651,20 @@ textarea.input.has-scroll {
 
 .logic-operator-container.is-horizontal .logic-content-cell {
   padding: var(--space-3);
+}
+
+.logic-operator-container.is-horizontal .logic-text-node {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logic-operator-container.is-horizontal .logic-text-node .flex-1 {
+  min-width: 0;
+}
+
+.logic-operator-container.is-horizontal .input-inline {
+  min-width: 0;
+  width: 100%;
 }
 
 .logic-horizontal-divider {
