@@ -612,19 +612,19 @@ textarea.input.has-scroll {
 }
 
 .layout-toggle-btn .icon-vertical {
-  display: block;
+  display: none;
 }
 
 .layout-toggle-btn .icon-horizontal {
-  display: none;
+  display: block;
 }
 
 .logic-operator-container.is-horizontal .layout-toggle-btn .icon-vertical {
-  display: none;
+  display: block;
 }
 
 .logic-operator-container.is-horizontal .layout-toggle-btn .icon-horizontal {
-  display: block;
+  display: none;
 }
 
 .logic-operator-container[data-child-count="2"] .layout-toggle-btn,
