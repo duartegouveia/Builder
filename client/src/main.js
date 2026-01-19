@@ -68,9 +68,9 @@ let state = {
 
 // --- Actions ---
 
-function updateBuilder(key, newNode) {
+function updateBuilder(key, newNode, skipRender = false) {
   state.builders[key] = newNode;
-  render();
+  if (!skipRender) render();
 }
 
 // --- DOM Rendering ---
@@ -113,7 +113,7 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
     const input = createElement('input', 'flex-1 h-9 border-none focus:ring-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground');
     input.value = node.textValue || '';
     input.placeholder = 'Enter text...';
-    input.oninput = (e) => onChange({ ...node, textValue: e.target.value });
+    input.oninput = (e) => onChange({ ...node, textValue: e.target.value }, true);
     
     wrapper.appendChild(icon);
     wrapper.appendChild(input);
@@ -172,10 +172,10 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
         const childWrapper = createElement('div', 'border-b last:border-b-0 p-2 hover:bg-muted/5 transition-colors flex gap-3 items-start group');
         
         const childContent = createElement('div', 'flex-1 min-w-0');
-        const updateChild = (updatedChild) => {
+        const updateChild = (updatedChild, skipRender = false) => {
             const newChildren = [...node.children];
             newChildren[index] = updatedChild;
-            onChange({ ...node, children: newChildren });
+            onChange({ ...node, children: newChildren }, skipRender);
         };
         const removeChild = () => {
              const newChildren = node.children.filter((_, i) => i !== index);
@@ -385,7 +385,7 @@ function renderSection(title, node, builderKey) {
     const h2 = createElement('h2', 'text-sm font-semibold text-muted-foreground uppercase tracking-wider text-center', title);
     const wrapper = createElement('div', 'bg-muted/5 p-2 rounded-lg');
     
-    wrapper.appendChild(renderNode(node, (newNode) => updateBuilder(builderKey, newNode), undefined, true));
+    wrapper.appendChild(renderNode(node, (newNode, skipRender) => updateBuilder(builderKey, newNode, skipRender), undefined, true));
     
     section.appendChild(h2);
     section.appendChild(wrapper);
@@ -422,7 +422,7 @@ function render() {
   const dynamicContainer = createElement('div', 'pt-8 border-t');
   dynamicContainer.innerHTML = `<h2 class="text-xl font-semibold mb-6 text-center text-primary">Dynamic Playground</h2>`;
   const dynamicWrapper = createElement('div', 'bg-muted/10 p-6 rounded-xl border border-dashed');
-  dynamicWrapper.appendChild(renderNode(state.builders['dynamic'], (n) => updateBuilder('dynamic', n), undefined, true));
+  dynamicWrapper.appendChild(renderNode(state.builders['dynamic'], (n, skipRender) => updateBuilder('dynamic', n, skipRender), undefined, true));
   dynamicContainer.appendChild(dynamicWrapper);
   
   container.appendChild(dynamicContainer);
