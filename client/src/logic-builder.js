@@ -510,6 +510,12 @@ function handleAddChild(builderKey, nodeId) {
   
   operatorContainer.dataset.childCount = childCount;
   
+  // If exceeds 3 children, switch to vertical layout
+  if (childCount > 3 && operatorContainer.classList.contains('is-horizontal')) {
+    operatorContainer.classList.remove('is-horizontal');
+    operatorContainer.querySelectorAll('.logic-horizontal-divider').forEach(d => d.remove());
+  }
+  
   if (childCount === 1) {
     const emptyRow = rowsContainer.querySelector('.logic-row-empty');
     if (emptyRow) emptyRow.remove();
@@ -524,6 +530,20 @@ function handleAddChild(builderKey, nodeId) {
     
     updateOperatorLabels(rowsContainer, nodeData);
     updateRemoveButtons(rowsContainer, nodeData, builderKey);
+    
+    // Update horizontal dividers if in horizontal mode
+    if (operatorContainer.classList.contains('is-horizontal')) {
+      const config = OPERATOR_CONFIG[nodeData.type];
+      operatorContainer.querySelectorAll('.logic-horizontal-divider').forEach(d => d.remove());
+      const rows = rowsContainer.querySelectorAll('.logic-row-grid');
+      rows.forEach((row, i) => {
+        if (i < rows.length - 1) {
+          const divider = cloneTemplate('tpl-horizontal-divider');
+          divider.querySelector('.logic-horizontal-label').textContent = config.label;
+          row.after(divider);
+        }
+      });
+    }
   }
   
   updateAddButton(addArea, nodeData, builderKey);
