@@ -515,7 +515,7 @@ textarea.input.has-scroll {
 }
 
 .logic-node.is-root {
-  padding: var(--space-5);
+  padding: 10px;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
