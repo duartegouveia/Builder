@@ -34,6 +34,58 @@ const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?
 
 // --- Helper Functions ---
 
+// Get all unique variable names from the tree
+const extractVariables = (node: LogicNode): string[] => {
+  const vars = new Set<string>();
+  
+  const traverse = (n: LogicNode) => {
+    if (n.type === 'TEXT' && n.textValue) {
+      vars.add(n.textValue);
+    }
+    if (n.children) {
+      n.children.forEach(traverse);
+    }
+  };
+  
+  traverse(node);
+  return Array.from(vars).sort();
+};
+
+// Evaluate the logic tree
+const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolean => {
+  if (node.type === 'TEXT') {
+    return values[node.textValue || ''] || false;
+  }
+  
+  if (node.type === 'EMPTY') return false; // Treat empty as false
+  
+  const childResults = node.children?.map(c => evaluateLogic(c, values)) || [];
+  
+  switch (node.type) {
+    case 'AND':
+      return childResults.length > 0 && childResults.every(r => r);
+    case 'OR':
+      return childResults.some(r => r);
+    case 'XOR':
+      // XOR for n inputs: true if odd number of inputs are true
+      return childResults.filter(r => r).length % 2 === 1;
+    case 'IMP':
+      // p -> q is equivalent to !p || q
+      // Only 2 children allowed/expected for IMP
+      if (childResults.length < 2) return false;
+      return !childResults[0] || childResults[1];
+    case 'BIC':
+      // p <-> q is equivalent to (p -> q) && (q -> p) or simply p === q
+      if (childResults.length < 2) return false;
+      return childResults[0] === childResults[1];
+    case 'NOT':
+      if (childResults.length === 0) return true;
+      return !childResults[0];
+    default:
+      return false;
+  }
+};
+
 const createNode = (type: NodeType): LogicNode => {
   const config = OPERATOR_CONFIG[type];
   const node: LogicNode = {
@@ -56,6 +108,48 @@ const createNode = (type: NodeType): LogicNode => {
 };
 
 // --- Components ---
+
+const TruthTable: React.FC<{ 
+    variables: string[], 
+    values: Record<string, boolean>, 
+    onChange: (variable: string, value: boolean) => void,
+    result: boolean 
+}> = ({ variables, values, onChange, result }) => {
+    if (variables.length === 0) return null;
+
+    return (
+        <div className="bg-card border rounded-lg p-4 shadow-sm space-y-4">
+            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2">Evaluation</h3>
+            <div className="flex flex-wrap gap-4 items-center">
+                {variables.map(v => (
+                    <div key={v} className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-md border">
+                        <span className="font-mono font-bold text-sm">{v}</span>
+                        <div className="h-4 w-px bg-border mx-1" />
+                        <button
+                            onClick={() => onChange(v, !values[v])}
+                            className={cn(
+                                "text-xs font-bold px-2 py-0.5 rounded transition-colors",
+                                values[v] ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                            )}
+                        >
+                            {values[v] ? 'TRUE' : 'FALSE'}
+                        </button>
+                    </div>
+                ))}
+            </div>
+            
+            <div className="flex items-center gap-3 pt-2 border-t mt-4">
+                <span className="text-sm font-medium">Result:</span>
+                <span className={cn(
+                    "text-lg font-mono font-bold px-3 py-1 rounded",
+                    result ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                )}>
+                    {result ? 'TRUE' : 'FALSE'}
+                </span>
+            </div>
+        </div>
+    );
+};
 
 interface NodeEditorProps {
   node: LogicNode;
@@ -329,6 +423,31 @@ export default function LogicBuilder() {
     'dynamic': createNode('EMPTY')
   });
 
+  const [truthValues, setTruthValues] = useState<Record<string, boolean>>({});
+
+  // Dynamic builder variables and result
+  const dynamicVariables = extractVariables(builders['dynamic']);
+  const dynamicResult = evaluateLogic(builders['dynamic'], truthValues);
+
+  // Auto-initialize new variables to false
+  useEffect(() => {
+    const newValues = { ...truthValues };
+    let changed = false;
+    dynamicVariables.forEach(v => {
+        if (v && !(v in newValues)) {
+            newValues[v] = false;
+            changed = true;
+        }
+    });
+    if (changed) {
+        setTruthValues(newValues);
+    }
+  }, [dynamicVariables, truthValues]);
+
+  const toggleVariable = (variable: string, value: boolean) => {
+      setTruthValues(prev => ({ ...prev, [variable]: value }));
+  };
+
   function createInitialNode(type: NodeType): LogicNode {
       const node = createNode(type);
       // Initialize with min children
@@ -365,11 +484,22 @@ export default function LogicBuilder() {
         </div>
 
         {/* Dynamic Builder */}
-        <div className="pt-8 border-t">
-             <h2 className="text-xl font-semibold mb-6 text-center text-primary">Dynamic Playground</h2>
+        <div className="pt-8 border-t space-y-6">
+             <div className="text-center">
+                <h2 className="text-xl font-semibold text-primary">Dynamic Playground</h2>
+                <p className="text-sm text-muted-foreground mt-1">Build complex logic and evaluate it</p>
+             </div>
+             
              <div className="bg-muted/10 p-6 rounded-xl border border-dashed">
                 <NodeEditor node={builders['dynamic']} onChange={(n) => updateBuilder('dynamic', n)} isRoot={true} />
              </div>
+
+             <TruthTable 
+                variables={dynamicVariables}
+                values={truthValues}
+                onChange={toggleVariable}
+                result={dynamicResult}
+             />
         </div>
 
         <div className="h-20" /> {/* Spacer */}
