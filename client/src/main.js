@@ -278,8 +278,8 @@ function renderTypeSelector(node, onChange) {
     // Trigger Button
     const trigger = createElement('button', 'h-8 w-8 p-0 shrink-0 font-bold bg-muted hover:bg-muted/80 text-muted-foreground rounded-md flex items-center justify-center transition-colors', ICONS.CHEVRON_RIGHT);
     
-    // Dropdown Content
-    const dropdown = createElement('div', 'absolute top-full left-0 mt-1 w-32 p-1 rounded-md border bg-popover text-popover-foreground shadow-md z-50 hidden flex flex-col gap-1 bg-white dark:bg-zinc-950');
+    // Dropdown Content (We create it but don't append it to wrapper yet)
+    const dropdown = createElement('div', 'fixed w-32 p-1 rounded-md border bg-popover text-popover-foreground shadow-md z-[9999] hidden flex flex-col gap-1 bg-white dark:bg-zinc-950');
     
     // Generate Options
     Object.entries(OPERATOR_CONFIG).forEach(([key, conf]) => {
@@ -289,10 +289,9 @@ function renderTypeSelector(node, onChange) {
         optionBtn.onclick = (e) => {
             e.stopPropagation(); // Prevent bubbling
             
-            if (key === node.type) {
-                 dropdown.classList.add('hidden');
-                 return;
-            }
+            closeDropdown();
+            
+            if (key === node.type) return;
             
             const newType = key;
             const newNode = createNode(newType);
@@ -318,31 +317,74 @@ function renderTypeSelector(node, onChange) {
         dropdown.appendChild(optionBtn);
     });
 
+    const closeDropdown = () => {
+        dropdown.classList.add('hidden');
+        if (dropdown.parentNode === document.body) {
+            document.body.removeChild(dropdown);
+        }
+    };
+
     // Toggle logic
     trigger.onclick = (e) => {
         e.stopPropagation();
         
-        // Close all other open dropdowns
-        document.querySelectorAll('.custom-dropdown').forEach(el => {
-            if (el !== dropdown) el.classList.add('hidden');
+        const isHidden = dropdown.classList.contains('hidden') || dropdown.parentNode !== document.body;
+
+        // Close all other open dropdowns first
+        document.querySelectorAll('.custom-dropdown-active').forEach(el => {
+            // We can't easily access the close function of others, 
+            // but we can remove them from DOM if we marked them.
+            if (el.parentNode === document.body) {
+                document.body.removeChild(el);
+            }
         });
 
-        dropdown.classList.toggle('hidden');
-        dropdown.classList.add('custom-dropdown');
+        if (isHidden) {
+            document.body.appendChild(dropdown);
+            dropdown.classList.remove('hidden');
+            dropdown.classList.add('custom-dropdown-active');
+            
+            // Calculate position
+            const rect = trigger.getBoundingClientRect();
+            dropdown.style.top = `${rect.bottom + 4}px`;
+            dropdown.style.left = `${rect.left}px`;
+        } else {
+            closeDropdown();
+        }
     };
 
+    // We store the close function on the trigger element to access it globally if needed, 
+    // or rely on the global click listener cleaning up DOM nodes.
+    // The global listener below removes .custom-dropdown-active from body.
+    
     wrapper.appendChild(trigger);
-    wrapper.appendChild(dropdown);
+    // wrapper.appendChild(dropdown); // Don't append to wrapper, we portal it to body
     
     return wrapper;
 }
 
 // Global click listener to close dropdowns
-document.addEventListener('click', () => {
-    document.querySelectorAll('.custom-dropdown').forEach(el => {
-        el.classList.add('hidden');
+document.addEventListener('click', (e) => {
+    // If click is inside a dropdown, don't close (handled by stopPropagation in option click)
+    // But options close it manually.
+    // If click is outside, close all.
+    document.querySelectorAll('.custom-dropdown-active').forEach(el => {
+        if (!el.contains(e.target)) {
+            if (el.parentNode === document.body) {
+                document.body.removeChild(el);
+            }
+        }
     });
 });
+
+// Update scroll listener to close dropdowns on scroll to prevent detached floating
+window.addEventListener('scroll', () => {
+     document.querySelectorAll('.custom-dropdown-active').forEach(el => {
+        if (el.parentNode === document.body) {
+            document.body.removeChild(el);
+        }
+    });
+}, true); // Capture phase to catch scrolling of any element
 
 
 function renderSection(title, node, builderKey) {
