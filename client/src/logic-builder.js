@@ -261,49 +261,65 @@ function renderNodeHtml(node, builderKey, isRoot = false, canRemove = true, pare
   const canRemoveChildren = minChildren == null || (node.children?.length ?? 0) > minChildren;
   const childCount = node.children?.length ?? 0;
 
-  const renderOperatorLabels = () => {
+  const renderRowsWithLabels = () => {
     if (childCount === 0) {
-      return `<span class="logic-operator-label">${config.label}</span>`;
+      return `
+        <div class="logic-row-grid logic-row-empty">
+          <div class="logic-label-cell">
+            <span class="logic-operator-label">${config.label}</span>
+          </div>
+          <div class="logic-content-cell"></div>
+        </div>
+      `;
     }
+    
     if (childCount === 1) {
-      return `<div class="logic-label-single"><span class="logic-operator-label">${config.label}</span></div>`;
+      const child = node.children[0];
+      return `
+        <div class="logic-row-grid">
+          <div class="logic-label-cell">
+            <span class="logic-operator-label">${config.label}</span>
+          </div>
+          <div class="logic-content-cell">
+            ${renderNodeHtml(child, builderKey, false, canRemoveChildren, node.id, 0)}
+          </div>
+        </div>
+      `;
     }
-    const labels = [];
-    for (let i = 0; i < childCount - 1; i++) {
-      labels.push(`<div class="logic-label-between"><span class="logic-operator-label">${config.label}</span></div>`);
+    
+    const rows = [];
+    for (let i = 0; i < childCount; i++) {
+      const child = node.children[i];
+      const isLast = i === childCount - 1;
+      
+      rows.push(`
+        <div class="logic-row-grid ${!isLast ? 'has-separator' : ''}">
+          <div class="logic-label-cell">
+            ${!isLast ? `<span class="logic-operator-label">${config.label}</span>` : ''}
+          </div>
+          <div class="logic-content-cell">
+            ${renderNodeHtml(child, builderKey, false, canRemoveChildren, node.id, i)}
+          </div>
+        </div>
+      `);
     }
-    return `<div class="logic-labels-container" data-label-count="${childCount - 1}">${labels.join('')}</div>`;
+    return rows.join('');
   };
 
   return `
     <div class="logic-node ${isRoot ? 'is-root' : ''}">
       ${!isRoot ? `<div class="mt-2 flex flex-col gap-1 items-center">${typeSelectorHtml}</div>` : ''}
       <div class="logic-operator-container" data-child-count="${childCount}">
-        <div class="flex">
-          <div class="logic-operator-column" data-child-count="${childCount}">
-            ${renderOperatorLabels()}
-          </div>
-          
-          <div class="logic-children-column">
-            <div class="logic-children-list">
-              ${node.children?.map((child, index) => `
-                <div class="logic-child-row" data-row-index="${index}">
-                  <div class="flex-1" style="min-width: 0;">
-                    ${renderNodeHtml(child, builderKey, false, canRemoveChildren, node.id, index)}
-                  </div>
-                </div>
-              `).join('') || ''}
-            </div>
-            
-            ${canAdd ? `
-              <div class="logic-add-area">
-                <button class="btn btn-outline btn-icon-sm rounded-full shadow-sm add-child-btn" data-node-id="${node.id}" data-builder="${builderKey}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                </button>
-              </div>
-            ` : ''}
-          </div>
+        <div class="logic-rows-container">
+          ${renderRowsWithLabels()}
         </div>
+        ${canAdd ? `
+          <div class="logic-add-area">
+            <button class="btn btn-outline btn-icon-sm rounded-full shadow-sm add-child-btn" data-node-id="${node.id}" data-builder="${builderKey}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            </button>
+          </div>
+        ` : ''}
       </div>
       ${!isRoot && removeButton ? `<div class="mt-2">${removeButton}</div>` : ''}
     </div>

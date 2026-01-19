@@ -572,22 +572,10 @@ textarea.input {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: visible;
-}
-
-.logic-operator-column {
-  width: 56px;
-  min-width: 56px;
-  background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  padding: var(--space-3) var(--space-2);
 }
 
-.logic-operator-column::before {
+.logic-operator-container::before {
   content: "";
   position: absolute;
   top: 0;
@@ -596,6 +584,7 @@ textarea.input {
   width: 4px;
   background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-600) 100%);
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  z-index: 1;
 }
 
 .logic-operator-label {
@@ -612,66 +601,51 @@ textarea.input {
   border-radius: var(--radius-sm);
 }
 
-.logic-label-single {
+.logic-rows-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.logic-row-grid {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  position: relative;
+}
+
+.logic-row-grid.has-separator {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.logic-row-grid.logic-row-empty {
+  min-height: 60px;
+}
+
+.logic-label-cell {
+  background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  position: relative;
+  border-right: 1px solid var(--border);
 }
 
-.logic-labels-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.logic-label-between {
-  flex: 1;
-  display: flex;
+.logic-row-grid.has-separator .logic-label-cell {
   align-items: flex-end;
-  justify-content: center;
   padding-bottom: 0;
-  position: relative;
 }
 
-.logic-label-between .logic-operator-label {
-  position: absolute;
-  bottom: 0;
+.logic-row-grid.has-separator .logic-label-cell .logic-operator-label {
+  position: relative;
   transform: translateY(50%);
+  z-index: 2;
 }
 
-.logic-children-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.logic-children-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.logic-child-row {
+.logic-content-cell {
   padding: var(--space-4);
-  border-bottom: 1px solid var(--border-light);
   transition: background var(--transition-fast);
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  position: relative;
 }
 
-.logic-child-row:last-child {
-  border-bottom: none;
-}
-
-.logic-child-row:hover {
+.logic-content-cell:hover {
   background: var(--slate-50);
 }
 
