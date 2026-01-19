@@ -19,6 +19,7 @@ const ICONS = {
 };
 
 // --- Helper Functions ---
+const DEFAULT_TYPE = Object.keys(OPERATOR_CONFIG)[0];
 
 const createNode = (type) => {
   const config = OPERATOR_CONFIG[type];
@@ -33,7 +34,7 @@ const createNode = (type) => {
 
   if (node.children && node.minChildren && node.minChildren > 0) {
     for (let i = 0; i < node.minChildren; i++) {
-      node.children.push(createNode('EMPTY'));
+      node.children.push(createNode(DEFAULT_TYPE));
     }
   }
 
@@ -45,7 +46,7 @@ const createInitialNode = (type) => {
     const min = node.minChildren ?? (type === 'AND' || type === 'OR' ? 2 : 0);
     if (node.children) {
         while (node.children.length < min) {
-            node.children.push(createNode('EMPTY'));
+            node.children.push(createNode(DEFAULT_TYPE));
         }
     }
     return node;
@@ -61,7 +62,7 @@ let state = {
     'imp': createInitialNode('IMP'),
     'bic': createInitialNode('BIC'),
     'not': createInitialNode('NOT'),
-    'dynamic': createNode('EMPTY')
+    'dynamic': createNode(DEFAULT_TYPE)
   }
 };
 
@@ -247,7 +248,7 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
       const addArea = createElement('div', 'p-2 flex justify-center border-t bg-muted/5 mt-[5px]');
       const addBtn = createElement('button', 'h-8 w-8 rounded-full shadow-sm hover:scale-110 transition-transform bg-background border flex items-center justify-center', ICONS.PLUS);
       addBtn.onclick = () => {
-          const newNode = createNode('EMPTY');
+          const newNode = createNode(DEFAULT_TYPE);
           onChange({
               ...node,
               children: [...(node.children || []), newNode]
@@ -305,7 +306,7 @@ function renderTypeSelector(node, onChange) {
             if (newNode.children) {
                  const min = newNode.minChildren ?? 0;
                  while (newNode.children.length < min) {
-                     newNode.children.push(createNode('EMPTY'));
+                     newNode.children.push(createNode(DEFAULT_TYPE));
                  }
                  if (newNode.maxChildren != null && newNode.children.length > newNode.maxChildren) {
                      newNode.children = newNode.children.slice(0, newNode.maxChildren);
