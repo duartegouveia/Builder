@@ -542,7 +542,7 @@ textarea.input.has-scroll {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: var(--space-3) var(--space-4);
+  padding: 5px;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
