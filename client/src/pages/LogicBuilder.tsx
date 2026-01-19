@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, ChevronRight, Check, AlertCircle } from 'lucide-react';
+import { Plus, X, ChevronRight, Check, AlertCircle, Download, FileJson } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,43 +109,78 @@ const createNode = (type: NodeType): LogicNode => {
 
 // --- Components ---
 
-const TruthTable: React.FC<{ 
+const LogicControls: React.FC<{ 
     variables: string[], 
     values: Record<string, boolean>, 
     onChange: (variable: string, value: boolean) => void,
-    result: boolean 
-}> = ({ variables, values, onChange, result }) => {
-    if (variables.length === 0) return null;
-
+    result: boolean,
+    onExport: () => void
+}> = ({ variables, values, onChange, result, onExport }) => {
     return (
-        <div className="bg-card border rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2">Evaluation</h3>
-            <div className="flex flex-wrap gap-4 items-center">
-                {variables.map(v => (
-                    <div key={v} className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-md border">
-                        <span className="font-mono font-bold text-sm">{v}</span>
-                        <div className="h-4 w-px bg-border mx-1" />
-                        <button
-                            onClick={() => onChange(v, !values[v])}
-                            className={cn(
-                                "text-xs font-bold px-2 py-0.5 rounded transition-colors",
-                                values[v] ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                            )}
-                        >
-                            {values[v] ? 'TRUE' : 'FALSE'}
-                        </button>
+        <div className="bg-card border rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            {/* Left: Logic Evaluation (Variables) */}
+            <div className="flex-1 space-y-2 w-full md:w-auto">
+                <div className="flex items-center justify-between md:justify-start gap-4">
+                     <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                        <Check className="w-3 h-3" />
+                        Logic Evaluation
+                     </h3>
+                     {/* Result Badge (Mobile Only) */}
+                     <div className="md:hidden">
+                        <span className={cn(
+                            "text-xs font-mono font-bold px-2 py-0.5 rounded",
+                            result ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                        )}>
+                            {result ? 'TRUE' : 'FALSE'}
+                        </span>
+                     </div>
+                </div>
+
+                {variables.length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic">Add text variables to evaluate...</p>
+                ) : (
+                    <div className="flex flex-wrap gap-3">
+                        {variables.map(v => (
+                            <button
+                                key={v}
+                                onClick={() => onChange(v, !values[v])}
+                                className={cn(
+                                    "flex items-center gap-2 px-3 py-1.5 rounded-md border transition-all text-sm group",
+                                    values[v] ? "bg-green-50/50 border-green-200 hover:border-green-300" : "bg-red-50/50 border-red-200 hover:border-red-300"
+                                )}
+                            >
+                                <span className="font-mono font-bold">{v}</span>
+                                <div className={cn("h-3 w-px mx-1 group-hover:opacity-100 opacity-30 transition-opacity", values[v] ? "bg-green-400" : "bg-red-400")} />
+                                <span className={cn("font-bold text-xs", values[v] ? "text-green-700" : "text-red-700")}>
+                                    {values[v] ? 'T' : 'F'}
+                                </span>
+                            </button>
+                        ))}
                     </div>
-                ))}
+                )}
             </div>
             
-            <div className="flex items-center gap-3 pt-2 border-t mt-4">
-                <span className="text-sm font-medium">Result:</span>
-                <span className={cn(
-                    "text-lg font-mono font-bold px-3 py-1 rounded",
-                    result ? "bg-green-500 text-white" : "bg-red-500 text-white"
-                )}>
-                    {result ? 'TRUE' : 'FALSE'}
-                </span>
+            {/* Divider */}
+            <div className="hidden md:block w-px h-12 bg-border" />
+
+            {/* Right: Result & Export */}
+            <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+                {/* Result Display (Desktop) */}
+                <div className="hidden md:flex flex-col items-end gap-1 mr-2">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Result</span>
+                    <span className={cn(
+                        "text-lg font-mono font-bold px-3 py-1 rounded shadow-sm",
+                        result ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                    )}>
+                        {result ? 'TRUE' : 'FALSE'}
+                    </span>
+                </div>
+
+                <Button variant="outline" className="gap-2" onClick={onExport}>
+                    <Download className="w-4 h-4" />
+                    <span className="hidden sm:inline">Export JSON</span>
+                </Button>
             </div>
         </div>
     );
@@ -464,6 +499,16 @@ export default function LogicBuilder() {
       setBuilders(prev => ({ ...prev, [key]: newNode }));
   };
 
+  const handleExport = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(builders['dynamic'], null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "logic_tree.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
@@ -494,11 +539,12 @@ export default function LogicBuilder() {
                 <NodeEditor node={builders['dynamic']} onChange={(n) => updateBuilder('dynamic', n)} isRoot={true} />
              </div>
 
-             <TruthTable 
+             <LogicControls 
                 variables={dynamicVariables}
                 values={truthValues}
                 onChange={toggleVariable}
                 result={dynamicResult}
+                onExport={handleExport}
              />
         </div>
 
