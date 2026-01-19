@@ -713,6 +713,10 @@ textarea.input.has-scroll {
 .logic-row-grid {
   display: block;
   position: relative;
+  margin-left: 56px;
+}
+
+.logic-operator-container.is-horizontal .logic-row-grid {
   margin-left: 0;
 }
 
