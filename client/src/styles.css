@@ -431,6 +431,10 @@ textarea.input {
 }
 
 /* ===== Select Component ===== */
+.relative {
+  position: relative;
+}
+
 .select-trigger {
   display: flex;
   align-items: center;
@@ -998,6 +1002,7 @@ input[type="checkbox"] {
 /* ===== Popover Show State ===== */
 .popover-container {
   position: relative;
+  z-index: 1;
 }
 
 .popover-content {
@@ -1006,11 +1011,11 @@ input[type="checkbox"] {
   top: 100%;
   left: 0;
   margin-top: 4px;
-  z-index: 50;
+  z-index: 9999;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   padding: var(--space-2);
   min-width: 160px;
 }
@@ -1024,12 +1029,16 @@ input[type="checkbox"] {
 .select-content {
   display: none;
   position: absolute;
-  z-index: 50;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  z-index: 9999;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   padding: var(--space-1);
+  min-width: 100%;
 }
 
 .select-content.show {
