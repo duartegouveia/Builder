@@ -159,13 +159,9 @@ function buildLeafNodeDOM(nodeData, builderKey, canRemove, parentId, childIndex)
   return nodeEl;
 }
 
-function buildRowDOM(nodeData, builderKey, childData, childIndex, showLabel, canRemoveChild) {
-  const config = OPERATOR_CONFIG[nodeData.type];
+function buildRowDOM(nodeData, builderKey, childData, childIndex, canRemoveChild) {
   const row = cloneTemplate('tpl-row-grid');
   row.dataset.rowIndex = childIndex;
-  
-  const labelCell = row.querySelector('.logic-label-cell');
-  labelCell.textContent = showLabel ? config.label : '';
   
   const contentCell = row.querySelector('.logic-content-cell');
   contentCell.appendChild(buildNodeDOM(childData, builderKey, false, canRemoveChild, nodeData.id, childIndex));
@@ -194,18 +190,32 @@ function buildOperatorNodeDOM(nodeData, builderKey, isRoot, canRemove, parentId,
   if (childCount === 0) {
     const row = cloneTemplate('tpl-row-grid');
     row.classList.add('logic-row-empty');
-    row.querySelector('.logic-label-cell').textContent = config.label;
     rowsContainer.appendChild(row);
+    
+    const label = cloneTemplate('tpl-label-cell');
+    label.textContent = config.label;
+    rowsContainer.appendChild(label);
   } else if (childCount === 1) {
     const canRemoveChild = nodeData.minChildren == null || childCount > nodeData.minChildren;
-    const row = buildRowDOM(nodeData, builderKey, children[0], 0, true, canRemoveChild);
+    const row = buildRowDOM(nodeData, builderKey, children[0], 0, canRemoveChild);
     rowsContainer.appendChild(row);
+    
+    const label = cloneTemplate('tpl-label-cell');
+    label.textContent = config.label;
+    rowsContainer.appendChild(label);
   } else {
     const canRemoveChild = nodeData.minChildren == null || childCount > nodeData.minChildren;
     for (let i = 0; i < childCount; i++) {
-      const isLast = i === childCount - 1;
-      const row = buildRowDOM(nodeData, builderKey, children[i], i, !isLast, canRemoveChild);
+      const row = buildRowDOM(nodeData, builderKey, children[i], i, canRemoveChild);
       rowsContainer.appendChild(row);
+      
+      const isLast = i === childCount - 1;
+      if (!isLast) {
+        const label = cloneTemplate('tpl-label-cell');
+        label.textContent = config.label;
+        label.dataset.afterRow = i;
+        rowsContainer.appendChild(label);
+      }
     }
   }
   
@@ -364,17 +374,10 @@ function updateEvaluation() {
 
 function updateOperatorLabels(rowsContainer, nodeData) {
   const config = OPERATOR_CONFIG[nodeData.type];
-  const rows = rowsContainer.querySelectorAll('.logic-row-grid');
-  const childCount = rows.length;
+  const labels = rowsContainer.querySelectorAll('.logic-label-cell');
   
-  rows.forEach((row, i) => {
-    const labelCell = row.querySelector('.logic-label-cell');
-    if (childCount === 1) {
-      labelCell.textContent = config.label;
-    } else {
-      const isLast = i === childCount - 1;
-      labelCell.textContent = isLast ? '' : config.label;
-    }
+  labels.forEach(label => {
+    label.textContent = config.label;
   });
   
   updateLabelPositions(rowsContainer);
@@ -383,15 +386,37 @@ function updateOperatorLabels(rowsContainer, nodeData) {
 function updateLabelPositions(container) {
   if (!container) container = document;
   
-  const rows = container.querySelectorAll('.logic-row-grid.has-separator');
-  rows.forEach(row => {
-    const labelCell = row.querySelector('.logic-label-cell');
-    if (!labelCell) return;
+  const rowsContainers = container.querySelectorAll ? 
+    container.querySelectorAll('.logic-rows-container') : 
+    [container];
+  
+  rowsContainers.forEach(rowsContainer => {
+    const rows = Array.from(rowsContainer.querySelectorAll(':scope > .logic-row-grid'));
+    const labels = Array.from(rowsContainer.querySelectorAll(':scope > .logic-label-cell'));
     
-    const rowHeight = row.offsetHeight;
-    const labelHeight = labelCell.offsetHeight;
-    
-    labelCell.style.top = (rowHeight - labelHeight / 2) + 'px';
+    labels.forEach((label, i) => {
+      if (rows.length <= 1) {
+        const row = rows[0];
+        if (row) {
+          const rowTop = row.offsetTop;
+          const rowHeight = row.offsetHeight;
+          const labelHeight = label.offsetHeight;
+          label.style.top = (rowTop + (rowHeight - labelHeight) / 2) + 'px';
+        }
+      } else {
+        const afterRowIndex = parseInt(label.dataset.afterRow, 10);
+        const currentRow = rows[afterRowIndex];
+        const nextRow = rows[afterRowIndex + 1];
+        
+        if (currentRow && nextRow) {
+          const currentRowBottom = currentRow.offsetTop + currentRow.offsetHeight;
+          const nextRowTop = nextRow.offsetTop;
+          const labelHeight = label.offsetHeight;
+          const midPoint = (currentRowBottom + nextRowTop) / 2;
+          label.style.top = (midPoint - labelHeight / 2) + 'px';
+        }
+      }
+    });
   });
 }
 
@@ -537,19 +562,36 @@ function handleAddChild(builderKey, nodeId) {
     operatorContainer.querySelectorAll('.logic-horizontal-divider').forEach(d => d.remove());
   }
   
+  rowsContainer.querySelectorAll('.logic-label-cell').forEach(l => l.remove());
+  const config = OPERATOR_CONFIG[nodeData.type];
+  
   if (childCount === 1) {
     const emptyRow = rowsContainer.querySelector('.logic-row-empty');
     if (emptyRow) emptyRow.remove();
     
     const canRemoveChild = nodeData.minChildren == null || childCount > nodeData.minChildren;
-    const newRow = buildRowDOM(nodeData, builderKey, newChild, 0, true, canRemoveChild);
-    rowsContainer.appendChild(newRow);
-  } else {
-    const canRemoveChild = nodeData.minChildren == null || childCount > nodeData.minChildren;
-    const newRow = buildRowDOM(nodeData, builderKey, newChild, childCount - 1, false, canRemoveChild);
+    const newRow = buildRowDOM(nodeData, builderKey, newChild, 0, canRemoveChild);
     rowsContainer.appendChild(newRow);
     
-    updateOperatorLabels(rowsContainer, nodeData);
+    const label = cloneTemplate('tpl-label-cell');
+    label.textContent = config.label;
+    rowsContainer.appendChild(label);
+  } else {
+    const canRemoveChild = nodeData.minChildren == null || childCount > nodeData.minChildren;
+    const newRow = buildRowDOM(nodeData, builderKey, newChild, childCount - 1, canRemoveChild);
+    rowsContainer.appendChild(newRow);
+    
+    const allRows = rowsContainer.querySelectorAll('.logic-row-grid');
+    allRows.forEach((row, i) => {
+      row.dataset.rowIndex = i;
+      if (i < childCount - 1) {
+        const label = cloneTemplate('tpl-label-cell');
+        label.textContent = config.label;
+        label.dataset.afterRow = i;
+        row.after(label);
+      }
+    });
+    
     updateRemoveButtons(rowsContainer, nodeData, builderKey);
     
     // Update horizontal dividers if in horizontal mode
@@ -567,7 +609,10 @@ function handleAddChild(builderKey, nodeId) {
     }
   }
   
+  updateLabelPositions(rowsContainer);
   updateAddButton(addArea, nodeData, builderKey);
+  
+  if (builderKey === 'dynamic') updateEvaluation();
 }
 
 function unregisterNodeRecursive(builderKey, nodeData) {
@@ -603,16 +648,40 @@ function handleRemoveChild(builderKey, parentId, childIndex) {
     rows[childIndex].remove();
   }
   
+  rowsContainer.querySelectorAll('.logic-label-cell').forEach(l => l.remove());
+  
+  const config = OPERATOR_CONFIG[parentData.type];
+  
   if (childCount === 0) {
-    const config = OPERATOR_CONFIG[parentData.type];
     const emptyRow = cloneTemplate('tpl-row-grid');
     emptyRow.classList.add('logic-row-empty');
-    emptyRow.querySelector('.logic-label-cell').textContent = config.label;
     rowsContainer.appendChild(emptyRow);
+    
+    const label = cloneTemplate('tpl-label-cell');
+    label.textContent = config.label;
+    rowsContainer.appendChild(label);
+  } else if (childCount === 1) {
+    const label = cloneTemplate('tpl-label-cell');
+    label.textContent = config.label;
+    rowsContainer.appendChild(label);
+    
+    updateRemoveButtons(rowsContainer, parentData, builderKey);
   } else {
-    updateOperatorLabels(rowsContainer, parentData);
+    const remainingRows = rowsContainer.querySelectorAll('.logic-row-grid');
+    remainingRows.forEach((row, i) => {
+      row.dataset.rowIndex = i;
+      if (i < childCount - 1) {
+        const label = cloneTemplate('tpl-label-cell');
+        label.textContent = config.label;
+        label.dataset.afterRow = i;
+        row.after(label);
+      }
+    });
+    
     updateRemoveButtons(rowsContainer, parentData, builderKey);
   }
+  
+  updateLabelPositions(rowsContainer);
   
   updateAddButton(addArea, parentData, builderKey);
   

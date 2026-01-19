@@ -707,50 +707,37 @@ textarea.input.has-scroll {
 .logic-rows-container {
   display: flex;
   flex-direction: column;
-}
-
-.logic-row-grid {
-  display: grid;
-  grid-template-columns: 56px 1fr;
   position: relative;
 }
 
-.logic-row-grid.has-separator {
-  border-bottom: none;
+.logic-row-grid {
+  display: block;
+  position: relative;
+  margin-left: 56px;
 }
 
 .logic-row-grid.logic-row-empty {
   min-height: 40px;
 }
 
-.logic-row-grid.logic-row-empty .logic-label-cell {
-  min-height: 0;
-}
-
 .logic-label-cell {
-  background: var(--slate-100);
+  position: absolute;
+  left: 0;
+  width: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  border-right: 1px solid var(--border);
   font-size: 0.6875rem;
   font-weight: 800;
   color: var(--slate-500);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-
-.logic-row-grid.has-separator .logic-label-cell {
-  position: absolute;
-  left: 0;
-  width: 56px;
-  height: auto;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 2px 4px;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 .logic-content-cell {
