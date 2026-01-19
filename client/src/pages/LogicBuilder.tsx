@@ -224,7 +224,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
 
                 {/* Add Button Area */}
                 {canAdd && (
-                    <div className="p-2 flex justify-center border-t bg-muted/5">
+                    <div className="p-2 flex justify-center border-t bg-muted/5 mt-[5px]">
                         <Button 
                             variant="outline" 
                             size="icon" 
