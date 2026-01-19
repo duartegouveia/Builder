@@ -612,7 +612,7 @@ textarea.input {
 }
 
 .logic-row-grid.has-separator {
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: none;
 }
 
 .logic-row-grid.logic-row-empty {
