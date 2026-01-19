@@ -345,7 +345,18 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   const renderChildren = () => {
     if (isHorizontalMode) {
          return (
-             <div className="flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row flex-wrap md:flex-nowrap items-center gap-4 overflow-x-auto min-h-[100px]">
+             <div className="flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row flex-wrap md:flex-nowrap items-center gap-4 overflow-x-auto min-h-[100px] relative group/hz">
+                {/* Toggle button for horizontal mode - appears on hover */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover/hz:opacity-60 hover:!opacity-100 transition-opacity z-10"
+                    onClick={toggleLayout}
+                    title="Switch to Vertical Layout"
+                >
+                    <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                </Button>
+                
                 {node.children?.map((child, index) => (
                     <React.Fragment key={child.id}>
                         {index > 0 && (
@@ -442,19 +453,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
         {!isRoot && (
            <div className="mt-2 flex flex-col gap-1 items-center">
              {renderTypeSelector()}
-             
-             {/* If horizontal, show toggle here since there's no operator column */}
-             {isHorizontalMode && (
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-full mt-1 opacity-50 hover:opacity-100"
-                    onClick={toggleLayout}
-                    title="Switch to Vertical Layout"
-                >
-                    <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
-                </Button>
-             )}
            </div>
         )}
         
