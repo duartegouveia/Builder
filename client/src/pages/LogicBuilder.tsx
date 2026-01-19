@@ -190,6 +190,52 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   const canAdd = node.maxChildren == null || (node.children?.length ?? 0) < node.maxChildren;
   const canRemove = node.minChildren == null || (node.children?.length ?? 0) > node.minChildren;
 
+  // Horizontal Mode Check for specific operators (min=max=2 or 3)
+  const isHorizontalMode = 
+      node.minChildren === node.maxChildren && 
+      (node.minChildren === 2 || node.minChildren === 3);
+
+  if (isHorizontalMode) {
+      return (
+        <div className={cn("w-full flex items-center gap-2", isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : "")}>
+            {!isRoot && (
+               <div className="mr-2">
+                 {renderTypeSelector()}
+               </div>
+            )}
+            
+            <div className={cn("flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row items-center gap-4 overflow-x-auto", !isRoot && "border-l-4 border-l-primary/20")}>
+                {node.children?.map((child, index) => (
+                    <React.Fragment key={child.id}>
+                        {index > 0 && (
+                            <div className="font-bold text-muted-foreground px-2 py-1 bg-muted rounded text-sm uppercase shrink-0">
+                                {config.label}
+                            </div>
+                        )}
+                        <div className="flex-1 min-w-[200px]">
+                            <NodeEditor 
+                                node={child} 
+                                onChange={(updated) => updateChild(index, updated)} 
+                            />
+                        </div>
+                    </React.Fragment>
+                ))}
+            </div>
+
+            {!isRoot && onRemove && (
+                <Button 
+                   variant="ghost" 
+                   size="icon" 
+                   className="ml-2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                   onClick={onRemove}
+                >
+                    <X className="h-4 w-4" />
+                </Button>
+            )}
+        </div>
+      );
+  }
+
   return (
     <div className={cn("w-full flex items-start gap-2", isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : "")}>
         {!isRoot && (
