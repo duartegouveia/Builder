@@ -1,26 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, X, ChevronRight, Check, Download, ArrowLeftRight, ArrowUpDown } from 'lucide-react';
 
-// --- Types ---
-
-export type NodeType = 'VARIABLE' | 'INTEGER' | 'FLOAT' | 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'BOOLEAN' | 'EMPTY';
-
-export interface LogicNode {
-  id: string;
-  type: NodeType;
-  children?: LogicNode[];
-  textValue?: string;
-  booleanValue?: boolean;
-  integerValue?: string;
-  floatValue?: string;
-  minChildren?: number | null;
-  maxChildren?: number | null;
-  layoutPreference?: 'horizontal' | 'vertical';
-}
-
-// --- Constants ---
-
-const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?: number | null }> = {
+const OPERATOR_CONFIG = {
   'VARIABLE': { label: 'Variable' },
   'INTEGER': { label: 'Integer' },
   'FLOAT': { label: 'Float' },
@@ -35,12 +16,10 @@ const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?
   'NOT': { label: 'NOT', min: 1, max: 1 },
 };
 
-// --- Helper Functions ---
-
-const extractVariables = (node: LogicNode): string[] => {
-  const vars = new Set<string>();
+const extractVariables = (node) => {
+  const vars = new Set();
   
-  const traverse = (n: LogicNode) => {
+  const traverse = (n) => {
     if ((n.type === 'TEXT' || n.type === 'MULTILINE' || n.type === 'VARIABLE') && n.textValue) {
       vars.add(n.textValue);
     }
@@ -53,7 +32,7 @@ const extractVariables = (node: LogicNode): string[] => {
   return Array.from(vars).sort();
 };
 
-const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolean => {
+const evaluateLogic = (node, values) => {
   if (node.type === 'TEXT' || node.type === 'MULTILINE' || node.type === 'VARIABLE') {
     return values[node.textValue || ''] || false;
   }
@@ -87,14 +66,14 @@ const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolea
   }
 };
 
-const createNode = (type: NodeType): LogicNode => {
+const createNode = (type) => {
   const config = OPERATOR_CONFIG[type];
   const isTextType = type === 'TEXT' || type === 'MULTILINE' || type === 'VARIABLE';
   const isBooleanType = type === 'BOOLEAN';
   const isIntegerType = type === 'INTEGER';
   const isFloatType = type === 'FLOAT';
   const isLeafType = isTextType || isBooleanType || isIntegerType || isFloatType;
-  const node: LogicNode = {
+  const node = {
     id: Math.random().toString(36).substr(2, 9),
     type,
     children: isLeafType ? undefined : [],
@@ -115,18 +94,13 @@ const createNode = (type: NodeType): LogicNode => {
   return node;
 };
 
-// --- Components ---
-
-const Popover: React.FC<{ 
-  trigger: React.ReactNode; 
-  children: React.ReactNode;
-}> = ({ trigger, children }) => {
+const Popover = ({ trigger, children }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
         setOpen(false);
       }
     };
@@ -148,13 +122,7 @@ const Popover: React.FC<{
   );
 };
 
-const LogicControls: React.FC<{ 
-    variables: string[], 
-    values: Record<string, boolean>, 
-    onChange: (variable: string, value: boolean) => void,
-    result: boolean,
-    onExport: () => void
-}> = ({ variables, values, onChange, result, onExport }) => {
+const LogicControls = ({ variables, values, onChange, result, onExport }) => {
     return (
         <div className="logic-controls">
             <div className="flex-1 space-y-2 w-full">
@@ -185,10 +153,10 @@ const LogicControls: React.FC<{
                                     height: 12, 
                                     width: 1, 
                                     margin: '0 0.25rem',
-                                    backgroundColor: values[v] ? 'var(--green-400)' : 'var(--red-400)',
+                                    backgroundColor: values[v] ? 'var(--success-400)' : 'var(--error-400)',
                                     opacity: 0.3 
                                 }} />
-                                <span className={`font-bold text-xs ${values[v] ? 'text-green-700' : 'text-red-700'}`} style={{ color: values[v] ? 'var(--green-700)' : 'var(--red-700)' }}>
+                                <span className={`font-bold text-xs ${values[v] ? 'text-success' : 'text-error'}`}>
                                     {values[v] ? 'T' : 'F'}
                                 </span>
                             </button>
@@ -200,12 +168,6 @@ const LogicControls: React.FC<{
             <div className="hidden md-block" style={{ width: 1, height: 48, backgroundColor: 'var(--border)' }} />
 
             <div className="flex items-center gap-4 w-full justify-end" style={{ width: 'auto' }}>
-                <div className="hidden md-flex flex-col items-end gap-1 mr-2" style={{ display: 'none' }}>
-                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold" style={{ fontSize: 10 }}>Result</span>
-                    <span className={`logic-result-badge ${result ? 'is-true' : 'is-false'}`}>
-                        {result ? 'TRUE' : 'FALSE'}
-                    </span>
-                </div>
                 <div className="flex-col items-end gap-1 mr-2" style={{ display: 'flex' }}>
                     <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold" style={{ fontSize: 10 }}>Result</span>
                     <span className={`logic-result-badge ${result ? 'is-true' : 'is-false'}`}>
@@ -215,21 +177,14 @@ const LogicControls: React.FC<{
 
                 <button className="btn btn-outline btn-md gap-2" onClick={onExport}>
                     <Download style={{ width: 16, height: 16 }} />
-                    <span className="hidden sm-inline" style={{ display: 'inline' }}>Export JSON</span>
+                    <span style={{ display: 'inline' }}>Export JSON</span>
                 </button>
             </div>
         </div>
     );
 };
 
-interface NodeEditorProps {
-  node: LogicNode;
-  onChange: (updated: LogicNode) => void;
-  onRemove?: () => void;
-  isRoot?: boolean;
-}
-
-const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoot = false }) => {
+const NodeEditor = ({ node, onChange, onRemove, isRoot = false }) => {
   
   const addChild = () => {
     if (!node.children) return;
@@ -240,20 +195,20 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
     });
   };
 
-  const updateChild = (index: number, updatedChild: LogicNode) => {
+  const updateChild = (index, updatedChild) => {
     if (!node.children) return;
     const newChildren = [...node.children];
     newChildren[index] = updatedChild;
     onChange({ ...node, children: newChildren });
   };
 
-  const removeChild = (index: number) => {
+  const removeChild = (index) => {
     if (!node.children) return;
     const newChildren = node.children.filter((_, i) => i !== index);
     onChange({ ...node, children: newChildren });
   };
 
-  const handleTypeChange = (newType: NodeType) => {
+  const handleTypeChange = (newType) => {
     if (newType === node.type) return;
     
     const newNode = createNode(newType);
@@ -289,7 +244,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
             key={key} 
             className="btn btn-ghost justify-start"
             style={{ justifyContent: 'flex-start', height: 32, padding: '0 0.5rem', fontSize: '0.875rem' }}
-            onClick={() => handleTypeChange(key as NodeType)}
+            onClick={() => handleTypeChange(key)}
           >
             {conf.label}
           </button>
@@ -298,7 +253,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
     </Popover>
   );
 
-  // 1. Empty State
   if (node.type === 'EMPTY') {
     return (
       <div className="logic-empty">
@@ -313,7 +267,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
     );
   }
 
-  // 1b. Variable Node
   if (node.type === 'VARIABLE') {
       return (
           <div className="logic-text-node">
@@ -337,7 +290,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 1c. Integer Node
   if (node.type === 'INTEGER') {
       return (
           <div className="logic-text-node">
@@ -361,7 +313,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 1d. Float Node
   if (node.type === 'FLOAT') {
       return (
           <div className="logic-text-node">
@@ -385,7 +336,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 2. Text Node
   if (node.type === 'TEXT') {
       return (
           <div className="logic-text-node">
@@ -409,7 +359,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 2b. Multiline Text Node
   if (node.type === 'MULTILINE') {
       return (
           <div className="logic-text-node items-start">
@@ -432,7 +381,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 2c. Boolean Node
   if (node.type === 'BOOLEAN') {
       return (
           <div className="logic-text-node">
@@ -459,7 +407,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
       );
   }
 
-  // 3. Operator Node
   const config = OPERATOR_CONFIG[node.type];
   
   const minChildren = node.minChildren ?? config.min ?? 0;
@@ -509,7 +456,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
             </div>
          );
     } else {
-        // Vertical Mode
         return (
             <div className="logic-operator-container">
                 <div className="flex">
@@ -592,9 +538,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   );
 };
 
-// --- Section Component ---
-
-const Section: React.FC<{ title: string; node: LogicNode; onChange: (n: LogicNode) => void }> = ({ title, node, onChange }) => {
+const Section = ({ title, node, onChange }) => {
     return (
         <section className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">{title}</h2>
@@ -603,11 +547,20 @@ const Section: React.FC<{ title: string; node: LogicNode; onChange: (n: LogicNod
     );
 };
 
-// --- Main Page Component ---
-
 export default function LogicBuilder() {
   
-  const [builders, setBuilders] = useState<Record<string, LogicNode>>({
+  function createInitialNode(type) {
+      const node = createNode(type);
+      const min = node.minChildren ?? (type === 'AND' || type === 'OR' ? 2 : 0);
+      if (node.children) {
+          while (node.children.length < min) {
+              node.children.push(createNode('EMPTY'));
+          }
+      }
+      return node;
+  }
+
+  const [builders, setBuilders] = useState({
     'and': createInitialNode('AND'),
     'or': createInitialNode('OR'),
     'xor': createInitialNode('XOR'),
@@ -617,7 +570,7 @@ export default function LogicBuilder() {
     'dynamic': createNode('EMPTY')
   });
 
-  const [truthValues, setTruthValues] = useState<Record<string, boolean>>({});
+  const [truthValues, setTruthValues] = useState({});
 
   const dynamicVariables = extractVariables(builders['dynamic']);
   const dynamicResult = evaluateLogic(builders['dynamic'], truthValues);
@@ -636,22 +589,11 @@ export default function LogicBuilder() {
     }
   }, [dynamicVariables, truthValues]);
 
-  const toggleVariable = (variable: string, value: boolean) => {
+  const toggleVariable = (variable, value) => {
       setTruthValues(prev => ({ ...prev, [variable]: value }));
   };
 
-  function createInitialNode(type: NodeType): LogicNode {
-      const node = createNode(type);
-      const min = node.minChildren ?? (type === 'AND' || type === 'OR' ? 2 : 0);
-      if (node.children) {
-          while (node.children.length < min) {
-              node.children.push(createNode('EMPTY'));
-          }
-      }
-      return node;
-  }
-
-  const updateBuilder = (key: string, newNode: LogicNode) => {
+  const updateBuilder = (key, newNode) => {
       setBuilders(prev => ({ ...prev, [key]: newNode }));
   };
 

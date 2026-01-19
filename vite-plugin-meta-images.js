@@ -1,12 +1,7 @@
-import type { Plugin } from 'vite';
 import fs from 'fs';
 import path from 'path';
 
-/**
- * Vite plugin that updates og:image and twitter:image meta tags
- * to point to the app's opengraph image with the correct Replit domain.
- */
-export function metaImagesPlugin(): Plugin {
+export function metaImagesPlugin() {
   return {
     name: 'vite-plugin-meta-images',
     transformIndexHtml(html) {
@@ -16,13 +11,12 @@ export function metaImagesPlugin(): Plugin {
         return html;
       }
 
-      // Check if opengraph image exists in public directory
       const publicDir = path.resolve(process.cwd(), 'client', 'public');
       const opengraphPngPath = path.join(publicDir, 'opengraph.png');
       const opengraphJpgPath = path.join(publicDir, 'opengraph.jpg');
       const opengraphJpegPath = path.join(publicDir, 'opengraph.jpeg');
 
-      let imageExt: string | null = null;
+      let imageExt = null;
       if (fs.existsSync(opengraphPngPath)) {
         imageExt = 'png';
       } else if (fs.existsSync(opengraphJpgPath)) {
@@ -55,7 +49,7 @@ export function metaImagesPlugin(): Plugin {
   };
 }
 
-function getDeploymentUrl(): string | null {
+function getDeploymentUrl() {
   if (process.env.REPLIT_INTERNAL_APP_DOMAIN) {
     const url = `https://${process.env.REPLIT_INTERNAL_APP_DOMAIN}`;
     log('[meta-images] using internal app domain:', url);
@@ -71,7 +65,7 @@ function getDeploymentUrl(): string | null {
   return null;
 }
 
-function log(...args: any[]): void {
+function log(...args) {
   if (process.env.NODE_ENV === 'production') {
     console.log(...args);
   }

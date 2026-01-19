@@ -1,43 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, FlaskConical, Info, ChevronRight, ChevronDown, Network } from 'lucide-react';
 import { Link } from "wouter";
-import { 
-  Variable, 
-  computePropagation, 
-  calculateUncertainty, 
-  CalculationResult 
-} from '@/lib/error-utils';
+import { computePropagation, calculateUncertainty } from '@/lib/error-utils.js';
 
-// --- Simple Select Component ---
-
-interface SelectItemProps {
-  value: string;
-  children: React.ReactNode;
-}
-
-interface SelectProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  children: React.ReactNode;
-  'data-testid'?: string;
-}
-
-const Select: React.FC<SelectProps> = ({ value, onValueChange, children, 'data-testid': testId }) => {
+const Select = ({ value, onValueChange, children, 'data-testid': testId }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
   
-  const options: { value: string; label: string }[] = [];
+  const options = [];
   React.Children.forEach(children, (child) => {
-    if (React.isValidElement<SelectItemProps>(child) && child.type === SelectItem) {
-      options.push({ value: child.props.value, label: child.props.children as string });
+    if (React.isValidElement(child) && child.type === SelectItem) {
+      options.push({ value: child.props.value, label: child.props.children });
     }
   });
 
   const selectedLabel = options.find(o => o.value === value)?.label || 'Select...';
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
         setOpen(false);
       }
     };
@@ -74,22 +55,20 @@ const Select: React.FC<SelectProps> = ({ value, onValueChange, children, 'data-t
   );
 };
 
-const SelectItem: React.FC<{ value: string; children: React.ReactNode }> = ({ children }) => {
-  return null; // Just for prop extraction
+const SelectItem = ({ children }) => {
+  return null;
 };
 
-// --- Constants ---
-
-const INITIAL_VARIABLES: Variable[] = [
+const INITIAL_VARIABLES = [
   { id: '1', name: 'x', value: 10, type: 'analog', resolution: 0.1, uncertainty: 0.05 },
   { id: '2', name: 'y', value: 5, type: 'digital', resolution: 0.01, uncertainty: 0.01 },
 ];
 
 export default function ExperimentCalc() {
-  const [variables, setVariables] = useState<Variable[]>(INITIAL_VARIABLES);
+  const [variables, setVariables] = useState(INITIAL_VARIABLES);
   const [expression, setExpression] = useState('x * y^2');
-  const [result, setResult] = useState<CalculationResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
   const [showSteps, setShowSteps] = useState(false);
 
   useEffect(() => {
@@ -104,7 +83,7 @@ export default function ExperimentCalc() {
       const res = computePropagation(expression, variables);
       setResult(res);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
     }
   }, [variables, expression]);
@@ -125,11 +104,11 @@ export default function ExperimentCalc() {
     }]);
   };
 
-  const removeVariable = (id: string) => {
+  const removeVariable = (id) => {
     setVariables(variables.filter(v => v.id !== id));
   };
 
-  const updateVariable = (id: string, field: keyof Variable, value: any) => {
+  const updateVariable = (id, field, value) => {
     setVariables(variables.map(v => {
       if (v.id !== id) return v;
       
@@ -149,7 +128,6 @@ export default function ExperimentCalc() {
     <div className="min-h-screen bg-background p-4" style={{ padding: '1rem' }}>
       <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* Header */}
         <header className="space-y-2">
           <div className="exp-header">
             <FlaskConical style={{ width: 24, height: 24 }} />
@@ -165,12 +143,6 @@ export default function ExperimentCalc() {
                 </p>
             </div>
             <Link href="/logic">
-                <button className="btn btn-outline gap-2" style={{ display: 'none' }}>
-                    <Network style={{ width: 16, height: 16 }} />
-                    Logic Builder
-                </button>
-            </Link>
-            <Link href="/logic">
                 <button className="btn btn-outline gap-2">
                     <Network style={{ width: 16, height: 16 }} />
                     Logic Builder
@@ -181,7 +153,6 @@ export default function ExperimentCalc() {
 
         <div className="grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
           
-          {/* Left Column: Variables */}
           <div className="space-y-6" style={{ gridColumn: 'span 1' }}>
             <div className="card" style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
               <div className="card-header" style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -204,7 +175,6 @@ export default function ExperimentCalc() {
                       }}
                     >
                       <div className="flex flex-col gap-4">
-                        {/* Top Row: Name, Value, Type */}
                         <div className="exp-variable-grid">
                           <div style={{ gridColumn: 'span 2' }}>
                             <label className="label text-xs text-muted-foreground font-mono">Symbol</label>
@@ -233,7 +203,7 @@ export default function ExperimentCalc() {
                             <div style={{ marginTop: 4 }}>
                               <Select 
                                 value={variable.type} 
-                                onValueChange={(v: any) => updateVariable(variable.id, 'type', v)}
+                                onValueChange={(v) => updateVariable(variable.id, 'type', v)}
                                 data-testid={`select-type-${variable.id}`}
                               >
                                 <SelectItem value="analog">Analog (½ div)</SelectItem>
@@ -255,7 +225,6 @@ export default function ExperimentCalc() {
                           </div>
                         </div>
 
-                        {/* Bottom Row: Resolution & Uncertainty */}
                         <div className="exp-resolution-grid">
                           <div style={{ gridColumn: 'span 5' }}>
                             <label className="label text-xs text-muted-foreground">
@@ -315,7 +284,6 @@ export default function ExperimentCalc() {
             </div>
           </div>
 
-          {/* Right Column: Calculation */}
           <div className="space-y-6" style={{ gridColumn: 'span 1' }}>
             <div className="card sticky" style={{ top: 32, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
               <div className="card-header">
@@ -355,7 +323,7 @@ export default function ExperimentCalc() {
                       </div>
                       <div className="exp-result-error">
                         <span>±</span>
-                        <span style={{ color: 'var(--destructive)' }}>{result.error.toPrecision(2)}</span>
+                        <span style={{ color: 'var(--error-500)' }}>{result.error.toPrecision(2)}</span>
                       </div>
                     </div>
 
@@ -384,7 +352,7 @@ export default function ExperimentCalc() {
                                 <div className="text-xs text-muted-foreground mt-1 font-mono" style={{ opacity: 0.8 }}>
                                   {step.symbolicDerivative}
                                 </div>
-                                <div className="text-xs mt-1" style={{ color: 'var(--destructive)' }}>
+                                <div className="text-xs mt-1" style={{ color: 'var(--error-500)' }}>
                                   Contribution: {(step.contribution / Math.pow(result.error, 2) * 100).toFixed(1)}%
                                 </div>
                               </div>
@@ -396,7 +364,7 @@ export default function ExperimentCalc() {
                   </div>
                 ) : (
                    <div className="flex items-center justify-center text-muted-foreground text-sm italic border border-dashed rounded-xl" style={{ height: 160, backgroundColor: 'rgba(0,0,0,0.02)' }}>
-                    {error ? <span style={{ color: 'var(--destructive)' }}>{error}</span> : "Enter a valid expression..."}
+                    {error ? <span style={{ color: 'var(--error-500)' }}>{error}</span> : "Enter a valid expression..."}
                    </div>
                 )}
               </div>
