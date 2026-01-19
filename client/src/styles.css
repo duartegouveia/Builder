@@ -571,7 +571,7 @@ textarea.input {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .logic-operator-column {
@@ -1050,7 +1050,10 @@ input[type="checkbox"] {
 /* ===== Popover Show State ===== */
 .popover-container {
   position: relative;
-  z-index: 1;
+}
+
+.popover-container:has(.popover-content.show) {
+  z-index: 9999;
 }
 
 .popover-content {
@@ -1063,7 +1066,7 @@ input[type="checkbox"] {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   padding: var(--space-2);
   min-width: 160px;
 }
