@@ -24,6 +24,19 @@ function generateId() {
   return Math.random().toString(36).substr(2, 9);
 }
 
+function autoResizeTextarea(textarea) {
+  textarea.style.height = 'auto';
+  const maxHeight = 200;
+  const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+  textarea.style.height = newHeight + 'px';
+  
+  if (textarea.scrollHeight > maxHeight) {
+    textarea.classList.add('has-scroll');
+  } else {
+    textarea.classList.remove('has-scroll');
+  }
+}
+
 function createNode(type) {
   const config = OPERATOR_CONFIG[type];
   const isTextType = type === 'TEXT' || type === 'MULTILINE' || type === 'VARIABLE';
@@ -467,11 +480,14 @@ function attachBuilderListeners(builderKey) {
   });
   
   container.querySelectorAll('.node-textarea-input').forEach(textarea => {
+    autoResizeTextarea(textarea);
+    
     textarea.addEventListener('input', (e) => {
       const { nodeId, builder } = e.target.dataset;
       if (nodeId && builder) {
         handleNodeUpdate(builder, nodeId, { textValue: e.target.value }, true);
       }
+      autoResizeTextarea(e.target);
     });
   });
   

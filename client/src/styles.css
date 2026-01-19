@@ -361,10 +361,15 @@ p {
 }
 
 textarea.input {
-  height: calc(4 * 1.5em + 2 * var(--space-3));
   min-height: calc(4 * 1.5em + 2 * var(--space-3));
-  resize: vertical;
+  max-height: 200px;
+  resize: none;
   line-height: 1.5;
+  overflow-y: hidden;
+}
+
+textarea.input.has-scroll {
+  overflow-y: auto;
 }
 
 /* ===== Card Component ===== */
