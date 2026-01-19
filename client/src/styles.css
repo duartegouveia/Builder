@@ -641,7 +641,7 @@ textarea.input {
 }
 
 .logic-content-cell {
-  padding: var(--space-4);
+  padding: 5px var(--space-4);
   transition: background var(--transition-fast);
 }
 
