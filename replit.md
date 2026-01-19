@@ -69,10 +69,10 @@ The backend is located in `server/` with:
 ## Routing
 
 The application uses multi-page routing with separate HTML files:
-- `/` - Error Propagator (index.html)
-- `/logic.html` - Logic Builder (logic.html)
+- `/` - Logic Builder (index.html) - Main page
+- `/logic.html` - Error Propagator (logic.html)
 
-Navigation uses standard anchor links between HTML pages (e.g., `<a href="/logic.html">`).
+Navigation uses standard anchor links between HTML pages.
 
 ## External Dependencies
 
