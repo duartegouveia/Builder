@@ -753,9 +753,8 @@ textarea.input.has-scroll {
 
 .logic-row-grid.has-separator .logic-label-cell .logic-operator-label {
   position: absolute;
-  bottom: 0;
   left: 50%;
-  transform: translate(150%, 50%);
+  transform: translateX(-50%);
   z-index: 2;
 }
 

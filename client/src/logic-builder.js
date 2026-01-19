@@ -376,6 +376,28 @@ function updateOperatorLabels(rowsContainer, nodeData) {
       labelEl.textContent = isLast ? '' : config.label;
     }
   });
+  
+  updateLabelPositions(rowsContainer);
+}
+
+function updateLabelPositions(container) {
+  if (!container) container = document;
+  
+  const rows = container.querySelectorAll('.logic-row-grid.has-separator');
+  rows.forEach(row => {
+    const labelCell = row.querySelector('.logic-label-cell');
+    const labelEl = row.querySelector('.logic-operator-label');
+    if (!labelCell || !labelEl) return;
+    
+    const rowHeight = row.offsetHeight;
+    const labelHeight = labelEl.offsetHeight;
+    
+    labelEl.style.top = (rowHeight - labelHeight / 2) + 'px';
+  });
+}
+
+function updateAllLabelPositions() {
+  updateLabelPositions(document);
 }
 
 function updateRemoveButtons(rowsContainer, nodeData, builderKey) {
@@ -713,6 +735,7 @@ function setupEventDelegation() {
           nodeData.textValue = textarea.value;
         }
         autoResizeTextarea(textarea);
+        updateAllLabelPositions();
         if (builder === 'dynamic') updateEvaluation();
       }
       return;
@@ -766,6 +789,8 @@ function init() {
   
   setupEventDelegation();
   renderAllBuilders();
+  
+  requestAnimationFrame(updateAllLabelPositions);
   
   document.getElementById('btn-export')?.addEventListener('click', handleExport);
 }
