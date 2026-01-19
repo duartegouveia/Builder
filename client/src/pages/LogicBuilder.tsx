@@ -23,13 +23,13 @@ export interface LogicNode {
 // --- Constants ---
 
 const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?: number | null }> = {
+  'TEXT': { label: 'Text' },
   'AND': { label: 'AND', min: 0, max: null }, // min 0 effectively means null in the original context (no strict constraint shown, but logic implies >=2 usually, original says null)
   'OR': { label: 'OR', min: 0, max: null },
   'XOR': { label: 'XOR', min: 2, max: 2 },
   'IMP': { label: '⇒', min: 2, max: 2 },
   'BIC': { label: '⇔', min: 2, max: 2 },
   'NOT': { label: 'NOT', min: 1, max: 1 },
-  'TEXT': { label: 'Text' },
 };
 
 // --- Helper Functions ---
