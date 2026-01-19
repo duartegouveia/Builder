@@ -596,9 +596,8 @@ textarea.input {
   white-space: nowrap;
   text-align: center;
   z-index: 1;
-  background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
+  background: transparent;
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
 }
 
 .logic-rows-container {
@@ -653,7 +652,7 @@ textarea.input {
   padding: 10px var(--space-4);
   display: flex;
   justify-content: center;
-  background: var(--slate-50);
+  background: transparent;
   border-top: 1px solid var(--border-light);
 }
 
