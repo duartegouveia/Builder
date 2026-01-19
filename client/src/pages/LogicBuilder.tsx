@@ -3,13 +3,14 @@ import { Plus, X, ChevronRight, Check, Download, ArrowLeftRight, ArrowUpDown } f
 
 // --- Types ---
 
-export type NodeType = 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'EMPTY';
+export type NodeType = 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'BOOLEAN' | 'EMPTY';
 
 export interface LogicNode {
   id: string;
   type: NodeType;
   children?: LogicNode[];
   textValue?: string;
+  booleanValue?: boolean;
   minChildren?: number | null;
   maxChildren?: number | null;
   layoutPreference?: 'horizontal' | 'vertical';
@@ -20,6 +21,7 @@ export interface LogicNode {
 const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?: number | null }> = {
   'TEXT': { label: 'Text' },
   'MULTILINE': { label: 'Multiline Text' },
+  'BOOLEAN': { label: 'Boolean' },
   'AND': { label: 'AND', min: 0, max: null },
   'OR': { label: 'OR', min: 0, max: null },
   'XOR': { label: 'XOR', min: 2, max: 2 },
@@ -51,6 +53,10 @@ const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolea
     return values[node.textValue || ''] || false;
   }
   
+  if (node.type === 'BOOLEAN') {
+    return node.booleanValue || false;
+  }
+  
   if (node.type === 'EMPTY') return false;
   
   const childResults = node.children?.map(c => evaluateLogic(c, values)) || [];
@@ -79,11 +85,14 @@ const evaluateLogic = (node: LogicNode, values: Record<string, boolean>): boolea
 const createNode = (type: NodeType): LogicNode => {
   const config = OPERATOR_CONFIG[type];
   const isTextType = type === 'TEXT' || type === 'MULTILINE';
+  const isBooleanType = type === 'BOOLEAN';
+  const isLeafType = isTextType || isBooleanType;
   const node: LogicNode = {
     id: Math.random().toString(36).substr(2, 9),
     type,
-    children: isTextType ? undefined : [],
+    children: isLeafType ? undefined : [],
     textValue: isTextType ? '' : undefined,
+    booleanValue: isBooleanType ? false : undefined,
     minChildren: config?.min ?? null,
     maxChildren: config?.max ?? null,
   };
@@ -334,6 +343,34 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     className="input flex-1"
                     style={{ borderColor: 'transparent', backgroundColor: 'transparent', minHeight: 60, resize: 'vertical' }}
                  />
+             </div>
+             {onRemove && (
+                 <button className="btn btn-ghost btn-icon-sm text-muted-foreground ml-2" onClick={onRemove}>
+                     <X style={{ width: 16, height: 16 }} />
+                 </button>
+             )}
+          </div>
+      );
+  }
+
+  // 2c. Boolean Node
+  if (node.type === 'BOOLEAN') {
+      return (
+          <div className="logic-text-node">
+             {renderTypeSelector()}
+             <div className="flex-1 flex items-center gap-3">
+                 <div className="logic-text-badge">01</div>
+                 <label className="flex items-center gap-2 cursor-pointer">
+                     <input 
+                        type="checkbox"
+                        checked={node.booleanValue || false}
+                        onChange={(e) => onChange({ ...node, booleanValue: e.target.checked })}
+                        style={{ width: 18, height: 18, cursor: 'pointer' }}
+                     />
+                     <span className="font-mono font-bold" style={{ color: node.booleanValue ? 'var(--green-700)' : 'var(--red-700)' }}>
+                        {node.booleanValue ? '1' : '0'}
+                     </span>
+                 </label>
              </div>
              {onRemove && (
                  <button className="btn btn-ghost btn-icon-sm text-muted-foreground ml-2" onClick={onRemove}>
