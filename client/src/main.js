@@ -52,6 +52,49 @@ const CONFIG_RULES = {
     }
 };
 
+// --- JSON Export Logic ---
+
+function extractJSONFromDOM(element) {
+    if (!element) return null;
+    
+    // Find the actual logic node element if the passed element is a wrapper
+    const nodeEl = element.classList.contains('logic-node') ? element : element.querySelector('.logic-node');
+    if (!nodeEl) return null;
+
+    const kind = nodeEl.dataset.kind || '';
+    const result = { kind, items: [] };
+
+    if (kind === 'TEXT') {
+        const input = nodeEl.querySelector('input');
+        if (input) {
+            result.text = input.value;
+        }
+    } else {
+        // Find children
+        // We look for the specific structure we created
+        // .children-container > .child-wrapper > .child-content > .logic-node
+        const childrenContainer = nodeEl.querySelector('.children-container');
+        if (childrenContainer) {
+            // Iterate over direct children (wrappers)
+            Array.from(childrenContainer.children).forEach(wrapper => {
+                // The wrapper might contain the node directly or inside .child-content
+                // Our structure: wrapper > childContent > renderNode(div.logic-node)
+                // But wait, renderNode returns the div.logic-node.
+                // So wrapper > childContent > div.logic-node
+                
+                // We must be careful not to find nested nodes deeper down.
+                // querySelector inside the wrapper should find the immediate child node.
+                const childNodeEl = wrapper.querySelector('.logic-node');
+                if (childNodeEl) {
+                    result.items.push(extractJSONFromDOM(childNodeEl));
+                }
+            });
+        }
+    }
+
+    return result;
+}
+
 // --- Helper Functions ---
 const DEFAULT_TYPE = Object.keys(OPERATOR_CONFIG)[0];
 
@@ -119,7 +162,8 @@ function createElement(tag, className = "", innerHTML = "") {
 function renderNode(node, onChange, onRemove, isRoot = false, path = []) {
   // 1. Empty State
   if (node.type === 'EMPTY') {
-    const container = createElement('div', 'flex items-center w-full p-2 border border-dashed border-muted-foreground/30 rounded-md bg-muted/20');
+    const container = createElement('div', 'flex items-center w-full p-2 border border-dashed border-muted-foreground/30 rounded-md bg-muted/20 logic-node');
+    container.dataset.kind = 'EMPTY';
     
     const selector = renderTypeSelector(node, onChange, path);
     container.appendChild(selector);
@@ -137,7 +181,8 @@ function renderNode(node, onChange, onRemove, isRoot = false, path = []) {
 
   // 2. Text Node
   if (node.type === 'TEXT') {
-    const container = createElement('div', 'flex items-center w-full p-2 border rounded-md bg-background shadow-sm');
+    const container = createElement('div', 'flex items-center w-full p-2 border rounded-md bg-background shadow-sm logic-node');
+    container.dataset.kind = 'TEXT';
     
     container.appendChild(renderTypeSelector(node, onChange, path));
     
@@ -167,7 +212,8 @@ function renderNode(node, onChange, onRemove, isRoot = false, path = []) {
   const canAdd = constraints.max === null || (node.children?.length ?? 0) < constraints.max;
   const canRemove = constraints.min === null || (node.children?.length ?? 0) > constraints.min;
 
-  const container = createElement('div', `w-full flex items-start gap-2 ${isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : ""}`);
+  const container = createElement('div', `w-full flex items-start gap-2 logic-node ${isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : ""}`);
+  container.dataset.kind = node.type;
 
   if (!isRoot) {
     const selectorContainer = createElement('div', 'mt-2');
@@ -198,7 +244,7 @@ function renderNode(node, onChange, onRemove, isRoot = false, path = []) {
   
   // Children Column
   const childrenCol = createElement('div', 'flex-1 flex flex-col min-w-0');
-  const childrenContainer = createElement('div', 'flex flex-col');
+  const childrenContainer = createElement('div', 'flex flex-col children-container');
   
   if (node.children) {
     node.children.forEach((child, index) => {
@@ -450,8 +496,21 @@ function renderSection(title, node, builderKey) {
     
     wrapper.appendChild(renderNode(node, (newNode, skipRender) => updateBuilder(builderKey, newNode, skipRender), undefined, true));
     
+    // Export Button
+    const exportBtn = createElement('button', 'w-full mt-2 py-2 px-4 bg-secondary text-secondary-foreground rounded-md text-sm font-medium hover:bg-secondary/80 transition-colors', 'Export JSON');
+    exportBtn.onclick = () => {
+        const rootNode = wrapper.querySelector('.logic-node');
+        const json = extractJSONFromDOM(rootNode);
+        if (json) {
+            alert(JSON.stringify(json, null, 2));
+        } else {
+            alert('No logic to export');
+        }
+    };
+    
     section.appendChild(h2);
     section.appendChild(wrapper);
+    section.appendChild(exportBtn);
     return section;
 }
 
@@ -493,6 +552,19 @@ function render() {
   dynamicContainer.innerHTML = `<h2 class="text-xl font-semibold mb-6 text-center text-primary">Dynamic Playground</h2>`;
   const dynamicWrapper = createElement('div', 'bg-muted/10 p-6 rounded-xl border border-dashed');
   dynamicWrapper.appendChild(renderNode(state.builders['dynamic'], (n, skipRender) => updateBuilder('dynamic', n, skipRender), undefined, true));
+  
+  const dynamicExportBtn = createElement('button', 'w-full mt-4 py-2 px-4 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm', 'Export JSON');
+  dynamicExportBtn.onclick = () => {
+      const rootNode = dynamicWrapper.querySelector('.logic-node');
+      const json = extractJSONFromDOM(rootNode);
+      if (json) {
+          alert(JSON.stringify(json, null, 2));
+      } else {
+          alert('No logic to export');
+      }
+  };
+  dynamicWrapper.appendChild(dynamicExportBtn);
+
   dynamicContainer.appendChild(dynamicWrapper);
   
   container.appendChild(dynamicContainer);
