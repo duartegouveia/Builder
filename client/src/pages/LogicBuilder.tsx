@@ -3,7 +3,7 @@ import { Plus, X, ChevronRight, Check, Download, ArrowLeftRight, ArrowUpDown } f
 
 // --- Types ---
 
-export type NodeType = 'VARIABLE' | 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'BOOLEAN' | 'EMPTY';
+export type NodeType = 'VARIABLE' | 'INTEGER' | 'AND' | 'OR' | 'XOR' | 'IMP' | 'BIC' | 'NOT' | 'TEXT' | 'MULTILINE' | 'BOOLEAN' | 'EMPTY';
 
 export interface LogicNode {
   id: string;
@@ -11,6 +11,7 @@ export interface LogicNode {
   children?: LogicNode[];
   textValue?: string;
   booleanValue?: boolean;
+  integerValue?: string;
   minChildren?: number | null;
   maxChildren?: number | null;
   layoutPreference?: 'horizontal' | 'vertical';
@@ -20,6 +21,7 @@ export interface LogicNode {
 
 const OPERATOR_CONFIG: Record<string, { label: string; min?: number | null; max?: number | null }> = {
   'VARIABLE': { label: 'Variable' },
+  'INTEGER': { label: 'Integer' },
   'TEXT': { label: 'Text' },
   'MULTILINE': { label: 'Multiline Text' },
   'BOOLEAN': { label: 'Boolean' },
@@ -87,13 +89,15 @@ const createNode = (type: NodeType): LogicNode => {
   const config = OPERATOR_CONFIG[type];
   const isTextType = type === 'TEXT' || type === 'MULTILINE' || type === 'VARIABLE';
   const isBooleanType = type === 'BOOLEAN';
-  const isLeafType = isTextType || isBooleanType;
+  const isIntegerType = type === 'INTEGER';
+  const isLeafType = isTextType || isBooleanType || isIntegerType;
   const node: LogicNode = {
     id: Math.random().toString(36).substr(2, 9),
     type,
     children: isLeafType ? undefined : [],
     textValue: isTextType ? '' : undefined,
     booleanValue: isBooleanType ? false : undefined,
+    integerValue: isIntegerType ? '' : undefined,
     minChildren: config?.min ?? null,
     maxChildren: config?.max ?? null,
   };
@@ -319,6 +323,31 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     placeholder="Variable name..."
                     className="input"
                     style={{ width: 200, borderColor: 'transparent', backgroundColor: 'transparent' }}
+                 />
+             </div>
+             {onRemove && (
+                 <button className="btn btn-ghost btn-icon-sm text-muted-foreground ml-2" onClick={onRemove}>
+                     <X style={{ width: 16, height: 16 }} />
+                 </button>
+             )}
+          </div>
+      );
+  }
+
+  // 1c. Integer Node
+  if (node.type === 'INTEGER') {
+      return (
+          <div className="logic-text-node">
+             {renderTypeSelector()}
+             <div className="flex-1 flex items-center gap-2">
+                 <div className="logic-text-badge">123</div>
+                 <input 
+                    type="text"
+                    value={node.integerValue} 
+                    onChange={(e) => onChange({ ...node, integerValue: e.target.value })}
+                    placeholder="Enter integer..."
+                    className="input"
+                    style={{ width: 150, borderColor: 'transparent', backgroundColor: 'transparent' }}
                  />
              </div>
              {onRemove && (
