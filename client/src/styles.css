@@ -586,7 +586,7 @@ textarea.input.has-scroll {
 .logic-bar-cell {
   position: absolute;
   left: 0;
-  bottom: 4px;
+  bottom: 15px;
   width: 56px;
   display: flex;
   justify-content: center;
