@@ -641,6 +641,15 @@ function setupEventDelegation() {
       return;
     }
     
+    const layoutBtn = e.target.closest('.layout-toggle-btn');
+    if (layoutBtn) {
+      const container = layoutBtn.closest('.logic-operator-container');
+      if (container) {
+        container.classList.toggle('is-horizontal');
+      }
+      return;
+    }
+    
     document.querySelectorAll('.popover-content.show').forEach(c => {
       c.classList.remove('show');
     });

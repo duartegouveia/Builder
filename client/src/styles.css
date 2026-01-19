@@ -580,6 +580,66 @@ textarea.input.has-scroll {
   position: relative;
 }
 
+.logic-bar-cell {
+  position: absolute;
+  left: 0;
+  bottom: 4px;
+  width: 56px;
+  display: flex;
+  justify-content: center;
+  z-index: 3;
+}
+
+.layout-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: var(--slate-200);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--slate-500);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  opacity: 0.6;
+}
+
+.layout-toggle-btn:hover {
+  background: var(--slate-300);
+  color: var(--slate-700);
+  opacity: 1;
+}
+
+.logic-operator-container[data-child-count="1"] .layout-toggle-btn,
+.logic-operator-container[data-child-count="2"] .layout-toggle-btn,
+.logic-operator-container[data-child-count="3"] .layout-toggle-btn {
+  display: flex;
+}
+
+.logic-operator-container.is-horizontal .logic-rows-container {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.logic-operator-container.is-horizontal .logic-row-grid {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 150px;
+}
+
+.logic-operator-container.is-horizontal .logic-label-cell {
+  border-right: none;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-1);
+}
+
+.logic-operator-container.is-horizontal .logic-content-cell {
+  flex: 1;
+}
+
 .logic-operator-container::before {
   content: "";
   position: absolute;
