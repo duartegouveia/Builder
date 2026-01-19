@@ -5,11 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ExperimentCalc from "@/pages/ExperimentCalc";
+import LogicBuilder from "@/pages/LogicBuilder";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={ExperimentCalc}/>
+      <Route path="/logic" component={LogicBuilder}/>
       <Route component={NotFound} />
     </Switch>
   );

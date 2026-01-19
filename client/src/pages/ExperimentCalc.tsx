@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Calculator, FlaskConical, Settings2, Info, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Calculator, FlaskConical, Settings2, Info, ChevronRight, ChevronDown, Network } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import { 
   Variable, 
   computePropagation, 
@@ -104,12 +105,22 @@ export default function ExperimentCalc() {
             <FlaskConical className="w-6 h-6" />
             <span className="font-mono font-bold tracking-tight">LAB.CALC // v1.0</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
-            Experimental Error Propagator
-          </h1>
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Define variables, choose equipment type (Analog/Digital), and calculate error propagation instantly.
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+                    Experimental Error Propagator
+                </h1>
+                <p className="text-muted-foreground max-w-2xl text-lg mt-1">
+                    Define variables, choose equipment type (Analog/Digital), and calculate error propagation instantly.
+                </p>
+            </div>
+            <Link href="/logic">
+                <Button variant="outline" className="gap-2 hidden md:flex">
+                    <Network className="w-4 h-4" />
+                    Logic Builder
+                </Button>
+            </Link>
+          </div>
         </header>
 
         <div className="grid lg:grid-cols-12 gap-8">

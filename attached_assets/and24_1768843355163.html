@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Operadores Lógicos Builder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      position: relative;
+    }
+
+    .op-column {
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      position: relative;
+    }
+
+    .op-label {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: #555;
+      font-weight: 600;
+      background: transparent;
+      padding: 2px 8px;
+      user-select: none;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .lines-column {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      max-height: 60vh;
+    }
+
+    .line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #eee;
+      background: white;
+      transition: background 0.15s;
+      min-height: 52px;
+    }
+
+    .line:hover { background: #f8fcff; }
+    .line:last-child { border-bottom: none; }
+
+    .input-wrapper { flex: 1; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4d9fff;
+      box-shadow: 0 0 0 3px rgba(77,159,255,0.15);
+    }
+
+    .remove-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffebee;
+      color: #d32f2f;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remove-btn:hover { background: #ffcdd2; transform: scale(1.08); }
+
+    .add-section {
+      text-align: center;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+    }
+
+    .add-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #e3f2fd;
+      color: #1976d2;
+      border: none;
+      font-size: 1.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(25,118,210,0.15);
+      transition: all 0.2s;
+      margin-bottom: 5px;
+    }
+
+    .add-btn:hover { background: #bbdefb; transform: scale(1.1); }
+
+    .add-btn:disabled,
+    .add-section[hidden] {
+      display: none;
+    }
+
+    h2 { text-align: center; margin-bottom: 1rem; color: #333; }
+
+    /* Multikind container */
+    .multikind-container {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border: 1px solid #e0e0e0;
+      padding: 16px;
+      margin-top: 2rem;
+    }
+
+    .multikind-flex {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .multikind-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .popup-btn {
+      width: 20px;
+      height: 20px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .popup-btn:hover { background: #ccc; }
+
+    .content-area {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px dashed #aaa;
+      border-radius: 6px;
+      background: #fafafa;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+      color: #444;
+    }
+
+    .message {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-style: italic;
+      display: none;
+    }
+
+    .error-message {
+      background: #ffebee;
+      color: #8B0000;
+      border: 1px solid #ffcdd2;
+    }
+
+    .success-message {
+      background: #e8f5e9;
+      color: #006400;
+      border: 1px solid #c8e6c9;
+    }
+
+    .message.visible {
+      display: block;
+    }
+
+    .popup-menu {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      padding: 8px 0;
+      z-index: 1000;
+      min-width: 140px;
+      display: none;
+    }
+
+    .popup-menu.visible {
+      display: block;
+    }
+
+    .popup-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .popup-item:hover {
+      background: #f0f4ff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Builders iniciais -->
+<h2>AND (mín null, máx null)</h2>
+<div class="container" id="and-container"></div>
+
+<h2>OR (mín null, máx null)</h2>
+<div class="container" id="or-container"></div>
+
+<h2>XOR (mín 2, máx 2)</h2>
+<div class="container" id="xor-container"></div>
+
+<h2>⇒ (mín 2, máx 2)</h2>
+<div class="container" id="imp-container"></div>
+
+<h2>⇔ (mín 2, máx 2)</h2>
+<div class="container" id="bic-container"></div>
+
+<h2>NOT (mín 1, máx 1)</h2>
+<div class="container" id="not-container"></div>
+
+<!-- Footer com popup -->
+<div class="multikind-container">
+  <div class="multikind-flex">
+    <div class="multikind-row">
+      <div class="popup-btn" id="popupTrigger">></div>
+      <div class="content-area" id="contentArea">
+        Escolha uma operação no botão >
+      </div>
+    </div>
+
+    <div class="message" id="statusMsg"></div>
+  </div>
+</div>
+
+<!-- Popup movido para o body -->
+<div class="popup-menu" id="popupMenu">
+  <div class="popup-item" data-value="Text" data-min="1" data-max="1">Text</div>
+  <div class="popup-item" data-value="AND" data-min="null" data-max="null">AND</div>
+  <div class="popup-item" data-value="OR" data-min="null" data-max="null">OR</div>
+  <div class="popup-item" data-value="XOR" data-min="2" data-max="2">XOR</div>
+  <div class="popup-item" data-value="⇒" data-min="2" data-max="2">⇒</div>
+  <div class="popup-item" data-value="⇔" data-min="2" data-max="2">⇔</div>
+  <div class="popup-item" data-value="NOT" data-min="1" data-max="1">NOT</div>
+</div>
+
+<!-- Div base dinâmico para novos builders -->
+<div id="dynamic-builder" style="margin-top: 2rem; width: 100%; max-width: 520px;"></div>
+
+<!-- 20 <br> para teste de scroll -->
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
+
+<script>
+// Função de inicialização do builder
+function initOperador(containerId, operacao, minLinhas, maxLinhas) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (maxLinhas !== null) {
+    container.dataset.maxLinhas = maxLinhas;
+  }
+
+  const linesContainer = document.createElement('div');
+  linesContainer.className = 'lines-column';
+  linesContainer.id = `lines-${containerId}`;
+
+  const opColumn = document.createElement('div');
+  opColumn.className = 'op-column';
+  opColumn.id = `op-${containerId}`;
+
+  const content = document.createElement('div');
+  content.className = 'content';
+  content.appendChild(opColumn);
+  content.appendChild(linesContainer);
+
+  container.innerHTML = '';
+  container.appendChild(content);
+
+  const addSection = document.createElement('div');
+  addSection.className = 'add-section';
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '+';
+  addBtn.id = `add-${containerId}`;
+  addSection.appendChild(addBtn);
+  container.appendChild(addSection);
+
+  function createLine() {
+    const line = document.createElement('div');
+    line.className = 'line';
+
+    // Clona o layout do multikind-container inteiro
+    const template = document.querySelector('.multikind-container').cloneNode(true);
+
+    // Remove o título h2 se existir no clone
+    const title = template.querySelector('h2');
+    if (title) title.remove();
+
+    // Ajusta IDs para evitar duplicatas
+    const uniqueId = Date.now();
+    const popupBtn = template.querySelector('.popup-btn');
+    const contentArea = template.querySelector('.content-area');
+    const msgDiv = template.querySelector('.message');
+
+    if (popupBtn) popupBtn.id = `popupTrigger-line-${uniqueId}`;
+    if (contentArea) contentArea.id = `contentArea-line-${uniqueId}`;
+    if (msgDiv) msgDiv.id = `msg-line-${uniqueId}`;
+
+    // Evento de clique no botão > da nova linha
+    if (popupBtn) {
+      popupBtn.addEventListener('click', () => {
+        // Abre o popup global e guarda o content-area desta linha
+        currentPopupTrigger = popupBtn;
+        const rect = popupBtn.getBoundingClientRect();
+        popupMenu.style.left = `${rect.left + window.scrollX}px`;
+        popupMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        popupMenu.classList.add('visible');
+      });
+    }
+
+    line.appendChild(template);
+
+    // Botão remover
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = () => {
+      line.remove();
+      updateOpLabels();
+      updateAddButton();
+      updateRemoveButtons();
+    };
+    line.appendChild(removeBtn);
+
+    return line;
+  }
+
+  function updateOpLabels() {
+    opColumn.innerHTML = '';
+    const lines = linesContainer.children;
+    const num = lines.length;
+
+    if (num === 0) return;
+
+    // Caso especial: 1 linha só → label centrada na linha
+    if (num === 1) {
+      const lineHeight = lines[0].offsetHeight;
+      const label = document.createElement('div');
+      label.className = 'op-label';
+      label.textContent = operacao;
+      label.style.top = '50%';
+      label.style.transform = 'translate(-50%, -50%)';
+      label.style.height = `${lineHeight}px`;
+      label.style.lineHeight = `${lineHeight}px`;
+      opColumn.appendChild(label);
+      return;
+    }
+
+    // Caso normal: múltiplas linhas
+    if (num >= 2) {
+      let cumulativeTop = 0;
+
+      for (let i = 0; i < num - 1; i++) {
+        const prevLine = lines[i];
+        const nextLine = lines[i + 1];
+
+        const prevHeight = prevLine.offsetHeight;
+        const nextHeight = nextLine.offsetHeight;
+
+        const andHeight = (prevHeight + nextHeight) / 2;
+
+        const andDiv = document.createElement('div');
+        andDiv.className = 'op-label';
+        andDiv.textContent = operacao;
+
+        andDiv.style.top = `${cumulativeTop + prevHeight - andHeight / 2}px`;
+        andDiv.style.height = `${andHeight}px`;
+        andDiv.style.lineHeight = `${andHeight}px`;
+
+        opColumn.appendChild(andDiv);
+
+        cumulativeTop += prevHeight;
+      }
+    }
+  }
+
+  function updateAddButton() {
+    const current = linesContainer.children.length;
+    const max = container.dataset.maxLinhas ? parseInt(container.dataset.maxLinhas) : Infinity;
+    const addSection = container.querySelector('.add-section');
+    addSection.hidden = (max !== Infinity && current >= max);
+  }
+
+  function updateRemoveButtons() {
+    const current = linesContainer.children.length;
+    const min = minLinhas ?? 0;
+    const showRemove = (min === null || current > min);
+
+    linesContainer.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.style.display = showRemove ? 'flex' : 'none';
+    });
+  }
+
+  function addNewLine() {
+    const line = createLine();
+    linesContainer.appendChild(line);
+    updateOpLabels();
+    updateAddButton();
+    updateRemoveButtons();
+    // Foco no input da nova linha (se existir)
+    const input = line.querySelector('input');
+    if (input) input.focus();
+
+    new ResizeObserver(updateOpLabels).observe(line);
+  }
+
+  addBtn.onclick = addNewLine;
+
+  linesContainer.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+      e.preventDefault();
+      addNewLine();
+    }
+  });
+
+  new MutationObserver(() => {
+    updateOpLabels();
+    updateAddButton();
+    updateRemoveButtons();
+  }).observe(linesContainer, { childList: true, subtree: true });
+
+  const min = minLinhas ?? 2;
+  const startLines = (minLinhas === null) ? 2 : minLinhas;
+  for (let i = 0; i < startLines; i++) {
+    addNewLine();
+  }
+
+  setTimeout(() => {
+    updateOpLabels();
+    updateAddButton();
+    updateRemoveButtons();
+  }, 100);
+}
+
+// Inicialização dos builders iniciais
+initOperador('and-container', 'AND', null, null);
+initOperador('or-container', 'OR', null, null);
+initOperador('xor-container', 'XOR', 2, 2);
+initOperador('imp-container', '⇒', 2, 2);
+initOperador('bic-container', '⇔', 2, 2);
+initOperador('not-container', 'NOT', 1, 1);
+
+// ────────────────────────────────────────────────
+// Footer com popup → cria builder dinâmico no content-area relativo
+// ────────────────────────────────────────────────
+
+let currentContentArea = null;
+let currentPopupTrigger = null;
+
+const popupTrigger = document.getElementById('popupTrigger');
+const popupMenu = document.getElementById('popupMenu');
+const statusMsg = document.getElementById('statusMsg');
+
+// Inicializa currentContentArea com o div atual
+currentContentArea = popupTrigger.closest('.multikind-row').querySelector('.content-area');
+
+// Mostrar/esconder popup e guardar o botão que o abriu
+popupTrigger.addEventListener('click', () => {
+  currentPopupTrigger = popupTrigger;
+  const rect = popupTrigger.getBoundingClientRect();
+  popupMenu.style.left = `${rect.left + window.scrollX}px`;
+  popupMenu.style.top = `${rect.bottom + window.scrollY + 5}px`; // 5px abaixo do botão
+  popupMenu.classList.toggle('visible');
+});
+
+// Fechar popup ao clicar fora
+document.addEventListener('click', e => {
+  if (!popupTrigger.contains(e.target) && !popupMenu.contains(e.target)) {
+    popupMenu.classList.remove('visible');
+  }
+});
+
+// Escolher opção do popup → atualiza content-area do botão que abriu e cria builder dentro dele
+popupMenu.addEventListener('click', e => {
+  if (e.target.classList.contains('popup-item')) {
+    const value = e.target.dataset.value;
+    const min = e.target.dataset.min === 'null' ? null : parseInt(e.target.dataset.min);
+    const max = e.target.dataset.max === 'null' ? null : parseInt(e.target.dataset.max);
+
+    // Atualiza o content-area do botão que abriu o popup (relativo)
+    if (currentPopupTrigger) {
+      currentContentArea = currentPopupTrigger.closest('.multikind-row').querySelector('.content-area');
+      currentContentArea.innerHTML = '';
+
+      // Cria novo container dentro do content-area
+      const newContainer = document.createElement('div');
+      newContainer.className = 'container';
+      newContainer.id = 'dynamic-container-' + Date.now(); // ID único
+      currentContentArea.appendChild(newContainer);
+
+      // Inicializa o builder no novo container
+      initOperador(newContainer.id, value, min, max);
+    }
+
+    // Fecha o popup
+    popupMenu.classList.remove('visible');
+
+    // Mensagem de sucesso (verde escuro)
+    statusMsg.textContent = `Builder para ${value} criado com sucesso.`;
+    statusMsg.classList.remove('error-message');
+    statusMsg.classList.add('success-message', 'visible');
+    setTimeout(() => statusMsg.classList.remove('visible'), 4000);
+  }
+});
+</script>
+
+<!-- 20 <br> para teste de scroll -->
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
+
+</body>
+</html>
