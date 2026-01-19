@@ -650,7 +650,7 @@ textarea.input.has-scroll {
 }
 
 .logic-operator-container.is-horizontal .logic-content-cell {
-  padding: var(--space-3);
+  padding: 5px;
 }
 
 .logic-operator-container.is-horizontal .logic-text-node {
@@ -671,7 +671,7 @@ textarea.input.has-scroll {
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--space-2);
+  padding: 0 5px;
 }
 
 .logic-operator-container.is-horizontal .logic-horizontal-divider {
