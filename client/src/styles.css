@@ -736,6 +736,10 @@ textarea.input.has-scroll {
   min-height: 40px;
 }
 
+.logic-row-grid.logic-row-empty .logic-label-cell {
+  min-height: 0;
+}
+
 .logic-label-cell {
   background: var(--slate-100);
   display: flex;
