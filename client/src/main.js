@@ -144,11 +144,23 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
   const innerFlex = createElement('div', 'flex');
   
   // Operator Column
-  const opCol = createElement('div', 'w-12 bg-muted/30 border-r flex flex-col items-center justify-center relative min-h-[60px]');
+  const opCol = createElement('div', 'w-12 bg-muted/30 border-r flex flex-col relative min-h-[60px]');
   const accent = createElement('div', 'absolute inset-y-0 left-0 w-1 bg-primary/10');
-  const label = createElement('span', 'text-[10px] font-black text-muted-foreground uppercase tracking-wider rotate-[-90deg] whitespace-nowrap select-none', config.label);
   opCol.appendChild(accent);
-  opCol.appendChild(label);
+
+  const childCount = node.children ? node.children.length : 0;
+
+  if (childCount < 2) {
+      // Case 0 or 1: Center, no rotation
+      opCol.classList.add('items-center', 'justify-center');
+      const label = createElement('span', 'text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none', config.label);
+      opCol.appendChild(label);
+  } else {
+      // Case >= 2: Labels at junctions
+      // We will add labels dynamically
+      // But we need the children to be rendered first and sized.
+      // We'll setup the observer after building the full structure.
+  }
   
   // Children Column
   const childrenCol = createElement('div', 'flex-1 flex flex-col min-w-0');
@@ -176,6 +188,60 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
   }
   
   childrenCol.appendChild(childrenContainer);
+
+  // Setup ResizeObserver for Case >= 2
+  if (childCount >= 2) {
+      const updateLabels = () => {
+          // Remove existing absolute labels (keep accent)
+          // Note: Accent is first child.
+          while (opCol.children.length > 1) {
+              opCol.removeChild(opCol.lastChild);
+          }
+
+          const children = Array.from(childrenContainer.children);
+          // We need labels between child i and child i+1
+          // i goes from 0 to length - 2
+          for (let i = 0; i < children.length - 1; i++) {
+              const child = children[i];
+              // Position is bottom of current child relative to container
+              // Since childrenContainer is top aligned with opCol
+              const y = child.offsetTop + child.offsetHeight;
+              
+              const label = createElement('span', 'absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase tracking-wider whitespace-nowrap select-none bg-muted/30 px-1', config.label);
+              label.style.top = `${y}px`;
+              
+              // To improve visibility over the border line, maybe add a small background or border?
+              // The user said "aligned with the passage".
+              // Let's add a small background to the label so it covers the border line visually if needed, 
+              // or just sits on top.
+              // I added bg-muted/30 to match column background to mask lines if any? 
+              // Actually opCol has bg-muted/30.
+              // Let's just place it.
+              
+              opCol.appendChild(label);
+          }
+      };
+
+      // Observe the children container for size changes
+      // We also need to observe individual children if their content changes but not container width?
+      // observing childrenContainer with box: 'border-box' should catch height changes of children affecting container height.
+      // But we need the positions of internal boundaries.
+      // It's safer to observe the container.
+      
+      const observer = new ResizeObserver(() => {
+          // Use requestAnimationFrame to avoid loop limit errors and ensure layout is done
+          requestAnimationFrame(updateLabels);
+      });
+      
+      observer.observe(childrenContainer);
+      
+      // Cleanup observer when element is removed?
+      // In this simple Vanilla implementation, we don't have a component unmount lifecycle.
+      // But since we replace innerHTML of root on render(), the DOM nodes are garbage collected.
+      // The observer should be GC'd too if the target node is GC'd. 
+      // (JS WeakRefs logic applies to observers usually).
+  }
+
 
   if (canAdd) {
       const addArea = createElement('div', 'p-2 flex justify-center border-t bg-muted/5 mt-[5px]');
