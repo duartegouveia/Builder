@@ -611,6 +611,22 @@ textarea.input.has-scroll {
   opacity: 1;
 }
 
+.layout-toggle-btn .icon-vertical {
+  display: block;
+}
+
+.layout-toggle-btn .icon-horizontal {
+  display: none;
+}
+
+.logic-operator-container.is-horizontal .layout-toggle-btn .icon-vertical {
+  display: none;
+}
+
+.logic-operator-container.is-horizontal .layout-toggle-btn .icon-horizontal {
+  display: block;
+}
+
 .logic-operator-container[data-child-count="2"] .layout-toggle-btn,
 .logic-operator-container[data-child-count="3"] .layout-toggle-btn {
   display: flex;
