@@ -637,7 +637,27 @@ function setupEventDelegation() {
     if (layoutBtn) {
       const container = layoutBtn.closest('.logic-operator-container');
       if (container) {
-        container.classList.toggle('is-horizontal');
+        const isHorizontal = container.classList.toggle('is-horizontal');
+        const rowsContainer = container.querySelector('.logic-rows-container');
+        const nodeEl = container.closest('[data-node-id]');
+        const nodeId = nodeEl?.dataset.nodeId;
+        const builder = nodeEl?.dataset.builder;
+        const nodeData = nodeId && builder ? getNodeData(builder, nodeId) : null;
+        const config = nodeData ? OPERATOR_CONFIG[nodeData.type] : null;
+        
+        if (isHorizontal && config) {
+          container.querySelectorAll('.logic-horizontal-divider').forEach(d => d.remove());
+          const rows = rowsContainer.querySelectorAll('.logic-row-grid');
+          rows.forEach((row, i) => {
+            if (i < rows.length - 1) {
+              const divider = cloneTemplate('tpl-horizontal-divider');
+              divider.querySelector('.logic-horizontal-label').textContent = config.label;
+              row.after(divider);
+            }
+          });
+        } else {
+          container.querySelectorAll('.logic-horizontal-divider').forEach(d => d.remove());
+        }
       }
       return;
     }

@@ -620,24 +620,43 @@ textarea.input.has-scroll {
 .logic-operator-container.is-horizontal .logic-rows-container {
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 0;
+  align-items: stretch;
 }
 
 .logic-operator-container.is-horizontal .logic-row-grid {
-  display: flex;
-  flex-direction: column;
+  display: block;
   flex: 1;
-  min-width: 150px;
+  min-width: 120px;
 }
 
 .logic-operator-container.is-horizontal .logic-label-cell {
-  border-right: none;
-  border-bottom: 1px solid var(--border);
-  padding: var(--space-1);
+  display: none;
 }
 
 .logic-operator-container.is-horizontal .logic-content-cell {
-  flex: 1;
+  padding: var(--space-3);
+}
+
+.logic-horizontal-divider {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2);
+}
+
+.logic-operator-container.is-horizontal .logic-horizontal-divider {
+  display: flex;
+}
+
+.logic-horizontal-label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--slate-100);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
 }
 
 .logic-operator-container::before {
