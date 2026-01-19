@@ -207,54 +207,77 @@ function renderNode(node, onChange, onRemove, isRoot = false) {
 }
 
 function renderTypeSelector(node, onChange) {
-    // Simple dropdown simulation or native select for vanilla simplicity
-    // A custom popover is complex in vanilla without libs, let's use a native select styled to look okay-ish 
-    // OR just a simple custom dropdown
-    
-    // Let's use a native select hidden behind a custom trigger for simplicity but ensuring it works
     const wrapper = createElement('div', 'relative inline-block');
     
-    const trigger = createElement('button', 'h-8 w-8 p-0 shrink-0 font-bold bg-muted hover:bg-muted/80 text-muted-foreground rounded-md flex items-center justify-center', ICONS.CHEVRON_RIGHT);
+    // Trigger Button
+    const trigger = createElement('button', 'h-8 w-8 p-0 shrink-0 font-bold bg-muted hover:bg-muted/80 text-muted-foreground rounded-md flex items-center justify-center transition-colors', ICONS.CHEVRON_RIGHT);
     
-    const select = createElement('select', 'absolute inset-0 opacity-0 cursor-pointer w-full h-full');
+    // Dropdown Content
+    const dropdown = createElement('div', 'absolute top-full left-0 mt-1 w-32 p-1 rounded-md border bg-popover text-popover-foreground shadow-md z-50 hidden flex flex-col gap-1 bg-white dark:bg-zinc-950');
     
+    // Generate Options
     Object.entries(OPERATOR_CONFIG).forEach(([key, conf]) => {
-        const option = createElement('option', '', conf.label);
-        option.value = key;
-        option.selected = key === node.type;
-        select.appendChild(option);
+        const isSelected = key === node.type;
+        const optionBtn = createElement('button', `w-full text-left px-2 py-1.5 text-xs rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors ${isSelected ? 'bg-accent font-medium text-accent-foreground' : ''}`, conf.label);
+
+        optionBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevent bubbling
+            
+            if (key === node.type) {
+                 dropdown.classList.add('hidden');
+                 return;
+            }
+            
+            const newType = key;
+            const newNode = createNode(newType);
+            
+             // Preserve children logic
+            if (node.children && newNode.children) {
+                newNode.children = [...node.children];
+            }
+
+            // Enforce limits
+            if (newNode.children) {
+                 const min = newNode.minChildren ?? 0;
+                 while (newNode.children.length < min) {
+                     newNode.children.push(createNode('EMPTY'));
+                 }
+                 if (newNode.maxChildren != null && newNode.children.length > newNode.maxChildren) {
+                     newNode.children = newNode.children.slice(0, newNode.maxChildren);
+                 }
+            }
+            
+            onChange(newNode);
+        };
+        dropdown.appendChild(optionBtn);
     });
 
-    select.onchange = (e) => {
-        const newType = e.target.value;
-        if (newType === node.type) return;
-
-        const newNode = createNode(newType);
+    // Toggle logic
+    trigger.onclick = (e) => {
+        e.stopPropagation();
         
-        // Preserve children logic
-        if (node.children && newNode.children) {
-            newNode.children = [...node.children];
-        }
+        // Close all other open dropdowns
+        document.querySelectorAll('.custom-dropdown').forEach(el => {
+            if (el !== dropdown) el.classList.add('hidden');
+        });
 
-        // Enforce limits
-        if (newNode.children) {
-             const min = newNode.minChildren ?? 0;
-             while (newNode.children.length < min) {
-                 newNode.children.push(createNode('EMPTY'));
-             }
-             if (newNode.maxChildren != null && newNode.children.length > newNode.maxChildren) {
-                 newNode.children = newNode.children.slice(0, newNode.maxChildren);
-             }
-        }
-        
-        onChange(newNode);
+        dropdown.classList.toggle('hidden');
+        dropdown.classList.add('custom-dropdown');
     };
 
     wrapper.appendChild(trigger);
-    wrapper.appendChild(select);
+    wrapper.appendChild(dropdown);
     
     return wrapper;
 }
+
+// Global click listener to close dropdowns
+document.addEventListener('click', () => {
+    document.querySelectorAll('.custom-dropdown').forEach(el => {
+        el.classList.add('hidden');
+    });
+});
+
 
 function renderSection(title, node, builderKey) {
     const section = createElement('section', 'space-y-4');
