@@ -713,7 +713,7 @@ textarea.input.has-scroll {
 .logic-row-grid {
   display: block;
   position: relative;
-  margin-left: 56px;
+  margin-left: 0;
 }
 
 .logic-row-grid.logic-row-empty {
