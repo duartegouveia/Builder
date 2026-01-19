@@ -227,17 +227,6 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                                             onRemove={canRemove ? () => removeChild(index) : undefined}
                                         />
                                     </div>
-                                    {/* Only show remove button for children, root node management is up to parent container if needed */}
-                                    {canRemove && (
-                                         <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            onClick={() => removeChild(index)}
-                                            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity mt-2"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    )}
                                 </motion.div>
                             ))}
                         </AnimatePresence>
@@ -265,10 +254,15 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
             
             Wait, if I put the > button to the LEFT of the main block, it solves it.
         */}
-        {isRoot && (
-           <div className="absolute top-2 right-2">
-              {/* Optional actions for root */}
-           </div>
+        {!isRoot && onRemove && (
+            <Button 
+               variant="ghost" 
+               size="icon" 
+               className="mt-2 h-8 w-8 text-muted-foreground hover:text-destructive"
+               onClick={onRemove}
+            >
+                <X className="h-4 w-4" />
+            </Button>
         )}
     </div>
   );
