@@ -164,8 +164,8 @@ function buildRowDOM(nodeData, builderKey, childData, childIndex, showLabel, can
   const row = cloneTemplate('tpl-row-grid');
   row.dataset.rowIndex = childIndex;
   
-  const labelEl = row.querySelector('.logic-operator-label');
-  labelEl.textContent = showLabel ? config.label : '';
+  const labelCell = row.querySelector('.logic-label-cell');
+  labelCell.textContent = showLabel ? config.label : '';
   
   const contentCell = row.querySelector('.logic-content-cell');
   contentCell.appendChild(buildNodeDOM(childData, builderKey, false, canRemoveChild, nodeData.id, childIndex));
@@ -194,7 +194,7 @@ function buildOperatorNodeDOM(nodeData, builderKey, isRoot, canRemove, parentId,
   if (childCount === 0) {
     const row = cloneTemplate('tpl-row-grid');
     row.classList.add('logic-row-empty');
-    row.querySelector('.logic-operator-label').textContent = config.label;
+    row.querySelector('.logic-label-cell').textContent = config.label;
     rowsContainer.appendChild(row);
   } else if (childCount === 1) {
     const canRemoveChild = nodeData.minChildren == null || childCount > nodeData.minChildren;
@@ -368,12 +368,12 @@ function updateOperatorLabels(rowsContainer, nodeData) {
   const childCount = rows.length;
   
   rows.forEach((row, i) => {
-    const labelEl = row.querySelector('.logic-operator-label');
+    const labelCell = row.querySelector('.logic-label-cell');
     if (childCount === 1) {
-      labelEl.textContent = config.label;
+      labelCell.textContent = config.label;
     } else {
       const isLast = i === childCount - 1;
-      labelEl.textContent = isLast ? '' : config.label;
+      labelCell.textContent = isLast ? '' : config.label;
     }
   });
   
@@ -386,13 +386,12 @@ function updateLabelPositions(container) {
   const rows = container.querySelectorAll('.logic-row-grid.has-separator');
   rows.forEach(row => {
     const labelCell = row.querySelector('.logic-label-cell');
-    const labelEl = row.querySelector('.logic-operator-label');
-    if (!labelCell || !labelEl) return;
+    if (!labelCell) return;
     
     const rowHeight = row.offsetHeight;
-    const labelHeight = labelEl.offsetHeight;
+    const labelHeight = labelCell.offsetHeight;
     
-    labelEl.style.top = (rowHeight - labelHeight / 2) + 'px';
+    labelCell.style.top = (rowHeight - labelHeight / 2) + 'px';
   });
 }
 
@@ -608,7 +607,7 @@ function handleRemoveChild(builderKey, parentId, childIndex) {
     const config = OPERATOR_CONFIG[parentData.type];
     const emptyRow = cloneTemplate('tpl-row-grid');
     emptyRow.classList.add('logic-row-empty');
-    emptyRow.querySelector('.logic-operator-label').textContent = config.label;
+    emptyRow.querySelector('.logic-label-cell').textContent = config.label;
     rowsContainer.appendChild(emptyRow);
   } else {
     updateOperatorLabels(rowsContainer, parentData);

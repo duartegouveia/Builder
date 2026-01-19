@@ -704,19 +704,6 @@ textarea.input.has-scroll {
   z-index: 1;
 }
 
-.logic-operator-label {
-  font-size: 0.6875rem;
-  font-weight: 800;
-  color: var(--slate-500);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  text-align: center;
-  z-index: 1;
-  background: transparent;
-  padding: var(--space-1) var(--space-2);
-}
-
 .logic-rows-container {
   display: flex;
   flex-direction: column;
@@ -747,6 +734,11 @@ textarea.input.has-scroll {
   justify-content: center;
   position: relative;
   border-right: 1px solid var(--border);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .logic-row-grid.has-separator .logic-label-cell {
@@ -754,13 +746,11 @@ textarea.input.has-scroll {
   left: 0;
   width: 56px;
   height: auto;
-  background: transparent;
-  border-right: none;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
   z-index: 2;
-}
-
-.logic-row-grid.has-separator .logic-label-cell .logic-operator-label {
-  transform: translateX(0);
 }
 
 .logic-content-cell {
