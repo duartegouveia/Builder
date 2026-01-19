@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, ChevronRight, Check, AlertCircle, Download, FileJson } from 'lucide-react';
+import { Plus, X, ChevronRight, Check, AlertCircle, Download, FileJson, ArrowLeftRight, ArrowUpDown } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ export interface LogicNode {
   textValue?: string;
   minChildren?: number | null;
   maxChildren?: number | null;
+  layoutPreference?: 'horizontal' | 'vertical';
 }
 
 // --- Constants ---
@@ -324,21 +325,27 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
   const canAdd = maxChildren == null || (node.children?.length ?? 0) < maxChildren;
   const canRemove = minChildren == null || (node.children?.length ?? 0) > minChildren;
 
-  // Horizontal Mode Check for specific operators (min=max=2 or 3)
-  const isHorizontalMode = 
-      minChildren === maxChildren && 
-      (minChildren === 2 || minChildren === 3);
+  // Horizontal Mode Check:
+  // 1. Explicit preference? Use it.
+  // 2. Default rule: min=max=2 or 3 implies horizontal by default.
+  
+  const defaultHorizontal = minChildren === maxChildren && (minChildren === 2 || minChildren === 3);
+  
+  // Use preference if set, otherwise default
+  const isHorizontalMode = node.layoutPreference 
+      ? node.layoutPreference === 'horizontal'
+      : defaultHorizontal;
 
-  if (isHorizontalMode) {
-      return (
-        <div className={cn("w-full flex items-center gap-2", isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : "")}>
-            {!isRoot && (
-               <div className="mr-2">
-                 {renderTypeSelector()}
-               </div>
-            )}
-            
-            <div className={cn("flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row items-center gap-4 overflow-x-auto", !isRoot && "border-l-4 border-l-primary/20")}>
+  const toggleLayout = () => {
+      const newLayout = isHorizontalMode ? 'vertical' : 'horizontal';
+      onChange({ ...node, layoutPreference: newLayout });
+  };
+
+  // Render content based on mode
+  const renderChildren = () => {
+    if (isHorizontalMode) {
+         return (
+             <div className="flex-1 border rounded-lg p-4 bg-card shadow-sm flex flex-row flex-wrap md:flex-nowrap items-center gap-4 overflow-x-auto min-h-[100px]">
                 {node.children?.map((child, index) => (
                     <React.Fragment key={child.id}>
                         {index > 0 && (
@@ -355,85 +362,104 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
                     </React.Fragment>
                 ))}
             </div>
+         );
+    } else {
+        // Vertical Mode
+        return (
+            <div className="flex-1 border rounded-lg overflow-hidden bg-card shadow-sm">
+                <div className="flex">
+                    {/* Operator Column */}
+                    <div className="w-12 bg-muted/30 border-r flex flex-col items-center py-2 relative group/op-col">
+                         <div className="absolute inset-y-0 left-0 w-1 bg-primary/10" />
+                         
+                         {/* Centered Label */}
+                         <div className="flex-1 flex items-center justify-center w-full">
+                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider rotate-[-90deg] whitespace-nowrap">
+                                {config.label}
+                            </span>
+                         </div>
+                         
+                         {/* Toggle Button at Bottom */}
+                         <div className="mt-auto pt-2 opacity-0 group-hover/op-col:opacity-100 transition-opacity">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 rounded-full"
+                                onClick={toggleLayout}
+                                title="Switch to Horizontal Layout"
+                            >
+                                <ArrowLeftRight className="h-3 w-3 text-muted-foreground" />
+                            </Button>
+                         </div>
+                    </div>
+                    
+                    {/* Lines Column */}
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <div className="flex flex-col">
+                            <AnimatePresence initial={false}>
+                                {node.children?.map((child, index) => (
+                                    <motion.div 
+                                        key={child.id}
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="border-b last:border-b-0 p-2 hover:bg-muted/5 transition-colors flex gap-3 items-start group"
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <NodeEditor 
+                                                node={child} 
+                                                onChange={(updated) => updateChild(index, updated)} 
+                                                onRemove={canRemove ? () => removeChild(index) : undefined}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
 
-            {!isRoot && onRemove && (
-                <Button 
-                   variant="ghost" 
-                   size="icon" 
-                   className="ml-2 h-8 w-8 text-muted-foreground hover:text-destructive"
-                   onClick={onRemove}
-                >
-                    <X className="h-4 w-4" />
-                </Button>
-            )}
-        </div>
-      );
-  }
+                        {/* Add Button Area */}
+                        {canAdd && (
+                            <div className="p-2 flex justify-center border-t bg-muted/5 mt-[5px]">
+                                <Button 
+                                    variant="outline" 
+                                    size="icon" 
+                                    className="h-8 w-8 rounded-full shadow-sm hover:scale-110 transition-transform bg-background"
+                                    onClick={addChild}
+                                >
+                                    <Plus className="h-4 w-4 text-primary" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+  };
 
   return (
     <div className={cn("w-full flex items-start gap-2", isRoot ? "p-4 border rounded-lg bg-card shadow-sm" : "")}>
         {!isRoot && (
-           <div className="mt-2">
+           <div className="mt-2 flex flex-col gap-1 items-center">
              {renderTypeSelector()}
+             
+             {/* If horizontal, show toggle here since there's no operator column */}
+             {isHorizontalMode && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-full mt-1 opacity-50 hover:opacity-100"
+                    onClick={toggleLayout}
+                    title="Switch to Vertical Layout"
+                >
+                    <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                </Button>
+             )}
            </div>
         )}
         
-        <div className={cn("flex-1 border rounded-lg overflow-hidden bg-card shadow-sm", !isRoot && "border-l-4 border-l-primary/20")}>
-            <div className="flex">
-                {/* Operator Column */}
-                <div className="w-12 bg-muted/30 border-r flex flex-col items-center justify-center relative">
-                     <div className="absolute inset-y-0 left-0 w-1 bg-primary/10" />
-                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider rotate-[-90deg] whitespace-nowrap">
-                         {config.label}
-                     </span>
-                </div>
-                
-                {/* Lines Column */}
-                <div className="flex-1 flex flex-col min-w-0">
-                    <div className="flex flex-col">
-                        <AnimatePresence initial={false}>
-                            {node.children?.map((child, index) => (
-                                <motion.div 
-                                    key={child.id}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="border-b last:border-b-0 p-2 hover:bg-muted/5 transition-colors flex gap-3 items-start group"
-                                >
-                                    <div className="flex-1 min-w-0">
-                                        <NodeEditor 
-                                            node={child} 
-                                            onChange={(updated) => updateChild(index, updated)} 
-                                            onRemove={canRemove ? () => removeChild(index) : undefined}
-                                        />
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Add Button Area */}
-                    {canAdd && (
-                        <div className="p-2 flex justify-center border-t bg-muted/5 mt-[5px]">
-                            <Button 
-                                variant="outline" 
-                                size="icon" 
-                                className="h-8 w-8 rounded-full shadow-sm hover:scale-110 transition-transform bg-background"
-                                onClick={addChild}
-                            >
-                                <Plus className="h-4 w-4 text-primary" />
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+        {renderChildren()}
         
-        {/* If it's root, we might want a reset or something, but usually root doesn't have the > button unless we wrap it specifically. 
-            The requirement says "when choosing an option... replacement should not eliminate > button".
-            
-            Wait, if I put the > button to the LEFT of the main block, it solves it.
-        */}
         {!isRoot && onRemove && (
             <Button 
                variant="ghost" 
