@@ -361,8 +361,8 @@ p {
 }
 
 textarea.input {
-  height: auto;
-  min-height: 80px;
+  height: calc(4 * 1.5em + 2 * var(--space-3));
+  min-height: calc(4 * 1.5em + 2 * var(--space-3));
   resize: vertical;
   line-height: 1.5;
 }

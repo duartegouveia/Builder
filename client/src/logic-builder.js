@@ -378,9 +378,11 @@ function updateEvaluation() {
   }
 }
 
-function handleNodeUpdate(builderKey, nodeId, updates) {
+function handleNodeUpdate(builderKey, nodeId, updates, skipRender = false) {
   state.builders[builderKey] = updateNodeInTree(state.builders[builderKey], nodeId, node => ({ ...node, ...updates }));
-  renderBuilder(builderKey);
+  if (!skipRender) {
+    renderBuilder(builderKey);
+  }
   if (builderKey === 'dynamic') updateEvaluation();
 }
 
@@ -459,7 +461,7 @@ function attachBuilderListeners(builderKey) {
     input.addEventListener('input', (e) => {
       const { nodeId, builder, field } = e.target.dataset;
       if (nodeId && builder && field) {
-        handleNodeUpdate(builder, nodeId, { [field]: e.target.value });
+        handleNodeUpdate(builder, nodeId, { [field]: e.target.value }, true);
       }
     });
   });
@@ -468,7 +470,7 @@ function attachBuilderListeners(builderKey) {
     textarea.addEventListener('input', (e) => {
       const { nodeId, builder } = e.target.dataset;
       if (nodeId && builder) {
-        handleNodeUpdate(builder, nodeId, { textValue: e.target.value });
+        handleNodeUpdate(builder, nodeId, { textValue: e.target.value }, true);
       }
     });
   });
