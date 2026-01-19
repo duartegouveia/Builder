@@ -732,10 +732,7 @@ textarea.input.has-scroll {
   color: var(--slate-500);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 2px 4px;
+  background: transparent;
   z-index: 2;
   box-sizing: border-box;
 }
