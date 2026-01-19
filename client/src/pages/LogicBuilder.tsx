@@ -299,7 +299,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ node, onChange, onRemove, isRoo
           <div className="logic-text-node">
              {renderTypeSelector()}
              <div className="flex-1 flex items-center gap-2">
-                 <div className="logic-text-badge">Tx</div>
+                 <div className="logic-text-badge">abc</div>
                  <input 
                     type="text"
                     value={node.textValue} 
