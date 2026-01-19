@@ -386,9 +386,14 @@ function updateOperatorLabels(rowsContainer, nodeData) {
 function updateLabelPositions(container) {
   if (!container) container = document;
   
-  const rowsContainers = container.querySelectorAll ? 
-    container.querySelectorAll('.logic-rows-container') : 
-    [container];
+  let rowsContainers;
+  if (container.classList && container.classList.contains('logic-rows-container')) {
+    rowsContainers = [container];
+  } else if (container.querySelectorAll) {
+    rowsContainers = container.querySelectorAll('.logic-rows-container');
+  } else {
+    rowsContainers = [container];
+  }
   
   rowsContainers.forEach(rowsContainer => {
     const rows = Array.from(rowsContainer.querySelectorAll(':scope > .logic-row-grid'));
