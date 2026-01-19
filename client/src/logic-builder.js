@@ -256,22 +256,36 @@ function renderNodeHtml(node, builderKey, isRoot = false, canRemove = true, pare
   const maxChildren = node.maxChildren ?? config.max ?? null;
   const canAdd = maxChildren == null || (node.children?.length ?? 0) < maxChildren;
   const canRemoveChildren = minChildren == null || (node.children?.length ?? 0) > minChildren;
+  const childCount = node.children?.length ?? 0;
+
+  const renderConnectorLines = () => {
+    if (childCount === 0) {
+      return '';
+    }
+    if (childCount === 1) {
+      return '<div class="logic-connector-single"></div>';
+    }
+    const lines = [];
+    for (let i = 0; i < childCount - 1; i++) {
+      lines.push(`<div class="logic-connector-line" data-line-index="${i}"></div>`);
+    }
+    return `<div class="logic-connector-lines" data-child-count="${childCount}">${lines.join('')}</div>`;
+  };
 
   return `
     <div class="logic-node ${isRoot ? 'is-root' : ''}">
       ${!isRoot ? `<div class="mt-2 flex flex-col gap-1 items-center">${typeSelectorHtml}</div>` : ''}
-      <div class="logic-operator-container">
+      <div class="logic-operator-container" data-child-count="${childCount}">
         <div class="flex">
-          <div class="logic-operator-column">
-            <div class="flex-1 flex items-center justify-center w-full">
-              <span class="logic-operator-label">${config.label}</span>
-            </div>
+          <div class="logic-operator-column" data-child-count="${childCount}">
+            <span class="logic-operator-label">${config.label}</span>
+            ${renderConnectorLines()}
           </div>
           
           <div class="logic-children-column">
-            <div class="flex flex-col">
+            <div class="logic-children-list">
               ${node.children?.map((child, index) => `
-                <div class="logic-child-row">
+                <div class="logic-child-row" data-row-index="${index}">
                   <div class="flex-1" style="min-width: 0;">
                     ${renderNodeHtml(child, builderKey, false, canRemoveChildren, node.id, index)}
                   </div>
