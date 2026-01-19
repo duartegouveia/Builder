@@ -679,7 +679,7 @@ textarea.input {
 }
 
 .logic-add-area {
-  padding: var(--space-4);
+  padding: 10px var(--space-4);
   display: flex;
   justify-content: center;
   background: var(--slate-50);
