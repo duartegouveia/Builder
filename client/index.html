@@ -1,27 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta property="og:title" content="Error Propagator">
+  <meta property="og:description" content="Scientific calculator for experimental error propagation">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://replit.com/public/images/opengraph.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@replit">
+  <meta name="twitter:title" content="Error Propagator">
+  <meta name="twitter:description" content="Scientific calculator for experimental error propagation">
+  <meta name="twitter:image" content="https://replit.com/public/images/opengraph.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Error Propagator</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="min-h-screen bg-background p-4">
+      <div class="max-w-5xl mx-auto space-y-8">
+        
+        <header class="space-y-2">
+          <div class="exp-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>
+            <span class="font-mono font-bold tracking-tight">LAB.CALC // v1.0</span>
+          </div>
+          <div class="flex justify-between items-start">
+            <div>
+              <h1 class="text-3xl font-bold text-foreground tracking-tight">
+                Experimental Error Propagator
+              </h1>
+              <p class="text-muted-foreground text-lg mt-1" style="max-width: 42rem;">
+                Define variables, choose equipment type (Analog/Digital), and calculate error propagation instantly.
+              </p>
+            </div>
+            <a href="/logic.html" class="btn btn-outline gap-2" data-testid="link-logic">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+              Logic Builder
+            </a>
+          </div>
+        </header>
 
-    <meta property="og:title" content="Logic Builder & Error Propagator" />
-    <meta property="og:description" content="Dual-tool application for logic operations and scientific error propagation" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://replit.com/public/images/opengraph.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@replit" />
-    <meta name="twitter:title" content="Logic Builder & Error Propagator" />
-    <meta name="twitter:description" content="Dual-tool application for logic operations and scientific error propagation" />
-    <meta name="twitter:image" content="https://replit.com/public/images/opengraph.png" />
+        <div class="exp-grid">
+          <div class="space-y-6">
+            <div class="card">
+              <div class="card-header" style="padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                <div>
+                  <h2 class="card-title">Variables</h2>
+                  <p class="card-description">Define your measured quantities</p>
+                </div>
+                <button id="btn-add-variable" class="btn btn-outline btn-sm gap-2" data-testid="button-add-variable">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                  Add Variable
+                </button>
+              </div>
+              <div class="card-content" id="variables-container">
+                <!-- Variables will be rendered here by JavaScript -->
+              </div>
+            </div>
+          </div>
 
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <title>Logic Builder & Error Propagator</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+          <div class="space-y-6">
+            <div class="card sticky" style="top: 32px;">
+              <div class="card-header">
+                <h2 class="card-title">Expression</h2>
+                <p class="card-description">Enter formula using variables (e.g., x * y^2)</p>
+              </div>
+              <div class="card-content space-y-6">
+                <div>
+                  <label class="sr-only">Formula</label>
+                  <div class="relative">
+                    <div class="absolute text-muted-foreground font-mono font-bold text-lg" style="left: 12px; top: 50%; transform: translateY(-50%);">f =</div>
+                    <input 
+                      type="text"
+                      id="input-expression"
+                      class="input font-mono"
+                      style="padding-left: 48px; padding-top: 24px; padding-bottom: 24px; font-size: 1.125rem; background-color: rgba(0,0,0,0.02); border-color: hsl(221, 83%, 53%, 0.2);"
+                      placeholder="e.g. x * sin(y)"
+                      value="x * y^2"
+                      data-testid="input-expression"
+                    >
+                  </div>
+                </div>
+
+                <div id="result-container">
+                  <!-- Result will be rendered here by JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/experiment-calc.js"></script>
+</body>
 </html>

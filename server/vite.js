@@ -38,18 +38,18 @@ export async function setupVite(server, app) {
     const url = req.originalUrl;
 
     try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html",
-      );
+      let htmlFile = "index.html";
+      if (url === "/logic.html" || url.startsWith("/logic.html?")) {
+        htmlFile = "logic.html";
+      }
+      
+      const clientTemplate = path.resolve(__dirname, "..", "client", htmlFile);
+
+      if (!fs.existsSync(clientTemplate)) {
+        return next();
+      }
 
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.jsx"`,
-        `src="/src/main.jsx?v=${nanoid()}"`,
-      );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {

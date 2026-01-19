@@ -16,7 +16,16 @@ export function serveStatic(app) {
 
   app.use(express.static(distPath));
 
-  app.use("*", (_req, res) => {
+  app.use("*", (req, res) => {
+    const url = req.originalUrl;
+    
+    if (url === "/logic.html" || url.startsWith("/logic.html?")) {
+      const logicPath = path.resolve(distPath, "logic.html");
+      if (fs.existsSync(logicPath)) {
+        return res.sendFile(logicPath);
+      }
+    }
+    
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
