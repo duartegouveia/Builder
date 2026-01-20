@@ -1,18 +1,44 @@
 import './styles.css';
 
 const OPERATOR_CONFIG = {
+  // Leaf types
   'VARIABLE': { label: 'Variable' },
   'INTEGER': { label: 'Integer' },
   'FLOAT': { label: 'Float' },
   'TEXT': { label: 'Text' },
   'MULTILINE': { label: 'Multiline Text' },
   'BOOLEAN': { label: 'Boolean' },
+  // Logic operators
   'AND': { label: 'AND', min: null, max: null, default: 2 },
   'OR': { label: 'OR', min: null, max: null, default: 2 },
   'XOR': { label: 'XOR', min: 2, max: 2 },
   'IMP': { label: '=>', min: 2, max: 2 },
   'BIC': { label: '<=>', min: 2, max: 2 },
   'NOT': { label: 'NOT', min: 1, max: 1 },
+  // Math n-ary operators
+  'ADD': { label: '+', min: null, max: null, default: 2 },
+  'MUL': { label: '×', min: null, max: null, default: 2 },
+  // Math binary operators
+  'SUB': { label: '−', min: 2, max: 2 },
+  'DIV': { label: '÷', min: 2, max: 2 },
+  'POW': { label: '^', min: 2, max: 2 },
+  'IDIV': { label: 'div', min: 2, max: 2 },
+  'MOD': { label: 'mod', min: 2, max: 2 },
+  // Math unary operators
+  'ABS': { label: '|x|', min: 1, max: 1 },
+  'SIN': { label: 'sin', min: 1, max: 1 },
+  'COS': { label: 'cos', min: 1, max: 1 },
+  'TAN': { label: 'tan', min: 1, max: 1 },
+  'ASIN': { label: 'arcsin', min: 1, max: 1 },
+  'ACOS': { label: 'arccos', min: 1, max: 1 },
+  'ATAN': { label: 'arctan', min: 1, max: 1 },
+  'SEC': { label: 'sec', min: 1, max: 1 },
+  'CSC': { label: 'csc', min: 1, max: 1 },
+  'SINH': { label: 'sinh', min: 1, max: 1 },
+  'COSH': { label: 'cosh', min: 1, max: 1 },
+  // Math ternary operators
+  'SUM': { label: 'Σ', min: 3, max: 3 },
+  'PROD': { label: 'Π', min: 3, max: 3 },
 };
 
 const state = {
@@ -44,7 +70,8 @@ function autoResizeTextarea(textarea) {
 }
 
 function isOperatorType(type) {
-  return ['AND', 'OR', 'XOR', 'IMP', 'BIC', 'NOT'].includes(type);
+  const config = OPERATOR_CONFIG[type];
+  return config && (config.min !== undefined || config.max !== undefined);
 }
 
 function createNodeData(type) {
@@ -861,6 +888,13 @@ function init() {
     'imp': createInitialNodeData('IMP'),
     'bic': createInitialNodeData('BIC'),
     'not': createInitialNodeData('NOT'),
+    'add': createInitialNodeData('ADD'),
+    'mul': createInitialNodeData('MUL'),
+    'sub': createInitialNodeData('SUB'),
+    'div': createInitialNodeData('DIV'),
+    'pow': createInitialNodeData('POW'),
+    'sin': createInitialNodeData('SIN'),
+    'sum': createInitialNodeData('SUM'),
     'dynamic': createNodeData('EMPTY')
   };
   

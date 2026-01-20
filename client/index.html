@@ -68,6 +68,41 @@
         </section>
 
         <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">+ Add (min null, max null)</h2>
+          <div id="builder-add" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">&times; Multiply (min null, max null)</h2>
+          <div id="builder-mul" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">&minus; Subtract (min 2, max 2)</h2>
+          <div id="builder-sub" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">&divide; Divide (min 2, max 2)</h2>
+          <div id="builder-div" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">^ Power (min 2, max 2)</h2>
+          <div id="builder-pow" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">sin (min 1, max 1)</h2>
+          <div id="builder-sin" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-foreground">&Sigma; Sum (min 3, max 3)</h2>
+          <div id="builder-sum" class="logic-section"></div>
+        </section>
+
+        <section class="space-y-4">
           <h2 class="text-lg font-semibold text-foreground">Dynamic Playground</h2>
           <div id="builder-dynamic" class="logic-section"></div>
         </section>
@@ -114,19 +149,45 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       </button>
       <div class="popover-content">
-        <div class="flex flex-col gap-1" style="min-width: 160px;">
+        <div class="flex flex-col gap-1" style="min-width: 160px; max-height: 400px; overflow-y: auto;">
+          <div class="text-xs text-muted-foreground uppercase tracking-wider font-bold px-2 py-1">Values</div>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="VARIABLE" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Variable</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="INTEGER" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Integer</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="FLOAT" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Float</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="TEXT" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Text</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="MULTILINE" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Multiline Text</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="BOOLEAN" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">Boolean</button>
+          <div class="text-xs text-muted-foreground uppercase tracking-wider font-bold px-2 py-1 mt-2">Logic</div>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="AND" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">AND</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="OR" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">OR</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="XOR" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">XOR</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="IMP" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&rArr;</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="BIC" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&hArr;</button>
           <button class="btn btn-ghost justify-start type-select-btn" data-type="NOT" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">NOT</button>
+          <div class="text-xs text-muted-foreground uppercase tracking-wider font-bold px-2 py-1 mt-2">Math N-ary</div>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="ADD" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">+ (Add)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="MUL" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&times; (Multiply)</button>
+          <div class="text-xs text-muted-foreground uppercase tracking-wider font-bold px-2 py-1 mt-2">Math Binary</div>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="SUB" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&minus; (Subtract)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="DIV" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&divide; (Divide)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="POW" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">^ (Power)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="IDIV" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">div (Int Div)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="MOD" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">mod (Modulo)</button>
+          <div class="text-xs text-muted-foreground uppercase tracking-wider font-bold px-2 py-1 mt-2">Math Unary</div>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="ABS" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">|x| (Abs)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="SIN" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">sin</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="COS" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">cos</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="TAN" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">tan</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="ASIN" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">arcsin</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="ACOS" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">arccos</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="ATAN" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">arctan</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="SEC" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">sec</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="CSC" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">csc</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="SINH" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">sinh</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="COSH" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">cosh</button>
+          <div class="text-xs text-muted-foreground uppercase tracking-wider font-bold px-2 py-1 mt-2">Math Ternary</div>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="SUM" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&Sigma; (Sum)</button>
+          <button class="btn btn-ghost justify-start type-select-btn" data-type="PROD" style="justify-content: flex-start; height: 32px; padding: 0 0.5rem; font-size: 0.875rem;">&Pi; (Product)</button>
         </div>
       </div>
     </div>
