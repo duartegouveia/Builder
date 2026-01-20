@@ -67,6 +67,8 @@ function autoResizeTextarea(textarea) {
   } else {
     textarea.classList.remove('has-scroll');
   }
+  
+  requestAnimationFrame(updateAllLabelPositions);
 }
 
 function isOperatorType(type) {
@@ -880,6 +882,41 @@ function handleExport() {
   URL.revokeObjectURL(url);
 }
 
+function setupResizeObserver() {
+  const resizeObserver = new ResizeObserver((entries) => {
+    requestAnimationFrame(updateAllLabelPositions);
+  });
+  
+  const mutationObserver = new MutationObserver((mutations) => {
+    let shouldUpdate = false;
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1) {
+            const rows = node.querySelectorAll ? node.querySelectorAll('.logic-row-grid') : [];
+            rows.forEach(row => resizeObserver.observe(row));
+            if (node.classList?.contains('logic-row-grid')) {
+              resizeObserver.observe(node);
+            }
+          }
+        });
+        shouldUpdate = true;
+      }
+    }
+    if (shouldUpdate) {
+      requestAnimationFrame(updateAllLabelPositions);
+    }
+  });
+  
+  document.querySelectorAll('.logic-row-grid').forEach(row => {
+    resizeObserver.observe(row);
+  });
+  
+  document.querySelectorAll('.logic-section').forEach(section => {
+    mutationObserver.observe(section, { childList: true, subtree: true });
+  });
+}
+
 function init() {
   state.builders = {
     'and': createInitialNodeData('AND'),
@@ -901,7 +938,10 @@ function init() {
   setupEventDelegation();
   renderAllBuilders();
   
-  requestAnimationFrame(updateAllLabelPositions);
+  requestAnimationFrame(() => {
+    updateAllLabelPositions();
+    setupResizeObserver();
+  });
   
   document.getElementById('btn-export')?.addEventListener('click', handleExport);
 }
