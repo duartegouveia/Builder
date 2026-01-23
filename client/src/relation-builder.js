@@ -3020,33 +3020,110 @@ function toggleGroupBy(colIdx) {
 }
 
 function expandRelationColumn(colIdx) {
-  if (state.columnTypes[colIdx] !== 'relation') return;
-  
-  const newItems = [];
-  const nestedColumns = {};
-  
-  state.relation.items.forEach(row => {
-    const nestedRelation = row[colIdx];
-    if (!nestedRelation || !nestedRelation.items || nestedRelation.items.length === 0) {
-      const newRow = [...row];
-      newRow[colIdx] = null;
-      newItems.push(newRow);
-    } else {
-      Object.assign(nestedColumns, nestedRelation.columns);
-      nestedRelation.items.forEach(nestedRow => {
-        const newRow = [...row];
-        newRow[colIdx] = null;
-        nestedRow.forEach((val, i) => {
-          newRow.push(val);
-        });
-        newItems.push(newRow);
-      });
+  // Find ALL relation columns
+  const relationColIndices = [];
+  state.columnTypes.forEach((type, idx) => {
+    if (type === 'relation') {
+      relationColIndices.push(idx);
     }
   });
   
-  const newColumnsObj = {...state.relation.columns};
-  delete newColumnsObj[state.columnNames[colIdx]];
-  Object.assign(newColumnsObj, nestedColumns);
+  if (relationColIndices.length === 0) return;
+  
+  // Collect all nested columns from all relation columns
+  const allNestedColumns = {};
+  state.relation.items.forEach(row => {
+    relationColIndices.forEach(relColIdx => {
+      const nestedRelation = row[relColIdx];
+      if (nestedRelation && nestedRelation.columns) {
+        Object.assign(allNestedColumns, nestedRelation.columns);
+      }
+    });
+  });
+  
+  // Build new column structure: non-relation columns + all nested columns
+  const newColumnsObj = {};
+  state.columnNames.forEach((name, idx) => {
+    if (state.columnTypes[idx] !== 'relation') {
+      newColumnsObj[name] = state.columnTypes[idx];
+    }
+  });
+  Object.assign(newColumnsObj, allNestedColumns);
+  
+  const nestedColNames = Object.keys(allNestedColumns);
+  const nonRelationColIndices = [];
+  state.columnTypes.forEach((type, idx) => {
+    if (type !== 'relation') {
+      nonRelationColIndices.push(idx);
+    }
+  });
+  
+  // Generate Cartesian product of all relation columns
+  let newItems = [];
+  
+  state.relation.items.forEach(row => {
+    // Start with base row (non-relation values)
+    const baseValues = nonRelationColIndices.map(idx => row[idx]);
+    
+    // Collect arrays of rows from each relation column
+    const relationRowArrays = relationColIndices.map(relColIdx => {
+      const nestedRelation = row[relColIdx];
+      if (!nestedRelation || !nestedRelation.items || nestedRelation.items.length === 0) {
+        // No nested data - return array with nulls for all nested columns from this relation
+        const nestedColCount = nestedRelation?.columns ? Object.keys(nestedRelation.columns).length : 0;
+        return [new Array(nestedColCount).fill(null)];
+      }
+      return nestedRelation.items;
+    });
+    
+    // Cartesian product of all relation row arrays
+    function cartesianProduct(arrays) {
+      if (arrays.length === 0) return [[]];
+      return arrays.reduce((acc, curr) => {
+        const result = [];
+        acc.forEach(a => {
+          curr.forEach(b => {
+            result.push([...a, ...b]);
+          });
+        });
+        return result;
+      }, [[]]);
+    }
+    
+    const cartesian = cartesianProduct(relationRowArrays);
+    
+    // Create new rows combining base values with cartesian product results
+    cartesian.forEach(nestedValues => {
+      // Map nested values to correct positions based on column names
+      const newRow = [...baseValues];
+      
+      // Add values for each nested column (in order of allNestedColumns)
+      let offset = 0;
+      relationColIndices.forEach(relColIdx => {
+        const nestedRelation = row[relColIdx];
+        if (nestedRelation && nestedRelation.columns) {
+          const nestedColNamesForThis = Object.keys(nestedRelation.columns);
+          nestedColNamesForThis.forEach((ncName, ncIdx) => {
+            const targetIdx = nestedColNames.indexOf(ncName);
+            if (targetIdx >= 0) {
+              const valueIdx = offset + ncIdx;
+              if (valueIdx < nestedValues.length) {
+                newRow[nonRelationColIndices.length + targetIdx] = nestedValues[valueIdx];
+              }
+            }
+          });
+          offset += nestedColNamesForThis.length;
+        }
+      });
+      
+      // Fill any missing nested columns with null
+      while (newRow.length < nonRelationColIndices.length + nestedColNames.length) {
+        newRow.push(null);
+      }
+      
+      newItems.push(newRow);
+    });
+  });
   
   state.relation = {
     pot: 'relation',
