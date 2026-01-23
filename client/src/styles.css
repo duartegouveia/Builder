@@ -2376,3 +2376,110 @@ input[type="number"] {
   background: var(--primary-50);
   color: var(--primary-600);
 }
+
+/* AI Panel Styles */
+.ai-panel {
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--slate-50) 100%);
+  border: 1px solid var(--primary-200);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+}
+
+.ai-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--primary-100);
+  border-bottom: 1px solid var(--primary-200);
+  font-weight: 600;
+  color: var(--primary-700);
+}
+
+.ai-panel-content {
+  padding: var(--space-4);
+}
+
+.ai-response {
+  min-height: 60px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.ai-response:empty::before {
+  content: "Ask questions about your data, e.g.: 'What is the average age?', 'Show only active items', 'How many items have price > 100?'";
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.ai-response.loading::after {
+  content: "Analyzing...";
+  color: var(--primary-600);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.ai-input-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.ai-question-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.ai-question-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+.ai-filter-result {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--success-50);
+  border: 1px solid var(--success-200);
+  border-radius: var(--radius-sm);
+  color: var(--success-700);
+  font-size: 0.8125rem;
+}
+
+.ai-filter-result button {
+  margin-left: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: var(--success-600);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.ai-filter-result button:hover {
+  background: var(--success-700);
+}
+
+.ai-error {
+  color: var(--error-600);
+  background: var(--error-50);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--error-200);
+}

@@ -110,6 +110,12 @@ Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, 
 9. **Column Selection** - Select columns via context menu to group into nested relations
 10. **Nested Relations** - Support for `relation` column type with expandable cell views
 11. **Cartesian Product** - Expand nested relation columns to flatten data
+12. **Relation Column Statistics** - For `relation` type columns, statistics based on row counts (min, max, mean, median, quartiles, box plot, skewness, kurtosis)
+13. **String Length Statistics** - For `string`/`multilinestring` columns, statistics based on Unicode character length (min, max, mean, median, quartiles, box plot, skewness, kurtosis)
+14. **AI Assistant** - AI-powered data analysis panel that can:
+    - Answer questions about the data
+    - Suggest and apply filters based on natural language queries
+    - Uses OpenAI via Replit AI Integrations (no API key required)
 
 ## External Dependencies
 

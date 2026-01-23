@@ -1057,6 +1057,61 @@ function calculateStatistics(colIdx) {
     stats.uniqueCount = Object.keys(freq).length;
     const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
     stats.topValues = sorted.slice(0, 5);
+    
+    // Length statistics (Unicode character count)
+    const lengths = values.map(v => [...String(v)].length);
+    lengths.sort((a, b) => a - b);
+    
+    if (lengths.length > 0) {
+      stats.lengthStats = {};
+      stats.lengthStats.allNumericValues = lengths;
+      stats.lengthStats.min = Math.min(...lengths);
+      stats.lengthStats.max = Math.max(...lengths);
+      stats.lengthStats.sum = lengths.reduce((a, b) => a + b, 0);
+      stats.lengthStats.mean = stats.lengthStats.sum / lengths.length;
+      stats.lengthStats.range = stats.lengthStats.max - stats.lengthStats.min;
+      
+      // Median
+      const mid = Math.floor(lengths.length / 2);
+      stats.lengthStats.median = lengths.length % 2 ? lengths[mid] : (lengths[mid - 1] + lengths[mid]) / 2;
+      
+      // Mode
+      const lenFreq = {};
+      lengths.forEach(v => lenFreq[v] = (lenFreq[v] || 0) + 1);
+      const maxLenFreq = Math.max(...Object.values(lenFreq));
+      stats.lengthStats.mode = Object.keys(lenFreq).filter(k => lenFreq[k] === maxLenFreq).map(Number);
+      
+      // Variance and Std Dev
+      stats.lengthStats.variance = lengths.reduce((sum, n) => sum + Math.pow(n - stats.lengthStats.mean, 2), 0) / lengths.length;
+      stats.lengthStats.stdDev = Math.sqrt(stats.lengthStats.variance);
+      
+      // Quartiles
+      const q1Idx = Math.floor(lengths.length * 0.25);
+      const q3Idx = Math.floor(lengths.length * 0.75);
+      stats.lengthStats.q1 = lengths[q1Idx];
+      stats.lengthStats.q3 = lengths[q3Idx];
+      stats.lengthStats.iqr = stats.lengthStats.q3 - stats.lengthStats.q1;
+      
+      // Whiskers for box plot
+      const whiskerLow = stats.lengthStats.q1 - 1.5 * stats.lengthStats.iqr;
+      const whiskerHigh = stats.lengthStats.q3 + 1.5 * stats.lengthStats.iqr;
+      stats.lengthStats.whiskerLow = Math.max(whiskerLow, stats.lengthStats.min);
+      stats.lengthStats.whiskerHigh = Math.min(whiskerHigh, stats.lengthStats.max);
+      
+      // Outliers
+      stats.lengthStats.outliers = lengths.filter(n => n < whiskerLow || n > whiskerHigh);
+      const farLow = stats.lengthStats.q1 - 3 * stats.lengthStats.iqr;
+      const farHigh = stats.lengthStats.q3 + 3 * stats.lengthStats.iqr;
+      stats.lengthStats.farOutliers = lengths.filter(n => n < farLow || n > farHigh);
+      
+      // Skewness
+      const m3 = lengths.reduce((sum, n) => sum + Math.pow(n - stats.lengthStats.mean, 3), 0) / lengths.length;
+      stats.lengthStats.skewness = stats.lengthStats.stdDev > 0 ? m3 / Math.pow(stats.lengthStats.stdDev, 3) : 0;
+      
+      // Kurtosis
+      const m4 = lengths.reduce((sum, n) => sum + Math.pow(n - stats.lengthStats.mean, 4), 0) / lengths.length;
+      stats.lengthStats.kurtosis = stats.lengthStats.variance > 0 ? (m4 / Math.pow(stats.lengthStats.variance, 2)) : 0;
+    }
   } else if (type === 'boolean') {
     // Treat boolean as categorical data
     const freq = {};
@@ -2705,6 +2760,40 @@ function showStatisticsPanel(colIdx) {
         statsHtml += `<div class="stats-row stats-row-small"><span>${String(val).substring(0, 20)}</span><span>${count}</span></div>`;
       });
     }
+    
+    // Length statistics (Unicode character count)
+    if (stats.lengthStats) {
+      const ls = stats.lengthStats;
+      statsHtml += generateBoxPlotSVG(ls);
+      statsHtml += `
+        <div class="stats-divider"></div>
+        <div class="stats-subtitle">Length Statistics (Unicode chars)</div>
+        <div class="stats-row"><span>Min Length:</span><span>${ls.min ?? '—'}</span></div>
+        <div class="stats-row"><span>Max Length:</span><span>${ls.max ?? '—'}</span></div>
+        <div class="stats-row"><span>Range |max−min|:</span><span>${ls.range ?? '—'}</span></div>
+        <div class="stats-row"><span>Total Chars:</span><span>${ls.sum ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Mean:</span><span>${ls.mean?.toFixed(2) ?? '—'}</span></div>
+        <div class="stats-row"><span>Median:</span><span>${ls.median ?? '—'}</span></div>
+        <div class="stats-row"><span>Mode:</span><span>${ls.mode?.join(', ') ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Std Dev σ:</span><span>${ls.stdDev?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-row"><span>Variance σ²:</span><span>${ls.variance?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Q1 (25%):</span><span>${ls.q1 ?? '—'}</span></div>
+        <div class="stats-row"><span>Q3 (75%):</span><span>${ls.q3 ?? '—'}</span></div>
+        <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${ls.iqr ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${ls.outliers?.length ?? 0}</span></div>
+        <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${ls.farOutliers?.length ?? 0}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-subtitle">Distribution Shape</div>
+        <div class="shape-charts-row">
+          ${generateSkewnessSVG(ls.skewness)}
+          ${generateKurtosisSVG(ls.kurtosis)}
+        </div>
+      `;
+    }
   } else if (type === 'date' || type === 'datetime' || type === 'time') {
     const label = type === 'time' ? 'Time' : 'Date';
     
@@ -3213,10 +3302,133 @@ function updateRelationFromInput(input) {
   textarea.value = JSON.stringify(state.relation, null, 2);
 }
 
+// AI Panel functions
+async function askAI(question) {
+  const responseDiv = document.getElementById('ai-response');
+  responseDiv.innerHTML = '';
+  responseDiv.classList.add('loading');
+  
+  try {
+    const response = await fetch('/api/ai/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question,
+        relation: state.relation
+      })
+    });
+    
+    if (!response.ok) throw new Error('AI request failed');
+    
+    const result = await response.json();
+    responseDiv.classList.remove('loading');
+    
+    if (result.type === 'filter' && result.conditions) {
+      // Display filter result with apply button
+      responseDiv.innerHTML = `
+        <div>${result.description || 'Filter suggestion:'}</div>
+        <div class="ai-filter-result">
+          <span>Filter: ${result.conditions.map(c => `${c.column} ${c.operator} ${c.value ?? ''}`).join(' AND ')}</span>
+          <button id="btn-apply-ai-filter">Apply Filter</button>
+        </div>
+      `;
+      
+      document.getElementById('btn-apply-ai-filter').addEventListener('click', () => {
+        applyAIFilter(result.conditions);
+      });
+    } else if (result.type === 'answer') {
+      responseDiv.innerHTML = `<div>${result.text}</div>`;
+    } else {
+      responseDiv.innerHTML = `<div>${JSON.stringify(result)}</div>`;
+    }
+  } catch (error) {
+    responseDiv.classList.remove('loading');
+    responseDiv.innerHTML = `<div class="ai-error">Error: ${error.message}</div>`;
+  }
+}
+
+function applyAIFilter(conditions) {
+  // Apply AI-suggested filters to the table
+  conditions.forEach(cond => {
+    const colIdx = state.columnNames.indexOf(cond.column);
+    if (colIdx === -1) return;
+    
+    const colType = state.columnTypes[colIdx];
+    
+    // Map AI operators to filter format
+    let filterType, filterValue;
+    switch (cond.operator) {
+      case 'equals':
+        filterType = 'values';
+        filterValue = new Set([cond.value]);
+        break;
+      case 'contains':
+        filterType = 'values';
+        // Find matching values
+        const matchingValues = new Set();
+        state.relation.items.forEach(row => {
+          const val = row[colIdx];
+          if (val && String(val).toLowerCase().includes(String(cond.value).toLowerCase())) {
+            matchingValues.add(val);
+          }
+        });
+        filterValue = matchingValues;
+        break;
+      case 'gt':
+      case 'gte':
+      case 'lt':
+      case 'lte':
+        filterType = 'values';
+        const numericMatches = new Set();
+        state.relation.items.forEach(row => {
+          const val = row[colIdx];
+          const numVal = parseFloat(val);
+          const condVal = parseFloat(cond.value);
+          if (!isNaN(numVal) && !isNaN(condVal)) {
+            if ((cond.operator === 'gt' && numVal > condVal) ||
+                (cond.operator === 'gte' && numVal >= condVal) ||
+                (cond.operator === 'lt' && numVal < condVal) ||
+                (cond.operator === 'lte' && numVal <= condVal)) {
+              numericMatches.add(val);
+            }
+          }
+        });
+        filterValue = numericMatches;
+        break;
+      case 'isNull':
+        filterType = 'null';
+        break;
+      case 'isNotNull':
+        filterType = 'notNull';
+        break;
+      default:
+        return;
+    }
+    
+    if (filterType === 'values' && filterValue) {
+      state.filters[colIdx] = { type: 'values', values: filterValue };
+    } else if (filterType === 'null') {
+      state.filters[colIdx] = { type: 'null' };
+    } else if (filterType === 'notNull') {
+      state.filters[colIdx] = { type: 'notNull' };
+    }
+  });
+  
+  state.currentPage = 1;
+  applyFilters();
+  renderTable();
+  showToast('AI filter applied');
+}
+
 function init() {
   const textarea = document.getElementById('relation-json');
   const btnGenerate = document.getElementById('btn-generate-demo');
   const btnParse = document.getElementById('btn-parse-relation');
+  const btnAiPanel = document.getElementById('btn-ai-panel');
+  const aiPanel = document.getElementById('ai-panel');
+  const btnCloseAi = document.getElementById('btn-close-ai');
+  const btnAiAsk = document.getElementById('btn-ai-ask');
+  const aiQuestion = document.getElementById('ai-question');
   
   btnGenerate.addEventListener('click', () => {
     const demo = generateDemoRelation();
@@ -3241,9 +3453,37 @@ function init() {
       state.filteredIndices = [...Array(result.data.items.length).keys()];
       state.sortedIndices = [...state.filteredIndices];
       
+      // Show AI button when data is loaded
+      btnAiPanel.style.display = 'flex';
+      
       renderTable();
     } else {
       alert('Parse error: ' + result.error);
+    }
+  });
+  
+  // AI Panel events
+  btnAiPanel.addEventListener('click', () => {
+    aiPanel.style.display = aiPanel.style.display === 'none' ? 'block' : 'none';
+  });
+  
+  btnCloseAi.addEventListener('click', () => {
+    aiPanel.style.display = 'none';
+  });
+  
+  btnAiAsk.addEventListener('click', () => {
+    const question = aiQuestion.value.trim();
+    if (question) {
+      askAI(question);
+    }
+  });
+  
+  aiQuestion.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const question = aiQuestion.value.trim();
+      if (question) {
+        askAI(question);
+      }
     }
   });
 }

@@ -72,8 +72,27 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">Relation Table</h3>
+              <button id="btn-ai-panel" class="btn btn-outline btn-sm gap-2" data-testid="button-ai-panel" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                AI Assistant
+              </button>
             </div>
             <div class="card-content">
+              <div id="ai-panel" class="ai-panel" style="display: none;">
+                <div class="ai-panel-header">
+                  <span>AI Data Assistant</span>
+                  <button id="btn-close-ai" class="btn-close-dialog">✕</button>
+                </div>
+                <div class="ai-panel-content">
+                  <div id="ai-response" class="ai-response"></div>
+                  <div class="ai-input-row">
+                    <input type="text" id="ai-question" class="ai-question-input" placeholder="Ask a question about your data..." data-testid="input-ai-question">
+                    <button id="btn-ai-ask" class="btn btn-primary btn-sm" data-testid="button-ai-ask">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
               <div id="relation-table-container" class="relation-table-container">
                 <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
               </div>
