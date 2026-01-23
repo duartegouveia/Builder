@@ -1509,6 +1509,14 @@ input[type="number"] {
   color: var(--muted-foreground);
 }
 
+.pagination-total {
+  font-weight: 500;
+}
+
+.pagination-filtered {
+  color: var(--amber-600);
+}
+
 .pagination-selected {
   color: var(--primary);
   font-weight: 500;

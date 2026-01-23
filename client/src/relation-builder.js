@@ -836,12 +836,17 @@ function renderPagination() {
   if (!container) return;
   
   const totalPages = getTotalPages();
-  const totalRecords = state.sortedIndices.length;
+  const totalRecords = state.relation.items.length;
+  const filteredRecords = state.sortedIndices.length;
+  const selectedRecords = state.selectedRows.size;
+  
+  const hasFilter = filteredRecords !== totalRecords;
   
   container.innerHTML = `
     <div class="pagination-info">
-      <span>${totalRecords} records</span>
-      <span class="pagination-selected">${state.selectedRows.size} selected</span>
+      <span class="pagination-total">${totalRecords} total</span>
+      ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
+      <span class="pagination-selected">${selectedRecords} selected</span>
     </div>
     <div class="pagination-size">
       <label>Per page:</label>
