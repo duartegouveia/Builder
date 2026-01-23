@@ -277,7 +277,53 @@ function matchesCriteria(value, criteria, colIdx) {
     return value.toLowerCase().includes(criteria.contains.toLowerCase());
   }
   
+  // Comparison operators for numeric and date/time types
+  if (criteria.comparison) {
+    if (value === null || value === undefined) return false;
+    
+    let numValue = value;
+    let compValue = criteria.value;
+    let compValue2 = criteria.value2;
+    
+    // Convert to comparable numbers
+    if (type === 'int' || type === 'float') {
+      numValue = Number(value);
+      compValue = Number(compValue);
+      if (compValue2 !== undefined) compValue2 = Number(compValue2);
+    } else if (type === 'date' || type === 'datetime') {
+      numValue = new Date(value).getTime();
+      compValue = new Date(compValue).getTime();
+      if (compValue2 !== undefined) compValue2 = new Date(compValue2).getTime();
+    } else if (type === 'time') {
+      numValue = parseTimeToMs(value);
+      compValue = parseTimeToMs(compValue);
+      if (compValue2 !== undefined) compValue2 = parseTimeToMs(compValue2);
+    }
+    
+    switch (criteria.comparison) {
+      case 'eq': return numValue === compValue;
+      case 'neq': return numValue !== compValue;
+      case 'gt': return numValue > compValue;
+      case 'gte': return numValue >= compValue;
+      case 'lt': return numValue < compValue;
+      case 'lte': return numValue <= compValue;
+      case 'between': return numValue >= compValue && numValue <= compValue2;
+      default: return true;
+    }
+  }
+  
   return true;
+}
+
+function parseTimeToMs(timeStr) {
+  const parts = String(timeStr).split(':').map(Number);
+  if (parts.length >= 2) {
+    const hours = parts[0] || 0;
+    const minutes = parts[1] || 0;
+    const seconds = parts[2] || 0;
+    return (hours * 3600 + minutes * 60 + seconds) * 1000;
+  }
+  return 0;
 }
 
 // Sorting functions
@@ -1236,12 +1282,13 @@ function showColumnMenu(colIdx, x, y) {
     <div class="column-menu-section">
       <div class="column-menu-title">Filter</div>
       <button class="column-menu-item" data-action="filter-values">By Values...</button>
-      <button class="column-menu-item" data-action="filter-null">Only Null</button>
-      <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
-      ${type === 'int' || type === 'float' ? `
+      ${type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
+        <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
         <button class="column-menu-item" data-action="filter-top10">Top 10</button>
         <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
       ` : ''}
+      <button class="column-menu-item" data-action="filter-null">Only Null</button>
+      <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
       <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
     </div>
     <div class="column-menu-section">
@@ -1302,6 +1349,9 @@ function handleColumnMenuAction(colIdx, action) {
       break;
     case 'filter-values':
       showFilterValuesDialog(colIdx);
+      return;
+    case 'filter-comparison':
+      showFilterComparisonDialog(colIdx);
       return;
     case 'filter-null':
       state.filters[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
@@ -1449,6 +1499,96 @@ function showFilterValuesDialog(colIdx) {
       state.filters[colIdx] = { type: 'values', values: selected };
     }
     
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
+}
+
+function showFilterComparisonDialog(colIdx) {
+  closeAllMenus();
+  
+  const type = state.columnTypes[colIdx];
+  const name = state.columnNames[colIdx];
+  const currentFilter = state.filters[colIdx];
+  
+  const isDateTime = type === 'date' || type === 'datetime' || type === 'time';
+  let inputType = 'number';
+  if (type === 'date') inputType = 'date';
+  if (type === 'datetime') inputType = 'datetime-local';
+  if (type === 'time') inputType = 'time';
+  
+  const currentComparison = currentFilter?.criteria?.comparison || 'eq';
+  const currentValue = currentFilter?.criteria?.value || '';
+  const currentValue2 = currentFilter?.criteria?.value2 || '';
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'filter-dialog';
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Filter: ${name}</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="filter-comparison-form">
+      <div class="filter-form-row">
+        <label>Operator:</label>
+        <select id="filter-comparison-op" class="filter-select">
+          <option value="eq" ${currentComparison === 'eq' ? 'selected' : ''}>=  Equal</option>
+          <option value="neq" ${currentComparison === 'neq' ? 'selected' : ''}>≠  Not Equal</option>
+          <option value="gt" ${currentComparison === 'gt' ? 'selected' : ''}>>  Greater Than</option>
+          <option value="gte" ${currentComparison === 'gte' ? 'selected' : ''}>≥  Greater or Equal</option>
+          <option value="lt" ${currentComparison === 'lt' ? 'selected' : ''}><  Less Than</option>
+          <option value="lte" ${currentComparison === 'lte' ? 'selected' : ''}>≤  Less or Equal</option>
+          <option value="between" ${currentComparison === 'between' ? 'selected' : ''}>↔  Between</option>
+        </select>
+      </div>
+      <div class="filter-form-row">
+        <label id="filter-value-label">Value:</label>
+        <input type="${inputType}" id="filter-comparison-value" class="filter-input" value="${currentValue}" ${type === 'float' ? 'step="0.001"' : ''}>
+      </div>
+      <div class="filter-form-row" id="filter-value2-row" style="display: ${currentComparison === 'between' ? 'flex' : 'none'}">
+        <label>To:</label>
+        <input type="${inputType}" id="filter-comparison-value2" class="filter-input" value="${currentValue2}" ${type === 'float' ? 'step="0.001"' : ''}>
+      </div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline" id="filter-cancel">Cancel</button>
+      <button class="btn btn-primary" id="filter-apply">Apply</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  const opSelect = dialog.querySelector('#filter-comparison-op');
+  const value2Row = dialog.querySelector('#filter-value2-row');
+  const valueLabel = dialog.querySelector('#filter-value-label');
+  
+  opSelect.addEventListener('change', () => {
+    const isBetween = opSelect.value === 'between';
+    value2Row.style.display = isBetween ? 'flex' : 'none';
+    valueLabel.textContent = isBetween ? 'From:' : 'Value:';
+  });
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelector('#filter-apply').addEventListener('click', () => {
+    const comparison = opSelect.value;
+    const value = dialog.querySelector('#filter-comparison-value').value;
+    const value2 = dialog.querySelector('#filter-comparison-value2').value;
+    
+    if (!value) {
+      dialog.remove();
+      return;
+    }
+    
+    const criteria = { comparison, value };
+    if (comparison === 'between' && value2) {
+      criteria.value2 = value2;
+    }
+    
+    state.filters[colIdx] = { type: 'criteria', criteria };
     state.currentPage = 1;
     dialog.remove();
     renderTable();
