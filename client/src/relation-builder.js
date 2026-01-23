@@ -10,7 +10,7 @@ let state = {
   editable: false,
   
   // Pagination
-  pageSize: 20,
+  pageSize: 10,
   currentPage: 1,
   
   // Selection
