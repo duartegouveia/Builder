@@ -1112,6 +1112,63 @@ function calculateStatistics(colIdx) {
       const m4 = lengths.reduce((sum, n) => sum + Math.pow(n - stats.lengthStats.mean, 4), 0) / lengths.length;
       stats.lengthStats.kurtosis = stats.lengthStats.variance > 0 ? (m4 / Math.pow(stats.lengthStats.variance, 2)) : 0;
     }
+    
+    // Line count statistics (only for multilinestring)
+    if (type === 'multilinestring') {
+      const lineCounts = values.map(v => String(v).split('\n').length);
+      lineCounts.sort((a, b) => a - b);
+      
+      if (lineCounts.length > 0) {
+        stats.lineStats = {};
+        stats.lineStats.allNumericValues = lineCounts;
+        stats.lineStats.min = Math.min(...lineCounts);
+        stats.lineStats.max = Math.max(...lineCounts);
+        stats.lineStats.sum = lineCounts.reduce((a, b) => a + b, 0);
+        stats.lineStats.mean = stats.lineStats.sum / lineCounts.length;
+        stats.lineStats.range = stats.lineStats.max - stats.lineStats.min;
+        
+        // Median
+        const midLine = Math.floor(lineCounts.length / 2);
+        stats.lineStats.median = lineCounts.length % 2 ? lineCounts[midLine] : (lineCounts[midLine - 1] + lineCounts[midLine]) / 2;
+        
+        // Mode
+        const lineFreq = {};
+        lineCounts.forEach(v => lineFreq[v] = (lineFreq[v] || 0) + 1);
+        const maxLineFreq = Math.max(...Object.values(lineFreq));
+        stats.lineStats.mode = Object.keys(lineFreq).filter(k => lineFreq[k] === maxLineFreq).map(Number);
+        
+        // Variance and Std Dev
+        stats.lineStats.variance = lineCounts.reduce((sum, n) => sum + Math.pow(n - stats.lineStats.mean, 2), 0) / lineCounts.length;
+        stats.lineStats.stdDev = Math.sqrt(stats.lineStats.variance);
+        
+        // Quartiles
+        const q1LineIdx = Math.floor(lineCounts.length * 0.25);
+        const q3LineIdx = Math.floor(lineCounts.length * 0.75);
+        stats.lineStats.q1 = lineCounts[q1LineIdx];
+        stats.lineStats.q3 = lineCounts[q3LineIdx];
+        stats.lineStats.iqr = stats.lineStats.q3 - stats.lineStats.q1;
+        
+        // Whiskers for box plot
+        const whiskerLineLow = stats.lineStats.q1 - 1.5 * stats.lineStats.iqr;
+        const whiskerLineHigh = stats.lineStats.q3 + 1.5 * stats.lineStats.iqr;
+        stats.lineStats.whiskerLow = Math.max(whiskerLineLow, stats.lineStats.min);
+        stats.lineStats.whiskerHigh = Math.min(whiskerLineHigh, stats.lineStats.max);
+        
+        // Outliers
+        stats.lineStats.outliers = lineCounts.filter(n => n < whiskerLineLow || n > whiskerLineHigh);
+        const farLineLow = stats.lineStats.q1 - 3 * stats.lineStats.iqr;
+        const farLineHigh = stats.lineStats.q3 + 3 * stats.lineStats.iqr;
+        stats.lineStats.farOutliers = lineCounts.filter(n => n < farLineLow || n > farLineHigh);
+        
+        // Skewness
+        const m3Line = lineCounts.reduce((sum, n) => sum + Math.pow(n - stats.lineStats.mean, 3), 0) / lineCounts.length;
+        stats.lineStats.skewness = stats.lineStats.stdDev > 0 ? m3Line / Math.pow(stats.lineStats.stdDev, 3) : 0;
+        
+        // Kurtosis
+        const m4Line = lineCounts.reduce((sum, n) => sum + Math.pow(n - stats.lineStats.mean, 4), 0) / lineCounts.length;
+        stats.lineStats.kurtosis = stats.lineStats.variance > 0 ? (m4Line / Math.pow(stats.lineStats.variance, 2)) : 0;
+      }
+    }
   } else if (type === 'boolean') {
     // Treat boolean as categorical data
     const freq = {};
@@ -2791,6 +2848,40 @@ function showStatisticsPanel(colIdx) {
         <div class="shape-charts-row">
           ${generateSkewnessSVG(ls.skewness)}
           ${generateKurtosisSVG(ls.kurtosis)}
+        </div>
+      `;
+    }
+    
+    // Line count statistics (only for multilinestring)
+    if (stats.lineStats) {
+      const lns = stats.lineStats;
+      statsHtml += generateBoxPlotSVG(lns);
+      statsHtml += `
+        <div class="stats-divider"></div>
+        <div class="stats-subtitle">Line Count Statistics</div>
+        <div class="stats-row"><span>Min Lines:</span><span>${lns.min ?? '—'}</span></div>
+        <div class="stats-row"><span>Max Lines:</span><span>${lns.max ?? '—'}</span></div>
+        <div class="stats-row"><span>Range |max−min|:</span><span>${lns.range ?? '—'}</span></div>
+        <div class="stats-row"><span>Total Lines:</span><span>${lns.sum ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Mean:</span><span>${lns.mean?.toFixed(2) ?? '—'}</span></div>
+        <div class="stats-row"><span>Median:</span><span>${lns.median ?? '—'}</span></div>
+        <div class="stats-row"><span>Mode:</span><span>${lns.mode?.join(', ') ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Std Dev σ:</span><span>${lns.stdDev?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-row"><span>Variance σ²:</span><span>${lns.variance?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Q1 (25%):</span><span>${lns.q1 ?? '—'}</span></div>
+        <div class="stats-row"><span>Q3 (75%):</span><span>${lns.q3 ?? '—'}</span></div>
+        <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${lns.iqr ?? '—'}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${lns.outliers?.length ?? 0}</span></div>
+        <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${lns.farOutliers?.length ?? 0}</span></div>
+        <div class="stats-divider"></div>
+        <div class="stats-subtitle">Distribution Shape</div>
+        <div class="shape-charts-row">
+          ${generateSkewnessSVG(lns.skewness)}
+          ${generateKurtosisSVG(lns.kurtosis)}
         </div>
       `;
     }
