@@ -7,7 +7,7 @@ let state = {
   relation: null,
   columnNames: [],
   columnTypes: [],
-  editable: true,
+  editable: false,
   
   // Pagination
   pageSize: 20,
