@@ -724,6 +724,117 @@ function generateKurtosisSVG(kurtosis) {
   `;
 }
 
+// DateTime Box Plot SVG Generator (uses numeric milliseconds)
+function generateDateTimeBoxPlotSVG(stats, type) {
+  if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
+  
+  const width = 350;
+  const height = 180;
+  const padding = { top: 15, bottom: 25, left: 45, right: 15 };
+  const plotHeight = height - padding.top - padding.bottom;
+  const scatterX = 70;
+  const boxX = 115;
+  const boxWidth = 30;
+  const labelX = 170;
+  
+  const min = stats.numMin;
+  const max = stats.numMax;
+  const range = max - min || 1;
+  
+  const scaleY = (val) => padding.top + plotHeight - ((val - min) / range) * plotHeight;
+  
+  let svg = `<svg width="${width}" height="${height}" class="boxplot-svg">`;
+  
+  // Y-axis
+  svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#666" stroke-width="1"/>`;
+  
+  // Scatter plot points with jitter
+  const jitterRange = 15;
+  stats.allNumericValues.forEach((val) => {
+    const y = scaleY(val);
+    const jitter = (Math.random() - 0.5) * jitterRange;
+    const x = scatterX + jitter;
+    
+    let color = 'rgba(74, 144, 226, 0.15)';
+    if (stats.farOutliers.includes(val)) {
+      color = 'rgba(220, 53, 69, 0.5)';
+    } else if (stats.outliers.includes(val)) {
+      color = 'rgba(255, 152, 0, 0.5)';
+    }
+    
+    svg += `<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`;
+  });
+  
+  // Box plot
+  const q1Y = scaleY(stats.numQ1);
+  const q3Y = scaleY(stats.numQ3);
+  const medianY = scaleY(stats.numMedian);
+  const whiskerLowY = scaleY(stats.whiskerLow);
+  const whiskerHighY = scaleY(stats.whiskerHigh);
+  
+  // Whiskers
+  svg += `<line x1="${boxX + boxWidth/2}" y1="${whiskerHighY}" x2="${boxX + boxWidth/2}" y2="${q3Y}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  svg += `<line x1="${boxX + boxWidth/2}" y1="${q1Y}" x2="${boxX + boxWidth/2}" y2="${whiskerLowY}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  
+  // Whisker caps
+  svg += `<line x1="${boxX + boxWidth/4}" y1="${whiskerHighY}" x2="${boxX + 3*boxWidth/4}" y2="${whiskerHighY}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  svg += `<line x1="${boxX + boxWidth/4}" y1="${whiskerLowY}" x2="${boxX + 3*boxWidth/4}" y2="${whiskerLowY}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  
+  // Box
+  svg += `<rect x="${boxX}" y="${q3Y}" width="${boxWidth}" height="${q1Y - q3Y}" fill="rgba(74, 144, 226, 0.3)" stroke="#4a90e2" stroke-width="1.5"/>`;
+  
+  // Median line
+  svg += `<line x1="${boxX}" y1="${medianY}" x2="${boxX + boxWidth}" y2="${medianY}" stroke="#2563eb" stroke-width="2"/>`;
+  
+  // Mean marker
+  const meanY = scaleY(stats.numMean);
+  svg += `<polygon points="${boxX + boxWidth/2},${meanY - 4} ${boxX + boxWidth/2 + 4},${meanY} ${boxX + boxWidth/2},${meanY + 4} ${boxX + boxWidth/2 - 4},${meanY}" fill="#22c55e" stroke="#16a34a" stroke-width="1"/>`;
+  
+  // Annotations
+  const annotationStyle = 'font-size="8" fill="#666"';
+  
+  svg += `<line x1="${boxX + boxWidth}" y1="${whiskerHighY}" x2="${labelX - 5}" y2="${whiskerHighY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR (Q3−Q1)</text>`;
+  
+  svg += `<line x1="${boxX + boxWidth}" y1="${q3Y}" x2="${labelX - 5}" y2="${q3Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${q3Y + 3}" ${annotationStyle}>Q3 (75%)</text>`;
+  
+  svg += `<line x1="${boxX + boxWidth}" y1="${medianY}" x2="${labelX - 5}" y2="${medianY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>Median (50%)</text>`;
+  
+  svg += `<line x1="${boxX + boxWidth}" y1="${q1Y}" x2="${labelX - 5}" y2="${q1Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${q1Y + 3}" ${annotationStyle}>Q1 (25%)</text>`;
+  
+  svg += `<line x1="${boxX + boxWidth}" y1="${whiskerLowY}" x2="${labelX - 5}" y2="${whiskerLowY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR (Q3−Q1)</text>`;
+  
+  // Outliers
+  stats.outliers.forEach(val => {
+    const y = scaleY(val);
+    svg += `<circle cx="${boxX + boxWidth/2}" cy="${y}" r="4" fill="none" stroke="#ff9800" stroke-width="1.5"/>`;
+  });
+  
+  stats.farOutliers.forEach(val => {
+    const y = scaleY(val);
+    svg += `<circle cx="${boxX + boxWidth/2}" cy="${y}" r="4" fill="none" stroke="#dc3545" stroke-width="2"/>`;
+  });
+  
+  // Labels
+  svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Points</text>`;
+  svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Box</text>`;
+  
+  svg += `</svg>`;
+  
+  let legend = `<div class="boxplot-legend">
+    <span><span class="legend-dot legend-normal"></span>Normal</span>
+    <span><span class="legend-dot legend-outlier"></span>Outlier</span>
+    <span><span class="legend-dot legend-far"></span>Far outlier</span>
+    <span><span class="legend-diamond"></span>Mean</span>
+  </div>`;
+  
+  return `<div class="boxplot-container">${svg}${legend}</div>`;
+}
+
 // Statistics functions
 function calculateStatistics(colIdx) {
   const values = state.relation.items
@@ -960,14 +1071,46 @@ function calculateStatistics(colIdx) {
       // Quartiles
       const q1Idx = Math.floor(nums.length * 0.25);
       const q3Idx = Math.floor(nums.length * 0.75);
-      stats.q1 = formatValue(nums[q1Idx]);
-      stats.q3 = formatValue(nums[q3Idx]);
-      const iqrMs = nums[q3Idx] - nums[q1Idx];
+      const q1Ms = nums[q1Idx];
+      const q3Ms = nums[q3Idx];
+      stats.q1 = formatValue(q1Ms);
+      stats.q3 = formatValue(q3Ms);
+      const iqrMs = q3Ms - q1Ms;
       if (type === 'time') {
         stats.iqr = formatValue(iqrMs);
       } else {
         stats.iqr = `${(iqrMs / (1000 * 60 * 60 * 24)).toFixed(1)} days`;
       }
+      
+      // Store numeric values for box plot generation
+      stats.allNumericValues = nums;
+      stats.numMin = Math.min(...nums);
+      stats.numMax = Math.max(...nums);
+      stats.numQ1 = q1Ms;
+      stats.numQ3 = q3Ms;
+      stats.numMedian = medianMs;
+      stats.numMean = meanMs;
+      stats.numIqr = iqrMs;
+      
+      // Whiskers for box plot
+      const whiskerLow = q1Ms - 1.5 * iqrMs;
+      const whiskerHigh = q3Ms + 1.5 * iqrMs;
+      stats.whiskerLow = Math.max(whiskerLow, stats.numMin);
+      stats.whiskerHigh = Math.min(whiskerHigh, stats.numMax);
+      
+      // Outliers
+      stats.outliers = nums.filter(n => n < whiskerLow || n > whiskerHigh);
+      const farLow = q1Ms - 3 * iqrMs;
+      const farHigh = q3Ms + 3 * iqrMs;
+      stats.farOutliers = nums.filter(n => n < farLow || n > farHigh);
+      
+      // Skewness (Fisher's)
+      const m3 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 3), 0) / nums.length;
+      stats.skewness = m3 / Math.pow(stats.stdDev, 3);
+      
+      // Kurtosis (Fisher's)
+      const m4 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 4), 0) / nums.length;
+      stats.kurtosis = (m4 / Math.pow(stats.variance, 2));
     }
   }
   
@@ -2341,6 +2484,10 @@ function showStatisticsPanel(colIdx) {
     }
   } else if (type === 'date' || type === 'datetime' || type === 'time') {
     const label = type === 'time' ? 'Time' : 'Date';
+    
+    // Box plot for date/time values
+    statsHtml += generateDateTimeBoxPlotSVG(stats, type);
+    
     statsHtml += `
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Min ${label}:</span><span>${stats.min ?? '—'}</span></div>
@@ -2355,6 +2502,15 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
       <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
       <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Distribution Shape</div>
+      <div class="shape-charts-row">
+        ${generateSkewnessSVG(stats.skewness)}
+        ${generateKurtosisSVG(stats.kurtosis)}
+      </div>
     `;
   }
   
