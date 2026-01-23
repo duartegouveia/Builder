@@ -2763,10 +2763,39 @@ input[type="number"] {
 
 /* Diagram View */
 .diagram-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   padding: var(--space-3);
   background: var(--slate-50);
   border-radius: var(--radius);
   margin-bottom: var(--space-4);
+  align-items: center;
+}
+
+.diagram-config-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.diagram-config-row label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.tsne-hint {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+
+.tsne-progress {
+  font-size: 0.875rem;
+  color: var(--primary-600);
+  font-weight: 500;
+  animation: pulse-recording 1s infinite;
 }
 
 .diagram-container {

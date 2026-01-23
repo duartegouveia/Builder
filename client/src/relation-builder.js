@@ -4136,6 +4136,19 @@ function runClustering() {
     return;
   }
   
+  const n = state.sortedIndices.length;
+  const maxPoints = 500;
+  
+  if (n > maxPoints) {
+    if (!confirm('You have ' + n + ' rows. t-SNE with more than ' + maxPoints + ' points may be slow and freeze the browser. Continue anyway?')) {
+      return;
+    }
+  }
+  
+  // Get t-SNE parameters from UI
+  const perplexity = parseInt(document.getElementById('tsne-perplexity')?.value) || 30;
+  const iterations = parseInt(document.getElementById('tsne-iterations')?.value) || 500;
+  
   // Get categorical/numeric columns for similarity calculation
   const cols = [];
   state.columnTypes.forEach((type, idx) => {
@@ -4149,7 +4162,7 @@ function runClustering() {
     return;
   }
   
-  // Normalize data for each column
+  // Prepare data matrix
   const data = state.sortedIndices.map(i => {
     const row = state.relation.items[i];
     return cols.map(colIdx => {
@@ -4159,7 +4172,6 @@ function runClustering() {
       if (type === 'boolean') return val ? 1 : 0;
       if (type === 'int' || type === 'float') return val;
       if (type === 'string' || type === 'select') {
-        // Hash string to number for comparison
         let hash = 0;
         const str = String(val);
         for (let i = 0; i < str.length; i++) {
@@ -4172,97 +4184,281 @@ function runClustering() {
     });
   });
   
-  // Normalize each column to 0-1 range
-  cols.forEach((_, colIdx) => {
-    const values = data.map(row => row[colIdx]);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const range = max - min || 1;
-    data.forEach(row => {
-      row[colIdx] = (row[colIdx] - min) / range;
-    });
-  });
+  // Normalize each column to zero mean and unit variance
+  const nCols = cols.length;
+  const nRows = data.length;
   
-  // Initialize nodes with random positions
-  const canvas = document.getElementById('diagram-canvas');
-  const width = canvas.width;
-  const height = canvas.height;
-  
-  const nodes = data.map((d, i) => ({
-    idx: state.sortedIndices[i],
-    x: Math.random() * (width - 100) + 50,
-    y: Math.random() * (height - 100) + 50,
-    vx: 0,
-    vy: 0,
-    data: d,
-    color: 'hsl(' + (i * 137.5 % 360) + ', 70%, 50%)'
-  }));
-  
-  // Calculate distances between all pairs
-  function distance(a, b) {
-    let sum = 0;
-    for (let i = 0; i < a.data.length; i++) {
-      const diff = a.data[i] - b.data[i];
-      sum += diff * diff;
+  for (let c = 0; c < nCols; c++) {
+    let mean = 0;
+    for (let r = 0; r < nRows; r++) mean += data[r][c];
+    mean /= nRows;
+    
+    let variance = 0;
+    for (let r = 0; r < nRows; r++) variance += (data[r][c] - mean) ** 2;
+    variance /= nRows;
+    const std = Math.sqrt(variance) || 1;
+    
+    for (let r = 0; r < nRows; r++) {
+      data[r][c] = (data[r][c] - mean) / std;
     }
-    return Math.sqrt(sum);
   }
   
-  // Force-directed layout simulation
-  const iterations = 100;
-  const repulsion = 500;
-  const attraction = 0.1;
-  const damping = 0.9;
+  // Show progress
+  const progressEl = document.getElementById('tsne-progress');
+  if (progressEl) progressEl.style.display = 'block';
   
+  // Run t-SNE asynchronously
+  setTimeout(() => {
+    const result = tSNE(data, {
+      perplexity: Math.min(perplexity, Math.floor(nRows / 3)),
+      iterations: iterations,
+      learningRate: 200,
+      onProgress: (iter, total) => {
+        if (progressEl) {
+          progressEl.textContent = 't-SNE: ' + Math.round(iter / total * 100) + '%';
+        }
+      }
+    });
+    
+    // Convert to nodes for rendering
+    const canvas = document.getElementById('diagram-canvas');
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 40;
+    
+    // Find bounds
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    result.forEach(p => {
+      minX = Math.min(minX, p[0]);
+      maxX = Math.max(maxX, p[0]);
+      minY = Math.min(minY, p[1]);
+      maxY = Math.max(maxY, p[1]);
+    });
+    
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    
+    const nodes = result.map((p, i) => ({
+      idx: state.sortedIndices[i],
+      x: padding + ((p[0] - minX) / rangeX) * (width - 2 * padding),
+      y: padding + ((p[1] - minY) / rangeY) * (height - 2 * padding),
+      data: data[i],
+      color: 'hsl(' + (i * 137.5 % 360) + ', 70%, 50%)'
+    }));
+    
+    state.diagramNodes = nodes;
+    
+    if (progressEl) progressEl.style.display = 'none';
+    renderDiagram();
+  }, 50);
+}
+
+function tSNE(X, options = {}) {
+  const n = X.length;
+  const dim = 2;
+  const perplexity = options.perplexity || 30;
+  const iterations = options.iterations || 500;
+  const learningRate = options.learningRate || 200;
+  const onProgress = options.onProgress || (() => {});
+  const earlyExaggeration = 4;
+  const earlyExaggerationEnd = 100;
+  
+  // Compute pairwise distances
+  const D = [];
+  for (let i = 0; i < n; i++) {
+    D[i] = [];
+    for (let j = 0; j < n; j++) {
+      let sum = 0;
+      for (let k = 0; k < X[i].length; k++) {
+        sum += (X[i][k] - X[j][k]) ** 2;
+      }
+      D[i][j] = sum;
+    }
+  }
+  
+  // Compute P (joint probabilities in high-dimensional space)
+  const P = computeJointProbabilities(D, perplexity, n);
+  
+  // Apply early exaggeration to P
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      P[i][j] *= earlyExaggeration;
+    }
+  }
+  
+  // Initialize Y randomly
+  const Y = [];
+  for (let i = 0; i < n; i++) {
+    Y[i] = [Math.random() * 0.0001, Math.random() * 0.0001];
+  }
+  
+  // Initialize momentum, gains, and previous gradients
+  const gains = [];
+  const Ymom = [];
+  const prevGrads = [];
+  for (let i = 0; i < n; i++) {
+    gains[i] = [1, 1];
+    Ymom[i] = [0, 0];
+    prevGrads[i] = [0, 0];
+  }
+  
+  // Optimization loop
   for (let iter = 0; iter < iterations; iter++) {
-    // Reset forces
-    nodes.forEach(n => { n.vx = 0; n.vy = 0; });
-    
-    // Repulsion between all nodes
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = nodes[j].x - nodes[i].x;
-        const dy = nodes[j].y - nodes[i].y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = repulsion / (dist * dist);
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        nodes[i].vx -= fx;
-        nodes[i].vy -= fy;
-        nodes[j].vx += fx;
-        nodes[j].vy += fy;
+    // End early exaggeration
+    if (iter === earlyExaggerationEnd) {
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          P[i][j] /= earlyExaggeration;
+        }
       }
     }
     
-    // Attraction based on similarity
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const similarity = 1 - distance(nodes[i], nodes[j]) / Math.sqrt(cols.length);
-        const dx = nodes[j].x - nodes[i].x;
-        const dy = nodes[j].y - nodes[i].y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = attraction * similarity * dist;
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        nodes[i].vx += fx;
-        nodes[i].vy += fy;
-        nodes[j].vx -= fx;
-        nodes[j].vy -= fy;
+    // Compute low-dimensional affinities Q
+    const Qnum = [];
+    let Qsum = 0;
+    
+    for (let i = 0; i < n; i++) {
+      Qnum[i] = [];
+      for (let j = 0; j < n; j++) {
+        if (i === j) {
+          Qnum[i][j] = 0;
+        } else {
+          const dist = (Y[i][0] - Y[j][0]) ** 2 + (Y[i][1] - Y[j][1]) ** 2;
+          Qnum[i][j] = 1 / (1 + dist);
+          Qsum += Qnum[i][j];
+        }
       }
     }
     
-    // Apply forces with damping
-    nodes.forEach(n => {
-      n.x += n.vx * damping;
-      n.y += n.vy * damping;
-      // Keep in bounds
-      n.x = Math.max(20, Math.min(width - 20, n.x));
-      n.y = Math.max(20, Math.min(height - 20, n.y));
-    });
+    // Normalize Q
+    const Q = [];
+    for (let i = 0; i < n; i++) {
+      Q[i] = [];
+      for (let j = 0; j < n; j++) {
+        Q[i][j] = Math.max(Qnum[i][j] / Qsum, 1e-12);
+      }
+    }
+    
+    // Compute gradients
+    const grads = [];
+    for (let i = 0; i < n; i++) {
+      let gx = 0, gy = 0;
+      for (let j = 0; j < n; j++) {
+        if (i !== j) {
+          const mult = (P[i][j] - Q[i][j]) * Qnum[i][j];
+          gx += mult * (Y[i][0] - Y[j][0]);
+          gy += mult * (Y[i][1] - Y[j][1]);
+        }
+      }
+      grads[i] = [4 * gx, 4 * gy];
+    }
+    
+    // Update with momentum and adaptive gains
+    const momentum = iter < 250 ? 0.5 : 0.8;
+    
+    for (let i = 0; i < n; i++) {
+      for (let d = 0; d < dim; d++) {
+        // Compare current gradient sign with previous gradient sign (not momentum)
+        const sameSign = Math.sign(grads[i][d]) === Math.sign(prevGrads[i][d]);
+        gains[i][d] = sameSign ? gains[i][d] * 0.8 : gains[i][d] + 0.2;
+        gains[i][d] = Math.max(gains[i][d], 0.01);
+        
+        Ymom[i][d] = momentum * Ymom[i][d] - learningRate * gains[i][d] * grads[i][d];
+        Y[i][d] += Ymom[i][d];
+        
+        prevGrads[i][d] = grads[i][d];
+      }
+    }
+    
+    // Center Y
+    let meanX = 0, meanY = 0;
+    for (let i = 0; i < n; i++) {
+      meanX += Y[i][0];
+      meanY += Y[i][1];
+    }
+    meanX /= n;
+    meanY /= n;
+    for (let i = 0; i < n; i++) {
+      Y[i][0] -= meanX;
+      Y[i][1] -= meanY;
+    }
+    
+    if (iter % 50 === 0) {
+      onProgress(iter, iterations);
+    }
   }
   
-  state.diagramNodes = nodes;
-  renderDiagram();
+  onProgress(iterations, iterations);
+  return Y;
+}
+
+function computeJointProbabilities(D, perplexity, n) {
+  const P = [];
+  const targetEntropy = Math.log(perplexity);
+  
+  for (let i = 0; i < n; i++) {
+    P[i] = [];
+    
+    // Binary search for sigma
+    let sigma = 1;
+    let sigmaMin = -Infinity;
+    let sigmaMax = Infinity;
+    
+    for (let attempt = 0; attempt < 50; attempt++) {
+      // Compute conditional probabilities
+      let sumP = 0;
+      const pRow = [];
+      
+      for (let j = 0; j < n; j++) {
+        if (i === j) {
+          pRow[j] = 0;
+        } else {
+          pRow[j] = Math.exp(-D[i][j] / (2 * sigma * sigma));
+          sumP += pRow[j];
+        }
+      }
+      
+      // Normalize and compute entropy
+      let entropy = 0;
+      for (let j = 0; j < n; j++) {
+        pRow[j] = sumP > 0 ? pRow[j] / sumP : 0;
+        if (pRow[j] > 1e-12) {
+          entropy -= pRow[j] * Math.log(pRow[j]);
+        }
+      }
+      
+      // Check if entropy is close enough
+      const diff = entropy - targetEntropy;
+      if (Math.abs(diff) < 1e-5) {
+        P[i] = pRow;
+        break;
+      }
+      
+      // Binary search update
+      if (diff > 0) {
+        sigmaMax = sigma;
+        sigma = sigmaMin === -Infinity ? sigma / 2 : (sigma + sigmaMin) / 2;
+      } else {
+        sigmaMin = sigma;
+        sigma = sigmaMax === Infinity ? sigma * 2 : (sigma + sigmaMax) / 2;
+      }
+      
+      if (attempt === 49) {
+        P[i] = pRow;
+      }
+    }
+  }
+  
+  // Symmetrize
+  const Psym = [];
+  for (let i = 0; i < n; i++) {
+    Psym[i] = [];
+    for (let j = 0; j < n; j++) {
+      Psym[i][j] = Math.max((P[i][j] + P[j][i]) / (2 * n), 1e-12);
+    }
+  }
+  
+  return Psym;
 }
 
 function renderDiagram() {

@@ -148,7 +148,17 @@
               
               <div id="view-diagram" class="view-content" style="display: none;">
                 <div class="diagram-config">
-                  <button id="btn-run-clustering" class="btn btn-primary btn-sm" data-testid="button-run-clustering">Run Clustering</button>
+                  <div class="diagram-config-row">
+                    <label>Perplexity:</label>
+                    <input type="number" id="tsne-perplexity" class="pivot-select" value="30" min="5" max="100" style="width: 80px;" data-testid="input-tsne-perplexity">
+                    <span class="tsne-hint">5-50 typical</span>
+                  </div>
+                  <div class="diagram-config-row">
+                    <label>Iterations:</label>
+                    <input type="number" id="tsne-iterations" class="pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;" data-testid="input-tsne-iterations">
+                  </div>
+                  <button id="btn-run-clustering" class="btn btn-primary btn-sm" data-testid="button-run-clustering">Run t-SNE</button>
+                  <span id="tsne-progress" class="tsne-progress" style="display: none;">Calculating...</span>
                 </div>
                 <div id="diagram-container" class="diagram-container">
                   <canvas id="diagram-canvas" width="800" height="600"></canvas>
