@@ -1112,6 +1112,40 @@ function invertSelection(pageOnly = false) {
   renderTable();
 }
 
+function removeSelectedRows() {
+  if (state.selectedRows.size === 0) return;
+  
+  if (!confirm(`Remove ${state.selectedRows.size} selected rows from the data?`)) return;
+  
+  // Get sorted indices to remove (descending to preserve indices)
+  const indicesToRemove = [...state.selectedRows].sort((a, b) => b - a);
+  
+  indicesToRemove.forEach(idx => {
+    state.relation.items.splice(idx, 1);
+  });
+  
+  state.selectedRows.clear();
+  state.currentPage = 1;
+  renderTable();
+  updateJsonOutput();
+}
+
+function removeUnselectedRows() {
+  if (state.selectedRows.size === 0) return;
+  
+  const unselectedCount = state.sortedIndices.length - state.selectedRows.size;
+  if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${state.selectedRows.size} selected rows will remain.`)) return;
+  
+  // Keep only selected rows (create new array with selected items)
+  const selectedIndices = [...state.selectedRows].sort((a, b) => a - b);
+  state.relation.items = selectedIndices.map(idx => state.relation.items[idx]);
+  
+  state.selectedRows.clear();
+  state.currentPage = 1;
+  renderTable();
+  updateJsonOutput();
+}
+
 // Render functions
 function createInputForType(type, value, rowIdx, colIdx, editable) {
   const wrapper = document.createElement('div');
@@ -1360,8 +1394,13 @@ function renderPagination() {
       <button class="btn-page" id="btn-last" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
     </div>
     <div class="pagination-actions">
-      <button class="btn btn-sm btn-outline" id="btn-invert-page">Invert Page</button>
-      <button class="btn btn-sm btn-outline" id="btn-invert-all">Invert All</button>
+      <select id="selection-actions" class="selection-actions-select">
+        <option value="" disabled selected>Selection Actions...</option>
+        <option value="invert-page">↔ Invert Page</option>
+        <option value="invert-all">↔ Invert All</option>
+        <option value="remove-selected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Selected (${selectedRecords})</option>
+        <option value="remove-unselected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Unselected (${filteredRecords - selectedRecords})</option>
+      </select>
     </div>
   `;
   
@@ -1404,8 +1443,25 @@ function renderPagination() {
     }
   });
   
-  document.getElementById('btn-invert-page').addEventListener('click', () => invertSelection(true));
-  document.getElementById('btn-invert-all').addEventListener('click', () => invertSelection(false));
+  document.getElementById('selection-actions').addEventListener('change', (e) => {
+    const action = e.target.value;
+    e.target.value = ''; // Reset to placeholder
+    
+    switch (action) {
+      case 'invert-page':
+        invertSelection(true);
+        break;
+      case 'invert-all':
+        invertSelection(false);
+        break;
+      case 'remove-selected':
+        removeSelectedRows();
+        break;
+      case 'remove-unselected':
+        removeUnselectedRows();
+        break;
+    }
+  });
   
   // Row operations buttons, nested relation buttons, and boolean checkboxes - single click handler
   document.getElementById('relation-table-container').addEventListener('click', (e) => {
