@@ -463,6 +463,71 @@ function generateFrequencyTableHTML(stats, colName, order = 'desc') {
   return html;
 }
 
+// Boolean Histogram SVG Generator
+function generateBooleanHistogramSVG(stats) {
+  if (!stats.freqTableDesc || stats.freqTableDesc.length === 0) return '';
+  
+  const data = stats.freqTableDesc;
+  const maxCount = Math.max(...data.map(d => d.count));
+  
+  const barHeight = 28;
+  const labelWidth = 60;
+  const barMaxWidth = 150;
+  const padding = { top: 10, bottom: 10, left: 10, right: 50 };
+  const width = labelWidth + barMaxWidth + padding.left + padding.right;
+  const height = data.length * barHeight + padding.top + padding.bottom;
+  
+  let svg = `<svg width="${width}" height="${height}" class="histogram-svg">`;
+  
+  data.forEach((item, i) => {
+    const y = padding.top + i * barHeight;
+    const barWidth = (item.count / maxCount) * barMaxWidth;
+    const label = item.key === 'true' ? '✓ True' : '✗ False';
+    const color = item.key === 'true' ? 'rgba(34, 197, 94, 0.6)' : 'rgba(239, 68, 68, 0.6)';
+    
+    svg += `<rect x="${padding.left + labelWidth}" y="${y + 4}" width="${barWidth}" height="${barHeight - 8}" fill="${color}" rx="3"/>`;
+    svg += `<text x="${padding.left + labelWidth - 5}" y="${y + barHeight/2 + 4}" text-anchor="end" font-size="12" fill="#333">${label}</text>`;
+    svg += `<text x="${padding.left + labelWidth + barWidth + 4}" y="${y + barHeight/2 + 4}" text-anchor="start" font-size="11" fill="#666">${item.count} (${item.percent}%)</text>`;
+  });
+  
+  svg += `</svg>`;
+  
+  return `<div class="histogram-container">${svg}</div>`;
+}
+
+// Boolean Frequency Table HTML Generator
+function generateBooleanFrequencyTableHTML(stats, order = 'desc') {
+  const data = order === 'desc' ? stats.freqTableDesc : stats.freqTableAsc;
+  
+  if (!data || data.length === 0) return '';
+  
+  let html = `<table class="freq-table">
+    <thead>
+      <tr>
+        <th>Value</th>
+        <th>n</th>
+        <th>%</th>
+        <th>Cum n</th>
+        <th>Cum %</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  
+  data.forEach(item => {
+    const label = item.key === 'true' ? '✓ True' : '✗ False';
+    html += `<tr>
+      <td>${label}</td>
+      <td>${item.count}</td>
+      <td>${item.percent}%</td>
+      <td>${item.cumCount}</td>
+      <td>${item.cumPercent}%</td>
+    </tr>`;
+  });
+  
+  html += `</tbody></table>`;
+  return html;
+}
+
 // Box Plot SVG Generator
 function generateBoxPlotSVG(stats) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
@@ -993,10 +1058,82 @@ function calculateStatistics(colIdx) {
     const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
     stats.topValues = sorted.slice(0, 5);
   } else if (type === 'boolean') {
-    const trueCount = values.filter(v => v === true).length;
+    // Treat boolean as categorical data
+    const freq = {};
+    values.forEach(v => {
+      const key = v === true ? 'true' : 'false';
+      freq[key] = (freq[key] || 0) + 1;
+    });
+    
+    const trueCount = freq['true'] || 0;
+    const falseCount = freq['false'] || 0;
     stats.trueCount = trueCount;
-    stats.falseCount = nonNull - trueCount;
+    stats.falseCount = falseCount;
     stats.truePercent = ((trueCount / nonNull) * 100).toFixed(1);
+    stats.falsePercent = ((falseCount / nonNull) * 100).toFixed(1);
+    
+    const k = Object.keys(freq).length;
+    stats.categoryCount = k;
+    
+    const n = nonNull;
+    const sortedDesc = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+    const sortedAsc = Object.entries(freq).sort((a, b) => a[1] - b[1]);
+    
+    let cumDesc = 0;
+    let cumAsc = 0;
+    
+    stats.freqTableDesc = sortedDesc.map(([key, count]) => {
+      cumDesc += count;
+      return {
+        key,
+        count,
+        percent: ((count / n) * 100).toFixed(2),
+        cumCount: cumDesc,
+        cumPercent: ((cumDesc / n) * 100).toFixed(2)
+      };
+    });
+    
+    stats.freqTableAsc = sortedAsc.map(([key, count]) => {
+      cumAsc += count;
+      return {
+        key,
+        count,
+        percent: ((count / n) * 100).toFixed(2),
+        cumCount: cumAsc,
+        cumPercent: ((cumAsc / n) * 100).toFixed(2)
+      };
+    });
+    
+    // Mode
+    const maxFreq = Math.max(...Object.values(freq));
+    stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq);
+    stats.modeCount = maxFreq;
+    stats.modePercent = ((maxFreq / n) * 100).toFixed(2);
+    
+    // Entropy
+    const probabilities = Object.values(freq).map(c => c / n);
+    stats.entropy = -probabilities.reduce((sum, p) => {
+      if (p > 0) return sum + p * Math.log2(p);
+      return sum;
+    }, 0);
+    stats.maxEntropy = Math.log2(k);
+    stats.normalizedEntropy = k > 1 ? (stats.entropy / stats.maxEntropy) : 0;
+    
+    // Gini-Simpson Index
+    stats.giniSimpson = 1 - probabilities.reduce((sum, p) => sum + p * p, 0);
+    
+    // Variation Ratio
+    stats.variationRatio = 1 - (maxFreq / n);
+    
+    // IQV
+    if (k > 1) {
+      const sumPSquared = probabilities.reduce((sum, p) => sum + p * p, 0);
+      stats.iqv = (k / (k - 1)) * (1 - sumPSquared);
+    } else {
+      stats.iqv = 0;
+    }
+    
+    stats.frequencies = freq;
   } else if (type === 'date' || type === 'datetime' || type === 'time') {
     // Convert to milliseconds for statistical calculations
     let nums;
@@ -2466,10 +2603,29 @@ function showStatisticsPanel(colIdx) {
       ${generateFrequencyTableHTML(stats, name, 'asc')}
     `;
   } else if (type === 'boolean') {
+    // Generate boolean histogram (similar to categorical)
+    statsHtml += generateBooleanHistogramSVG(stats);
+    
+    // Basic counts
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>True:</span><span>${stats.trueCount} (${stats.truePercent}%)</span></div>
-      <div class="stats-row"><span>False:</span><span>${stats.falseCount}</span></div>
+      <div class="stats-subtitle">Centrality</div>
+      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.join(', ') ?? '—'} (${stats.modePercent}%)</span></div>
+      <div class="stats-row"><span>Categories:</span><span>${stats.categoryCount}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Dispersion</div>
+      <div class="stats-row"><span>Entropy H(X):</span><span>${stats.entropy?.toFixed(4) ?? '—'} bits</span></div>
+      <div class="stats-row"><span>Max Entropy:</span><span>${stats.maxEntropy?.toFixed(4) ?? '—'} bits</span></div>
+      <div class="stats-row"><span>Normalized Entropy:</span><span>${stats.normalizedEntropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Gini-Simpson:</span><span>${stats.giniSimpson?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>IQV:</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Variation Ratio:</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Frequency Table (Desc)</div>
+      ${generateBooleanFrequencyTableHTML(stats, 'desc')}
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Frequency Table (Asc)</div>
+      ${generateBooleanFrequencyTableHTML(stats, 'asc')}
     `;
   } else if (type === 'string' || type === 'multilinestring') {
     statsHtml += `
