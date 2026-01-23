@@ -593,6 +593,137 @@ function generateBoxPlotSVG(stats) {
   return `<div class="boxplot-container">${svg}${legend}</div>`;
 }
 
+// Skewness visualization SVG - compares with normal distribution (skewness = 0)
+function generateSkewnessSVG(skewness) {
+  if (skewness === null || skewness === undefined) return '';
+  
+  const width = 160;
+  const height = 60;
+  const centerX = width / 2;
+  const baseY = height - 10;
+  
+  // Clamp skewness for display
+  const clampedSkew = Math.max(-3, Math.min(3, skewness));
+  
+  // Generate normal curve points
+  const normalPoints = [];
+  for (let x = 0; x <= width; x += 2) {
+    const t = (x - centerX) / 30;
+    const y = baseY - 35 * Math.exp(-t * t / 2);
+    normalPoints.push(`${x},${y}`);
+  }
+  
+  // Generate skewed curve points (using skew-normal approximation)
+  const skewedPoints = [];
+  for (let x = 0; x <= width; x += 2) {
+    const t = (x - centerX) / 30;
+    // Shift peak based on skewness
+    const shift = -clampedSkew * 0.3;
+    const adjustedT = t - shift;
+    // Asymmetric tails
+    const asymmetry = 1 + clampedSkew * adjustedT * 0.15;
+    const y = baseY - 35 * Math.exp(-adjustedT * adjustedT / 2) * Math.max(0.2, asymmetry);
+    skewedPoints.push(`${x},${y}`);
+  }
+  
+  let svg = `<svg width="${width}" height="${height}" class="shape-svg">`;
+  
+  // Baseline
+  svg += `<line x1="10" y1="${baseY}" x2="${width-10}" y2="${baseY}" stroke="#ddd" stroke-width="1"/>`;
+  
+  // Normal distribution (dashed gray)
+  svg += `<polyline points="${normalPoints.join(' ')}" fill="none" stroke="#aaa" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+  
+  // Skewed distribution (solid blue)
+  svg += `<polyline points="${skewedPoints.join(' ')}" fill="none" stroke="#4a90e2" stroke-width="2"/>`;
+  
+  // Center line
+  svg += `<line x1="${centerX}" y1="${baseY - 40}" x2="${centerX}" y2="${baseY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  
+  svg += `</svg>`;
+  
+  // Interpretation
+  let interpretation = 'Symmetric';
+  if (skewness > 0.5) interpretation = 'Right-skewed (positive)';
+  else if (skewness < -0.5) interpretation = 'Left-skewed (negative)';
+  
+  return `
+    <div class="shape-chart">
+      <div class="shape-chart-title">Skewness: ${skewness.toFixed(3)}</div>
+      ${svg}
+      <div class="shape-chart-legend">
+        <span class="legend-line legend-normal-line"></span> Normal (0)
+        <span class="legend-line legend-data-line"></span> Data
+      </div>
+      <div class="shape-interpretation">${interpretation}</div>
+    </div>
+  `;
+}
+
+// Kurtosis visualization SVG - compares with normal distribution (kurtosis = 3)
+function generateKurtosisSVG(kurtosis) {
+  if (kurtosis === null || kurtosis === undefined) return '';
+  
+  const width = 160;
+  const height = 60;
+  const centerX = width / 2;
+  const baseY = height - 10;
+  
+  // Excess kurtosis (normal = 0)
+  const excessKurtosis = kurtosis - 3;
+  const clampedKurt = Math.max(-3, Math.min(6, excessKurtosis));
+  
+  // Generate normal curve points (mesokurtic)
+  const normalPoints = [];
+  for (let x = 0; x <= width; x += 2) {
+    const t = (x - centerX) / 30;
+    const y = baseY - 35 * Math.exp(-t * t / 2);
+    normalPoints.push(`${x},${y}`);
+  }
+  
+  // Generate curve with different kurtosis
+  const kurtPoints = [];
+  for (let x = 0; x <= width; x += 2) {
+    const t = (x - centerX) / 30;
+    // Adjust peak height and tail weight based on kurtosis
+    const peakFactor = 1 + clampedKurt * 0.08;
+    const tailFactor = 1 + clampedKurt * 0.05;
+    const exponent = 2 / (1 + clampedKurt * 0.1);
+    const y = baseY - 35 * peakFactor * Math.exp(-Math.pow(Math.abs(t), exponent) * tailFactor / 2);
+    kurtPoints.push(`${x},${y}`);
+  }
+  
+  let svg = `<svg width="${width}" height="${height}" class="shape-svg">`;
+  
+  // Baseline
+  svg += `<line x1="10" y1="${baseY}" x2="${width-10}" y2="${baseY}" stroke="#ddd" stroke-width="1"/>`;
+  
+  // Normal distribution (dashed gray)
+  svg += `<polyline points="${normalPoints.join(' ')}" fill="none" stroke="#aaa" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+  
+  // Data distribution (solid blue)
+  svg += `<polyline points="${kurtPoints.join(' ')}" fill="none" stroke="#4a90e2" stroke-width="2"/>`;
+  
+  svg += `</svg>`;
+  
+  // Interpretation
+  let interpretation = 'Mesokurtic (normal)';
+  if (excessKurtosis > 1) interpretation = 'Leptokurtic (heavy tails)';
+  else if (excessKurtosis < -1) interpretation = 'Platykurtic (light tails)';
+  
+  return `
+    <div class="shape-chart">
+      <div class="shape-chart-title">Kurtosis: ${kurtosis.toFixed(3)} (excess: ${excessKurtosis.toFixed(3)})</div>
+      ${svg}
+      <div class="shape-chart-legend">
+        <span class="legend-line legend-normal-line"></span> Normal (3)
+        <span class="legend-line legend-data-line"></span> Data
+      </div>
+      <div class="shape-interpretation">${interpretation}</div>
+    </div>
+  `;
+}
+
 // Statistics functions
 function calculateStatistics(colIdx) {
   const values = state.relation.items
@@ -2087,8 +2218,11 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
       <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Skewness:</span><span>${stats.skewness?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Kurtosis:</span><span>${stats.kurtosis?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-subtitle">Distribution Shape</div>
+      <div class="shape-charts-row">
+        ${generateSkewnessSVG(stats.skewness)}
+        ${generateKurtosisSVG(stats.kurtosis)}
+      </div>
     `;
   } else if (type === 'select') {
     // Get mode display value
