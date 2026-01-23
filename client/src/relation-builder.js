@@ -851,6 +851,7 @@ function renderPagination() {
     <div class="pagination-size">
       <label>Per page:</label>
       <select id="page-size-select">
+        <option value="10" ${state.pageSize === 10 ? 'selected' : ''}>10</option>
         <option value="20" ${state.pageSize === 20 ? 'selected' : ''}>20</option>
         <option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50</option>
         <option value="100" ${state.pageSize === 100 ? 'selected' : ''}>100</option>
