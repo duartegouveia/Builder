@@ -1144,12 +1144,13 @@ function attachTableEventListeners() {
     }
   });
   
-  // Tri-state boolean checkboxes (cycle: true → false → null → true)
-  document.querySelectorAll('.bool-tristate').forEach(checkbox => {
-    checkbox.addEventListener('click', (e) => {
+  // Tri-state boolean checkboxes (cycle: true → false → null → true) - use event delegation
+  document.getElementById('relation-table-container').addEventListener('click', (e) => {
+    if (e.target.matches('.bool-tristate')) {
       e.preventDefault();
       e.stopPropagation();
       
+      const checkbox = e.target;
       const rowIdx = parseInt(checkbox.dataset.row);
       const colIdx = parseInt(checkbox.dataset.col);
       const currentValue = state.relation.items[rowIdx][colIdx];
@@ -1169,7 +1170,7 @@ function attachTableEventListeners() {
       
       // Update checkbox state immediately
       updateBoolCheckbox(checkbox, newValue);
-    });
+    }
   });
 }
 
