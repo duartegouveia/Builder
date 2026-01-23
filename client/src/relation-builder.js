@@ -1341,16 +1341,13 @@ function syncFooterColumnWidths(mainTable, footerTable) {
     footerTable.style.width = mainTable.offsetWidth + 'px';
   });
   
-  // Sync horizontal scroll
+  // Sync horizontal scroll (footer has overflow hidden, main controls scroll)
   const tableWrapper = mainTable.closest('.relation-table-wrapper');
   const footerWrapper = footerTable.closest('.relation-footer-wrapper');
   
   if (tableWrapper && footerWrapper) {
     tableWrapper.addEventListener('scroll', () => {
       footerWrapper.scrollLeft = tableWrapper.scrollLeft;
-    });
-    footerWrapper.addEventListener('scroll', () => {
-      tableWrapper.scrollLeft = footerWrapper.scrollLeft;
     });
   }
 }
@@ -1554,7 +1551,7 @@ function renderTable() {
     
     const td = document.createElement('td');
     td.className = 'relation-td-stats';
-    td.innerHTML = `<button class="btn-stats" data-col="${colIdx}">Σ Stats</button>`;
+    td.innerHTML = `<button class="btn-stats" data-col="${colIdx}" title="Statistics">Σ</button>`;
     footerRow.appendChild(td);
   });
   

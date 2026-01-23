@@ -1257,7 +1257,7 @@ input[type="checkbox"] {
 }
 
 .relation-footer-wrapper {
-  overflow-x: auto;
+  overflow-x: hidden;
   border-top: 2px solid var(--border);
   background: var(--slate-50);
 }
@@ -2033,20 +2033,24 @@ input[type="number"] {
 /* Footer Stats Button */
 .relation-td-stats {
   padding: var(--space-1);
+  text-align: center;
 }
 
 .btn-stats {
-  padding: 4px 8px;
-  font-size: 0.6875rem;
-  background: var(--slate-100);
-  border: 1px solid var(--border);
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  background: transparent;
+  border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  white-space: nowrap;
+  color: var(--muted-foreground);
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s;
 }
 
 .btn-stats:hover {
-  background: var(--slate-200);
+  opacity: 1;
+  color: var(--primary);
 }
 
 /* Format Icon */
