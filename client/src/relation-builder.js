@@ -1249,6 +1249,61 @@ function calculateStatistics(colIdx) {
       const m4 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 4), 0) / nums.length;
       stats.kurtosis = (m4 / Math.pow(stats.variance, 2));
     }
+  } else if (type === 'relation') {
+    // Statistics based on row counts in nested relations
+    const rowCounts = values.map(v => v?.items?.length || 0);
+    
+    if (rowCounts.length > 0) {
+      rowCounts.sort((a, b) => a - b);
+      
+      stats.allNumericValues = rowCounts;
+      stats.min = Math.min(...rowCounts);
+      stats.max = Math.max(...rowCounts);
+      stats.sum = rowCounts.reduce((a, b) => a + b, 0);
+      stats.mean = stats.sum / rowCounts.length;
+      stats.range = stats.max - stats.min;
+      
+      // Median
+      const mid = Math.floor(rowCounts.length / 2);
+      stats.median = rowCounts.length % 2 ? rowCounts[mid] : (rowCounts[mid - 1] + rowCounts[mid]) / 2;
+      
+      // Mode
+      const freq = {};
+      rowCounts.forEach(v => freq[v] = (freq[v] || 0) + 1);
+      const maxFreq = Math.max(...Object.values(freq));
+      stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq).map(Number);
+      
+      // Variance and Std Dev
+      stats.variance = rowCounts.reduce((sum, n) => sum + Math.pow(n - stats.mean, 2), 0) / rowCounts.length;
+      stats.stdDev = Math.sqrt(stats.variance);
+      
+      // Quartiles
+      const q1Idx = Math.floor(rowCounts.length * 0.25);
+      const q3Idx = Math.floor(rowCounts.length * 0.75);
+      stats.q1 = rowCounts[q1Idx];
+      stats.q3 = rowCounts[q3Idx];
+      stats.iqr = stats.q3 - stats.q1;
+      
+      // Whiskers for box plot
+      const whiskerLow = stats.q1 - 1.5 * stats.iqr;
+      const whiskerHigh = stats.q3 + 1.5 * stats.iqr;
+      stats.whiskerLow = Math.max(whiskerLow, stats.min);
+      stats.whiskerHigh = Math.min(whiskerHigh, stats.max);
+      
+      // Outliers
+      stats.outliers = rowCounts.filter(n => n < whiskerLow || n > whiskerHigh);
+      const farLow = stats.q1 - 3 * stats.iqr;
+      const farHigh = stats.q3 + 3 * stats.iqr;
+      stats.farOutliers = rowCounts.filter(n => n < farLow || n > farHigh);
+      
+      // Skewness
+      const m3 = rowCounts.reduce((sum, n) => sum + Math.pow(n - stats.mean, 3), 0) / rowCounts.length;
+      stats.skewness = stats.stdDev > 0 ? m3 / Math.pow(stats.stdDev, 3) : 0;
+      
+      // Kurtosis
+      const m4 = rowCounts.reduce((sum, n) => sum + Math.pow(n - stats.mean, 4), 0) / rowCounts.length;
+      stats.kurtosis = stats.variance > 0 ? (m4 / Math.pow(stats.variance, 2)) : 0;
+    }
   }
   
   return stats;
@@ -1467,6 +1522,18 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
         span.textContent = '—';
       }
       wrapper.appendChild(span);
+      return wrapper;
+    }
+    
+    if (type === 'relation') {
+      const btn = document.createElement('button');
+      btn.className = 'relation-cell-btn';
+      const count = value?.items?.length || 0;
+      btn.innerHTML = `📋 ${count}`;
+      btn.title = `View nested relation (${count} rows)`;
+      btn.dataset.row = rowIdx;
+      btn.dataset.col = colIdx;
+      wrapper.appendChild(btn);
       return wrapper;
     }
     
@@ -2654,6 +2721,37 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Std Dev:</span><span>${stats.stdDevFormatted ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
+      <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
+      <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Distribution Shape</div>
+      <div class="shape-charts-row">
+        ${generateSkewnessSVG(stats.skewness)}
+        ${generateKurtosisSVG(stats.kurtosis)}
+      </div>
+    `;
+  } else if (type === 'relation') {
+    // Statistics based on row counts in nested relations
+    statsHtml += generateBoxPlotSVG(stats);
+    statsHtml += `
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Row Count Statistics</div>
+      <div class="stats-row"><span>Min Rows:</span><span>${stats.min ?? '—'}</span></div>
+      <div class="stats-row"><span>Max Rows:</span><span>${stats.max ?? '—'}</span></div>
+      <div class="stats-row"><span>Range |max−min|:</span><span>${stats.range ?? '—'}</span></div>
+      <div class="stats-row"><span>Total Rows:</span><span>${stats.sum ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Mean:</span><span>${stats.mean?.toFixed(2) ?? '—'}</span></div>
+      <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
+      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.join(', ') ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Std Dev σ:</span><span>${stats.stdDev?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Variance σ²:</span><span>${stats.variance?.toFixed(4) ?? '—'}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
       <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
