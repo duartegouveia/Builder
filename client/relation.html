@@ -71,19 +71,92 @@
         <section class="space-y-4">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Relation Table</h3>
-              <button id="btn-ai-panel" class="btn btn-outline btn-sm gap-2" data-testid="button-ai-panel" style="display: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-                AI Assistant
-              </button>
+              <h3 class="card-title">Relation Data</h3>
             </div>
             <div class="card-content">
-              <div id="ai-panel" class="ai-panel" style="display: none;">
-                <div class="ai-panel-header">
-                  <span>AI Data Assistant</span>
-                  <button id="btn-close-ai" class="btn-close-dialog">✕</button>
+              <div id="view-tabs" class="view-tabs" style="display: none;">
+                <button class="view-tab active" data-view="table" data-testid="tab-table">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+                  Table
+                </button>
+                <button class="view-tab" data-view="cards" data-testid="tab-cards">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                  Cards
+                </button>
+                <button class="view-tab" data-view="pivot" data-testid="tab-pivot">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v18h18V3Z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                  Pivot
+                </button>
+                <button class="view-tab" data-view="correlation" data-testid="tab-correlation">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                  Correlation
+                </button>
+                <button class="view-tab" data-view="diagram" data-testid="tab-diagram">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" x2="12" y1="8" y2="8"/><line x1="3.95" x2="8.54" y1="6.06" y2="14"/><line x1="10.88" x2="15.46" y1="21.94" y2="14"/></svg>
+                  Diagram
+                </button>
+                <button class="view-tab" data-view="ai" data-testid="tab-ai">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                  AI
+                </button>
+              </div>
+              
+              <div id="view-table" class="view-content">
+                <div id="relation-table-container" class="relation-table-container">
+                  <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
                 </div>
-                <div class="ai-panel-content">
+              </div>
+              
+              <div id="view-cards" class="view-content" style="display: none;">
+                <div id="cards-container" class="cards-container"></div>
+              </div>
+              
+              <div id="view-pivot" class="view-content" style="display: none;">
+                <div class="pivot-config">
+                  <div class="pivot-config-row">
+                    <label>Rows:</label>
+                    <select id="pivot-rows" class="pivot-select" data-testid="select-pivot-rows"></select>
+                  </div>
+                  <div class="pivot-config-row">
+                    <label>Columns:</label>
+                    <select id="pivot-cols" class="pivot-select" data-testid="select-pivot-cols"></select>
+                  </div>
+                  <div class="pivot-config-row">
+                    <label>Values:</label>
+                    <div id="pivot-values-config" class="pivot-values-config"></div>
+                    <button id="btn-add-pivot-value" class="btn btn-outline btn-sm">+ Add</button>
+                  </div>
+                  <button id="btn-generate-pivot" class="btn btn-primary btn-sm" data-testid="button-generate-pivot">Generate Pivot</button>
+                </div>
+                <div id="pivot-table-container" class="pivot-table-container"></div>
+              </div>
+              
+              <div id="view-correlation" class="view-content" style="display: none;">
+                <div class="correlation-config">
+                  <div class="correlation-config-row">
+                    <label>Column X:</label>
+                    <select id="corr-col-x" class="pivot-select" data-testid="select-corr-x"></select>
+                  </div>
+                  <div class="correlation-config-row">
+                    <label>Column Y:</label>
+                    <select id="corr-col-y" class="pivot-select" data-testid="select-corr-y"></select>
+                  </div>
+                  <button id="btn-calculate-corr" class="btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
+                </div>
+                <div id="correlation-result" class="correlation-result"></div>
+              </div>
+              
+              <div id="view-diagram" class="view-content" style="display: none;">
+                <div class="diagram-config">
+                  <button id="btn-run-clustering" class="btn btn-primary btn-sm" data-testid="button-run-clustering">Run Clustering</button>
+                </div>
+                <div id="diagram-container" class="diagram-container">
+                  <canvas id="diagram-canvas" width="800" height="600"></canvas>
+                </div>
+              </div>
+              
+              <div id="view-ai" class="view-content" style="display: none;">
+                <div class="ai-panel-inline">
                   <div id="ai-response" class="ai-response"></div>
                   <div class="ai-input-row">
                     <input type="text" id="ai-question" class="ai-question-input" placeholder="Ask a question about your data..." data-testid="input-ai-question">
@@ -93,9 +166,7 @@
                   </div>
                 </div>
               </div>
-              <div id="relation-table-container" class="relation-table-container">
-                <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
-              </div>
+              
             </div>
           </div>
         </section>

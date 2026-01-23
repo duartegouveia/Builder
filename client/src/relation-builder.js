@@ -2,6 +2,14 @@ import './styles.css';
 
 const COLUMN_TYPES = ['boolean', 'string', 'multilinestring', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
 
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  const str = String(text);
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // State management
 let state = {
   relation: null,
@@ -10,9 +18,16 @@ let state = {
   options: {}, // {columnName: {key: htmlValue}}
   editable: false,
   
+  // Current view
+  currentView: 'table', // 'table', 'cards', 'pivot', 'correlation', 'diagram', 'ai'
+  
   // Pagination
   pageSize: 10,
   currentPage: 1,
+  
+  // Cards view pagination
+  cardsPageSize: 12, // Default: 4 cards per row * 3 rows
+  cardsCurrentPage: 1,
   
   // Selection
   selectedRows: new Set(),
@@ -34,6 +49,16 @@ let state = {
   
   // Column selection (for multi-column operations)
   selectedColumns: new Set(),
+  
+  // Pivot table config
+  pivotConfig: {
+    rowColumn: null,
+    colColumn: null,
+    values: [] // [{column: idx, aggregation: 'count'|'pctTotal'|'pctRow'|'pctCol'}]
+  },
+  
+  // Diagram/Clustering
+  diagramNodes: [],
   
   // Computed
   filteredIndices: [],
@@ -3511,13 +3536,766 @@ function applyAIFilter(conditions) {
   showToast('AI filter applied');
 }
 
+function switchView(viewName) {
+  state.currentView = viewName;
+  
+  // Update tab states
+  document.querySelectorAll('.view-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.view === viewName);
+  });
+  
+  // Show/hide view content
+  document.querySelectorAll('.view-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  document.getElementById('view-' + viewName).style.display = 'block';
+  
+  // Render specific view content
+  if (viewName === 'cards') {
+    renderCardsView();
+  } else if (viewName === 'pivot') {
+    initPivotConfig();
+  } else if (viewName === 'correlation') {
+    initCorrelationConfig();
+  } else if (viewName === 'diagram') {
+    // Diagram will be rendered on button click
+  } else if (viewName === 'ai') {
+    // AI view is always ready
+  }
+}
+
+let cardsResizeObserver = null;
+
+function renderCardsView() {
+  if (!state.relation) return;
+  
+  const container = document.getElementById('cards-container');
+  const indices = state.sortedIndices;
+  
+  // Setup resize observer if not already
+  if (!cardsResizeObserver) {
+    cardsResizeObserver = new ResizeObserver(() => {
+      if (state.currentView === 'cards') {
+        renderCardsView();
+      }
+    });
+    cardsResizeObserver.observe(container.parentElement);
+  }
+  
+  // Calculate cards per row based on container width
+  const containerWidth = container.parentElement.offsetWidth || 900;
+  const cardMinWidth = 280;
+  const cardsPerRow = Math.max(1, Math.floor(containerWidth / cardMinWidth));
+  
+  // Calculate page sizes (3, 6, 9, 12 rows of cards)
+  const pageSizeOptions = [3, 6, 9, 12].map(rows => rows * cardsPerRow);
+  state.cardsPageSize = pageSizeOptions.find(s => s >= state.cardsPageSize) || pageSizeOptions[0];
+  
+  const totalItems = indices.length;
+  const totalPages = Math.ceil(totalItems / state.cardsPageSize);
+  const startIdx = (state.cardsCurrentPage - 1) * state.cardsPageSize;
+  const endIdx = Math.min(startIdx + state.cardsPageSize, totalItems);
+  const pageIndices = indices.slice(startIdx, endIdx);
+  
+  let html = '<div class="cards-grid" style="display: grid; grid-template-columns: repeat(' + cardsPerRow + ', 1fr); gap: 16px;">';
+  
+  pageIndices.forEach((rowIdx, i) => {
+    const row = state.relation.items[rowIdx];
+    const isSelected = state.selectedRows.has(rowIdx);
+    
+    html += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '">';
+    html += '<div class="data-card-header">';
+    html += '<input type="checkbox" class="data-card-checkbox" ' + (isSelected ? 'checked' : '') + ' data-row-idx="' + rowIdx + '">';
+    html += '<span class="data-card-id">#' + (rowIdx + 1) + '</span>';
+    html += '</div>';
+    
+    state.columnNames.forEach((colName, colIdx) => {
+      const value = row[colIdx];
+      const type = state.columnTypes[colIdx];
+      let displayValue = formatCellValue(value, type, colIdx);
+      const fullValue = value !== null && value !== undefined ? String(value) : '';
+      
+      html += '<div class="data-card-field">';
+      html += '<div class="data-card-label">' + escapeHtml(colName) + '</div>';
+      html += '<div class="data-card-value" title="' + escapeHtml(fullValue) + '">' + displayValue + '</div>';
+      html += '</div>';
+    });
+    
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  
+  // Pagination for cards
+  html += '<div class="cards-pagination">';
+  html += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
+  html += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
+  html += '<span>Page ' + state.cardsCurrentPage + ' of ' + totalPages + ' (' + totalItems + ' items)</span>';
+  html += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
+  html += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
+  html += '<select class="cards-page-size">';
+  pageSizeOptions.forEach(size => {
+    html += '<option value="' + size + '" ' + (state.cardsPageSize === size ? 'selected' : '') + '>' + size + ' cards</option>';
+  });
+  html += '</select>';
+  html += '</div>';
+  
+  container.innerHTML = html;
+  
+  // Event listeners for cards
+  container.querySelectorAll('.data-card-checkbox').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.dataset.rowIdx);
+      if (e.target.checked) {
+        state.selectedRows.add(idx);
+      } else {
+        state.selectedRows.delete(idx);
+      }
+      e.target.closest('.data-card').classList.toggle('selected', e.target.checked);
+    });
+  });
+  
+  container.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const action = e.target.dataset.action;
+      if (action === 'cards-first') state.cardsCurrentPage = 1;
+      else if (action === 'cards-prev') state.cardsCurrentPage = Math.max(1, state.cardsCurrentPage - 1);
+      else if (action === 'cards-next') state.cardsCurrentPage = Math.min(totalPages, state.cardsCurrentPage + 1);
+      else if (action === 'cards-last') state.cardsCurrentPage = totalPages;
+      renderCardsView();
+    });
+  });
+  
+  container.querySelector('.cards-page-size')?.addEventListener('change', (e) => {
+    state.cardsPageSize = parseInt(e.target.value);
+    state.cardsCurrentPage = 1;
+    renderCardsView();
+  });
+}
+
+function getCategoricalOrNumericColumns() {
+  const cols = [];
+  state.columnNames.forEach((name, idx) => {
+    const type = state.columnTypes[idx];
+    if (['boolean', 'string', 'select', 'int', 'float', 'date', 'datetime', 'time'].includes(type)) {
+      cols.push({ idx, name, type });
+    }
+  });
+  return cols;
+}
+
+function initPivotConfig() {
+  const cols = getCategoricalOrNumericColumns();
+  
+  const rowSelect = document.getElementById('pivot-rows');
+  const colSelect = document.getElementById('pivot-cols');
+  
+  let options = '<option value="">Select column...</option>';
+  cols.forEach(c => {
+    options += '<option value="' + c.idx + '">' + escapeHtml(c.name) + ' (' + c.type + ')</option>';
+  });
+  
+  rowSelect.innerHTML = options;
+  colSelect.innerHTML = options;
+  
+  // Initialize values config
+  renderPivotValuesConfig();
+}
+
+function renderPivotValuesConfig() {
+  const container = document.getElementById('pivot-values-config');
+  const cols = getCategoricalOrNumericColumns();
+  
+  let html = '';
+  state.pivotConfig.values.forEach((v, i) => {
+    const colName = v.column !== null ? state.columnNames[v.column] : '';
+    html += '<div class="pivot-value-item">';
+    html += '<select class="pivot-value-col" data-idx="' + i + '">';
+    html += '<option value="">Column...</option>';
+    cols.forEach(c => {
+      html += '<option value="' + c.idx + '" ' + (v.column === c.idx ? 'selected' : '') + '>' + escapeHtml(c.name) + '</option>';
+    });
+    html += '</select>';
+    html += '<select class="pivot-value-agg" data-idx="' + i + '">';
+    html += '<option value="count" ' + (v.aggregation === 'count' ? 'selected' : '') + '>Count</option>';
+    html += '<option value="pctTotal" ' + (v.aggregation === 'pctTotal' ? 'selected' : '') + '>% Total</option>';
+    html += '<option value="pctRow" ' + (v.aggregation === 'pctRow' ? 'selected' : '') + '>% Row</option>';
+    html += '<option value="pctCol" ' + (v.aggregation === 'pctCol' ? 'selected' : '') + '>% Col</option>';
+    html += '</select>';
+    html += '<button data-remove-idx="' + i + '">×</button>';
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+  
+  // Event listeners
+  container.querySelectorAll('.pivot-value-col').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      state.pivotConfig.values[idx].column = e.target.value ? parseInt(e.target.value) : null;
+    });
+  });
+  
+  container.querySelectorAll('.pivot-value-agg').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      state.pivotConfig.values[idx].aggregation = e.target.value;
+    });
+  });
+  
+  container.querySelectorAll('[data-remove-idx]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.removeIdx);
+      state.pivotConfig.values.splice(idx, 1);
+      renderPivotValuesConfig();
+    });
+  });
+}
+
+function generatePivotTable() {
+  const rowColIdx = document.getElementById('pivot-rows').value;
+  const colColIdx = document.getElementById('pivot-cols').value;
+  
+  if (!rowColIdx || !colColIdx) {
+    alert('Please select both row and column dimensions');
+    return;
+  }
+  
+  const rowIdx = parseInt(rowColIdx);
+  const colIdx = parseInt(colColIdx);
+  
+  if (rowIdx === colIdx) {
+    alert('Row and column dimensions must be different');
+    return;
+  }
+  
+  // Get aggregation configs (default to count if none selected)
+  const aggregations = state.pivotConfig.values.length > 0 ? state.pivotConfig.values : [{ column: null, aggregation: 'count' }];
+  
+  // Get unique values for rows and columns
+  const rowValues = new Set();
+  const colValues = new Set();
+  
+  state.sortedIndices.forEach(i => {
+    const row = state.relation.items[i];
+    if (row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
+    if (row[colIdx] !== null) colValues.add(String(row[colIdx]));
+  });
+  
+  const rowValuesArr = Array.from(rowValues).sort();
+  const colValuesArr = Array.from(colValues).sort();
+  
+  // Build pivot data for each aggregation
+  const pivotData = {}; // { aggIdx: { rowVal: { colVal: count } } }
+  let grandTotal = 0;
+  const rowTotals = {};
+  const colTotals = {};
+  
+  aggregations.forEach((_, aggIdx) => {
+    pivotData[aggIdx] = {};
+    rowValuesArr.forEach(rv => {
+      pivotData[aggIdx][rv] = {};
+      colValuesArr.forEach(cv => {
+        pivotData[aggIdx][rv][cv] = 0;
+      });
+    });
+  });
+  
+  rowValuesArr.forEach(rv => {
+    rowTotals[rv] = 0;
+  });
+  colValuesArr.forEach(cv => {
+    colTotals[cv] = 0;
+  });
+  
+  state.sortedIndices.forEach(i => {
+    const row = state.relation.items[i];
+    const rv = row[rowIdx] !== null ? String(row[rowIdx]) : null;
+    const cv = row[colIdx] !== null ? String(row[colIdx]) : null;
+    
+    if (rv !== null && cv !== null) {
+      aggregations.forEach((_, aggIdx) => {
+        pivotData[aggIdx][rv][cv]++;
+      });
+      rowTotals[rv]++;
+      colTotals[cv]++;
+      grandTotal++;
+    }
+  });
+  
+  // Helper to format value based on aggregation type
+  function formatValue(count, aggType, rowVal, colVal) {
+    if (aggType === 'count') return count;
+    if (aggType === 'pctTotal') return grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%';
+    if (aggType === 'pctRow') return rowTotals[rowVal] > 0 ? (count / rowTotals[rowVal] * 100).toFixed(1) + '%' : '0%';
+    if (aggType === 'pctCol') return colTotals[colVal] > 0 ? (count / colTotals[colVal] * 100).toFixed(1) + '%' : '0%';
+    return count;
+  }
+  
+  // Render pivot table
+  let html = '<table class="pivot-table">';
+  
+  // Header row with column values
+  html += '<thead><tr>';
+  html += '<th class="pivot-row-header" rowspan="2">' + escapeHtml(state.columnNames[rowIdx]) + ' \\ ' + escapeHtml(state.columnNames[colIdx]) + '</th>';
+  colValuesArr.forEach(cv => {
+    html += '<th colspan="' + aggregations.length + '">' + escapeHtml(cv) + '</th>';
+  });
+  html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
+  html += '</tr>';
+  
+  // Sub-header with aggregation labels
+  html += '<tr>';
+  for (let c = 0; c <= colValuesArr.length; c++) {
+    aggregations.forEach(agg => {
+      const label = agg.aggregation === 'count' ? 'Count' : 
+                    agg.aggregation === 'pctTotal' ? '%Tot' : 
+                    agg.aggregation === 'pctRow' ? '%Row' : '%Col';
+      html += '<th style="font-size: 0.75rem; font-weight: normal;">' + label + '</th>';
+    });
+  }
+  html += '</tr></thead>';
+  
+  html += '<tbody>';
+  
+  rowValuesArr.forEach(rv => {
+    html += '<tr>';
+    html += '<td class="pivot-row-header">' + escapeHtml(rv) + '</td>';
+    colValuesArr.forEach(cv => {
+      aggregations.forEach((agg, aggIdx) => {
+        const count = pivotData[aggIdx][rv][cv];
+        const displayVal = formatValue(count, agg.aggregation, rv, cv);
+        html += '<td>' + displayVal + '</td>';
+      });
+    });
+    // Row totals
+    aggregations.forEach(agg => {
+      const count = rowTotals[rv];
+      const displayVal = agg.aggregation === 'count' ? count : 
+                         agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                         agg.aggregation === 'pctRow' ? '100%' :
+                         (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%');
+      html += '<td class="pivot-total">' + displayVal + '</td>';
+    });
+    html += '</tr>';
+  });
+  
+  // Total row
+  html += '<tr class="pivot-total">';
+  html += '<td class="pivot-row-header pivot-total">Total</td>';
+  colValuesArr.forEach(cv => {
+    aggregations.forEach(agg => {
+      const count = colTotals[cv];
+      const displayVal = agg.aggregation === 'count' ? count :
+                         agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                         agg.aggregation === 'pctRow' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                         '100%';
+      html += '<td>' + displayVal + '</td>';
+    });
+  });
+  // Grand total
+  aggregations.forEach(agg => {
+    const displayVal = agg.aggregation === 'count' ? grandTotal : '100%';
+    html += '<td>' + displayVal + '</td>';
+  });
+  html += '</tr>';
+  
+  html += '</tbody></table>';
+  
+  document.getElementById('pivot-table-container').innerHTML = html;
+}
+
+function initCorrelationConfig() {
+  const cols = getCategoricalOrNumericColumns();
+  
+  const xSelect = document.getElementById('corr-col-x');
+  const ySelect = document.getElementById('corr-col-y');
+  
+  let options = '<option value="">Select column...</option>';
+  cols.forEach(c => {
+    const typeLabel = ['int', 'float'].includes(c.type) ? 'numeric' : 
+                      ['boolean', 'string', 'select'].includes(c.type) ? 'categorical' : 'temporal';
+    options += '<option value="' + c.idx + '">' + escapeHtml(c.name) + ' (' + typeLabel + ')</option>';
+  });
+  
+  xSelect.innerHTML = options;
+  ySelect.innerHTML = options;
+}
+
+function calculateCorrelation() {
+  const xColIdx = document.getElementById('corr-col-x').value;
+  const yColIdx = document.getElementById('corr-col-y').value;
+  
+  if (!xColIdx || !yColIdx) {
+    alert('Please select both X and Y columns');
+    return;
+  }
+  
+  const xIdx = parseInt(xColIdx);
+  const yIdx = parseInt(yColIdx);
+  const xType = state.columnTypes[xIdx];
+  const yType = state.columnTypes[yIdx];
+  
+  const isNumericX = ['int', 'float'].includes(xType);
+  const isNumericY = ['int', 'float'].includes(yType);
+  const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
+  const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
+  
+  // Convert temporal to numeric (timestamp)
+  function toNumeric(val, type) {
+    if (val === null) return null;
+    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
+    if (['date', 'datetime'].includes(type)) {
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    if (type === 'time') {
+      const parts = String(val).split(':');
+      if (parts.length >= 2) {
+        return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + (parseInt(parts[2]) || 0);
+      }
+      return null;
+    }
+    return null;
+  }
+  
+  // Both numeric/temporal: use Pearson
+  if ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) {
+    const pairs = [];
+    state.sortedIndices.forEach(i => {
+      const row = state.relation.items[i];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) {
+        pairs.push({ x, y });
+      }
+    });
+    
+    if (pairs.length < 2) {
+      document.getElementById('correlation-result').innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
+      return;
+    }
+    
+    renderPearsonCorrelation(pairs, xIdx, yIdx);
+  } else {
+    // Categorical: use Cramér's V
+    const contingency = {};
+    const xCounts = {};
+    const yCounts = {};
+    let total = 0;
+    
+    state.sortedIndices.forEach(i => {
+      const row = state.relation.items[i];
+      const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
+      const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
+      
+      if (xVal !== null && yVal !== null) {
+        if (!contingency[xVal]) contingency[xVal] = {};
+        if (!contingency[xVal][yVal]) contingency[xVal][yVal] = 0;
+        contingency[xVal][yVal]++;
+        
+        xCounts[xVal] = (xCounts[xVal] || 0) + 1;
+        yCounts[yVal] = (yCounts[yVal] || 0) + 1;
+        total++;
+      }
+    });
+    
+    if (total < 2) {
+      document.getElementById('correlation-result').innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
+      return;
+    }
+    
+    // Calculate Chi-squared
+    let chiSquared = 0;
+    const xKeys = Object.keys(xCounts);
+    const yKeys = Object.keys(yCounts);
+    
+    xKeys.forEach(xVal => {
+      yKeys.forEach(yVal => {
+        const observed = (contingency[xVal] && contingency[xVal][yVal]) || 0;
+        const expected = (xCounts[xVal] * yCounts[yVal]) / total;
+        if (expected > 0) {
+          chiSquared += Math.pow(observed - expected, 2) / expected;
+        }
+      });
+    });
+    
+    // Calculate Cramér's V
+    const k = Math.min(xKeys.length, yKeys.length);
+    const cramersV = k > 1 ? Math.sqrt(chiSquared / (total * (k - 1))) : 0;
+    
+    renderCramersV(cramersV, total, xIdx, yIdx, xKeys.length, yKeys.length);
+  }
+}
+
+function renderPearsonCorrelation(pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  const sumX = pairs.reduce((s, p) => s + p.x, 0);
+  const sumY = pairs.reduce((s, p) => s + p.y, 0);
+  const sumXY = pairs.reduce((s, p) => s + p.x * p.y, 0);
+  const sumX2 = pairs.reduce((s, p) => s + p.x * p.x, 0);
+  const sumY2 = pairs.reduce((s, p) => s + p.y * p.y, 0);
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  
+  const r = denominator === 0 ? 0 : numerator / denominator;
+  
+  const absR = Math.abs(r);
+  let strength = 'No correlation';
+  if (absR >= 0.9) strength = 'Very strong';
+  else if (absR >= 0.7) strength = 'Strong';
+  else if (absR >= 0.5) strength = 'Moderate';
+  else if (absR >= 0.3) strength = 'Weak';
+  else if (absR >= 0.1) strength = 'Very weak';
+  
+  const colorClass = r > 0.1 ? 'correlation-positive' : r < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Pearson Correlation (r)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + r.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (r > 0 ? 'positive' : r < 0 ? 'negative' : '') + ' correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' pairs</div>';
+  
+  // SVG scatter plot
+  const width = 400;
+  const height = 300;
+  const padding = 40;
+  
+  const xMin = Math.min(...pairs.map(p => p.x));
+  const xMax = Math.max(...pairs.map(p => p.x));
+  const yMin = Math.min(...pairs.map(p => p.y));
+  const yMax = Math.max(...pairs.map(p => p.y));
+  
+  const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+  const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+  html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
+  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  
+  pairs.forEach(p => {
+    const cx = xScale(p.x);
+    const cy = yScale(p.y);
+    html += '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="#3b82f6" opacity="0.6"/>';
+  });
+  
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  const slope = numerator / (n * sumX2 - sumX * sumX || 1);
+  const intercept = meanY - slope * meanX;
+  
+  const lineX1 = xMin;
+  const lineY1 = slope * lineX1 + intercept;
+  const lineX2 = xMax;
+  const lineY2 = slope * lineX2 + intercept;
+  
+  html += '<line x1="' + xScale(lineX1) + '" y1="' + yScale(lineY1) + '" x2="' + xScale(lineX2) + '" y2="' + yScale(lineY2) + '" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"/>';
+  html += '</svg>';
+  html += '</div>';
+  
+  document.getElementById('correlation-result').innerHTML = html;
+}
+
+function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
+  let strength = 'No association';
+  if (v >= 0.5) strength = 'Strong';
+  else if (v >= 0.3) strength = 'Moderate';
+  else if (v >= 0.1) strength = 'Weak';
+  else if (v >= 0.05) strength = 'Very weak';
+  
+  const colorClass = v >= 0.3 ? 'correlation-positive' : v >= 0.1 ? 'correlation-neutral' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Cramér\'s V (categorical association)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + v.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' association</div>';
+  html += '<div class="correlation-label">n = ' + n + ' pairs | ' + xCategories + ' × ' + yCategories + ' categories</div>';
+  
+  // Visual bar for Cramér's V (0 to 1)
+  const width = 300;
+  const barHeight = 30;
+  
+  html += '<svg viewBox="0 0 ' + width + ' ' + (barHeight + 20) + '" style="width: 300px; height: 50px;">';
+  html += '<rect x="0" y="0" width="' + width + '" height="' + barHeight + '" fill="#e5e7eb" rx="4"/>';
+  html += '<rect x="0" y="0" width="' + (v * width) + '" height="' + barHeight + '" fill="#10b981" rx="4"/>';
+  html += '<text x="10" y="' + (barHeight + 15) + '" font-size="11" fill="#666">0</text>';
+  html += '<text x="' + (width - 10) + '" y="' + (barHeight + 15) + '" font-size="11" fill="#666" text-anchor="end">1</text>';
+  html += '</svg>';
+  
+  html += '</div>';
+  
+  document.getElementById('correlation-result').innerHTML = html;
+}
+
+function runClustering() {
+  if (!state.relation || state.sortedIndices.length === 0) {
+    alert('No data to cluster');
+    return;
+  }
+  
+  // Get categorical/numeric columns for similarity calculation
+  const cols = [];
+  state.columnTypes.forEach((type, idx) => {
+    if (['boolean', 'string', 'select', 'int', 'float'].includes(type)) {
+      cols.push(idx);
+    }
+  });
+  
+  if (cols.length === 0) {
+    alert('No suitable columns for clustering');
+    return;
+  }
+  
+  // Normalize data for each column
+  const data = state.sortedIndices.map(i => {
+    const row = state.relation.items[i];
+    return cols.map(colIdx => {
+      const val = row[colIdx];
+      const type = state.columnTypes[colIdx];
+      if (val === null) return 0;
+      if (type === 'boolean') return val ? 1 : 0;
+      if (type === 'int' || type === 'float') return val;
+      if (type === 'string' || type === 'select') {
+        // Hash string to number for comparison
+        let hash = 0;
+        const str = String(val);
+        for (let i = 0; i < str.length; i++) {
+          hash = ((hash << 5) - hash) + str.charCodeAt(i);
+          hash |= 0;
+        }
+        return hash;
+      }
+      return 0;
+    });
+  });
+  
+  // Normalize each column to 0-1 range
+  cols.forEach((_, colIdx) => {
+    const values = data.map(row => row[colIdx]);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    data.forEach(row => {
+      row[colIdx] = (row[colIdx] - min) / range;
+    });
+  });
+  
+  // Initialize nodes with random positions
+  const canvas = document.getElementById('diagram-canvas');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  const nodes = data.map((d, i) => ({
+    idx: state.sortedIndices[i],
+    x: Math.random() * (width - 100) + 50,
+    y: Math.random() * (height - 100) + 50,
+    vx: 0,
+    vy: 0,
+    data: d,
+    color: 'hsl(' + (i * 137.5 % 360) + ', 70%, 50%)'
+  }));
+  
+  // Calculate distances between all pairs
+  function distance(a, b) {
+    let sum = 0;
+    for (let i = 0; i < a.data.length; i++) {
+      const diff = a.data[i] - b.data[i];
+      sum += diff * diff;
+    }
+    return Math.sqrt(sum);
+  }
+  
+  // Force-directed layout simulation
+  const iterations = 100;
+  const repulsion = 500;
+  const attraction = 0.1;
+  const damping = 0.9;
+  
+  for (let iter = 0; iter < iterations; iter++) {
+    // Reset forces
+    nodes.forEach(n => { n.vx = 0; n.vy = 0; });
+    
+    // Repulsion between all nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[j].x - nodes[i].x;
+        const dy = nodes[j].y - nodes[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = repulsion / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        nodes[i].vx -= fx;
+        nodes[i].vy -= fy;
+        nodes[j].vx += fx;
+        nodes[j].vy += fy;
+      }
+    }
+    
+    // Attraction based on similarity
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const similarity = 1 - distance(nodes[i], nodes[j]) / Math.sqrt(cols.length);
+        const dx = nodes[j].x - nodes[i].x;
+        const dy = nodes[j].y - nodes[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = attraction * similarity * dist;
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        nodes[i].vx += fx;
+        nodes[i].vy += fy;
+        nodes[j].vx -= fx;
+        nodes[j].vy -= fy;
+      }
+    }
+    
+    // Apply forces with damping
+    nodes.forEach(n => {
+      n.x += n.vx * damping;
+      n.y += n.vy * damping;
+      // Keep in bounds
+      n.x = Math.max(20, Math.min(width - 20, n.x));
+      n.y = Math.max(20, Math.min(height - 20, n.y));
+    });
+  }
+  
+  state.diagramNodes = nodes;
+  renderDiagram();
+}
+
+function renderDiagram() {
+  const canvas = document.getElementById('diagram-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw background
+  ctx.fillStyle = '#fafafa';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw nodes
+  state.diagramNodes.forEach(node => {
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, 8, 0, Math.PI * 2);
+    ctx.fillStyle = node.color;
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+  
+  // Add legend
+  ctx.fillStyle = '#666';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Rows: ' + state.diagramNodes.length + ' | Similar rows cluster together', 10, canvas.height - 10);
+}
+
 function init() {
   const textarea = document.getElementById('relation-json');
   const btnGenerate = document.getElementById('btn-generate-demo');
   const btnParse = document.getElementById('btn-parse-relation');
-  const btnAiPanel = document.getElementById('btn-ai-panel');
-  const aiPanel = document.getElementById('ai-panel');
-  const btnCloseAi = document.getElementById('btn-close-ai');
   const btnAiAsk = document.getElementById('btn-ai-ask');
   const aiQuestion = document.getElementById('ai-question');
   
@@ -3543,9 +4321,15 @@ function init() {
       state.formatting = {};
       state.filteredIndices = [...Array(result.data.items.length).keys()];
       state.sortedIndices = [...state.filteredIndices];
+      state.pivotConfig = { rowColumn: null, colColumn: null, values: [] };
+      state.diagramNodes = [];
       
-      // Show AI button when data is loaded
-      btnAiPanel.style.display = 'flex';
+      // Show view tabs when data is loaded
+      document.getElementById('view-tabs').style.display = 'flex';
+      
+      // Reset to table view
+      state.currentView = 'table';
+      switchView('table');
       
       renderTable();
     } else {
@@ -3553,23 +4337,39 @@ function init() {
     }
   });
   
-  // AI Panel events
-  btnAiPanel.addEventListener('click', () => {
-    aiPanel.style.display = aiPanel.style.display === 'none' ? 'block' : 'none';
+  // View tabs event listeners
+  document.querySelectorAll('.view-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      const view = e.currentTarget.dataset.view;
+      switchView(view);
+    });
   });
   
-  btnCloseAi.addEventListener('click', () => {
-    aiPanel.style.display = 'none';
+  // Pivot table events
+  document.getElementById('btn-add-pivot-value')?.addEventListener('click', () => {
+    if (state.pivotConfig.values.length < 4) {
+      state.pivotConfig.values.push({ column: null, aggregation: 'count' });
+      renderPivotValuesConfig();
+    }
   });
   
-  btnAiAsk.addEventListener('click', () => {
+  document.getElementById('btn-generate-pivot')?.addEventListener('click', generatePivotTable);
+  
+  // Correlation events
+  document.getElementById('btn-calculate-corr')?.addEventListener('click', calculateCorrelation);
+  
+  // Diagram events
+  document.getElementById('btn-run-clustering')?.addEventListener('click', runClustering);
+  
+  // AI events
+  btnAiAsk?.addEventListener('click', () => {
     const question = aiQuestion.value.trim();
     if (question) {
       askAI(question);
     }
   });
   
-  aiQuestion.addEventListener('keypress', (e) => {
+  aiQuestion?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       const question = aiQuestion.value.trim();
       if (question) {
