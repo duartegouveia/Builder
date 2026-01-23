@@ -511,7 +511,7 @@ function calculateStatistics(colIdx) {
     total,
     nonNull,
     nullCount,
-    nullPercent: ((nullCount / total) * 100).toFixed(1)
+    nullPercent: ((nullCount / total) * 100).toFixed(2)
   };
   
   if (type === 'int' || type === 'float') {
@@ -1849,9 +1849,11 @@ function showStatisticsPanel(colIdx) {
   panel.className = 'stats-panel';
   panel.dataset.col = colIdx;
   
+  const nonNullPercent = ((stats.nonNull / stats.total) * 100).toFixed(2);
+  
   let statsHtml = `
-    <div class="stats-row"><span>Total Records:</span><span>${stats.total}</span></div>
-    <div class="stats-row"><span>Non-null:</span><span>${stats.nonNull}</span></div>
+    <div class="stats-row"><span>Total Records:</span><span>${stats.total} (100.00%)</span></div>
+    <div class="stats-row"><span>Non-null:</span><span>${stats.nonNull} (${nonNullPercent}%)</span></div>
     <div class="stats-row"><span>Null:</span><span>${stats.nullCount} (${stats.nullPercent}%)</span></div>
   `;
   
