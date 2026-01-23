@@ -1024,8 +1024,8 @@ textarea.input.has-scroll {
 
 /* ===== Checkbox Styling ===== */
 input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   accent-color: var(--primary);
   cursor: pointer;
   border-radius: var(--radius-sm);
@@ -1336,8 +1336,8 @@ input[type="checkbox"] {
 }
 
 .relation-checkbox {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
 }
 
@@ -1352,8 +1352,8 @@ input[type="checkbox"] {
 }
 
 .relation-editable-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
 }
 
@@ -1377,6 +1377,51 @@ input[type="checkbox"] {
   color: var(--red-500);
 }
 
+.relation-bool-null {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* Boolean cell display */
+.bool-true {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: var(--green-100);
+  color: var(--green-700);
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.bool-false {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: var(--red-100);
+  color: var(--red-600);
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.bool-null {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: var(--slate-100);
+  color: var(--slate-500);
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
 .relation-table-readonly td {
   background: var(--slate-50);
 }
@@ -1384,9 +1429,10 @@ input[type="checkbox"] {
 /* Relation Table Advanced Features */
 .relation-th-select,
 .relation-td-select {
-  width: 32px;
+  width: 24px;
+  min-width: 24px;
   text-align: center;
-  padding: var(--space-1);
+  padding: 2px;
 }
 
 .relation-th-sortable {
