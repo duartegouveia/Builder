@@ -29,6 +29,7 @@ let state = {
   groupByColumns: [], // Column indices to group by
   groupedData: null, // Grouped data structure
   expandedGroups: new Set(), // Set of expanded group keys
+  groupBySelectedValues: {}, // {columnIdx: selectedValue} - the value selected for each grouped column
   
   // Column selection (for multi-column operations)
   selectedColumns: new Set(),
@@ -165,10 +166,40 @@ function applyFilters() {
       }
     }
     
+    // Also check group by selected values
+    if (passes) {
+      for (const [colIdxStr, selectedValue] of Object.entries(state.groupBySelectedValues)) {
+        const colIdx = parseInt(colIdxStr);
+        const value = items[i][colIdx];
+        // Compare with proper null handling
+        if (selectedValue === null) {
+          if (value !== null) {
+            passes = false;
+            break;
+          }
+        } else if (value === null || String(value) !== String(selectedValue)) {
+          passes = false;
+          break;
+        }
+      }
+    }
+    
     if (passes) {
       state.filteredIndices.push(i);
     }
   }
+}
+
+function getUniqueValuesForColumn(colIdx) {
+  const values = new Set();
+  state.relation.items.forEach(row => {
+    values.add(row[colIdx]);
+  });
+  return Array.from(values).sort((a, b) => {
+    if (a === null) return 1;
+    if (b === null) return -1;
+    return String(a).localeCompare(String(b));
+  });
 }
 
 function matchesCriteria(value, criteria, colIdx) {
@@ -803,15 +834,58 @@ function renderTable() {
   
   // Group info header (if any groups)
   if (state.groupByColumns.length > 0) {
-    const groupNames = state.groupByColumns.map(i => state.columnNames[i]).join(', ');
     const groupInfo = document.createElement('div');
     groupInfo.className = 'group-by-indicator';
-    groupInfo.innerHTML = `<span>Grouped by: <strong>${groupNames}</strong></span><button class="btn-clear-groups">✕ Clear</button>`;
+    
+    let groupHtml = '<span>Grouped by:</span>';
+    state.groupByColumns.forEach(colIdx => {
+      const colName = state.columnNames[colIdx];
+      const uniqueValues = getUniqueValuesForColumn(colIdx);
+      const currentValue = state.groupBySelectedValues[colIdx];
+      const hasSelection = currentValue !== undefined;
+      
+      groupHtml += `
+        <div class="group-by-col" data-col="${colIdx}">
+          <strong>${colName}:</strong>
+          <select class="group-value-select" data-col="${colIdx}">
+            <option value="__all__"${!hasSelection ? ' selected' : ''}>All (${uniqueValues.length})</option>
+            ${uniqueValues.map(v => {
+              const val = v === null ? '__null__' : v;
+              const label = v === null ? '(null)' : String(v);
+              const selected = hasSelection && String(currentValue) === String(v) ? ' selected' : '';
+              return `<option value="${val}"${selected}>${label}</option>`;
+            }).join('')}
+          </select>
+        </div>
+      `;
+    });
+    groupHtml += '<button class="btn-clear-groups" data-testid="button-clear-groups">✕ Clear</button>';
+    
+    groupInfo.innerHTML = groupHtml;
     container.appendChild(groupInfo);
     
     groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
       state.groupByColumns = [];
+      state.groupBySelectedValues = {};
       renderTable();
+    });
+    
+    groupInfo.querySelectorAll('.group-value-select').forEach(select => {
+      select.addEventListener('change', (e) => {
+        const colIdx = parseInt(e.target.dataset.col);
+        const value = e.target.value;
+        
+        if (value === '__all__') {
+          delete state.groupBySelectedValues[colIdx];
+        } else if (value === '__null__') {
+          state.groupBySelectedValues[colIdx] = null;
+        } else {
+          state.groupBySelectedValues[colIdx] = value;
+        }
+        
+        state.currentPage = 1;
+        renderTable();
+      });
     });
   }
   
@@ -1123,6 +1197,7 @@ function handleColumnMenuAction(colIdx, action) {
       return;
     case 'clear-groups':
       state.groupByColumns = [];
+      state.groupBySelectedValues = {};
       break;
     case 'expand-relation':
       expandRelationColumn(colIdx);
@@ -1347,6 +1422,8 @@ function toggleGroupBy(colIdx) {
   const idx = state.groupByColumns.indexOf(colIdx);
   if (idx >= 0) {
     state.groupByColumns.splice(idx, 1);
+    // Also remove selected value for this column
+    delete state.groupBySelectedValues[colIdx];
   } else {
     state.groupByColumns.push(colIdx);
   }
@@ -1398,6 +1475,7 @@ function expandRelationColumn(colIdx) {
   state.filters = {};
   state.formatting = {};
   state.groupByColumns = [];
+  state.groupBySelectedValues = {};
   state.currentPage = 1;
   
   document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
@@ -1489,6 +1567,7 @@ function groupColumnsIntoRelation(colIndices, newColName) {
   state.filters = {};
   state.formatting = {};
   state.groupByColumns = [];
+  state.groupBySelectedValues = {};
   state.currentPage = 1;
   
   document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
