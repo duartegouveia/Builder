@@ -1251,8 +1251,24 @@ input[type="checkbox"] {
 }
 
 .relation-table-wrapper {
-  max-height: 500px;
+  max-height: 400px;
   overflow-y: auto;
+  overflow-x: auto;
+}
+
+.relation-footer-wrapper {
+  overflow-x: auto;
+  border-top: 2px solid var(--border);
+  background: var(--slate-50);
+}
+
+.relation-footer-table {
+  border-top: none;
+}
+
+.relation-footer-table tfoot td {
+  background: var(--slate-50);
+  border-top: none;
 }
 
 .relation-table {

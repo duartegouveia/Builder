@@ -1300,6 +1300,37 @@ function renderPagination() {
   });
 }
 
+function syncFooterColumnWidths(mainTable, footerTable) {
+  // Wait for DOM to render, then sync widths
+  requestAnimationFrame(() => {
+    const mainCells = mainTable.querySelectorAll('thead th');
+    const footerCells = footerTable.querySelectorAll('tfoot td');
+    
+    mainCells.forEach((th, idx) => {
+      if (footerCells[idx]) {
+        footerCells[idx].style.width = th.offsetWidth + 'px';
+        footerCells[idx].style.minWidth = th.offsetWidth + 'px';
+      }
+    });
+    
+    // Match total table width
+    footerTable.style.width = mainTable.offsetWidth + 'px';
+  });
+  
+  // Sync horizontal scroll
+  const tableWrapper = mainTable.closest('.relation-table-wrapper');
+  const footerWrapper = footerTable.closest('.relation-footer-wrapper');
+  
+  if (tableWrapper && footerWrapper) {
+    tableWrapper.addEventListener('scroll', () => {
+      footerWrapper.scrollLeft = tableWrapper.scrollLeft;
+    });
+    footerWrapper.addEventListener('scroll', () => {
+      tableWrapper.scrollLeft = footerWrapper.scrollLeft;
+    });
+  }
+}
+
 function renderTable() {
   const container = document.getElementById('relation-table-container');
   container.innerHTML = '';
@@ -1477,7 +1508,16 @@ function renderTable() {
   
   table.appendChild(tbody);
   
-  // Footer with statistics
+  tableWrapper.appendChild(table);
+  container.appendChild(tableWrapper);
+  
+  // Footer table (separate, outside scroll area)
+  const footerWrapper = document.createElement('div');
+  footerWrapper.className = 'relation-footer-wrapper';
+  
+  const footerTable = document.createElement('table');
+  footerTable.className = 'relation-table relation-footer-table';
+  
   const tfoot = document.createElement('tfoot');
   const footerRow = document.createElement('tr');
   
@@ -1495,10 +1535,12 @@ function renderTable() {
   });
   
   tfoot.appendChild(footerRow);
-  table.appendChild(tfoot);
+  footerTable.appendChild(tfoot);
+  footerWrapper.appendChild(footerTable);
+  container.appendChild(footerWrapper);
   
-  tableWrapper.appendChild(table);
-  container.appendChild(tableWrapper);
+  // Sync column widths between main table and footer
+  syncFooterColumnWidths(table, footerTable);
   
   // Pagination
   const paginationDiv = document.createElement('div');
