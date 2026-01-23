@@ -44,11 +44,35 @@
         </header>
 
         <section class="space-y-4">
-          <div class="card p-8 text-center">
-            <div class="text-muted-foreground">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-              <p class="text-lg">Relation Builder coming soon...</p>
-              <p class="text-sm mt-2">This page will allow you to build and visualize mathematical relations.</p>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Relation JSON</h3>
+              <div class="flex gap-2">
+                <button id="btn-generate-demo" class="btn btn-outline btn-sm gap-2" data-testid="button-generate-demo">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                  Generate Demo
+                </button>
+                <button id="btn-parse-relation" class="btn btn-primary btn-sm gap-2" data-testid="button-parse-relation">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                  Parse & Display
+                </button>
+              </div>
+            </div>
+            <div class="card-content">
+              <textarea id="relation-json" class="relation-json-textarea" placeholder='{"pot": "relation", "column_def": ["int", "string", "boolean"], "items": [[1, "test", true]]}' data-testid="textarea-relation-json"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Relation Table</h3>
+            </div>
+            <div class="card-content">
+              <div id="relation-table-container" class="relation-table-container">
+                <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
+              </div>
             </div>
           </div>
         </section>
@@ -56,5 +80,6 @@
       </div>
     </div>
   </div>
+  <script type="module" src="/src/relation-builder.js"></script>
 </body>
 </html>

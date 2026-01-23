@@ -41,6 +41,8 @@ export async function setupVite(server, app) {
       let htmlFile = "index.html";
       if (url === "/logic.html" || url.startsWith("/logic.html?")) {
         htmlFile = "logic.html";
+      } else if (url === "/relation.html" || url.startsWith("/relation.html?")) {
+        htmlFile = "relation.html";
       }
       
       const clientTemplate = path.resolve(__dirname, "..", "client", htmlFile);
