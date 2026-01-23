@@ -453,12 +453,19 @@ function generateCategoricalHistogramSVG(stats, colName) {
   return `<div class="histogram-container">${svg}</div>`;
 }
 
-// Generate frequency table HTML for select type
-function generateFrequencyTableHTML(stats, colName, order = 'desc') {
+// Generate combined frequency table HTML for select type (both asc and desc cumulative)
+function generateFrequencyTableHTML(stats, colName) {
   const colOptions = state.options[colName] || {};
-  const data = order === 'desc' ? stats.freqTableDesc : stats.freqTableAsc;
+  const descData = stats.freqTableDesc;
+  const ascData = stats.freqTableAsc;
   
-  if (!data || data.length === 0) return '';
+  if (!descData || descData.length === 0) return '';
+  
+  // Build lookup for ascending cumulative values by key
+  const ascLookup = {};
+  ascData.forEach(item => {
+    ascLookup[item.key] = { cumCount: item.cumCount, cumPercent: item.cumPercent };
+  });
   
   let html = `<table class="freq-table">
     <thead>
@@ -466,21 +473,26 @@ function generateFrequencyTableHTML(stats, colName, order = 'desc') {
         <th>Value</th>
         <th>n</th>
         <th>%</th>
-        <th>Cum n</th>
-        <th>Cum %</th>
+        <th>Cum↓ n</th>
+        <th>Cum↓ %</th>
+        <th>Cum↑ n</th>
+        <th>Cum↑ %</th>
       </tr>
     </thead>
     <tbody>`;
   
-  data.forEach(item => {
+  descData.forEach(item => {
     const label = colOptions[item.key] || item.key;
     const displayLabel = label.length > 12 ? label.substring(0, 10) + '...' : label;
+    const asc = ascLookup[item.key] || { cumCount: '—', cumPercent: '—' };
     html += `<tr>
       <td title="${label}">${displayLabel}</td>
       <td>${item.count}</td>
       <td>${item.percent}%</td>
       <td>${item.cumCount}</td>
       <td>${item.cumPercent}%</td>
+      <td>${asc.cumCount}</td>
+      <td>${asc.cumPercent}%</td>
     </tr>`;
   });
   
@@ -520,11 +532,18 @@ function generateBooleanHistogramSVG(stats) {
   return `<div class="histogram-container">${svg}</div>`;
 }
 
-// Boolean Frequency Table HTML Generator
-function generateBooleanFrequencyTableHTML(stats, order = 'desc') {
-  const data = order === 'desc' ? stats.freqTableDesc : stats.freqTableAsc;
+// Boolean Frequency Table HTML Generator (combined asc and desc cumulative)
+function generateBooleanFrequencyTableHTML(stats) {
+  const descData = stats.freqTableDesc;
+  const ascData = stats.freqTableAsc;
   
-  if (!data || data.length === 0) return '';
+  if (!descData || descData.length === 0) return '';
+  
+  // Build lookup for ascending cumulative values by key
+  const ascLookup = {};
+  ascData.forEach(item => {
+    ascLookup[item.key] = { cumCount: item.cumCount, cumPercent: item.cumPercent };
+  });
   
   let html = `<table class="freq-table">
     <thead>
@@ -532,20 +551,25 @@ function generateBooleanFrequencyTableHTML(stats, order = 'desc') {
         <th>Value</th>
         <th>n</th>
         <th>%</th>
-        <th>Cum n</th>
-        <th>Cum %</th>
+        <th>Cum↓ n</th>
+        <th>Cum↓ %</th>
+        <th>Cum↑ n</th>
+        <th>Cum↑ %</th>
       </tr>
     </thead>
     <tbody>`;
   
-  data.forEach(item => {
+  descData.forEach(item => {
     const label = item.key === 'true' ? '✓ True' : '✗ False';
+    const asc = ascLookup[item.key] || { cumCount: '—', cumPercent: '—' };
     html += `<tr>
       <td>${label}</td>
       <td>${item.count}</td>
       <td>${item.percent}%</td>
       <td>${item.cumCount}</td>
       <td>${item.cumPercent}%</td>
+      <td>${asc.cumCount}</td>
+      <td>${asc.cumPercent}%</td>
     </tr>`;
   });
   
@@ -2819,18 +2843,11 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-row"><span>IQV:</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
     `;
     
-    // Frequency table (descending)
+    // Frequency table (combined)
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Frequency Table (Desc)</div>
-      ${generateFrequencyTableHTML(stats, name, 'desc')}
-    `;
-    
-    // Frequency table (ascending)
-    statsHtml += `
-      <div class="stats-divider"></div>
-      <div class="stats-subtitle">Frequency Table (Asc)</div>
-      ${generateFrequencyTableHTML(stats, name, 'asc')}
+      <div class="stats-subtitle">Frequency Table</div>
+      ${generateFrequencyTableHTML(stats, name)}
     `;
   } else if (type === 'boolean') {
     // Generate boolean histogram (similar to categorical)
@@ -2851,11 +2868,8 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-row"><span>IQV:</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
       <div class="stats-row"><span>Variation Ratio:</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Frequency Table (Desc)</div>
-      ${generateBooleanFrequencyTableHTML(stats, 'desc')}
-      <div class="stats-divider"></div>
-      <div class="stats-subtitle">Frequency Table (Asc)</div>
-      ${generateBooleanFrequencyTableHTML(stats, 'asc')}
+      <div class="stats-subtitle">Frequency Table</div>
+      ${generateBooleanFrequencyTableHTML(stats)}
     `;
   } else if (type === 'string' || type === 'multilinestring') {
     statsHtml += `
