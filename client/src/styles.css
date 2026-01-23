@@ -2798,6 +2798,61 @@ input[type="number"] {
   animation: pulse-recording 1s infinite;
 }
 
+/* Diagram Popup */
+.diagram-popup {
+  position: fixed;
+  z-index: 10000;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  min-width: 240px;
+  max-width: 360px;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.diagram-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: var(--slate-50);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.cluster-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+}
+
+.diagram-popup-content {
+  padding: var(--space-2) var(--space-3);
+}
+
+.popup-field {
+  margin-bottom: var(--space-1);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.popup-label {
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.popup-value {
+  color: var(--foreground);
+  word-break: break-word;
+}
+
 .diagram-container {
   display: flex;
   justify-content: center;

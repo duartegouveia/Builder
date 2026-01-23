@@ -3548,7 +3548,8 @@ function switchView(viewName) {
   document.querySelectorAll('.view-content').forEach(content => {
     content.style.display = 'none';
   });
-  document.getElementById('view-' + viewName).style.display = 'block';
+  const viewEl = document.getElementById('view-' + viewName);
+  if (viewEl) viewEl.style.display = 'block';
   
   // Render specific view content
   if (viewName === 'cards') {
@@ -3558,7 +3559,8 @@ function switchView(viewName) {
   } else if (viewName === 'correlation') {
     initCorrelationConfig();
   } else if (viewName === 'diagram') {
-    // Diagram will be rendered on button click
+    // Setup click handler for diagram canvas
+    setupDiagramClickHandler();
   } else if (viewName === 'ai') {
     // AI view is always ready
   }
@@ -4238,19 +4240,137 @@ function runClustering() {
     const rangeX = maxX - minX || 1;
     const rangeY = maxY - minY || 1;
     
-    const nodes = result.map((p, i) => ({
+    // Calculate ball radius based on number of records
+    const ballRadius = Math.max(4, Math.min(12, 200 / Math.sqrt(nRows)));
+    
+    // Create initial nodes
+    let nodes = result.map((p, i) => ({
       idx: state.sortedIndices[i],
       x: padding + ((p[0] - minX) / rangeX) * (width - 2 * padding),
       y: padding + ((p[1] - minY) / rangeY) * (height - 2 * padding),
-      data: data[i],
-      color: 'hsl(' + (i * 137.5 % 360) + ', 70%, 50%)'
+      rawData: data[i],
+      radius: ballRadius
     }));
     
+    // Apply k-means clustering for colors
+    const numClusters = Math.min(8, Math.max(2, Math.floor(Math.sqrt(nRows / 2))));
+    const clusterColors = [
+      '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
+      '#ff7f00', '#ffff33', '#a65628', '#f781bf'
+    ];
+    
+    const clusterAssignments = kMeansClustering(result, numClusters);
+    nodes.forEach((node, i) => {
+      node.cluster = clusterAssignments[i];
+      node.color = clusterColors[clusterAssignments[i] % clusterColors.length];
+    });
+    
+    // Apply collision detection to prevent overlapping
+    nodes = applyCollisionDetection(nodes, width, height, padding);
+    
     state.diagramNodes = nodes;
+    state.diagramBallRadius = ballRadius;
     
     if (progressEl) progressEl.style.display = 'none';
     renderDiagram();
   }, 50);
+}
+
+// K-means clustering algorithm
+function kMeansClustering(points, k, maxIterations = 50) {
+  const n = points.length;
+  if (n === 0) return [];
+  
+  // Initialize centroids randomly from data points
+  const centroidIndices = [];
+  while (centroidIndices.length < k) {
+    const idx = Math.floor(Math.random() * n);
+    if (!centroidIndices.includes(idx)) {
+      centroidIndices.push(idx);
+    }
+  }
+  let centroids = centroidIndices.map(i => [...points[i]]);
+  
+  let assignments = new Array(n).fill(0);
+  
+  for (let iter = 0; iter < maxIterations; iter++) {
+    // Assign points to nearest centroid
+    let changed = false;
+    for (let i = 0; i < n; i++) {
+      let minDist = Infinity;
+      let minCluster = 0;
+      for (let c = 0; c < k; c++) {
+        const dist = (points[i][0] - centroids[c][0]) ** 2 + (points[i][1] - centroids[c][1]) ** 2;
+        if (dist < minDist) {
+          minDist = dist;
+          minCluster = c;
+        }
+      }
+      if (assignments[i] !== minCluster) {
+        assignments[i] = minCluster;
+        changed = true;
+      }
+    }
+    
+    if (!changed) break;
+    
+    // Update centroids
+    const counts = new Array(k).fill(0);
+    const sums = centroids.map(() => [0, 0]);
+    for (let i = 0; i < n; i++) {
+      const c = assignments[i];
+      counts[c]++;
+      sums[c][0] += points[i][0];
+      sums[c][1] += points[i][1];
+    }
+    for (let c = 0; c < k; c++) {
+      if (counts[c] > 0) {
+        centroids[c][0] = sums[c][0] / counts[c];
+        centroids[c][1] = sums[c][1] / counts[c];
+      }
+    }
+  }
+  
+  return assignments;
+}
+
+// Collision detection with gentle force-based separation
+function applyCollisionDetection(nodes, width, height, padding, iterations = 15) {
+  const minDist = (nodes[0]?.radius || 8) * 2.1;
+  
+  for (let iter = 0; iter < iterations; iter++) {
+    let moved = false;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[j].x - nodes[i].x;
+        const dy = nodes[j].y - nodes[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < minDist && dist > 0) {
+          const overlap = (minDist - dist) / 2;
+          const ux = dx / dist;
+          const uy = dy / dist;
+          
+          nodes[i].x -= ux * overlap;
+          nodes[i].y -= uy * overlap;
+          nodes[j].x += ux * overlap;
+          nodes[j].y += uy * overlap;
+          moved = true;
+        }
+      }
+    }
+    
+    // Keep nodes within bounds
+    for (let i = 0; i < nodes.length; i++) {
+      const r = nodes[i].radius;
+      nodes[i].x = Math.max(padding + r, Math.min(width - padding - r, nodes[i].x));
+      nodes[i].y = Math.max(padding + r, Math.min(height - padding - r, nodes[i].y));
+    }
+    
+    if (!moved) break;
+  }
+  
+  return nodes;
 }
 
 function tSNE(X, options = {}) {
@@ -4473,8 +4593,9 @@ function renderDiagram() {
   
   // Draw nodes
   state.diagramNodes.forEach(node => {
+    const radius = node.radius || 8;
     ctx.beginPath();
-    ctx.arc(node.x, node.y, 8, 0, Math.PI * 2);
+    ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
     ctx.fillStyle = node.color;
     ctx.fill();
     ctx.strokeStyle = '#333';
@@ -4482,10 +4603,169 @@ function renderDiagram() {
     ctx.stroke();
   });
   
-  // Add legend
+  // Draw cluster legend
+  const clusters = [...new Set(state.diagramNodes.map(n => n.cluster))].sort((a, b) => a - b);
+  const clusterColors = [
+    '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
+    '#ff7f00', '#ffff33', '#a65628', '#f781bf'
+  ];
+  
+  let legendX = 10;
+  ctx.font = '11px sans-serif';
+  clusters.forEach((cluster, i) => {
+    const color = clusterColors[cluster % clusterColors.length];
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(legendX + 6, canvas.height - 20, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#333';
+    const label = 'C' + (cluster + 1);
+    ctx.fillText(label, legendX + 15, canvas.height - 16);
+    legendX += 40;
+  });
+  
+  // Add info text
   ctx.fillStyle = '#666';
   ctx.font = '12px sans-serif';
-  ctx.fillText('Rows: ' + state.diagramNodes.length + ' | Similar rows cluster together', 10, canvas.height - 10);
+  ctx.fillText('Rows: ' + state.diagramNodes.length + ' | Click a point to see data', 10, canvas.height - 40);
+}
+
+function setupDiagramClickHandler() {
+  const canvas = document.getElementById('diagram-canvas');
+  if (!canvas) return;
+  
+  // Remove existing listener if any
+  canvas.removeEventListener('click', handleDiagramClick);
+  canvas.addEventListener('click', handleDiagramClick);
+}
+
+function handleDiagramClick(event) {
+  const canvas = event.target;
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  
+  // Find clicked node
+  let clickedNode = null;
+  for (let i = state.diagramNodes.length - 1; i >= 0; i--) {
+    const node = state.diagramNodes[i];
+    const dx = x - node.x;
+    const dy = y - node.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist <= (node.radius || 8)) {
+      clickedNode = node;
+      break;
+    }
+  }
+  
+  if (clickedNode) {
+    showDiagramPopup(clickedNode, event.clientX, event.clientY);
+  } else {
+    hideDiagramPopup();
+  }
+}
+
+function showDiagramPopup(node, clientX, clientY) {
+  // Remove existing popup
+  hideDiagramPopup();
+  
+  // Get row data
+  const rowIdx = node.idx;
+  const rowData = state.relation.items[rowIdx];
+  
+  // Create popup using DOM methods for security
+  const popup = document.createElement('div');
+  popup.id = 'diagram-popup';
+  popup.className = 'diagram-popup';
+  
+  // Header
+  const header = document.createElement('div');
+  header.className = 'diagram-popup-header';
+  header.textContent = 'Row ' + (rowIdx + 1) + ' ';
+  
+  const badge = document.createElement('span');
+  badge.className = 'cluster-badge';
+  badge.style.background = node.color;
+  badge.textContent = 'Cluster ' + (node.cluster + 1);
+  header.appendChild(badge);
+  
+  popup.appendChild(header);
+  
+  // Content
+  const content = document.createElement('div');
+  content.className = 'diagram-popup-content';
+  
+  state.columnNames.forEach((col, i) => {
+    const value = rowData[i];
+    const type = state.columnTypes[i];
+    
+    const field = document.createElement('div');
+    field.className = 'popup-field';
+    
+    const label = document.createElement('span');
+    label.className = 'popup-label';
+    label.textContent = col + ': ';
+    field.appendChild(label);
+    
+    const valueSpan = document.createElement('span');
+    valueSpan.className = 'popup-value';
+    
+    if (value === null || value === undefined) {
+      valueSpan.className += ' null-value';
+      valueSpan.textContent = 'null';
+    } else if (type === 'relation') {
+      valueSpan.textContent = '[Relation: ' + (value.items?.length || 0) + ' rows]';
+    } else if (typeof value === 'object') {
+      valueSpan.textContent = JSON.stringify(value);
+    } else if (type === 'multilinestring') {
+      const str = String(value);
+      valueSpan.textContent = str.substring(0, 100) + (str.length > 100 ? '...' : '');
+    } else {
+      const str = String(value);
+      valueSpan.textContent = str.substring(0, 50) + (str.length > 50 ? '...' : '');
+    }
+    
+    field.appendChild(valueSpan);
+    content.appendChild(field);
+  });
+  
+  popup.appendChild(content);
+  
+  // Position popup
+  document.body.appendChild(popup);
+  
+  const popupRect = popup.getBoundingClientRect();
+  let left = clientX + 10;
+  let top = clientY + 10;
+  
+  // Keep within viewport
+  if (left + popupRect.width > window.innerWidth) {
+    left = clientX - popupRect.width - 10;
+  }
+  if (top + popupRect.height > window.innerHeight) {
+    top = clientY - popupRect.height - 10;
+  }
+  
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', closeDiagramPopupOnOutsideClick);
+  }, 10);
+}
+
+function hideDiagramPopup() {
+  const existing = document.getElementById('diagram-popup');
+  if (existing) existing.remove();
+  document.removeEventListener('click', closeDiagramPopupOnOutsideClick);
+}
+
+function closeDiagramPopupOnOutsideClick(event) {
+  const popup = document.getElementById('diagram-popup');
+  if (popup && !popup.contains(event.target)) {
+    hideDiagramPopup();
+  }
 }
 
 function init() {
