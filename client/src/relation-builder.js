@@ -1,6 +1,6 @@
 import './styles.css';
 
-const COLUMN_TYPES = ['boolean', 'string', 'multilinestring', 'int', 'float', 'date', 'datetime', 'time'];
+const COLUMN_TYPES = ['boolean', 'string', 'multilinestring', 'int', 'float', 'date', 'datetime', 'time', 'relation'];
 
 // State management
 let state = {
@@ -20,10 +20,18 @@ let state = {
   sortCriteria: [], // [{column: idx, direction: 'asc'|'desc'}]
   
   // Filtering
-  filters: {}, // {columnIdx: {type: 'values'|'criteria', values: [], criteria: {}}}
+  filters: {}, // {columnIdx: {type: 'values'|'criteria'|'indices', values: [], criteria: {}, indices: Set}}
   
   // Conditional formatting
   formatting: {}, // {columnIdx: [{condition: {}, style: {}}]}
+  
+  // Group By
+  groupByColumns: [], // Column indices to group by
+  groupedData: null, // Grouped data structure
+  expandedGroups: new Set(), // Set of expanded group keys
+  
+  // Column selection (for multi-column operations)
+  selectedColumns: new Set(),
   
   // Computed
   filteredIndices: [],
@@ -312,6 +320,72 @@ function calculateStatistics(colIdx) {
   return stats;
 }
 
+// Group By functions
+function applyGroupBy() {
+  if (state.groupByColumns.length === 0) {
+    state.groupedData = null;
+    return;
+  }
+  
+  const groups = new Map();
+  
+  state.filteredIndices.forEach(idx => {
+    const row = state.relation.items[idx];
+    const key = state.groupByColumns.map(colIdx => JSON.stringify(row[colIdx])).join('|');
+    
+    if (!groups.has(key)) {
+      groups.set(key, {
+        keyValues: state.groupByColumns.map(colIdx => row[colIdx]),
+        indices: []
+      });
+    }
+    groups.get(key).indices.push(idx);
+  });
+  
+  state.groupedData = groups;
+}
+
+function getVisibleColumns() {
+  return state.columnNames
+    .map((name, idx) => ({ name, type: state.columnTypes[idx], idx }))
+    .filter((_, idx) => !state.groupByColumns.includes(idx));
+}
+
+
+
+
+
+// Relation type functions
+function formatCellValue(value, type) {
+  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  
+  if (type === 'relation') {
+    const count = value?.items?.length || 0;
+    return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
+  }
+  if (type === 'boolean') {
+    return value ? '<span class="bool-true">✓</span>' : '<span class="bool-false">✗</span>';
+  }
+  if (type === 'multilinestring') {
+    return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
+  }
+  
+  return String(value);
+}
+
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
+function updateTextarea() {
+  const textarea = document.getElementById('relation-json');
+  textarea.value = JSON.stringify(state.relation, null, 2);
+}
+
 // Pagination functions
 function getTotalPages() {
   if (state.pageSize === 'all') return 1;
@@ -395,7 +469,16 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
     return wrapper;
   }
   
-  if (type === 'boolean') {
+  if (type === 'relation') {
+    const btn = document.createElement('button');
+    btn.className = 'relation-cell-btn';
+    const count = value?.items?.length || 0;
+    btn.innerHTML = `📋 ${count}`;
+    btn.title = `View nested relation (${count} rows)`;
+    btn.dataset.row = rowIdx;
+    btn.dataset.col = colIdx;
+    wrapper.appendChild(btn);
+  } else if (type === 'boolean') {
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = value === true || value === 'true';
@@ -583,6 +666,23 @@ function renderPagination() {
   
   document.getElementById('btn-invert-page').addEventListener('click', () => invertSelection(true));
   document.getElementById('btn-invert-all').addEventListener('click', () => invertSelection(false));
+  
+  // Row operations buttons
+  document.getElementById('relation-table-container').addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-row-ops')) {
+      const rowIdx = parseInt(e.target.dataset.row);
+      const rect = e.target.getBoundingClientRect();
+      showRowOperationsMenu(rowIdx, rect.left, rect.bottom + 5);
+      e.stopPropagation();
+    }
+    
+    if (e.target.classList.contains('relation-cell-btn')) {
+      const rowIdx = parseInt(e.target.dataset.row);
+      const colIdx = parseInt(e.target.dataset.col);
+      showNestedRelationDialog(rowIdx, colIdx);
+      e.stopPropagation();
+    }
+  });
 }
 
 function renderTable() {
@@ -625,22 +725,45 @@ function renderTable() {
   indexTh.className = 'relation-th-index';
   headerRow.appendChild(indexTh);
   
-  // Data columns
+  // Group info header (if any groups)
+  if (state.groupByColumns.length > 0) {
+    const groupNames = state.groupByColumns.map(i => state.columnNames[i]).join(', ');
+    const groupInfo = document.createElement('div');
+    groupInfo.className = 'group-by-indicator';
+    groupInfo.innerHTML = `<span>Grouped by: <strong>${groupNames}</strong></span><button class="btn-clear-groups">✕ Clear</button>`;
+    container.appendChild(groupInfo);
+    
+    groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
+      state.groupByColumns = [];
+      renderTable();
+    });
+  }
+  
+  // Data columns (skip grouped columns)
   state.columnNames.forEach((name, idx) => {
+    if (state.groupByColumns.includes(idx)) return;
+    
     const th = document.createElement('th');
     th.className = 'relation-th-sortable';
     th.dataset.col = idx;
     const type = state.columnTypes[idx];
     const sortIndicator = getSortIndicator(idx);
     const filterActive = state.filters[idx] ? ' filter-active' : '';
+    const colSelected = state.selectedColumns.has(idx) ? ' col-selected' : '';
     th.innerHTML = `
-      <div class="relation-th-content${filterActive}">
+      <div class="relation-th-content${filterActive}${colSelected}">
         <span class="relation-col-name">${name}${sortIndicator}</span>
         <span class="relation-col-type">${type}</span>
       </div>
     `;
     headerRow.appendChild(th);
   });
+  
+  // Operations column header
+  const opsTh = document.createElement('th');
+  opsTh.className = 'relation-th-ops';
+  opsTh.textContent = '';
+  headerRow.appendChild(opsTh);
   
   thead.appendChild(headerRow);
   table.appendChild(thead);
@@ -674,14 +797,22 @@ function renderTable() {
     indexTd.className = 'relation-td-index';
     tr.appendChild(indexTd);
     
-    // Data cells
+    // Data cells (skip grouped columns)
     row.forEach((value, colIdx) => {
+      if (state.groupByColumns.includes(colIdx)) return;
+      
       const td = document.createElement('td');
       const type = state.columnTypes[colIdx];
       td.appendChild(createInputForType(type, value, rowIdx, colIdx, state.editable));
       applyConditionalFormatting(value, colIdx, td);
       tr.appendChild(td);
     });
+    
+    // Operations button
+    const opsTd = document.createElement('td');
+    opsTd.className = 'relation-td-ops';
+    opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
+    tr.appendChild(opsTd);
     
     tbody.appendChild(tr);
   });
@@ -696,11 +827,15 @@ function renderTable() {
   footerRow.appendChild(document.createElement('td')); // Index column
   
   state.columnNames.forEach((_, colIdx) => {
+    if (state.groupByColumns.includes(colIdx)) return;
+    
     const td = document.createElement('td');
     td.className = 'relation-td-stats';
     td.innerHTML = `<button class="btn-stats" data-col="${colIdx}">Σ Stats</button>`;
     footerRow.appendChild(td);
   });
+  
+  footerRow.appendChild(document.createElement('td')); // Operations column
   
   tfoot.appendChild(footerRow);
   table.appendChild(tfoot);
@@ -802,6 +937,9 @@ function showColumnMenu(colIdx, x, y) {
   const type = state.columnTypes[colIdx];
   const name = state.columnNames[colIdx];
   
+  const isGrouped = state.groupByColumns.includes(colIdx);
+  const isSelected = state.selectedColumns.has(colIdx);
+  
   menu.innerHTML = `
     <div class="column-menu-header">${name} (${type})</div>
     <div class="column-menu-section">
@@ -820,6 +958,25 @@ function showColumnMenu(colIdx, x, y) {
         <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
       ` : ''}
       <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
+    </div>
+    <div class="column-menu-section">
+      <div class="column-menu-title">Group By</div>
+      <button class="column-menu-item ${isGrouped ? 'active' : ''}" data-action="toggle-group">${isGrouped ? '✓ Grouped' : 'Group by this column'}</button>
+      <button class="column-menu-item" data-action="clear-groups">✕ Clear All Groups</button>
+    </div>
+    ${type === 'relation' ? `
+    <div class="column-menu-section">
+      <div class="column-menu-title">Relation</div>
+      <button class="column-menu-item" data-action="expand-relation">⊗ Cartesian Product</button>
+    </div>
+    ` : ''}
+    <div class="column-menu-section">
+      <div class="column-menu-title">Column Selection</div>
+      <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
+      ${state.selectedColumns.size > 0 ? `
+        <button class="column-menu-item" data-action="group-selected-cols">Group Selected → Relation</button>
+        <button class="column-menu-item" data-action="clear-col-selection">Clear Selection</button>
+      ` : ''}
     </div>
     <div class="column-menu-section">
       <div class="column-menu-title">Conditional Formatting</div>
@@ -884,6 +1041,28 @@ function handleColumnMenuAction(colIdx, action) {
       break;
     case 'format-clear':
       delete state.formatting[colIdx];
+      break;
+    case 'toggle-group':
+      toggleGroupBy(colIdx);
+      return;
+    case 'clear-groups':
+      state.groupByColumns = [];
+      break;
+    case 'expand-relation':
+      expandRelationColumn(colIdx);
+      return;
+    case 'toggle-select-col':
+      if (state.selectedColumns.has(colIdx)) {
+        state.selectedColumns.delete(colIdx);
+      } else {
+        state.selectedColumns.add(colIdx);
+      }
+      break;
+    case 'group-selected-cols':
+      showGroupColumnsDialog();
+      return;
+    case 'clear-col-selection':
+      state.selectedColumns.clear();
       break;
   }
   
@@ -1074,7 +1253,398 @@ function showStatisticsPanel(colIdx) {
 }
 
 function closeAllMenus() {
-  document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel').forEach(el => el.remove());
+  document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog, .group-cols-dialog').forEach(el => el.remove());
+}
+
+function toggleGroupBy(colIdx) {
+  const idx = state.groupByColumns.indexOf(colIdx);
+  if (idx >= 0) {
+    state.groupByColumns.splice(idx, 1);
+  } else {
+    state.groupByColumns.push(colIdx);
+  }
+  state.currentPage = 1;
+  renderTable();
+}
+
+function expandRelationColumn(colIdx) {
+  if (state.columnTypes[colIdx] !== 'relation') return;
+  
+  const newItems = [];
+  const nestedColumns = {};
+  
+  state.relation.items.forEach(row => {
+    const nestedRelation = row[colIdx];
+    if (!nestedRelation || !nestedRelation.items || nestedRelation.items.length === 0) {
+      const newRow = [...row];
+      newRow[colIdx] = null;
+      newItems.push(newRow);
+    } else {
+      Object.assign(nestedColumns, nestedRelation.columns);
+      nestedRelation.items.forEach(nestedRow => {
+        const newRow = [...row];
+        newRow[colIdx] = null;
+        nestedRow.forEach((val, i) => {
+          newRow.push(val);
+        });
+        newItems.push(newRow);
+      });
+    }
+  });
+  
+  const newColumnsObj = {...state.relation.columns};
+  delete newColumnsObj[state.columnNames[colIdx]];
+  Object.assign(newColumnsObj, nestedColumns);
+  
+  state.relation = {
+    pot: 'relation',
+    columns: newColumnsObj,
+    items: newItems
+  };
+  
+  state.columnNames = Object.keys(newColumnsObj);
+  state.columnTypes = Object.values(newColumnsObj);
+  state.filteredIndices = [...Array(newItems.length).keys()];
+  state.sortedIndices = [...state.filteredIndices];
+  state.selectedRows = new Set();
+  state.sortCriteria = [];
+  state.filters = {};
+  state.formatting = {};
+  state.groupByColumns = [];
+  state.currentPage = 1;
+  
+  document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+  renderTable();
+}
+
+function showGroupColumnsDialog() {
+  closeAllMenus();
+  
+  const selectedCols = [...state.selectedColumns];
+  if (selectedCols.length === 0) return;
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'group-cols-dialog';
+  
+  const colNames = selectedCols.map(i => state.columnNames[i]).join(', ');
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Group Columns into Relation</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="group-cols-content">
+      <p>Selected columns: <strong>${colNames}</strong></p>
+      <label>New relation column name:</label>
+      <input type="text" id="group-col-name" value="nested_data" class="relation-input" />
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline" id="group-cancel">Cancel</button>
+      <button class="btn btn-primary" id="group-apply">Group</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#group-cancel').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelector('#group-apply').addEventListener('click', () => {
+    const newColName = dialog.querySelector('#group-col-name').value.trim() || 'nested_data';
+    groupColumnsIntoRelation(selectedCols, newColName);
+    dialog.remove();
+  });
+}
+
+function groupColumnsIntoRelation(colIndices, newColName) {
+  const nestedColumnNames = colIndices.map(i => state.columnNames[i]);
+  const nestedColumnTypes = colIndices.map(i => state.columnTypes[i]);
+  
+  const nestedColumns = {};
+  nestedColumnNames.forEach((name, i) => {
+    nestedColumns[name] = nestedColumnTypes[i];
+  });
+  
+  const newItems = state.relation.items.map(row => {
+    const nestedRow = colIndices.map(i => row[i]);
+    const nestedRelation = {
+      pot: 'relation',
+      columns: nestedColumns,
+      items: [nestedRow]
+    };
+    
+    const newRow = row.filter((_, i) => !colIndices.includes(i));
+    newRow.push(nestedRelation);
+    return newRow;
+  });
+  
+  const newColumnsObj = {};
+  state.columnNames.forEach((name, i) => {
+    if (!colIndices.includes(i)) {
+      newColumnsObj[name] = state.columnTypes[i];
+    }
+  });
+  newColumnsObj[newColName] = 'relation';
+  
+  state.relation = {
+    pot: 'relation',
+    columns: newColumnsObj,
+    items: newItems
+  };
+  
+  state.columnNames = Object.keys(newColumnsObj);
+  state.columnTypes = Object.values(newColumnsObj);
+  state.filteredIndices = [...Array(newItems.length).keys()];
+  state.sortedIndices = [...state.filteredIndices];
+  state.selectedRows = new Set();
+  state.selectedColumns = new Set();
+  state.sortCriteria = [];
+  state.filters = {};
+  state.formatting = {};
+  state.groupByColumns = [];
+  state.currentPage = 1;
+  
+  document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+  renderTable();
+}
+
+function showRowOperationsMenu(rowIdx, x, y) {
+  closeAllMenus();
+  
+  const menu = document.createElement('div');
+  menu.className = 'row-ops-menu';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  
+  const hasSelection = state.selectedRows.size > 0;
+  
+  menu.innerHTML = `
+    <div class="column-menu-header">Row ${rowIdx + 1}</div>
+    <button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>
+    ${state.editable ? `
+      <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏ Edit</button>
+      <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
+      <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑 Delete</button>
+    ` : ''}
+    ${hasSelection ? `
+      <div class="column-menu-section">
+        <div class="column-menu-title">Selection (${state.selectedRows.size} rows)</div>
+        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑 Delete Selected</button>
+      </div>
+    ` : ''}
+  `;
+  
+  document.body.appendChild(menu);
+  
+  menu.addEventListener('click', (e) => {
+    const action = e.target.dataset.action;
+    if (!action) return;
+    
+    handleRowOperation(rowIdx, action);
+    menu.remove();
+  });
+  
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 0);
+}
+
+function handleRowOperation(rowIdx, action) {
+  switch (action) {
+    case 'view-row':
+      showRowViewDialog(rowIdx);
+      break;
+    case 'edit-row':
+      showRowEditDialog(rowIdx);
+      break;
+    case 'copy-row':
+      const rowCopy = [...state.relation.items[rowIdx]];
+      state.relation.items.push(rowCopy);
+      state.filteredIndices = [...Array(state.relation.items.length).keys()];
+      state.sortedIndices = [...state.filteredIndices];
+      document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+      renderTable();
+      break;
+    case 'delete-row':
+      if (confirm('Delete this row?')) {
+        state.relation.items.splice(rowIdx, 1);
+        state.selectedRows.delete(rowIdx);
+        state.filteredIndices = [...Array(state.relation.items.length).keys()];
+        state.sortedIndices = [...state.filteredIndices];
+        document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+        renderTable();
+      }
+      break;
+    case 'delete-selected':
+      if (confirm(`Delete ${state.selectedRows.size} selected rows?`)) {
+        const indices = [...state.selectedRows].sort((a, b) => b - a);
+        indices.forEach(i => state.relation.items.splice(i, 1));
+        state.selectedRows.clear();
+        state.filteredIndices = [...Array(state.relation.items.length).keys()];
+        state.sortedIndices = [...state.filteredIndices];
+        document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+        renderTable();
+      }
+      break;
+  }
+}
+
+function showRowViewDialog(rowIdx) {
+  closeAllMenus();
+  
+  const row = state.relation.items[rowIdx];
+  const dialog = document.createElement('div');
+  dialog.className = 'filter-dialog';
+  
+  let content = '<div class="row-view-content">';
+  state.columnNames.forEach((name, i) => {
+    const type = state.columnTypes[i];
+    let val = row[i];
+    if (type === 'relation' && val) {
+      val = `<em>${val.items?.length || 0} nested rows</em>`;
+    } else {
+      val = val === null ? '<em>null</em>' : String(val);
+    }
+    content += `<div class="row-view-item"><strong>${name}:</strong> ${val}</div>`;
+  });
+  content += '</div>';
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Row ${rowIdx + 1} Details</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    ${content}
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline" id="close-view">Close</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#close-view').addEventListener('click', () => dialog.remove());
+}
+
+function showRowEditDialog(rowIdx) {
+  closeAllMenus();
+  
+  const row = state.relation.items[rowIdx];
+  const dialog = document.createElement('div');
+  dialog.className = 'filter-dialog';
+  
+  let content = '<div class="row-edit-content">';
+  state.columnNames.forEach((name, i) => {
+    const type = state.columnTypes[i];
+    const val = row[i];
+    let input = '';
+    
+    if (type === 'relation') {
+      input = `<span class="text-muted-foreground">(nested relation - edit in JSON)</span>`;
+    } else if (type === 'boolean') {
+      input = `<input type="checkbox" data-col="${i}" ${val ? 'checked' : ''} />`;
+    } else if (type === 'multilinestring') {
+      input = `<textarea data-col="${i}" rows="3">${val || ''}</textarea>`;
+    } else {
+      const inputType = type === 'int' || type === 'float' ? 'number' : type === 'date' ? 'date' : type === 'time' ? 'time' : type === 'datetime' ? 'datetime-local' : 'text';
+      input = `<input type="${inputType}" data-col="${i}" value="${val || ''}" />`;
+    }
+    
+    content += `<div class="row-edit-item"><label>${name} (${type}):</label>${input}</div>`;
+  });
+  content += '</div>';
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Edit Row ${rowIdx + 1}</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    ${content}
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline" id="cancel-edit">Cancel</button>
+      <button class="btn btn-primary" id="save-edit">Save</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#cancel-edit').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelector('#save-edit').addEventListener('click', () => {
+    state.columnNames.forEach((name, i) => {
+      const type = state.columnTypes[i];
+      if (type === 'relation') return;
+      
+      const input = dialog.querySelector(`[data-col="${i}"]`);
+      if (!input) return;
+      
+      let value;
+      if (type === 'boolean') {
+        value = input.checked;
+      } else if (type === 'int') {
+        value = parseInt(input.value) || 0;
+      } else if (type === 'float') {
+        value = parseFloat(input.value) || 0;
+      } else {
+        value = input.value;
+      }
+      
+      state.relation.items[rowIdx][i] = value;
+    });
+    
+    document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+    dialog.remove();
+    renderTable();
+  });
+}
+
+function showNestedRelationDialog(rowIdx, colIdx) {
+  closeAllMenus();
+  
+  const nestedRelation = state.relation.items[rowIdx][colIdx];
+  if (!nestedRelation || !nestedRelation.columns) return;
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog';
+  
+  const colNames = Object.keys(nestedRelation.columns);
+  const colTypes = Object.values(nestedRelation.columns);
+  
+  let tableHtml = '<table class="nested-relation-table"><thead><tr>';
+  colNames.forEach(name => tableHtml += `<th>${name}</th>`);
+  tableHtml += '</tr></thead><tbody>';
+  
+  (nestedRelation.items || []).forEach(row => {
+    tableHtml += '<tr>';
+    row.forEach((val, i) => {
+      const type = colTypes[i];
+      let display = val === null ? '<em>null</em>' : String(val);
+      if (type === 'relation') display = `<em>${val?.items?.length || 0} rows</em>`;
+      tableHtml += `<td>${display}</td>`;
+    });
+    tableHtml += '</tr>';
+  });
+  
+  tableHtml += '</tbody></table>';
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Nested Relation (${nestedRelation.items?.length || 0} rows)</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="nested-relation-content">${tableHtml}</div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline" id="close-nested">Close</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#close-nested').addEventListener('click', () => dialog.remove());
 }
 
 function updateRelationFromInput(input) {

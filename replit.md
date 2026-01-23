@@ -88,7 +88,7 @@ A relation is a JSON object with:
 - `columns`: Object mapping column names to types (e.g., `{"id": "int", "name": "string"}`)
 - `items`: Array of arrays containing row data
 
-Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`
+Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`, `relation`
 
 ### Table Features
 1. **Pagination** - 20/50/100/all per page, first/prev/next/last navigation, direct page input
@@ -105,6 +105,11 @@ Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, 
    - Std dev, variance
    - Q1, Q3, IQR
    - Skewness, kurtosis (for numeric columns)
+7. **Group By** - Right-click column header to group by column, hides grouped columns with indicator bar
+8. **Row Operations** - Per-row menu (⋮) with View, Edit, Copy, Delete options
+9. **Column Selection** - Select columns via context menu to group into nested relations
+10. **Nested Relations** - Support for `relation` column type with expandable cell views
+11. **Cartesian Product** - Expand nested relation columns to flatten data
 
 ## External Dependencies
 
