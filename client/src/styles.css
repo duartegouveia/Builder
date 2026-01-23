@@ -1679,26 +1679,28 @@ input[type="number"] {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  width: 320px;
+  width: 300px;
   max-height: 400px;
   z-index: 1001;
   display: flex;
   flex-direction: column;
+  font-size: 0.8125rem;
 }
 
 .filter-dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--border);
   font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .btn-close-dialog {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: 1rem;
   cursor: pointer;
   color: var(--muted-foreground);
   padding: 0;
@@ -1751,15 +1753,20 @@ input[type="number"] {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-top: 1px solid var(--border);
 }
 
+.filter-dialog-footer .btn {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.8125rem;
+}
+
 .filter-comparison-form {
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .filter-form-row {
@@ -1769,8 +1776,8 @@ input[type="number"] {
 }
 
 .filter-form-row label {
-  min-width: 70px;
-  font-size: var(--font-sm);
+  min-width: 60px;
+  font-size: 0.75rem;
   color: var(--muted-foreground);
 }
 
