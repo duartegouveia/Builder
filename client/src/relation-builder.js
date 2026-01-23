@@ -390,6 +390,79 @@ function compareValues(a, b, type) {
   return String(a).localeCompare(String(b));
 }
 
+// Categorical Histogram SVG Generator
+function generateCategoricalHistogramSVG(stats, colName) {
+  if (!stats.freqTableDesc || stats.freqTableDesc.length === 0) return '';
+  
+  const colOptions = state.options[colName] || {};
+  const data = stats.freqTableDesc;
+  const maxCount = Math.max(...data.map(d => d.count));
+  
+  const barHeight = 22;
+  const labelWidth = 100;
+  const barMaxWidth = 120;
+  const padding = { top: 10, bottom: 10, left: 10, right: 40 };
+  const width = labelWidth + barMaxWidth + padding.left + padding.right;
+  const height = data.length * barHeight + padding.top + padding.bottom;
+  
+  let svg = `<svg width="${width}" height="${height}" class="histogram-svg">`;
+  
+  data.forEach((item, i) => {
+    const y = padding.top + i * barHeight;
+    const barWidth = (item.count / maxCount) * barMaxWidth;
+    const label = colOptions[item.key] || item.key;
+    
+    // Bar
+    svg += `<rect x="${padding.left + labelWidth}" y="${y + 2}" width="${barWidth}" height="${barHeight - 4}" fill="rgba(74, 144, 226, 0.6)" rx="2"/>`;
+    
+    // Label (truncate if too long)
+    const displayLabel = label.length > 15 ? label.substring(0, 12) + '...' : label;
+    svg += `<text x="${padding.left + labelWidth - 5}" y="${y + barHeight/2 + 4}" text-anchor="end" font-size="11" fill="#333">${displayLabel}</text>`;
+    
+    // Count
+    svg += `<text x="${padding.left + labelWidth + barWidth + 4}" y="${y + barHeight/2 + 4}" text-anchor="start" font-size="10" fill="#666">${item.count}</text>`;
+  });
+  
+  svg += `</svg>`;
+  
+  return `<div class="histogram-container">${svg}</div>`;
+}
+
+// Generate frequency table HTML for select type
+function generateFrequencyTableHTML(stats, colName, order = 'desc') {
+  const colOptions = state.options[colName] || {};
+  const data = order === 'desc' ? stats.freqTableDesc : stats.freqTableAsc;
+  
+  if (!data || data.length === 0) return '';
+  
+  let html = `<table class="freq-table">
+    <thead>
+      <tr>
+        <th>Value</th>
+        <th>n</th>
+        <th>%</th>
+        <th>Cum n</th>
+        <th>Cum %</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  
+  data.forEach(item => {
+    const label = colOptions[item.key] || item.key;
+    const displayLabel = label.length > 12 ? label.substring(0, 10) + '...' : label;
+    html += `<tr>
+      <td title="${label}">${displayLabel}</td>
+      <td>${item.count}</td>
+      <td>${item.percent}%</td>
+      <td>${item.cumCount}</td>
+      <td>${item.cumPercent}%</td>
+    </tr>`;
+  });
+  
+  html += `</tbody></table>`;
+  return html;
+}
+
 // Box Plot SVG Generator
 function generateBoxPlotSVG(stats) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
@@ -578,6 +651,75 @@ function calculateStatistics(colIdx) {
       // Range
       stats.range = stats.max - stats.min;
     }
+  } else if (type === 'select') {
+    // Categorical statistics for select type
+    const freq = {};
+    values.forEach(v => freq[v] = (freq[v] || 0) + 1);
+    
+    const k = Object.keys(freq).length; // Number of categories
+    stats.categoryCount = k;
+    
+    // Frequency table sorted by count descending
+    const sortedDesc = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+    const sortedAsc = Object.entries(freq).sort((a, b) => a[1] - b[1]);
+    
+    // Build frequency table with absolute, relative, and cumulative frequencies
+    let cumAsc = 0;
+    let cumDesc = 0;
+    const n = nonNull;
+    
+    stats.freqTableDesc = sortedDesc.map(([key, count]) => {
+      cumDesc += count;
+      return {
+        key,
+        count,
+        percent: ((count / n) * 100).toFixed(2),
+        cumCount: cumDesc,
+        cumPercent: ((cumDesc / n) * 100).toFixed(2)
+      };
+    });
+    
+    stats.freqTableAsc = sortedAsc.map(([key, count]) => {
+      cumAsc += count;
+      return {
+        key,
+        count,
+        percent: ((count / n) * 100).toFixed(2),
+        cumCount: cumAsc,
+        cumPercent: ((cumAsc / n) * 100).toFixed(2)
+      };
+    });
+    
+    // Mode (most frequent category/categories)
+    const maxFreq = Math.max(...Object.values(freq));
+    stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq);
+    stats.modeCount = maxFreq;
+    stats.modePercent = ((maxFreq / n) * 100).toFixed(2);
+    
+    // Entropy (Shannon entropy for diversity measurement)
+    const probabilities = Object.values(freq).map(c => c / n);
+    stats.entropy = -probabilities.reduce((sum, p) => {
+      if (p > 0) return sum + p * Math.log2(p);
+      return sum;
+    }, 0);
+    stats.maxEntropy = Math.log2(k); // Maximum possible entropy
+    stats.normalizedEntropy = k > 1 ? (stats.entropy / stats.maxEntropy) : 0;
+    
+    // Gini-Simpson Index (probability that two random items are different)
+    stats.giniSimpson = 1 - probabilities.reduce((sum, p) => sum + p * p, 0);
+    
+    // Variation Ratio (proportion of cases not in the mode)
+    stats.variationRatio = 1 - (maxFreq / n);
+    
+    // Index of Qualitative Variation (IQV) - 0 to 1, 1 = max diversity
+    if (k > 1) {
+      const sumPSquared = probabilities.reduce((sum, p) => sum + p * p, 0);
+      stats.iqv = (k / (k - 1)) * (1 - sumPSquared);
+    } else {
+      stats.iqv = 0;
+    }
+    
+    stats.frequencies = freq;
   } else if (type === 'string' || type === 'multilinestring') {
     const freq = {};
     values.forEach(v => freq[v] = (freq[v] || 0) + 1);
@@ -1884,6 +2026,48 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Skewness:</span><span>${stats.skewness?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Kurtosis:</span><span>${stats.kurtosis?.toFixed(3) ?? '—'}</span></div>
+    `;
+  } else if (type === 'select') {
+    // Get mode display value
+    const colOptions = state.options[name] || {};
+    const modeDisplay = stats.mode?.map(k => colOptions[k] || k).join(', ') || '—';
+    
+    // Add histogram
+    statsHtml += generateCategoricalHistogramSVG(stats, name);
+    
+    // Centrality measures
+    statsHtml += `
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Centrality</div>
+      <div class="stats-row"><span>Categories:</span><span>${stats.categoryCount}</span></div>
+      <div class="stats-row"><span>Mode:</span><span>${modeDisplay}</span></div>
+      <div class="stats-row"><span>Mode Count:</span><span>${stats.modeCount} (${stats.modePercent}%)</span></div>
+    `;
+    
+    // Dispersion measures
+    statsHtml += `
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Dispersion</div>
+      <div class="stats-row"><span>Variation Ratio:</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Entropy:</span><span>${stats.entropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Max Entropy:</span><span>${stats.maxEntropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Norm. Entropy:</span><span>${stats.normalizedEntropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>Gini-Simpson:</span><span>${stats.giniSimpson?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>IQV:</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
+    `;
+    
+    // Frequency table (descending)
+    statsHtml += `
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Frequency Table (Desc)</div>
+      ${generateFrequencyTableHTML(stats, name, 'desc')}
+    `;
+    
+    // Frequency table (ascending)
+    statsHtml += `
+      <div class="stats-divider"></div>
+      <div class="stats-subtitle">Frequency Table (Asc)</div>
+      ${generateFrequencyTableHTML(stats, name, 'asc')}
     `;
   } else if (type === 'boolean') {
     statsHtml += `
