@@ -467,7 +467,7 @@ function generateFrequencyTableHTML(stats, colName, order = 'desc') {
 function generateBoxPlotSVG(stats) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
   
-  const width = 320;
+  const width = 350;
   const height = 180;
   const padding = { top: 15, bottom: 25, left: 45, right: 15 };
   const plotHeight = height - padding.top - padding.bottom;
@@ -544,7 +544,7 @@ function generateBoxPlotSVG(stats) {
   
   // Upper whisker annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerHighY}" x2="${labelX - 5}" y2="${whiskerHighY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR</text>`;
+  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR (Q3−Q1)</text>`;
   
   // Q3 annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${q3Y}" x2="${labelX - 5}" y2="${q3Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
@@ -560,7 +560,7 @@ function generateBoxPlotSVG(stats) {
   
   // Lower whisker annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerLowY}" x2="${labelX - 5}" y2="${whiskerLowY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR</text>`;
+  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR (Q3−Q1)</text>`;
   
   // Outliers on box plot side
   stats.outliers.forEach(val => {
