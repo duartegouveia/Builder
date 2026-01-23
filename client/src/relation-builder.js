@@ -3720,6 +3720,10 @@ function renderPivotValuesConfig() {
     html += '</select>';
     html += '<select class="pivot-value-agg" data-idx="' + i + '">';
     html += '<option value="count" ' + (v.aggregation === 'count' ? 'selected' : '') + '>Count</option>';
+    html += '<option value="sum" ' + (v.aggregation === 'sum' ? 'selected' : '') + '>Sum</option>';
+    html += '<option value="average" ' + (v.aggregation === 'average' ? 'selected' : '') + '>Average</option>';
+    html += '<option value="median" ' + (v.aggregation === 'median' ? 'selected' : '') + '>Median</option>';
+    html += '<option value="stddev" ' + (v.aggregation === 'stddev' ? 'selected' : '') + '>Std Dev</option>';
     html += '<option value="pctTotal" ' + (v.aggregation === 'pctTotal' ? 'selected' : '') + '>% Total</option>';
     html += '<option value="pctRow" ' + (v.aggregation === 'pctRow' ? 'selected' : '') + '>% Row</option>';
     html += '<option value="pctCol" ' + (v.aggregation === 'pctCol' ? 'selected' : '') + '>% Col</option>';
@@ -3787,19 +3791,32 @@ function generatePivotTable() {
   const rowValuesArr = Array.from(rowValues).sort();
   const colValuesArr = Array.from(colValues).sort();
   
-  // Build pivot data for each aggregation
-  const pivotData = {}; // { aggIdx: { rowVal: { colVal: count } } }
+  // Build pivot data for each aggregation - store arrays of values for numeric aggregations
+  const pivotData = {}; // { aggIdx: { rowVal: { colVal: [] or count } } }
   let grandTotal = 0;
   const rowTotals = {};
   const colTotals = {};
+  const rowValuesData = {}; // { aggIdx: { rowVal: [] } } for row totals
+  const colValuesData = {}; // { aggIdx: { colVal: [] } } for col totals
+  const grandValuesData = {}; // { aggIdx: [] } for grand totals
   
-  aggregations.forEach((_, aggIdx) => {
+  const numericAggs = ['sum', 'average', 'median', 'stddev'];
+  
+  aggregations.forEach((agg, aggIdx) => {
     pivotData[aggIdx] = {};
+    rowValuesData[aggIdx] = {};
+    colValuesData[aggIdx] = {};
+    grandValuesData[aggIdx] = [];
+    
     rowValuesArr.forEach(rv => {
       pivotData[aggIdx][rv] = {};
+      rowValuesData[aggIdx][rv] = [];
       colValuesArr.forEach(cv => {
-        pivotData[aggIdx][rv][cv] = 0;
+        pivotData[aggIdx][rv][cv] = numericAggs.includes(agg.aggregation) ? [] : 0;
       });
+    });
+    colValuesArr.forEach(cv => {
+      colValuesData[aggIdx][cv] = [];
     });
   });
   
@@ -3816,8 +3833,21 @@ function generatePivotTable() {
     const cv = row[colIdx] !== null ? String(row[colIdx]) : null;
     
     if (rv !== null && cv !== null) {
-      aggregations.forEach((_, aggIdx) => {
-        pivotData[aggIdx][rv][cv]++;
+      aggregations.forEach((agg, aggIdx) => {
+        if (numericAggs.includes(agg.aggregation)) {
+          if (agg.column !== null) {
+            const val = parseFloat(row[agg.column]);
+            if (!isNaN(val)) {
+              pivotData[aggIdx][rv][cv].push(val);
+              rowValuesData[aggIdx][rv].push(val);
+              colValuesData[aggIdx][cv].push(val);
+              grandValuesData[aggIdx].push(val);
+            }
+          }
+          // If column is null, array stays empty and will show "-"
+        } else {
+          pivotData[aggIdx][rv][cv]++;
+        }
       });
       rowTotals[rv]++;
       colTotals[cv]++;
@@ -3825,8 +3855,39 @@ function generatePivotTable() {
     }
   });
   
+  // Helper functions for statistics
+  function calcSum(arr) { return arr.reduce((a, b) => a + b, 0); }
+  function calcMean(arr) { return arr.length > 0 ? calcSum(arr) / arr.length : 0; }
+  function calcMedian(arr) {
+    if (arr.length === 0) return 0;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+  function calcStdDev(arr) {
+    if (arr.length < 1) return 0;
+    const mean = calcMean(arr);
+    const sqDiffs = arr.map(v => (v - mean) ** 2);
+    return Math.sqrt(calcSum(sqDiffs) / arr.length); // Population std dev for consistency
+  }
+  
+  function computeAggValue(data, aggType) {
+    if (Array.isArray(data)) {
+      if (data.length === 0) return '-';
+      if (aggType === 'sum') return calcSum(data).toFixed(2);
+      if (aggType === 'average') return calcMean(data).toFixed(2);
+      if (aggType === 'median') return calcMedian(data).toFixed(2);
+      if (aggType === 'stddev') return calcStdDev(data).toFixed(2);
+    }
+    return data;
+  }
+  
   // Helper to format value based on aggregation type
-  function formatValue(count, aggType, rowVal, colVal) {
+  function formatValue(data, aggType, rowVal, colVal) {
+    if (numericAggs.includes(aggType)) {
+      return computeAggValue(data, aggType);
+    }
+    const count = data;
     if (aggType === 'count') return count;
     if (aggType === 'pctTotal') return grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%';
     if (aggType === 'pctRow') return rowTotals[rowVal] > 0 ? (count / rowTotals[rowVal] * 100).toFixed(1) + '%' : '0%';
@@ -3850,9 +3911,11 @@ function generatePivotTable() {
   html += '<tr>';
   for (let c = 0; c <= colValuesArr.length; c++) {
     aggregations.forEach(agg => {
-      const label = agg.aggregation === 'count' ? 'Count' : 
-                    agg.aggregation === 'pctTotal' ? '%Tot' : 
-                    agg.aggregation === 'pctRow' ? '%Row' : '%Col';
+      const labels = {
+        count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev',
+        pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col'
+      };
+      const label = labels[agg.aggregation] || agg.aggregation;
       html += '<th style="font-size: 0.75rem; font-weight: normal;">' + label + '</th>';
     });
   }
@@ -3871,12 +3934,17 @@ function generatePivotTable() {
       });
     });
     // Row totals
-    aggregations.forEach(agg => {
-      const count = rowTotals[rv];
-      const displayVal = agg.aggregation === 'count' ? count : 
-                         agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
-                         agg.aggregation === 'pctRow' ? '100%' :
-                         (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%');
+    aggregations.forEach((agg, aggIdx) => {
+      let displayVal;
+      if (numericAggs.includes(agg.aggregation)) {
+        displayVal = computeAggValue(rowValuesData[aggIdx][rv], agg.aggregation);
+      } else {
+        const count = rowTotals[rv];
+        displayVal = agg.aggregation === 'count' ? count : 
+                     agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                     agg.aggregation === 'pctRow' ? '100%' :
+                     (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%');
+      }
       html += '<td class="pivot-total">' + displayVal + '</td>';
     });
     html += '</tr>';
@@ -3886,18 +3954,28 @@ function generatePivotTable() {
   html += '<tr class="pivot-total">';
   html += '<td class="pivot-row-header pivot-total">Total</td>';
   colValuesArr.forEach(cv => {
-    aggregations.forEach(agg => {
-      const count = colTotals[cv];
-      const displayVal = agg.aggregation === 'count' ? count :
-                         agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
-                         agg.aggregation === 'pctRow' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
-                         '100%';
+    aggregations.forEach((agg, aggIdx) => {
+      let displayVal;
+      if (numericAggs.includes(agg.aggregation)) {
+        displayVal = computeAggValue(colValuesData[aggIdx][cv], agg.aggregation);
+      } else {
+        const count = colTotals[cv];
+        displayVal = agg.aggregation === 'count' ? count :
+                     agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                     agg.aggregation === 'pctRow' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                     '100%';
+      }
       html += '<td>' + displayVal + '</td>';
     });
   });
   // Grand total
-  aggregations.forEach(agg => {
-    const displayVal = agg.aggregation === 'count' ? grandTotal : '100%';
+  aggregations.forEach((agg, aggIdx) => {
+    let displayVal;
+    if (numericAggs.includes(agg.aggregation)) {
+      displayVal = computeAggValue(grandValuesData[aggIdx], agg.aggregation);
+    } else {
+      displayVal = agg.aggregation === 'count' ? grandTotal : '100%';
+    }
     html += '<td>' + displayVal + '</td>';
   });
   html += '</tr>';
