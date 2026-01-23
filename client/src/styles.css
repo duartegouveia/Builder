@@ -1314,7 +1314,8 @@ input[type="checkbox"] {
 }
 
 .relation-input,
-.relation-textarea {
+.relation-textarea,
+.relation-select {
   width: 100%;
   padding: 4px 6px;
   font-size: 0.8125rem;
@@ -1324,9 +1325,28 @@ input[type="checkbox"] {
 }
 
 .relation-input:focus,
-.relation-textarea:focus {
+.relation-textarea:focus,
+.relation-select:focus {
   outline: none;
   border-color: var(--primary);
+}
+
+.relation-select {
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.relation-select option {
+  padding: 4px 8px;
+}
+
+.select-display {
+  display: inline-block;
+}
+
+.select-display-key {
+  color: var(--muted-foreground);
+  font-style: italic;
 }
 
 .relation-textarea {

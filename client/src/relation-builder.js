@@ -1,12 +1,13 @@
 import './styles.css';
 
-const COLUMN_TYPES = ['boolean', 'string', 'multilinestring', 'int', 'float', 'date', 'datetime', 'time', 'relation'];
+const COLUMN_TYPES = ['boolean', 'string', 'multilinestring', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
 
 // State management
 let state = {
   relation: null,
   columnNames: [],
   columnTypes: [],
+  options: {}, // {columnName: {key: htmlValue}}
   editable: false,
   
   // Pagination
@@ -128,6 +129,7 @@ function generateDemoRelation() {
   const columns = {
     id: 'int',
     name: 'string',
+    country: 'select',
     active: 'boolean',
     score: 'float',
     birth_date: 'date',
@@ -137,6 +139,23 @@ function generateDemoRelation() {
     orders: 'relation',
     tags: 'relation'
   };
+  
+  const options = {
+    country: {
+      pt: '🇵🇹 Portugal',
+      es: '🇪🇸 España',
+      fr: '🇫🇷 France',
+      de: '🇩🇪 Deutschland',
+      it: '🇮🇹 Italia',
+      uk: '🇬🇧 United Kingdom',
+      us: '🇺🇸 United States',
+      br: '🇧🇷 Brasil',
+      jp: '🇯🇵 Japan',
+      cn: '🇨🇳 China'
+    }
+  };
+  
+  const countryKeys = Object.keys(options.country);
   
   const columnKeys = Object.keys(columns);
   const columnTypes = Object.values(columns);
@@ -157,6 +176,11 @@ function generateDemoRelation() {
         }
       }
       
+      // Handle select type
+      if (type === 'select' && colName === 'country') {
+        return countryKeys[Math.floor(Math.random() * countryKeys.length)];
+      }
+      
       return generateRandomValue(type);
     });
     items.push(row);
@@ -165,6 +189,7 @@ function generateDemoRelation() {
   return {
     pot: 'relation',
     columns: columns,
+    options: options,
     items: items
   };
 }
@@ -688,7 +713,7 @@ function getVisibleColumns() {
 
 
 // Relation type functions
-function formatCellValue(value, type) {
+function formatCellValue(value, type, colName) {
   if (value === null || value === undefined) return '<span class="null-value">null</span>';
   
   if (type === 'relation') {
@@ -703,6 +728,13 @@ function formatCellValue(value, type) {
   }
   if (type === 'multilinestring') {
     return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
+  }
+  if (type === 'select') {
+    const colOptions = state.options[colName];
+    if (colOptions && colOptions[value] !== undefined) {
+      return `<span class="select-display">${colOptions[value]}</span>`;
+    }
+    return `<span class="select-display-key">${value}</span>`;
   }
   
   return String(value);
@@ -811,6 +843,22 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
       return wrapper;
     }
     
+    if (type === 'select') {
+      const colName = state.columnNames[colIdx];
+      const colOptions = state.options[colName];
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly select-display';
+      if (colOptions && colOptions[value] !== undefined) {
+        span.innerHTML = colOptions[value];
+      } else if (value !== null && value !== undefined) {
+        span.textContent = value;
+      } else {
+        span.textContent = '—';
+      }
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+    
     const span = document.createElement('span');
     span.className = 'relation-cell-readonly';
     if (type === 'multilinestring') {
@@ -859,6 +907,30 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
     textarea.className = 'relation-textarea';
     textarea.rows = 2;
     wrapper.appendChild(textarea);
+  } else if (type === 'select') {
+    const colName = state.columnNames[colIdx];
+    const colOptions = state.options[colName] || {};
+    const select = document.createElement('select');
+    select.dataset.row = rowIdx;
+    select.dataset.col = colIdx;
+    select.className = 'relation-select';
+    
+    // Add empty option for null
+    const emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = '— Select —';
+    select.appendChild(emptyOpt);
+    
+    // Add options
+    for (const [key, html] of Object.entries(colOptions)) {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.innerHTML = html;
+      if (value === key) opt.selected = true;
+      select.appendChild(opt);
+    }
+    
+    wrapper.appendChild(select);
   } else {
     const input = document.createElement('input');
     input.type = getInputType(type);
@@ -1343,7 +1415,7 @@ function attachTableEventListeners() {
   
   // Cell editing
   document.getElementById('relation-table-container').addEventListener('change', (e) => {
-    if (e.target.matches('.relation-input, .relation-textarea')) {
+    if (e.target.matches('.relation-input, .relation-textarea, .relation-select')) {
       updateRelationFromInput(e.target);
     }
   });
@@ -2280,6 +2352,8 @@ function updateRelationFromInput(input) {
     value = parseFloat(input.value) || 0;
   } else if (type === 'datetime') {
     value = input.value.replace('T', ' ');
+  } else if (type === 'select') {
+    value = input.value || null;
   } else {
     value = input.value;
   }
@@ -2308,6 +2382,7 @@ function init() {
       state.relation = result.data;
       state.columnNames = Object.keys(result.data.columns);
       state.columnTypes = Object.values(result.data.columns);
+      state.options = result.data.options || {};
       state.editable = editable;
       state.currentPage = 1;
       state.selectedRows = new Set();
