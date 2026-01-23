@@ -916,6 +916,12 @@ function renderTable() {
   selectTh.innerHTML = `<input type="checkbox" id="select-all-checkbox" />`;
   headerRow.appendChild(selectTh);
   
+  // Operations column header (position 2)
+  const opsTh = document.createElement('th');
+  opsTh.className = 'relation-th-ops';
+  opsTh.textContent = '';
+  headerRow.appendChild(opsTh);
+  
   // Index column
   const indexTh = document.createElement('th');
   indexTh.textContent = '#';
@@ -999,12 +1005,6 @@ function renderTable() {
     headerRow.appendChild(th);
   });
   
-  // Operations column header
-  const opsTh = document.createElement('th');
-  opsTh.className = 'relation-th-ops';
-  opsTh.textContent = '';
-  headerRow.appendChild(opsTh);
-  
   thead.appendChild(headerRow);
   table.appendChild(thead);
   
@@ -1031,6 +1031,12 @@ function renderTable() {
     selectTd.appendChild(selectCheckbox);
     tr.appendChild(selectTd);
     
+    // Operations button (position 2)
+    const opsTd = document.createElement('td');
+    opsTd.className = 'relation-td-ops';
+    opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
+    tr.appendChild(opsTd);
+    
     // Index
     const indexTd = document.createElement('td');
     indexTd.textContent = rowIdx + 1;
@@ -1048,12 +1054,6 @@ function renderTable() {
       tr.appendChild(td);
     });
     
-    // Operations button
-    const opsTd = document.createElement('td');
-    opsTd.className = 'relation-td-ops';
-    opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
-    tr.appendChild(opsTd);
-    
     tbody.appendChild(tr);
   });
   
@@ -1064,6 +1064,7 @@ function renderTable() {
   const footerRow = document.createElement('tr');
   
   footerRow.appendChild(document.createElement('td')); // Select column
+  footerRow.appendChild(document.createElement('td')); // Operations column
   footerRow.appendChild(document.createElement('td')); // Index column
   
   state.columnNames.forEach((_, colIdx) => {
@@ -1074,8 +1075,6 @@ function renderTable() {
     td.innerHTML = `<button class="btn-stats" data-col="${colIdx}">Σ Stats</button>`;
     footerRow.appendChild(td);
   });
-  
-  footerRow.appendChild(document.createElement('td')); // Operations column
   
   tfoot.appendChild(footerRow);
   table.appendChild(tfoot);
