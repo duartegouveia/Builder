@@ -4377,6 +4377,54 @@ function init() {
       }
     }
   });
+  
+  // Voice input button
+  const btnVoice = document.getElementById('btn-ai-voice');
+  let recognition = null;
+  
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      aiQuestion.value = transcript;
+      btnVoice.classList.remove('recording');
+      btnVoice.querySelector('svg').style.color = '';
+    };
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      btnVoice.classList.remove('recording');
+      btnVoice.querySelector('svg').style.color = '';
+      if (event.error === 'not-allowed') {
+        alert('Microphone access denied. Please allow microphone access to use voice input.');
+      }
+    };
+    
+    recognition.onend = () => {
+      btnVoice.classList.remove('recording');
+      btnVoice.querySelector('svg').style.color = '';
+    };
+    
+    btnVoice?.addEventListener('click', () => {
+      if (btnVoice.classList.contains('recording')) {
+        recognition.stop();
+      } else {
+        btnVoice.classList.add('recording');
+        btnVoice.querySelector('svg').style.color = '#ef4444';
+        recognition.start();
+      }
+    });
+  } else {
+    // Browser doesn't support speech recognition
+    btnVoice?.addEventListener('click', () => {
+      alert('Voice input is not supported in this browser. Please use Chrome or Edge.');
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
