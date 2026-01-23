@@ -467,13 +467,14 @@ function generateFrequencyTableHTML(stats, colName, order = 'desc') {
 function generateBoxPlotSVG(stats) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
   
-  const width = 200;
+  const width = 320;
   const height = 180;
   const padding = { top: 15, bottom: 25, left: 45, right: 15 };
   const plotHeight = height - padding.top - padding.bottom;
   const scatterX = 70;  // X position for scatter points
-  const boxX = 130;     // X position for box plot
+  const boxX = 115;     // X position for box plot
   const boxWidth = 30;
+  const labelX = 170;   // X position for annotations
   
   const min = stats.min;
   const max = stats.max;
@@ -537,6 +538,29 @@ function generateBoxPlotSVG(stats) {
   // Mean marker (diamond)
   const meanY = scaleY(stats.mean);
   svg += `<polygon points="${boxX + boxWidth/2},${meanY - 4} ${boxX + boxWidth/2 + 4},${meanY} ${boxX + boxWidth/2},${meanY + 4} ${boxX + boxWidth/2 - 4},${meanY}" fill="#22c55e" stroke="#16a34a" stroke-width="1"/>`;
+  
+  // Annotations (right side labels)
+  const annotationStyle = 'font-size="8" fill="#666"';
+  
+  // Upper whisker annotation
+  svg += `<line x1="${boxX + boxWidth}" y1="${whiskerHighY}" x2="${labelX - 5}" y2="${whiskerHighY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR</text>`;
+  
+  // Q3 annotation
+  svg += `<line x1="${boxX + boxWidth}" y1="${q3Y}" x2="${labelX - 5}" y2="${q3Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${q3Y + 3}" ${annotationStyle}>Q3 (75%)</text>`;
+  
+  // Median annotation
+  svg += `<line x1="${boxX + boxWidth}" y1="${medianY}" x2="${labelX - 5}" y2="${medianY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>Median (50%)</text>`;
+  
+  // Q1 annotation
+  svg += `<line x1="${boxX + boxWidth}" y1="${q1Y}" x2="${labelX - 5}" y2="${q1Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${q1Y + 3}" ${annotationStyle}>Q1 (25%)</text>`;
+  
+  // Lower whisker annotation
+  svg += `<line x1="${boxX + boxWidth}" y1="${whiskerLowY}" x2="${labelX - 5}" y2="${whiskerLowY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
+  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR</text>`;
   
   // Outliers on box plot side
   stats.outliers.forEach(val => {
