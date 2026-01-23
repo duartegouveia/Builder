@@ -2081,6 +2081,7 @@ function renderTable() {
       const currentValue = state.groupBySelectedValues[colIdx];
       const hasSelection = currentValue !== undefined;
       
+      const colType = state.columnTypes[colIdx];
       groupHtml += `
         <div class="group-by-col" data-col="${colIdx}">
           <strong>${colName}:</strong>
@@ -2088,9 +2089,17 @@ function renderTable() {
             <option value="__all__"${!hasSelection ? ' selected' : ''}>All (${uniqueValues.length})</option>
             ${uniqueValues.map(v => {
               const val = v === null ? '__null__' : v;
-              const label = v === null ? '(null)' : String(v);
+              let label;
+              if (v === null) {
+                label = '(null)';
+              } else if (colType === 'select') {
+                const colOptions = state.options[colName];
+                label = (colOptions && colOptions[v] !== undefined) ? colOptions[v] : String(v);
+              } else {
+                label = String(v);
+              }
               const selected = hasSelection && String(currentValue) === String(v) ? ' selected' : '';
-              return `<option value="${val}"${selected}>${label}</option>`;
+              return `<option value="${val}"${selected}>${escapeHtml(label)}</option>`;
             }).join('')}
           </select>
         </div>
