@@ -48,7 +48,7 @@ function generateRandomString(length = 8) {
   return result;
 }
 
-function generateRandomValue(type) {
+function generateRandomValue(type, nestedRelationSchema = null) {
   switch (type) {
     case 'boolean':
       return Math.random() > 0.5;
@@ -77,12 +77,54 @@ function generateRandomValue(type) {
       const m = String(Math.floor(Math.random() * 60)).padStart(2, '0');
       const s = String(Math.floor(Math.random() * 60)).padStart(2, '0');
       return `${h}:${m}:${s}`;
+    case 'relation':
+      if (nestedRelationSchema) {
+        return generateNestedRelation(nestedRelationSchema);
+      }
+      return null;
     default:
       return null;
   }
 }
 
+function generateNestedRelation(schema) {
+  const numRows = Math.floor(Math.random() * 4) + 1; // 1-4 rows
+  const columnTypes = Object.values(schema.columns);
+  const items = [];
+  
+  for (let i = 0; i < numRows; i++) {
+    const row = columnTypes.map((type, idx) => {
+      if (Math.random() < 0.1) return null; // 10% nulls
+      return generateRandomValue(type);
+    });
+    items.push(row);
+  }
+  
+  return {
+    pot: 'relation',
+    columns: schema.columns,
+    items: items
+  };
+}
+
 function generateDemoRelation() {
+  // Define nested relation schemas (consistent across all rows)
+  const ordersSchema = {
+    columns: {
+      order_id: 'int',
+      product: 'string',
+      quantity: 'int',
+      price: 'float'
+    }
+  };
+  
+  const tagsSchema = {
+    columns: {
+      tag_name: 'string',
+      priority: 'int'
+    }
+  };
+  
   const columns = {
     id: 'int',
     name: 'string',
@@ -91,15 +133,30 @@ function generateDemoRelation() {
     birth_date: 'date',
     created_at: 'datetime',
     start_time: 'time',
-    notes: 'multilinestring'
+    notes: 'multilinestring',
+    orders: 'relation',
+    tags: 'relation'
   };
   
+  const columnKeys = Object.keys(columns);
   const columnTypes = Object.values(columns);
   const items = [];
+  
   for (let i = 0; i < 50; i++) {
     const row = columnTypes.map((type, idx) => {
-      if (idx === 0) return i + 1;
+      const colName = columnKeys[idx];
+      if (colName === 'id') return i + 1;
       if (Math.random() < 0.05) return null; // 5% nulls
+      
+      // Handle nested relations with their schemas
+      if (type === 'relation') {
+        if (colName === 'orders') {
+          return generateRandomValue('relation', ordersSchema);
+        } else if (colName === 'tags') {
+          return generateRandomValue('relation', tagsSchema);
+        }
+      }
+      
       return generateRandomValue(type);
     });
     items.push(row);
