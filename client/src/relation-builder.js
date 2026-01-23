@@ -1273,52 +1273,83 @@ function showColumnMenu(colIdx, x, y) {
   
   menu.innerHTML = `
     <div class="column-menu-header">${name} (${type})</div>
-    <div class="column-menu-section">
-      <div class="column-menu-title">Sort</div>
-      <button class="column-menu-item" data-action="sort-asc">↑ Ascending</button>
-      <button class="column-menu-item" data-action="sort-desc">↓ Descending</button>
-      <button class="column-menu-item" data-action="sort-clear">✕ Clear Sort</button>
-    </div>
-    <div class="column-menu-section">
-      <div class="column-menu-title">Filter</div>
-      <button class="column-menu-item" data-action="filter-values">By Values...</button>
-      ${type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
-        <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
-        <button class="column-menu-item" data-action="filter-top10">Top 10</button>
-        <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
+    <div class="column-menu-accordion">
+      <div class="accordion-section" data-section="sort">
+        <div class="accordion-header">Sort <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item" data-action="sort-asc">↑ Ascending</button>
+          <button class="column-menu-item" data-action="sort-desc">↓ Descending</button>
+          <button class="column-menu-item" data-action="sort-clear">✕ Clear Sort</button>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="filter">
+        <div class="accordion-header">Filter <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item" data-action="filter-values">By Values...</button>
+          ${type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
+            <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
+            <button class="column-menu-item" data-action="filter-top10">Top 10</button>
+            <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
+          ` : ''}
+          <button class="column-menu-item" data-action="filter-null">Only Null</button>
+          <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
+          <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="group">
+        <div class="accordion-header">Group By <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item ${isGrouped ? 'active' : ''}" data-action="toggle-group">${isGrouped ? '✓ Grouped' : 'Group by this column'}</button>
+          <button class="column-menu-item" data-action="clear-groups">✕ Clear All Groups</button>
+        </div>
+      </div>
+      ${type === 'relation' ? `
+      <div class="accordion-section" data-section="relation">
+        <div class="accordion-header">Relation <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item" data-action="expand-relation">⊗ Cartesian Product</button>
+        </div>
+      </div>
       ` : ''}
-      <button class="column-menu-item" data-action="filter-null">Only Null</button>
-      <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
-      <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
-    </div>
-    <div class="column-menu-section">
-      <div class="column-menu-title">Group By</div>
-      <button class="column-menu-item ${isGrouped ? 'active' : ''}" data-action="toggle-group">${isGrouped ? '✓ Grouped' : 'Group by this column'}</button>
-      <button class="column-menu-item" data-action="clear-groups">✕ Clear All Groups</button>
-    </div>
-    ${type === 'relation' ? `
-    <div class="column-menu-section">
-      <div class="column-menu-title">Relation</div>
-      <button class="column-menu-item" data-action="expand-relation">⊗ Cartesian Product</button>
-    </div>
-    ` : ''}
-    <div class="column-menu-section">
-      <div class="column-menu-title">Column Selection</div>
-      <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
-      ${state.selectedColumns.size > 0 ? `
-        <button class="column-menu-item" data-action="group-selected-cols">Group Selected → Relation</button>
-        <button class="column-menu-item" data-action="clear-col-selection">Clear Selection</button>
-      ` : ''}
-    </div>
-    <div class="column-menu-section">
-      <div class="column-menu-title">Conditional Formatting</div>
-      <button class="column-menu-item" data-action="format-databar">Data Bar</button>
-      <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
-      <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
+      <div class="accordion-section" data-section="selection">
+        <div class="accordion-header">Column Selection <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
+          ${state.selectedColumns.size > 0 ? `
+            <button class="column-menu-item" data-action="group-selected-cols">Group Selected → Relation</button>
+            <button class="column-menu-item" data-action="clear-col-selection">Clear Selection</button>
+          ` : ''}
+        </div>
+      </div>
+      <div class="accordion-section" data-section="formatting">
+        <div class="accordion-header">Conditional Formatting <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item" data-action="format-databar">Data Bar</button>
+          <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
+          <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
+        </div>
+      </div>
     </div>
   `;
   
   document.body.appendChild(menu);
+  
+  // Accordion behavior - only one open at a time
+  menu.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const section = header.parentElement;
+      const isOpen = section.classList.contains('open');
+      
+      // Close all sections
+      menu.querySelectorAll('.accordion-section').forEach(s => s.classList.remove('open'));
+      
+      // Open clicked section if it was closed
+      if (!isOpen) {
+        section.classList.add('open');
+      }
+    });
+  });
   
   menu.addEventListener('click', (e) => {
     const action = e.target.dataset.action;

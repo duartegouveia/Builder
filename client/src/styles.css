@@ -1597,27 +1597,59 @@ input[type="number"] {
   border-bottom: 1px solid var(--border);
 }
 
-.column-menu-section {
-  padding: var(--space-1) 0;
+.column-menu-accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion-section {
   border-bottom: 1px solid var(--border-light);
 }
 
-.column-menu-section:last-child {
+.accordion-section:last-child {
   border-bottom: none;
 }
 
-.column-menu-title {
-  padding: var(--space-1) var(--space-3);
-  font-size: 0.6875rem;
-  font-weight: 600;
+.accordion-header {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.accordion-header:hover {
+  background: var(--slate-50);
+}
+
+.accordion-arrow {
+  font-size: 0.625rem;
   color: var(--muted-foreground);
-  text-transform: uppercase;
+  transition: transform 0.15s ease;
+}
+
+.accordion-section.open .accordion-arrow {
+  transform: rotate(90deg);
+}
+
+.accordion-content {
+  display: none;
+  padding-bottom: var(--space-1);
+}
+
+.accordion-section.open .accordion-content {
+  display: block;
 }
 
 .column-menu-item {
   display: block;
   width: 100%;
   padding: var(--space-2) var(--space-3);
+  padding-left: var(--space-4);
   text-align: left;
   background: none;
   border: none;
