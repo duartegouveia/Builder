@@ -2,10 +2,11 @@
 
 ## Overview
 
-Error Propagator is a scientific web application designed for experimental error propagation calculations. The application provides two main tools:
+Error Propagator is a scientific web application designed for experimental error propagation calculations. The application provides three main tools:
 
-1. **Experiment Calculator** - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
-2. **Logic Builder** - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.)
+1. **Logic Builder** (/) - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.) and mathematical operators (arithmetic, trigonometric, summation/product)
+2. **Error Propagator** (/logic.html) - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
+3. **Relation Builder** (/relation.html) - An advanced data table interface for creating, viewing, and editing relational data with JSON input/output
 
 The application uses vanilla JavaScript for the frontend and Express.js for the backend.
 
@@ -26,12 +27,14 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite
 
 The frontend uses separate HTML files:
-- `client/index.html` - Error Propagator page (serves at /)
-- `client/logic.html` - Logic Builder page (serves at /logic.html)
+- `client/index.html` - Logic Builder page (serves at /)
+- `client/logic.html` - Error Propagator page (serves at /logic.html)
+- `client/relation.html` - Relation Builder page (serves at /relation.html)
 
 JavaScript files in `client/src/`:
+- `logic-builder.js` - Logic Builder interactivity
 - `experiment-calc.js` - Error Propagator interactivity
-- `logic-builder.js` - Logic Builder interactivity  
+- `relation-builder.js` - Relation Builder with advanced table features
 - `lib/error-utils.js` - Error propagation calculations using mathjs
 - `styles.css` - All application styles
 
@@ -71,8 +74,37 @@ The backend is located in `server/` with:
 The application uses multi-page routing with separate HTML files:
 - `/` - Logic Builder (index.html) - Main page
 - `/logic.html` - Error Propagator (logic.html)
+- `/relation.html` - Relation Builder (relation.html)
 
 Navigation uses standard anchor links between HTML pages.
+
+## Relation Builder Features
+
+The Relation Builder provides an advanced data table interface:
+
+### Data Structure
+A relation is a JSON object with:
+- `pot`: "relation" (identifies the object type)
+- `columns`: Object mapping column names to types (e.g., `{"id": "int", "name": "string"}`)
+- `items`: Array of arrays containing row data
+
+Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`
+
+### Table Features
+1. **Pagination** - 20/50/100/all per page, first/prev/next/last navigation, direct page input
+2. **Selection** - Row checkboxes, three-state header checkbox, invert selection (page/all)
+3. **Sorting** - Click header to sort, Shift+click for multi-column with priority indicators
+4. **Filtering** - Right-click context menu with:
+   - Filter by values (checkbox list)
+   - Null/Not null filters
+   - Top 10 / Top 10% (numeric columns)
+5. **Conditional Formatting** - Data bars, color scales via context menu
+6. **Statistics Footer** - Per-column statistics panel showing:
+   - Count, nulls, min, max, range, sum
+   - Mean, median, mode
+   - Std dev, variance
+   - Q1, Q3, IQR
+   - Skewness, kurtosis (for numeric columns)
 
 ## External Dependencies
 
