@@ -916,13 +916,14 @@ function renderPagination() {
   document.getElementById('btn-invert-page').addEventListener('click', () => invertSelection(true));
   document.getElementById('btn-invert-all').addEventListener('click', () => invertSelection(false));
   
-  // Row operations buttons
+  // Row operations buttons, nested relation buttons, and boolean checkboxes - single click handler
   document.getElementById('relation-table-container').addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-row-ops')) {
       const rowIdx = parseInt(e.target.dataset.row);
       const rect = e.target.getBoundingClientRect();
       showRowOperationsMenu(rowIdx, rect.left, rect.bottom + 5);
       e.stopPropagation();
+      return;
     }
     
     if (e.target.classList.contains('relation-cell-btn')) {
@@ -930,6 +931,35 @@ function renderPagination() {
       const colIdx = parseInt(e.target.dataset.col);
       showNestedRelationDialog(rowIdx, colIdx);
       e.stopPropagation();
+      return;
+    }
+    
+    // Tri-state boolean checkboxes (cycle: true → false → null → true)
+    if (e.target.matches('.bool-tristate')) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const checkbox = e.target;
+      const rowIdx = parseInt(checkbox.dataset.row);
+      const colIdx = parseInt(checkbox.dataset.col);
+      const currentValue = state.relation.items[rowIdx][colIdx];
+      
+      // Cycle: true → false → null → true
+      let newValue;
+      if (currentValue === true) {
+        newValue = false;
+      } else if (currentValue === false) {
+        newValue = null;
+      } else {
+        newValue = true;
+      }
+      
+      state.relation.items[rowIdx][colIdx] = newValue;
+      updateTextarea();
+      
+      // Update checkbox state immediately
+      updateBoolCheckbox(checkbox, newValue);
+      return;
     }
   });
 }
@@ -1195,52 +1225,27 @@ function attachTableEventListeners() {
       updateRelationFromInput(e.target);
     }
   });
-  
-  // Tri-state boolean checkboxes (cycle: true → false → null → true) - use event delegation
-  document.getElementById('relation-table-container').addEventListener('click', (e) => {
-    if (e.target.matches('.bool-tristate')) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const checkbox = e.target;
-      const rowIdx = parseInt(checkbox.dataset.row);
-      const colIdx = parseInt(checkbox.dataset.col);
-      const currentValue = state.relation.items[rowIdx][colIdx];
-      
-      // Cycle: true → false → null → true
-      let newValue;
-      if (currentValue === true) {
-        newValue = false;
-      } else if (currentValue === false) {
-        newValue = null;
-      } else {
-        newValue = true;
-      }
-      
-      state.relation.items[rowIdx][colIdx] = newValue;
-      updateTextarea();
-      
-      // Update checkbox state immediately
-      updateBoolCheckbox(checkbox, newValue);
-    }
-  });
 }
 
 function updateBoolCheckbox(checkbox, value) {
   checkbox.classList.remove('bool-tristate-true', 'bool-tristate-false', 'bool-tristate-null');
-  if (value === true) {
-    checkbox.checked = true;
-    checkbox.indeterminate = false;
-    checkbox.classList.add('bool-tristate-true');
-  } else if (value === false) {
-    checkbox.checked = false;
-    checkbox.indeterminate = false;
-    checkbox.classList.add('bool-tristate-false');
-  } else {
-    checkbox.checked = false;
-    checkbox.indeterminate = true;
-    checkbox.classList.add('bool-tristate-null');
-  }
+  
+  // Use setTimeout to ensure DOM properties are set after the event cycle completes
+  setTimeout(() => {
+    if (value === true) {
+      checkbox.checked = true;
+      checkbox.indeterminate = false;
+      checkbox.classList.add('bool-tristate-true');
+    } else if (value === false) {
+      checkbox.checked = false;
+      checkbox.indeterminate = false;
+      checkbox.classList.add('bool-tristate-false');
+    } else {
+      checkbox.checked = false;
+      checkbox.indeterminate = true;
+      checkbox.classList.add('bool-tristate-null');
+    }
+  }, 0);
 }
 
 function handleSort(colIdx, addToExisting) {
