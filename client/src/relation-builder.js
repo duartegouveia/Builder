@@ -3586,8 +3586,8 @@ function renderCardsView() {
   
   // Calculate cards per row based on container width
   const containerWidth = container.parentElement.offsetWidth || 900;
-  const cardMinWidth = 280;
-  const cardsPerRow = Math.max(1, Math.floor(containerWidth / cardMinWidth));
+  const cardMinWidth = 200;
+  const cardsPerRow = Math.max(2, Math.floor(containerWidth / cardMinWidth));
   
   // Calculate page sizes (3, 6, 9, 12 rows of cards)
   const pageSizeOptions = [3, 6, 9, 12].map(rows => rows * cardsPerRow);

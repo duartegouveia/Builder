@@ -2536,9 +2536,13 @@ input[type="number"] {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: var(--space-3);
+  padding: var(--space-2);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   transition: box-shadow 0.15s ease;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .data-card:hover {
@@ -2554,9 +2558,15 @@ input[type="number"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-2);
-  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-1);
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.data-card-content {
+  flex: 1;
+  overflow: hidden;
 }
 
 .data-card-checkbox {
@@ -2570,19 +2580,20 @@ input[type="number"] {
 }
 
 .data-card-field {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+  line-height: 1.2;
 }
 
 .data-card-label {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   color: var(--muted-foreground);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .data-card-value {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
