@@ -117,6 +117,29 @@ Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, 
     - Suggest and apply filters based on natural language queries
     - Uses OpenAI via Replit AI Integrations (no API key required)
 
+### View Tabs System
+The Relation Builder has 6 different views accessible via tabs:
+
+1. **Table View** - Default view showing data in tabular format with all table features
+2. **Cards View** - Grid of equal-sized cards, one per row
+   - Responsive grid layout based on container width
+   - Truncated text with tooltips for full content
+   - Pagination with 3/6/9/12 rows options
+   - Automatic resize handling with ResizeObserver
+3. **Pivot Table View** - Cross-tabulation of two categorical/numeric columns
+   - Row and column dimension selectors
+   - Up to 4 aggregation values: Count, % Total, % Row, % Column
+   - Subtotals and grand totals
+4. **Correlation View** - Two-column correlation analysis
+   - Pearson correlation for numeric/temporal columns (with scatter plot and trend line)
+   - Cramér's V for categorical columns (association measure)
+   - Visual strength indicators
+5. **Diagram View** - Force-directed clustering visualization
+   - Each row represented as a colored circle
+   - Similar rows cluster together based on categorical/numeric values
+   - Uses force-atlas-like algorithm for layout
+6. **AI View** - Natural language data assistant (moved from separate panel)
+
 ## External Dependencies
 
 ### Scientific Computing
