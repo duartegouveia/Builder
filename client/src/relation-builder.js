@@ -471,9 +471,10 @@ function formatCellValue(value, type) {
     return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
   }
   if (type === 'boolean') {
-    if (value === true) return '<input type="checkbox" class="bool-checkbox bool-checkbox-true" checked disabled>';
-    if (value === false) return '<input type="checkbox" class="bool-checkbox bool-checkbox-false" disabled>';
-    return '<input type="checkbox" class="bool-checkbox bool-checkbox-null" disabled>';
+    // Checkboxes are handled separately in renderTable to allow interaction
+    if (value === true) return '<span class="bool-display bool-display-true">✓</span>';
+    if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
+    return '<span class="bool-display bool-display-null">—</span>';
   }
   if (type === 'multilinestring') {
     return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
@@ -563,12 +564,31 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
   wrapper.className = 'relation-cell-input';
   
   if (!editable) {
+    if (type === 'boolean') {
+      // Boolean uses tri-state checkbox even in read-only mode
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.dataset.row = rowIdx;
+      checkbox.dataset.col = colIdx;
+      checkbox.className = 'bool-tristate';
+      if (value === true) {
+        checkbox.checked = true;
+        checkbox.classList.add('bool-tristate-true');
+      } else if (value === false) {
+        checkbox.checked = false;
+        checkbox.classList.add('bool-tristate-false');
+      } else {
+        checkbox.checked = false;
+        checkbox.indeterminate = true;
+        checkbox.classList.add('bool-tristate-null');
+      }
+      wrapper.appendChild(checkbox);
+      return wrapper;
+    }
+    
     const span = document.createElement('span');
     span.className = 'relation-cell-readonly';
-    if (type === 'boolean') {
-      span.textContent = value === null ? '—' : (value ? '✓' : '✗');
-      span.className += value === null ? ' relation-bool-null' : (value ? ' relation-bool-true' : ' relation-bool-false');
-    } else if (type === 'multilinestring') {
+    if (type === 'multilinestring') {
       span.className = 'relation-cell-multiline';
       span.textContent = value || '—';
     } else {
@@ -588,12 +608,23 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
     btn.dataset.col = colIdx;
     wrapper.appendChild(btn);
   } else if (type === 'boolean') {
+    // Boolean uses tri-state checkbox
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.checked = value === true || value === 'true';
     checkbox.dataset.row = rowIdx;
     checkbox.dataset.col = colIdx;
-    checkbox.className = 'relation-checkbox';
+    checkbox.className = 'bool-tristate';
+    if (value === true) {
+      checkbox.checked = true;
+      checkbox.classList.add('bool-tristate-true');
+    } else if (value === false) {
+      checkbox.checked = false;
+      checkbox.classList.add('bool-tristate-false');
+    } else {
+      checkbox.checked = false;
+      checkbox.indeterminate = true;
+      checkbox.classList.add('bool-tristate-null');
+    }
     wrapper.appendChild(checkbox);
   } else if (type === 'multilinestring') {
     const textarea = document.createElement('textarea');
@@ -1052,9 +1083,47 @@ function attachTableEventListeners() {
   
   // Cell editing
   document.getElementById('relation-table-container').addEventListener('change', (e) => {
-    if (e.target.matches('.relation-input, .relation-textarea, .relation-checkbox')) {
+    if (e.target.matches('.relation-input, .relation-textarea')) {
       updateRelationFromInput(e.target);
     }
+  });
+  
+  // Tri-state boolean checkboxes (cycle: true → false → null → true)
+  document.querySelectorAll('.bool-tristate').forEach(checkbox => {
+    checkbox.addEventListener('click', (e) => {
+      e.preventDefault();
+      const rowIdx = parseInt(checkbox.dataset.row);
+      const colIdx = parseInt(checkbox.dataset.col);
+      const currentValue = state.relation.items[rowIdx][colIdx];
+      
+      // Cycle: true → false → null → true
+      let newValue;
+      if (currentValue === true) {
+        newValue = false;
+      } else if (currentValue === false) {
+        newValue = null;
+      } else {
+        newValue = true;
+      }
+      
+      state.relation.items[rowIdx][colIdx] = newValue;
+      updateTextarea();
+      
+      // Update checkbox state
+      if (newValue === true) {
+        checkbox.checked = true;
+        checkbox.indeterminate = false;
+        checkbox.className = 'bool-tristate bool-tristate-true';
+      } else if (newValue === false) {
+        checkbox.checked = false;
+        checkbox.indeterminate = false;
+        checkbox.className = 'bool-tristate bool-tristate-false';
+      } else {
+        checkbox.checked = false;
+        checkbox.indeterminate = true;
+        checkbox.className = 'bool-tristate bool-tristate-null';
+      }
+    });
   });
 }
 
