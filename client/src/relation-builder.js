@@ -1632,6 +1632,13 @@ function showFilterComparisonDialog(colIdx) {
 }
 
 function showStatisticsPanel(colIdx) {
+  // Check if panel for this column is already open - if so, close it (toggle behavior)
+  const existingPanel = document.querySelector(`.stats-panel[data-col="${colIdx}"]`);
+  if (existingPanel) {
+    existingPanel.remove();
+    return;
+  }
+  
   closeAllMenus();
   
   const stats = calculateStatistics(colIdx);
@@ -1640,6 +1647,7 @@ function showStatisticsPanel(colIdx) {
   
   const panel = document.createElement('div');
   panel.className = 'stats-panel';
+  panel.dataset.col = colIdx;
   
   let statsHtml = `
     <div class="stats-row"><span>Total Records:</span><span>${stats.total}</span></div>
