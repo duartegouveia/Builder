@@ -365,6 +365,112 @@ function compareValues(a, b, type) {
   return String(a).localeCompare(String(b));
 }
 
+// Box Plot SVG Generator
+function generateBoxPlotSVG(stats) {
+  if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
+  
+  const width = 200;
+  const height = 180;
+  const padding = { top: 15, bottom: 25, left: 45, right: 15 };
+  const plotHeight = height - padding.top - padding.bottom;
+  const scatterX = 70;  // X position for scatter points
+  const boxX = 130;     // X position for box plot
+  const boxWidth = 30;
+  
+  const min = stats.min;
+  const max = stats.max;
+  const range = max - min || 1;
+  
+  // Scale function: value to Y position (inverted because SVG Y grows downward)
+  const scaleY = (val) => padding.top + plotHeight - ((val - min) / range) * plotHeight;
+  
+  let svg = `<svg width="${width}" height="${height}" class="boxplot-svg">`;
+  
+  // Y-axis
+  svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#666" stroke-width="1"/>`;
+  
+  // Y-axis ticks and labels
+  const tickValues = [min, stats.q1, stats.median, stats.q3, max];
+  tickValues.forEach(val => {
+    const y = scaleY(val);
+    svg += `<line x1="${padding.left - 4}" y1="${y}" x2="${padding.left}" y2="${y}" stroke="#666" stroke-width="1"/>`;
+    svg += `<text x="${padding.left - 6}" y="${y + 3}" text-anchor="end" font-size="9" fill="#888">${val.toFixed(1)}</text>`;
+  });
+  
+  // Scatter plot points (left column) with jitter
+  const jitterRange = 15;
+  stats.allNumericValues.forEach((val, i) => {
+    const y = scaleY(val);
+    const jitter = (Math.random() - 0.5) * jitterRange;
+    const x = scatterX + jitter;
+    
+    // Determine color based on outlier status
+    let color = 'rgba(74, 144, 226, 0.15)'; // Normal - blue with 10% opacity
+    if (stats.farOutliers.includes(val)) {
+      color = 'rgba(220, 53, 69, 0.5)'; // Far outlier - red
+    } else if (stats.outliers.includes(val)) {
+      color = 'rgba(255, 152, 0, 0.5)'; // Outlier - orange
+    }
+    
+    svg += `<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`;
+  });
+  
+  // Box plot (right side)
+  const q1Y = scaleY(stats.q1);
+  const q3Y = scaleY(stats.q3);
+  const medianY = scaleY(stats.median);
+  const whiskerLowY = scaleY(stats.whiskerLow);
+  const whiskerHighY = scaleY(stats.whiskerHigh);
+  
+  // Whiskers (vertical lines)
+  svg += `<line x1="${boxX + boxWidth/2}" y1="${whiskerHighY}" x2="${boxX + boxWidth/2}" y2="${q3Y}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  svg += `<line x1="${boxX + boxWidth/2}" y1="${q1Y}" x2="${boxX + boxWidth/2}" y2="${whiskerLowY}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  
+  // Whisker caps (horizontal lines)
+  svg += `<line x1="${boxX + boxWidth/4}" y1="${whiskerHighY}" x2="${boxX + 3*boxWidth/4}" y2="${whiskerHighY}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  svg += `<line x1="${boxX + boxWidth/4}" y1="${whiskerLowY}" x2="${boxX + 3*boxWidth/4}" y2="${whiskerLowY}" stroke="#4a90e2" stroke-width="1.5"/>`;
+  
+  // Box (Q1 to Q3)
+  svg += `<rect x="${boxX}" y="${q3Y}" width="${boxWidth}" height="${q1Y - q3Y}" fill="rgba(74, 144, 226, 0.3)" stroke="#4a90e2" stroke-width="1.5"/>`;
+  
+  // Median line
+  svg += `<line x1="${boxX}" y1="${medianY}" x2="${boxX + boxWidth}" y2="${medianY}" stroke="#2563eb" stroke-width="2"/>`;
+  
+  // Mean marker (diamond)
+  const meanY = scaleY(stats.mean);
+  svg += `<polygon points="${boxX + boxWidth/2},${meanY - 4} ${boxX + boxWidth/2 + 4},${meanY} ${boxX + boxWidth/2},${meanY + 4} ${boxX + boxWidth/2 - 4},${meanY}" fill="#22c55e" stroke="#16a34a" stroke-width="1"/>`;
+  
+  // Outliers on box plot side
+  stats.outliers.forEach(val => {
+    const y = scaleY(val);
+    svg += `<circle cx="${boxX + boxWidth/2}" cy="${y}" r="4" fill="none" stroke="#ff9800" stroke-width="1.5"/>`;
+  });
+  
+  // Far outliers on box plot side
+  stats.farOutliers.forEach(val => {
+    const y = scaleY(val);
+    svg += `<circle cx="${boxX + boxWidth/2}" cy="${y}" r="4" fill="none" stroke="#dc3545" stroke-width="2"/>`;
+    svg += `<line x1="${boxX + boxWidth/2 - 2}" y1="${y - 2}" x2="${boxX + boxWidth/2 + 2}" y2="${y + 2}" stroke="#dc3545" stroke-width="1.5"/>`;
+    svg += `<line x1="${boxX + boxWidth/2 - 2}" y1="${y + 2}" x2="${boxX + boxWidth/2 + 2}" y2="${y - 2}" stroke="#dc3545" stroke-width="1.5"/>`;
+  });
+  
+  // Labels
+  svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Points</text>`;
+  svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Box</text>`;
+  
+  svg += `</svg>`;
+  
+  // Legend
+  let legend = `<div class="boxplot-legend">
+    <span><span class="legend-dot legend-normal"></span>Normal</span>
+    <span><span class="legend-dot legend-outlier"></span>Outlier</span>
+    <span><span class="legend-dot legend-far"></span>Far outlier</span>
+    <span><span class="legend-diamond"></span>Mean</span>
+  </div>`;
+  
+  return `<div class="boxplot-container">${svg}${legend}</div>`;
+}
+
 // Statistics functions
 function calculateStatistics(colIdx) {
   const values = state.relation.items
@@ -414,6 +520,22 @@ function calculateStatistics(colIdx) {
       stats.q1 = nums[q1Idx];
       stats.q3 = nums[q3Idx];
       stats.iqr = stats.q3 - stats.q1;
+      
+      // Whiskers and outliers for box plot
+      const lowerWhisker = stats.q1 - 1.5 * stats.iqr;
+      const upperWhisker = stats.q3 + 1.5 * stats.iqr;
+      const lowerFar = stats.q1 - 3 * stats.iqr;
+      const upperFar = stats.q3 + 3 * stats.iqr;
+      
+      // Find actual whisker endpoints (min/max within bounds)
+      stats.whiskerLow = nums.find(n => n >= lowerWhisker) ?? stats.min;
+      stats.whiskerHigh = nums.slice().reverse().find(n => n <= upperWhisker) ?? stats.max;
+      
+      // Classify points
+      stats.normalPoints = nums.filter(n => n >= lowerWhisker && n <= upperWhisker);
+      stats.outliers = nums.filter(n => (n < lowerWhisker && n >= lowerFar) || (n > upperWhisker && n <= upperFar));
+      stats.farOutliers = nums.filter(n => n < lowerFar || n > upperFar);
+      stats.allNumericValues = nums;
       
       // Skewness
       const n = nums.length;
@@ -1662,6 +1784,9 @@ function showStatisticsPanel(colIdx) {
   `;
   
   if (type === 'int' || type === 'float') {
+    // Add box plot visualization
+    statsHtml += generateBoxPlotSVG(stats);
+    
     statsHtml += `
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Min:</span><span>${stats.min?.toFixed(3) ?? '—'}</span></div>
@@ -1679,6 +1804,9 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>IQR:</span><span>${stats.iqr?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Outliers:</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>Far Outliers:</span><span>${stats.farOutliers?.length ?? 0}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Skewness:</span><span>${stats.skewness?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Kurtosis:</span><span>${stats.kurtosis?.toFixed(3) ?? '—'}</span></div>

@@ -1818,8 +1818,8 @@ input[type="number"] {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  width: 300px;
-  max-height: 500px;
+  width: 320px;
+  max-height: 600px;
   z-index: 1001;
   display: flex;
   flex-direction: column;
@@ -1863,6 +1863,78 @@ input[type="number"] {
   color: var(--muted-foreground);
   margin-top: var(--space-2);
   margin-bottom: var(--space-1);
+}
+
+/* Box Plot Styles */
+.boxplot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--space-3) 0;
+  padding: var(--space-2);
+  background: var(--background);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+}
+
+.boxplot-svg {
+  display: block;
+}
+
+.boxplot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+
+.boxplot-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.legend-normal {
+  background: rgba(74, 144, 226, 0.4);
+}
+
+.legend-dot.legend-outlier {
+  background: transparent;
+  border: 2px solid #ff9800;
+}
+
+.legend-dot.legend-far {
+  background: transparent;
+  border: 2px solid #dc3545;
+  position: relative;
+}
+
+.legend-diamond {
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-bottom-color: #22c55e;
+  position: relative;
+  top: -4px;
+}
+
+.legend-diamond::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 4px;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-top-color: #22c55e;
 }
 
 /* Footer Stats Button */
