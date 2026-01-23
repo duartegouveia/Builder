@@ -2084,12 +2084,13 @@ input[type="number"] {
 /* Shape Charts (Skewness & Kurtosis) */
 .shape-charts-row {
   display: flex;
-  gap: var(--space-3);
+  flex-direction: column;
+  gap: var(--space-2);
   margin-top: var(--space-2);
 }
 
 .shape-chart {
-  flex: 1;
+  width: 100%;
   background: var(--slate-50);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -2107,6 +2108,7 @@ input[type="number"] {
 .shape-svg {
   display: block;
   margin: 0 auto;
+  max-width: 100%;
 }
 
 .shape-chart-legend {
