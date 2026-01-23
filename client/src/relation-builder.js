@@ -2416,6 +2416,7 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-header">Column Selection <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
+          <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
           ${state.selectedColumns.size > 0 ? `
             <button class="column-menu-item" data-action="group-selected-cols">Group Selected → Relation</button>
             <button class="column-menu-item" data-action="clear-col-selection">Clear Selection</button>
@@ -2525,6 +2526,11 @@ function handleColumnMenuAction(colIdx, action) {
       } else {
         state.selectedColumns.add(colIdx);
       }
+      break;
+    case 'select-all-cols':
+      state.columnNames.forEach((_, idx) => {
+        state.selectedColumns.add(idx);
+      });
       break;
     case 'group-selected-cols':
       showGroupColumnsDialog();
