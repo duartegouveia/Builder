@@ -92,9 +92,25 @@ function parseRelation(jsonStr) {
   }
 }
 
-function createInputForType(type, value, rowIdx, colIdx) {
+function createInputForType(type, value, rowIdx, colIdx, editable) {
   const wrapper = document.createElement('div');
   wrapper.className = 'relation-cell-input';
+  
+  if (!editable) {
+    const span = document.createElement('span');
+    span.className = 'relation-cell-readonly';
+    if (type === 'boolean') {
+      span.textContent = value ? '✓' : '✗';
+      span.className += value ? ' relation-bool-true' : ' relation-bool-false';
+    } else if (type === 'multilinestring') {
+      span.className = 'relation-cell-multiline';
+      span.textContent = value || '';
+    } else {
+      span.textContent = value !== null && value !== undefined ? String(value) : '';
+    }
+    wrapper.appendChild(span);
+    return wrapper;
+  }
   
   if (type === 'boolean') {
     const checkbox = document.createElement('input');
@@ -152,7 +168,7 @@ function formatValueForInput(type, value) {
   return String(value);
 }
 
-function renderTable(relation) {
+function renderTable(relation, editable) {
   const container = document.getElementById('relation-table-container');
   container.innerHTML = '';
   
@@ -169,6 +185,9 @@ function renderTable(relation) {
   
   const table = document.createElement('table');
   table.className = 'relation-table';
+  if (!editable) {
+    table.classList.add('relation-table-readonly');
+  }
   
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
@@ -201,7 +220,7 @@ function renderTable(relation) {
     row.forEach((value, colIdx) => {
       const td = document.createElement('td');
       const type = columnTypes[colIdx];
-      td.appendChild(createInputForType(type, value, rowIdx, colIdx));
+      td.appendChild(createInputForType(type, value, rowIdx, colIdx, editable));
       tr.appendChild(td);
     });
     
@@ -214,6 +233,7 @@ function renderTable(relation) {
   
   window.currentRelation = relation;
   window.currentColumnTypes = columnTypes;
+  window.currentEditable = editable;
 }
 
 function updateRelationFromTable() {
@@ -261,8 +281,9 @@ function init() {
   
   btnParse.addEventListener('click', () => {
     const result = parseRelation(textarea.value);
+    const editable = document.getElementById('relation-editable').checked;
     if (result.success) {
-      renderTable(result.data);
+      renderTable(result.data, editable);
     } else {
       alert('Parse error: ' + result.error);
     }
