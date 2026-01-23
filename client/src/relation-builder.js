@@ -1149,6 +1149,8 @@ function attachTableEventListeners() {
   document.querySelectorAll('.bool-tristate').forEach(checkbox => {
     checkbox.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      
       const rowIdx = parseInt(checkbox.dataset.row);
       const colIdx = parseInt(checkbox.dataset.col);
       const currentValue = state.relation.items[rowIdx][colIdx];
@@ -1166,22 +1168,27 @@ function attachTableEventListeners() {
       state.relation.items[rowIdx][colIdx] = newValue;
       updateTextarea();
       
-      // Update checkbox state
-      if (newValue === true) {
-        checkbox.checked = true;
-        checkbox.indeterminate = false;
-        checkbox.className = 'bool-tristate bool-tristate-true';
-      } else if (newValue === false) {
-        checkbox.checked = false;
-        checkbox.indeterminate = false;
-        checkbox.className = 'bool-tristate bool-tristate-false';
-      } else {
-        checkbox.checked = false;
-        checkbox.indeterminate = true;
-        checkbox.className = 'bool-tristate bool-tristate-null';
-      }
+      // Update checkbox state immediately
+      updateBoolCheckbox(checkbox, newValue);
     });
   });
+}
+
+function updateBoolCheckbox(checkbox, value) {
+  checkbox.classList.remove('bool-tristate-true', 'bool-tristate-false', 'bool-tristate-null');
+  if (value === true) {
+    checkbox.checked = true;
+    checkbox.indeterminate = false;
+    checkbox.classList.add('bool-tristate-true');
+  } else if (value === false) {
+    checkbox.checked = false;
+    checkbox.indeterminate = false;
+    checkbox.classList.add('bool-tristate-false');
+  } else {
+    checkbox.checked = false;
+    checkbox.indeterminate = true;
+    checkbox.classList.add('bool-tristate-null');
+  }
 }
 
 function handleSort(colIdx, addToExisting) {
