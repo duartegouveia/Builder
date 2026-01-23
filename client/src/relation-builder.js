@@ -308,12 +308,88 @@ function calculateStatistics(colIdx) {
     stats.trueCount = trueCount;
     stats.falseCount = nonNull - trueCount;
     stats.truePercent = ((trueCount / nonNull) * 100).toFixed(1);
-  } else if (type === 'date' || type === 'datetime') {
-    const dates = values.map(v => new Date(v)).filter(d => !isNaN(d));
-    if (dates.length > 0) {
-      dates.sort((a, b) => a - b);
-      stats.min = dates[0].toISOString().split('T')[0];
-      stats.max = dates[dates.length - 1].toISOString().split('T')[0];
+  } else if (type === 'date' || type === 'datetime' || type === 'time') {
+    // Convert to milliseconds for statistical calculations
+    let nums;
+    if (type === 'time') {
+      // Parse time strings (HH:MM:SS or HH:MM) to milliseconds since midnight
+      nums = values.map(v => {
+        const parts = String(v).split(':').map(Number);
+        if (parts.length >= 2) {
+          const hours = parts[0] || 0;
+          const minutes = parts[1] || 0;
+          const seconds = parts[2] || 0;
+          return (hours * 3600 + minutes * 60 + seconds) * 1000;
+        }
+        return NaN;
+      }).filter(n => !isNaN(n));
+    } else {
+      nums = values.map(v => new Date(v).getTime()).filter(n => !isNaN(n));
+    }
+    
+    if (nums.length > 0) {
+      nums.sort((a, b) => a - b);
+      
+      // Format functions for display
+      const formatValue = (ms) => {
+        if (type === 'time') {
+          const totalSec = Math.floor(ms / 1000);
+          const h = Math.floor(totalSec / 3600);
+          const m = Math.floor((totalSec % 3600) / 60);
+          const s = totalSec % 60;
+          return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        } else if (type === 'date') {
+          return new Date(ms).toISOString().split('T')[0];
+        } else {
+          return new Date(ms).toISOString().replace('T', ' ').slice(0, 19);
+        }
+      };
+      
+      stats.min = formatValue(Math.min(...nums));
+      stats.max = formatValue(Math.max(...nums));
+      stats.sum = nums.reduce((a, b) => a + b, 0);
+      stats.mean = formatValue(stats.sum / nums.length);
+      
+      // Median
+      const mid = Math.floor(nums.length / 2);
+      const medianMs = nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+      stats.median = formatValue(medianMs);
+      
+      // Range in human-readable format
+      const rangeMs = Math.max(...nums) - Math.min(...nums);
+      if (type === 'time') {
+        stats.range = formatValue(rangeMs);
+      } else {
+        // For dates, show range in days
+        const rangeDays = rangeMs / (1000 * 60 * 60 * 24);
+        stats.range = `${rangeDays.toFixed(1)} days`;
+      }
+      
+      // Variance and Std Dev (in milliseconds, shown as duration)
+      const meanMs = stats.sum / nums.length;
+      const variance = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 2), 0) / nums.length;
+      stats.variance = variance;
+      stats.stdDev = Math.sqrt(variance);
+      
+      // Format std dev as duration
+      if (type === 'time') {
+        stats.stdDevFormatted = formatValue(stats.stdDev);
+      } else {
+        const stdDevDays = stats.stdDev / (1000 * 60 * 60 * 24);
+        stats.stdDevFormatted = `${stdDevDays.toFixed(2)} days`;
+      }
+      
+      // Quartiles
+      const q1Idx = Math.floor(nums.length * 0.25);
+      const q3Idx = Math.floor(nums.length * 0.75);
+      stats.q1 = formatValue(nums[q1Idx]);
+      stats.q3 = formatValue(nums[q3Idx]);
+      const iqrMs = nums[q3Idx] - nums[q1Idx];
+      if (type === 'time') {
+        stats.iqr = formatValue(iqrMs);
+      } else {
+        stats.iqr = `${(iqrMs / (1000 * 60 * 60 * 24)).toFixed(1)} days`;
+      }
     }
   }
   
@@ -1224,11 +1300,22 @@ function showStatisticsPanel(colIdx) {
         statsHtml += `<div class="stats-row stats-row-small"><span>${String(val).substring(0, 20)}</span><span>${count}</span></div>`;
       });
     }
-  } else if (type === 'date' || type === 'datetime') {
+  } else if (type === 'date' || type === 'datetime' || type === 'time') {
+    const label = type === 'time' ? 'Time' : 'Date';
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Min Date:</span><span>${stats.min ?? '—'}</span></div>
-      <div class="stats-row"><span>Max Date:</span><span>${stats.max ?? '—'}</span></div>
+      <div class="stats-row"><span>Min ${label}:</span><span>${stats.min ?? '—'}</span></div>
+      <div class="stats-row"><span>Max ${label}:</span><span>${stats.max ?? '—'}</span></div>
+      <div class="stats-row"><span>Range:</span><span>${stats.range ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Mean:</span><span>${stats.mean ?? '—'}</span></div>
+      <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Std Dev:</span><span>${stats.stdDevFormatted ?? '—'}</span></div>
+      <div class="stats-divider"></div>
+      <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
+      <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
+      <div class="stats-row"><span>IQR:</span><span>${stats.iqr ?? '—'}</span></div>
     `;
   }
   
