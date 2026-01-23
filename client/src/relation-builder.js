@@ -2070,7 +2070,7 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Min:</span><span>${stats.min?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Max:</span><span>${stats.max?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Range:</span><span>${stats.range?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>Range |max−min|:</span><span>${stats.range?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Sum:</span><span>${stats.sum?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Mean:</span><span>${stats.mean?.toFixed(3) ?? '—'}</span></div>
@@ -2082,10 +2082,10 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>IQR:</span><span>${stats.iqr?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Outliers:</span><span>${stats.outliers?.length ?? 0}</span></div>
-      <div class="stats-row"><span>Far Outliers:</span><span>${stats.farOutliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Skewness:</span><span>${stats.skewness?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-row"><span>Kurtosis:</span><span>${stats.kurtosis?.toFixed(3) ?? '—'}</span></div>
@@ -2155,7 +2155,7 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Min ${label}:</span><span>${stats.min ?? '—'}</span></div>
       <div class="stats-row"><span>Max ${label}:</span><span>${stats.max ?? '—'}</span></div>
-      <div class="stats-row"><span>Range:</span><span>${stats.range ?? '—'}</span></div>
+      <div class="stats-row"><span>Range |max−min|:</span><span>${stats.range ?? '—'}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Mean:</span><span>${stats.mean ?? '—'}</span></div>
       <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
@@ -2164,7 +2164,7 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
       <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
-      <div class="stats-row"><span>IQR:</span><span>${stats.iqr ?? '—'}</span></div>
+      <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr ?? '—'}</span></div>
     `;
   }
   
