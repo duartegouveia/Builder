@@ -46,12 +46,21 @@ function generateRandomValue(type) {
 }
 
 function generateDemoRelation() {
-  const columnDef = ['int', 'string', 'boolean', 'float', 'date', 'datetime', 'time', 'multilinestring'];
-  const columnNames = ['id', 'name', 'active', 'score', 'birth_date', 'created_at', 'start_time', 'notes'];
+  const columns = {
+    id: 'int',
+    name: 'string',
+    active: 'boolean',
+    score: 'float',
+    birth_date: 'date',
+    created_at: 'datetime',
+    start_time: 'time',
+    notes: 'multilinestring'
+  };
   
+  const columnTypes = Object.values(columns);
   const items = [];
   for (let i = 0; i < 50; i++) {
-    const row = columnDef.map((type, idx) => {
+    const row = columnTypes.map((type, idx) => {
       if (idx === 0) return i + 1;
       return generateRandomValue(type);
     });
@@ -60,8 +69,7 @@ function generateDemoRelation() {
   
   return {
     pot: 'relation',
-    column_names: columnNames,
-    column_def: columnDef,
+    columns: columns,
     items: items
   };
 }
@@ -72,8 +80,8 @@ function parseRelation(jsonStr) {
     if (data.pot !== 'relation') {
       throw new Error('Invalid relation: pot must be "relation"');
     }
-    if (!Array.isArray(data.column_def)) {
-      throw new Error('Invalid relation: column_def must be an array');
+    if (typeof data.columns !== 'object' || data.columns === null) {
+      throw new Error('Invalid relation: columns must be an object');
     }
     if (!Array.isArray(data.items)) {
       throw new Error('Invalid relation: items must be an array');
@@ -148,10 +156,13 @@ function renderTable(relation) {
   const container = document.getElementById('relation-table-container');
   container.innerHTML = '';
   
-  if (!relation || !relation.column_def || !relation.items) {
+  if (!relation || !relation.columns || !relation.items) {
     container.innerHTML = '<p class="text-muted-foreground">No data to display</p>';
     return;
   }
+  
+  const columnNames = Object.keys(relation.columns);
+  const columnTypes = Object.values(relation.columns);
   
   const tableWrapper = document.createElement('div');
   tableWrapper.className = 'relation-table-wrapper';
@@ -167,9 +178,9 @@ function renderTable(relation) {
   indexTh.className = 'relation-th-index';
   headerRow.appendChild(indexTh);
   
-  relation.column_def.forEach((type, idx) => {
+  columnNames.forEach((name, idx) => {
     const th = document.createElement('th');
-    const name = relation.column_names ? relation.column_names[idx] : `col_${idx}`;
+    const type = columnTypes[idx];
     th.innerHTML = `<div class="relation-th-content"><span class="relation-col-name">${name}</span><span class="relation-col-type">${type}</span></div>`;
     headerRow.appendChild(th);
   });
@@ -189,7 +200,7 @@ function renderTable(relation) {
     
     row.forEach((value, colIdx) => {
       const td = document.createElement('td');
-      const type = relation.column_def[colIdx];
+      const type = columnTypes[colIdx];
       td.appendChild(createInputForType(type, value, rowIdx, colIdx));
       tr.appendChild(td);
     });
@@ -202,17 +213,19 @@ function renderTable(relation) {
   container.appendChild(tableWrapper);
   
   window.currentRelation = relation;
+  window.currentColumnTypes = columnTypes;
 }
 
 function updateRelationFromTable() {
-  if (!window.currentRelation) return;
+  if (!window.currentRelation || !window.currentColumnTypes) return;
   
   const relation = window.currentRelation;
+  const columnTypes = window.currentColumnTypes;
   
   document.querySelectorAll('.relation-table tbody tr').forEach((tr, rowIdx) => {
     const cells = tr.querySelectorAll('td:not(.relation-td-index)');
     cells.forEach((td, colIdx) => {
-      const type = relation.column_def[colIdx];
+      const type = columnTypes[colIdx];
       const input = td.querySelector('input, textarea');
       if (input) {
         let value;
