@@ -72,9 +72,9 @@ The backend is located in `server/` with:
 ## Routing
 
 The application uses multi-page routing with separate HTML files:
-- `/` - Logic Builder (index.html) - Main page
+- `/` - Relation Builder (relation.html) - Main page
 - `/logic.html` - Error Propagator (logic.html)
-- `/relation.html` - Relation Builder (relation.html)
+- `/logic-builder.html` - Logic Builder (index.html)
 
 Navigation uses standard anchor links between HTML pages.
 

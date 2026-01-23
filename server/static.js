@@ -26,13 +26,13 @@ export function serveStatic(app) {
       }
     }
     
-    if (url === "/relation.html" || url.startsWith("/relation.html?")) {
-      const relationPath = path.resolve(distPath, "relation.html");
-      if (fs.existsSync(relationPath)) {
-        return res.sendFile(relationPath);
+    if (url === "/logic-builder.html" || url.startsWith("/logic-builder.html?")) {
+      const logicBuilderPath = path.resolve(distPath, "index.html");
+      if (fs.existsSync(logicBuilderPath)) {
+        return res.sendFile(logicBuilderPath);
       }
     }
     
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(distPath, "relation.html"));
   });
 }
