@@ -2262,7 +2262,18 @@ function attachTableEventListeners() {
   document.querySelectorAll('.relation-th-sortable').forEach(th => {
     th.addEventListener('click', (e) => {
       const colIdx = parseInt(th.dataset.col);
-      handleSort(colIdx, e.shiftKey);
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl+click toggles column selection
+        if (state.selectedColumns.has(colIdx)) {
+          state.selectedColumns.delete(colIdx);
+        } else {
+          state.selectedColumns.add(colIdx);
+        }
+        renderTable();
+      } else {
+        // Normal click or shift+click for sorting
+        handleSort(colIdx, e.shiftKey);
+      }
     });
     
     th.addEventListener('contextmenu', (e) => {
