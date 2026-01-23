@@ -1382,44 +1382,26 @@ input[type="checkbox"] {
   font-style: italic;
 }
 
-/* Boolean cell display */
-.bool-true {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: var(--green-100);
-  color: var(--green-700);
-  border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 600;
+/* Boolean cell display - checkboxes */
+.bool-checkbox {
+  width: 14px;
+  height: 14px;
+  cursor: default;
+  margin: 0;
 }
 
-.bool-false {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: var(--red-100);
-  color: var(--red-600);
-  border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.bool-checkbox-true {
+  accent-color: var(--green-600);
 }
 
-.bool-null {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: var(--slate-100);
-  color: var(--slate-500);
-  border-radius: 3px;
-  font-size: 0.65rem;
-  font-weight: 500;
+.bool-checkbox-false {
+  accent-color: var(--primary);
+}
+
+.bool-checkbox-null {
+  accent-color: var(--slate-400);
+  opacity: 0.5;
+  background: var(--slate-200);
 }
 
 .relation-table-readonly td {

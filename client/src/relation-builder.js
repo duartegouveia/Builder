@@ -471,9 +471,9 @@ function formatCellValue(value, type) {
     return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
   }
   if (type === 'boolean') {
-    if (value === true) return '<span class="bool-true">T</span>';
-    if (value === false) return '<span class="bool-false">F</span>';
-    return '<span class="bool-null">—</span>';
+    if (value === true) return '<input type="checkbox" class="bool-checkbox bool-checkbox-true" checked disabled>';
+    if (value === false) return '<input type="checkbox" class="bool-checkbox bool-checkbox-false" disabled>';
+    return '<input type="checkbox" class="bool-checkbox bool-checkbox-null" disabled>';
   }
   if (type === 'multilinestring') {
     return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
