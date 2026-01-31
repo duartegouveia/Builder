@@ -135,7 +135,7 @@ export const unicodeBlocks = {
   "Tai Le": { start: 0x1950, end: 0x197F },
   "Tai Tham": { start: 0x1A20, end: 0x1AAF },
   "Tai Viet": { start: 0xAA80, end: 0xAADF },
-  "Tai Yo": { start: 0x1CF00, end: 0x1CFCF },
+  "Tai Yo": { start: 0x1CE50, end: 0x1CE9F },
   "New Tai Lue": { start: 0x1980, end: 0x19DF },
   
   // Mongolian
@@ -295,7 +295,163 @@ export const unicodeBlocks = {
   "Bopomofo": { start: 0x3100, end: 0x312F },
   "Bopomofo Extended": { start: 0x31A0, end: 0x31BF },
   "Yi Syllables": { start: 0xA000, end: 0xA48F },
-  "Yi Radicals": { start: 0xA490, end: 0xA4CF }
+  "Yi Radicals": { start: 0xA490, end: 0xA4CF },
+  
+  // CJK Extensions C-J
+  "CJK Unified Ideographs Extension C": { start: 0x2A700, end: 0x2B73F },
+  "CJK Unified Ideographs Extension D": { start: 0x2B740, end: 0x2B81F },
+  "CJK Unified Ideographs Extension E": { start: 0x2B820, end: 0x2CEAF },
+  "CJK Unified Ideographs Extension F": { start: 0x2CEB0, end: 0x2EBEF },
+  "CJK Unified Ideographs Extension G": { start: 0x30000, end: 0x3134F },
+  "CJK Unified Ideographs Extension H": { start: 0x31350, end: 0x323AF },
+  "CJK Unified Ideographs Extension I": { start: 0x2EBF0, end: 0x2EE5F },
+  "CJK Unified Ideographs Extension J": { start: 0x323B0, end: 0x3347F },
+  "CJK Compatibility Ideographs Supplement": { start: 0x2F800, end: 0x2FA1F },
+  
+  // Ideographic
+  "Ideographic Description Characters": { start: 0x2FF0, end: 0x2FFF },
+  "Ideographic Symbols and Punctuation": { start: 0x16FE0, end: 0x16FFF },
+  "Enclosed Ideographic Supplement": { start: 0x1F200, end: 0x1F2FF },
+  
+  // Additional Numbers
+  "Indic Siyaq Numbers": { start: 0x1EC70, end: 0x1ECBF },
+  "Kaktovik Numerals": { start: 0x1D2C0, end: 0x1D2DF },
+  "Mayan Numerals": { start: 0x1D2E0, end: 0x1D2FF },
+  "Ottoman Siyaq Numbers": { start: 0x1ED00, end: 0x1ED4F },
+  "Rumi Numeral Symbols": { start: 0x10E60, end: 0x10E7F },
+  "Sinhala Archaic Numbers": { start: 0x111E0, end: 0x111FF },
+  "Tai Xuan Jing Symbols": { start: 0x1D300, end: 0x1D35F },
+  
+  // Technical
+  "Tags": { start: 0xE0000, end: 0xE007F },
+  "Shorthand Format Controls": { start: 0x1BCA0, end: 0x1BCAF },
+  
+  // Symbols
+  "Ancient Symbols": { start: 0x10190, end: 0x101CF },
+  
+  // Music
+  "Znamenny Musical Notation": { start: 0x1CF00, end: 0x1CFCF },
+  
+  // Variation Selectors
+  "Variation Selectors": { start: 0xFE00, end: 0xFE0F },
+  "Variation Selectors Supplement": { start: 0xE0100, end: 0xE01EF },
+  
+  // Surrogates
+  "High Private Use Surrogates": { start: 0xDB80, end: 0xDBFF },
+  "High Surrogates": { start: 0xD800, end: 0xDB7F },
+  "Low Surrogates": { start: 0xDC00, end: 0xDFFF },
+  
+  // Private Use
+  "Private Use Area": { start: 0xE000, end: 0xF8FF },
+  "Supplementary Private Use Area-A": { start: 0xF0000, end: 0xFFFFF },
+  "Supplementary Private Use Area-B": { start: 0x100000, end: 0x10FFFF },
+  
+  // Kana
+  "Kana Extended-A": { start: 0x1B100, end: 0x1B12F },
+  "Kana Extended-B": { start: 0x1AFF0, end: 0x1AFFF },
+  "Kana Supplement": { start: 0x1B000, end: 0x1B0FF },
+  "Kanbun": { start: 0x3190, end: 0x319F },
+  
+  // Tangut
+  "Tangut": { start: 0x17000, end: 0x187FF },
+  "Tangut Components": { start: 0x18800, end: 0x18AFF },
+  "Tangut Supplement": { start: 0x18D00, end: 0x18D8F },
+  
+  // Duployan
+  "Duployan": { start: 0x1BC00, end: 0x1BC9F },
+  
+  // Khitan
+  "Khitan Small Script": { start: 0x18B00, end: 0x18CFF },
+  
+  // Historical scripts for Escritas
+  "Anatolian Hieroglyphs": { start: 0x14400, end: 0x1467F },
+  "Carian": { start: 0x102A0, end: 0x102DF },
+  "Caucasian Albanian": { start: 0x10530, end: 0x1056F },
+  "Chorasmian": { start: 0x10FB0, end: 0x10FDF },
+  "Coptic Epact Numbers": { start: 0x102E0, end: 0x102FF },
+  "Cuneiform": { start: 0x12000, end: 0x123FF },
+  "Cuneiform Numbers and Punctuation": { start: 0x12400, end: 0x1247F },
+  "Early Dynastic Cuneiform": { start: 0x12480, end: 0x1254F },
+  "Cypriot Syllabary": { start: 0x10800, end: 0x1083F },
+  "Cypro-Minoan": { start: 0x12F90, end: 0x12FFF },
+  "Egyptian Hieroglyph Format Controls": { start: 0x13430, end: 0x1345F },
+  "Egyptian Hieroglyphs": { start: 0x13000, end: 0x1342F },
+  "Egyptian Hieroglyphs Extended-A": { start: 0x13460, end: 0x143FF },
+  "Elbasan": { start: 0x10500, end: 0x1052F },
+  "Elymaic": { start: 0x10FE0, end: 0x10FFF },
+  "Hatran": { start: 0x108E0, end: 0x108FF },
+  "Imperial Aramaic": { start: 0x10840, end: 0x1085F },
+  "Inscriptional Pahlavi": { start: 0x10B60, end: 0x10B7F },
+  "Inscriptional Parthian": { start: 0x10B40, end: 0x10B5F },
+  "Kharoshthi": { start: 0x10A00, end: 0x10A5F },
+  "Linear A": { start: 0x10600, end: 0x1077F },
+  "Linear B Ideograms": { start: 0x10080, end: 0x100FF },
+  "Linear B Syllabary": { start: 0x10000, end: 0x1007F },
+  "Lycian": { start: 0x10280, end: 0x1029F },
+  "Lydian": { start: 0x10920, end: 0x1093F },
+  "Manichaean": { start: 0x10AC0, end: 0x10AFF },
+  "Meroitic Cursive": { start: 0x109A0, end: 0x109FF },
+  "Meroitic Hieroglyphs": { start: 0x10980, end: 0x1099F },
+  "Nabataean": { start: 0x10880, end: 0x108AF },
+  "Old Hungarian": { start: 0x10C80, end: 0x10CFF },
+  "Old Permic": { start: 0x10350, end: 0x1037F },
+  "Old Sogdian": { start: 0x10F00, end: 0x10F2F },
+  "Old Turkic": { start: 0x10C00, end: 0x10C4F },
+  "Old Uyghur": { start: 0x10F70, end: 0x10FAF },
+  "Palmyrene": { start: 0x10860, end: 0x1087F },
+  "Phaistos Disc": { start: 0x101D0, end: 0x101FF },
+  "Psalter Pahlavi": { start: 0x10B80, end: 0x10BAF },
+  "Sogdian": { start: 0x10F30, end: 0x10F6F },
+  "Vithkuqi": { start: 0x10570, end: 0x105BF },
+  "Sidetic": { start: 0x105C0, end: 0x105FF },
+  
+  // Modern scripts for Escritas
+  "Ahom": { start: 0x11700, end: 0x1174F },
+  "Avestan": { start: 0x10B00, end: 0x10B3F },
+  "Bamum Supplement": { start: 0x16800, end: 0x16A3F },
+  "Bassa Vah": { start: 0x16AD0, end: 0x16AFF },
+  "Bhaiksuki": { start: 0x11C00, end: 0x11C6F },
+  "Buhid": { start: 0x1740, end: 0x175F },
+  "Cham": { start: 0xAA00, end: 0xAA5F },
+  "Combining Half Marks": { start: 0xFE20, end: 0xFE2F },
+  "Dives Akuru": { start: 0x11900, end: 0x1195F },
+  "Dogra": { start: 0x11800, end: 0x1184F },
+  "Gunjala Gondi": { start: 0x11D60, end: 0x11DAF },
+  "Hanifi Rohingya": { start: 0x10D00, end: 0x10D3F },
+  "Hanunoo": { start: 0x1720, end: 0x173F },
+  "Kayah Li": { start: 0xA900, end: 0xA92F },
+  "Kawi": { start: 0x11F00, end: 0x11F5F },
+  "Khudawadi": { start: 0x112B0, end: 0x112FF },
+  "Makasar": { start: 0x11EE0, end: 0x11EFF },
+  "Masaram Gondi": { start: 0x11D00, end: 0x11D5F },
+  "Medefaidrin": { start: 0x16E40, end: 0x16E9F },
+  "Mende Kikakui": { start: 0x1E800, end: 0x1E8DF },
+  "Nandinagari": { start: 0x119A0, end: 0x119FF },
+  "Nyiakeng Puachue Hmong": { start: 0x1E100, end: 0x1E14F },
+  "Pau Cin Hau": { start: 0x11AC0, end: 0x11AFF },
+  "Rejang": { start: 0xA930, end: 0xA95F },
+  "Saurashtra": { start: 0xA880, end: 0xA8DF },
+  "Sora Sompeng": { start: 0x110D0, end: 0x110FF },
+  "Syloti Nagri": { start: 0xA800, end: 0xA82F },
+  "Tagalog": { start: 0x1700, end: 0x171F },
+  "Tagbanwa": { start: 0x1760, end: 0x177F },
+  "Takri": { start: 0x11680, end: 0x116CF },
+  "Tirhuta": { start: 0x11480, end: 0x114DF },
+  "Toto": { start: 0x1E290, end: 0x1E2BF },
+  "Warang Citi": { start: 0x118A0, end: 0x118FF },
+  "Yezidi": { start: 0x10E80, end: 0x10EBF },
+  "Zanabazar Square": { start: 0x11A00, end: 0x11A4F },
+  "Sutton SignWriting": { start: 0x1D800, end: 0x1DAAF },
+  "Garay": { start: 0x10D40, end: 0x10D8F },
+  "Gurung Khema": { start: 0x16100, end: 0x1613F },
+  "Kirat Rai": { start: 0x16D40, end: 0x16D7F },
+  "Nag Mundari": { start: 0x1E4D0, end: 0x1E4FF },
+  "Ol Onal": { start: 0x1E5D0, end: 0x1E5FF },
+  "Sunuwar": { start: 0x11BC0, end: 0x11BFF },
+  "Todhri": { start: 0x105A0, end: 0x105BF },
+  "Tolong Siki": { start: 0x1E0C0, end: 0x1E0FF },
+  "Tulu-Tigalari": { start: 0x11380, end: 0x113FF },
+  "Beria Erfe": { start: 0x10EF0, end: 0x10F2F }
 };
 
 // Hierarchy for navigation
@@ -344,7 +500,14 @@ export const pageHierarchy = {
           "Phags_pa": ["Phags-pa"]
         },
         "Logograficas": {
-          "Cjk": ["CJK Unified Ideographs", "CJK Symbols and Punctuation", "CJK Compatibility", "CJK Compatibility Forms", "CJK Compatibility Ideographs"]
+          "Cjk": [
+            "CJK Unified Ideographs", "CJK Unified Ideographs Extension A", "CJK Unified Ideographs Extension B",
+            "CJK Unified Ideographs Extension C", "CJK Unified Ideographs Extension D", "CJK Unified Ideographs Extension E",
+            "CJK Unified Ideographs Extension F", "CJK Unified Ideographs Extension G", "CJK Unified Ideographs Extension H",
+            "CJK Unified Ideographs Extension I", "CJK Unified Ideographs Extension J",
+            "CJK Symbols and Punctuation", "CJK Compatibility", "CJK Compatibility Forms",
+            "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement"
+          ]
         }
       },
       "Americas": {
@@ -355,18 +518,96 @@ export const pageHierarchy = {
       }
     },
     "Blocos": {
-      "DiacriticosEFonetica": ["Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement", "IPA Extensions", "Phonetic Extensions", "Phonetic Extensions Supplement", "Spacing Modifier Letters"],
-      "PontuacaoESeparadores": ["General Punctuation", "Supplemental Punctuation", "Vertical Forms"],
-      "NumerosEEnvolventes": ["Number Forms", "Superscripts and Subscripts", "Enclosed Alphanumerics", "Enclosed CJK Letters and Months", "Common Indic Number Forms"],
+      "DiacriticosEFonetica": [
+        "Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement",
+        "Combining Diacritical Marks for Symbols", "IPA Extensions", "Modifier Tone Letters",
+        "Phonetic Extensions", "Phonetic Extensions Supplement", "Spacing Modifier Letters", "Vedic Extensions"
+      ],
+      "PontuacaoESeparadores": [
+        "General Punctuation", "Ideographic Description Characters", "Ideographic Symbols and Punctuation",
+        "Shorthand Format Controls", "Supplemental Punctuation", "Vertical Forms"
+      ],
+      "NumerosEEnvolventes": [
+        "Aegean Numbers", "Common Indic Number Forms", "Counting Rod Numerals",
+        "Enclosed Alphanumeric Supplement", "Enclosed Alphanumerics", "Enclosed CJK Letters and Months",
+        "Enclosed Ideographic Supplement", "Indic Siyaq Numbers", "Kaktovik Numerals", "Mayan Numerals",
+        "Number Forms", "Ottoman Siyaq Numbers", "Rumi Numeral Symbols", "Sinhala Archaic Numbers",
+        "Superscripts and Subscripts", "Tai Xuan Jing Symbols"
+      ],
       "MoedaEUnidades": ["Currency Symbols"],
-      "Setas": ["Arrows", "Supplemental Arrows-A", "Supplemental Arrows-B", "Supplemental Arrows-C", "Miscellaneous Symbols and Arrows"],
-      "Matematica": ["Mathematical Operators", "Supplemental Mathematical Operators", "Miscellaneous Mathematical Symbols-A", "Miscellaneous Mathematical Symbols-B", "Mathematical Alphanumeric Symbols"],
-      "TecnicoEControlo": ["Miscellaneous Technical", "Control Pictures", "Optical Character Recognition", "Specials"],
-      "CaixasEFormas": ["Block Elements", "Box Drawing", "Geometric Shapes", "Geometric Shapes Extended", "Braille Patterns"],
-      "SimbolosGeraisEDingbats": ["Miscellaneous Symbols", "Dingbats", "Ornamental Dingbats", "Alchemical Symbols", "Chess Symbols"],
-      "PictogramasEEmoji": ["Emoticons", "Miscellaneous Symbols and Pictographs", "Supplemental Symbols and Pictographs", "Symbols and Pictographs Extended-A", "Transport and Map Symbols"],
+      "Setas": [
+        "Arrows", "Miscellaneous Symbols and Arrows",
+        "Supplemental Arrows-A", "Supplemental Arrows-B", "Supplemental Arrows-C"
+      ],
+      "Matematica": [
+        "Arabic Mathematical Alphabetic Symbols", "Mathematical Alphanumeric Symbols",
+        "Mathematical Operators", "Miscellaneous Mathematical Symbols-A",
+        "Miscellaneous Mathematical Symbols-B", "Supplemental Mathematical Operators"
+      ],
+      "TecnicoEControlo": [
+        "Control Pictures", "Miscellaneous Technical", "Optical Character Recognition", "Specials", "Tags"
+      ],
+      "CaixasEFormas": [
+        "Block Elements", "Box Drawing", "Braille Patterns", "Geometric Shapes", "Geometric Shapes Extended"
+      ],
+      "SimbolosGeraisEDingbats": [
+        "Alchemical Symbols", "Chess Symbols", "Dingbats", "Miscellaneous Symbols",
+        "Ornamental Dingbats", "Yijing Hexagram Symbols"
+      ],
+      "PictogramasEEmoji": [
+        "Emoticons", "Miscellaneous Symbols and Pictographs", "Supplemental Symbols and Pictographs",
+        "Symbols and Pictographs Extended-A", "Transport and Map Symbols"
+      ],
       "Jogos": ["Domino Tiles", "Mahjong Tiles", "Playing Cards"],
-      "Musica": ["Musical Symbols", "Ancient Greek Musical Notation", "Byzantine Musical Symbols"]
+      "Musica": [
+        "Ancient Greek Musical Notation", "Byzantine Musical Symbols", "Musical Symbols", "Znamenny Musical Notation"
+      ],
+      "CompatibilidadeEApresentacao": [
+        "Alphabetic Presentation Forms", "Arabic Presentation Forms-A", "Arabic Presentation Forms-B",
+        "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement", "CJK Compatibility Forms",
+        "CJK Compatibility", "Halfwidth and Fullwidth Forms", "Small Form Variants",
+        "Variation Selectors", "Variation Selectors Supplement"
+      ],
+      "Surrogates": ["High Private Use Surrogates", "High Surrogates", "Low Surrogates"],
+      "UsoPrivado": ["Private Use Area", "Supplementary Private Use Area-A", "Supplementary Private Use Area-B"],
+      "Escritas": {
+        "ComponentesEIndices": [
+          "CJK Radicals Supplement", "CJK Strokes", "Duployan", "Kana Extended-A", "Kana Extended-B",
+          "Kana Supplement", "Kangxi Radicals", "Kanbun", "Khitan Small Script", "Tangut",
+          "Tangut Components", "Tangut Components Supplement", "Tangut Supplement", "Yi Radicals", "Yijing Hexagram Symbols"
+        ],
+        "Historicas": [
+          "Aegean Numbers", "Ancient Symbols", "Anatolian Hieroglyphs", "Carian", "Caucasian Albanian",
+          "Chorasmian", "Coptic Epact Numbers", "Cuneiform", "Cuneiform Numbers and Punctuation",
+          "Cypriot Syllabary", "Cypro-Minoan", "Egyptian Hieroglyph Format Controls",
+          "Egyptian Hieroglyphs Extended-A", "Egyptian Hieroglyphs", "Elbasan", "Elymaic", "Gothic",
+          "Hatran", "Imperial Aramaic", "Inscriptional Pahlavi", "Inscriptional Parthian", "Kharoshthi",
+          "Linear A", "Linear B Ideograms", "Linear B Syllabary", "Lycian", "Lydian", "Manichaean",
+          "Meroitic Cursive", "Meroitic Hieroglyphs", "Nabataean", "Old Hungarian", "Old Italic",
+          "Old Permic", "Old Sogdian", "Old Turkic", "Old Uyghur", "Palmyrene", "Phaistos Disc",
+          "Psalter Pahlavi", "Sidetic", "Sogdian", "Vithkuqi"
+        ],
+        "Modernas": [
+          "Ahom", "Arabic Extended-C", "Avestan", "Balinese", "Bamum Supplement", "Bamum", "Bassa Vah",
+          "Batak", "Beria Erfe", "Bhaiksuki", "Bopomofo Extended", "Bopomofo", "Buginese", "Buhid",
+          "Chakma", "Cham", "Combining Half Marks", "Coptic", "Cyrillic Extended-D", "Dives Akuru",
+          "Dogra", "Early Dynastic Cuneiform", "Ethiopic Extended-B", "Garay", "Glagolitic Supplement",
+          "Glagolitic", "Gunjala Gondi", "Gurung Khema", "Hanifi Rohingya", "Hanunoo",
+          "High Private Use Surrogates", "Hiragana", "Ideographic Description Characters", "Javanese",
+          "Kayah Li", "Kawi", "Khmer", "Khudawadi", "Kirat Rai", "Lao", "Latin Extended Additional",
+          "Latin Extended-F", "Latin Extended-G", "Letterlike Symbols", "Lepcha", "Limbu",
+          "Lisu Supplement", "Lisu", "Makasar", "Mandaic", "Masaram Gondi", "Medefaidrin",
+          "Meetei Mayek Extensions", "Meetei Mayek", "Mende Kikakui", "Miao", "Miscellaneous Symbols and Arrows",
+          "Miscellaneous Technical", "Mro", "Myanmar Extended-C", "Nandinagari", "Nag Mundari",
+          "New Tai Lue", "Newa", "Nyiakeng Puachue Hmong", "Ogham", "Ol Chiki", "Ol Onal",
+          "Old North Arabian", "Old South Arabian", "Osage", "Osmanya", "Pahawh Hmong", "Pau Cin Hau",
+          "Rejang", "Runic", "Samaritan", "Saurashtra", "Shavian", "Sora Sompeng", "Sundanese Supplement",
+          "Sundanese", "Sunuwar", "Sutton SignWriting", "Syloti Nagri", "Tagalog", "Tagbanwa", "Tai Yo",
+          "Takri", "Tangsa", "Thaana", "Tirhuta", "Todhri", "Tolong Siki", "Toto", "Tulu-Tigalari",
+          "Unified Canadian Aboriginal Syllabics Extended-A", "Vai", "Wancho", "Warang Citi", "Yezidi",
+          "Yi Syllables", "Zanabazar Square"
+        ]
+      }
     }
   }
 };
