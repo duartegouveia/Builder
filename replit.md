@@ -187,13 +187,29 @@ The Virtual Keyboard provides comprehensive Unicode character input with:
 - Hebrew, Arabic, Japanese also have transliterations
 
 ### Output Management
-- Collected characters displayed in output textarea
+- Editable textarea for collected characters with cursor positioning
+- Text editing controls: Backspace (⌫), Delete (Del), Enter (↵)
 - Copy to clipboard button
 - Clear button to reset
+- End button to finish and send text
 
 ### Recent Pages
 - Tracks last 6 visited Unicode blocks
 - Quick access buttons for frequently used blocks
+
+### Floating Keyboard Panel
+- Floating toggle button (⌨) in bottom-right corner (draggable)
+- Keyboard panel with multiple position options:
+  - **Bottom** (default) - full width at bottom of screen
+  - **Top** - full width at top of screen
+  - **Left** - 1/3 width on left side
+  - **Right** - 1/3 width on right side
+- Position controls in panel header
+- Close button to hide panel
+
+### Mobile Responsive
+- On small screens (< 600px), shift and layout controls move to separate line
+- Hierarchy gets full width for easier navigation
 
 ## External Dependencies
 
