@@ -12,10 +12,23 @@ const state = {
   shiftState: 'lowercase', // 'lowercase', 'uppercase', 'capslock'
   hierarchyCollapsed: false, // true when block is selected, shows compact nav
   compositionInput: '', // For CJK romanization input
-  keyboardVisible: true, // Whether keyboard panel is visible
+  keyboardVisible: false, // Whether keyboard panel is visible (hidden by default)
   keyboardPosition: 'bottom', // 'bottom', 'top', 'left', 'right'
-  floatingButtonPos: { x: null, y: null } // Custom position for floating button
+  floatingButtonPos: { x: null, y: null }, // Custom position for floating button
+  activeExternalField: null, // Reference to external input/textarea being edited
+  isMultilineField: false // true for textarea, false for input[type=text]
 };
+
+// Unicode character names cache
+const unicodeNames = {};
+
+// Check if element is a valid text field for virtual keyboard
+function isValidTextField(el) {
+  if (!el) return false;
+  if (el.tagName === 'TEXTAREA') return true;
+  if (el.tagName === 'INPUT' && el.type === 'text') return true;
+  return false;
+}
 
 // Blocks that support composition (romanization to character)
 const COMPOSITION_BLOCKS = [
@@ -119,6 +132,9 @@ document.addEventListener('DOMContentLoaded', init);
 function init() {
   renderKeyboard();
   attachEventListeners();
+  setupExternalFieldTracking();
+  setupControlKeyListener();
+  updateFloatingButtonVisibility();
 }
 
 function renderKeyboard() {
@@ -126,9 +142,9 @@ function renderKeyboard() {
   if (!container) return;
   
   container.innerHTML = `
-    <button id="keyboard-toggle-btn" class="keyboard-toggle-btn" title="Toggle virtual keyboard">⌨</button>
+    <button id="keyboard-toggle-btn" class="keyboard-toggle-btn" style="display: none;" title="Toggle virtual keyboard">⌨</button>
     
-    <div id="keyboard-panel" class="keyboard-panel keyboard-position-${state.keyboardPosition}">
+    <div id="keyboard-panel" class="keyboard-panel keyboard-position-${state.keyboardPosition}${state.keyboardVisible ? '' : ' keyboard-panel-hidden'}">
       <div class="keyboard-panel-header">
         <span class="keyboard-panel-title">Virtual Keyboard</span>
         <div class="keyboard-position-controls">
@@ -157,7 +173,6 @@ function renderKeyboard() {
         </div>
         
         <div class="keyboard-nav-section">
-          <div class="keyboard-breadcrumb" id="keyboard-breadcrumb"></div>
           <div class="keyboard-recent" id="keyboard-recent"></div>
         </div>
         
@@ -200,10 +215,10 @@ function renderKeyboard() {
   `;
   
   renderHierarchy();
-  renderBreadcrumb();
   renderCompositionArea();
   renderRecentBlocks();
   renderCharacterGrid();
+  updateEnterButtonVisibility();
   
   // Set initial active state for position button
   const bottomBtn = document.getElementById('pos-bottom');
@@ -298,34 +313,73 @@ function buildHierarchyDOM(parent, obj, path) {
       group.appendChild(blocksDiv);
       parent.appendChild(group);
     } else {
-      // Branch node
-      const branch = document.createElement('div');
-      branch.className = 'hierarchy-branch' + (isExpanded ? ' expanded' : '');
-      branch.dataset.path = currentPath;
-      
-      const header = document.createElement('div');
-      header.className = 'hierarchy-header';
-      header.dataset.path = currentPath;
-      
-      const arrow = document.createElement('span');
-      arrow.className = 'hierarchy-arrow';
-      arrow.textContent = isExpanded ? '▼' : '▶';
-      header.appendChild(arrow);
-      
-      const label = document.createElement('span');
-      label.className = 'hierarchy-label';
-      label.textContent = formatLabel(key);
-      header.appendChild(label);
-      
-      branch.appendChild(header);
-      
-      const children = document.createElement('div');
-      children.className = 'hierarchy-children';
-      if (!isExpanded) children.style.display = 'none';
-      buildHierarchyDOM(children, value, currentPath);
-      
-      branch.appendChild(children);
-      parent.appendChild(branch);
+      // Check if this branch has only one child - if so, flatten it
+      const childKeys = Object.keys(value);
+      if (childKeys.length === 1 && !Array.isArray(value[childKeys[0]])) {
+        // Flatten: skip this level and show child directly with combined label
+        const childKey = childKeys[0];
+        const childValue = value[childKey];
+        const flattenedPath = `${currentPath}.${childKey}`;
+        const combinedLabel = `${formatLabel(key)}`;
+        
+        // Recurse with child value but show under parent label
+        const branch = document.createElement('div');
+        branch.className = 'hierarchy-branch' + (isExpanded ? ' expanded' : '');
+        branch.dataset.path = currentPath;
+        
+        const header = document.createElement('div');
+        header.className = 'hierarchy-header';
+        header.dataset.path = currentPath;
+        
+        const arrow = document.createElement('span');
+        arrow.className = 'hierarchy-arrow';
+        arrow.textContent = isExpanded ? '▼' : '▶';
+        header.appendChild(arrow);
+        
+        const label = document.createElement('span');
+        label.className = 'hierarchy-label';
+        label.textContent = combinedLabel;
+        header.appendChild(label);
+        
+        branch.appendChild(header);
+        
+        const children = document.createElement('div');
+        children.className = 'hierarchy-children';
+        if (!isExpanded) children.style.display = 'none';
+        buildHierarchyDOM(children, childValue, flattenedPath);
+        
+        branch.appendChild(children);
+        parent.appendChild(branch);
+      } else {
+        // Branch node - normal rendering
+        const branch = document.createElement('div');
+        branch.className = 'hierarchy-branch' + (isExpanded ? ' expanded' : '');
+        branch.dataset.path = currentPath;
+        
+        const header = document.createElement('div');
+        header.className = 'hierarchy-header';
+        header.dataset.path = currentPath;
+        
+        const arrow = document.createElement('span');
+        arrow.className = 'hierarchy-arrow';
+        arrow.textContent = isExpanded ? '▼' : '▶';
+        header.appendChild(arrow);
+        
+        const label = document.createElement('span');
+        label.className = 'hierarchy-label';
+        label.textContent = formatLabel(key);
+        header.appendChild(label);
+        
+        branch.appendChild(header);
+        
+        const children = document.createElement('div');
+        children.className = 'hierarchy-children';
+        if (!isExpanded) children.style.display = 'none';
+        buildHierarchyDOM(children, value, currentPath);
+        
+        branch.appendChild(children);
+        parent.appendChild(branch);
+      }
     }
   }
 }
@@ -360,51 +414,7 @@ function findBlockPath(blockName) {
   return search(pageHierarchy, '');
 }
 
-function renderBreadcrumb() {
-  const container = document.getElementById('keyboard-breadcrumb');
-  if (!container) return;
-  
-  container.innerHTML = '';
-  
-  const path = findBlockPath(state.currentBlock);
-  if (!path) {
-    const span = document.createElement('span');
-    span.className = 'breadcrumb-item active';
-    span.textContent = state.currentBlock;
-    container.appendChild(span);
-    return;
-  }
-  
-  const parts = path.split('.');
-  let currentPath = '';
-  
-  parts.forEach((part, idx) => {
-    currentPath = currentPath ? `${currentPath}.${part}` : part;
-    
-    if (idx > 0) {
-      const sep = document.createElement('span');
-      sep.className = 'breadcrumb-sep';
-      sep.textContent = ' › ';
-      container.appendChild(sep);
-    }
-    
-    const span = document.createElement('span');
-    span.className = 'breadcrumb-item';
-    span.dataset.path = currentPath;
-    span.textContent = formatLabel(part);
-    container.appendChild(span);
-  });
-  
-  const sep = document.createElement('span');
-  sep.className = 'breadcrumb-sep';
-  sep.textContent = ' › ';
-  container.appendChild(sep);
-  
-  const activeSpan = document.createElement('span');
-  activeSpan.className = 'breadcrumb-item active';
-  activeSpan.textContent = state.currentBlock;
-  container.appendChild(activeSpan);
-}
+// Breadcrumb removed per user request
 
 function renderCompositionArea() {
   const container = document.getElementById('keyboard-composition');
@@ -813,21 +823,18 @@ function attachEventListeners() {
     }
   });
   
-  // Long press for variants and skin tones
+  // Long press for Unicode info (all characters) and skin tones
   container.addEventListener('mousedown', (e) => {
     const keyBtn = e.target.closest('.keyboard-key');
     if (keyBtn) {
-      const hasVariants = keyBtn.classList.contains('has-variants');
       const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
-      if (hasVariants || hasSkinTones) {
-        state.longPressTimer = setTimeout(() => {
-          if (hasSkinTones) {
-            showSkinTonePopup(keyBtn);
-          } else {
-            showVariantsPopup(keyBtn);
-          }
-        }, state.longPressDelay);
-      }
+      state.longPressTimer = setTimeout(() => {
+        if (hasSkinTones) {
+          showSkinTonePopup(keyBtn);
+        } else {
+          showUnicodeInfoPopup(keyBtn);
+        }
+      }, state.longPressDelay);
     }
   });
   
@@ -845,22 +852,19 @@ function attachEventListeners() {
     }
   });
   
-  // Touch support for long press (variants and skin tones)
+  // Touch support for long press (Unicode info and skin tones)
   container.addEventListener('touchstart', (e) => {
     const keyBtn = e.target.closest('.keyboard-key');
     if (keyBtn) {
-      const hasVariants = keyBtn.classList.contains('has-variants');
       const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
-      if (hasVariants || hasSkinTones) {
-        state.longPressTimer = setTimeout(() => {
-          e.preventDefault();
-          if (hasSkinTones) {
-            showSkinTonePopup(keyBtn);
-          } else {
-            showVariantsPopup(keyBtn);
-          }
-        }, state.longPressDelay);
-      }
+      state.longPressTimer = setTimeout(() => {
+        e.preventDefault();
+        if (hasSkinTones) {
+          showSkinTonePopup(keyBtn);
+        } else {
+          showUnicodeInfoPopup(keyBtn);
+        }
+      }, state.longPressDelay);
     }
   });
   
@@ -929,7 +933,10 @@ function attachEventListeners() {
   
   // Toggle button and position controls
   document.getElementById('keyboard-toggle-btn')?.addEventListener('click', toggleKeyboard);
-  document.getElementById('keyboard-close-btn')?.addEventListener('click', () => setKeyboardVisible(false));
+  document.getElementById('keyboard-close-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setKeyboardVisible(false);
+  });
   document.getElementById('pos-top')?.addEventListener('click', () => setKeyboardPosition('top'));
   document.getElementById('pos-bottom')?.addEventListener('click', () => setKeyboardPosition('bottom'));
   document.getElementById('pos-left')?.addEventListener('click', () => setKeyboardPosition('left'));
@@ -968,24 +975,29 @@ function selectBlock(blockName) {
   state.compositionInput = ''; // Reset composition input when switching blocks
   
   renderHierarchy();
-  renderBreadcrumb();
   renderCompositionArea();
   renderRecentBlocks();
   renderCharacterGrid();
 }
 
 function addToOutput(char, isLetterChar = false) {
-  const outputEl = document.getElementById('keyboard-output');
-  if (outputEl) {
-    const start = outputEl.selectionStart;
-    const end = outputEl.selectionEnd;
-    const before = outputEl.value.substring(0, start);
-    const after = outputEl.value.substring(end);
-    outputEl.value = before + char + after;
-    state.output = outputEl.value;
+  // Use external field if active, otherwise use internal output
+  const targetEl = state.activeExternalField || document.getElementById('keyboard-output');
+  
+  if (targetEl) {
+    const start = targetEl.selectionStart;
+    const end = targetEl.selectionEnd;
+    const before = targetEl.value.substring(0, start);
+    const after = targetEl.value.substring(end);
+    targetEl.value = before + char + after;
+    
+    if (!state.activeExternalField) {
+      state.output = targetEl.value;
+    }
+    
     const newPos = start + char.length;
-    outputEl.setSelectionRange(newPos, newPos);
-    outputEl.focus();
+    targetEl.setSelectionRange(newPos, newPos);
+    targetEl.focus();
   } else {
     state.output += char;
   }
@@ -999,51 +1011,58 @@ function addToOutput(char, isLetterChar = false) {
 }
 
 function handleBackspace() {
-  const outputEl = document.getElementById('keyboard-output');
-  if (!outputEl) return;
+  const targetEl = state.activeExternalField || document.getElementById('keyboard-output');
+  if (!targetEl) return;
   
-  const start = outputEl.selectionStart;
-  const end = outputEl.selectionEnd;
+  const start = targetEl.selectionStart;
+  const end = targetEl.selectionEnd;
   
   if (start !== end) {
-    const before = outputEl.value.substring(0, start);
-    const after = outputEl.value.substring(end);
-    outputEl.value = before + after;
-    outputEl.setSelectionRange(start, start);
+    const before = targetEl.value.substring(0, start);
+    const after = targetEl.value.substring(end);
+    targetEl.value = before + after;
+    targetEl.setSelectionRange(start, start);
   } else if (start > 0) {
-    const before = outputEl.value.substring(0, start - 1);
-    const after = outputEl.value.substring(start);
-    outputEl.value = before + after;
-    outputEl.setSelectionRange(start - 1, start - 1);
+    const before = targetEl.value.substring(0, start - 1);
+    const after = targetEl.value.substring(start);
+    targetEl.value = before + after;
+    targetEl.setSelectionRange(start - 1, start - 1);
   }
-  state.output = outputEl.value;
-  outputEl.focus();
+  if (!state.activeExternalField) {
+    state.output = targetEl.value;
+  }
+  targetEl.focus();
 }
 
 function handleDelete() {
-  const outputEl = document.getElementById('keyboard-output');
-  if (!outputEl) return;
+  const targetEl = state.activeExternalField || document.getElementById('keyboard-output');
+  if (!targetEl) return;
   
-  const start = outputEl.selectionStart;
-  const end = outputEl.selectionEnd;
+  const start = targetEl.selectionStart;
+  const end = targetEl.selectionEnd;
   
   if (start !== end) {
-    const before = outputEl.value.substring(0, start);
-    const after = outputEl.value.substring(end);
-    outputEl.value = before + after;
-    outputEl.setSelectionRange(start, start);
-  } else if (start < outputEl.value.length) {
-    const before = outputEl.value.substring(0, start);
-    const after = outputEl.value.substring(start + 1);
-    outputEl.value = before + after;
-    outputEl.setSelectionRange(start, start);
+    const before = targetEl.value.substring(0, start);
+    const after = targetEl.value.substring(end);
+    targetEl.value = before + after;
+    targetEl.setSelectionRange(start, start);
+  } else if (start < targetEl.value.length) {
+    const before = targetEl.value.substring(0, start);
+    const after = targetEl.value.substring(start + 1);
+    targetEl.value = before + after;
+    targetEl.setSelectionRange(start, start);
   }
-  state.output = outputEl.value;
-  outputEl.focus();
+  if (!state.activeExternalField) {
+    state.output = targetEl.value;
+  }
+  targetEl.focus();
 }
 
 function handleEnter() {
-  addToOutput('\n');
+  // Only allow Enter for multiline fields (textareas)
+  if (state.isMultilineField || !state.activeExternalField) {
+    addToOutput('\n');
+  }
 }
 
 function handleEnd() {
@@ -1096,7 +1115,8 @@ function setKeyboardPosition(position) {
   state.keyboardPosition = position;
   const panel = document.getElementById('keyboard-panel');
   if (panel) {
-    panel.className = `keyboard-panel keyboard-position-${position}`;
+    const hiddenClass = state.keyboardVisible ? '' : ' keyboard-panel-hidden';
+    panel.className = `keyboard-panel keyboard-position-${position}${hiddenClass}`;
   }
   
   // Update active button state
@@ -1309,6 +1329,220 @@ function showSkinTonePopup(keyBtn) {
   });
   
   popup.appendChild(grid);
+  
+  // Position popup near the key
+  const rect = keyBtn.getBoundingClientRect();
+  const containerRect = document.getElementById('keyboard-container').getBoundingClientRect();
+  
+  popup.style.display = 'block';
+  popup.style.left = `${rect.left - containerRect.left}px`;
+  popup.style.top = `${rect.bottom - containerRect.top + 5}px`;
+  
+  // Ensure popup stays within bounds
+  const popupRect = popup.getBoundingClientRect();
+  if (popupRect.right > containerRect.right) {
+    popup.style.left = `${containerRect.right - popupRect.width - containerRect.left}px`;
+  }
+}
+
+// External field tracking
+function setupExternalFieldTracking() {
+  document.addEventListener('focusin', (e) => {
+    if (isValidTextField(e.target) && !e.target.closest('#keyboard-container')) {
+      state.activeExternalField = e.target;
+      state.isMultilineField = e.target.tagName === 'TEXTAREA';
+      updateFloatingButtonVisibility();
+      updateEnterButtonVisibility();
+    }
+  });
+  
+  document.addEventListener('focusout', (e) => {
+    // Only clear if focus is leaving to something that's not a valid field or keyboard
+    setTimeout(() => {
+      const activeEl = document.activeElement;
+      const isKeyboardElement = activeEl && activeEl.closest('#keyboard-container');
+      const isValidField = isValidTextField(activeEl) && !activeEl.closest('#keyboard-container');
+      
+      if (!isKeyboardElement && !isValidField) {
+        state.activeExternalField = null;
+        state.isMultilineField = false;
+        updateFloatingButtonVisibility();
+        updateEnterButtonVisibility();
+      }
+    }, 100);
+  });
+}
+
+// Control key listener
+function setupControlKeyListener() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Control' && !e.repeat) {
+      // Only toggle if there's an active valid field
+      if (state.activeExternalField || isValidTextField(document.activeElement)) {
+        if (!state.activeExternalField && isValidTextField(document.activeElement)) {
+          state.activeExternalField = document.activeElement;
+          state.isMultilineField = document.activeElement.tagName === 'TEXTAREA';
+        }
+        toggleKeyboard();
+        e.preventDefault();
+      }
+    }
+  });
+}
+
+// Update floating button visibility
+function updateFloatingButtonVisibility() {
+  const btn = document.getElementById('keyboard-toggle-btn');
+  if (!btn) return;
+  
+  const hasValidField = state.activeExternalField !== null;
+  btn.style.display = hasValidField ? '' : 'none';
+  
+  if (!hasValidField && state.keyboardVisible) {
+    setKeyboardVisible(false);
+  }
+}
+
+// Update Enter button visibility based on field type
+function updateEnterButtonVisibility() {
+  const enterBtn = document.getElementById('btn-enter');
+  if (!enterBtn) return;
+  
+  // Hide Enter button for single-line inputs
+  enterBtn.style.display = state.isMultilineField ? '' : 'none';
+}
+
+// Get Unicode character name (simplified - uses codepoint description)
+function getUnicodeName(codePoint) {
+  // Some common character names
+  const commonNames = {
+    0x0020: 'SPACE',
+    0x0021: 'EXCLAMATION MARK',
+    0x0022: 'QUOTATION MARK',
+    0x0023: 'NUMBER SIGN',
+    0x0024: 'DOLLAR SIGN',
+    0x0025: 'PERCENT SIGN',
+    0x0026: 'AMPERSAND',
+    0x0027: 'APOSTROPHE',
+    0x0028: 'LEFT PARENTHESIS',
+    0x0029: 'RIGHT PARENTHESIS',
+    0x002A: 'ASTERISK',
+    0x002B: 'PLUS SIGN',
+    0x002C: 'COMMA',
+    0x002D: 'HYPHEN-MINUS',
+    0x002E: 'FULL STOP',
+    0x002F: 'SOLIDUS',
+    0x003A: 'COLON',
+    0x003B: 'SEMICOLON',
+    0x003C: 'LESS-THAN SIGN',
+    0x003D: 'EQUALS SIGN',
+    0x003E: 'GREATER-THAN SIGN',
+    0x003F: 'QUESTION MARK',
+    0x0040: 'COMMERCIAL AT',
+    0x005B: 'LEFT SQUARE BRACKET',
+    0x005C: 'REVERSE SOLIDUS',
+    0x005D: 'RIGHT SQUARE BRACKET',
+    0x005E: 'CIRCUMFLEX ACCENT',
+    0x005F: 'LOW LINE',
+    0x0060: 'GRAVE ACCENT',
+    0x007B: 'LEFT CURLY BRACKET',
+    0x007C: 'VERTICAL LINE',
+    0x007D: 'RIGHT CURLY BRACKET',
+    0x007E: 'TILDE'
+  };
+  
+  if (commonNames[codePoint]) return commonNames[codePoint];
+  
+  // Letter names
+  if (codePoint >= 0x0041 && codePoint <= 0x005A) {
+    return 'LATIN CAPITAL LETTER ' + String.fromCodePoint(codePoint);
+  }
+  if (codePoint >= 0x0061 && codePoint <= 0x007A) {
+    return 'LATIN SMALL LETTER ' + String.fromCodePoint(codePoint).toUpperCase();
+  }
+  if (codePoint >= 0x0030 && codePoint <= 0x0039) {
+    const digitNames = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
+    return 'DIGIT ' + digitNames[codePoint - 0x0030];
+  }
+  
+  // Greek letters
+  if (codePoint >= 0x0391 && codePoint <= 0x03C9) {
+    const translit = getTransliteration(state.currentBlock, codePoint);
+    if (translit) return 'GREEK ' + (codePoint < 0x03B1 ? 'CAPITAL' : 'SMALL') + ' LETTER ' + translit.toUpperCase();
+  }
+  
+  // Default: show block name
+  return state.currentBlock.toUpperCase() + ' CHARACTER';
+}
+
+// Show Unicode info popup on long-press
+function showUnicodeInfoPopup(keyBtn) {
+  const char = keyBtn.dataset.char;
+  const code = parseInt(keyBtn.dataset.code);
+  const variants = accentedVariants[char];
+  
+  const popup = document.getElementById('variants-popup');
+  if (!popup) return;
+  
+  popup.innerHTML = '';
+  
+  // Unicode info section
+  const infoSection = document.createElement('div');
+  infoSection.className = 'unicode-info-section';
+  
+  const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
+  const charName = getUnicodeName(code);
+  
+  const charDisplay = document.createElement('div');
+  charDisplay.className = 'unicode-info-char';
+  charDisplay.textContent = char;
+  infoSection.appendChild(charDisplay);
+  
+  const details = document.createElement('div');
+  details.className = 'unicode-info-details';
+  details.innerHTML = `
+    <div class="unicode-info-row"><span class="info-label">U+</span><span class="info-value">${hexCode}</span></div>
+    <div class="unicode-info-row"><span class="info-label">Hex:</span><span class="info-value">0x${hexCode}</span></div>
+    <div class="unicode-info-row"><span class="info-label">Dec:</span><span class="info-value">${code}</span></div>
+    <div class="unicode-info-row unicode-info-name"><span class="info-value">${charName}</span></div>
+  `;
+  infoSection.appendChild(details);
+  
+  popup.appendChild(infoSection);
+  
+  // Variants section (if any)
+  if (variants && variants.length > 0) {
+    const variantsSection = document.createElement('div');
+    variantsSection.className = 'variants-section';
+    
+    const variantsTitle = document.createElement('div');
+    variantsTitle.className = 'variants-title';
+    variantsTitle.textContent = 'Variants';
+    variantsSection.appendChild(variantsTitle);
+    
+    const grid = document.createElement('div');
+    grid.className = 'variants-grid';
+    
+    variants.forEach(v => {
+      const vCode = v.codePointAt(0);
+      const vHex = vCode.toString(16).toUpperCase().padStart(4, '0');
+      
+      const btn = document.createElement('button');
+      btn.className = 'variant-key';
+      btn.dataset.char = v;
+      btn.title = `U+${vHex}`;
+      
+      const charSpan = document.createElement('span');
+      charSpan.className = 'key-char';
+      charSpan.textContent = v;
+      btn.appendChild(charSpan);
+      
+      grid.appendChild(btn);
+    });
+    
+    variantsSection.appendChild(grid);
+    popup.appendChild(variantsSection);
+  }
   
   // Position popup near the key
   const rect = keyBtn.getBoundingClientRect();
