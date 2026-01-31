@@ -33,6 +33,13 @@ export function serveStatic(app) {
       }
     }
     
-    res.sendFile(path.resolve(distPath, "relation.html"));
+    if (url === "/relation.html" || url.startsWith("/relation.html?")) {
+      const relationPath = path.resolve(distPath, "relation.html");
+      if (fs.existsSync(relationPath)) {
+        return res.sendFile(relationPath);
+      }
+    }
+    
+    res.sendFile(path.resolve(distPath, "keyboard.html"));
   });
 }
