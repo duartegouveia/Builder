@@ -2,11 +2,12 @@
 
 ## Overview
 
-Error Propagator is a scientific web application designed for experimental error propagation calculations. The application provides three main tools:
+Multi-tool web application providing scientific computing and input tools. The application provides four main tools:
 
-1. **Logic Builder** (/) - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.) and mathematical operators (arithmetic, trigonometric, summation/product)
-2. **Error Propagator** (/logic.html) - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
-3. **Relation Builder** (/relation.html) - An advanced data table interface for creating, viewing, and editing relational data with JSON input/output
+1. **Virtual Keyboard** (/) - Comprehensive Unicode character browser with hierarchical navigation, long-press variants, transliteration for non-Latin scripts, multiple keyboard layouts, and output management
+2. **Relation Builder** (/relation.html) - An advanced data table interface for creating, viewing, and editing relational data with JSON input/output, six different views (Table, Cards, Pivot, Correlation, Diagram, AI)
+3. **Error Propagator** (/logic.html) - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
+4. **Logic Builder** (/logic-builder.html) - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.)
 
 The application uses vanilla JavaScript for the frontend and Express.js for the backend.
 
@@ -27,14 +28,17 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite
 
 The frontend uses separate HTML files:
-- `client/index.html` - Logic Builder page (serves at /)
-- `client/logic.html` - Error Propagator page (serves at /logic.html)
+- `client/keyboard.html` - Virtual Keyboard page (serves at /)
 - `client/relation.html` - Relation Builder page (serves at /relation.html)
+- `client/logic.html` - Error Propagator page (serves at /logic.html)
+- `client/index.html` - Logic Builder page (serves at /logic-builder.html)
 
 JavaScript files in `client/src/`:
-- `logic-builder.js` - Logic Builder interactivity
-- `experiment-calc.js` - Error Propagator interactivity
+- `virtual-keyboard.js` - Virtual Keyboard with hierarchical Unicode browser
+- `unicode-data.js` - Unicode block definitions, transliterations, accented variants
 - `relation-builder.js` - Relation Builder with advanced table features
+- `experiment-calc.js` - Error Propagator interactivity
+- `logic-builder.js` - Logic Builder interactivity
 - `lib/error-utils.js` - Error propagation calculations using mathjs
 - `styles.css` - All application styles
 
@@ -139,6 +143,47 @@ The Relation Builder has 6 different views accessible via tabs:
    - Similar rows cluster together based on categorical/numeric values
    - Uses force-atlas-like algorithm for layout
 6. **AI View** - Natural language data assistant (moved from separate panel)
+
+## Virtual Keyboard Features
+
+The Virtual Keyboard provides comprehensive Unicode character input with:
+
+### Unicode Block Navigation
+- Hierarchical organization by Linguas (Languages) > Continentes > Regions > Scripts
+- 100+ Unicode blocks covering Latin, Greek, Cyrillic, Hebrew, Arabic, CJK, and symbols
+- Expandable/collapsible navigation tree
+- Breadcrumb trail showing current location
+
+### Character Grid
+- Clickable character buttons with Unicode codepoint tooltips
+- Large blocks (2000+ characters) are truncated for performance
+- Support for non-BMP characters (emoji, historic scripts)
+
+### Keyboard Layouts
+- Unicode Order (default for non-Latin blocks)
+- QWERTY, AZERTY, QWERTZ (for Latin Basic)
+- Alphabetic (A-Z order)
+- HCESAR (frequency-optimized)
+
+### Long-Press Variants
+- 60+ base characters have accented/related variants
+- Long-press (500ms) on characters like 'a' shows popup with ã, â, á, à, etc.
+- Works on both mouse and touch devices
+
+### Transliteration
+- Non-Latin scripts show Latin transliteration labels
+- Greek: α shows "alpha", β shows "beta"
+- Cyrillic: а shows "a", б shows "b"
+- Hebrew, Arabic, Japanese also have transliterations
+
+### Output Management
+- Collected characters displayed in output textarea
+- Copy to clipboard button
+- Clear button to reset
+
+### Recent Pages
+- Tracks last 6 visited Unicode blocks
+- Quick access buttons for frequently used blocks
 
 ## External Dependencies
 
