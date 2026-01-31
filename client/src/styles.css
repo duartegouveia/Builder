@@ -3257,3 +3257,69 @@ input[type="number"] {
 .variant-key .key-char {
   font-size: 18px;
 }
+
+/* Keyboard Controls Right Section */
+.keyboard-controls-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 160px;
+}
+
+/* Shift Button Control */
+.keyboard-shift-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.shift-btn {
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shift-btn.shift-lowercase {
+  background: var(--slate-100);
+  border-color: var(--border);
+}
+
+.shift-btn.shift-uppercase {
+  background: var(--primary-100);
+  border-color: var(--primary-400);
+  color: var(--primary-700);
+}
+
+.shift-btn.shift-capslock {
+  background: var(--primary-500);
+  border-color: var(--primary-600);
+  color: white;
+}
+
+.shift-label {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  min-width: 70px;
+}
+
+/* Keyboard Grid Separator */
+.keyboard-separator {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-2) 0;
+}
+
+/* Space Key */
+.keyboard-space-key {
+  min-width: 120px;
+  background: var(--slate-100);
+}
+
+.keyboard-space-key:hover {
+  background: var(--primary-50);
+}
