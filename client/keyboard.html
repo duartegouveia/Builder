@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta property="og:title" content="Virtual Keyboard">
+  <meta property="og:description" content="Virtual keyboard for input and experimentation">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://replit.com/public/images/opengraph.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@replit">
+  <meta name="twitter:title" content="Virtual Keyboard">
+  <meta name="twitter:description" content="Virtual keyboard for input and experimentation">
+  <meta name="twitter:image" content="https://replit.com/public/images/opengraph.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Virtual Keyboard</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="min-h-screen bg-background p-4">
+      <div class="max-w-3xl mx-auto space-y-12">
+        
+        <header class="space-y-2 text-center">
+          <nav class="flex justify-center gap-2" style="margin-bottom: 1rem;">
+            <a href="/" class="btn btn-outline btn-sm gap-2" data-testid="link-relation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="3"/><circle cx="19" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M7.5 8 12 15"/><path d="m16.5 8-4.5 7"/></svg>
+              Relation
+            </a>
+            <a href="/logic-builder.html" class="btn btn-outline btn-sm gap-2" data-testid="link-logic">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+              Logic Builder
+            </a>
+            <a href="/logic.html" class="btn btn-outline btn-sm gap-2" data-testid="link-error-propagator">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>
+              Error Propagator
+            </a>
+          </nav>
+          <h1 class="text-3xl font-bold text-foreground tracking-tight">
+            Virtual Keyboard
+          </h1>
+          <p class="text-muted-foreground text-lg" style="max-width: 42rem; margin: 0 auto;">
+            Virtual keyboard for input and experimentation
+          </p>
+        </header>
+
+        <section class="space-y-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Keyboard</h3>
+            </div>
+            <div class="card-content">
+              <div id="keyboard-container"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/virtual-keyboard.js"></script>
+</body>
+</html>
