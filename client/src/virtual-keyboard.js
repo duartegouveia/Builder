@@ -1,5 +1,5 @@
 // Virtual Keyboard JavaScript
-import { unicodeBlocks, pageHierarchy, transliterations, accentedVariants, keyboardLayouts, getBlockCharacters, getTransliteration } from './unicode-data.js';
+import { unicodeBlocks, pageHierarchy, transliterations, accentedVariants, keyboardLayouts, keyboardRows, getBlockCharacters, getTransliteration } from './unicode-data.js';
 
 const state = {
   currentBlock: 'Basic Latin',
@@ -9,8 +9,16 @@ const state = {
   output: '',
   longPressTimer: null,
   longPressDelay: 500,
-  shiftState: 'lowercase' // 'lowercase', 'uppercase', 'capslock'
+  shiftState: 'lowercase', // 'lowercase', 'uppercase', 'capslock'
+  hierarchyCollapsed: false, // true when block is selected, shows compact nav
+  compositionInput: '' // For CJK romanization input
 };
+
+// Blocks that support composition (romanization to character)
+const COMPOSITION_BLOCKS = [
+  'Hiragana', 'Katakana', 'Katakana Phonetic Extensions',
+  'Hangul Compatibility Jamo'
+];
 
 // Shift state icons
 const SHIFT_ICONS = {
@@ -18,6 +26,53 @@ const SHIFT_ICONS = {
   uppercase: '⬆',
   capslock: '⇪'
 };
+
+// Skin tone modifiers for emoji
+const SKIN_TONES = [
+  { code: 0x1F3FB, name: 'light', char: '\u{1F3FB}' },
+  { code: 0x1F3FC, name: 'medium-light', char: '\u{1F3FC}' },
+  { code: 0x1F3FD, name: 'medium', char: '\u{1F3FD}' },
+  { code: 0x1F3FE, name: 'medium-dark', char: '\u{1F3FE}' },
+  { code: 0x1F3FF, name: 'dark', char: '\u{1F3FF}' }
+];
+
+// Emoji codepoint ranges that support skin tone modifiers
+// Includes hand gestures, people, and body parts
+const SKIN_TONE_EMOJI_RANGES = [
+  // Hand gestures
+  [0x1F44A, 0x1F44D], // 👊-👍 fist bump to thumbs up
+  [0x1F44E, 0x1F44F], // 👎-👏 thumbs down, clapping
+  [0x1F450, 0x1F450], // 👐 open hands
+  [0x1F4AA, 0x1F4AA], // 💪 flexed biceps
+  [0x1F590, 0x1F590], // 🖐 raised hand with fingers splayed
+  [0x1F595, 0x1F596], // 🖕-🖖 middle finger, vulcan salute
+  [0x1F918, 0x1F91F], // 🤘-🤟 various hand signs
+  [0x1F926, 0x1F926], // 🤦 facepalm
+  [0x1F930, 0x1F939], // 🤰-🤹 pregnant to juggling
+  [0x1F9B5, 0x1F9B6], // 🦵-🦶 leg, foot
+  [0x1F9BB, 0x1F9BB], // 🦻 ear with hearing aid
+  [0x1F9D1, 0x1F9DD], // 🧑-🧝 person to elf
+  // Pointing fingers
+  [0x261D, 0x261D],   // ☝ index pointing up
+  [0x270A, 0x270D],   // ✊-✍ fist to writing hand
+  // People
+  [0x1F466, 0x1F469], // 👦-👩 boy to woman
+  [0x1F46E, 0x1F46E], // 👮 police officer
+  [0x1F470, 0x1F478], // 👰-👸 bride to princess
+  [0x1F47C, 0x1F47C], // 👼 baby angel
+  [0x1F481, 0x1F487], // 💁-💇 person tipping hand to person getting haircut
+  [0x1F574, 0x1F575], // 🕴-🕵 man in suit, detective
+  [0x1F57A, 0x1F57A], // 🕺 man dancing
+  [0x1F645, 0x1F647], // 🙅-🙇 gestures
+  [0x1F64B, 0x1F64F], // 🙋-🙏 raising hand to person with folded hands
+];
+
+// Check if an emoji supports skin tone modifiers
+function supportsSkinTone(codePoint) {
+  return SKIN_TONE_EMOJI_RANGES.some(([start, end]) => 
+    codePoint >= start && codePoint <= end
+  );
+}
 
 // Symbol ordering by frequency (most common first)
 const SYMBOL_ORDER = [
@@ -108,6 +163,12 @@ function renderKeyboard() {
         </div>
       </div>
       
+      <div class="keyboard-composition" id="keyboard-composition" style="display: none;">
+        <label>Type romanization:</label>
+        <input type="text" id="composition-input" class="keyboard-input" placeholder="e.g., ka, shi, tsu..." autocomplete="off">
+        <div class="composition-matches" id="composition-matches"></div>
+      </div>
+      
       <div class="keyboard-grid-container">
         <div class="keyboard-grid" id="keyboard-grid"></div>
       </div>
@@ -118,6 +179,7 @@ function renderKeyboard() {
   
   renderHierarchy();
   renderBreadcrumb();
+  renderCompositionArea();
   renderRecentBlocks();
   renderCharacterGrid();
 }
@@ -128,10 +190,50 @@ function renderHierarchy() {
   
   container.innerHTML = '';
   
-  const tree = document.createElement('div');
-  tree.className = 'hierarchy-tree';
-  buildHierarchyDOM(tree, pageHierarchy, '');
-  container.appendChild(tree);
+  if (state.hierarchyCollapsed) {
+    // Compact mode: show current block and recent blocks in a horizontal line
+    const compactNav = document.createElement('div');
+    compactNav.className = 'hierarchy-compact';
+    
+    // Button to expand hierarchy
+    const expandBtn = document.createElement('button');
+    expandBtn.className = 'btn btn-sm btn-outline hierarchy-expand-btn';
+    expandBtn.id = 'hierarchy-expand-btn';
+    expandBtn.title = 'Show all languages';
+    expandBtn.textContent = '☰ Browse';
+    compactNav.appendChild(expandBtn);
+    
+    // Current block label
+    const currentLabel = document.createElement('span');
+    currentLabel.className = 'hierarchy-current';
+    currentLabel.textContent = state.currentBlock;
+    compactNav.appendChild(currentLabel);
+    
+    // Recent blocks (excluding current)
+    const recentFiltered = state.recentBlocks.filter(b => b !== state.currentBlock);
+    if (recentFiltered.length > 0) {
+      const recentContainer = document.createElement('div');
+      recentContainer.className = 'hierarchy-recent-compact';
+      
+      recentFiltered.forEach(block => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-ghost hierarchy-recent-btn';
+        btn.dataset.block = block;
+        btn.textContent = block;
+        recentContainer.appendChild(btn);
+      });
+      
+      compactNav.appendChild(recentContainer);
+    }
+    
+    container.appendChild(compactNav);
+  } else {
+    // Full hierarchy tree
+    const tree = document.createElement('div');
+    tree.className = 'hierarchy-tree';
+    buildHierarchyDOM(tree, pageHierarchy, '');
+    container.appendChild(tree);
+  }
 }
 
 function buildHierarchyDOM(parent, obj, path) {
@@ -275,6 +377,71 @@ function renderBreadcrumb() {
   container.appendChild(activeSpan);
 }
 
+function renderCompositionArea() {
+  const container = document.getElementById('keyboard-composition');
+  const input = document.getElementById('composition-input');
+  if (!container) return;
+  
+  // Show composition area only for blocks that support it
+  if (COMPOSITION_BLOCKS.includes(state.currentBlock)) {
+    container.style.display = 'flex';
+    if (input) {
+      input.value = state.compositionInput;
+    }
+    updateCompositionMatches();
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function updateCompositionMatches() {
+  const container = document.getElementById('composition-matches');
+  const input = state.compositionInput.toLowerCase().trim();
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!input) return;
+  
+  // Get transliterations for current block
+  const blockTranslit = transliterations[state.currentBlock];
+  if (!blockTranslit) return;
+  
+  // Find all matching characters
+  const matches = [];
+  for (const [codePoint, translit] of Object.entries(blockTranslit)) {
+    if (translit.toLowerCase().startsWith(input)) {
+      const code = parseInt(codePoint);
+      const char = String.fromCodePoint(code);
+      matches.push({ code, char, translit });
+    }
+  }
+  
+  // Sort by transliteration length (shorter first = exact match first)
+  matches.sort((a, b) => a.translit.length - b.translit.length);
+  
+  // Show up to 10 matches
+  matches.slice(0, 10).forEach(({ code, char, translit }) => {
+    const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
+    const btn = document.createElement('button');
+    btn.className = 'composition-match';
+    btn.dataset.char = char;
+    btn.title = `U+${hexCode}`;
+    
+    const charSpan = document.createElement('span');
+    charSpan.className = 'match-char';
+    charSpan.textContent = char;
+    btn.appendChild(charSpan);
+    
+    const translitSpan = document.createElement('span');
+    translitSpan.className = 'match-translit';
+    translitSpan.textContent = translit;
+    btn.appendChild(translitSpan);
+    
+    container.appendChild(btn);
+  });
+}
+
 function renderRecentBlocks() {
   const container = document.getElementById('keyboard-recent');
   if (!container) return;
@@ -366,10 +533,13 @@ function renderCharacterGrid() {
     const translit = getTransliteration(state.currentBlock, item.code);
     const baseChar = item.char;
     const hasVariants = accentedVariants[baseChar] && accentedVariants[baseChar].length > 0;
+    const hasSkinTones = supportsSkinTone(item.code);
     const hexCode = item.code.toString(16).toUpperCase().padStart(4, '0');
     
     const btn = document.createElement('button');
-    btn.className = 'keyboard-key' + (hasVariants ? ' has-variants' : '');
+    btn.className = 'keyboard-key';
+    if (hasVariants) btn.classList.add('has-variants');
+    if (hasSkinTones) btn.classList.add('has-skin-tones');
     btn.dataset.char = displayChar;
     btn.dataset.baseChar = baseChar;
     btn.dataset.code = item.code;
@@ -388,7 +558,7 @@ function renderCharacterGrid() {
       btn.appendChild(translitSpan);
     }
     
-    if (hasVariants) {
+    if (hasVariants || hasSkinTones) {
       const indicator = document.createElement('span');
       indicator.className = 'key-indicator';
       indicator.textContent = '•';
@@ -401,10 +571,38 @@ function renderCharacterGrid() {
   // Add letters first
   if (letters.length > 0) {
     const isUppercase = state.shiftState !== 'lowercase';
-    letters.forEach(item => {
-      const displayChar = isUppercase ? item.upperChar : item.char;
-      container.appendChild(createKey(item, displayChar));
-    });
+    const rows = keyboardRows[state.currentLayout];
+    
+    // Use row-based layout for Basic Latin with row-supporting layouts
+    if (state.currentBlock === 'Basic Latin' && rows) {
+      // Create a map from letter to item for quick lookup
+      const letterMap = {};
+      letters.forEach(item => {
+        letterMap[item.char.toLowerCase()] = item;
+      });
+      
+      // Render each row
+      rows.forEach((rowLetters, rowIndex) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'keyboard-row';
+        
+        rowLetters.forEach(letter => {
+          const item = letterMap[letter];
+          if (item) {
+            const displayChar = isUppercase ? item.upperChar : item.char;
+            rowDiv.appendChild(createKey(item, displayChar));
+          }
+        });
+        
+        container.appendChild(rowDiv);
+      });
+    } else {
+      // Default: render all letters in a single flow
+      letters.forEach(item => {
+        const displayChar = isUppercase ? item.upperChar : item.char;
+        container.appendChild(createKey(item, displayChar));
+      });
+    }
   }
   
   // Add separator and digits
@@ -548,7 +746,16 @@ function attachEventListeners() {
       return;
     }
     
-    const blockBtn = e.target.closest('.hierarchy-block, .recent-block');
+    // Expand hierarchy button in compact mode
+    const expandBtn = e.target.closest('#hierarchy-expand-btn');
+    if (expandBtn) {
+      state.hierarchyCollapsed = false;
+      renderHierarchy();
+      return;
+    }
+    
+    // Block selection from hierarchy, recent, or compact recent
+    const blockBtn = e.target.closest('.hierarchy-block, .recent-block, .hierarchy-recent-btn');
     if (blockBtn) {
       selectBlock(blockBtn.dataset.block);
       return;
@@ -577,13 +784,21 @@ function attachEventListeners() {
     }
   });
   
-  // Long press for variants
+  // Long press for variants and skin tones
   container.addEventListener('mousedown', (e) => {
     const keyBtn = e.target.closest('.keyboard-key');
-    if (keyBtn && keyBtn.classList.contains('has-variants')) {
-      state.longPressTimer = setTimeout(() => {
-        showVariantsPopup(keyBtn);
-      }, state.longPressDelay);
+    if (keyBtn) {
+      const hasVariants = keyBtn.classList.contains('has-variants');
+      const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
+      if (hasVariants || hasSkinTones) {
+        state.longPressTimer = setTimeout(() => {
+          if (hasSkinTones) {
+            showSkinTonePopup(keyBtn);
+          } else {
+            showVariantsPopup(keyBtn);
+          }
+        }, state.longPressDelay);
+      }
     }
   });
   
@@ -601,14 +816,22 @@ function attachEventListeners() {
     }
   });
   
-  // Touch support for long press
+  // Touch support for long press (variants and skin tones)
   container.addEventListener('touchstart', (e) => {
     const keyBtn = e.target.closest('.keyboard-key');
-    if (keyBtn && keyBtn.classList.contains('has-variants')) {
-      state.longPressTimer = setTimeout(() => {
-        e.preventDefault();
-        showVariantsPopup(keyBtn);
-      }, state.longPressDelay);
+    if (keyBtn) {
+      const hasVariants = keyBtn.classList.contains('has-variants');
+      const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
+      if (hasVariants || hasSkinTones) {
+        state.longPressTimer = setTimeout(() => {
+          e.preventDefault();
+          if (hasSkinTones) {
+            showSkinTonePopup(keyBtn);
+          } else {
+            showVariantsPopup(keyBtn);
+          }
+        }, state.longPressDelay);
+      }
     }
   });
   
@@ -627,6 +850,40 @@ function attachEventListeners() {
       renderCharacterGrid();
     });
   }
+  
+  // Composition input
+  const compositionInput = document.getElementById('composition-input');
+  if (compositionInput) {
+    compositionInput.addEventListener('input', (e) => {
+      state.compositionInput = e.target.value;
+      updateCompositionMatches();
+    });
+    compositionInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        // Select first match on Enter
+        const firstMatch = document.querySelector('.composition-match');
+        if (firstMatch) {
+          addToOutput(firstMatch.dataset.char, false);
+          state.compositionInput = '';
+          compositionInput.value = '';
+          updateCompositionMatches();
+        }
+      }
+    });
+  }
+  
+  // Composition match click
+  container.addEventListener('click', (e) => {
+    const matchBtn = e.target.closest('.composition-match');
+    if (matchBtn) {
+      addToOutput(matchBtn.dataset.char, false);
+      state.compositionInput = '';
+      const input = document.getElementById('composition-input');
+      if (input) input.value = '';
+      updateCompositionMatches();
+      return;
+    }
+  });
   
   // Output actions
   document.getElementById('btn-copy-output')?.addEventListener('click', copyOutput);
@@ -647,6 +904,7 @@ function selectBlock(blockName) {
   if (!unicodeBlocks[blockName]) return;
   
   state.currentBlock = blockName;
+  state.hierarchyCollapsed = true; // Collapse hierarchy after selection
   
   // Update recent blocks
   const idx = state.recentBlocks.indexOf(blockName);
@@ -658,8 +916,11 @@ function selectBlock(blockName) {
     state.recentBlocks.pop();
   }
   
+  state.compositionInput = ''; // Reset composition input when switching blocks
+  
   renderHierarchy();
   renderBreadcrumb();
+  renderCompositionArea();
   renderRecentBlocks();
   renderCharacterGrid();
 }
@@ -754,5 +1015,68 @@ function hideVariantsPopup() {
   const popup = document.getElementById('variants-popup');
   if (popup) {
     popup.style.display = 'none';
+  }
+}
+
+function showSkinTonePopup(keyBtn) {
+  const char = keyBtn.dataset.char;
+  const code = parseInt(keyBtn.dataset.code);
+  
+  if (!supportsSkinTone(code)) return;
+  
+  const popup = document.getElementById('variants-popup');
+  if (!popup) return;
+  
+  popup.innerHTML = '';
+  
+  const title = document.createElement('div');
+  title.className = 'variants-title';
+  title.textContent = `Skin tones for ${char}`;
+  popup.appendChild(title);
+  
+  const grid = document.createElement('div');
+  grid.className = 'variants-grid';
+  
+  // Add default (no skin tone)
+  const defaultBtn = document.createElement('button');
+  defaultBtn.className = 'variant-key';
+  defaultBtn.dataset.char = char;
+  defaultBtn.title = 'Default';
+  const defaultSpan = document.createElement('span');
+  defaultSpan.className = 'key-char';
+  defaultSpan.textContent = char;
+  defaultBtn.appendChild(defaultSpan);
+  grid.appendChild(defaultBtn);
+  
+  // Add each skin tone variant
+  SKIN_TONES.forEach(tone => {
+    const combined = char + tone.char;
+    const btn = document.createElement('button');
+    btn.className = 'variant-key';
+    btn.dataset.char = combined;
+    btn.title = tone.name;
+    
+    const charSpan = document.createElement('span');
+    charSpan.className = 'key-char';
+    charSpan.textContent = combined;
+    btn.appendChild(charSpan);
+    
+    grid.appendChild(btn);
+  });
+  
+  popup.appendChild(grid);
+  
+  // Position popup near the key
+  const rect = keyBtn.getBoundingClientRect();
+  const containerRect = document.getElementById('keyboard-container').getBoundingClientRect();
+  
+  popup.style.display = 'block';
+  popup.style.left = `${rect.left - containerRect.left}px`;
+  popup.style.top = `${rect.bottom - containerRect.top + 5}px`;
+  
+  // Ensure popup stays within bounds
+  const popupRect = popup.getBoundingClientRect();
+  if (popupRect.right > containerRect.right) {
+    popup.style.left = `${containerRect.right - popupRect.width - containerRect.left}px`;
   }
 }

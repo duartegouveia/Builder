@@ -3036,6 +3036,42 @@ input[type="number"] {
   padding: var(--space-2);
 }
 
+/* Compact hierarchy navigation (after block selection) */
+.hierarchy-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-1) 0;
+}
+
+.hierarchy-expand-btn {
+  flex-shrink: 0;
+}
+
+.hierarchy-current {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: var(--text-base);
+}
+
+.hierarchy-recent-compact {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.hierarchy-recent-btn {
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-2);
+  color: var(--muted-foreground);
+}
+
+.hierarchy-recent-btn:hover {
+  color: var(--foreground);
+  background: var(--slate-100);
+}
+
 .hierarchy-tree {
   font-size: var(--text-sm);
 }
@@ -3306,6 +3342,19 @@ input[type="number"] {
   min-width: 70px;
 }
 
+/* Keyboard Row (for QWERTY/AZERTY/QWERTZ/HCESAR layouts) */
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.keyboard-row:not(:last-child) {
+  margin-bottom: var(--space-1);
+}
+
 /* Keyboard Grid Separator */
 .keyboard-separator {
   grid-column: 1 / -1;
@@ -3322,4 +3371,74 @@ input[type="number"] {
 
 .keyboard-space-key:hover {
   background: var(--primary-50);
+}
+
+/* Composition Area (for CJK romanization input) */
+.keyboard-composition {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--slate-50);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.keyboard-composition label {
+  font-weight: 500;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.keyboard-input {
+  flex: 0 1 200px;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+}
+
+.keyboard-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+.composition-matches {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.composition-match {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.composition-match:hover {
+  background: var(--primary-50);
+  border-color: var(--primary);
+}
+
+.composition-match:first-child {
+  background: var(--primary-50);
+  border-color: var(--primary);
+}
+
+.match-char {
+  font-size: 1.5rem;
+}
+
+.match-translit {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
 }

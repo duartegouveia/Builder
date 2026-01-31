@@ -450,6 +450,22 @@ export const transliterations = {
     0x30E4: "ya", 0x30E6: "yu", 0x30E8: "yo",
     0x30E9: "ra", 0x30EA: "ri", 0x30EB: "ru", 0x30EC: "re", 0x30ED: "ro",
     0x30EF: "wa", 0x30F2: "wo", 0x30F3: "n"
+  },
+  // Korean Hangul Compatibility Jamo
+  "Hangul Compatibility Jamo": {
+    // Consonants
+    0x3131: "g", 0x3132: "gg", 0x3133: "gs", 0x3134: "n", 0x3135: "nj",
+    0x3136: "nh", 0x3137: "d", 0x3138: "dd", 0x3139: "r", 0x313A: "rg",
+    0x313B: "rm", 0x313C: "rb", 0x313D: "rs", 0x313E: "rt", 0x313F: "rp",
+    0x3140: "rh", 0x3141: "m", 0x3142: "b", 0x3143: "bb", 0x3144: "bs",
+    0x3145: "s", 0x3146: "ss", 0x3147: "ng", 0x3148: "j", 0x3149: "jj",
+    0x314A: "ch", 0x314B: "k", 0x314C: "t", 0x314D: "p", 0x314E: "h",
+    // Vowels
+    0x314F: "a", 0x3150: "ae", 0x3151: "ya", 0x3152: "yae", 0x3153: "eo",
+    0x3154: "e", 0x3155: "yeo", 0x3156: "ye", 0x3157: "o", 0x3158: "wa",
+    0x3159: "wae", 0x315A: "oe", 0x315B: "yo", 0x315C: "u", 0x315D: "weo",
+    0x315E: "we", 0x315F: "wi", 0x3160: "yu", 0x3161: "eu", 0x3162: "yi",
+    0x3163: "i"
   }
 };
 
@@ -532,12 +548,37 @@ export const accentedVariants = {
 };
 
 // Layout orders for Latin keyboards
+// Keyboard layouts with row structure for visual line breaks
 export const keyboardLayouts = {
   qwerty: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
   azerty: ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'w', 'x', 'c', 'v', 'b', 'n'],
   qwertz: ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'y', 'x', 'c', 'v', 'b', 'n', 'm'],
   alphabetic: 'abcdefghijklmnopqrstuvwxyz'.split(''),
   hcesar: 'hvtbjepqxczfaongdmsulrikyw'.split('')
+};
+
+// Row structure for layouts that should have line breaks
+export const keyboardRows = {
+  qwerty: [
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+    ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+  ],
+  azerty: [
+    ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm'],
+    ['w', 'x', 'c', 'v', 'b', 'n']
+  ],
+  qwertz: [
+    ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
+    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+    ['y', 'x', 'c', 'v', 'b', 'n', 'm']
+  ],
+  hcesar: [
+    ['h', 'v', 't', 'b', 'j', 'e', 'p', 'q', 'x', 'c'],
+    ['z', 'f', 'a', 'o', 'n', 'g', 'd', 'm', 's'],
+    ['u', 'l', 'r', 'i', 'k', 'y', 'w']
+  ]
 };
 
 // Get characters from a Unicode block (optionally limited for performance)
