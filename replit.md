@@ -158,6 +158,16 @@ The Virtual Keyboard provides comprehensive Unicode character input with:
 - Clickable character buttons with Unicode codepoint tooltips
 - Large blocks (2000+ characters) are truncated for performance
 - Support for non-BMP characters (emoji, historic scripts)
+- Characters organized: letters first, then numbers, then symbols
+- Visual separators between character categories
+- Space key (␣) available at the bottom of every page
+
+### Shift Button (Case Control)
+- Three-state shift button for uppercase/lowercase control:
+  - **minúscula** (⇧) - Default lowercase state
+  - **maiúscula** (⬆) - Temporary uppercase, auto-reverts after selecting a letter
+  - **PRESA** (⇪) - Capslock mode, stays locked until clicked again
+- Only letters trigger state transitions; numbers and symbols maintain current state
 
 ### Keyboard Layouts
 - Unicode Order (default for non-Latin blocks)
