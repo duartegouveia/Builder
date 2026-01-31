@@ -4,7 +4,7 @@
 
 Multi-tool web application providing scientific computing and input tools. The application provides four main tools:
 
-1. **Virtual Keyboard** (/) - Comprehensive Unicode character browser with hierarchical navigation, long-press variants, transliteration for non-Latin scripts, multiple keyboard layouts, and output management
+1. **Virtual Keyboard** (/) - Comprehensive Unicode character browser with hierarchical navigation, long-press variants, transliteration for non-Latin scripts, multiple keyboard layouts, shift button for case control, collapsed navigation, emoji skin tone modifiers, CJK romanization composition, and output management
 2. **Relation Builder** (/relation.html) - An advanced data table interface for creating, viewing, and editing relational data with JSON input/output, six different views (Table, Cards, Pivot, Correlation, Diagram, AI)
 3. **Error Propagator** (/logic.html) - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
 4. **Logic Builder** (/logic-builder.html) - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.)
