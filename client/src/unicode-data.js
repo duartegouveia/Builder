@@ -540,13 +540,13 @@ export const keyboardLayouts = {
   hcesar: 'hvtbjepqxczfaongdmsulrikyw'.split('')
 };
 
-// Get characters from a Unicode block
-export function getBlockCharacters(blockName) {
+// Get characters from a Unicode block (optionally limited for performance)
+export function getBlockCharacters(blockName, limit = Infinity) {
   const block = unicodeBlocks[blockName];
   if (!block) return [];
   
   const chars = [];
-  for (let code = block.start; code <= block.end; code++) {
+  for (let code = block.start; code <= block.end && chars.length < limit; code++) {
     try {
       const char = String.fromCodePoint(code);
       // Skip control characters and unassigned

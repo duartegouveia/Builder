@@ -73,16 +73,15 @@ function renderHierarchy() {
   const container = document.getElementById('keyboard-hierarchy');
   if (!container) return;
   
-  let html = '<div class="hierarchy-tree">';
-  html += buildHierarchyHTML(pageHierarchy, '', 0);
-  html += '</div>';
+  container.innerHTML = '';
   
-  container.innerHTML = html;
+  const tree = document.createElement('div');
+  tree.className = 'hierarchy-tree';
+  buildHierarchyDOM(tree, pageHierarchy, '');
+  container.appendChild(tree);
 }
 
-function buildHierarchyHTML(obj, path, depth) {
-  let html = '';
-  
+function buildHierarchyDOM(parent, obj, path) {
   for (const key in obj) {
     const value = obj[key];
     const currentPath = path ? `${path}.${key}` : key;
@@ -90,28 +89,61 @@ function buildHierarchyHTML(obj, path, depth) {
     
     if (Array.isArray(value)) {
       // Leaf node - list of blocks
-      html += `<div class="hierarchy-group" data-path="${currentPath}">`;
-      html += `<div class="hierarchy-header hierarchy-leaf" data-path="${currentPath}">${formatLabel(key)}</div>`;
-      html += `<div class="hierarchy-blocks">`;
+      const group = document.createElement('div');
+      group.className = 'hierarchy-group';
+      group.dataset.path = currentPath;
+      
+      const header = document.createElement('div');
+      header.className = 'hierarchy-header hierarchy-leaf';
+      header.dataset.path = currentPath;
+      header.textContent = formatLabel(key);
+      group.appendChild(header);
+      
+      const blocksDiv = document.createElement('div');
+      blocksDiv.className = 'hierarchy-blocks';
+      
       value.forEach(block => {
         const isActive = block === state.currentBlock;
-        html += `<button class="hierarchy-block${isActive ? ' active' : ''}" data-block="${block}">${block}</button>`;
+        const btn = document.createElement('button');
+        btn.className = 'hierarchy-block' + (isActive ? ' active' : '');
+        btn.dataset.block = block;
+        btn.textContent = block;
+        blocksDiv.appendChild(btn);
       });
-      html += `</div></div>`;
+      
+      group.appendChild(blocksDiv);
+      parent.appendChild(group);
     } else {
       // Branch node
-      html += `<div class="hierarchy-branch${isExpanded ? ' expanded' : ''}" data-path="${currentPath}">`;
-      html += `<div class="hierarchy-header" data-path="${currentPath}">`;
-      html += `<span class="hierarchy-arrow">${isExpanded ? '▼' : '▶'}</span>`;
-      html += `<span class="hierarchy-label">${formatLabel(key)}</span>`;
-      html += `</div>`;
-      html += `<div class="hierarchy-children"${isExpanded ? '' : ' style="display:none"'}>`;
-      html += buildHierarchyHTML(value, currentPath, depth + 1);
-      html += `</div></div>`;
+      const branch = document.createElement('div');
+      branch.className = 'hierarchy-branch' + (isExpanded ? ' expanded' : '');
+      branch.dataset.path = currentPath;
+      
+      const header = document.createElement('div');
+      header.className = 'hierarchy-header';
+      header.dataset.path = currentPath;
+      
+      const arrow = document.createElement('span');
+      arrow.className = 'hierarchy-arrow';
+      arrow.textContent = isExpanded ? '▼' : '▶';
+      header.appendChild(arrow);
+      
+      const label = document.createElement('span');
+      label.className = 'hierarchy-label';
+      label.textContent = formatLabel(key);
+      header.appendChild(label);
+      
+      branch.appendChild(header);
+      
+      const children = document.createElement('div');
+      children.className = 'hierarchy-children';
+      if (!isExpanded) children.style.display = 'none';
+      buildHierarchyDOM(children, value, currentPath);
+      
+      branch.appendChild(children);
+      parent.appendChild(branch);
     }
   }
-  
-  return html;
 }
 
 function formatLabel(key) {
@@ -148,44 +180,71 @@ function renderBreadcrumb() {
   const container = document.getElementById('keyboard-breadcrumb');
   if (!container) return;
   
+  container.innerHTML = '';
+  
   const path = findBlockPath(state.currentBlock);
   if (!path) {
-    container.innerHTML = `<span class="breadcrumb-item active">${state.currentBlock}</span>`;
+    const span = document.createElement('span');
+    span.className = 'breadcrumb-item active';
+    span.textContent = state.currentBlock;
+    container.appendChild(span);
     return;
   }
   
   const parts = path.split('.');
-  let html = '';
   let currentPath = '';
   
   parts.forEach((part, idx) => {
     currentPath = currentPath ? `${currentPath}.${part}` : part;
-    if (idx > 0) html += ' <span class="breadcrumb-sep">›</span> ';
-    html += `<span class="breadcrumb-item" data-path="${currentPath}">${formatLabel(part)}</span>`;
+    
+    if (idx > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'breadcrumb-sep';
+      sep.textContent = ' › ';
+      container.appendChild(sep);
+    }
+    
+    const span = document.createElement('span');
+    span.className = 'breadcrumb-item';
+    span.dataset.path = currentPath;
+    span.textContent = formatLabel(part);
+    container.appendChild(span);
   });
   
-  html += ' <span class="breadcrumb-sep">›</span> ';
-  html += `<span class="breadcrumb-item active">${state.currentBlock}</span>`;
+  const sep = document.createElement('span');
+  sep.className = 'breadcrumb-sep';
+  sep.textContent = ' › ';
+  container.appendChild(sep);
   
-  container.innerHTML = html;
+  const activeSpan = document.createElement('span');
+  activeSpan.className = 'breadcrumb-item active';
+  activeSpan.textContent = state.currentBlock;
+  container.appendChild(activeSpan);
 }
 
 function renderRecentBlocks() {
   const container = document.getElementById('keyboard-recent');
   if (!container) return;
   
+  container.innerHTML = '';
+  
   if (state.recentBlocks.length === 0) {
-    container.innerHTML = '';
     return;
   }
   
-  let html = '<span class="recent-label">Recent:</span>';
+  const label = document.createElement('span');
+  label.className = 'recent-label';
+  label.textContent = 'Recent:';
+  container.appendChild(label);
+  
   state.recentBlocks.forEach(block => {
     const isActive = block === state.currentBlock;
-    html += `<button class="recent-block${isActive ? ' active' : ''}" data-block="${block}">${block}</button>`;
+    const btn = document.createElement('button');
+    btn.className = 'recent-block' + (isActive ? ' active' : '');
+    btn.dataset.block = block;
+    btn.textContent = block;
+    container.appendChild(btn);
   });
-  
-  container.innerHTML = html;
 }
 
 function renderCharacterGrid() {
@@ -198,46 +257,62 @@ function renderCharacterGrid() {
     return;
   }
   
-  let chars = getBlockCharacters(state.currentBlock);
+  const maxChars = 2000;
+  let chars = getBlockCharacters(state.currentBlock, maxChars + 1);
+  const totalChars = chars.length;
+  const truncated = totalChars > maxChars;
+  
+  if (truncated) {
+    chars = chars.slice(0, maxChars);
+  }
   
   // Apply layout ordering for Basic Latin
   if (state.currentBlock === 'Basic Latin' && state.currentLayout !== 'unicode') {
     chars = applyLayout(chars, state.currentLayout);
   }
   
-  // Limit display for very large blocks (like CJK)
-  const maxChars = 2000;
-  const truncated = chars.length > maxChars;
-  if (truncated) {
-    chars = chars.slice(0, maxChars);
-  }
-  
-  let html = '';
+  // Build grid using DOM for security
+  container.innerHTML = '';
   
   chars.forEach(({ code, char }) => {
     const translit = getTransliteration(state.currentBlock, code);
     const hasVariants = accentedVariants[char] && accentedVariants[char].length > 0;
     const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
     
-    html += `<button class="keyboard-key${hasVariants ? ' has-variants' : ''}" 
-      data-char="${escapeAttr(char)}" 
-      data-code="${code}"
-      title="U+${hexCode}${translit ? ' (' + translit + ')' : ''}">`;
-    html += `<span class="key-char">${escapeHtml(char)}</span>`;
+    const btn = document.createElement('button');
+    btn.className = 'keyboard-key' + (hasVariants ? ' has-variants' : '');
+    btn.dataset.char = char;
+    btn.dataset.code = code;
+    btn.title = `U+${hexCode}${translit ? ' (' + translit + ')' : ''}`;
+    
+    const charSpan = document.createElement('span');
+    charSpan.className = 'key-char';
+    charSpan.textContent = char;
+    btn.appendChild(charSpan);
+    
     if (translit) {
-      html += `<span class="key-translit">${escapeHtml(translit)}</span>`;
+      const translitSpan = document.createElement('span');
+      translitSpan.className = 'key-translit';
+      translitSpan.textContent = translit;
+      btn.appendChild(translitSpan);
     }
+    
     if (hasVariants) {
-      html += `<span class="key-indicator">•</span>`;
+      const indicator = document.createElement('span');
+      indicator.className = 'key-indicator';
+      indicator.textContent = '•';
+      btn.appendChild(indicator);
     }
-    html += `</button>`;
+    
+    container.appendChild(btn);
   });
   
   if (truncated) {
-    html += `<div class="keyboard-truncated">Showing first ${maxChars} of ${chars.length + (maxChars)} characters</div>`;
+    const truncMsg = document.createElement('div');
+    truncMsg.className = 'keyboard-truncated';
+    truncMsg.textContent = `Showing first ${maxChars} of ${block.end - block.start + 1}+ characters`;
+    container.appendChild(truncMsg);
   }
-  
-  container.innerHTML = html;
 }
 
 function applyLayout(chars, layoutName) {
@@ -443,17 +518,34 @@ function showVariantsPopup(keyBtn) {
   const popup = document.getElementById('variants-popup');
   if (!popup) return;
   
-  let html = `<div class="variants-title">Variants of "${char}"</div><div class="variants-grid">`;
+  popup.innerHTML = '';
+  
+  const title = document.createElement('div');
+  title.className = 'variants-title';
+  title.textContent = `Variants of "${char}"`;
+  popup.appendChild(title);
+  
+  const grid = document.createElement('div');
+  grid.className = 'variants-grid';
+  
   variants.forEach(v => {
     const code = v.codePointAt(0);
     const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
-    html += `<button class="variant-key" data-char="${escapeAttr(v)}" title="U+${hexCode}">
-      <span class="key-char">${escapeHtml(v)}</span>
-    </button>`;
+    
+    const btn = document.createElement('button');
+    btn.className = 'variant-key';
+    btn.dataset.char = v;
+    btn.title = `U+${hexCode}`;
+    
+    const charSpan = document.createElement('span');
+    charSpan.className = 'key-char';
+    charSpan.textContent = v;
+    btn.appendChild(charSpan);
+    
+    grid.appendChild(btn);
   });
-  html += '</div>';
   
-  popup.innerHTML = html;
+  popup.appendChild(grid);
   
   // Position popup near the key
   const rect = keyBtn.getBoundingClientRect();
@@ -475,14 +567,4 @@ function hideVariantsPopup() {
   if (popup) {
     popup.style.display = 'none';
   }
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-function escapeAttr(str) {
-  return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
