@@ -11,7 +11,10 @@ const state = {
   longPressDelay: 500,
   shiftState: 'lowercase', // 'lowercase', 'uppercase', 'capslock'
   hierarchyCollapsed: false, // true when block is selected, shows compact nav
-  compositionInput: '' // For CJK romanization input
+  compositionInput: '', // For CJK romanization input
+  keyboardVisible: true, // Whether keyboard panel is visible
+  keyboardPosition: 'bottom', // 'bottom', 'top', 'left', 'right'
+  floatingButtonPos: { x: null, y: null } // Custom position for floating button
 };
 
 // Blocks that support composition (romanization to character)
@@ -123,57 +126,76 @@ function renderKeyboard() {
   if (!container) return;
   
   container.innerHTML = `
-    <div class="keyboard-wrapper">
-      <div class="keyboard-output-section">
-        <label class="keyboard-label">Output</label>
-        <div class="keyboard-output-container">
-          <textarea id="keyboard-output" class="keyboard-output" placeholder="Click characters to add them here..." readonly></textarea>
-          <div class="keyboard-output-actions">
-            <button id="btn-copy-output" class="btn btn-sm btn-outline" title="Copy to clipboard">Copy</button>
-            <button id="btn-clear-output" class="btn btn-sm btn-outline" title="Clear output">Clear</button>
-          </div>
+    <button id="keyboard-toggle-btn" class="keyboard-toggle-btn" title="Toggle virtual keyboard">⌨</button>
+    
+    <div id="keyboard-panel" class="keyboard-panel keyboard-position-${state.keyboardPosition}">
+      <div class="keyboard-panel-header">
+        <span class="keyboard-panel-title">Virtual Keyboard</span>
+        <div class="keyboard-position-controls">
+          <button id="pos-top" class="btn btn-xs btn-outline" title="Top">↑</button>
+          <button id="pos-bottom" class="btn btn-xs btn-outline" title="Bottom">↓</button>
+          <button id="pos-left" class="btn btn-xs btn-outline" title="Left 1/3">←</button>
+          <button id="pos-right" class="btn btn-xs btn-outline" title="Right 1/3">→</button>
+          <button id="keyboard-close-btn" class="btn btn-xs btn-outline" title="Close">✕</button>
         </div>
       </div>
       
-      <div class="keyboard-nav-section">
-        <div class="keyboard-breadcrumb" id="keyboard-breadcrumb"></div>
-        <div class="keyboard-recent" id="keyboard-recent"></div>
-      </div>
-      
-      <div class="keyboard-controls">
-        <div class="keyboard-hierarchy" id="keyboard-hierarchy"></div>
-        <div class="keyboard-controls-right">
-          <div class="keyboard-shift-control">
-            <button id="shift-button" class="btn btn-outline shift-btn" title="Shift: minúscula / maiúscula / maiúscula presa">
-              <span id="shift-icon">⇧</span>
-            </button>
-            <span id="shift-label" class="shift-label">minúscula</span>
-          </div>
-          <div class="keyboard-layout-selector">
-            <label>Layout:</label>
-            <select id="layout-select" class="keyboard-select">
-              <option value="unicode">Unicode Order</option>
-              <option value="qwerty" selected>QWERTY</option>
-              <option value="azerty">AZERTY</option>
-              <option value="qwertz">QWERTZ</option>
-              <option value="alphabetic">Alphabetic</option>
-              <option value="hcesar">HCESAR</option>
-            </select>
+      <div class="keyboard-wrapper">
+        <div class="keyboard-output-section">
+          <label class="keyboard-label">Output</label>
+          <div class="keyboard-output-container">
+            <textarea id="keyboard-output" class="keyboard-output" placeholder="Click characters to add them here..."></textarea>
+            <div class="keyboard-output-actions">
+              <button id="btn-backspace" class="btn btn-sm btn-outline" title="Backspace">⌫</button>
+              <button id="btn-delete" class="btn btn-sm btn-outline" title="Delete">Del</button>
+              <button id="btn-enter" class="btn btn-sm btn-outline" title="New line">↵</button>
+              <button id="btn-copy-output" class="btn btn-sm btn-outline" title="Copy to clipboard">Copy</button>
+              <button id="btn-clear-output" class="btn btn-sm btn-outline" title="Clear output">Clear</button>
+              <button id="btn-end" class="btn btn-sm btn-primary" title="Finish and send to input">End</button>
+            </div>
           </div>
         </div>
+        
+        <div class="keyboard-nav-section">
+          <div class="keyboard-breadcrumb" id="keyboard-breadcrumb"></div>
+          <div class="keyboard-recent" id="keyboard-recent"></div>
+        </div>
+        
+        <div class="keyboard-controls">
+          <div class="keyboard-hierarchy" id="keyboard-hierarchy"></div>
+          <div class="keyboard-controls-right">
+            <div class="keyboard-shift-control">
+              <button id="shift-button" class="btn btn-outline shift-btn" title="Shift: minúscula / maiúscula / maiúscula presa">
+                <span id="shift-icon">⇧</span>
+              </button>
+              <span id="shift-label" class="shift-label">minúscula</span>
+            </div>
+            <div class="keyboard-layout-selector">
+              <label>Layout:</label>
+              <select id="layout-select" class="keyboard-select">
+                <option value="alphabetic">Alphabetic</option>
+                <option value="qwerty" selected>QWERTY</option>
+                <option value="azerty">AZERTY</option>
+                <option value="qwertz">QWERTZ</option>
+                <option value="hcesar">HCESAR</option>
+                <option value="unicode">Unicode Order</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="keyboard-composition" id="keyboard-composition" style="display: none;">
+          <label>Type romanization:</label>
+          <input type="text" id="composition-input" class="keyboard-input" placeholder="e.g., ka, shi, tsu..." autocomplete="off">
+          <div class="composition-matches" id="composition-matches"></div>
+        </div>
+        
+        <div class="keyboard-grid-container">
+          <div class="keyboard-grid" id="keyboard-grid"></div>
+        </div>
+        
+        <div class="keyboard-variants-popup" id="variants-popup" style="display: none;"></div>
       </div>
-      
-      <div class="keyboard-composition" id="keyboard-composition" style="display: none;">
-        <label>Type romanization:</label>
-        <input type="text" id="composition-input" class="keyboard-input" placeholder="e.g., ka, shi, tsu..." autocomplete="off">
-        <div class="composition-matches" id="composition-matches"></div>
-      </div>
-      
-      <div class="keyboard-grid-container">
-        <div class="keyboard-grid" id="keyboard-grid"></div>
-      </div>
-      
-      <div class="keyboard-variants-popup" id="variants-popup" style="display: none;"></div>
     </div>
   `;
   
@@ -182,6 +204,13 @@ function renderKeyboard() {
   renderCompositionArea();
   renderRecentBlocks();
   renderCharacterGrid();
+  
+  // Set initial active state for position button
+  const bottomBtn = document.getElementById('pos-bottom');
+  if (bottomBtn) {
+    bottomBtn.classList.remove('btn-outline');
+    bottomBtn.classList.add('btn-primary');
+  }
 }
 
 function renderHierarchy() {
@@ -888,6 +917,26 @@ function attachEventListeners() {
   // Output actions
   document.getElementById('btn-copy-output')?.addEventListener('click', copyOutput);
   document.getElementById('btn-clear-output')?.addEventListener('click', clearOutput);
+  document.getElementById('btn-backspace')?.addEventListener('click', handleBackspace);
+  document.getElementById('btn-delete')?.addEventListener('click', handleDelete);
+  document.getElementById('btn-enter')?.addEventListener('click', handleEnter);
+  document.getElementById('btn-end')?.addEventListener('click', handleEnd);
+  
+  // Sync output state when user edits textarea directly
+  document.getElementById('keyboard-output')?.addEventListener('input', (e) => {
+    state.output = e.target.value;
+  });
+  
+  // Toggle button and position controls
+  document.getElementById('keyboard-toggle-btn')?.addEventListener('click', toggleKeyboard);
+  document.getElementById('keyboard-close-btn')?.addEventListener('click', () => setKeyboardVisible(false));
+  document.getElementById('pos-top')?.addEventListener('click', () => setKeyboardPosition('top'));
+  document.getElementById('pos-bottom')?.addEventListener('click', () => setKeyboardPosition('bottom'));
+  document.getElementById('pos-left')?.addEventListener('click', () => setKeyboardPosition('left'));
+  document.getElementById('pos-right')?.addEventListener('click', () => setKeyboardPosition('right'));
+  
+  // Make toggle button draggable
+  setupToggleButtonDrag();
   
   // Close variants popup on outside click
   document.addEventListener('click', (e) => {
@@ -926,10 +975,19 @@ function selectBlock(blockName) {
 }
 
 function addToOutput(char, isLetterChar = false) {
-  state.output += char;
   const outputEl = document.getElementById('keyboard-output');
   if (outputEl) {
-    outputEl.value = state.output;
+    const start = outputEl.selectionStart;
+    const end = outputEl.selectionEnd;
+    const before = outputEl.value.substring(0, start);
+    const after = outputEl.value.substring(end);
+    outputEl.value = before + char + after;
+    state.output = outputEl.value;
+    const newPos = start + char.length;
+    outputEl.setSelectionRange(newPos, newPos);
+    outputEl.focus();
+  } else {
+    state.output += char;
   }
   
   // Handle shift state transition: uppercase (temporary) returns to lowercase after letter
@@ -938,6 +996,72 @@ function addToOutput(char, isLetterChar = false) {
     updateShiftUI();
     renderCharacterGrid();
   }
+}
+
+function handleBackspace() {
+  const outputEl = document.getElementById('keyboard-output');
+  if (!outputEl) return;
+  
+  const start = outputEl.selectionStart;
+  const end = outputEl.selectionEnd;
+  
+  if (start !== end) {
+    const before = outputEl.value.substring(0, start);
+    const after = outputEl.value.substring(end);
+    outputEl.value = before + after;
+    outputEl.setSelectionRange(start, start);
+  } else if (start > 0) {
+    const before = outputEl.value.substring(0, start - 1);
+    const after = outputEl.value.substring(start);
+    outputEl.value = before + after;
+    outputEl.setSelectionRange(start - 1, start - 1);
+  }
+  state.output = outputEl.value;
+  outputEl.focus();
+}
+
+function handleDelete() {
+  const outputEl = document.getElementById('keyboard-output');
+  if (!outputEl) return;
+  
+  const start = outputEl.selectionStart;
+  const end = outputEl.selectionEnd;
+  
+  if (start !== end) {
+    const before = outputEl.value.substring(0, start);
+    const after = outputEl.value.substring(end);
+    outputEl.value = before + after;
+    outputEl.setSelectionRange(start, start);
+  } else if (start < outputEl.value.length) {
+    const before = outputEl.value.substring(0, start);
+    const after = outputEl.value.substring(start + 1);
+    outputEl.value = before + after;
+    outputEl.setSelectionRange(start, start);
+  }
+  state.output = outputEl.value;
+  outputEl.focus();
+}
+
+function handleEnter() {
+  addToOutput('\n');
+}
+
+function handleEnd() {
+  const outputEl = document.getElementById('keyboard-output');
+  if (!outputEl) return;
+  
+  const text = outputEl.value;
+  if (!text) return;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn-end');
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = 'Sent!';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    }
+    clearOutput();
+  });
 }
 
 function copyOutput() {
@@ -949,6 +1073,126 @@ function copyOutput() {
       setTimeout(() => { btn.textContent = original; }, 1500);
     }
   });
+}
+
+function toggleKeyboard() {
+  setKeyboardVisible(!state.keyboardVisible);
+}
+
+function setKeyboardVisible(visible) {
+  state.keyboardVisible = visible;
+  const panel = document.getElementById('keyboard-panel');
+  const toggleBtn = document.getElementById('keyboard-toggle-btn');
+  
+  if (panel) {
+    panel.classList.toggle('keyboard-panel-hidden', !visible);
+  }
+  if (toggleBtn) {
+    toggleBtn.classList.toggle('keyboard-toggle-active', visible);
+  }
+}
+
+function setKeyboardPosition(position) {
+  state.keyboardPosition = position;
+  const panel = document.getElementById('keyboard-panel');
+  if (panel) {
+    panel.className = `keyboard-panel keyboard-position-${position}`;
+  }
+  
+  // Update active button state
+  ['top', 'bottom', 'left', 'right'].forEach(pos => {
+    const btn = document.getElementById(`pos-${pos}`);
+    if (btn) {
+      btn.classList.toggle('btn-primary', pos === position);
+      btn.classList.toggle('btn-outline', pos !== position);
+    }
+  });
+}
+
+function setupToggleButtonDrag() {
+  const btn = document.getElementById('keyboard-toggle-btn');
+  if (!btn) return;
+  
+  let isDragging = false;
+  let hasMoved = false;
+  let startX, startY, initialX, initialY;
+  
+  btn.addEventListener('mousedown', startDrag);
+  btn.addEventListener('touchstart', startDrag, { passive: false });
+  
+  function startDrag(e) {
+    if (e.type === 'touchstart') {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    } else {
+      startX = e.clientX;
+      startY = e.clientY;
+    }
+    
+    const rect = btn.getBoundingClientRect();
+    initialX = rect.left;
+    initialY = rect.top;
+    isDragging = true;
+    hasMoved = false;
+    
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', endDrag);
+  }
+  
+  function onDrag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    let currentX, currentY;
+    if (e.type === 'touchmove') {
+      currentX = e.touches[0].clientX;
+      currentY = e.touches[0].clientY;
+    } else {
+      currentX = e.clientX;
+      currentY = e.clientY;
+    }
+    
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+    
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      hasMoved = true;
+    }
+    
+    const newX = Math.max(0, Math.min(window.innerWidth - btn.offsetWidth, initialX + deltaX));
+    const newY = Math.max(0, Math.min(window.innerHeight - btn.offsetHeight, initialY + deltaY));
+    
+    btn.style.left = newX + 'px';
+    btn.style.top = newY + 'px';
+    btn.style.right = 'auto';
+    btn.style.bottom = 'auto';
+    
+    state.floatingButtonPos = { x: newX, y: newY };
+  }
+  
+  function endDrag(e) {
+    isDragging = false;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', endDrag);
+    
+    if (hasMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+  
+  // Prevent click from firing after drag
+  btn.addEventListener('click', (e) => {
+    if (hasMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+      hasMoved = false;
+    }
+  }, true);
 }
 
 function clearOutput() {
