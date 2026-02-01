@@ -266,7 +266,11 @@ function renderOutputField() {
   const outputEl = document.getElementById('keyboard-output');
   if (outputEl) {
     outputEl.value = currentValue;
-    outputEl.setSelectionRange(state.externalCursorPos, state.externalCursorPos);
+    // Focus and set cursor position after a short delay to ensure DOM is ready
+    setTimeout(() => {
+      outputEl.focus();
+      outputEl.setSelectionRange(state.externalCursorPos, state.externalCursorPos);
+    }, 10);
     outputEl.addEventListener('input', (e) => {
       state.output = e.target.value;
     });
@@ -796,7 +800,7 @@ function updateShiftUI() {
   
   if (icon) icon.textContent = SHIFT_ICONS[state.shiftState];
   if (label) {
-    const labels = { lowercase: 'minúscula', uppercase: 'maiúscula', capslock: 'PRESA' };
+    const labels = { lowercase: 'minúscula', uppercase: 'MAIÚSCULA', capslock: 'MAIÚSCULA PRESA' };
     label.textContent = labels[state.shiftState];
   }
   if (btn) {
@@ -1447,6 +1451,17 @@ function showSkinTonePopup(keyBtn) {
   
   popup.innerHTML = '';
   
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'variants-popup-close';
+  closeBtn.innerHTML = '×';
+  closeBtn.title = 'Close';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideVariantsPopup();
+  });
+  popup.appendChild(closeBtn);
+  
   const title = document.createElement('div');
   title.className = 'variants-title';
   title.textContent = `Skin tones for ${char}`;
@@ -1573,7 +1588,126 @@ function updateEnterButtonVisibility() {
 
 // Get Unicode character name (simplified - uses codepoint description)
 function getUnicodeName(codePoint) {
-  // Some common character names
+  // Extended Latin character names (Latin Extended-A, Latin Extended-B, Latin-1 Supplement)
+  const latinExtended = {
+    // Latin-1 Supplement (accented letters)
+    0x00C0: 'LATIN CAPITAL LETTER A WITH GRAVE',
+    0x00C1: 'LATIN CAPITAL LETTER A WITH ACUTE',
+    0x00C2: 'LATIN CAPITAL LETTER A WITH CIRCUMFLEX',
+    0x00C3: 'LATIN CAPITAL LETTER A WITH TILDE',
+    0x00C4: 'LATIN CAPITAL LETTER A WITH DIAERESIS',
+    0x00C5: 'LATIN CAPITAL LETTER A WITH RING ABOVE',
+    0x00C6: 'LATIN CAPITAL LETTER AE',
+    0x00C7: 'LATIN CAPITAL LETTER C WITH CEDILLA',
+    0x00C8: 'LATIN CAPITAL LETTER E WITH GRAVE',
+    0x00C9: 'LATIN CAPITAL LETTER E WITH ACUTE',
+    0x00CA: 'LATIN CAPITAL LETTER E WITH CIRCUMFLEX',
+    0x00CB: 'LATIN CAPITAL LETTER E WITH DIAERESIS',
+    0x00CC: 'LATIN CAPITAL LETTER I WITH GRAVE',
+    0x00CD: 'LATIN CAPITAL LETTER I WITH ACUTE',
+    0x00CE: 'LATIN CAPITAL LETTER I WITH CIRCUMFLEX',
+    0x00CF: 'LATIN CAPITAL LETTER I WITH DIAERESIS',
+    0x00D0: 'LATIN CAPITAL LETTER ETH',
+    0x00D1: 'LATIN CAPITAL LETTER N WITH TILDE',
+    0x00D2: 'LATIN CAPITAL LETTER O WITH GRAVE',
+    0x00D3: 'LATIN CAPITAL LETTER O WITH ACUTE',
+    0x00D4: 'LATIN CAPITAL LETTER O WITH CIRCUMFLEX',
+    0x00D5: 'LATIN CAPITAL LETTER O WITH TILDE',
+    0x00D6: 'LATIN CAPITAL LETTER O WITH DIAERESIS',
+    0x00D8: 'LATIN CAPITAL LETTER O WITH STROKE',
+    0x00D9: 'LATIN CAPITAL LETTER U WITH GRAVE',
+    0x00DA: 'LATIN CAPITAL LETTER U WITH ACUTE',
+    0x00DB: 'LATIN CAPITAL LETTER U WITH CIRCUMFLEX',
+    0x00DC: 'LATIN CAPITAL LETTER U WITH DIAERESIS',
+    0x00DD: 'LATIN CAPITAL LETTER Y WITH ACUTE',
+    0x00DE: 'LATIN CAPITAL LETTER THORN',
+    0x00DF: 'LATIN SMALL LETTER SHARP S',
+    0x00E0: 'LATIN SMALL LETTER A WITH GRAVE',
+    0x00E1: 'LATIN SMALL LETTER A WITH ACUTE',
+    0x00E2: 'LATIN SMALL LETTER A WITH CIRCUMFLEX',
+    0x00E3: 'LATIN SMALL LETTER A WITH TILDE',
+    0x00E4: 'LATIN SMALL LETTER A WITH DIAERESIS',
+    0x00E5: 'LATIN SMALL LETTER A WITH RING ABOVE',
+    0x00E6: 'LATIN SMALL LETTER AE',
+    0x00E7: 'LATIN SMALL LETTER C WITH CEDILLA',
+    0x00E8: 'LATIN SMALL LETTER E WITH GRAVE',
+    0x00E9: 'LATIN SMALL LETTER E WITH ACUTE',
+    0x00EA: 'LATIN SMALL LETTER E WITH CIRCUMFLEX',
+    0x00EB: 'LATIN SMALL LETTER E WITH DIAERESIS',
+    0x00EC: 'LATIN SMALL LETTER I WITH GRAVE',
+    0x00ED: 'LATIN SMALL LETTER I WITH ACUTE',
+    0x00EE: 'LATIN SMALL LETTER I WITH CIRCUMFLEX',
+    0x00EF: 'LATIN SMALL LETTER I WITH DIAERESIS',
+    0x00F0: 'LATIN SMALL LETTER ETH',
+    0x00F1: 'LATIN SMALL LETTER N WITH TILDE',
+    0x00F2: 'LATIN SMALL LETTER O WITH GRAVE',
+    0x00F3: 'LATIN SMALL LETTER O WITH ACUTE',
+    0x00F4: 'LATIN SMALL LETTER O WITH CIRCUMFLEX',
+    0x00F5: 'LATIN SMALL LETTER O WITH TILDE',
+    0x00F6: 'LATIN SMALL LETTER O WITH DIAERESIS',
+    0x00F8: 'LATIN SMALL LETTER O WITH STROKE',
+    0x00F9: 'LATIN SMALL LETTER U WITH GRAVE',
+    0x00FA: 'LATIN SMALL LETTER U WITH ACUTE',
+    0x00FB: 'LATIN SMALL LETTER U WITH CIRCUMFLEX',
+    0x00FC: 'LATIN SMALL LETTER U WITH DIAERESIS',
+    0x00FD: 'LATIN SMALL LETTER Y WITH ACUTE',
+    0x00FE: 'LATIN SMALL LETTER THORN',
+    0x00FF: 'LATIN SMALL LETTER Y WITH DIAERESIS',
+    // Latin Extended-A
+    0x0100: 'LATIN CAPITAL LETTER A WITH MACRON',
+    0x0101: 'LATIN SMALL LETTER A WITH MACRON',
+    0x0102: 'LATIN CAPITAL LETTER A WITH BREVE',
+    0x0103: 'LATIN SMALL LETTER A WITH BREVE',
+    0x0104: 'LATIN CAPITAL LETTER A WITH OGONEK',
+    0x0105: 'LATIN SMALL LETTER A WITH OGONEK',
+    0x0106: 'LATIN CAPITAL LETTER C WITH ACUTE',
+    0x0107: 'LATIN SMALL LETTER C WITH ACUTE',
+    0x010C: 'LATIN CAPITAL LETTER C WITH CARON',
+    0x010D: 'LATIN SMALL LETTER C WITH CARON',
+    0x010E: 'LATIN CAPITAL LETTER D WITH CARON',
+    0x010F: 'LATIN SMALL LETTER D WITH CARON',
+    0x0110: 'LATIN CAPITAL LETTER D WITH STROKE',
+    0x0111: 'LATIN SMALL LETTER D WITH STROKE',
+    0x0112: 'LATIN CAPITAL LETTER E WITH MACRON',
+    0x0113: 'LATIN SMALL LETTER E WITH MACRON',
+    0x0118: 'LATIN CAPITAL LETTER E WITH OGONEK',
+    0x0119: 'LATIN SMALL LETTER E WITH OGONEK',
+    0x011A: 'LATIN CAPITAL LETTER E WITH CARON',
+    0x011B: 'LATIN SMALL LETTER E WITH CARON',
+    0x0141: 'LATIN CAPITAL LETTER L WITH STROKE',
+    0x0142: 'LATIN SMALL LETTER L WITH STROKE',
+    0x0143: 'LATIN CAPITAL LETTER N WITH ACUTE',
+    0x0144: 'LATIN SMALL LETTER N WITH ACUTE',
+    0x0147: 'LATIN CAPITAL LETTER N WITH CARON',
+    0x0148: 'LATIN SMALL LETTER N WITH CARON',
+    0x0150: 'LATIN CAPITAL LETTER O WITH DOUBLE ACUTE',
+    0x0151: 'LATIN SMALL LETTER O WITH DOUBLE ACUTE',
+    0x0152: 'LATIN CAPITAL LIGATURE OE',
+    0x0153: 'LATIN SMALL LIGATURE OE',
+    0x0158: 'LATIN CAPITAL LETTER R WITH CARON',
+    0x0159: 'LATIN SMALL LETTER R WITH CARON',
+    0x015A: 'LATIN CAPITAL LETTER S WITH ACUTE',
+    0x015B: 'LATIN SMALL LETTER S WITH ACUTE',
+    0x0160: 'LATIN CAPITAL LETTER S WITH CARON',
+    0x0161: 'LATIN SMALL LETTER S WITH CARON',
+    0x0164: 'LATIN CAPITAL LETTER T WITH CARON',
+    0x0165: 'LATIN SMALL LETTER T WITH CARON',
+    0x016E: 'LATIN CAPITAL LETTER U WITH RING ABOVE',
+    0x016F: 'LATIN SMALL LETTER U WITH RING ABOVE',
+    0x0170: 'LATIN CAPITAL LETTER U WITH DOUBLE ACUTE',
+    0x0171: 'LATIN SMALL LETTER U WITH DOUBLE ACUTE',
+    0x0178: 'LATIN CAPITAL LETTER Y WITH DIAERESIS',
+    0x0179: 'LATIN CAPITAL LETTER Z WITH ACUTE',
+    0x017A: 'LATIN SMALL LETTER Z WITH ACUTE',
+    0x017B: 'LATIN CAPITAL LETTER Z WITH DOT ABOVE',
+    0x017C: 'LATIN SMALL LETTER Z WITH DOT ABOVE',
+    0x017D: 'LATIN CAPITAL LETTER Z WITH CARON',
+    0x017E: 'LATIN SMALL LETTER Z WITH CARON'
+  };
+  
+  if (latinExtended[codePoint]) return latinExtended[codePoint];
+  
+  // Common symbols and punctuation
   const commonNames = {
     0x0020: 'SPACE',
     0x0021: 'EXCLAMATION MARK',
@@ -1607,12 +1741,33 @@ function getUnicodeName(codePoint) {
     0x007B: 'LEFT CURLY BRACKET',
     0x007C: 'VERTICAL LINE',
     0x007D: 'RIGHT CURLY BRACKET',
-    0x007E: 'TILDE'
+    0x007E: 'TILDE',
+    0x00A1: 'INVERTED EXCLAMATION MARK',
+    0x00A2: 'CENT SIGN',
+    0x00A3: 'POUND SIGN',
+    0x00A4: 'CURRENCY SIGN',
+    0x00A5: 'YEN SIGN',
+    0x00A7: 'SECTION SIGN',
+    0x00A9: 'COPYRIGHT SIGN',
+    0x00AB: 'LEFT-POINTING DOUBLE ANGLE QUOTATION MARK',
+    0x00AE: 'REGISTERED SIGN',
+    0x00B0: 'DEGREE SIGN',
+    0x00B1: 'PLUS-MINUS SIGN',
+    0x00B2: 'SUPERSCRIPT TWO',
+    0x00B3: 'SUPERSCRIPT THREE',
+    0x00B5: 'MICRO SIGN',
+    0x00B6: 'PILCROW SIGN',
+    0x00B7: 'MIDDLE DOT',
+    0x00B9: 'SUPERSCRIPT ONE',
+    0x00BB: 'RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK',
+    0x00BF: 'INVERTED QUESTION MARK',
+    0x00D7: 'MULTIPLICATION SIGN',
+    0x00F7: 'DIVISION SIGN'
   };
   
   if (commonNames[codePoint]) return commonNames[codePoint];
   
-  // Letter names
+  // Basic Latin letters
   if (codePoint >= 0x0041 && codePoint <= 0x005A) {
     return 'LATIN CAPITAL LETTER ' + String.fromCodePoint(codePoint);
   }
@@ -1630,8 +1785,17 @@ function getUnicodeName(codePoint) {
     if (translit) return 'GREEK ' + (codePoint < 0x03B1 ? 'CAPITAL' : 'SMALL') + ' LETTER ' + translit.toUpperCase();
   }
   
-  // Default: show block name
-  return state.currentBlock.toUpperCase() + ' CHARACTER';
+  // Cyrillic letters
+  if (codePoint >= 0x0400 && codePoint <= 0x04FF) {
+    const isCapital = codePoint < 0x0430 || (codePoint >= 0x0400 && codePoint <= 0x040F);
+    const translit = getTransliteration(state.currentBlock, codePoint);
+    if (translit) return 'CYRILLIC ' + (isCapital ? 'CAPITAL' : 'SMALL') + ' LETTER ' + translit.toUpperCase();
+    return 'CYRILLIC ' + (isCapital ? 'CAPITAL' : 'SMALL') + ' LETTER';
+  }
+  
+  // Default: show block name with character type
+  const blockName = state.currentBlock ? state.currentBlock.toUpperCase() : 'UNICODE';
+  return blockName + ' CHARACTER';
 }
 
 // Show Unicode info popup on long-press
@@ -1647,6 +1811,17 @@ function showUnicodeInfoPopup(keyBtn) {
   if (!popup) return;
   
   popup.innerHTML = '';
+  
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'variants-popup-close';
+  closeBtn.innerHTML = '×';
+  closeBtn.title = 'Close';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideVariantsPopup();
+  });
+  popup.appendChild(closeBtn);
   
   // Unicode info section
   const infoSection = document.createElement('div');
@@ -1732,6 +1907,17 @@ function showUnicodeInfoPopupForChar(char) {
   if (!popup) return;
   
   popup.innerHTML = '';
+  
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'variants-popup-close';
+  closeBtn.innerHTML = '×';
+  closeBtn.title = 'Close';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideVariantsPopup();
+  });
+  popup.appendChild(closeBtn);
   
   // Unicode info section for current character
   const infoSection = document.createElement('div');

@@ -10,7 +10,7 @@
 .keyboard-output-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .keyboard-label {
@@ -22,7 +22,7 @@
 .keyboard-output-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .keyboard-output {
@@ -153,15 +153,31 @@
   min-width: auto;
 }
 
-/* Blocks bar - separate line for Unicode blocks */
+/* Blocks bar - separate line for Unicode blocks (simplified) */
 .keyboard-blocks-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  background: var(--slate-50);
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+}
+
+.keyboard-blocks-bar .recent-block {
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  background: transparent;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  color: var(--muted-foreground);
+}
+
+.keyboard-blocks-bar .recent-block:hover {
+  background: var(--slate-100);
+  color: var(--foreground);
+}
+
+.keyboard-blocks-bar .recent-block.active {
+  background: var(--primary-100);
+  border-color: var(--primary-300);
+  color: var(--primary-700);
 }
 
 /* Compact hierarchy navigation (after block selection) */
@@ -372,6 +388,12 @@
   min-width: 100px;
 }
 
+.keyboard-digits-section .keyboard-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
 .keyboard-symbols-section {
   width: 100%;
   border-top: 1px solid var(--border);
@@ -483,6 +505,29 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   padding: var(--space-3);
   max-width: 300px;
+}
+
+.variants-popup-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+}
+
+.variants-popup-close:hover {
+  background: var(--slate-100);
+  color: var(--foreground);
 }
 
 .variants-title {
@@ -687,6 +732,13 @@
   color: white;
 }
 
+.shift-btn.shift-uppercase:hover,
+.shift-btn.shift-capslock:hover {
+  background: var(--primary-600);
+  border-color: var(--primary-700);
+  color: white;
+}
+
 .shift-label {
   font-size: var(--text-sm);
   color: var(--muted-foreground);
@@ -717,11 +769,12 @@
 /* Space Key */
 .keyboard-space-key {
   flex: 0 0 auto;
-  min-width: 120px;
-  max-width: calc(5 * 46px); /* Max 5 button widths (42px + 4px gap) */
-  width: 100%;
+  width: calc(3 * 42px + 2 * 4px); /* 3 letter widths with gaps */
+  max-width: calc(3 * 42px + 2 * 4px);
   background: var(--card);
   margin-top: var(--space-2);
+  align-self: center;
+  border-bottom: 3px solid var(--primary-500);
 }
 
 .keyboard-space-key:hover {
