@@ -9,6 +9,7 @@ const state = {
   output: '',
   longPressTimer: null,
   longPressDelay: 500,
+  longPressTriggered: false, // Flag to prevent click after long-press
   shiftState: 'lowercase', // 'lowercase', 'uppercase', 'capslock'
   hierarchyCollapsed: true, // Start collapsed, show hierarchy when user clicks Browse
   compositionInput: '', // For CJK romanization input
@@ -193,8 +194,8 @@ function renderKeyboard() {
             <button id="btn-end" class="btn btn-sm btn-primary" title="Finish and send to input">End</button>
           </div>
           <div class="keyboard-controls-right">
-            <div class="keyboard-hierarchy" id="keyboard-hierarchy"></div>
             <button id="hierarchy-expand-btn" class="btn btn-sm btn-outline hierarchy-expand-btn" title="Browse all languages">☰</button>
+            <div id="hierarchy-popup" class="hierarchy-popup" style="display: none;"></div>
             <div class="keyboard-shift-control">
               <button id="shift-button" class="btn btn-outline shift-btn" title="Shift: minúscula / maiúscula / maiúscula presa">
                 <span id="shift-icon">⇧</span>
@@ -213,6 +214,8 @@ function renderKeyboard() {
             </div>
           </div>
         </div>
+        
+        <div class="keyboard-blocks-bar" id="keyboard-hierarchy"></div>
         
         <div class="keyboard-composition" id="keyboard-composition" style="display: none;">
           <label>Type romanization:</label>
@@ -272,33 +275,78 @@ function renderOutputField() {
 
 function renderHierarchy() {
   const container = document.getElementById('keyboard-hierarchy');
+  const popup = document.getElementById('hierarchy-popup');
   if (!container) return;
   
   container.innerHTML = '';
   
-  if (state.hierarchyCollapsed) {
-    // Compact mode: show recent blocks with current highlighted (Browse button is in controls-right)
-    const compactNav = document.createElement('div');
-    compactNav.className = 'hierarchy-compact';
-    
-    // Show all recent blocks, with CSS highlighting the current one
-    state.recentBlocks.forEach(block => {
-      const btn = document.createElement('button');
-      const isActive = block === state.currentBlock;
-      btn.className = 'btn btn-sm hierarchy-recent-btn' + (isActive ? ' active' : '');
-      btn.dataset.block = block;
-      btn.textContent = block;
-      compactNav.appendChild(btn);
-    });
-    
-    container.appendChild(compactNav);
-  } else {
-    // Full hierarchy tree
-    const tree = document.createElement('div');
-    tree.className = 'hierarchy-tree';
-    buildHierarchyDOM(tree, pageHierarchy, '');
-    container.appendChild(tree);
+  // Always show recent blocks in the compact section
+  const compactNav = document.createElement('div');
+  compactNav.className = 'hierarchy-compact';
+  
+  // Show all recent blocks, with CSS highlighting the current one
+  state.recentBlocks.forEach(block => {
+    const btn = document.createElement('button');
+    const isActive = block === state.currentBlock;
+    btn.className = 'btn btn-sm hierarchy-recent-btn' + (isActive ? ' active' : '');
+    btn.dataset.block = block;
+    btn.textContent = block;
+    compactNav.appendChild(btn);
+  });
+  
+  container.appendChild(compactNav);
+  
+  // Show/hide the floating hierarchy popup
+  if (popup) {
+    if (!state.hierarchyCollapsed) {
+      // Render full hierarchy tree in popup
+      popup.innerHTML = '';
+      
+      const header = document.createElement('div');
+      header.className = 'hierarchy-popup-header';
+      header.innerHTML = '<span>Browse Languages</span><button id="hierarchy-close-btn" class="btn btn-xs btn-outline">✕</button>';
+      popup.appendChild(header);
+      
+      const tree = document.createElement('div');
+      tree.className = 'hierarchy-tree';
+      buildHierarchyDOM(tree, pageHierarchy, '');
+      popup.appendChild(tree);
+      
+      popup.style.display = 'block';
+      positionHierarchyPopup(popup);
+    } else {
+      popup.style.display = 'none';
+    }
   }
+}
+
+function positionHierarchyPopup(popup) {
+  const expandBtn = document.getElementById('hierarchy-expand-btn');
+  if (!expandBtn || !popup) return;
+  
+  const btnRect = expandBtn.getBoundingClientRect();
+  const popupWidth = 320;
+  const popupMaxHeight = 400;
+  
+  // Try to position below the button first
+  let top = btnRect.bottom + 5;
+  let left = btnRect.left;
+  
+  // Ensure popup stays within viewport horizontally
+  if (left + popupWidth > window.innerWidth - 10) {
+    left = window.innerWidth - popupWidth - 10;
+  }
+  if (left < 10) left = 10;
+  
+  // Ensure popup stays within viewport vertically
+  if (top + popupMaxHeight > window.innerHeight - 10) {
+    // Position above the button instead
+    top = btnRect.top - popupMaxHeight - 5;
+    if (top < 10) top = 10;
+  }
+  
+  popup.style.top = `${top}px`;
+  popup.style.left = `${left}px`;
 }
 
 function buildHierarchyDOM(parent, obj, path) {
@@ -831,15 +879,31 @@ function attachEventListeners() {
     // Expand hierarchy button in compact mode
     const expandBtn = e.target.closest('#hierarchy-expand-btn');
     if (expandBtn) {
-      state.hierarchyCollapsed = false;
+      state.hierarchyCollapsed = !state.hierarchyCollapsed;
       renderHierarchy();
       return;
     }
     
-    // Block selection from hierarchy, recent, or compact recent
-    const blockBtn = e.target.closest('.hierarchy-block, .recent-block, .hierarchy-recent-btn');
-    if (blockBtn) {
-      selectBlock(blockBtn.dataset.block);
+    // Close hierarchy popup button
+    const closeHierarchyBtn = e.target.closest('#hierarchy-close-btn');
+    if (closeHierarchyBtn) {
+      state.hierarchyCollapsed = true;
+      renderHierarchy();
+      return;
+    }
+    
+    // Block selection from hierarchy popup
+    const hierarchyBlockBtn = e.target.closest('.hierarchy-block');
+    if (hierarchyBlockBtn) {
+      state.hierarchyCollapsed = true; // Close popup after selection
+      selectBlock(hierarchyBlockBtn.dataset.block, true); // true = from hierarchy popup
+      return;
+    }
+    
+    // Block selection from recent blocks bar (does not reorder)
+    const recentBlockBtn = e.target.closest('.recent-block, .hierarchy-recent-btn');
+    if (recentBlockBtn) {
+      selectBlock(recentBlockBtn.dataset.block, false); // false = just select, don't reorder
       return;
     }
     
@@ -851,6 +915,11 @@ function attachEventListeners() {
     
     const keyBtn = e.target.closest('.keyboard-key');
     if (keyBtn) {
+      // Skip if this was a long-press
+      if (state.longPressTriggered) {
+        state.longPressTriggered = false;
+        return;
+      }
       const char = keyBtn.dataset.char;
       const isLetterKey = keyBtn.dataset.isLetter === 'true';
       addToOutput(char, isLetterKey);
@@ -859,6 +928,11 @@ function attachEventListeners() {
     
     const variantBtn = e.target.closest('.variant-key');
     if (variantBtn) {
+      // Skip if this was a long-press
+      if (state.longPressTriggered) {
+        state.longPressTriggered = false;
+        return;
+      }
       const char = variantBtn.dataset.char;
       addToOutput(char, isLetter(char));
       hideVariantsPopup();
@@ -871,9 +945,12 @@ function attachEventListeners() {
     const keyBtn = e.target.closest('.keyboard-key');
     const variantBtn = e.target.closest('.variant-key');
     
+    state.longPressTriggered = false; // Reset flag on new press
+    
     if (keyBtn) {
       const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
       state.longPressTimer = setTimeout(() => {
+        state.longPressTriggered = true; // Mark that long-press was triggered
         if (hasSkinTones) {
           showSkinTonePopup(keyBtn);
         } else {
@@ -883,6 +960,7 @@ function attachEventListeners() {
     } else if (variantBtn) {
       // Long-press on variant key shows info for that variant
       state.longPressTimer = setTimeout(() => {
+        state.longPressTriggered = true;
         showUnicodeInfoPopupForChar(variantBtn.dataset.char);
       }, state.longPressDelay);
     }
@@ -907,9 +985,12 @@ function attachEventListeners() {
     const keyBtn = e.target.closest('.keyboard-key');
     const variantBtn = e.target.closest('.variant-key');
     
+    state.longPressTriggered = false; // Reset flag on new press
+    
     if (keyBtn) {
       const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
       state.longPressTimer = setTimeout(() => {
+        state.longPressTriggered = true;
         e.preventDefault();
         if (hasSkinTones) {
           showSkinTonePopup(keyBtn);
@@ -919,6 +1000,7 @@ function attachEventListeners() {
       }, state.longPressDelay);
     } else if (variantBtn) {
       state.longPressTimer = setTimeout(() => {
+        state.longPressTriggered = true;
         e.preventDefault();
         showUnicodeInfoPopupForChar(variantBtn.dataset.char);
       }, state.longPressDelay);
@@ -1060,20 +1142,19 @@ function updateLayoutOptions() {
   select.value = state.currentLayout;
 }
 
-function selectBlock(blockName) {
+function selectBlock(blockName, fromHierarchyPopup = false) {
   if (!unicodeBlocks[blockName]) return;
   
   state.currentBlock = blockName;
   state.hierarchyCollapsed = true; // Collapse hierarchy after selection
   
-  // Update recent blocks
-  const idx = state.recentBlocks.indexOf(blockName);
-  if (idx > -1) {
-    state.recentBlocks.splice(idx, 1);
-  }
-  state.recentBlocks.unshift(blockName);
-  if (state.recentBlocks.length > state.maxRecent) {
-    state.recentBlocks.pop();
+  // Only add to recent blocks if selected from hierarchy popup (not already in list)
+  // Clicking an existing recent block does NOT change the order
+  if (fromHierarchyPopup && !state.recentBlocks.includes(blockName)) {
+    state.recentBlocks.unshift(blockName);
+    if (state.recentBlocks.length > state.maxRecent) {
+      state.recentBlocks.pop();
+    }
   }
   
   state.compositionInput = ''; // Reset composition input when switching blocks
@@ -1185,29 +1266,22 @@ function handleEnd() {
     state.activeExternalField.value = text;
     state.activeExternalField.setSelectionRange(cursorPos, cursorPos);
     state.activeExternalField.focus();
-    
-    const btn = document.getElementById('btn-end');
-    if (btn) {
-      const original = btn.textContent;
-      btn.textContent = 'Done!';
-      setTimeout(() => { btn.textContent = original; }, 1500);
-    }
   } else {
     // No external field - copy to clipboard as fallback
     navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById('btn-end');
-      if (btn) {
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = original; }, 1500);
-      }
       clearOutput();
     });
   }
+  
+  // Close the keyboard panel
+  setKeyboardVisible(false);
 }
 
 function copyOutput() {
-  navigator.clipboard.writeText(state.output).then(() => {
+  const outputEl = document.getElementById('keyboard-output');
+  const text = outputEl ? outputEl.value : state.output;
+  
+  navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('btn-copy-output');
     if (btn) {
       const original = btn.textContent;
@@ -1428,10 +1502,10 @@ function setupExternalFieldTracking() {
   
   document.addEventListener('focusout', (e) => {
     // Only clear if focus is leaving to something that's not a valid field or keyboard
-    // Don't clear if keyboard is visible - user is actively using it
-    setTimeout(() => {
+    // Use requestAnimationFrame to ensure we check after DOM updates
+    requestAnimationFrame(() => {
+      // Never clear while keyboard is visible - user is actively using it
       if (state.keyboardVisible) {
-        // Keyboard is open - don't clear the external field reference
         return;
       }
       
@@ -1439,13 +1513,16 @@ function setupExternalFieldTracking() {
       const isKeyboardElement = activeEl && activeEl.closest('#keyboard-container');
       const isValidField = isValidTextField(activeEl) && !activeEl.closest('#keyboard-container');
       
-      if (!isKeyboardElement && !isValidField) {
+      // Also check if the click target was inside the keyboard container
+      const clickedKeyboard = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('#keyboard-container');
+      
+      if (!isKeyboardElement && !isValidField && !clickedKeyboard) {
         state.activeExternalField = null;
         state.isMultilineField = false;
         updateFloatingButtonVisibility();
         updateEnterButtonVisibility();
       }
-    }, 100);
+    });
   });
 }
 

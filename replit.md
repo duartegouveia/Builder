@@ -40,7 +40,13 @@ JavaScript files in `client/src/`:
 - `experiment-calc.js` - Error Propagator interactivity
 - `logic-builder.js` - Logic Builder interactivity
 - `lib/error-utils.js` - Error propagation calculations using mathjs
-- `styles.css` - All application styles
+
+CSS files in `client/src/`:
+- `styles.css` - Shared styles, CSS variables, base typography
+- `styles_virtual_keyboard.css` - Virtual Keyboard specific styles
+- `styles_relation.css` - Relation Builder specific styles
+- `styles_logic_builder.css` - Logic Builder specific styles
+- `styles_error_propagator.css` - Error Propagator specific styles
 
 Navigation uses standard anchor links between pages (no SPA, no hash routing).
 
@@ -189,16 +195,25 @@ The Virtual Keyboard provides comprehensive Unicode character input with:
 ### Output Management
 - Editable textarea for collected characters with cursor positioning
 - Text editing controls: Backspace (⌫), Delete (Del), Enter (↵)
-- Copy to clipboard button
+- Copy to clipboard button (copies current textarea content)
 - Clear button to reset
-- End button to finish and send text
+- End button transfers content to original external field and closes keyboard
 
-### Recent Pages
+### External Field Integration
+- Click any text input or textarea on the page to activate keyboard toggle
+- Toggle button (⌨) appears only when a valid text field is focused
+- Keyboard syncs text and cursor position with the external field
+- End button transfers content back to the original field
+
+### Recent Pages (Unicode Blocks Bar)
 - Tracks last 6 visited Unicode blocks
-- Quick access buttons for frequently used blocks
+- Recent blocks displayed in a separate bar below controls
+- Clicking a recent block does NOT reorder the list
+- Selecting from hierarchy popup adds new blocks to the list
 
 ### Floating Keyboard Panel
 - Floating toggle button (⌨) in bottom-right corner (draggable)
+- Toggle button only visible when a text field is focused
 - Keyboard panel with multiple position options:
   - **Bottom** (default) - full width at bottom of screen
   - **Top** - full width at top of screen

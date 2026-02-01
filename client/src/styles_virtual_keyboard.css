@@ -153,23 +153,15 @@
   min-width: auto;
 }
 
-.keyboard-controls-unified .keyboard-hierarchy {
-  flex: 0 1 auto;
-  max-height: none;
-  overflow: visible;
-  border: none;
-  background: none;
-  padding: 0;
-}
-
-.keyboard-hierarchy {
-  flex: 1;
-  max-height: 300px;
-  overflow-y: auto;
+/* Blocks bar - separate line for Unicode blocks */
+.keyboard-blocks-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--slate-50);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--card);
-  padding: var(--space-2);
 }
 
 /* Compact hierarchy navigation (after block selection) */
@@ -217,6 +209,38 @@
 .hierarchy-recent-btn.active:hover {
   background: var(--primary);
   opacity: 0.9;
+}
+
+/* Floating Hierarchy Popup */
+.hierarchy-popup {
+  position: fixed;
+  z-index: 100002;
+  width: 320px;
+  max-height: 400px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hierarchy-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--slate-50);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.hierarchy-popup .hierarchy-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2);
 }
 
 .hierarchy-tree {
@@ -692,8 +716,12 @@
 
 /* Space Key */
 .keyboard-space-key {
+  flex: 0 0 auto;
   min-width: 120px;
-  background: var(--slate-100);
+  max-width: calc(5 * 46px); /* Max 5 button widths (42px + 4px gap) */
+  width: 100%;
+  background: var(--card);
+  margin-top: var(--space-2);
 }
 
 .keyboard-space-key:hover {
