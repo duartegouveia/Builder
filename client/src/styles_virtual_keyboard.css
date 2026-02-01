@@ -933,29 +933,6 @@
     display: none;
   }
   
-  /* Smaller keys for mobile */
-  .keyboard-row .keyboard-key {
-    flex: 0 0 28px;
-    min-width: 26px;
-    max-width: 32px;
-    min-height: 40px;
-    padding: 2px;
-  }
-  
-  .key-char {
-    font-size: 16px;
-  }
-  
-  .key-label {
-    font-size: 7px;
-  }
-  
-  .keyboard-digits-section .keyboard-key {
-    width: 32px;
-    min-width: 28px;
-    max-width: 36px;
-    min-height: 40px;
-  }
 }
 
 /* Keyboard Toggle Button (Floating) */
@@ -1200,11 +1177,9 @@
   max-width: 60px;
 }
 
-/* Mobile override for all positions including fullscreen */
+/* Mobile: smaller keys for all positions */
 @media (max-width: 600px) {
-  .keyboard-position-fullscreen .keyboard-row .keyboard-key,
-  .keyboard-position-bottom .keyboard-row .keyboard-key,
-  .keyboard-position-top .keyboard-row .keyboard-key {
+  .keyboard-panel .keyboard-row .keyboard-key {
     flex: 0 0 28px;
     min-width: 26px;
     max-width: 32px;
@@ -1212,23 +1187,15 @@
     padding: 2px;
   }
   
-  .keyboard-position-fullscreen .key-char,
-  .keyboard-position-bottom .key-char,
-  .keyboard-position-top .key-char,
-  .key-char {
-    font-size: 16px !important;
+  .keyboard-panel .key-char {
+    font-size: 16px;
   }
   
-  .keyboard-position-fullscreen .key-label,
-  .keyboard-position-bottom .key-label,
-  .keyboard-position-top .key-label,
-  .key-label {
-    font-size: 7px !important;
+  .keyboard-panel .key-label {
+    font-size: 7px;
   }
   
-  .keyboard-position-fullscreen .keyboard-digits-section .keyboard-key,
-  .keyboard-position-bottom .keyboard-digits-section .keyboard-key,
-  .keyboard-position-top .keyboard-digits-section .keyboard-key {
+  .keyboard-panel .keyboard-digits-section .keyboard-key {
     width: 32px;
     min-width: 28px;
     max-width: 36px;
