@@ -214,7 +214,6 @@ function renderKeyboard() {
                 <option value="qwerty">QWERTY</option>
                 <option value="azerty">AZERTY</option>
                 <option value="qwertz">QWERTZ</option>
-                <option value="hcesar">HCESAR</option>
                 <option value="unicode">Unicode Order</option>
               </select>
               <select id="dictionary-language" class="keyboard-select" title="Autocomplete dictionary">
@@ -1271,7 +1270,7 @@ function updateLayoutOptions() {
   if (!select) return;
   
   const isLatin = isLatinBlock(state.currentBlock);
-  const latinOnlyLayouts = ['qwerty', 'azerty', 'qwertz', 'hcesar'];
+  const latinOnlyLayouts = ['qwerty', 'azerty', 'qwertz'];
   
   // Show/hide Latin-only options
   Array.from(select.options).forEach(option => {

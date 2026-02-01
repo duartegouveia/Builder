@@ -817,8 +817,7 @@ export const keyboardLayouts = {
   qwerty: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
   azerty: ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'w', 'x', 'c', 'v', 'b', 'n'],
   qwertz: ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'y', 'x', 'c', 'v', 'b', 'n', 'm'],
-  alphabetic: 'abcdefghijklmnopqrstuvwxyz'.split(''),
-  hcesar: 'hvtbjepqxczfaongdmsulrikyw'.split('')
+  alphabetic: 'abcdefghijklmnopqrstuvwxyz'.split('')
 };
 
 // Row structure for layouts that should have line breaks
@@ -837,11 +836,6 @@ export const keyboardRows = {
     ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
     ['y', 'x', 'c', 'v', 'b', 'n', 'm']
-  ],
-  hcesar: [
-    ['h', 'v', 't', 'b', 'j', 'e', 'p', 'q', 'x', 'c'],
-    ['z', 'f', 'a', 'o', 'n', 'g', 'd', 'm', 's'],
-    ['u', 'l', 'r', 'i', 'k', 'y', 'w']
   ]
 };
 
