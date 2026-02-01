@@ -308,7 +308,7 @@ function renderHierarchy() {
       
       const header = document.createElement('div');
       header.className = 'hierarchy-popup-header';
-      header.innerHTML = '<span>Browse Languages</span><button id="hierarchy-close-btn" class="btn btn-xs btn-outline">✕</button>';
+      header.innerHTML = '<span>Browse Unicode Blocks</span><button id="hierarchy-close-btn" class="btn btn-xs btn-outline">✕</button>';
       popup.appendChild(header);
       
       const tree = document.createElement('div');
@@ -330,7 +330,7 @@ function positionHierarchyPopup(popup) {
   
   const btnRect = expandBtn.getBoundingClientRect();
   const popupWidth = 320;
-  const popupMaxHeight = 400;
+  const popupMaxHeight = window.innerHeight * 0.7; // 70% of viewport height
   
   // Try to position below the button first
   let top = btnRect.bottom + 5;
@@ -1091,42 +1091,38 @@ function attachEventListeners() {
   });
   
   // Show variants popup when user selects a single character in output
+  // Use selectionchange event which is the most reliable for text selection
   let selectionTimeout = null;
-  const outputEl = document.getElementById('keyboard-output');
-  if (outputEl) {
-    // Use mouseup to detect selection changes (more reliable than select event)
-    outputEl.addEventListener('mouseup', () => {
-      clearTimeout(selectionTimeout);
-      const start = outputEl.selectionStart;
-      const end = outputEl.selectionEnd;
-      
-      // Check if exactly one character is selected
-      if (end - start === 1) {
-        const selectedChar = outputEl.value.substring(start, end);
-        
-        // Wait 500ms before showing popup
-        selectionTimeout = setTimeout(() => {
-          showSelectionVariantsPopup(selectedChar, outputEl);
-        }, 500);
-      }
-    });
+  
+  function checkOutputSelection() {
+    const outputEl = document.getElementById('keyboard-output');
+    if (!outputEl || document.activeElement !== outputEl) return;
     
-    // Also handle keyboard selection (shift+arrow)
-    outputEl.addEventListener('keyup', (e) => {
-      if (e.shiftKey || e.key === 'Shift') {
-        clearTimeout(selectionTimeout);
-        const start = outputEl.selectionStart;
-        const end = outputEl.selectionEnd;
-        
-        if (end - start === 1) {
-          const selectedChar = outputEl.value.substring(start, end);
-          selectionTimeout = setTimeout(() => {
-            showSelectionVariantsPopup(selectedChar, outputEl);
-          }, 500);
-        }
-      }
-    });
+    clearTimeout(selectionTimeout);
+    const start = outputEl.selectionStart;
+    const end = outputEl.selectionEnd;
+    
+    // Check if exactly one character is selected
+    if (end - start === 1) {
+      const selectedChar = outputEl.value.substring(start, end);
+      
+      // Wait 500ms before showing popup
+      selectionTimeout = setTimeout(() => {
+        showSelectionVariantsPopup(selectedChar, outputEl);
+      }, 500);
+    }
   }
+  
+  // Use selectionchange for most reliable detection
+  document.addEventListener('selectionchange', checkOutputSelection);
+  
+  // Fallback: mouseup on document when output is focused
+  document.addEventListener('mouseup', () => {
+    const outputEl = document.getElementById('keyboard-output');
+    if (outputEl && document.activeElement === outputEl) {
+      checkOutputSelection();
+    }
+  });
   
   // Toggle button and position controls
   document.getElementById('keyboard-toggle-btn')?.addEventListener('click', toggleKeyboard);
