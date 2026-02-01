@@ -3276,8 +3276,8 @@ input[type="number"] {
 }
 
 .keyboard-variants-popup {
-  position: absolute;
-  z-index: 1000;
+  position: fixed;
+  z-index: 100001; /* Above keyboard panel (100000) */
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);

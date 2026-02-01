@@ -3,14 +3,14 @@ import { unicodeBlocks, pageHierarchy, transliterations, accentedVariants, keybo
 
 const state = {
   currentBlock: 'Basic Latin',
-  currentLayout: 'qwerty',
-  recentBlocks: [],
+  currentLayout: 'alphabetic',
+  recentBlocks: ['Basic Latin'], // Pre-populate with Latin
   maxRecent: 6,
   output: '',
   longPressTimer: null,
   longPressDelay: 500,
   shiftState: 'lowercase', // 'lowercase', 'uppercase', 'capslock'
-  hierarchyCollapsed: false, // true when block is selected, shows compact nav
+  hierarchyCollapsed: true, // Start collapsed, show hierarchy when user clicks Browse
   compositionInput: '', // For CJK romanization input
   keyboardVisible: false, // Whether keyboard panel is visible (hidden by default)
   keyboardPosition: 'bottom', // 'bottom', 'top', 'left', 'right', 'fullscreen'
@@ -190,8 +190,8 @@ function renderKeyboard() {
             <div class="keyboard-layout-selector">
               <label>Layout:</label>
               <select id="layout-select" class="keyboard-select">
-                <option value="alphabetic">Alphabetic</option>
-                <option value="qwerty" selected>QWERTY</option>
+                <option value="alphabetic" selected>Alphabetic</option>
+                <option value="qwerty">QWERTY</option>
                 <option value="azerty">AZERTY</option>
                 <option value="qwertz">QWERTZ</option>
                 <option value="hcesar">HCESAR</option>
@@ -220,6 +220,7 @@ function renderKeyboard() {
   renderHierarchy();
   renderCompositionArea();
   renderRecentBlocks();
+  updateLayoutOptions();
   renderCharacterGrid();
   updateEnterButtonVisibility();
   
@@ -979,6 +980,48 @@ function attachEventListeners() {
   });
 }
 
+// Check if a block is Latin-based (supports QWERTY/AZERTY/QWERTZ layouts)
+function isLatinBlock(blockName) {
+  const latinBlocks = [
+    'Basic Latin',
+    'Latin-1 Supplement',
+    'Latin Extended-A',
+    'Latin Extended-B',
+    'Latin Extended-C',
+    'Latin Extended-D',
+    'Latin Extended-E',
+    'Latin Extended Additional',
+    'IPA Extensions',
+    'Phonetic Extensions',
+    'Phonetic Extensions Supplement',
+    'Latin Extended-F',
+    'Latin Extended-G'
+  ];
+  return latinBlocks.includes(blockName);
+}
+
+// Update layout options based on current block
+function updateLayoutOptions() {
+  const select = document.getElementById('layout-select');
+  if (!select) return;
+  
+  const isLatin = isLatinBlock(state.currentBlock);
+  const latinOnlyLayouts = ['qwerty', 'azerty', 'qwertz', 'hcesar'];
+  
+  // Show/hide Latin-only options
+  Array.from(select.options).forEach(option => {
+    if (latinOnlyLayouts.includes(option.value)) {
+      option.style.display = isLatin ? '' : 'none';
+    }
+  });
+  
+  // If current layout is Latin-only and block is not Latin, switch to alphabetic
+  if (!isLatin && latinOnlyLayouts.includes(state.currentLayout)) {
+    state.currentLayout = 'alphabetic';
+    select.value = 'alphabetic';
+  }
+}
+
 function selectBlock(blockName) {
   if (!unicodeBlocks[blockName]) return;
   
@@ -1000,6 +1043,7 @@ function selectBlock(blockName) {
   renderHierarchy();
   renderCompositionArea();
   renderRecentBlocks();
+  updateLayoutOptions();
   renderCharacterGrid();
 }
 
@@ -1323,19 +1367,38 @@ function showSkinTonePopup(keyBtn) {
   
   popup.appendChild(grid);
   
-  // Position popup near the key
+  // Position popup near the key using fixed positioning
   const rect = keyBtn.getBoundingClientRect();
-  const containerRect = document.getElementById('keyboard-container').getBoundingClientRect();
   
+  popup.style.position = 'fixed';
   popup.style.display = 'block';
-  popup.style.left = `${rect.left - containerRect.left}px`;
-  popup.style.top = `${rect.bottom - containerRect.top + 5}px`;
   
-  // Ensure popup stays within bounds
+  // Try to position below the key first
+  let top = rect.bottom + 5;
+  let left = rect.left;
+  
+  // Get popup dimensions after it's visible
   const popupRect = popup.getBoundingClientRect();
-  if (popupRect.right > containerRect.right) {
-    popup.style.left = `${containerRect.right - popupRect.width - containerRect.left}px`;
+  
+  // Ensure popup stays within viewport horizontally
+  if (left + popupRect.width > window.innerWidth - 10) {
+    left = window.innerWidth - popupRect.width - 10;
   }
+  if (left < 10) {
+    left = 10;
+  }
+  
+  // Ensure popup stays within viewport vertically
+  // If not enough space below, position above the key
+  if (top + popupRect.height > window.innerHeight - 10) {
+    top = rect.top - popupRect.height - 5;
+  }
+  if (top < 10) {
+    top = 10;
+  }
+  
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
 }
 
 // External field tracking
@@ -1537,17 +1600,36 @@ function showUnicodeInfoPopup(keyBtn) {
     popup.appendChild(variantsSection);
   }
   
-  // Position popup near the key
+  // Position popup near the key using fixed positioning
   const rect = keyBtn.getBoundingClientRect();
-  const containerRect = document.getElementById('keyboard-container').getBoundingClientRect();
   
+  popup.style.position = 'fixed';
   popup.style.display = 'block';
-  popup.style.left = `${rect.left - containerRect.left}px`;
-  popup.style.top = `${rect.bottom - containerRect.top + 5}px`;
   
-  // Ensure popup stays within bounds
+  // Try to position below the key first
+  let top = rect.bottom + 5;
+  let left = rect.left;
+  
+  // Get popup dimensions after it's visible
   const popupRect = popup.getBoundingClientRect();
-  if (popupRect.right > containerRect.right) {
-    popup.style.left = `${containerRect.right - popupRect.width - containerRect.left}px`;
+  
+  // Ensure popup stays within viewport horizontally
+  if (left + popupRect.width > window.innerWidth - 10) {
+    left = window.innerWidth - popupRect.width - 10;
   }
+  if (left < 10) {
+    left = 10;
+  }
+  
+  // Ensure popup stays within viewport vertically
+  // If not enough space below, position above the key
+  if (top + popupRect.height > window.innerHeight - 10) {
+    top = rect.top - popupRect.height - 5;
+  }
+  if (top < 10) {
+    top = 10;
+  }
+  
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
 }
