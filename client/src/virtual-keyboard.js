@@ -1124,6 +1124,16 @@ function attachEventListeners() {
     }
   });
   
+  // Also handle keyboard selection (shift+arrow keys)
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+      const outputEl = document.getElementById('keyboard-output');
+      if (outputEl && document.activeElement === outputEl) {
+        checkOutputSelection();
+      }
+    }
+  });
+  
   // Toggle button and position controls
   document.getElementById('keyboard-toggle-btn')?.addEventListener('click', toggleKeyboard);
   document.getElementById('keyboard-close-btn')?.addEventListener('click', (e) => {

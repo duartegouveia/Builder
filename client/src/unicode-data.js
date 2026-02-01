@@ -516,98 +516,96 @@ export const pageHierarchy = {
       }
     }
   },
-  "Simbolos_e_Blocos": {
-      "Diacriticos_e_Fonetica": [
-        "Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement",
-        "Combining Diacritical Marks for Symbols", "IPA Extensions", "Modifier Tone Letters",
-        "Phonetic Extensions", "Phonetic Extensions Supplement", "Spacing Modifier Letters", "Vedic Extensions"
-      ],
-      "Pontuacao_e_Separadores": [
-        "General Punctuation", "Ideographic Description Characters", "Ideographic Symbols and Punctuation",
-        "Shorthand Format Controls", "Supplemental Punctuation", "Vertical Forms"
-      ],
-      "Numeros_e_Envolventes": [
-        "Aegean Numbers", "Common Indic Number Forms", "Counting Rod Numerals",
-        "Enclosed Alphanumeric Supplement", "Enclosed Alphanumerics", "Enclosed CJK Letters and Months",
-        "Enclosed Ideographic Supplement", "Indic Siyaq Numbers", "Kaktovik Numerals", "Mayan Numerals",
-        "Number Forms", "Ottoman Siyaq Numbers", "Rumi Numeral Symbols", "Sinhala Archaic Numbers",
-        "Superscripts and Subscripts", "Tai Xuan Jing Symbols"
-      ],
-      "Moeda_e_Unidades": ["Currency Symbols"],
-      "Setas": [
-        "Arrows", "Miscellaneous Symbols and Arrows",
-        "Supplemental Arrows-A", "Supplemental Arrows-B", "Supplemental Arrows-C"
-      ],
-      "Matematica": [
-        "Arabic Mathematical Alphabetic Symbols", "Mathematical Alphanumeric Symbols",
-        "Mathematical Operators", "Miscellaneous Mathematical Symbols-A",
-        "Miscellaneous Mathematical Symbols-B", "Supplemental Mathematical Operators"
-      ],
-      "Tecnico_e_Controlo": [
-        "Control Pictures", "Miscellaneous Technical", "Optical Character Recognition", "Specials", "Tags"
-      ],
-      "Caixas_e_Formas": [
-        "Block Elements", "Box Drawing", "Braille Patterns", "Geometric Shapes", "Geometric Shapes Extended"
-      ],
-      "Simbolos_Gerais_e_Dingbats": [
-        "Alchemical Symbols", "Chess Symbols", "Dingbats", "Miscellaneous Symbols",
-        "Ornamental Dingbats", "Yijing Hexagram Symbols"
-      ],
-      "Pictogramas_e_Emoji": [
-        "Emoticons", "Miscellaneous Symbols and Pictographs", "Supplemental Symbols and Pictographs",
-        "Symbols and Pictographs Extended-A", "Transport and Map Symbols"
-      ],
-      "Jogos": ["Domino Tiles", "Mahjong Tiles", "Playing Cards"],
-      "Musica": [
-        "Ancient Greek Musical Notation", "Byzantine Musical Symbols", "Musical Symbols", "Znamenny Musical Notation"
-      ],
-      "Compatibilidade_e_Apresentacao": [
-        "Alphabetic Presentation Forms", "Arabic Presentation Forms-A", "Arabic Presentation Forms-B",
-        "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement", "CJK Compatibility Forms",
-        "CJK Compatibility", "Halfwidth and Fullwidth Forms", "Small Form Variants",
-        "Variation Selectors", "Variation Selectors Supplement"
-      ],
-      "Surrogates": ["High Private Use Surrogates", "High Surrogates", "Low Surrogates"],
-      "Uso_Privado": ["Private Use Area", "Supplementary Private Use Area-A", "Supplementary Private Use Area-B"],
-      "Escritas": {
-        "Componentes_e_Indices": [
-          "CJK Radicals Supplement", "CJK Strokes", "Duployan", "Kana Extended-A", "Kana Extended-B",
-          "Kana Supplement", "Kangxi Radicals", "Kanbun", "Khitan Small Script", "Tangut",
-          "Tangut Components", "Tangut Components Supplement", "Tangut Supplement", "Yi Radicals", "Yijing Hexagram Symbols"
-        ],
-        "Historicas": [
-          "Aegean Numbers", "Ancient Symbols", "Anatolian Hieroglyphs", "Carian", "Caucasian Albanian",
-          "Chorasmian", "Coptic Epact Numbers", "Cuneiform", "Cuneiform Numbers and Punctuation",
-          "Cypriot Syllabary", "Cypro-Minoan", "Egyptian Hieroglyph Format Controls",
-          "Egyptian Hieroglyphs Extended-A", "Egyptian Hieroglyphs", "Elbasan", "Elymaic", "Gothic",
-          "Hatran", "Imperial Aramaic", "Inscriptional Pahlavi", "Inscriptional Parthian", "Kharoshthi",
-          "Linear A", "Linear B Ideograms", "Linear B Syllabary", "Lycian", "Lydian", "Manichaean",
-          "Meroitic Cursive", "Meroitic Hieroglyphs", "Nabataean", "Old Hungarian", "Old Italic",
-          "Old Permic", "Old Sogdian", "Old Turkic", "Old Uyghur", "Palmyrene", "Phaistos Disc",
-          "Psalter Pahlavi", "Sidetic", "Sogdian", "Vithkuqi"
-        ],
-        "Modernas": [
-          "Ahom", "Arabic Extended-C", "Avestan", "Balinese", "Bamum Supplement", "Bamum", "Bassa Vah",
-          "Batak", "Beria Erfe", "Bhaiksuki", "Bopomofo Extended", "Bopomofo", "Buginese", "Buhid",
-          "Chakma", "Cham", "Combining Half Marks", "Coptic", "Cyrillic Extended-D", "Dives Akuru",
-          "Dogra", "Early Dynastic Cuneiform", "Ethiopic Extended-B", "Garay", "Glagolitic Supplement",
-          "Glagolitic", "Gunjala Gondi", "Gurung Khema", "Hanifi Rohingya", "Hanunoo",
-          "High Private Use Surrogates", "Hiragana", "Ideographic Description Characters", "Javanese",
-          "Kayah Li", "Kawi", "Khmer", "Khudawadi", "Kirat Rai", "Lao", "Latin Extended Additional",
-          "Latin Extended-F", "Latin Extended-G", "Letterlike Symbols", "Lepcha", "Limbu",
-          "Lisu Supplement", "Lisu", "Makasar", "Mandaic", "Masaram Gondi", "Medefaidrin",
-          "Meetei Mayek Extensions", "Meetei Mayek", "Mende Kikakui", "Miao", "Miscellaneous Symbols and Arrows",
-          "Miscellaneous Technical", "Mro", "Myanmar Extended-C", "Nandinagari", "Nag Mundari",
-          "New Tai Lue", "Newa", "Nyiakeng Puachue Hmong", "Ogham", "Ol Chiki", "Ol Onal",
-          "Old North Arabian", "Old South Arabian", "Osage", "Osmanya", "Pahawh Hmong", "Pau Cin Hau",
-          "Rejang", "Runic", "Samaritan", "Saurashtra", "Shavian", "Sora Sompeng", "Sundanese Supplement",
-          "Sundanese", "Sunuwar", "Sutton SignWriting", "Syloti Nagri", "Tagalog", "Tagbanwa", "Tai Yo",
-          "Takri", "Tangsa", "Thaana", "Tirhuta", "Todhri", "Tolong Siki", "Toto", "Tulu-Tigalari",
-          "Unified Canadian Aboriginal Syllabics Extended-A", "Vai", "Wancho", "Warang Citi", "Yezidi",
-          "Yi Syllables", "Zanabazar Square"
-        ]
-      }
-    }
+  "Diacriticos_e_Fonetica": [
+    "Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement",
+    "Combining Diacritical Marks for Symbols", "IPA Extensions", "Modifier Tone Letters",
+    "Phonetic Extensions", "Phonetic Extensions Supplement", "Spacing Modifier Letters", "Vedic Extensions"
+  ],
+  "Pontuacao_e_Separadores": [
+    "General Punctuation", "Ideographic Description Characters", "Ideographic Symbols and Punctuation",
+    "Shorthand Format Controls", "Supplemental Punctuation", "Vertical Forms"
+  ],
+  "Numeros_e_Envolventes": [
+    "Aegean Numbers", "Common Indic Number Forms", "Counting Rod Numerals",
+    "Enclosed Alphanumeric Supplement", "Enclosed Alphanumerics", "Enclosed CJK Letters and Months",
+    "Enclosed Ideographic Supplement", "Indic Siyaq Numbers", "Kaktovik Numerals", "Mayan Numerals",
+    "Number Forms", "Ottoman Siyaq Numbers", "Rumi Numeral Symbols", "Sinhala Archaic Numbers",
+    "Superscripts and Subscripts", "Tai Xuan Jing Symbols"
+  ],
+  "Moeda_e_Unidades": ["Currency Symbols"],
+  "Setas": [
+    "Arrows", "Miscellaneous Symbols and Arrows",
+    "Supplemental Arrows-A", "Supplemental Arrows-B", "Supplemental Arrows-C"
+  ],
+  "Matematica": [
+    "Arabic Mathematical Alphabetic Symbols", "Mathematical Alphanumeric Symbols",
+    "Mathematical Operators", "Miscellaneous Mathematical Symbols-A",
+    "Miscellaneous Mathematical Symbols-B", "Supplemental Mathematical Operators"
+  ],
+  "Tecnico_e_Controlo": [
+    "Control Pictures", "Miscellaneous Technical", "Optical Character Recognition", "Specials", "Tags"
+  ],
+  "Caixas_e_Formas": [
+    "Block Elements", "Box Drawing", "Braille Patterns", "Geometric Shapes", "Geometric Shapes Extended"
+  ],
+  "Simbolos_Gerais_e_Dingbats": [
+    "Alchemical Symbols", "Chess Symbols", "Dingbats", "Miscellaneous Symbols",
+    "Ornamental Dingbats", "Yijing Hexagram Symbols"
+  ],
+  "Pictogramas_e_Emoji": [
+    "Emoticons", "Miscellaneous Symbols and Pictographs", "Supplemental Symbols and Pictographs",
+    "Symbols and Pictographs Extended-A", "Transport and Map Symbols"
+  ],
+  "Jogos": ["Domino Tiles", "Mahjong Tiles", "Playing Cards"],
+  "Musica": [
+    "Ancient Greek Musical Notation", "Byzantine Musical Symbols", "Musical Symbols", "Znamenny Musical Notation"
+  ],
+  "Compatibilidade_e_Apresentacao": [
+    "Alphabetic Presentation Forms", "Arabic Presentation Forms-A", "Arabic Presentation Forms-B",
+    "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement", "CJK Compatibility Forms",
+    "CJK Compatibility", "Halfwidth and Fullwidth Forms", "Small Form Variants",
+    "Variation Selectors", "Variation Selectors Supplement"
+  ],
+  "Surrogates": ["High Private Use Surrogates", "High Surrogates", "Low Surrogates"],
+  "Uso_Privado": ["Private Use Area", "Supplementary Private Use Area-A", "Supplementary Private Use Area-B"],
+  "Escritas": {
+    "Componentes_e_Indices": [
+      "CJK Radicals Supplement", "CJK Strokes", "Duployan", "Kana Extended-A", "Kana Extended-B",
+      "Kana Supplement", "Kangxi Radicals", "Kanbun", "Khitan Small Script", "Tangut",
+      "Tangut Components", "Tangut Components Supplement", "Tangut Supplement", "Yi Radicals", "Yijing Hexagram Symbols"
+    ],
+    "Historicas": [
+      "Aegean Numbers", "Ancient Symbols", "Anatolian Hieroglyphs", "Carian", "Caucasian Albanian",
+      "Chorasmian", "Coptic Epact Numbers", "Cuneiform", "Cuneiform Numbers and Punctuation",
+      "Cypriot Syllabary", "Cypro-Minoan", "Egyptian Hieroglyph Format Controls",
+      "Egyptian Hieroglyphs Extended-A", "Egyptian Hieroglyphs", "Elbasan", "Elymaic", "Gothic",
+      "Hatran", "Imperial Aramaic", "Inscriptional Pahlavi", "Inscriptional Parthian", "Kharoshthi",
+      "Linear A", "Linear B Ideograms", "Linear B Syllabary", "Lycian", "Lydian", "Manichaean",
+      "Meroitic Cursive", "Meroitic Hieroglyphs", "Nabataean", "Old Hungarian", "Old Italic",
+      "Old Permic", "Old Sogdian", "Old Turkic", "Old Uyghur", "Palmyrene", "Phaistos Disc",
+      "Psalter Pahlavi", "Sidetic", "Sogdian", "Vithkuqi"
+    ],
+    "Modernas": [
+      "Ahom", "Arabic Extended-C", "Avestan", "Balinese", "Bamum Supplement", "Bamum", "Bassa Vah",
+      "Batak", "Beria Erfe", "Bhaiksuki", "Bopomofo Extended", "Bopomofo", "Buginese", "Buhid",
+      "Chakma", "Cham", "Combining Half Marks", "Coptic", "Cyrillic Extended-D", "Dives Akuru",
+      "Dogra", "Early Dynastic Cuneiform", "Ethiopic Extended-B", "Garay", "Glagolitic Supplement",
+      "Glagolitic", "Gunjala Gondi", "Gurung Khema", "Hanifi Rohingya", "Hanunoo",
+      "High Private Use Surrogates", "Hiragana", "Ideographic Description Characters", "Javanese",
+      "Kayah Li", "Kawi", "Khmer", "Khudawadi", "Kirat Rai", "Lao", "Latin Extended Additional",
+      "Latin Extended-F", "Latin Extended-G", "Letterlike Symbols", "Lepcha", "Limbu",
+      "Lisu Supplement", "Lisu", "Makasar", "Mandaic", "Masaram Gondi", "Medefaidrin",
+      "Meetei Mayek Extensions", "Meetei Mayek", "Mende Kikakui", "Miao", "Miscellaneous Symbols and Arrows",
+      "Miscellaneous Technical", "Mro", "Myanmar Extended-C", "Nandinagari", "Nag Mundari",
+      "New Tai Lue", "Newa", "Nyiakeng Puachue Hmong", "Ogham", "Ol Chiki", "Ol Onal",
+      "Old North Arabian", "Old South Arabian", "Osage", "Osmanya", "Pahawh Hmong", "Pau Cin Hau",
+      "Rejang", "Runic", "Samaritan", "Saurashtra", "Shavian", "Sora Sompeng", "Sundanese Supplement",
+      "Sundanese", "Sunuwar", "Sutton SignWriting", "Syloti Nagri", "Tagalog", "Tagbanwa", "Tai Yo",
+      "Takri", "Tangsa", "Thaana", "Tirhuta", "Todhri", "Tolong Siki", "Toto", "Tulu-Tigalari",
+      "Unified Canadian Aboriginal Syllabics Extended-A", "Vai", "Wancho", "Warang Citi", "Yezidi",
+      "Yi Syllables", "Zanabazar Square"
+    ]
+  }
 };
 
 // Latin transliterations for non-Latin scripts
