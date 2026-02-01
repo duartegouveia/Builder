@@ -3035,6 +3035,39 @@ input[type="number"] {
   align-items: flex-start;
 }
 
+/* Unified Controls Line */
+.keyboard-controls-unified {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.keyboard-controls-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.keyboard-controls-unified .keyboard-controls-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: auto;
+}
+
+.keyboard-controls-unified .keyboard-hierarchy {
+  flex: 0 1 auto;
+  max-height: none;
+  overflow: visible;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
 .keyboard-hierarchy {
   flex: 1;
   max-height: 300px;
@@ -3448,6 +3481,22 @@ input[type="number"] {
   min-width: 160px;
 }
 
+/* Key Alternatives Badge */
+.key-alternatives-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--primary);
+  color: white;
+  padding: 1px 4px;
+  border-radius: 8px;
+  min-width: 14px;
+  text-align: center;
+  line-height: 1.2;
+}
+
 /* Shift Button Control */
 .keyboard-shift-control {
   display: flex;
@@ -3627,25 +3676,37 @@ input[type="number"] {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 56px;
+  min-width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: 28px;
   background: var(--primary);
   color: white;
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  padding: 0 16px;
   transition: transform 0.2s, box-shadow 0.2s;
   touch-action: none;
 }
 
+.keyboard-toggle-icon {
+  font-size: 24px;
+}
+
+.keyboard-toggle-ctrl {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
 .keyboard-toggle-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 

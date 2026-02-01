@@ -3,7 +3,7 @@ import { unicodeBlocks, pageHierarchy, transliterations, accentedVariants, keybo
 
 const state = {
   currentBlock: 'Basic Latin',
-  currentLayout: 'alphabetic',
+  currentLayout: 'qwerty', // Default layout is QWERTY for Latin
   recentBlocks: ['Basic Latin'], // Pre-populate with Latin
   maxRecent: 6,
   output: '',
@@ -17,7 +17,9 @@ const state = {
   floatingButtonPos: { x: null, y: null }, // Custom position for floating button
   activeExternalField: null, // Reference to external input/textarea being edited
   isMultilineField: false, // true for textarea, false for input[type=text]
-  externalCursorPos: 0 // Cursor position from external field
+  externalCursorPos: 0, // Cursor position from external field
+  blockLayouts: { 'Basic Latin': 'qwerty' }, // Layout preferences per block
+  hasPhysicalKeyboard: true // Detected device type (desktop/laptop has keyboard)
 };
 
 // Unicode character names cache
@@ -130,7 +132,22 @@ function getSymbolOrder(char) {
 
 document.addEventListener('DOMContentLoaded', init);
 
+// Detect if device has physical keyboard (desktop/laptop vs mobile/tablet)
+function detectPhysicalKeyboard() {
+  // Check for touch-only devices
+  const isTouchOnly = navigator.maxTouchPoints > 0 && 
+                      !window.matchMedia('(hover: hover)').matches;
+  
+  // Check screen width (mobile devices typically < 768px)
+  const isSmallScreen = window.innerWidth < 768;
+  
+  // If it's a touch-only device OR a small screen, likely no physical keyboard
+  // Otherwise, assume it's a desktop/laptop with keyboard
+  return !isTouchOnly && !isSmallScreen;
+}
+
 function init() {
+  state.hasPhysicalKeyboard = detectPhysicalKeyboard();
   renderKeyboard();
   attachEventListeners();
   setupExternalFieldTracking();
@@ -143,7 +160,7 @@ function renderKeyboard() {
   if (!container) return;
   
   container.innerHTML = `
-    <button id="keyboard-toggle-btn" class="keyboard-toggle-btn" style="display: none;" title="Toggle virtual keyboard">⌨</button>
+    <button id="keyboard-toggle-btn" class="keyboard-toggle-btn" style="display: none;" title="Toggle virtual keyboard"><span class="keyboard-toggle-icon">⌨</span><span class="keyboard-toggle-ctrl"></span></button>
     
     <div id="keyboard-panel" class="keyboard-panel keyboard-position-${state.keyboardPosition}${state.keyboardVisible ? '' : ' keyboard-panel-hidden'}">
       <div class="keyboard-panel-header">
@@ -160,26 +177,22 @@ function renderKeyboard() {
       
       <div class="keyboard-wrapper">
         <div class="keyboard-output-section">
-          <label class="keyboard-label">Output</label>
           <div class="keyboard-output-container">
             <div id="keyboard-output-wrapper"></div>
-            <div class="keyboard-output-actions">
-              <button id="btn-backspace" class="btn btn-sm btn-outline" title="Backspace">⌫</button>
-              <button id="btn-delete" class="btn btn-sm btn-outline" title="Delete">Del</button>
-              <button id="btn-enter" class="btn btn-sm btn-outline" title="New line">↵</button>
-              <button id="btn-copy-output" class="btn btn-sm btn-outline" title="Copy to clipboard">Copy</button>
-              <button id="btn-clear-output" class="btn btn-sm btn-outline" title="Clear output">Clear</button>
-              <button id="btn-end" class="btn btn-sm btn-primary" title="Finish and send to input">End</button>
-            </div>
           </div>
         </div>
         
-        <div class="keyboard-nav-section">
-        </div>
-        
-        <div class="keyboard-controls">
-          <div class="keyboard-hierarchy" id="keyboard-hierarchy"></div>
+        <div class="keyboard-controls-unified">
+          <div class="keyboard-controls-left">
+            <button id="btn-backspace" class="btn btn-sm btn-outline" title="Backspace">⌫</button>
+            <button id="btn-delete" class="btn btn-sm btn-outline" title="Delete">Del</button>
+            <button id="btn-enter" class="btn btn-sm btn-outline" title="New line">↵</button>
+            <button id="btn-copy-output" class="btn btn-sm btn-outline" title="Copy to clipboard">Copy</button>
+            <button id="btn-clear-output" class="btn btn-sm btn-outline" title="Clear output">Clear</button>
+            <button id="btn-end" class="btn btn-sm btn-primary" title="Finish and send to input">End</button>
+          </div>
           <div class="keyboard-controls-right">
+            <div class="keyboard-hierarchy" id="keyboard-hierarchy"></div>
             <button id="hierarchy-expand-btn" class="btn btn-sm btn-outline hierarchy-expand-btn" title="Browse all languages">☰</button>
             <div class="keyboard-shift-control">
               <button id="shift-button" class="btn btn-outline shift-btn" title="Shift: minúscula / maiúscula / maiúscula presa">
@@ -188,7 +201,6 @@ function renderKeyboard() {
               <span id="shift-label" class="shift-label">minúscula</span>
             </div>
             <div class="keyboard-layout-selector">
-              <label>Layout:</label>
               <select id="layout-select" class="keyboard-select">
                 <option value="alphabetic" selected>Alphabetic</option>
                 <option value="qwerty">QWERTY</option>
@@ -605,6 +617,18 @@ function renderCharacterGrid() {
       btn.appendChild(translitSpan);
     }
     
+    // Add alternatives count badge (variants + skin tones)
+    const variantCount = hasVariants ? accentedVariants[baseChar].length : 0;
+    const skinToneCount = hasSkinTones ? SKIN_TONES.length : 0;
+    const totalAlternatives = variantCount + skinToneCount;
+    
+    if (totalAlternatives > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'key-alternatives-badge';
+      badge.textContent = totalAlternatives;
+      btn.appendChild(badge);
+    }
+    
     return btn;
   };
   
@@ -895,6 +919,8 @@ function attachEventListeners() {
   if (layoutSelect) {
     layoutSelect.addEventListener('change', (e) => {
       state.currentLayout = e.target.value;
+      // Save layout preference for current block
+      state.blockLayouts[state.currentBlock] = state.currentLayout;
       renderCharacterGrid();
     });
   }
@@ -1031,6 +1057,15 @@ function selectBlock(blockName) {
   }
   
   state.compositionInput = ''; // Reset composition input when switching blocks
+  
+  // Restore saved layout for this block, or use default
+  if (state.blockLayouts[blockName]) {
+    state.currentLayout = state.blockLayouts[blockName];
+  } else {
+    // Default layout based on block type
+    const isLatin = blockName.toLowerCase().includes('latin');
+    state.currentLayout = isLatin ? 'qwerty' : 'unicode';
+  }
   
   renderHierarchy();
   renderCompositionArea();
@@ -1416,6 +1451,12 @@ function updateFloatingButtonVisibility() {
   
   const hasValidField = state.activeExternalField !== null;
   btn.style.display = hasValidField ? '' : 'none';
+  
+  // Update CTRL label visibility based on device type
+  const ctrlSpan = btn.querySelector('.keyboard-toggle-ctrl');
+  if (ctrlSpan) {
+    ctrlSpan.textContent = state.hasPhysicalKeyboard ? 'CTRL' : '';
+  }
   
   if (!hasValidField && state.keyboardVisible) {
     setKeyboardVisible(false);
