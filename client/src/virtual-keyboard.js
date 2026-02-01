@@ -319,12 +319,24 @@ function renderHierarchy() {
   
   // Show all recent blocks, with CSS highlighting the current one
   state.recentBlocks.forEach(block => {
+    const wrapper = document.createElement('span');
+    wrapper.className = 'hierarchy-recent-item';
+    
     const btn = document.createElement('button');
     const isActive = block === state.currentBlock;
     btn.className = 'btn btn-sm hierarchy-recent-btn' + (isActive ? ' active' : '');
     btn.dataset.block = block;
     btn.textContent = block;
-    compactNav.appendChild(btn);
+    wrapper.appendChild(btn);
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn btn-xs hierarchy-recent-remove';
+    removeBtn.dataset.block = block;
+    removeBtn.textContent = '✕';
+    removeBtn.title = 'Remove from recent';
+    wrapper.appendChild(removeBtn);
+    
+    compactNav.appendChild(wrapper);
   });
   
   container.appendChild(compactNav);
@@ -1025,6 +1037,12 @@ function attachEventListeners() {
     }
     
     // Block selection from recent blocks bar (does not reorder)
+    const recentRemoveBtn = e.target.closest('.hierarchy-recent-remove');
+    if (recentRemoveBtn) {
+      removeFromRecent(recentRemoveBtn.dataset.block);
+      return;
+    }
+    
     const recentBlockBtn = e.target.closest('.recent-block, .hierarchy-recent-btn');
     if (recentBlockBtn) {
       selectBlock(recentBlockBtn.dataset.block, false); // false = just select, don't reorder
@@ -1323,6 +1341,27 @@ function updateLayoutOptions() {
   
   // Sync select value with current layout state
   select.value = state.currentLayout;
+}
+
+function removeFromRecent(blockName) {
+  const idx = state.recentBlocks.indexOf(blockName);
+  if (idx === -1) return;
+  
+  state.recentBlocks.splice(idx, 1);
+  
+  // If we removed the current block, switch to first available or Basic Latin
+  if (state.currentBlock === blockName) {
+    const newBlock = state.recentBlocks[0] || 'Basic Latin';
+    state.currentBlock = newBlock;
+    // Ensure Basic Latin is in recent if we fall back to it
+    if (!state.recentBlocks.includes('Basic Latin')) {
+      state.recentBlocks.unshift('Basic Latin');
+    }
+  }
+  
+  renderHierarchy();
+  renderCharacterGrid();
+  updateLayoutOptions();
 }
 
 function selectBlock(blockName, fromHierarchyPopup = false) {
