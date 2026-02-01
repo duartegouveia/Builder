@@ -633,8 +633,19 @@ function renderCharacterGrid() {
     return btn;
   };
   
-  // Add letters first
+  // Create sections wrapper for side-by-side layout when space allows
+  const sectionsWrapper = document.createElement('div');
+  sectionsWrapper.className = 'keyboard-sections';
+  
+  // Top row: letters and digits side by side
+  const topRow = document.createElement('div');
+  topRow.className = 'keyboard-top-row';
+  
+  // Add letters section
   if (letters.length > 0) {
+    const lettersSection = document.createElement('div');
+    lettersSection.className = 'keyboard-letters-section';
+    
     const isUppercase = state.shiftState !== 'lowercase';
     const rows = keyboardRows[state.currentLayout];
     
@@ -659,49 +670,20 @@ function renderCharacterGrid() {
           }
         });
         
-        container.appendChild(rowDiv);
+        lettersSection.appendChild(rowDiv);
       });
     } else {
-      // Default: render all letters in a single flow
+      // Default: render all letters in a grid
+      const lettersGrid = document.createElement('div');
+      lettersGrid.className = 'keyboard-grid-inner';
       letters.forEach(item => {
         const displayChar = isUppercase ? item.upperChar : item.char;
-        container.appendChild(createKey(item, displayChar));
+        lettersGrid.appendChild(createKey(item, displayChar));
       });
+      lettersSection.appendChild(lettersGrid);
     }
-  }
-  
-  // Add separator and digits
-  if (digits.length > 0 && letters.length > 0) {
-    const sep = document.createElement('div');
-    sep.className = 'keyboard-separator';
-    container.appendChild(sep);
-  }
-  
-  if (digits.length > 0) {
-    digits.forEach(item => {
-      container.appendChild(createKey(item, item.char));
-    });
-  }
-  
-  // Add separator and symbols
-  if (symbols.length > 0 && (letters.length > 0 || digits.length > 0)) {
-    const sep = document.createElement('div');
-    sep.className = 'keyboard-separator';
-    container.appendChild(sep);
-  }
-  
-  if (symbols.length > 0) {
-    symbols.forEach(item => {
-      container.appendChild(createKey(item, item.char));
-    });
-  }
-  
-  // Add space key for language pages
-  if (letters.length > 0) {
-    const sep = document.createElement('div');
-    sep.className = 'keyboard-separator';
-    container.appendChild(sep);
     
+    // Add space key at the bottom of letters section
     const spaceBtn = document.createElement('button');
     spaceBtn.className = 'keyboard-key keyboard-space-key';
     spaceBtn.dataset.char = ' ';
@@ -713,8 +695,43 @@ function renderCharacterGrid() {
     spaceLabel.textContent = '␣';
     spaceBtn.appendChild(spaceLabel);
     
-    container.appendChild(spaceBtn);
+    lettersSection.appendChild(spaceBtn);
+    topRow.appendChild(lettersSection);
   }
+  
+  // Add digits section
+  if (digits.length > 0) {
+    const digitsSection = document.createElement('div');
+    digitsSection.className = 'keyboard-digits-section';
+    
+    const digitsGrid = document.createElement('div');
+    digitsGrid.className = 'keyboard-grid-inner';
+    digits.forEach(item => {
+      digitsGrid.appendChild(createKey(item, item.char));
+    });
+    digitsSection.appendChild(digitsGrid);
+    
+    topRow.appendChild(digitsSection);
+  }
+  
+  sectionsWrapper.appendChild(topRow);
+  
+  // Bottom row: symbols
+  if (symbols.length > 0) {
+    const symbolsSection = document.createElement('div');
+    symbolsSection.className = 'keyboard-symbols-section';
+    
+    const symbolsGrid = document.createElement('div');
+    symbolsGrid.className = 'keyboard-grid-inner';
+    symbols.forEach(item => {
+      symbolsGrid.appendChild(createKey(item, item.char));
+    });
+    symbolsSection.appendChild(symbolsGrid);
+    
+    sectionsWrapper.appendChild(symbolsSection);
+  }
+  
+  container.appendChild(sectionsWrapper);
   
   if (truncated) {
     const truncMsg = document.createElement('div');
@@ -1037,8 +1054,10 @@ function updateLayoutOptions() {
   // If current layout is Latin-only and block is not Latin, switch to alphabetic
   if (!isLatin && latinOnlyLayouts.includes(state.currentLayout)) {
     state.currentLayout = 'alphabetic';
-    select.value = 'alphabetic';
   }
+  
+  // Sync select value with current layout state
+  select.value = state.currentLayout;
 }
 
 function selectBlock(blockName) {
@@ -1562,6 +1581,11 @@ function showUnicodeInfoPopup(keyBtn) {
   const charDisplay = document.createElement('div');
   charDisplay.className = 'unicode-info-char';
   charDisplay.textContent = char;
+  charDisplay.title = 'Click to insert';
+  charDisplay.addEventListener('click', () => {
+    addToOutput(char, isLetter(char));
+    hideVariantsPopup();
+  });
   infoSection.appendChild(charDisplay);
   
   const details = document.createElement('div');
@@ -1642,6 +1666,11 @@ function showUnicodeInfoPopupForChar(char) {
   const charDisplay = document.createElement('div');
   charDisplay.className = 'unicode-info-char';
   charDisplay.textContent = char;
+  charDisplay.title = 'Click to insert';
+  charDisplay.addEventListener('click', () => {
+    addToOutput(char, isLetter(char));
+    hideVariantsPopup();
+  });
   infoSection.appendChild(charDisplay);
   
   const details = document.createElement('div');

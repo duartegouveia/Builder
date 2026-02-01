@@ -3219,15 +3219,52 @@ input[type="number"] {
 }
 
 .keyboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
-  gap: 4px;
+  display: block;
   padding: var(--space-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--slate-100);
   max-height: 400px;
   overflow-y: auto;
+}
+
+/* Sections layout for side-by-side panels */
+.keyboard-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.keyboard-top-row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.keyboard-letters-section {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.keyboard-digits-section {
+  flex: 0 0 auto;
+  min-width: 100px;
+}
+
+.keyboard-symbols-section {
+  width: 100%;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.keyboard-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  gap: 4px;
 }
 
 /* Row-based layout for QWERTY etc */
@@ -3383,6 +3420,12 @@ input[type="number"] {
   background: var(--slate-100);
   border-radius: var(--radius-sm);
   padding: var(--space-2);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.unicode-info-char:hover {
+  background: var(--primary-100);
 }
 
 .unicode-info-details {
@@ -3835,9 +3878,43 @@ input[type="number"] {
   max-height: 150px;
 }
 
-.keyboard-position-left .keyboard-grid,
-.keyboard-position-right .keyboard-grid {
-  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+.keyboard-position-left .keyboard-grid-inner,
+.keyboard-position-right .keyboard-grid-inner {
+  grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+}
+
+.keyboard-position-left .keyboard-key,
+.keyboard-position-right .keyboard-key {
+  min-height: 40px;
+  padding: 2px;
+}
+
+.keyboard-position-left .keyboard-row .keyboard-key,
+.keyboard-position-right .keyboard-row .keyboard-key {
+  flex: 0 0 32px;
+  min-width: 32px;
+  max-width: 40px;
+}
+
+.keyboard-position-left .key-char,
+.keyboard-position-right .key-char {
+  font-size: 16px;
+}
+
+.keyboard-position-left .keyboard-top-row,
+.keyboard-position-right .keyboard-top-row {
+  flex-direction: column;
+}
+
+.keyboard-position-left .keyboard-letters-section,
+.keyboard-position-right .keyboard-letters-section {
+  min-width: auto;
+}
+
+.keyboard-position-left .keyboard-digits-section,
+.keyboard-position-right .keyboard-digits-section {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
 }
 
 /* Position: Fullscreen */
