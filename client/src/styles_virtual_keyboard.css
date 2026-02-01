@@ -28,9 +28,14 @@
 /* Autocomplete suggestions */
 .keyboard-autocomplete {
   display: none;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--space-1);
   padding: var(--space-1) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  scrollbar-width: thin;
 }
 
 .autocomplete-suggestion {
