@@ -1019,6 +1019,7 @@ function attachEventListeners() {
     
     const keyBtn = e.target.closest('.keyboard-key');
     if (keyBtn) {
+      console.log('[Click] keyboard-key detected, char:', keyBtn.dataset.char);
       // Skip if this was a long-press
       if (state.longPressTriggered) {
         state.longPressTriggered = false;
