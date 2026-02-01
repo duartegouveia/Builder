@@ -3081,6 +3081,17 @@ input[type="number"] {
   background: var(--slate-100);
 }
 
+.hierarchy-recent-btn.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+.hierarchy-recent-btn.active:hover {
+  background: var(--primary);
+  opacity: 0.9;
+}
+
 .hierarchy-tree {
   font-size: var(--text-sm);
 }

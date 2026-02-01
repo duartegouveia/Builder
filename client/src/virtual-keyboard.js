@@ -175,12 +175,12 @@ function renderKeyboard() {
         </div>
         
         <div class="keyboard-nav-section">
-          <div class="keyboard-recent" id="keyboard-recent"></div>
         </div>
         
         <div class="keyboard-controls">
           <div class="keyboard-hierarchy" id="keyboard-hierarchy"></div>
           <div class="keyboard-controls-right">
+            <button id="hierarchy-expand-btn" class="btn btn-sm btn-outline hierarchy-expand-btn" title="Browse all languages">☰</button>
             <div class="keyboard-shift-control">
               <button id="shift-button" class="btn btn-outline shift-btn" title="Shift: minúscula / maiúscula / maiúscula presa">
                 <span id="shift-icon">⇧</span>
@@ -219,7 +219,6 @@ function renderKeyboard() {
   renderOutputField();
   renderHierarchy();
   renderCompositionArea();
-  renderRecentBlocks();
   updateLayoutOptions();
   renderCharacterGrid();
   updateEnterButtonVisibility();
@@ -265,40 +264,19 @@ function renderHierarchy() {
   container.innerHTML = '';
   
   if (state.hierarchyCollapsed) {
-    // Compact mode: show current block and recent blocks in a horizontal line
+    // Compact mode: show recent blocks with current highlighted (Browse button is in controls-right)
     const compactNav = document.createElement('div');
     compactNav.className = 'hierarchy-compact';
     
-    // Button to expand hierarchy
-    const expandBtn = document.createElement('button');
-    expandBtn.className = 'btn btn-sm btn-outline hierarchy-expand-btn';
-    expandBtn.id = 'hierarchy-expand-btn';
-    expandBtn.title = 'Show all languages';
-    expandBtn.textContent = '☰ Browse';
-    compactNav.appendChild(expandBtn);
-    
-    // Current block label
-    const currentLabel = document.createElement('span');
-    currentLabel.className = 'hierarchy-current';
-    currentLabel.textContent = state.currentBlock;
-    compactNav.appendChild(currentLabel);
-    
-    // Recent blocks (excluding current)
-    const recentFiltered = state.recentBlocks.filter(b => b !== state.currentBlock);
-    if (recentFiltered.length > 0) {
-      const recentContainer = document.createElement('div');
-      recentContainer.className = 'hierarchy-recent-compact';
-      
-      recentFiltered.forEach(block => {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-sm btn-ghost hierarchy-recent-btn';
-        btn.dataset.block = block;
-        btn.textContent = block;
-        recentContainer.appendChild(btn);
-      });
-      
-      compactNav.appendChild(recentContainer);
-    }
+    // Show all recent blocks, with CSS highlighting the current one
+    state.recentBlocks.forEach(block => {
+      const btn = document.createElement('button');
+      const isActive = block === state.currentBlock;
+      btn.className = 'btn btn-sm hierarchy-recent-btn' + (isActive ? ' active' : '');
+      btn.dataset.block = block;
+      btn.textContent = block;
+      compactNav.appendChild(btn);
+    });
     
     container.appendChild(compactNav);
   } else {
@@ -846,9 +824,11 @@ function attachEventListeners() {
     }
   });
   
-  // Long press for Unicode info (all characters) and skin tones
+  // Long press for Unicode info (all characters, including variants) and skin tones
   container.addEventListener('mousedown', (e) => {
     const keyBtn = e.target.closest('.keyboard-key');
+    const variantBtn = e.target.closest('.variant-key');
+    
     if (keyBtn) {
       const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
       state.longPressTimer = setTimeout(() => {
@@ -857,6 +837,11 @@ function attachEventListeners() {
         } else {
           showUnicodeInfoPopup(keyBtn);
         }
+      }, state.longPressDelay);
+    } else if (variantBtn) {
+      // Long-press on variant key shows info for that variant
+      state.longPressTimer = setTimeout(() => {
+        showUnicodeInfoPopupForChar(variantBtn.dataset.char);
       }, state.longPressDelay);
     }
   });
@@ -875,9 +860,11 @@ function attachEventListeners() {
     }
   });
   
-  // Touch support for long press (Unicode info and skin tones)
+  // Touch support for long press (Unicode info, variants, and skin tones)
   container.addEventListener('touchstart', (e) => {
     const keyBtn = e.target.closest('.keyboard-key');
+    const variantBtn = e.target.closest('.variant-key');
+    
     if (keyBtn) {
       const hasSkinTones = keyBtn.classList.contains('has-skin-tones');
       state.longPressTimer = setTimeout(() => {
@@ -887,6 +874,11 @@ function attachEventListeners() {
         } else {
           showUnicodeInfoPopup(keyBtn);
         }
+      }, state.longPressDelay);
+    } else if (variantBtn) {
+      state.longPressTimer = setTimeout(() => {
+        e.preventDefault();
+        showUnicodeInfoPopupForChar(variantBtn.dataset.char);
       }, state.longPressDelay);
     }
   });
@@ -1042,14 +1034,13 @@ function selectBlock(blockName) {
   
   renderHierarchy();
   renderCompositionArea();
-  renderRecentBlocks();
   updateLayoutOptions();
   renderCharacterGrid();
 }
 
 function addToOutput(char, isLetterChar = false) {
-  // Use external field if active, otherwise use internal output
-  const targetEl = state.activeExternalField || document.getElementById('keyboard-output');
+  // Always use the internal keyboard output field
+  const targetEl = document.getElementById('keyboard-output');
   
   if (targetEl) {
     const start = targetEl.selectionStart;
@@ -1057,10 +1048,7 @@ function addToOutput(char, isLetterChar = false) {
     const before = targetEl.value.substring(0, start);
     const after = targetEl.value.substring(end);
     targetEl.value = before + char + after;
-    
-    if (!state.activeExternalField) {
-      state.output = targetEl.value;
-    }
+    state.output = targetEl.value;
     
     const newPos = start + char.length;
     targetEl.setSelectionRange(newPos, newPos);
@@ -1078,7 +1066,8 @@ function addToOutput(char, isLetterChar = false) {
 }
 
 function handleBackspace() {
-  const targetEl = state.activeExternalField || document.getElementById('keyboard-output');
+  // Always use the internal keyboard output field
+  const targetEl = document.getElementById('keyboard-output');
   if (!targetEl) return;
   
   const start = targetEl.selectionStart;
@@ -1095,14 +1084,13 @@ function handleBackspace() {
     targetEl.value = before + after;
     targetEl.setSelectionRange(start - 1, start - 1);
   }
-  if (!state.activeExternalField) {
-    state.output = targetEl.value;
-  }
+  state.output = targetEl.value;
   targetEl.focus();
 }
 
 function handleDelete() {
-  const targetEl = state.activeExternalField || document.getElementById('keyboard-output');
+  // Always use the internal keyboard output field
+  const targetEl = document.getElementById('keyboard-output');
   if (!targetEl) return;
   
   const start = targetEl.selectionStart;
@@ -1119,15 +1107,13 @@ function handleDelete() {
     targetEl.value = before + after;
     targetEl.setSelectionRange(start, start);
   }
-  if (!state.activeExternalField) {
-    state.output = targetEl.value;
-  }
+  state.output = targetEl.value;
   targetEl.focus();
 }
 
 function handleEnter() {
-  // Only allow Enter for multiline fields (textareas)
-  if (state.isMultilineField || !state.activeExternalField) {
+  // Allow Enter for multiline output (textarea) - the output adapts to external field type
+  if (state.isMultilineField) {
     addToOutput('\n');
   }
 }
@@ -1369,36 +1355,7 @@ function showSkinTonePopup(keyBtn) {
   
   // Position popup near the key using fixed positioning
   const rect = keyBtn.getBoundingClientRect();
-  
-  popup.style.position = 'fixed';
-  popup.style.display = 'block';
-  
-  // Try to position below the key first
-  let top = rect.bottom + 5;
-  let left = rect.left;
-  
-  // Get popup dimensions after it's visible
-  const popupRect = popup.getBoundingClientRect();
-  
-  // Ensure popup stays within viewport horizontally
-  if (left + popupRect.width > window.innerWidth - 10) {
-    left = window.innerWidth - popupRect.width - 10;
-  }
-  if (left < 10) {
-    left = 10;
-  }
-  
-  // Ensure popup stays within viewport vertically
-  // If not enough space below, position above the key
-  if (top + popupRect.height > window.innerHeight - 10) {
-    top = rect.top - popupRect.height - 5;
-  }
-  if (top < 10) {
-    top = 10;
-  }
-  
-  popup.style.left = `${left}px`;
-  popup.style.top = `${top}px`;
+  positionPopupNearElement(popup, rect);
 }
 
 // External field tracking
@@ -1414,7 +1371,13 @@ function setupExternalFieldTracking() {
   
   document.addEventListener('focusout', (e) => {
     // Only clear if focus is leaving to something that's not a valid field or keyboard
+    // Don't clear if keyboard is visible - user is actively using it
     setTimeout(() => {
+      if (state.keyboardVisible) {
+        // Keyboard is open - don't clear the external field reference
+        return;
+      }
+      
       const activeEl = document.activeElement;
       const isKeyboardElement = activeEl && activeEl.closest('#keyboard-container');
       const isValidField = isValidTextField(activeEl) && !activeEl.closest('#keyboard-container');
@@ -1602,7 +1565,90 @@ function showUnicodeInfoPopup(keyBtn) {
   
   // Position popup near the key using fixed positioning
   const rect = keyBtn.getBoundingClientRect();
+  positionPopupNearElement(popup, rect);
+}
+
+// Show Unicode info popup for a character (used for variants long-press)
+function showUnicodeInfoPopupForChar(char) {
+  const code = char.codePointAt(0);
+  const variants = accentedVariants[char];
   
+  const popup = document.getElementById('variants-popup');
+  if (!popup) return;
+  
+  // Keep current popup position (update content in place)
+  const currentTop = popup.style.top;
+  const currentLeft = popup.style.left;
+  
+  popup.innerHTML = '';
+  
+  // Unicode info section
+  const infoSection = document.createElement('div');
+  infoSection.className = 'unicode-info-section';
+  
+  const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
+  const charName = getUnicodeName(code);
+  
+  const charDisplay = document.createElement('div');
+  charDisplay.className = 'unicode-info-char';
+  charDisplay.textContent = char;
+  infoSection.appendChild(charDisplay);
+  
+  const details = document.createElement('div');
+  details.className = 'unicode-info-details';
+  details.innerHTML = `
+    <div class="unicode-info-row"><span class="info-label">U+</span><span class="info-value">${hexCode}</span></div>
+    <div class="unicode-info-row"><span class="info-label">Hex:</span><span class="info-value">0x${hexCode}</span></div>
+    <div class="unicode-info-row"><span class="info-label">Dec:</span><span class="info-value">${code}</span></div>
+    <div class="unicode-info-row unicode-info-name"><span class="info-value">${charName}</span></div>
+  `;
+  infoSection.appendChild(details);
+  
+  popup.appendChild(infoSection);
+  
+  // Variants section (if any)
+  if (variants && variants.length > 0) {
+    const variantsSection = document.createElement('div');
+    variantsSection.className = 'variants-section';
+    
+    const variantsTitle = document.createElement('div');
+    variantsTitle.className = 'variants-title';
+    variantsTitle.textContent = 'Variants';
+    variantsSection.appendChild(variantsTitle);
+    
+    const grid = document.createElement('div');
+    grid.className = 'variants-grid';
+    
+    variants.forEach(v => {
+      const vCode = v.codePointAt(0);
+      const vHex = vCode.toString(16).toUpperCase().padStart(4, '0');
+      
+      const btn = document.createElement('button');
+      btn.className = 'variant-key';
+      btn.dataset.char = v;
+      btn.title = `U+${vHex}`;
+      
+      const charSpan = document.createElement('span');
+      charSpan.className = 'key-char';
+      charSpan.textContent = v;
+      btn.appendChild(charSpan);
+      
+      grid.appendChild(btn);
+    });
+    
+    variantsSection.appendChild(grid);
+    popup.appendChild(variantsSection);
+  }
+  
+  // Keep popup at same position
+  popup.style.position = 'fixed';
+  popup.style.display = 'block';
+  popup.style.top = currentTop;
+  popup.style.left = currentLeft;
+}
+
+// Helper function to position popup near an element
+function positionPopupNearElement(popup, rect) {
   popup.style.position = 'fixed';
   popup.style.display = 'block';
   
