@@ -1383,9 +1383,11 @@ function getLastWord(text, cursorPos) {
 
 // Get autocomplete suggestions for the current word
 function getSuggestions(prefix, maxCount = 5) {
+  console.log('[getSuggestions] prefix:', prefix, 'lang:', state.dictionaryLanguage);
   if (!prefix || prefix.length < 1) return [];
   
   const dict = dictionaries[state.dictionaryLanguage];
+  console.log('[getSuggestions] dict exists:', !!dict, 'dict length:', dict ? dict.length : 0);
   if (!dict) return [];
   
   const lowerPrefix = prefix.toLowerCase();
@@ -1398,6 +1400,7 @@ function getSuggestions(prefix, maxCount = 5) {
     }
   }
   
+  console.log('[getSuggestions] found:', suggestions);
   return suggestions;
 }
 
