@@ -458,7 +458,7 @@ function buildHierarchyDOM(parent, obj, path) {
 }
 
 function formatLabel(key) {
-  return key.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+  return key.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 e $2');
 }
 
 function isPathExpanded(path) {
@@ -1793,16 +1793,80 @@ function getUnicodeName(codePoint) {
     return 'CYRILLIC ' + (isCapital ? 'CAPITAL' : 'SMALL') + ' LETTER';
   }
   
-  // Default: show block name with character type
+  // Hebrew letters
+  if (codePoint >= 0x05D0 && codePoint <= 0x05EA) {
+    const hebrewNames = {
+      0x05D0: 'ALEF', 0x05D1: 'BET', 0x05D2: 'GIMEL', 0x05D3: 'DALET',
+      0x05D4: 'HE', 0x05D5: 'VAV', 0x05D6: 'ZAYIN', 0x05D7: 'HET',
+      0x05D8: 'TET', 0x05D9: 'YOD', 0x05DA: 'FINAL KAF', 0x05DB: 'KAF',
+      0x05DC: 'LAMED', 0x05DD: 'FINAL MEM', 0x05DE: 'MEM', 0x05DF: 'FINAL NUN',
+      0x05E0: 'NUN', 0x05E1: 'SAMEKH', 0x05E2: 'AYIN', 0x05E3: 'FINAL PE',
+      0x05E4: 'PE', 0x05E5: 'FINAL TSADI', 0x05E6: 'TSADI', 0x05E7: 'QOF',
+      0x05E8: 'RESH', 0x05E9: 'SHIN', 0x05EA: 'TAV'
+    };
+    if (hebrewNames[codePoint]) return 'HEBREW LETTER ' + hebrewNames[codePoint];
+  }
+  
+  // Arabic letters (basic)
+  if (codePoint >= 0x0621 && codePoint <= 0x064A) {
+    const translit = getTransliteration(state.currentBlock, codePoint);
+    if (translit) return 'ARABIC LETTER ' + translit.toUpperCase();
+  }
+  
+  // Hiragana
+  if (codePoint >= 0x3041 && codePoint <= 0x3096) {
+    const translit = getTransliteration(state.currentBlock, codePoint);
+    if (translit) return 'HIRAGANA LETTER ' + translit.toUpperCase();
+    return 'HIRAGANA LETTER';
+  }
+  
+  // Katakana
+  if (codePoint >= 0x30A1 && codePoint <= 0x30FA) {
+    const translit = getTransliteration(state.currentBlock, codePoint);
+    if (translit) return 'KATAKANA LETTER ' + translit.toUpperCase();
+    return 'KATAKANA LETTER';
+  }
+  
+  // Generate descriptive name based on character properties
+  const char = String.fromCodePoint(codePoint);
+  const hexCode = codePoint.toString(16).toUpperCase().padStart(4, '0');
+  
+  // Check if it's a letter
+  if (/\p{Letter}/u.test(char)) {
+    const blockName = state.currentBlock ? state.currentBlock.toUpperCase() : 'UNICODE';
+    return blockName + ' LETTER (U+' + hexCode + ')';
+  }
+  
+  // Check if it's a number
+  if (/\p{Number}/u.test(char)) {
+    const blockName = state.currentBlock ? state.currentBlock.toUpperCase() : 'UNICODE';
+    return blockName + ' DIGIT (U+' + hexCode + ')';
+  }
+  
+  // Check if it's punctuation
+  if (/\p{Punctuation}/u.test(char)) {
+    const blockName = state.currentBlock ? state.currentBlock.toUpperCase() : 'UNICODE';
+    return blockName + ' PUNCTUATION (U+' + hexCode + ')';
+  }
+  
+  // Check if it's a symbol
+  if (/\p{Symbol}/u.test(char)) {
+    const blockName = state.currentBlock ? state.currentBlock.toUpperCase() : 'UNICODE';
+    return blockName + ' SYMBOL (U+' + hexCode + ')';
+  }
+  
+  // Default: show block name with code point
   const blockName = state.currentBlock ? state.currentBlock.toUpperCase() : 'UNICODE';
-  return blockName + ' CHARACTER';
+  return blockName + ' (U+' + hexCode + ')';
 }
 
 // Show Unicode info popup on long-press
 function showUnicodeInfoPopup(keyBtn) {
   const char = keyBtn.dataset.char;
-  const code = parseInt(keyBtn.dataset.code);
-  const variants = accentedVariants[char];
+  // Use actual displayed character's code point, not stored base code
+  const code = char.codePointAt(0);
+  const baseChar = keyBtn.dataset.baseChar || char;
+  const variants = accentedVariants[baseChar];
   
   // Store the original character that opened this popup
   state.popupOriginalChar = char;

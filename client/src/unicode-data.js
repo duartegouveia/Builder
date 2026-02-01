@@ -457,67 +457,66 @@ export const unicodeBlocks = {
 // Hierarchy for navigation
 export const pageHierarchy = {
   "Linguas": {
-    "Continentes": {
-      "Europa": {
-        "Alfabeticas": {
-          "Latin": ["Basic Latin", "Latin-1 Supplement", "Latin Extended-A", "Latin Extended-B", "Latin Extended-C", "Latin Extended-D", "Latin Extended-E", "Latin Extended-F", "Latin Extended-G"],
-          "Greek": ["Greek and Coptic", "Ancient Greek Numbers"],
-          "Cyrillic": ["Cyrillic", "Cyrillic Supplement", "Cyrillic Extended-A", "Cyrillic Extended-B", "Cyrillic Extended-C"],
-          "Armenian": ["Armenian"],
-          "Georgian": ["Georgian", "Georgian Supplement", "Georgian Extended"]
-        }
-      },
-      "Africa": {
-        "Alfabeticas": {
-          "Ethiopic": ["Ethiopic", "Ethiopic Supplement", "Ethiopic Extended", "Ethiopic Extended-A"],
-          "Nko": ["N'Ko"],
-          "Adlam": ["Adlam"],
-          "Tifinagh": ["Tifinagh"]
-        }
-      },
-      "Asia": {
-        "Alfabeticas": {
-          "Hebrew": ["Hebrew"],
-          "Arabic": ["Arabic", "Arabic Supplement", "Arabic Extended-A", "Arabic Extended-B", "Arabic Presentation Forms-A", "Arabic Presentation Forms-B"],
-          "Syriac": ["Syriac", "Syriac Supplement"],
-          "Semiticas_antigas": ["Phoenician", "Ugaritic", "Old South Arabian", "Old North Arabian"],
-          "Iranicas_antigas": ["Old Persian"]
-        },
-        "Abugidas": {
-          "Indic_modernas": ["Devanagari", "Devanagari Extended", "Bengali", "Gurmukhi", "Gujarati", "Oriya", "Tamil", "Tamil Supplement", "Telugu", "Kannada", "Malayalam", "Sinhala"],
-          "Indic_historicas": ["Brahmi", "Grantha", "Sharada", "Siddham", "Modi", "Kaithi", "Mahajani", "Khojki", "Multani"]
-        },
-        "Silabicas": {
-          "Japanese": ["Hiragana", "Katakana", "Katakana Phonetic Extensions"],
-          "Korean": ["Hangul Jamo", "Hangul Jamo Extended-A", "Hangul Jamo Extended-B", "Hangul Syllables", "Hangul Compatibility Jamo"],
-          "Tibetan": ["Tibetan"],
-          "Myanmar": ["Myanmar", "Myanmar Extended-A", "Myanmar Extended-B"],
-          "Khmer": ["Khmer", "Khmer Symbols"],
-          "Thai": ["Thai"],
-          "Lao": ["Lao"],
-          "Tai": ["Tai Le", "Tai Tham", "Tai Viet"],
-          "Mongolian": ["Mongolian", "Mongolian Supplement"],
-          "Phags_pa": ["Phags-pa"]
-        },
-        "Logograficas": {
-          "Cjk": [
-            "CJK Unified Ideographs", "CJK Unified Ideographs Extension A", "CJK Unified Ideographs Extension B",
-            "CJK Unified Ideographs Extension C", "CJK Unified Ideographs Extension D", "CJK Unified Ideographs Extension E",
-            "CJK Unified Ideographs Extension F", "CJK Unified Ideographs Extension G", "CJK Unified Ideographs Extension H",
-            "CJK Unified Ideographs Extension I", "CJK Unified Ideographs Extension J",
-            "CJK Symbols and Punctuation", "CJK Compatibility", "CJK Compatibility Forms",
-            "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement"
-          ]
-        }
-      },
-      "Americas": {
-        "Silabicas": {
-          "Cherokee": ["Cherokee", "Cherokee Supplement"],
-          "Canadian_aboriginal": ["Unified Canadian Aboriginal Syllabics", "Unified Canadian Aboriginal Syllabics Extended"]
-        }
+    "Europa": {
+      "Alfabeticas": {
+        "Latin": ["Basic Latin", "Latin-1 Supplement", "Latin Extended-A", "Latin Extended-B", "Latin Extended-C", "Latin Extended-D", "Latin Extended-E", "Latin Extended-F", "Latin Extended-G"],
+        "Greek": ["Greek and Coptic", "Ancient Greek Numbers"],
+        "Cyrillic": ["Cyrillic", "Cyrillic Supplement", "Cyrillic Extended-A", "Cyrillic Extended-B", "Cyrillic Extended-C"],
+        "Armenian": ["Armenian"],
+        "Georgian": ["Georgian", "Georgian Supplement", "Georgian Extended"]
       }
     },
-    "Blocos": {
+    "Africa": {
+      "Alfabeticas": {
+        "Ethiopic": ["Ethiopic", "Ethiopic Supplement", "Ethiopic Extended", "Ethiopic Extended-A"],
+        "Nko": ["N'Ko"],
+        "Adlam": ["Adlam"],
+        "Tifinagh": ["Tifinagh"]
+      }
+    },
+    "Asia": {
+      "Alfabeticas": {
+        "Hebrew": ["Hebrew"],
+        "Arabic": ["Arabic", "Arabic Supplement", "Arabic Extended-A", "Arabic Extended-B", "Arabic Presentation Forms-A", "Arabic Presentation Forms-B"],
+        "Syriac": ["Syriac", "Syriac Supplement"],
+        "Semiticas_antigas": ["Phoenician", "Ugaritic", "Old South Arabian", "Old North Arabian"],
+        "Iranicas_antigas": ["Old Persian"]
+      },
+      "Abugidas": {
+        "Indic_modernas": ["Devanagari", "Devanagari Extended", "Bengali", "Gurmukhi", "Gujarati", "Oriya", "Tamil", "Tamil Supplement", "Telugu", "Kannada", "Malayalam", "Sinhala"],
+        "Indic_historicas": ["Brahmi", "Grantha", "Sharada", "Siddham", "Modi", "Kaithi", "Mahajani", "Khojki", "Multani"]
+      },
+      "Silabicas": {
+        "Japanese": ["Hiragana", "Katakana", "Katakana Phonetic Extensions"],
+        "Korean": ["Hangul Jamo", "Hangul Jamo Extended-A", "Hangul Jamo Extended-B", "Hangul Syllables", "Hangul Compatibility Jamo"],
+        "Tibetan": ["Tibetan"],
+        "Myanmar": ["Myanmar", "Myanmar Extended-A", "Myanmar Extended-B"],
+        "Khmer": ["Khmer", "Khmer Symbols"],
+        "Thai": ["Thai"],
+        "Lao": ["Lao"],
+        "Tai": ["Tai Le", "Tai Tham", "Tai Viet"],
+        "Mongolian": ["Mongolian", "Mongolian Supplement"],
+        "Phags_pa": ["Phags-pa"]
+      },
+      "Logograficas": {
+        "Cjk": [
+          "CJK Unified Ideographs", "CJK Unified Ideographs Extension A", "CJK Unified Ideographs Extension B",
+          "CJK Unified Ideographs Extension C", "CJK Unified Ideographs Extension D", "CJK Unified Ideographs Extension E",
+          "CJK Unified Ideographs Extension F", "CJK Unified Ideographs Extension G", "CJK Unified Ideographs Extension H",
+          "CJK Unified Ideographs Extension I", "CJK Unified Ideographs Extension J",
+          "CJK Symbols and Punctuation", "CJK Compatibility", "CJK Compatibility Forms",
+          "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement"
+        ]
+      }
+    },
+    "Americas": {
+      "Silabicas": {
+        "Cherokee": ["Cherokee", "Cherokee Supplement"],
+        "Canadian_aboriginal": ["Unified Canadian Aboriginal Syllabics", "Unified Canadian Aboriginal Syllabics Extended"]
+      }
+    }
+  },
+  "Blocos": {
       "DiacriticosEFonetica": [
         "Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement",
         "Combining Diacritical Marks for Symbols", "IPA Extensions", "Modifier Tone Letters",
@@ -609,7 +608,6 @@ export const pageHierarchy = {
         ]
       }
     }
-  }
 };
 
 // Latin transliterations for non-Latin scripts

@@ -157,27 +157,30 @@
 .keyboard-blocks-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
-  padding: var(--space-1) 0;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
 }
 
 .keyboard-blocks-bar .recent-block {
-  font-size: var(--text-xs);
-  padding: 2px 6px;
+  font-size: 11px;
+  padding: 1px 4px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: none;
   color: var(--muted-foreground);
 }
 
 .keyboard-blocks-bar .recent-block:hover {
-  background: var(--slate-100);
+  background: transparent;
   color: var(--foreground);
+  text-decoration: underline;
 }
 
 .keyboard-blocks-bar .recent-block.active {
-  background: var(--primary-100);
-  border-color: var(--primary-300);
-  color: var(--primary-700);
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-weight: 600;
 }
 
 /* Compact hierarchy navigation (after block selection) */
@@ -232,7 +235,7 @@
   position: fixed;
   z-index: 100002;
   width: 320px;
-  max-height: 400px;
+  max-height: 70vh;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -385,13 +388,19 @@
 
 .keyboard-digits-section {
   flex: 0 0 auto;
-  min-width: 100px;
 }
 
 .keyboard-digits-section .keyboard-grid-inner {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, 42px);
   gap: 4px;
+}
+
+.keyboard-digits-section .keyboard-key {
+  width: 42px;
+  min-width: 42px;
+  max-width: 42px;
+  min-height: 48px;
 }
 
 .keyboard-symbols-section {
@@ -706,9 +715,9 @@
 }
 
 .shift-btn {
-  width: 48px;
-  height: 48px;
-  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
   padding: 0;
   display: flex;
   align-items: center;
