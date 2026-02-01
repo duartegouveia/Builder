@@ -13,10 +13,11 @@ const state = {
   hierarchyCollapsed: false, // true when block is selected, shows compact nav
   compositionInput: '', // For CJK romanization input
   keyboardVisible: false, // Whether keyboard panel is visible (hidden by default)
-  keyboardPosition: 'bottom', // 'bottom', 'top', 'left', 'right'
+  keyboardPosition: 'bottom', // 'bottom', 'top', 'left', 'right', 'fullscreen'
   floatingButtonPos: { x: null, y: null }, // Custom position for floating button
   activeExternalField: null, // Reference to external input/textarea being edited
-  isMultilineField: false // true for textarea, false for input[type=text]
+  isMultilineField: false, // true for textarea, false for input[type=text]
+  externalCursorPos: 0 // Cursor position from external field
 };
 
 // Unicode character names cache
@@ -152,6 +153,7 @@ function renderKeyboard() {
           <button id="pos-bottom" class="btn btn-xs btn-outline" title="Bottom">↓</button>
           <button id="pos-left" class="btn btn-xs btn-outline" title="Left 1/3">←</button>
           <button id="pos-right" class="btn btn-xs btn-outline" title="Right 1/3">→</button>
+          <button id="pos-fullscreen" class="btn btn-xs btn-outline" title="Fullscreen">⛶</button>
           <button id="keyboard-close-btn" class="btn btn-xs btn-outline" title="Close">✕</button>
         </div>
       </div>
@@ -160,7 +162,7 @@ function renderKeyboard() {
         <div class="keyboard-output-section">
           <label class="keyboard-label">Output</label>
           <div class="keyboard-output-container">
-            <textarea id="keyboard-output" class="keyboard-output" placeholder="Click characters to add them here..."></textarea>
+            <div id="keyboard-output-wrapper"></div>
             <div class="keyboard-output-actions">
               <button id="btn-backspace" class="btn btn-sm btn-outline" title="Backspace">⌫</button>
               <button id="btn-delete" class="btn btn-sm btn-outline" title="Delete">Del</button>
@@ -214,6 +216,7 @@ function renderKeyboard() {
     </div>
   `;
   
+  renderOutputField();
   renderHierarchy();
   renderCompositionArea();
   renderRecentBlocks();
@@ -221,10 +224,36 @@ function renderKeyboard() {
   updateEnterButtonVisibility();
   
   // Set initial active state for position button
-  const bottomBtn = document.getElementById('pos-bottom');
-  if (bottomBtn) {
-    bottomBtn.classList.remove('btn-outline');
-    bottomBtn.classList.add('btn-primary');
+  const activePos = state.keyboardPosition;
+  ['top', 'bottom', 'left', 'right', 'fullscreen'].forEach(pos => {
+    const btn = document.getElementById(`pos-${pos}`);
+    if (btn) {
+      btn.classList.toggle('btn-primary', pos === activePos);
+      btn.classList.toggle('btn-outline', pos !== activePos);
+    }
+  });
+}
+
+function renderOutputField() {
+  const wrapper = document.getElementById('keyboard-output-wrapper');
+  if (!wrapper) return;
+  
+  const isMultiline = state.isMultilineField;
+  const currentValue = state.output || '';
+  
+  if (isMultiline) {
+    wrapper.innerHTML = `<textarea id="keyboard-output" class="keyboard-output" placeholder="Click characters to add them here..."></textarea>`;
+  } else {
+    wrapper.innerHTML = `<input type="text" id="keyboard-output" class="keyboard-output keyboard-output-single" placeholder="Click characters to add them here...">`;
+  }
+  
+  const outputEl = document.getElementById('keyboard-output');
+  if (outputEl) {
+    outputEl.value = currentValue;
+    outputEl.setSelectionRange(state.externalCursorPos, state.externalCursorPos);
+    outputEl.addEventListener('input', (e) => {
+      state.output = e.target.value;
+    });
   }
 }
 
@@ -576,7 +605,7 @@ function renderCharacterGrid() {
     const hexCode = item.code.toString(16).toUpperCase().padStart(4, '0');
     
     const btn = document.createElement('button');
-    btn.className = 'keyboard-key';
+    btn.className = 'keyboard-key has-popup';
     if (hasVariants) btn.classList.add('has-variants');
     if (hasSkinTones) btn.classList.add('has-skin-tones');
     btn.dataset.char = displayChar;
@@ -595,13 +624,6 @@ function renderCharacterGrid() {
       translitSpan.className = 'key-translit';
       translitSpan.textContent = translit;
       btn.appendChild(translitSpan);
-    }
-    
-    if (hasVariants || hasSkinTones) {
-      const indicator = document.createElement('span');
-      indicator.className = 'key-indicator';
-      indicator.textContent = '•';
-      btn.appendChild(indicator);
     }
     
     return btn;
@@ -941,6 +963,7 @@ function attachEventListeners() {
   document.getElementById('pos-bottom')?.addEventListener('click', () => setKeyboardPosition('bottom'));
   document.getElementById('pos-left')?.addEventListener('click', () => setKeyboardPosition('left'));
   document.getElementById('pos-right')?.addEventListener('click', () => setKeyboardPosition('right'));
+  document.getElementById('pos-fullscreen')?.addEventListener('click', () => setKeyboardPosition('fullscreen'));
   
   // Make toggle button draggable
   setupToggleButtonDrag();
@@ -1070,17 +1093,32 @@ function handleEnd() {
   if (!outputEl) return;
   
   const text = outputEl.value;
-  if (!text) return;
+  const cursorPos = outputEl.selectionStart || 0;
   
-  navigator.clipboard.writeText(text).then(() => {
+  // Sync text and cursor back to external field
+  if (state.activeExternalField) {
+    state.activeExternalField.value = text;
+    state.activeExternalField.setSelectionRange(cursorPos, cursorPos);
+    state.activeExternalField.focus();
+    
     const btn = document.getElementById('btn-end');
     if (btn) {
       const original = btn.textContent;
-      btn.textContent = 'Sent!';
+      btn.textContent = 'Done!';
       setTimeout(() => { btn.textContent = original; }, 1500);
     }
-    clearOutput();
-  });
+  } else {
+    // No external field - copy to clipboard as fallback
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-end');
+      if (btn) {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      }
+      clearOutput();
+    });
+  }
 }
 
 function copyOutput() {
@@ -1103,6 +1141,13 @@ function setKeyboardVisible(visible) {
   const panel = document.getElementById('keyboard-panel');
   const toggleBtn = document.getElementById('keyboard-toggle-btn');
   
+  // Sync text and cursor from external field when opening
+  if (visible && state.activeExternalField) {
+    state.output = state.activeExternalField.value || '';
+    state.externalCursorPos = state.activeExternalField.selectionStart || 0;
+    renderOutputField();
+  }
+  
   if (panel) {
     panel.classList.toggle('keyboard-panel-hidden', !visible);
   }
@@ -1120,7 +1165,7 @@ function setKeyboardPosition(position) {
   }
   
   // Update active button state
-  ['top', 'bottom', 'left', 'right'].forEach(pos => {
+  ['top', 'bottom', 'left', 'right', 'fullscreen'].forEach(pos => {
     const btn = document.getElementById(`pos-${pos}`);
     if (btn) {
       btn.classList.toggle('btn-primary', pos === position);
@@ -1220,58 +1265,6 @@ function clearOutput() {
   const outputEl = document.getElementById('keyboard-output');
   if (outputEl) {
     outputEl.value = '';
-  }
-}
-
-function showVariantsPopup(keyBtn) {
-  const char = keyBtn.dataset.char;
-  const variants = accentedVariants[char];
-  if (!variants || variants.length === 0) return;
-  
-  const popup = document.getElementById('variants-popup');
-  if (!popup) return;
-  
-  popup.innerHTML = '';
-  
-  const title = document.createElement('div');
-  title.className = 'variants-title';
-  title.textContent = `Variants of "${char}"`;
-  popup.appendChild(title);
-  
-  const grid = document.createElement('div');
-  grid.className = 'variants-grid';
-  
-  variants.forEach(v => {
-    const code = v.codePointAt(0);
-    const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
-    
-    const btn = document.createElement('button');
-    btn.className = 'variant-key';
-    btn.dataset.char = v;
-    btn.title = `U+${hexCode}`;
-    
-    const charSpan = document.createElement('span');
-    charSpan.className = 'key-char';
-    charSpan.textContent = v;
-    btn.appendChild(charSpan);
-    
-    grid.appendChild(btn);
-  });
-  
-  popup.appendChild(grid);
-  
-  // Position popup near the key
-  const rect = keyBtn.getBoundingClientRect();
-  const containerRect = document.getElementById('keyboard-container').getBoundingClientRect();
-  
-  popup.style.display = 'block';
-  popup.style.left = `${rect.left - containerRect.left}px`;
-  popup.style.top = `${rect.bottom - containerRect.top + 5}px`;
-  
-  // Ensure popup stays within bounds
-  const popupRect = popup.getBoundingClientRect();
-  if (popupRect.right > containerRect.right) {
-    popup.style.left = `${containerRect.right - popupRect.width - containerRect.left}px`;
   }
 }
 
