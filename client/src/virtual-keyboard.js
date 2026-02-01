@@ -19,7 +19,8 @@ const state = {
   isMultilineField: false, // true for textarea, false for input[type=text]
   externalCursorPos: 0, // Cursor position from external field
   blockLayouts: { 'Basic Latin': 'qwerty' }, // Layout preferences per block
-  hasPhysicalKeyboard: true // Detected device type (desktop/laptop has keyboard)
+  hasPhysicalKeyboard: true, // Detected device type (desktop/laptop has keyboard)
+  popupOriginalChar: null // Original character that opened the variants popup
 };
 
 // Unicode character names cache
@@ -1338,6 +1339,8 @@ function hideVariantsPopup() {
   if (popup) {
     popup.style.display = 'none';
   }
+  // Clear the original character reference
+  state.popupOriginalChar = null;
 }
 
 function showSkinTonePopup(keyBtn) {
@@ -1541,6 +1544,9 @@ function showUnicodeInfoPopup(keyBtn) {
   const code = parseInt(keyBtn.dataset.code);
   const variants = accentedVariants[char];
   
+  // Store the original character that opened this popup
+  state.popupOriginalChar = char;
+  
   const popup = document.getElementById('variants-popup');
   if (!popup) return;
   
@@ -1610,20 +1616,23 @@ function showUnicodeInfoPopup(keyBtn) {
 }
 
 // Show Unicode info popup for a character (used for variants long-press)
+// When viewing a variant, show the original character's variants with original first
 function showUnicodeInfoPopupForChar(char) {
   const code = char.codePointAt(0);
-  const variants = accentedVariants[char];
+  
+  // Use the original character's variants, not the current variant's
+  const originalChar = state.popupOriginalChar || char;
+  const originalVariants = accentedVariants[originalChar] || [];
+  
+  // Build the list: original char first, then all variants (excluding current char)
+  const allChars = [originalChar, ...originalVariants.filter(v => v !== originalChar)];
   
   const popup = document.getElementById('variants-popup');
   if (!popup) return;
   
-  // Keep current popup position (update content in place)
-  const currentTop = popup.style.top;
-  const currentLeft = popup.style.left;
-  
   popup.innerHTML = '';
   
-  // Unicode info section
+  // Unicode info section for current character
   const infoSection = document.createElement('div');
   infoSection.className = 'unicode-info-section';
   
@@ -1647,8 +1656,8 @@ function showUnicodeInfoPopupForChar(char) {
   
   popup.appendChild(infoSection);
   
-  // Variants section (if any)
-  if (variants && variants.length > 0) {
+  // Variants section - always show if original had variants
+  if (allChars.length > 1) {
     const variantsSection = document.createElement('div');
     variantsSection.className = 'variants-section';
     
@@ -1660,7 +1669,10 @@ function showUnicodeInfoPopupForChar(char) {
     const grid = document.createElement('div');
     grid.className = 'variants-grid';
     
-    variants.forEach(v => {
+    allChars.forEach(v => {
+      // Skip the current character being displayed
+      if (v === char) return;
+      
       const vCode = v.codePointAt(0);
       const vHex = vCode.toString(16).toUpperCase().padStart(4, '0');
       
@@ -1681,11 +1693,28 @@ function showUnicodeInfoPopupForChar(char) {
     popup.appendChild(variantsSection);
   }
   
-  // Keep popup at same position
+  // Recalculate popup position after content change
   popup.style.position = 'fixed';
   popup.style.display = 'block';
-  popup.style.top = currentTop;
-  popup.style.left = currentLeft;
+  
+  // Get popup dimensions and recalculate position
+  const popupRect = popup.getBoundingClientRect();
+  let top = parseFloat(popup.style.top) || 100;
+  let left = parseFloat(popup.style.left) || 100;
+  
+  // Ensure popup stays within viewport
+  if (left + popupRect.width > window.innerWidth - 10) {
+    left = window.innerWidth - popupRect.width - 10;
+  }
+  if (left < 10) left = 10;
+  
+  if (top + popupRect.height > window.innerHeight - 10) {
+    top = window.innerHeight - popupRect.height - 10;
+  }
+  if (top < 10) top = 10;
+  
+  popup.style.top = `${top}px`;
+  popup.style.left = `${left}px`;
 }
 
 // Helper function to position popup near an element

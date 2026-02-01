@@ -3484,17 +3484,12 @@ input[type="number"] {
 /* Key Alternatives Badge */
 .key-alternatives-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  font-size: 9px;
-  font-weight: 600;
-  background: var(--primary);
-  color: white;
-  padding: 1px 4px;
-  border-radius: 8px;
-  min-width: 14px;
-  text-align: center;
-  line-height: 1.2;
+  bottom: 1px;
+  right: 3px;
+  font-size: 8px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  line-height: 1;
 }
 
 /* Shift Button Control */
