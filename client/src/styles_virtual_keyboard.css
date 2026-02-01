@@ -740,12 +740,13 @@
 /* Key Alternatives Badge */
 .key-alternatives-badge {
   position: absolute;
-  bottom: 1px;
+  top: 2px;
   right: 3px;
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 400;
   color: var(--muted-foreground);
   line-height: 1;
+  opacity: 0.7;
 }
 
 /* Shift Button Control */
