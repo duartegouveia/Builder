@@ -1404,6 +1404,7 @@ function getSuggestions(prefix, maxCount = 5) {
 // Update autocomplete suggestions display
 function updateAutocomplete(text, cursorPos) {
   const container = document.getElementById('keyboard-autocomplete');
+  console.log('[Autocomplete] container:', container, 'text:', text, 'cursorPos:', cursorPos, 'dictLang:', state.dictionaryLanguage);
   if (!container) return;
   
   // Clear if no dictionary selected
@@ -1415,12 +1416,15 @@ function updateAutocomplete(text, cursorPos) {
   
   const currentWord = getLastWord(text, cursorPos);
   const suggestions = getSuggestions(currentWord);
+  console.log('[Autocomplete] currentWord:', currentWord, 'suggestions:', suggestions);
   
   if (suggestions.length === 0) {
     container.innerHTML = '';
     container.style.display = 'none';
     return;
   }
+  
+  console.log('[Autocomplete] Showing', suggestions.length, 'suggestions');
   
   container.style.display = 'flex';
   container.innerHTML = suggestions.map(word => {
