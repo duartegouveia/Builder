@@ -222,6 +222,21 @@ The Virtual Keyboard provides comprehensive Unicode character input with:
 - Position controls in panel header
 - Close button to hide panel
 
+### Physical Keyboard Mapping
+- When a non-Latin Unicode block is active (e.g., Cyrillic, Greek), typing on the physical keyboard inserts the corresponding Unicode character
+- Uses transliteration mappings: 'a' → 'а' (Cyrillic), 'b' → 'β' (Greek), etc.
+- Only single-letter transliterations are mapped; multi-letter mappings like "sh" not supported
+- For Basic Latin block, normal typing occurs (no interception)
+- Shift state affects character case
+
+### Autocomplete Dictionary
+- Language selector (Dict:) with options: none, Português, English, Español, Français, Deutsch
+- When a language is selected, typing shows word suggestions based on prefix matching
+- Clicking a suggestion replaces the current word prefix with the complete word
+- Dictionaries contain 100+ most common words per language
+- Suggestions update on character insertion, backspace, delete, and direct typing
+- Enter key clears suggestions (word is considered complete)
+
 ### Mobile Responsive
 - On small screens (< 600px), shift and layout controls move to separate line
 - Hierarchy gets full width for easier navigation

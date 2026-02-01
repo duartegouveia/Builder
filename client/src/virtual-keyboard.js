@@ -21,7 +21,70 @@ const state = {
   externalCursorPos: 0, // Cursor position from external field
   blockLayouts: { 'Basic Latin': 'qwerty' }, // Layout preferences per block
   hasPhysicalKeyboard: true, // Detected device type (desktop/laptop has keyboard)
-  popupOriginalChar: null // Original character that opened the variants popup
+  popupOriginalChar: null, // Original character that opened the variants popup
+  dictionaryLanguage: 'none' // Autocomplete dictionary language
+};
+
+// Basic frequency dictionaries for autocomplete (most common words)
+const dictionaries = {
+  pt: [
+    'de', 'que', 'e', 'o', 'a', 'do', 'da', 'em', 'um', 'para', 'é', 'com', 'não', 'uma', 'os',
+    'no', 'se', 'na', 'por', 'mais', 'as', 'dos', 'como', 'mas', 'foi', 'ao', 'ele', 'das',
+    'tem', 'à', 'seu', 'sua', 'ou', 'ser', 'quando', 'muito', 'há', 'nos', 'já', 'está', 'eu',
+    'também', 'só', 'pelo', 'pela', 'até', 'isso', 'ela', 'entre', 'era', 'depois', 'sem',
+    'mesmo', 'aos', 'ter', 'seus', 'quem', 'nas', 'me', 'esse', 'eles', 'estão', 'você',
+    'tinha', 'foram', 'essa', 'num', 'nem', 'suas', 'meu', 'às', 'minha', 'têm', 'numa',
+    'pelos', 'elas', 'havia', 'seja', 'qual', 'será', 'nós', 'tenho', 'lhe', 'deles', 'essas',
+    'esses', 'pelas', 'este', 'fosse', 'dele', 'tu', 'te', 'vocês', 'vos', 'lhes', 'meus',
+    'minhas', 'teu', 'tua', 'teus', 'tuas', 'nosso', 'nossa', 'nossos', 'nossas', 'dela',
+    'delas', 'esta', 'estes', 'estas', 'aquele', 'aquela', 'aqueles', 'aquelas', 'isto',
+    'aquilo', 'estou', 'está', 'estamos', 'estão', 'estive', 'esteve', 'estivemos',
+    'estiveram', 'estava', 'estávamos', 'estavam', 'estivera', 'estivéramos', 'esteja',
+    'estejamos', 'estejam', 'estivesse', 'estivéssemos', 'estivessem', 'estiver',
+    'estivermos', 'estiverem', 'hei', 'há', 'havemos', 'hão', 'houve', 'houvemos', 'houveram',
+    'obrigado', 'obrigada', 'olá', 'oi', 'bom', 'boa', 'dia', 'noite', 'tarde', 'sim', 'não'
+  ],
+  en: [
+    'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on',
+    'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we',
+    'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their',
+    'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when',
+    'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take', 'people', 'into',
+    'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than', 'then', 'now',
+    'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two',
+    'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any',
+    'these', 'give', 'day', 'most', 'us', 'hello', 'yes', 'please', 'thank', 'thanks'
+  ],
+  es: [
+    'de', 'la', 'que', 'el', 'en', 'y', 'a', 'los', 'del', 'se', 'las', 'por', 'un', 'para',
+    'con', 'no', 'una', 'su', 'al', 'lo', 'como', 'más', 'pero', 'sus', 'le', 'ya', 'o',
+    'este', 'sí', 'porque', 'esta', 'entre', 'cuando', 'muy', 'sin', 'sobre', 'también',
+    'me', 'hasta', 'hay', 'donde', 'quien', 'desde', 'todo', 'nos', 'durante', 'todos',
+    'uno', 'les', 'ni', 'contra', 'otros', 'ese', 'eso', 'ante', 'ellos', 'e', 'esto',
+    'mí', 'antes', 'algunos', 'qué', 'unos', 'yo', 'otro', 'otras', 'otra', 'él', 'tanto',
+    'esa', 'estos', 'mucho', 'quienes', 'nada', 'muchos', 'cual', 'poco', 'ella', 'estar',
+    'estas', 'algunas', 'algo', 'nosotros', 'hola', 'bueno', 'gracias', 'buenos', 'días'
+  ],
+  fr: [
+    'de', 'la', 'le', 'et', 'les', 'des', 'en', 'un', 'du', 'une', 'que', 'est', 'pour',
+    'qui', 'dans', 'a', 'par', 'plus', 'pas', 'au', 'sur', 'ne', 'se', 'ce', 'il', 'sont',
+    'ou', 'avec', 'son', 'aux', 'été', 'aussi', 'ont', 'sa', 'mais', 'comme', 'on', 'tout',
+    'nous', 'ses', 'leur', 'bien', 'où', 'elle', 'tous', 'ces', 'fait', 'peut', 'deux',
+    'ans', 'donc', 'entre', 'très', 'cette', 'notre', 'lui', 'après', 'si', 'sans', 'sous',
+    'même', 'autre', 'leurs', 'peu', 'encore', 'quel', 'alors', 'faire', 'temps', 'être',
+    'avoir', 'ils', 'elles', 'vous', 'je', 'me', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes',
+    'bonjour', 'bonsoir', 'merci', 'oui', 'non', 'monsieur', 'madame'
+  ],
+  de: [
+    'der', 'die', 'und', 'in', 'den', 'von', 'zu', 'das', 'mit', 'sich', 'des', 'auf', 'für',
+    'ist', 'im', 'dem', 'nicht', 'ein', 'eine', 'als', 'auch', 'es', 'an', 'werden', 'aus',
+    'er', 'hat', 'dass', 'sie', 'nach', 'wird', 'bei', 'einer', 'um', 'am', 'sind', 'noch',
+    'wie', 'einem', 'über', 'einen', 'so', 'zum', 'kann', 'nur', 'war', 'haben', 'ich',
+    'aber', 'wir', 'diese', 'wenn', 'sein', 'oder', 'mehr', 'bis', 'man', 'ihre', 'dann',
+    'unter', 'schon', 'sehr', 'selbst', 'alle', 'wieder', 'gegen', 'vom', 'was', 'diesem',
+    'vor', 'während', 'zwischen', 'sein', 'Jahre', 'worden', 'hallo', 'guten', 'tag',
+    'danke', 'bitte', 'ja', 'nein'
+  ]
 };
 
 // Unicode character names cache
@@ -154,6 +217,7 @@ function init() {
   attachEventListeners();
   setupExternalFieldTracking();
   setupControlKeyListener();
+  setupPhysicalKeyboardListener();
   updateFloatingButtonVisibility();
 }
 
@@ -181,6 +245,18 @@ function renderKeyboard() {
         <div class="keyboard-output-section">
           <div class="keyboard-output-container">
             <div id="keyboard-output-wrapper"></div>
+            <div class="keyboard-autocomplete" id="keyboard-autocomplete"></div>
+          </div>
+          <div class="keyboard-language-selector">
+            <label>Dict:</label>
+            <select id="dictionary-language" class="keyboard-select keyboard-select-sm">
+              <option value="none">-</option>
+              <option value="pt">Português</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </select>
           </div>
         </div>
         
@@ -1043,6 +1119,20 @@ function attachEventListeners() {
     });
   }
   
+  // Dictionary language selector
+  const dictSelect = document.getElementById('dictionary-language');
+  if (dictSelect) {
+    dictSelect.addEventListener('change', (e) => {
+      state.dictionaryLanguage = e.target.value;
+      // Update autocomplete with current output
+      const outputEl = document.getElementById('keyboard-output');
+      if (outputEl) {
+        updateAutocomplete(outputEl.value, outputEl.selectionStart);
+        outputEl.focus();
+      }
+    });
+  }
+  
   // Composition input
   const compositionInput = document.getElementById('composition-input');
   if (compositionInput) {
@@ -1088,6 +1178,7 @@ function attachEventListeners() {
   // Sync output state when user edits textarea directly
   document.getElementById('keyboard-output')?.addEventListener('input', (e) => {
     state.output = e.target.value;
+    updateAutocomplete(e.target.value, e.target.selectionStart);
   });
   
   // Show variants popup when user selects a single character in output
@@ -1255,6 +1346,9 @@ function addToOutput(char, isLetterChar = false) {
     const newPos = start + char.length;
     targetEl.setSelectionRange(newPos, newPos);
     targetEl.focus();
+    
+    // Update autocomplete suggestions
+    updateAutocomplete(targetEl.value, newPos);
   } else {
     state.output += char;
   }
@@ -1264,6 +1358,98 @@ function addToOutput(char, isLetterChar = false) {
     state.shiftState = 'lowercase';
     updateShiftUI();
     renderCharacterGrid();
+  }
+}
+
+// Get the current word being typed (before cursor)
+function getLastWord(text, cursorPos) {
+  const beforeCursor = text.substring(0, cursorPos);
+  const match = beforeCursor.match(/[\p{L}\p{M}]+$/u);
+  return match ? match[0] : '';
+}
+
+// Get autocomplete suggestions for the current word
+function getSuggestions(prefix, maxCount = 5) {
+  if (!prefix || prefix.length < 1) return [];
+  
+  const dict = dictionaries[state.dictionaryLanguage];
+  if (!dict) return [];
+  
+  const lowerPrefix = prefix.toLowerCase();
+  const suggestions = [];
+  
+  for (const word of dict) {
+    if (word.toLowerCase().startsWith(lowerPrefix) && word.toLowerCase() !== lowerPrefix) {
+      suggestions.push(word);
+      if (suggestions.length >= maxCount) break;
+    }
+  }
+  
+  return suggestions;
+}
+
+// Update autocomplete suggestions display
+function updateAutocomplete(text, cursorPos) {
+  const container = document.getElementById('keyboard-autocomplete');
+  if (!container) return;
+  
+  // Clear if no dictionary selected
+  if (state.dictionaryLanguage === 'none') {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  
+  const currentWord = getLastWord(text, cursorPos);
+  const suggestions = getSuggestions(currentWord);
+  
+  if (suggestions.length === 0) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  
+  container.style.display = 'flex';
+  container.innerHTML = suggestions.map(word => {
+    // Highlight the matched prefix
+    const matchLen = currentWord.length;
+    const prefix = word.substring(0, matchLen);
+    const suffix = word.substring(matchLen);
+    return `<button class="autocomplete-suggestion" data-word="${word}" data-prefix-len="${matchLen}"><span class="autocomplete-match">${prefix}</span>${suffix}</button>`;
+  }).join('');
+  
+  // Attach click handlers
+  container.querySelectorAll('.autocomplete-suggestion').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      applySuggestion(btn.dataset.word, parseInt(btn.dataset.prefixLen, 10));
+    });
+  });
+}
+
+// Apply the selected autocomplete suggestion
+function applySuggestion(word, prefixLen) {
+  const targetEl = document.getElementById('keyboard-output');
+  if (!targetEl) return;
+  
+  const cursorPos = targetEl.selectionStart;
+  const before = targetEl.value.substring(0, cursorPos - prefixLen);
+  const after = targetEl.value.substring(cursorPos);
+  
+  // Insert the word (replacing the prefix already typed) plus a space
+  targetEl.value = before + word + ' ' + after;
+  state.output = targetEl.value;
+  
+  const newPos = before.length + word.length + 1;
+  targetEl.setSelectionRange(newPos, newPos);
+  targetEl.focus();
+  
+  // Clear autocomplete
+  const container = document.getElementById('keyboard-autocomplete');
+  if (container) {
+    container.innerHTML = '';
+    container.style.display = 'none';
   }
 }
 
@@ -1281,11 +1467,13 @@ function handleBackspace() {
     targetEl.value = before + after;
     targetEl.setSelectionRange(start, start);
     targetEl.focus();
+    updateAutocomplete(targetEl.value, start);
   } else if (start > 0) {
     const before = targetEl.value.substring(0, start - 1);
     const after = targetEl.value.substring(start);
     targetEl.value = before + after;
     targetEl.setSelectionRange(start - 1, start - 1);
+    updateAutocomplete(targetEl.value, start - 1);
   }
   state.output = targetEl.value;
   targetEl.focus();
@@ -1312,12 +1500,19 @@ function handleDelete() {
   }
   state.output = targetEl.value;
   targetEl.focus();
+  updateAutocomplete(targetEl.value, targetEl.selectionStart);
 }
 
 function handleEnter() {
   // Allow Enter for multiline output (textarea) - the output adapts to external field type
   if (state.isMultilineField) {
     addToOutput('\n');
+  }
+  // Clear autocomplete after Enter (word is complete)
+  const container = document.getElementById('keyboard-autocomplete');
+  if (container) {
+    container.innerHTML = '';
+    container.style.display = 'none';
   }
 }
 
@@ -1716,6 +1911,68 @@ function setupExternalFieldTracking() {
         updateEnterButtonVisibility();
       }
     });
+  });
+}
+
+// Build reverse map of Latin keys to Unicode characters for current block
+function buildKeyMap() {
+  const block = unicodeBlocks[state.currentBlock];
+  if (!block) return {};
+  
+  const keyMap = {};
+  const blockTranslit = transliterations[state.currentBlock];
+  
+  if (blockTranslit) {
+    // Map single-letter transliterations to their Unicode characters
+    for (const [codePoint, translit] of Object.entries(blockTranslit)) {
+      if (translit.length === 1) {
+        const lowerTranslit = translit.toLowerCase();
+        const code = parseInt(codePoint);
+        const char = String.fromCodePoint(code);
+        // Only use the first match for each key
+        if (!keyMap[lowerTranslit]) {
+          keyMap[lowerTranslit] = { code, char, translit };
+        }
+      }
+    }
+  }
+  
+  return keyMap;
+}
+
+// Handle physical keyboard input when panel is open
+function setupPhysicalKeyboardListener() {
+  document.addEventListener('keydown', (e) => {
+    // Only intercept if keyboard panel is visible and output field is focused
+    if (!state.keyboardVisible) return;
+    
+    const outputEl = document.getElementById('keyboard-output');
+    if (!outputEl || document.activeElement !== outputEl) return;
+    
+    // Don't intercept special keys
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'Control' || e.key === 'Meta' || e.key === 'Alt' || e.key === 'Shift') return;
+    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Enter') return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') return;
+    if (e.key === 'Home' || e.key === 'End' || e.key === 'Tab' || e.key === 'Escape') return;
+    
+    // For Basic Latin, let normal typing happen
+    if (state.currentBlock === 'Basic Latin') return;
+    
+    // For non-Latin blocks, check if there's a mapping
+    const keyMap = buildKeyMap();
+    const lowerKey = e.key.toLowerCase();
+    
+    if (keyMap[lowerKey]) {
+      e.preventDefault();
+      const mapped = keyMap[lowerKey];
+      // Apply shift state
+      let charToInsert = mapped.char;
+      if (state.shiftState !== 'lowercase') {
+        charToInsert = charToInsert.toUpperCase();
+      }
+      addToOutput(charToInsert, isLetter(charToInsert));
+    }
   });
 }
 
