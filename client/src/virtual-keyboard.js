@@ -458,7 +458,12 @@ function buildHierarchyDOM(parent, obj, path) {
 }
 
 function formatLabel(key) {
-  return key.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 e $2');
+  // First replace underscores with spaces
+  let result = key.replace(/_/g, ' ');
+  // Insert " e " before any uppercase letter that follows a lowercase letter
+  // This handles CamelCase like "DiacriticosEFonetica" → "Diacriticos e Fonetica"
+  result = result.replace(/([a-z])([A-Z])/g, '$1 e $2');
+  return result;
 }
 
 function isPathExpanded(path) {
@@ -1085,6 +1090,44 @@ function attachEventListeners() {
     state.output = e.target.value;
   });
   
+  // Show variants popup when user selects a single character in output
+  let selectionTimeout = null;
+  const outputEl = document.getElementById('keyboard-output');
+  if (outputEl) {
+    // Use mouseup to detect selection changes (more reliable than select event)
+    outputEl.addEventListener('mouseup', () => {
+      clearTimeout(selectionTimeout);
+      const start = outputEl.selectionStart;
+      const end = outputEl.selectionEnd;
+      
+      // Check if exactly one character is selected
+      if (end - start === 1) {
+        const selectedChar = outputEl.value.substring(start, end);
+        
+        // Wait 500ms before showing popup
+        selectionTimeout = setTimeout(() => {
+          showSelectionVariantsPopup(selectedChar, outputEl);
+        }, 500);
+      }
+    });
+    
+    // Also handle keyboard selection (shift+arrow)
+    outputEl.addEventListener('keyup', (e) => {
+      if (e.shiftKey || e.key === 'Shift') {
+        clearTimeout(selectionTimeout);
+        const start = outputEl.selectionStart;
+        const end = outputEl.selectionEnd;
+        
+        if (end - start === 1) {
+          const selectedChar = outputEl.value.substring(start, end);
+          selectionTimeout = setTimeout(() => {
+            showSelectionVariantsPopup(selectedChar, outputEl);
+          }, 500);
+        }
+      }
+    });
+  }
+  
   // Toggle button and position controls
   document.getElementById('keyboard-toggle-btn')?.addEventListener('click', toggleKeyboard);
   document.getElementById('keyboard-close-btn')?.addEventListener('click', (e) => {
@@ -1469,6 +1512,104 @@ function hideVariantsPopup() {
   }
   // Clear the original character reference
   state.popupOriginalChar = null;
+}
+
+// Show variants popup when user selects a single character in output
+function showSelectionVariantsPopup(char, targetEl) {
+  const code = char.codePointAt(0);
+  
+  // Store original character for variant navigation
+  state.popupOriginalChar = char;
+  
+  const popup = document.getElementById('variants-popup');
+  if (!popup) return;
+  
+  popup.innerHTML = '';
+  
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'variants-popup-close';
+  closeBtn.innerHTML = '×';
+  closeBtn.title = 'Close';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideVariantsPopup();
+    targetEl.focus();
+  });
+  popup.appendChild(closeBtn);
+  
+  // Unicode info section
+  const infoSection = document.createElement('div');
+  infoSection.className = 'unicode-info-section';
+  
+  const hexCode = code.toString(16).toUpperCase().padStart(4, '0');
+  const charName = getUnicodeName(code);
+  
+  const charDisplay = document.createElement('div');
+  charDisplay.className = 'unicode-info-char';
+  charDisplay.textContent = char;
+  charDisplay.title = 'Character selected in output';
+  infoSection.appendChild(charDisplay);
+  
+  const details = document.createElement('div');
+  details.className = 'unicode-info-details';
+  details.innerHTML = `
+    <div class="unicode-info-row"><span class="info-label">U+</span><span class="info-value">${hexCode}</span></div>
+    <div class="unicode-info-row"><span class="info-label">Hex:</span><span class="info-value">0x${hexCode}</span></div>
+    <div class="unicode-info-row"><span class="info-label">Dec:</span><span class="info-value">${code}</span></div>
+    <div class="unicode-info-row unicode-info-name"><span class="info-value">${charName}</span></div>
+  `;
+  infoSection.appendChild(details);
+  popup.appendChild(infoSection);
+  
+  // Variants section - show if character has variants
+  const variants = accentedVariants[char] || [];
+  if (variants.length > 0) {
+    const variantsSection = document.createElement('div');
+    variantsSection.className = 'variants-section';
+    
+    const variantsTitle = document.createElement('div');
+    variantsTitle.className = 'variants-title';
+    variantsTitle.textContent = 'Variants';
+    variantsSection.appendChild(variantsTitle);
+    
+    const grid = document.createElement('div');
+    grid.className = 'variants-grid';
+    
+    variants.forEach(v => {
+      const vCode = v.codePointAt(0);
+      const vHex = vCode.toString(16).toUpperCase().padStart(4, '0');
+      
+      const btn = document.createElement('button');
+      btn.className = 'variant-key';
+      btn.dataset.char = v;
+      btn.title = `U+${vHex}`;
+      btn.textContent = v;
+      
+      // Click replaces the selected character in output
+      btn.addEventListener('click', () => {
+        const start = targetEl.selectionStart;
+        const end = targetEl.selectionEnd;
+        const before = targetEl.value.substring(0, start);
+        const after = targetEl.value.substring(end);
+        targetEl.value = before + v + after;
+        state.output = targetEl.value;
+        targetEl.setSelectionRange(start + v.length, start + v.length);
+        targetEl.focus();
+        hideVariantsPopup();
+      });
+      
+      grid.appendChild(btn);
+    });
+    
+    variantsSection.appendChild(grid);
+    popup.appendChild(variantsSection);
+  }
+  
+  // Position popup near the output field
+  popup.style.display = 'block';
+  const rect = targetEl.getBoundingClientRect();
+  positionPopupNearElement(popup, rect);
 }
 
 function showSkinTonePopup(keyBtn) {

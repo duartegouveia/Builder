@@ -514,26 +514,25 @@ export const pageHierarchy = {
         "Cherokee": ["Cherokee", "Cherokee Supplement"],
         "Canadian_aboriginal": ["Unified Canadian Aboriginal Syllabics", "Unified Canadian Aboriginal Syllabics Extended"]
       }
-    }
-  },
-  "Blocos": {
-      "DiacriticosEFonetica": [
+    },
+    "Simbolos_e_Blocos": {
+      "Diacriticos_e_Fonetica": [
         "Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement",
         "Combining Diacritical Marks for Symbols", "IPA Extensions", "Modifier Tone Letters",
         "Phonetic Extensions", "Phonetic Extensions Supplement", "Spacing Modifier Letters", "Vedic Extensions"
       ],
-      "PontuacaoESeparadores": [
+      "Pontuacao_e_Separadores": [
         "General Punctuation", "Ideographic Description Characters", "Ideographic Symbols and Punctuation",
         "Shorthand Format Controls", "Supplemental Punctuation", "Vertical Forms"
       ],
-      "NumerosEEnvolventes": [
+      "Numeros_e_Envolventes": [
         "Aegean Numbers", "Common Indic Number Forms", "Counting Rod Numerals",
         "Enclosed Alphanumeric Supplement", "Enclosed Alphanumerics", "Enclosed CJK Letters and Months",
         "Enclosed Ideographic Supplement", "Indic Siyaq Numbers", "Kaktovik Numerals", "Mayan Numerals",
         "Number Forms", "Ottoman Siyaq Numbers", "Rumi Numeral Symbols", "Sinhala Archaic Numbers",
         "Superscripts and Subscripts", "Tai Xuan Jing Symbols"
       ],
-      "MoedaEUnidades": ["Currency Symbols"],
+      "Moeda_e_Unidades": ["Currency Symbols"],
       "Setas": [
         "Arrows", "Miscellaneous Symbols and Arrows",
         "Supplemental Arrows-A", "Supplemental Arrows-B", "Supplemental Arrows-C"
@@ -543,17 +542,17 @@ export const pageHierarchy = {
         "Mathematical Operators", "Miscellaneous Mathematical Symbols-A",
         "Miscellaneous Mathematical Symbols-B", "Supplemental Mathematical Operators"
       ],
-      "TecnicoEControlo": [
+      "Tecnico_e_Controlo": [
         "Control Pictures", "Miscellaneous Technical", "Optical Character Recognition", "Specials", "Tags"
       ],
-      "CaixasEFormas": [
+      "Caixas_e_Formas": [
         "Block Elements", "Box Drawing", "Braille Patterns", "Geometric Shapes", "Geometric Shapes Extended"
       ],
-      "SimbolosGeraisEDingbats": [
+      "Simbolos_Gerais_e_Dingbats": [
         "Alchemical Symbols", "Chess Symbols", "Dingbats", "Miscellaneous Symbols",
         "Ornamental Dingbats", "Yijing Hexagram Symbols"
       ],
-      "PictogramasEEmoji": [
+      "Pictogramas_e_Emoji": [
         "Emoticons", "Miscellaneous Symbols and Pictographs", "Supplemental Symbols and Pictographs",
         "Symbols and Pictographs Extended-A", "Transport and Map Symbols"
       ],
@@ -561,16 +560,16 @@ export const pageHierarchy = {
       "Musica": [
         "Ancient Greek Musical Notation", "Byzantine Musical Symbols", "Musical Symbols", "Znamenny Musical Notation"
       ],
-      "CompatibilidadeEApresentacao": [
+      "Compatibilidade_e_Apresentacao": [
         "Alphabetic Presentation Forms", "Arabic Presentation Forms-A", "Arabic Presentation Forms-B",
         "CJK Compatibility Ideographs", "CJK Compatibility Ideographs Supplement", "CJK Compatibility Forms",
         "CJK Compatibility", "Halfwidth and Fullwidth Forms", "Small Form Variants",
         "Variation Selectors", "Variation Selectors Supplement"
       ],
       "Surrogates": ["High Private Use Surrogates", "High Surrogates", "Low Surrogates"],
-      "UsoPrivado": ["Private Use Area", "Supplementary Private Use Area-A", "Supplementary Private Use Area-B"],
+      "Uso_Privado": ["Private Use Area", "Supplementary Private Use Area-A", "Supplementary Private Use Area-B"],
       "Escritas": {
-        "ComponentesEIndices": [
+        "Componentes_e_Indices": [
           "CJK Radicals Supplement", "CJK Strokes", "Duployan", "Kana Extended-A", "Kana Extended-B",
           "Kana Supplement", "Kangxi Radicals", "Kanbun", "Khitan Small Script", "Tangut",
           "Tangut Components", "Tangut Components Supplement", "Tangut Supplement", "Yi Radicals", "Yijing Hexagram Symbols"
@@ -608,6 +607,7 @@ export const pageHierarchy = {
         ]
       }
     }
+  }
 };
 
 // Latin transliterations for non-Latin scripts

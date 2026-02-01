@@ -259,7 +259,9 @@
 .hierarchy-popup .hierarchy-tree {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--space-2);
+  min-height: 0; /* Required for flex child to scroll */
 }
 
 .hierarchy-tree {
