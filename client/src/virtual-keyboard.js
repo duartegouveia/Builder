@@ -14,7 +14,7 @@ const state = {
   hierarchyCollapsed: true, // Start collapsed, show hierarchy when user clicks Browse
   compositionInput: '', // For CJK romanization input
   keyboardVisible: false, // Whether keyboard panel is visible (hidden by default)
-  keyboardPosition: 'bottom', // 'bottom', 'top', 'left', 'right', 'fullscreen'
+  keyboardPosition: 'fullscreen', // 'bottom', 'top', 'left', 'right', 'fullscreen'
   floatingButtonPos: { x: null, y: null }, // Custom position for floating button
   activeExternalField: null, // Reference to external input/textarea being edited
   isMultilineField: false, // true for textarea, false for input[type=text]
@@ -819,6 +819,9 @@ function cycleShiftState() {
   }
   updateShiftUI();
   renderCharacterGrid();
+  // Restore focus to output field
+  const outputEl = document.getElementById('keyboard-output');
+  if (outputEl) outputEl.focus();
 }
 
 function applyLayout(chars, layoutName) {
@@ -893,6 +896,9 @@ function attachEventListeners() {
     if (closeHierarchyBtn) {
       state.hierarchyCollapsed = true;
       renderHierarchy();
+      // Restore focus to output field
+      const outputEl = document.getElementById('keyboard-output');
+      if (outputEl) outputEl.focus();
       return;
     }
     
@@ -1026,6 +1032,9 @@ function attachEventListeners() {
       // Save layout preference for current block
       state.blockLayouts[state.currentBlock] = state.currentLayout;
       renderCharacterGrid();
+      // Restore focus to output field
+      const outputEl = document.getElementById('keyboard-output');
+      if (outputEl) outputEl.focus();
     });
   }
   
@@ -1064,12 +1073,12 @@ function attachEventListeners() {
   });
   
   // Output actions
-  document.getElementById('btn-copy-output')?.addEventListener('click', copyOutput);
-  document.getElementById('btn-clear-output')?.addEventListener('click', clearOutput);
-  document.getElementById('btn-backspace')?.addEventListener('click', handleBackspace);
-  document.getElementById('btn-delete')?.addEventListener('click', handleDelete);
-  document.getElementById('btn-enter')?.addEventListener('click', handleEnter);
-  document.getElementById('btn-end')?.addEventListener('click', handleEnd);
+  document.getElementById('btn-copy-output')?.addEventListener('click', (e) => { e.preventDefault(); copyOutput(); });
+  document.getElementById('btn-clear-output')?.addEventListener('click', (e) => { e.preventDefault(); clearOutput(); });
+  document.getElementById('btn-backspace')?.addEventListener('click', (e) => { e.preventDefault(); handleBackspace(); });
+  document.getElementById('btn-delete')?.addEventListener('click', (e) => { e.preventDefault(); handleDelete(); });
+  document.getElementById('btn-enter')?.addEventListener('click', (e) => { e.preventDefault(); handleEnter(); });
+  document.getElementById('btn-end')?.addEventListener('click', (e) => { e.preventDefault(); handleEnd(); });
   
   // Sync output state when user edits textarea directly
   document.getElementById('keyboard-output')?.addEventListener('input', (e) => {
@@ -1082,11 +1091,11 @@ function attachEventListeners() {
     e.stopPropagation();
     setKeyboardVisible(false);
   });
-  document.getElementById('pos-top')?.addEventListener('click', () => setKeyboardPosition('top'));
-  document.getElementById('pos-bottom')?.addEventListener('click', () => setKeyboardPosition('bottom'));
-  document.getElementById('pos-left')?.addEventListener('click', () => setKeyboardPosition('left'));
-  document.getElementById('pos-right')?.addEventListener('click', () => setKeyboardPosition('right'));
-  document.getElementById('pos-fullscreen')?.addEventListener('click', () => setKeyboardPosition('fullscreen'));
+  document.getElementById('pos-top')?.addEventListener('click', (e) => { e.preventDefault(); setKeyboardPosition('top'); });
+  document.getElementById('pos-bottom')?.addEventListener('click', (e) => { e.preventDefault(); setKeyboardPosition('bottom'); });
+  document.getElementById('pos-left')?.addEventListener('click', (e) => { e.preventDefault(); setKeyboardPosition('left'); });
+  document.getElementById('pos-right')?.addEventListener('click', (e) => { e.preventDefault(); setKeyboardPosition('right'); });
+  document.getElementById('pos-fullscreen')?.addEventListener('click', (e) => { e.preventDefault(); setKeyboardPosition('fullscreen'); });
   
   // Make toggle button draggable
   setupToggleButtonDrag();
@@ -1176,6 +1185,10 @@ function selectBlock(blockName, fromHierarchyPopup = false) {
   renderCompositionArea();
   updateLayoutOptions();
   renderCharacterGrid();
+  
+  // Restore focus to output field
+  const outputEl = document.getElementById('keyboard-output');
+  if (outputEl) outputEl.focus();
 }
 
 function addToOutput(char, isLetterChar = false) {
@@ -1218,6 +1231,7 @@ function handleBackspace() {
     const after = targetEl.value.substring(end);
     targetEl.value = before + after;
     targetEl.setSelectionRange(start, start);
+    targetEl.focus();
   } else if (start > 0) {
     const before = targetEl.value.substring(0, start - 1);
     const after = targetEl.value.substring(start);
@@ -1284,6 +1298,7 @@ function handleEnd() {
 function copyOutput() {
   const outputEl = document.getElementById('keyboard-output');
   const text = outputEl ? outputEl.value : state.output;
+  const cursorPos = outputEl ? outputEl.selectionStart : 0;
   
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('btn-copy-output');
@@ -1291,6 +1306,11 @@ function copyOutput() {
       const original = btn.textContent;
       btn.textContent = 'Copied!';
       setTimeout(() => { btn.textContent = original; }, 1500);
+    }
+    // Restore focus and cursor position
+    if (outputEl) {
+      outputEl.focus();
+      outputEl.setSelectionRange(cursorPos, cursorPos);
     }
   });
 }
@@ -1320,6 +1340,10 @@ function setKeyboardVisible(visible) {
 }
 
 function setKeyboardPosition(position) {
+  // Save cursor position before changing position
+  const output = document.getElementById('keyboard-output');
+  const cursorPos = output ? output.selectionStart : 0;
+  
   state.keyboardPosition = position;
   const panel = document.getElementById('keyboard-panel');
   if (panel) {
@@ -1335,6 +1359,12 @@ function setKeyboardPosition(position) {
       btn.classList.toggle('btn-outline', pos !== position);
     }
   });
+  
+  // Restore focus and cursor position
+  if (output) {
+    output.focus();
+    output.setSelectionRange(cursorPos, cursorPos);
+  }
 }
 
 function setupToggleButtonDrag() {
@@ -1428,6 +1458,7 @@ function clearOutput() {
   const outputEl = document.getElementById('keyboard-output');
   if (outputEl) {
     outputEl.value = '';
+    outputEl.focus();
   }
 }
 
