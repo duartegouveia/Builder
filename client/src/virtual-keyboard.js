@@ -436,19 +436,30 @@ function buildHierarchyDOM(parent, obj, path) {
     const isExpanded = isPathExpanded(currentPath);
     
     if (Array.isArray(value)) {
-      // Leaf node - list of blocks
+      // Leaf node - list of blocks with expandable header
       const group = document.createElement('div');
-      group.className = 'hierarchy-group';
+      group.className = 'hierarchy-branch' + (isExpanded ? ' expanded' : '');
       group.dataset.path = currentPath;
       
       const header = document.createElement('div');
-      header.className = 'hierarchy-header hierarchy-leaf';
+      header.className = 'hierarchy-header';
       header.dataset.path = currentPath;
-      header.textContent = formatLabel(key);
+      
+      const arrow = document.createElement('span');
+      arrow.className = 'hierarchy-arrow';
+      arrow.textContent = isExpanded ? '▼' : '▶';
+      header.appendChild(arrow);
+      
+      const label = document.createElement('span');
+      label.className = 'hierarchy-label';
+      label.textContent = formatLabel(key);
+      header.appendChild(label);
+      
       group.appendChild(header);
       
       const blocksDiv = document.createElement('div');
-      blocksDiv.className = 'hierarchy-blocks';
+      blocksDiv.className = 'hierarchy-children hierarchy-blocks';
+      if (!isExpanded) blocksDiv.style.display = 'none';
       
       value.forEach(block => {
         const isActive = block === state.currentBlock;
@@ -1787,17 +1798,19 @@ function showSelectionVariantsPopup(char, targetEl) {
       btn.title = `U+${vHex}`;
       btn.textContent = v;
       
-      // Click replaces the selected character in output
-      btn.addEventListener('click', () => {
+      // Click inserts the variant character at cursor position (keeps popup open)
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const start = targetEl.selectionStart;
         const end = targetEl.selectionEnd;
         const before = targetEl.value.substring(0, start);
         const after = targetEl.value.substring(end);
         targetEl.value = before + v + after;
         state.output = targetEl.value;
-        targetEl.setSelectionRange(start + v.length, start + v.length);
-        targetEl.focus();
-        hideVariantsPopup();
+        const newPos = start + v.length;
+        targetEl.setSelectionRange(newPos, newPos);
+        // Keep popup open for multiple insertions - don't hide or change focus
       });
       
       grid.appendChild(btn);

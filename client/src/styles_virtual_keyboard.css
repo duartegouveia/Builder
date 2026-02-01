@@ -285,7 +285,6 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -299,14 +298,16 @@
   background: var(--slate-50);
   font-weight: 600;
   font-size: var(--text-sm);
+  flex-shrink: 0;
 }
 
 .hierarchy-popup .hierarchy-tree {
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--space-2);
-  min-height: 0; /* Required for flex child to scroll */
+  min-height: 0;
+  max-height: calc(70vh - 50px);
 }
 
 .hierarchy-tree {
