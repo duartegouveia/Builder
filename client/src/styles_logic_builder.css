@@ -1,0 +1,421 @@
+/* ===== Logic Builder Specific Styles ===== */
+/* Styles for the Logic Builder page (index.html / logic-builder.html) */
+
+.logic-node {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.logic-node.is-root {
+  padding: 10px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.logic-empty {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--slate-50);
+  border: 2px dashed var(--slate-300);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.logic-empty:hover {
+  border-color: var(--primary-400);
+  background: var(--primary-50);
+}
+
+.logic-text-node {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  transition: all var(--transition-fast);
+}
+
+.logic-text-node:hover {
+  border-color: var(--slate-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.logic-text-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-200) 100%);
+  color: var(--primary-700);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.625rem;
+  flex-shrink: 0;
+  border: 1px solid var(--primary-200);
+}
+
+.logic-operator-container {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: visible;
+  position: relative;
+}
+
+.logic-bar-cell {
+  position: absolute;
+  left: 0;
+  bottom: 5px;
+  width: 56px;
+  display: flex;
+  justify-content: center;
+  z-index: 3;
+}
+
+.layout-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: var(--slate-200);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--slate-500);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  opacity: 0.6;
+}
+
+.layout-toggle-btn:hover {
+  background: var(--slate-300);
+  color: var(--slate-700);
+  opacity: 1;
+}
+
+.layout-toggle-btn .icon-vertical {
+  display: none;
+}
+
+.layout-toggle-btn .icon-horizontal {
+  display: block;
+}
+
+.logic-operator-container.is-horizontal .layout-toggle-btn .icon-vertical {
+  display: block;
+}
+
+.logic-operator-container.is-horizontal .layout-toggle-btn .icon-horizontal {
+  display: none;
+}
+
+.logic-operator-container[data-child-count="2"] .layout-toggle-btn,
+.logic-operator-container[data-child-count="3"] .layout-toggle-btn {
+  display: flex;
+}
+
+.logic-operator-container.is-horizontal .logic-rows-container {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+.logic-operator-container.is-horizontal .logic-row-grid {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.logic-operator-container.is-horizontal .logic-label-cell {
+  display: none;
+}
+
+.logic-operator-container.is-horizontal .logic-content-cell {
+  padding: 5px;
+}
+
+.logic-operator-container.is-horizontal .logic-text-node {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logic-operator-container.is-horizontal .logic-text-node .flex-1 {
+  min-width: 0;
+}
+
+.logic-operator-container.is-horizontal .input-inline {
+  min-width: 0;
+  width: 100%;
+}
+
+.logic-horizontal-divider {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.logic-operator-container.is-horizontal .logic-horizontal-divider {
+  display: flex;
+}
+
+.logic-horizontal-label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  padding: 0;
+  border-radius: var(--radius-sm);
+}
+
+.logic-operator-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-600) 100%);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  z-index: 1;
+}
+
+.logic-rows-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.logic-row-grid {
+  display: block;
+  position: relative;
+  margin-left: 56px;
+}
+
+.logic-operator-container.is-horizontal .logic-row-grid {
+  margin-left: 0;
+}
+
+.logic-row-grid.logic-row-empty {
+  min-height: 15px;
+}
+
+.logic-label-cell {
+  position: absolute;
+  left: 5px;
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.logic-content-cell {
+  padding: 3px 5px;
+  transition: background var(--transition-fast);
+}
+
+.logic-content-cell:hover {
+  background: var(--slate-50);
+}
+
+.logic-add-area {
+  display: flex;
+  justify-content: center;
+  background: transparent;
+}
+
+.logic-add-area:has(.add-child-btn) {
+  padding: 5px;
+}
+
+.add-child-btn {
+  border-radius: var(--radius-full);
+  position: relative;
+  top: -1px;
+}
+
+/* Horizontal Layout */
+.logic-horizontal {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 70px;
+  position: relative;
+}
+
+.logic-horizontal-child {
+  flex: 1;
+  min-width: 220px;
+}
+
+.logic-operator-divider {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--slate-500);
+  padding: var(--space-2) var(--space-3);
+  background: var(--slate-100);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  border: 1px solid var(--slate-200);
+}
+
+.logic-toggle-btn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all var(--transition-fast);
+  z-index: 10;
+  box-shadow: var(--shadow-xs);
+}
+
+.logic-toggle-btn:hover {
+  opacity: 1;
+  background: var(--slate-50);
+  border-color: var(--slate-300);
+}
+
+.logic-toggle-btn-vertical {
+  margin-top: auto;
+  padding-top: var(--space-3);
+}
+
+/* Logic Controls */
+.logic-controls {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .logic-controls {
+    flex-direction: row;
+  }
+}
+
+.logic-variable-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: transparent;
+}
+
+.logic-variable-btn.is-true {
+  background: var(--success-50);
+  border-color: var(--success-200);
+  color: var(--success-700);
+}
+
+.logic-variable-btn.is-true:hover {
+  background: var(--success-100);
+  border-color: var(--success-500);
+}
+
+.logic-variable-btn.is-false {
+  background: var(--error-50);
+  border-color: var(--error-200);
+  color: var(--error-700);
+}
+
+.logic-variable-btn.is-false:hover {
+  background: var(--error-100);
+  border-color: var(--error-500);
+}
+
+.logic-result-badge {
+  font-size: 1rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.logic-result-badge.is-true {
+  background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
+  color: var(--white);
+}
+
+.logic-result-badge.is-false {
+  background: linear-gradient(135deg, var(--error-500) 0%, var(--error-600) 100%);
+  color: var(--white);
+}
+
+/* ===== Logic Builder Badge Variants ===== */
+.logic-text-badge-multiline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: var(--space-1) var(--space-2);
+  background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-200) 100%);
+  color: var(--primary-700);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  flex-shrink: 0;
+  border: 1px solid var(--primary-200);
+  white-space: pre-line;
+  line-height: 1.2;
+  height: auto;
+}

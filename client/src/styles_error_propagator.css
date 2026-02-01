@@ -1,0 +1,326 @@
+/* ===== Error Propagator Specific Styles ===== */
+/* Styles for the Experimental Error Propagator page (logic.html) */
+
+.exp-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--primary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.exp-variable-card {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-xs);
+  transition: all var(--transition-fast);
+}
+
+.exp-variable-card:hover {
+  border-color: var(--primary-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.exp-variable-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.exp-variable-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+  border: 1px solid var(--primary-200);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary-700);
+}
+
+.exp-variable-name {
+  flex: 1;
+}
+
+.exp-variable-name input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.9375rem;
+  background: var(--slate-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.exp-variable-name input:focus {
+  background: var(--white);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}
+
+.exp-variable-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.exp-variable-field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-500);
+  margin-bottom: var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.exp-variable-field input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.9375rem;
+  font-family: var(--font-mono);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.exp-variable-field input:focus {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}
+
+.exp-type-toggle {
+  display: flex;
+  gap: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  height: 36px;
+}
+
+.exp-type-toggle button {
+  flex: 1;
+  padding: 0 var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--white);
+  border: none;
+  cursor: pointer;
+  color: var(--slate-500);
+  transition: all var(--transition-fast);
+}
+
+.exp-type-toggle button:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.exp-type-toggle button.active {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.exp-type-toggle button:hover:not(.active) {
+  background: var(--slate-50);
+}
+
+.exp-result-panel {
+  background: linear-gradient(135deg, var(--slate-800) 0%, var(--slate-900) 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  color: var(--white);
+}
+
+.exp-result-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+.exp-result-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-4);
+  word-break: break-all;
+}
+
+.exp-result-error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.exp-error-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+}
+
+.exp-error-absolute,
+.exp-error-relative {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.exp-error-relative {
+  color: var(--primary-300);
+}
+
+.exp-formula-display {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  overflow-x: auto;
+}
+
+.exp-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--slate-400);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.exp-delete-btn:hover {
+  background: var(--error-50);
+  border-color: var(--error-200);
+  color: var(--error-600);
+}
+
+/* ===== Grid System ===== */
+.grid { display: grid; }
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--slate-100);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
+}
+
+/* ===== Cursor ===== */
+.cursor-pointer { cursor: pointer; }
+
+/* ===== Checkbox Styling ===== */
+input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== Italic ===== */
+.italic { font-style: italic; }
+
+/* ===== Input Variants ===== */
+.input-inline {
+  display: block;
+  padding: var(--space-2) 5px;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--foreground);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: all var(--transition-fast);
+  height: 36px;
+}
+
+.input-inline::placeholder {
+  color: var(--slate-400);
+}
+
+.input-inline:hover {
+  background: var(--slate-50);
+}
+
+.input-inline:focus {
+  background: var(--white);
+  box-shadow: var(--shadow-focus);
+}
+
+.textarea-inline {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--foreground);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: all var(--transition-fast);
+  min-height: 60px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.textarea-inline::placeholder {
+  color: var(--slate-400);
+}
+
+.textarea-inline:hover {
+  background: var(--slate-50);
+}
+
+.textarea-inline:focus {
+  background: var(--white);
+  box-shadow: var(--shadow-focus);
+}
+
+/* ===== Experiment Calc Grid ===== */
+.exp-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .exp-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+}
