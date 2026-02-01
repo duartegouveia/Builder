@@ -932,6 +932,30 @@
   .keyboard-layout-selector label {
     display: none;
   }
+  
+  /* Smaller keys for mobile */
+  .keyboard-row .keyboard-key {
+    flex: 0 0 28px;
+    min-width: 26px;
+    max-width: 32px;
+    min-height: 40px;
+    padding: 2px;
+  }
+  
+  .key-char {
+    font-size: 16px;
+  }
+  
+  .key-label {
+    font-size: 7px;
+  }
+  
+  .keyboard-digits-section .keyboard-key {
+    width: 32px;
+    min-width: 28px;
+    max-width: 36px;
+    min-height: 40px;
+  }
 }
 
 /* Keyboard Toggle Button (Floating) */
