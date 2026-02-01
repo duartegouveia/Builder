@@ -514,8 +514,9 @@ export const pageHierarchy = {
         "Cherokee": ["Cherokee", "Cherokee Supplement"],
         "Canadian_aboriginal": ["Unified Canadian Aboriginal Syllabics", "Unified Canadian Aboriginal Syllabics Extended"]
       }
-    },
-    "Simbolos_e_Blocos": {
+    }
+  },
+  "Simbolos_e_Blocos": {
       "Diacriticos_e_Fonetica": [
         "Combining Diacritical Marks", "Combining Diacritical Marks Extended", "Combining Diacritical Marks Supplement",
         "Combining Diacritical Marks for Symbols", "IPA Extensions", "Modifier Tone Letters",
@@ -607,7 +608,6 @@ export const pageHierarchy = {
         ]
       }
     }
-  }
 };
 
 // Latin transliterations for non-Latin scripts
