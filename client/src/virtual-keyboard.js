@@ -188,17 +188,6 @@ function renderKeyboard() {
             <div id="keyboard-output-wrapper"></div>
             <div class="keyboard-autocomplete" id="keyboard-autocomplete"></div>
           </div>
-          <div class="keyboard-language-selector">
-            <label>Dict:</label>
-            <select id="dictionary-language" class="keyboard-select keyboard-select-sm">
-              <option value="none">-</option>
-              <option value="pt">Português</option>
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
-            </select>
-          </div>
         </div>
         
         <div class="keyboard-controls-unified">
@@ -227,6 +216,14 @@ function renderKeyboard() {
                 <option value="qwertz">QWERTZ</option>
                 <option value="hcesar">HCESAR</option>
                 <option value="unicode">Unicode Order</option>
+              </select>
+              <select id="dictionary-language" class="keyboard-select" title="Autocomplete dictionary">
+                <option value="none">-</option>
+                <option value="pt">PT</option>
+                <option value="en">EN</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
               </select>
             </div>
           </div>
