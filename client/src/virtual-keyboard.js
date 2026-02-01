@@ -664,10 +664,56 @@ function renderCharacterGrid() {
         return aIdx - bIdx;
       });
     }
+  } else if (state.currentBlock !== 'Basic Latin') {
+    // For non-Latin blocks: sort by transliteration name
+    // Characters with transliteration come first (alphabetically), then others by code
+    letters.sort((a, b) => {
+      const aTranslit = getTransliteration(state.currentBlock, a.code);
+      const bTranslit = getTransliteration(state.currentBlock, b.code);
+      
+      // Both have transliteration: sort alphabetically by transliteration
+      if (aTranslit && bTranslit) {
+        return aTranslit.localeCompare(bTranslit);
+      }
+      // Only a has transliteration: a comes first
+      if (aTranslit && !bTranslit) return -1;
+      // Only b has transliteration: b comes first
+      if (!aTranslit && bTranslit) return 1;
+      // Neither has transliteration: sort by Unicode code
+      return a.code - b.code;
+    });
+    
+    // Also sort symbols: those with transliteration first
+    symbols.sort((a, b) => {
+      const aTranslit = getTransliteration(state.currentBlock, a.code);
+      const bTranslit = getTransliteration(state.currentBlock, b.code);
+      
+      if (aTranslit && bTranslit) {
+        return aTranslit.localeCompare(bTranslit);
+      }
+      if (aTranslit && !bTranslit) return -1;
+      if (!aTranslit && bTranslit) return 1;
+      return getSymbolOrder(a.char) - getSymbolOrder(b.char);
+    });
+    
+    // Also sort digits: those with transliteration first
+    digits.sort((a, b) => {
+      const aTranslit = getTransliteration(state.currentBlock, a.code);
+      const bTranslit = getTransliteration(state.currentBlock, b.code);
+      
+      if (aTranslit && bTranslit) {
+        return aTranslit.localeCompare(bTranslit);
+      }
+      if (aTranslit && !bTranslit) return -1;
+      if (!aTranslit && bTranslit) return 1;
+      return a.code - b.code;
+    });
   }
   
-  // Sort symbols by frequency
-  symbols.sort((a, b) => getSymbolOrder(a.char) - getSymbolOrder(b.char));
+  // Sort symbols by frequency (only for Basic Latin)
+  if (state.currentBlock === 'Basic Latin') {
+    symbols.sort((a, b) => getSymbolOrder(a.char) - getSymbolOrder(b.char));
+  }
   
   // Build grid using DOM for security
   container.innerHTML = '';
