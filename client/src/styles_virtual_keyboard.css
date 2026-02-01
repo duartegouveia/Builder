@@ -30,12 +30,17 @@
   display: none;
   flex-wrap: nowrap;
   gap: var(--space-1);
-  padding: var(--space-1) 0;
+  padding: var(--space-2);
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   max-width: 100%;
   scrollbar-width: thin;
+  background: var(--slate-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-1);
+  min-height: 32px;
 }
 
 .autocomplete-suggestion {
