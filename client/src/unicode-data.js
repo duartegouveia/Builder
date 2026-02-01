@@ -832,48 +832,60 @@ export const keyboardLayouts = {
 };
 
 // Row structure for layouts that should have line breaks
+// Numbers row: 1-9 then 0
+const numbersRow = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+
 export const keyboardRows = {
   qwerty: [
+    numbersRow,
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
     ['z', 'x', 'c', 'v', 'b', 'n', 'm']
   ],
   azerty: [
+    numbersRow,
     ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm'],
     ['w', 'x', 'c', 'v', 'b', 'n']
   ],
   qwertz: [
+    numbersRow,
     ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
     ['y', 'x', 'c', 'v', 'b', 'n', 'm']
   ],
   'qwerty-pt': [
+    numbersRow,
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç'],
     ['z', 'x', 'c', 'v', 'b', 'n', 'm']
   ],
   'abnt2': [
+    numbersRow,
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç'],
     ['z', 'x', 'c', 'v', 'b', 'n', 'm']
   ],
   'bepo': [
+    numbersRow,
     ['b', 'é', 'p', 'o', 'è', 'v', 'd', 'l', 'j', 'z'],
     ['a', 'u', 'i', 'e', 'c', 't', 's', 'r', 'n', 'm'],
     ['à', 'y', 'x', 'k', 'q', 'g', 'h', 'f', 'w']
   ],
   dvorak: [
+    numbersRow,
     ['p', 'y', 'f', 'g', 'c', 'r', 'l'],
     ['a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's'],
     ['q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z']
   ],
   colemak: [
+    numbersRow,
     ['q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y'],
     ['a', 'r', 's', 't', 'd', 'h', 'n', 'e', 'i', 'o'],
     ['z', 'x', 'c', 'v', 'b', 'k', 'm']
   ],
   workman: [
+    numbersRow,
     ['q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p'],
     ['a', 's', 'h', 't', 'g', 'y', 'n', 'e', 'o', 'i'],
     ['z', 'x', 'm', 'c', 'v', 'k', 'l']

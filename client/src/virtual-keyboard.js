@@ -794,27 +794,43 @@ function renderCharacterGrid() {
     
     // Use row-based layout for Basic Latin with row-supporting layouts
     if (state.currentBlock === 'Basic Latin' && rows) {
-      // Create a map from letter to item for quick lookup
-      const letterMap = {};
+      // Create a map from letter/digit to item for quick lookup
+      const charMap = {};
       letters.forEach(item => {
-        letterMap[item.char.toLowerCase()] = item;
+        charMap[item.char.toLowerCase()] = item;
+      });
+      // Also add digits to the map for layouts that include numbers
+      digits.forEach(item => {
+        charMap[item.char] = item;
       });
       
+      // Track which digits are rendered in rows (to skip them in separate section)
+      const digitsInRows = new Set();
+      
       // Render each row
-      rows.forEach((rowLetters, rowIndex) => {
+      rows.forEach((rowChars, rowIndex) => {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'keyboard-row';
         
-        rowLetters.forEach(letter => {
-          const item = letterMap[letter];
+        rowChars.forEach(char => {
+          const item = charMap[char];
           if (item) {
-            const displayChar = isUppercase ? item.upperChar : item.char;
-            rowDiv.appendChild(createKey(item, displayChar));
+            // Check if this is a digit
+            if (/^\d$/.test(char)) {
+              digitsInRows.add(char);
+              rowDiv.appendChild(createKey(item, item.char));
+            } else {
+              const displayChar = isUppercase ? item.upperChar : item.char;
+              rowDiv.appendChild(createKey(item, displayChar));
+            }
           }
         });
         
         lettersSection.appendChild(rowDiv);
       });
+      
+      // Store which digits were rendered for use later
+      lettersSection.dataset.digitsInRows = JSON.stringify([...digitsInRows]);
     } else {
       // Default: render all letters in a grid
       const lettersGrid = document.createElement('div');
@@ -842,14 +858,21 @@ function renderCharacterGrid() {
     topRow.appendChild(lettersSection);
   }
   
-  // Add digits section
-  if (digits.length > 0) {
+  // Add digits section (only if digits weren't already rendered in rows)
+  const lettersSectionEl = topRow.querySelector('.keyboard-letters-section');
+  const digitsInRowsData = lettersSectionEl?.dataset?.digitsInRows;
+  const digitsInRows = digitsInRowsData ? new Set(JSON.parse(digitsInRowsData)) : new Set();
+  
+  // Filter out digits that were already rendered in rows
+  const remainingDigits = digits.filter(item => !digitsInRows.has(item.char));
+  
+  if (remainingDigits.length > 0) {
     const digitsSection = document.createElement('div');
     digitsSection.className = 'keyboard-digits-section';
     
     const digitsGrid = document.createElement('div');
     digitsGrid.className = 'keyboard-grid-inner';
-    digits.forEach(item => {
+    remainingDigits.forEach(item => {
       digitsGrid.appendChild(createKey(item, item.char));
     });
     digitsSection.appendChild(digitsGrid);
