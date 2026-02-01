@@ -210,11 +210,25 @@ function renderKeyboard() {
             </div>
             <div class="keyboard-layout-selector">
               <select id="layout-select" class="keyboard-select">
-                <option value="alphabetic" selected>Alphabetic</option>
-                <option value="qwerty">QWERTY</option>
-                <option value="azerty">AZERTY</option>
-                <option value="qwertz">QWERTZ</option>
-                <option value="unicode">Unicode Order</option>
+                <optgroup label="Clássicos">
+                  <option value="qwerty">QWERTY</option>
+                  <option value="azerty">AZERTY</option>
+                  <option value="qwertz">QWERTZ</option>
+                </optgroup>
+                <optgroup label="Nacionais">
+                  <option value="qwerty-pt">QWERTY PT</option>
+                  <option value="abnt2">ABNT2</option>
+                  <option value="bepo">BÉPO</option>
+                </optgroup>
+                <optgroup label="Ergonómicos">
+                  <option value="dvorak">Dvorak</option>
+                  <option value="colemak">Colemak</option>
+                  <option value="workman">Workman</option>
+                </optgroup>
+                <optgroup label="Ordenação">
+                  <option value="alphabetic" selected>Alfabética</option>
+                  <option value="unicode">Unicode</option>
+                </optgroup>
               </select>
               <select id="dictionary-language" class="keyboard-select" title="Autocomplete dictionary">
                 <option value="none">-</option>
@@ -1270,7 +1284,7 @@ function updateLayoutOptions() {
   if (!select) return;
   
   const isLatin = isLatinBlock(state.currentBlock);
-  const latinOnlyLayouts = ['qwerty', 'azerty', 'qwertz'];
+  const latinOnlyLayouts = ['qwerty', 'azerty', 'qwertz', 'qwerty-pt', 'abnt2', 'bepo', 'dvorak', 'colemak', 'workman'];
   
   // Show/hide Latin-only options
   Array.from(select.options).forEach(option => {

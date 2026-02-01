@@ -814,10 +814,21 @@ export const accentedVariants = {
 // Layout orders for Latin keyboards
 // Keyboard layouts with row structure for visual line breaks
 export const keyboardLayouts = {
+  // Classic layouts
   qwerty: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
   azerty: ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'w', 'x', 'c', 'v', 'b', 'n'],
   qwertz: ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'y', 'x', 'c', 'v', 'b', 'n', 'm'],
-  alphabetic: 'abcdefghijklmnopqrstuvwxyz'.split('')
+  alphabetic: 'abcdefghijklmnopqrstuvwxyz'.split(''),
+  
+  // National layouts
+  'qwerty-pt': ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
+  'abnt2': ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
+  'bepo': ['b', 'é', 'p', 'o', 'è', 'v', 'd', 'l', 'j', 'z', 'a', 'u', 'i', 'e', 'c', 't', 's', 'r', 'n', 'm', 'à', 'y', 'x', 'k', 'q', 'g', 'h', 'f', 'w'],
+  
+  // Ergonomic layouts
+  dvorak: ['p', 'y', 'f', 'g', 'c', 'r', 'l', 'a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's', 'q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z'],
+  colemak: ['q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y', 'a', 'r', 's', 't', 'd', 'h', 'n', 'e', 'i', 'o', 'z', 'x', 'c', 'v', 'b', 'k', 'm'],
+  workman: ['q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p', 'a', 's', 'h', 't', 'g', 'y', 'n', 'e', 'o', 'i', 'z', 'x', 'm', 'c', 'v', 'k', 'l']
 };
 
 // Row structure for layouts that should have line breaks
@@ -836,6 +847,36 @@ export const keyboardRows = {
     ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
     ['y', 'x', 'c', 'v', 'b', 'n', 'm']
+  ],
+  'qwerty-pt': [
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç'],
+    ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+  ],
+  'abnt2': [
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç'],
+    ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+  ],
+  'bepo': [
+    ['b', 'é', 'p', 'o', 'è', 'v', 'd', 'l', 'j', 'z'],
+    ['a', 'u', 'i', 'e', 'c', 't', 's', 'r', 'n', 'm'],
+    ['à', 'y', 'x', 'k', 'q', 'g', 'h', 'f', 'w']
+  ],
+  dvorak: [
+    ['p', 'y', 'f', 'g', 'c', 'r', 'l'],
+    ['a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's'],
+    ['q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z']
+  ],
+  colemak: [
+    ['q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y'],
+    ['a', 'r', 's', 't', 'd', 'h', 'n', 'e', 'i', 'o'],
+    ['z', 'x', 'c', 'v', 'b', 'k', 'm']
+  ],
+  workman: [
+    ['q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p'],
+    ['a', 's', 'h', 't', 'g', 'y', 'n', 'e', 'o', 'i'],
+    ['z', 'x', 'm', 'c', 'v', 'k', 'l']
   ]
 };
 
