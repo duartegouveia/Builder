@@ -351,6 +351,8 @@ function renderOutputField() {
     }, 10);
     outputEl.addEventListener('input', (e) => {
       state.output = e.target.value;
+      // Update autocomplete suggestions when user types directly
+      updateAutocomplete(e.target.value, e.target.selectionStart);
     });
   }
 }
@@ -1188,11 +1190,8 @@ function attachEventListeners() {
   document.getElementById('btn-enter')?.addEventListener('click', (e) => { e.preventDefault(); handleEnter(); });
   document.getElementById('btn-end')?.addEventListener('click', (e) => { e.preventDefault(); handleEnd(); });
   
-  // Sync output state when user edits textarea directly
-  document.getElementById('keyboard-output')?.addEventListener('input', (e) => {
-    state.output = e.target.value;
-    updateAutocomplete(e.target.value, e.target.selectionStart);
-  });
+  // Note: The input event listener for keyboard-output is added in renderOutputField()
+  // because that element is created dynamically
   
   // Show variants popup when user selects a single character in output
   // Use selectionchange event which is the most reliable for text selection
