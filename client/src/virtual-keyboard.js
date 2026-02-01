@@ -1019,7 +1019,6 @@ function attachEventListeners() {
     
     const keyBtn = e.target.closest('.keyboard-key');
     if (keyBtn) {
-      console.log('[Click] keyboard-key detected, char:', keyBtn.dataset.char);
       // Skip if this was a long-press
       if (state.longPressTriggered) {
         state.longPressTriggered = false;
@@ -1346,10 +1345,8 @@ function selectBlock(blockName, fromHierarchyPopup = false) {
 }
 
 function addToOutput(char, isLetterChar = false) {
-  console.log('[addToOutput] char:', char, 'isLetter:', isLetterChar);
   // Always use the internal keyboard output field
   const targetEl = document.getElementById('keyboard-output');
-  console.log('[addToOutput] targetEl:', targetEl, 'value before:', targetEl?.value);
   
   if (targetEl) {
     const start = targetEl.selectionStart;
@@ -1358,7 +1355,6 @@ function addToOutput(char, isLetterChar = false) {
     const after = targetEl.value.substring(end);
     targetEl.value = before + char + after;
     state.output = targetEl.value;
-    console.log('[addToOutput] value after:', targetEl.value);
     
     const newPos = start + char.length;
     targetEl.setSelectionRange(newPos, newPos);
@@ -1387,11 +1383,9 @@ function getLastWord(text, cursorPos) {
 
 // Get autocomplete suggestions for the current word
 function getSuggestions(prefix, maxCount = 5) {
-  console.log('[getSuggestions] prefix:', prefix, 'lang:', state.dictionaryLanguage);
   if (!prefix || prefix.length < 1) return [];
   
   const dict = dictionaries[state.dictionaryLanguage];
-  console.log('[getSuggestions] dict exists:', !!dict, 'dict length:', dict ? dict.length : 0);
   if (!dict) return [];
   
   const lowerPrefix = prefix.toLowerCase();
@@ -1404,14 +1398,12 @@ function getSuggestions(prefix, maxCount = 5) {
     }
   }
   
-  console.log('[getSuggestions] found:', suggestions);
   return suggestions;
 }
 
 // Update autocomplete suggestions display
 function updateAutocomplete(text, cursorPos) {
   const container = document.getElementById('keyboard-autocomplete');
-  console.log('[Autocomplete] container:', container, 'text:', text, 'cursorPos:', cursorPos, 'dictLang:', state.dictionaryLanguage);
   if (!container) return;
   
   // Clear if no dictionary selected
@@ -1423,15 +1415,12 @@ function updateAutocomplete(text, cursorPos) {
   
   const currentWord = getLastWord(text, cursorPos);
   const suggestions = getSuggestions(currentWord);
-  console.log('[Autocomplete] currentWord:', currentWord, 'suggestions:', suggestions);
   
   if (suggestions.length === 0) {
     container.innerHTML = '';
     container.style.display = 'none';
     return;
   }
-  
-  console.log('[Autocomplete] Showing', suggestions.length, 'suggestions');
   
   container.style.display = 'flex';
   container.innerHTML = suggestions.map(word => {
