@@ -22,7 +22,8 @@ const state = {
   blockLayouts: { 'Basic Latin': 'qwerty' }, // Layout preferences per block
   hasPhysicalKeyboard: true, // Detected device type (desktop/laptop has keyboard)
   popupOriginalChar: null, // Original character that opened the variants popup
-  dictionaryLanguage: 'none' // Autocomplete dictionary language
+  dictionaryLanguage: 'none', // Autocomplete dictionary language
+  physicalShiftPressed: false // Physical Shift key is being held down
 };
 
 // Basic frequency dictionaries for autocomplete (most common words)
@@ -218,6 +219,7 @@ function init() {
   setupExternalFieldTracking();
   setupControlKeyListener();
   setupPhysicalKeyboardListener();
+  setupPhysicalShiftListener();
   updateFloatingButtonVisibility();
 }
 
@@ -790,7 +792,7 @@ function renderCharacterGrid() {
     const lettersSection = document.createElement('div');
     lettersSection.className = 'keyboard-letters-section';
     
-    const isUppercase = state.shiftState !== 'lowercase';
+    const isUppercase = shouldShowUppercase();
     const rows = keyboardRows[state.currentLayout];
     
     // Use row-based layout for Basic Latin with row-supporting layouts
@@ -1981,7 +1983,7 @@ function setupPhysicalKeyboardListener() {
       const mapped = keyMap[lowerKey];
       // Apply shift state
       let charToInsert = mapped.char;
-      if (state.shiftState !== 'lowercase') {
+      if (shouldShowUppercase()) {
         charToInsert = charToInsert.toUpperCase();
       }
       addToOutput(charToInsert, isLetter(charToInsert));
@@ -2002,6 +2004,47 @@ function setupControlKeyListener() {
         toggleKeyboard();
         e.preventDefault();
       }
+    }
+  });
+}
+
+// Calculate if letters should be displayed as uppercase
+// Considers both interface shift state and physical shift key
+function shouldShowUppercase() {
+  if (state.physicalShiftPressed) {
+    // Physical shift inverts the current state
+    return state.shiftState === 'lowercase';
+  }
+  return state.shiftState !== 'lowercase';
+}
+
+// Physical Shift and CapsLock key listeners
+function setupPhysicalShiftListener() {
+  // CapsLock syncs interface to actual CapsLock state
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'CapsLock') {
+      // Use getModifierState to get actual CapsLock state after this keypress
+      // Note: getModifierState returns state BEFORE the key is processed,
+      // so we invert it to get the new state
+      const willBeCapsLock = !e.getModifierState('CapsLock');
+      state.shiftState = willBeCapsLock ? 'capslock' : 'lowercase';
+      updateShiftUI();
+      renderCharacterGrid();
+    }
+  });
+  
+  // Shift key held down - temporary case inversion
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Shift' && !e.repeat) {
+      state.physicalShiftPressed = true;
+      renderCharacterGrid();
+    }
+  });
+  
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'Shift') {
+      state.physicalShiftPressed = false;
+      renderCharacterGrid();
     }
   });
 }
