@@ -336,9 +336,9 @@ function renderOutputField() {
   const currentValue = state.output || '';
   
   if (isMultiline) {
-    wrapper.innerHTML = `<textarea id="keyboard-output" class="keyboard-output" placeholder="Click characters to add them here..."></textarea>`;
+    wrapper.innerHTML = `<textarea id="keyboard-output" class="keyboard-output" autocomplete="off" placeholder="Click characters to add them here..."></textarea>`;
   } else {
-    wrapper.innerHTML = `<input type="text" id="keyboard-output" class="keyboard-output keyboard-output-single" placeholder="Click characters to add them here...">`;
+    wrapper.innerHTML = `<input type="text" id="keyboard-output" class="keyboard-output keyboard-output-single" autocomplete="off" placeholder="Click characters to add them here...">`;
   }
   
   const outputEl = document.getElementById('keyboard-output');
