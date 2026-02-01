@@ -1345,8 +1345,10 @@ function selectBlock(blockName, fromHierarchyPopup = false) {
 }
 
 function addToOutput(char, isLetterChar = false) {
+  console.log('[addToOutput] char:', char, 'isLetter:', isLetterChar);
   // Always use the internal keyboard output field
   const targetEl = document.getElementById('keyboard-output');
+  console.log('[addToOutput] targetEl:', targetEl, 'value before:', targetEl?.value);
   
   if (targetEl) {
     const start = targetEl.selectionStart;
@@ -1355,6 +1357,7 @@ function addToOutput(char, isLetterChar = false) {
     const after = targetEl.value.substring(end);
     targetEl.value = before + char + after;
     state.output = targetEl.value;
+    console.log('[addToOutput] value after:', targetEl.value);
     
     const newPos = start + char.length;
     targetEl.setSelectionRange(newPos, newPos);
