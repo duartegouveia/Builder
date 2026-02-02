@@ -3016,56 +3016,33 @@ input[type="number"] {
     color: var(--primary-foreground, white);
   }
 
-  .keyboard-help-tooltip {
-    display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    right: 0;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-3);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 10000;
-    text-align: left;
-  }
+}
 
-  .keyboard-help-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    right: 6px;
-    border: 6px solid transparent;
-    border-top-color: var(--border);
-  }
+/* Fixed position tooltip for keyboard help (added to body via JS) */
+.keyboard-help-tooltip-fixed {
+  position: fixed;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100000;
+  text-align: left;
+  pointer-events: none;
+}
 
-  .keyboard-help-tooltip::before {
-    content: '';
-    position: absolute;
-    top: 100%;
-    right: 7px;
-    border: 5px solid transparent;
-    border-top-color: var(--card);
-    z-index: 1;
-  }
+.keyboard-help-tooltip-fixed strong {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--foreground);
+}
 
-  .keyboard-help-badge:hover .keyboard-help-tooltip {
-    display: block;
-  }
-
-  .keyboard-help-tooltip strong {
-    display: block;
-    margin-bottom: var(--space-1);
-    color: var(--foreground);
-  }
-
-  .keyboard-help-tooltip b {
-    color: var(--primary);
-    font-weight: 600;
-  }
+.keyboard-help-tooltip-fixed b {
+  color: var(--primary);
+  font-weight: 600;
 }
 
 /* Hide on touch devices */

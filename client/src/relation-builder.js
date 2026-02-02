@@ -4703,20 +4703,78 @@ function renderViewTabs() {
     const initialView = viewOptions[0]?.toLowerCase() || 'table';
     const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
     tabsRight.innerHTML = `
-      <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ
-        <span class="keyboard-help-tooltip" data-testid="text-keyboard-shortcuts">
-          <strong>Atalhos de teclado e rato para o cabeçalho da coluna da tabela</strong><br>
-          <b>Right-click</b> — menu de contexto<br>
-          <b>Shift+click</b> — ordenar por várias colunas<br>
-          <b>Ctrl+click</b> — selecionar colunas
-        </span>
-      </span>
+      <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>
     `;
     viewTabs.appendChild(tabsRight);
+    
+    // Add hover event to show tooltip with fixed positioning
+    const badge = tabsRight.querySelector('.keyboard-help-badge');
+    if (badge) {
+      badge.addEventListener('mouseenter', showKeyboardHelpTooltip);
+      badge.addEventListener('mouseleave', hideKeyboardHelpTooltip);
+    }
   }
   
   // Show view tabs
   viewTabs.style.display = 'flex';
+}
+
+// Keyboard help tooltip functions
+let keyboardHelpTooltipEl = null;
+
+function showKeyboardHelpTooltip(e) {
+  const badge = e.currentTarget;
+  const rect = badge.getBoundingClientRect();
+  
+  // Remove existing tooltip if any
+  hideKeyboardHelpTooltip();
+  
+  // Create tooltip element
+  keyboardHelpTooltipEl = document.createElement('div');
+  keyboardHelpTooltipEl.className = 'keyboard-help-tooltip-fixed';
+  keyboardHelpTooltipEl.dataset.testid = 'text-keyboard-shortcuts';
+  keyboardHelpTooltipEl.innerHTML = `
+    <strong>Atalhos de teclado e rato para o cabeçalho da coluna da tabela</strong><br>
+    <b>Right-click</b> — menu de contexto<br>
+    <b>Shift+click</b> — ordenar por várias colunas<br>
+    <b>Ctrl+click</b> — selecionar colunas
+  `;
+  
+  document.body.appendChild(keyboardHelpTooltipEl);
+  
+  // Calculate position
+  const tooltipRect = keyboardHelpTooltipEl.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  // Position above the badge by default
+  let top = rect.top - tooltipRect.height - 8;
+  let left = rect.right - tooltipRect.width;
+  
+  // If would go off top, position below
+  if (top < 8) {
+    top = rect.bottom + 8;
+  }
+  
+  // If would go off left, adjust
+  if (left < 8) {
+    left = 8;
+  }
+  
+  // If would go off right, adjust
+  if (left + tooltipRect.width > viewportWidth - 8) {
+    left = viewportWidth - tooltipRect.width - 8;
+  }
+  
+  keyboardHelpTooltipEl.style.top = top + 'px';
+  keyboardHelpTooltipEl.style.left = left + 'px';
+}
+
+function hideKeyboardHelpTooltip() {
+  if (keyboardHelpTooltipEl) {
+    keyboardHelpTooltipEl.remove();
+    keyboardHelpTooltipEl = null;
+  }
 }
 
 function switchView(viewName) {
