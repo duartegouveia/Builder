@@ -385,6 +385,37 @@ function matchesCriteria(value, criteria, colIdx) {
     return value.toLowerCase().includes(criteria.contains.toLowerCase());
   }
   
+  // Text criteria operators for string columns
+  if (criteria.textOp) {
+    if (value === null || value === undefined) return false;
+    const strValue = String(value);
+    const searchValue = criteria.textValue || '';
+    const caseSensitive = criteria.caseSensitive;
+    
+    const compareStr = caseSensitive ? strValue : strValue.toLowerCase();
+    const compareSearch = caseSensitive ? searchValue : searchValue.toLowerCase();
+    
+    switch (criteria.textOp) {
+      case 'includes':
+        return compareStr.includes(compareSearch);
+      case 'equals':
+        return compareStr === compareSearch;
+      case 'startsWith':
+        return compareStr.startsWith(compareSearch);
+      case 'endsWith':
+        return compareStr.endsWith(compareSearch);
+      case 'regex':
+        try {
+          const regex = new RegExp(searchValue, caseSensitive ? '' : 'i');
+          return regex.test(strValue);
+        } catch {
+          return false;
+        }
+      default:
+        return true;
+    }
+  }
+  
   // Comparison operators for numeric and date/time types
   if (criteria.comparison) {
     if (value === null || value === undefined) return false;
@@ -2603,6 +2634,9 @@ function showColumnMenu(colIdx, x, y) {
             <button class="column-menu-item" data-action="filter-top10">Top 10</button>
             <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
           ` : ''}
+          ${type === 'string' || type === 'multilinestring' ? `
+            <button class="column-menu-item" data-action="filter-text-criteria">By Criteria...</button>
+          ` : ''}
           <button class="column-menu-item" data-action="filter-null">Only Null</button>
           <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
           <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
@@ -2711,6 +2745,9 @@ function handleColumnMenuAction(colIdx, action) {
       return;
     case 'filter-comparison':
       showFilterComparisonDialog(colIdx);
+      return;
+    case 'filter-text-criteria':
+      showFilterTextCriteriaDialog(colIdx);
       return;
     case 'filter-null':
       state.filters[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
@@ -3043,6 +3080,109 @@ function showFilterComparisonDialog(colIdx) {
     }
     
     state.filters[colIdx] = { type: 'criteria', criteria };
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
+}
+
+function showFilterTextCriteriaDialog(colIdx) {
+  closeAllMenus();
+  
+  const name = state.columnNames[colIdx];
+  const existingFilter = state.filters[colIdx];
+  
+  // Get current filter values if any
+  let currentOp = 'includes';
+  let currentValue = '';
+  let currentCaseSensitive = false;
+  
+  if (existingFilter?.type === 'criteria' && existingFilter.criteria.textOp) {
+    currentOp = existingFilter.criteria.textOp;
+    currentValue = existingFilter.criteria.textValue || '';
+    currentCaseSensitive = existingFilter.criteria.caseSensitive || false;
+  }
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'filter-dialog';
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Filter: ${name}</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="filter-comparison-form">
+      <div class="filter-form-row">
+        <label>Operator:</label>
+        <select id="filter-text-op" class="filter-select">
+          <option value="includes" ${currentOp === 'includes' ? 'selected' : ''}>includes</option>
+          <option value="equals" ${currentOp === 'equals' ? 'selected' : ''}>equal to</option>
+          <option value="startsWith" ${currentOp === 'startsWith' ? 'selected' : ''}>starts with</option>
+          <option value="endsWith" ${currentOp === 'endsWith' ? 'selected' : ''}>ends with</option>
+          <option value="regex" ${currentOp === 'regex' ? 'selected' : ''}>regular expression</option>
+        </select>
+      </div>
+      <div class="filter-form-row">
+        <label id="filter-text-value-label">Text:</label>
+        <input type="text" id="filter-text-value" class="filter-input" value="${currentValue.replace(/"/g, '&quot;')}" placeholder="Enter text...">
+      </div>
+      <div class="filter-form-row" id="filter-case-row">
+        <label></label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="filter-case-sensitive" ${currentCaseSensitive ? 'checked' : ''}>
+          Case sensitive
+        </label>
+      </div>
+      <div class="filter-form-row" id="filter-regex-hint" style="display: ${currentOp === 'regex' ? 'flex' : 'none'}">
+        <label></label>
+        <span class="hint-text">Example: ^[A-Z].*$ (starts with uppercase)</span>
+      </div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline" id="filter-cancel">Cancel</button>
+      <button class="btn btn-primary" id="filter-apply">Apply</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  const opSelect = dialog.querySelector('#filter-text-op');
+  const regexHint = dialog.querySelector('#filter-regex-hint');
+  const valueLabel = dialog.querySelector('#filter-text-value-label');
+  
+  opSelect.addEventListener('change', () => {
+    const isRegex = opSelect.value === 'regex';
+    regexHint.style.display = isRegex ? 'flex' : 'none';
+    valueLabel.textContent = isRegex ? 'Pattern:' : 'Text:';
+  });
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelector('#filter-apply').addEventListener('click', () => {
+    const textOp = opSelect.value;
+    const textValue = dialog.querySelector('#filter-text-value').value;
+    const caseSensitive = dialog.querySelector('#filter-case-sensitive').checked;
+    
+    if (!textValue) {
+      dialog.remove();
+      return;
+    }
+    
+    // Validate regex if needed
+    if (textOp === 'regex') {
+      try {
+        new RegExp(textValue, caseSensitive ? '' : 'i');
+      } catch (e) {
+        alert('Invalid regular expression: ' + e.message);
+        return;
+      }
+    }
+    
+    state.filters[colIdx] = { 
+      type: 'criteria', 
+      criteria: { textOp, textValue, caseSensitive } 
+    };
     state.currentPage = 1;
     dialog.remove();
     renderTable();

@@ -660,6 +660,26 @@ input[type="number"] {
   color: var(--muted-foreground);
 }
 
+.filter-form-row .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-form-row .checkbox-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.filter-form-row .hint-text {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
 .filter-select {
   flex: 1;
   padding: var(--space-2);
