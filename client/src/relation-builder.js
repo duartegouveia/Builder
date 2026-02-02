@@ -2383,8 +2383,8 @@ function renderTable() {
         const avgRowHeight = totalRowHeight / rows.length;
         totalRowHeight = avgRowHeight * maxRows;
       }
-      // +10 for borders, padding, and scrollbar prevention
-      const calculatedHeight = theadHeight + totalRowHeight + 10;
+      // +20 for borders, padding, and scrollbar prevention
+      const calculatedHeight = theadHeight + totalRowHeight + 20;
       tableWrapper.style.maxHeight = calculatedHeight + 'px';
     }
   });
