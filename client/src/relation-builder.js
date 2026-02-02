@@ -5546,6 +5546,317 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
   if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
+function analyzeAllPairs() {
+  if (!state.relation || state.sortedIndices.length < 2) {
+    alert('Not enough data for correlation analysis');
+    return;
+  }
+  
+  const method = el('.corr-method')?.value || 'auto';
+  const results = [];
+  
+  // Get all valid column indices
+  const validCols = [];
+  state.columnTypes.forEach((type, idx) => {
+    if (['int', 'float', 'date', 'datetime', 'time', 'boolean', 'string', 'select'].includes(type)) {
+      validCols.push(idx);
+    }
+  });
+  
+  if (validCols.length < 2) {
+    alert('Need at least 2 columns for correlation analysis');
+    return;
+  }
+  
+  // Helper to convert values
+  function toNumeric(val, type) {
+    if (val === null) return null;
+    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
+    if (['date', 'datetime'].includes(type)) {
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    if (type === 'time') {
+      const parts = String(val).split(':');
+      if (parts.length >= 2) {
+        return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + (parseInt(parts[2]) || 0);
+      }
+      return null;
+    }
+    return null;
+  }
+  
+  // Calculate correlation for each pair
+  for (let i = 0; i < validCols.length; i++) {
+    for (let j = i + 1; j < validCols.length; j++) {
+      const xIdx = validCols[i];
+      const yIdx = validCols[j];
+      const xType = state.columnTypes[xIdx];
+      const yType = state.columnTypes[yIdx];
+      
+      const isNumericX = ['int', 'float'].includes(xType);
+      const isNumericY = ['int', 'float'].includes(yType);
+      const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
+      const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
+      
+      let effectiveMethod = method;
+      if (method === 'auto') {
+        effectiveMethod = ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) ? 'pearson' : 'cramers';
+      }
+      
+      let correlation = 0;
+      let methodUsed = effectiveMethod;
+      let n = 0;
+      
+      if (effectiveMethod === 'pearson' || effectiveMethod === 'spearman') {
+        const pairs = [];
+        state.sortedIndices.forEach(idx => {
+          const row = state.relation.items[idx];
+          const x = toNumeric(row[xIdx], xType);
+          const y = toNumeric(row[yIdx], yType);
+          if (x !== null && y !== null) pairs.push({ x, y });
+        });
+        
+        if (pairs.length >= 2) {
+          n = pairs.length;
+          if (effectiveMethod === 'spearman') {
+            // Rank values
+            function rank(arr) {
+              const sorted = arr.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+              const ranks = new Array(arr.length);
+              let k = 0;
+              while (k < sorted.length) {
+                let l = k;
+                while (l < sorted.length && sorted[l].v === sorted[k].v) l++;
+                const avgRank = (k + 1 + l) / 2;
+                for (let m = k; m < l; m++) ranks[sorted[m].i] = avgRank;
+                k = l;
+              }
+              return ranks;
+            }
+            const xRanks = rank(pairs.map(p => p.x));
+            const yRanks = rank(pairs.map(p => p.y));
+            const sumRx = xRanks.reduce((s, r) => s + r, 0);
+            const sumRy = yRanks.reduce((s, r) => s + r, 0);
+            const sumRxRy = xRanks.reduce((s, r, idx) => s + r * yRanks[idx], 0);
+            const sumRx2 = xRanks.reduce((s, r) => s + r * r, 0);
+            const sumRy2 = yRanks.reduce((s, r) => s + r * r, 0);
+            const num = n * sumRxRy - sumRx * sumRy;
+            const den = Math.sqrt((n * sumRx2 - sumRx * sumRx) * (n * sumRy2 - sumRy * sumRy));
+            correlation = den === 0 ? 0 : num / den;
+          } else {
+            // Pearson
+            const sumX = pairs.reduce((s, p) => s + p.x, 0);
+            const sumY = pairs.reduce((s, p) => s + p.y, 0);
+            const sumXY = pairs.reduce((s, p) => s + p.x * p.y, 0);
+            const sumX2 = pairs.reduce((s, p) => s + p.x * p.x, 0);
+            const sumY2 = pairs.reduce((s, p) => s + p.y * p.y, 0);
+            const num = n * sumXY - sumX * sumY;
+            const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            correlation = den === 0 ? 0 : num / den;
+          }
+        }
+      } else {
+        // Cramér's V
+        const contingency = {};
+        const xCounts = {};
+        const yCounts = {};
+        let total = 0;
+        
+        state.sortedIndices.forEach(idx => {
+          const row = state.relation.items[idx];
+          const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
+          const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
+          if (xVal !== null && yVal !== null) {
+            if (!contingency[xVal]) contingency[xVal] = {};
+            if (!contingency[xVal][yVal]) contingency[xVal][yVal] = 0;
+            contingency[xVal][yVal]++;
+            xCounts[xVal] = (xCounts[xVal] || 0) + 1;
+            yCounts[yVal] = (yCounts[yVal] || 0) + 1;
+            total++;
+          }
+        });
+        
+        if (total >= 2) {
+          n = total;
+          let chiSquared = 0;
+          const xKeys = Object.keys(xCounts);
+          const yKeys = Object.keys(yCounts);
+          xKeys.forEach(xVal => {
+            yKeys.forEach(yVal => {
+              const observed = (contingency[xVal] && contingency[xVal][yVal]) || 0;
+              const expected = (xCounts[xVal] * yCounts[yVal]) / total;
+              if (expected > 0) chiSquared += Math.pow(observed - expected, 2) / expected;
+            });
+          });
+          const k = Math.min(xKeys.length, yKeys.length);
+          correlation = k > 1 ? Math.sqrt(chiSquared / (total * (k - 1))) : 0;
+        }
+      }
+      
+      if (n >= 2) {
+        results.push({
+          xIdx, yIdx,
+          xName: state.columnNames[xIdx],
+          yName: state.columnNames[yIdx],
+          method: methodUsed,
+          correlation: correlation,
+          absCorrelation: Math.abs(correlation),
+          n: n
+        });
+      }
+    }
+  }
+  
+  // Sort by absolute correlation descending
+  results.sort((a, b) => b.absCorrelation - a.absCorrelation);
+  
+  // Render accordion
+  let html = '<div class="correlation-accordion">';
+  results.forEach((r, idx) => {
+    const sign = r.method === 'cramers' ? '' : (r.correlation >= 0 ? '+' : '');
+    const colorClass = r.absCorrelation >= 0.5 ? 'corr-strong' : r.absCorrelation >= 0.3 ? 'corr-moderate' : r.absCorrelation >= 0.1 ? 'corr-weak' : 'corr-none';
+    const methodLabel = r.method === 'pearson' ? 'Pearson' : r.method === 'spearman' ? 'Spearman' : "Cramér's V";
+    
+    html += '<div class="corr-accordion-item">';
+    html += '<div class="corr-accordion-header ' + colorClass + '" data-idx="' + idx + '">';
+    html += '<span class="corr-accordion-title">' + escapeHtml(r.xName) + ' × ' + escapeHtml(r.yName) + '</span>';
+    html += '<span class="corr-accordion-meta">' + methodLabel + ': ' + sign + r.correlation.toFixed(3) + ' (n=' + r.n + ')</span>';
+    html += '<span class="corr-accordion-arrow">▶</span>';
+    html += '</div>';
+    html += '<div class="corr-accordion-content" data-x="' + r.xIdx + '" data-y="' + r.yIdx + '" data-method="' + r.method + '" style="display: none;"></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  
+  if (results.length === 0) {
+    html = '<p class="text-muted-foreground">No valid column pairs found for correlation analysis.</p>';
+  }
+  
+  const corrResultEl = el('.correlation-result');
+  if (corrResultEl) {
+    corrResultEl.innerHTML = html;
+    
+    // Add accordion click handlers
+    corrResultEl.querySelectorAll('.corr-accordion-header').forEach(header => {
+      header.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const arrow = this.querySelector('.corr-accordion-arrow');
+        const isOpen = content.style.display !== 'none';
+        
+        if (isOpen) {
+          content.style.display = 'none';
+          arrow.textContent = '▶';
+        } else {
+          content.style.display = 'block';
+          arrow.textContent = '▼';
+          
+          // Load detailed view if not already loaded
+          if (!content.dataset.loaded) {
+            const xIdx = parseInt(content.dataset.x);
+            const yIdx = parseInt(content.dataset.y);
+            const method = content.dataset.method;
+            renderPairDetail(content, xIdx, yIdx, method);
+            content.dataset.loaded = 'true';
+          }
+        }
+      });
+    });
+  }
+}
+
+function renderPairDetail(container, xIdx, yIdx, method) {
+  const xType = state.columnTypes[xIdx];
+  const yType = state.columnTypes[yIdx];
+  
+  function toNumeric(val, type) {
+    if (val === null) return null;
+    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
+    if (['date', 'datetime'].includes(type)) {
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    if (type === 'time') {
+      const parts = String(val).split(':');
+      if (parts.length >= 2) {
+        return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + (parseInt(parts[2]) || 0);
+      }
+      return null;
+    }
+    return null;
+  }
+  
+  if (method === 'pearson' || method === 'spearman') {
+    const pairs = [];
+    state.sortedIndices.forEach(idx => {
+      const row = state.relation.items[idx];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) pairs.push({ x, y });
+    });
+    
+    if (pairs.length < 2) {
+      container.innerHTML = '<p class="text-muted-foreground">Not enough data pairs.</p>';
+      return;
+    }
+    
+    // Build inline scatter plot
+    const width = 350;
+    const height = 250;
+    const padding = 35;
+    
+    const xMin = Math.min(...pairs.map(p => p.x));
+    const xMax = Math.max(...pairs.map(p => p.x));
+    const yMin = Math.min(...pairs.map(p => p.y));
+    const yMax = Math.max(...pairs.map(p => p.y));
+    
+    const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+    const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+    
+    let html = '<svg class="correlation-scatter-small" viewBox="0 0 ' + width + ' ' + height + '">';
+    html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+    html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+    html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
+    html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+    
+    const color = method === 'spearman' ? '#10b981' : '#3b82f6';
+    pairs.forEach(p => {
+      html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="3" fill="' + color + '" opacity="0.5"/>';
+    });
+    
+    html += '</svg>';
+    container.innerHTML = html;
+  } else {
+    // Cramér's V - show contingency info
+    const contingency = {};
+    const xCounts = {};
+    const yCounts = {};
+    let total = 0;
+    
+    state.sortedIndices.forEach(idx => {
+      const row = state.relation.items[idx];
+      const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
+      const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
+      if (xVal !== null && yVal !== null) {
+        if (!contingency[xVal]) contingency[xVal] = {};
+        if (!contingency[xVal][yVal]) contingency[xVal][yVal] = 0;
+        contingency[xVal][yVal]++;
+        xCounts[xVal] = (xCounts[xVal] || 0) + 1;
+        yCounts[yVal] = (yCounts[yVal] || 0) + 1;
+        total++;
+      }
+    });
+    
+    const xKeys = Object.keys(xCounts);
+    const yKeys = Object.keys(yCounts);
+    
+    let html = '<div class="corr-detail-cramers">';
+    html += '<p>' + xKeys.length + ' × ' + yKeys.length + ' categories, ' + total + ' observations</p>';
+    html += '</div>';
+    container.innerHTML = html;
+  }
+}
+
 function runClustering() {
   if (!state.relation || state.sortedIndices.length === 0) {
     alert('No data to cluster');
@@ -6263,6 +6574,7 @@ function init() {
       helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
     }
   });
+  el('.btn-corr-all')?.addEventListener('click', analyzeAllPairs);
   
   // Diagram events
   el('.btn-run-clustering')?.addEventListener('click', runClustering);
