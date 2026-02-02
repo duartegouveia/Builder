@@ -1351,15 +1351,29 @@ input[type="number"] {
   font-style: italic;
 }
 
+.ai-response.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ai-response.loading::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-200);
+  border-top-color: var(--primary-600);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .ai-response.loading::after {
   content: "Analyzing...";
   color: var(--primary-600);
-  animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* AI Response HTML content styles */
