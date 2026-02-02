@@ -4953,22 +4953,28 @@ function switchView(viewName) {
 
 let cardsResizeObserver = null;
 
-function renderCardsView() {
-  if (!state.relation) return;
+function renderCardsView(st = state) {
+  if (!st.relation) return;
   
-  const wrapper = el('.cards-view-wrapper');
-  const cardsContent = el('.cards-content');
-  const cardsNavigation = el('.cards-navigation');
+  const wrapper = st.container ? st.container.querySelector('.cards-view-wrapper') : el('.cards-view-wrapper');
+  const cardsContent = st.container ? st.container.querySelector('.cards-content') : el('.cards-content');
+  const cardsNavigation = st.container ? st.container.querySelector('.cards-navigation') : el('.cards-navigation');
   
   if (!wrapper || !cardsContent || !cardsNavigation) return;
   
-  const indices = getSortedIndices(state);
+  // Ensure indices are populated for this state
+  if (getSortedIndices(st).length === 0 && getFilteredIndices(st).length === 0) {
+    setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+    setSortedIndices(st, [...getFilteredIndices(st)]);
+  }
   
-  // Setup resize observer if not already
-  if (!cardsResizeObserver) {
+  const indices = getSortedIndices(st);
+  
+  // Setup resize observer if not already (only for global state)
+  if (!st.container && !cardsResizeObserver) {
     cardsResizeObserver = new ResizeObserver(() => {
-      if (getCurrentView(state) === 'cards') {
-        renderCardsView();
+      if (getCurrentView(st) === 'cards') {
+        renderCardsView(st);
       }
     });
     cardsResizeObserver.observe(wrapper);
@@ -4981,24 +4987,24 @@ function renderCardsView() {
   
   // Calculate page sizes (3, 6, 9, 12 rows of cards)
   const pageSizeOptions = [3, 6, 9, 12].map(rows => rows * cardsPerRow);
-  setCardsPageSize(state, pageSizeOptions.find(s => s >= getCardsPageSize(state)) || pageSizeOptions[0]);
+  setCardsPageSize(st, pageSizeOptions.find(s => s >= getCardsPageSize(st)) || pageSizeOptions[0]);
   
   const totalItems = indices.length;
-  const totalPages = Math.ceil(totalItems / getCardsPageSize(state));
-  const startIdx = (getCardsCurrentPage(state) - 1) * getCardsPageSize(state);
-  const endIdx = Math.min(startIdx + getCardsPageSize(state), totalItems);
+  const totalPages = Math.ceil(totalItems / getCardsPageSize(st));
+  const startIdx = (getCardsCurrentPage(st) - 1) * getCardsPageSize(st);
+  const endIdx = Math.min(startIdx + getCardsPageSize(st), totalItems);
   const pageIndices = indices.slice(startIdx, endIdx);
   
   // Render cards grid in first div
   let cardsHtml = '<div class="cards-grid" style="display: grid; grid-template-columns: repeat(' + cardsPerRow + ', 1fr); gap: 16px;">';
   
   // Calculate grid layout based on number of columns
-  const numCols = state.columnNames.length;
+  const numCols = st.columnNames.length;
   const gridCols = Math.min(numCols, 4); // Max 4 columns in grid
   
   pageIndices.forEach((rowIdx, i) => {
-    const row = state.relation.items[rowIdx];
-    const isSelected = getSelectedRows(state).has(rowIdx);
+    const row = st.relation.items[rowIdx];
+    const isSelected = getSelectedRows(st).has(rowIdx);
     
     cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '" style="--card-grid-cols: ' + gridCols + ';">';
     cardsHtml += '<div class="data-card-header">';
@@ -5007,16 +5013,16 @@ function renderCardsView() {
     cardsHtml += '</div>';
     cardsHtml += '<div class="data-card-body">';
     
-    state.columnNames.forEach((colName, colIdx) => {
+    st.columnNames.forEach((colName, colIdx) => {
       const value = row[colIdx];
-      const type = state.columnTypes[colIdx];
+      const type = st.columnTypes[colIdx];
       let displayValue = formatCellValue(value, type, colName);
       
       // Get display value for tooltip (use option label for select type)
       let tooltipValue = '';
       if (value !== null && value !== undefined) {
         if (type === 'select') {
-          const colOptions = state.options[colName];
+          const colOptions = st.options[colName];
           tooltipValue = (colOptions && colOptions[value] !== undefined) ? colOptions[value] : String(value);
         } else if (type === 'relation') {
           tooltipValue = (value?.items?.length || 0) + ' rows';
@@ -5046,9 +5052,9 @@ function renderCardsView() {
   cardsContent.innerHTML = cardsHtml;
   
   // Render navigation in second div
-  const totalRecords = state.relation.items.length;
-  const filteredRecords = getFilteredIndices(state).length;
-  const selectedRecords = getSelectedRows(state).size;
+  const totalRecords = st.relation.items.length;
+  const filteredRecords = getFilteredIndices(st).length;
+  const selectedRecords = getSelectedRows(st).size;
   const hasFilter = filteredRecords !== totalRecords;
   
   let navHtml = '<div class="cards-info">';
@@ -5060,14 +5066,14 @@ function renderCardsView() {
   navHtml += '</div>';
   
   navHtml += '<div class="cards-pagination">';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (getCardsCurrentPage(state) <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (getCardsCurrentPage(state) <= 1 ? 'disabled' : '') + '>⟨</button>';
-  navHtml += '<span>Page ' + getCardsCurrentPage(state) + ' of ' + totalPages + '</span>';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (getCardsCurrentPage(state) >= totalPages ? 'disabled' : '') + '>⟩</button>';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (getCardsCurrentPage(state) >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (getCardsCurrentPage(st) <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (getCardsCurrentPage(st) <= 1 ? 'disabled' : '') + '>⟨</button>';
+  navHtml += '<span>Page ' + getCardsCurrentPage(st) + ' of ' + totalPages + '</span>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (getCardsCurrentPage(st) >= totalPages ? 'disabled' : '') + '>⟩</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (getCardsCurrentPage(st) >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
   navHtml += '<select class="cards-page-size">';
   pageSizeOptions.forEach(size => {
-    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(state) === size ? 'selected' : '') + '>' + size + ' cards</option>';
+    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(st) === size ? 'selected' : '') + '>' + size + ' cards</option>';
   });
   navHtml += '</select>';
   navHtml += '</div>';
@@ -5089,9 +5095,9 @@ function renderCardsView() {
     cb.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.rowIdx);
       if (e.target.checked) {
-        getSelectedRows(state).add(idx);
+        getSelectedRows(st).add(idx);
       } else {
-        getSelectedRows(state).delete(idx);
+        getSelectedRows(st).delete(idx);
       }
       e.target.closest('.data-card').classList.toggle('selected', e.target.checked);
     });
@@ -5110,18 +5116,18 @@ function renderCardsView() {
   cardsNavigation.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const action = e.target.dataset.action;
-      if (action === 'cards-first') setCardsCurrentPage(state, 1);
-      else if (action === 'cards-prev') setCardsCurrentPage(state, Math.max(1, getCardsCurrentPage(state) - 1));
-      else if (action === 'cards-next') setCardsCurrentPage(state, Math.min(totalPages, getCardsCurrentPage(state) + 1));
-      else if (action === 'cards-last') setCardsCurrentPage(state, totalPages);
-      renderCardsView();
+      if (action === 'cards-first') setCardsCurrentPage(st, 1);
+      else if (action === 'cards-prev') setCardsCurrentPage(st, Math.max(1, getCardsCurrentPage(st) - 1));
+      else if (action === 'cards-next') setCardsCurrentPage(st, Math.min(totalPages, getCardsCurrentPage(st) + 1));
+      else if (action === 'cards-last') setCardsCurrentPage(st, totalPages);
+      renderCardsView(st);
     });
   });
   
   cardsNavigation.querySelector('.cards-page-size')?.addEventListener('change', (e) => {
-    setCardsPageSize(state, parseInt(e.target.value));
-    setCardsCurrentPage(state, 1);
-    renderCardsView();
+    setCardsPageSize(st, parseInt(e.target.value));
+    setCardsCurrentPage(st, 1);
+    renderCardsView(st);
   });
   
   cardsNavigation.querySelector('.cards-selection-actions')?.addEventListener('change', (e) => {
@@ -5130,34 +5136,34 @@ function renderCardsView() {
     
     if (action === 'invert-page') {
       pageIndices.forEach(idx => {
-        if (getSelectedRows(state).has(idx)) {
-          getSelectedRows(state).delete(idx);
+        if (getSelectedRows(st).has(idx)) {
+          getSelectedRows(st).delete(idx);
         } else {
-          getSelectedRows(state).add(idx);
+          getSelectedRows(st).add(idx);
         }
       });
     } else if (action === 'invert-all') {
       indices.forEach(idx => {
-        if (getSelectedRows(state).has(idx)) {
-          getSelectedRows(state).delete(idx);
+        if (getSelectedRows(st).has(idx)) {
+          getSelectedRows(st).delete(idx);
         } else {
-          getSelectedRows(state).add(idx);
+          getSelectedRows(st).add(idx);
         }
       });
     } else if (action === 'select-all') {
-      indices.forEach(idx => getSelectedRows(state).add(idx));
+      indices.forEach(idx => getSelectedRows(st).add(idx));
     } else if (action === 'deselect-all') {
-      getSelectedRows(state).clear();
+      getSelectedRows(st).clear();
     }
     
-    renderCardsView();
+    renderCardsView(st);
   });
 }
 
-function getCategoricalOrNumericColumns() {
+function getCategoricalOrNumericColumns(st = state) {
   const cols = [];
-  state.columnNames.forEach((name, idx) => {
-    const type = state.columnTypes[idx];
+  st.columnNames.forEach((name, idx) => {
+    const type = st.columnTypes[idx];
     if (['boolean', 'string', 'select', 'int', 'float', 'date', 'datetime', 'time'].includes(type)) {
       cols.push({ idx, name, type });
     }
@@ -5165,11 +5171,13 @@ function getCategoricalOrNumericColumns() {
   return cols;
 }
 
-function initPivotConfig() {
-  const cols = getCategoricalOrNumericColumns();
+function initPivotConfig(st = state) {
+  const cols = getCategoricalOrNumericColumns(st);
   
-  const rowSelect = el('.pivot-rows');
-  const colSelect = el('.pivot-cols');
+  const rowSelect = st.container ? st.container.querySelector('.pivot-rows') : el('.pivot-rows');
+  const colSelect = st.container ? st.container.querySelector('.pivot-cols') : el('.pivot-cols');
+  
+  if (!rowSelect || !colSelect) return;
   
   let options = '<option value="">Select column...</option>';
   cols.forEach(c => {
@@ -5180,16 +5188,18 @@ function initPivotConfig() {
   colSelect.innerHTML = options;
   
   // Initialize values config
-  renderPivotValuesConfig();
+  renderPivotValuesConfig(st);
 }
 
-function renderPivotValuesConfig() {
-  const container = el('.pivot-values-config');
-  const cols = getCategoricalOrNumericColumns();
+function renderPivotValuesConfig(st = state) {
+  const container = st.container ? st.container.querySelector('.pivot-values-config') : el('.pivot-values-config');
+  if (!container) return;
+  
+  const cols = getCategoricalOrNumericColumns(st);
   
   let html = '';
-  getPivotConfig(state).values.forEach((v, i) => {
-    const colName = v.column !== null ? state.columnNames[v.column] : '';
+  getPivotConfig(st).values.forEach((v, i) => {
+    const colName = v.column !== null ? st.columnNames[v.column] : '';
     html += '<div class="pivot-value-item">';
     html += '<select class="pivot-value-col" data-idx="' + i + '">';
     html += '<option value="">Column...</option>';
@@ -5217,22 +5227,22 @@ function renderPivotValuesConfig() {
   container.querySelectorAll('.pivot-value-col').forEach(sel => {
     sel.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.idx);
-      getPivotConfig(state).values[idx].column = e.target.value ? parseInt(e.target.value) : null;
+      getPivotConfig(st).values[idx].column = e.target.value ? parseInt(e.target.value) : null;
     });
   });
   
   container.querySelectorAll('.pivot-value-agg').forEach(sel => {
     sel.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.idx);
-      getPivotConfig(state).values[idx].aggregation = e.target.value;
+      getPivotConfig(st).values[idx].aggregation = e.target.value;
     });
   });
   
   container.querySelectorAll('[data-remove-idx]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const idx = parseInt(e.target.dataset.removeIdx);
-      getPivotConfig(state).values.splice(idx, 1);
-      renderPivotValuesConfig();
+      getPivotConfig(st).values.splice(idx, 1);
+      renderPivotValuesConfig(st);
     });
   });
 }
@@ -5531,11 +5541,13 @@ function generatePivotTable() {
   if (pivotContainer) pivotContainer.innerHTML = html;
 }
 
-function initCorrelationConfig() {
-  const cols = getCategoricalOrNumericColumns();
+function initCorrelationConfig(st = state) {
+  const cols = getCategoricalOrNumericColumns(st);
   
-  const xSelect = el('.corr-col-x');
-  const ySelect = el('.corr-col-y');
+  const xSelect = st.container ? st.container.querySelector('.corr-col-x') : el('.corr-col-x');
+  const ySelect = st.container ? st.container.querySelector('.corr-col-y') : el('.corr-col-y');
+  
+  if (!xSelect || !ySelect) return;
   
   let options = '<option value="">Select column...</option>';
   cols.forEach(c => {
@@ -8099,55 +8111,96 @@ function switchViewForInstance(st, view) {
   }
 }
 
-// Wrapper functions for parametrized view rendering
+// Wrapper functions for parametrized view rendering - all views use same code path
 function renderCards(st = state) {
-  if (st.container) {
-    renderCardsWithState(st);
-  } else {
-    renderCardsView();
-  }
+  renderCardsView(st);
 }
 
 function renderPivot(st = state) {
-  if (st.container) {
-    renderPivotWithState(st);
-  } else {
-    initPivotConfig();
-  }
+  initPivotConfig(st);
 }
 
 function renderCorrelation(st = state) {
-  if (st.container) {
-    // For instances, show placeholder (correlation view is complex)
-    const container = st.container.querySelector('.view-correlation');
-    if (container) {
-      const inner = container.querySelector('p');
-      if (inner) inner.textContent = 'Vista "Correlation" - funcionalidade completa em desenvolvimento.';
-    }
-  } else {
-    initCorrelationConfig();
-  }
+  initCorrelationConfig(st);
 }
 
 function renderAI(st = state) {
-  // AI view is always ready, no special initialization needed
-  if (st.container) {
-    const container = st.container.querySelector('.view-ai');
-    if (container) {
-      const inner = container.querySelector('p');
-      if (inner) inner.textContent = 'Vista "AI" - funcionalidade completa em desenvolvimento.';
-    }
-  }
+  initAIView(st);
 }
 
 function renderSaved(st = state) {
-  // Saved view is placeholder for future feature
-  if (st.container) {
-    const container = st.container.querySelector('.view-saved');
-    if (container) {
-      const inner = container.querySelector('p');
-      if (inner) inner.textContent = 'Vista "Saved" - funcionalidade completa em desenvolvimento.';
-    }
+  initSavedView(st);
+}
+
+function initAIView(st = state) {
+  const container = st.container ? st.container.querySelector('.ai-assistant') : el('.ai-assistant');
+  if (!container) return;
+  
+  // AI view is ready in HTML, just ensure event handlers work with correct state
+  const input = container.querySelector('.ai-input');
+  const submitBtn = container.querySelector('.ai-submit');
+  
+  if (input && submitBtn) {
+    // Re-attach handlers to use correct state
+    const newSubmitBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+    
+    newSubmitBtn.addEventListener('click', () => {
+      const question = input.value.trim();
+      if (question) {
+        askAIWithState(question, st);
+      }
+    });
+    
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+    
+    newInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const question = newInput.value.trim();
+        if (question) {
+          askAIWithState(question, st);
+        }
+      }
+    });
+  }
+}
+
+function initSavedView(st = state) {
+  const container = st.container ? st.container.querySelector('.saved-views-list') : el('.saved-views-list');
+  if (!container) return;
+  
+  // Saved view placeholder - will show saved view configs when implemented
+  container.innerHTML = '<p class="text-muted-foreground">No saved views yet. Save a view configuration to access it here.</p>';
+}
+
+async function askAIWithState(question, st = state) {
+  if (!st.relation) return;
+  
+  const responseContainer = st.container ? st.container.querySelector('.ai-response') : el('.ai-response');
+  if (!responseContainer) return;
+  
+  responseContainer.innerHTML = '<p class="text-muted-foreground">Analyzing...</p>';
+  
+  try {
+    const context = {
+      columns: st.columnNames.map((name, i) => ({ name, type: st.columnTypes[i] })),
+      rowCount: st.relation.items.length,
+      sampleData: st.relation.items.slice(0, 5)
+    };
+    
+    const response = await fetch('/api/ai/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, context })
+    });
+    
+    if (!response.ok) throw new Error('AI request failed');
+    
+    const result = await response.json();
+    responseContainer.innerHTML = '<div class="ai-result">' + escapeHtml(result.answer || result.response || 'No response') + '</div>';
+  } catch (error) {
+    responseContainer.innerHTML = '<p class="text-error">Error: ' + escapeHtml(error.message) + '</p>';
   }
 }
 
@@ -8500,237 +8553,7 @@ function showStatisticsPanelForInstance(st, colIdx) {
   document.body.appendChild(popup);
 }
 
-// Render cards for a specific instance - uses same CSS classes as main cards view
-function renderCardsWithState(st) {
-  const container = st.container;
-  const cardsWrapper = container.querySelector('.cards-view-wrapper');
-  if (!cardsWrapper || !st.relation) return;
-  
-  const cardsContent = cardsWrapper.querySelector('.cards-content');
-  const cardsNav = cardsWrapper.querySelector('.cards-navigation');
-  
-  // Ensure indices are populated
-  if (getSortedIndices(st).length === 0 && getFilteredIndices(st).length === 0) {
-    setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-    setSortedIndices(st, [...getFilteredIndices(st)]);
-  }
-  
-  const indices = getSortedIndices(st).length > 0 ? getSortedIndices(st) : getFilteredIndices(st);
-  const totalItems = indices.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / getCardsPageSize(st)));
-  const startIdx = (getCardsCurrentPage(st) - 1) * getCardsPageSize(st);
-  const pageIndices = indices.slice(startIdx, startIdx + getCardsPageSize(st));
-  
-  // Use the same data-cards-grid class as main view
-  let html = '<div class="data-cards-grid">';
-  pageIndices.forEach(rowIdx => {
-    const row = st.relation.items[rowIdx];
-    const isSelected = getSelectedRows(st).has(rowIdx);
-    
-    html += `<div class="data-card ${isSelected ? 'card-selected' : ''}" data-row-idx="${rowIdx}">`;
-    html += `<input type="checkbox" class="data-card-checkbox" ${isSelected ? 'checked' : ''} data-row-idx="${rowIdx}">`;
-    html += `<span class="card-id">#${rowIdx + 1}</span>`;
-    
-    st.columnNames.forEach((colName, colIdx) => {
-      const value = row[colIdx];
-      const type = st.columnTypes[colIdx];
-      const displayValue = formatCellValueForInstance(value, type, st.options, colName);
-      html += `<div class="card-field"><span class="card-field-label">${escapeHtml(colName)}:</span> ${displayValue}</div>`;
-    });
-    
-    html += '</div>';
-  });
-  html += '</div>';
-  cardsContent.innerHTML = html;
-  
-  // Navigation with selection info
-  const selectedCount = getSelectedRows(st).size;
-  let navHtml = `
-    <span class="cards-info">${totalItems} total</span>
-    <span class="cards-info-selected">${selectedCount} selected</span>
-  `;
-  if (totalPages > 1) {
-    navHtml += `
-      <button class="btn btn-sm cards-page-btn" data-action="first" ${getCardsCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
-      <button class="btn btn-sm cards-page-btn" data-action="prev" ${getCardsCurrentPage(st) === 1 ? 'disabled' : ''}>‹</button>
-      <span>Página ${getCardsCurrentPage(st)} de ${totalPages}</span>
-      <button class="btn btn-sm cards-page-btn" data-action="next" ${getCardsCurrentPage(st) === totalPages ? 'disabled' : ''}>›</button>
-      <button class="btn btn-sm cards-page-btn" data-action="last" ${getCardsCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
-    `;
-  }
-  navHtml += `
-    <select class="cards-page-size-select">
-      <option value="12" ${getCardsPageSize(st) === 12 ? 'selected' : ''}>12 cards</option>
-      <option value="24" ${getCardsPageSize(st) === 24 ? 'selected' : ''}>24 cards</option>
-      <option value="48" ${getCardsPageSize(st) === 48 ? 'selected' : ''}>48 cards</option>
-    </select>
-  `;
-  cardsNav.innerHTML = navHtml;
-  
-  // Card selection
-  cardsContent.querySelectorAll('.data-card-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', (e) => {
-      const rowIdx = parseInt(e.target.dataset.rowIdx);
-      if (e.target.checked) {
-        getSelectedRows(st).add(rowIdx);
-      } else {
-        getSelectedRows(st).delete(rowIdx);
-      }
-      e.target.closest('.data-card').classList.toggle('card-selected', e.target.checked);
-      cardsNav.querySelector('.cards-info-selected').textContent = `${getSelectedRows(st).size} selected`;
-    });
-  });
-  
-  // Page size change
-  cardsNav.querySelector('.cards-page-size-select')?.addEventListener('change', (e) => {
-    setCardsPageSize(st, parseInt(e.target.value));
-    setCardsCurrentPage(st, 1);
-    renderCardsWithState(st);
-  });
-  
-  // Navigation buttons
-  cardsNav.querySelectorAll('.cards-page-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const action = btn.dataset.action;
-      if (action === 'first') setCardsCurrentPage(st, 1);
-      else if (action === 'prev') setCardsCurrentPage(st, Math.max(1, getCardsCurrentPage(st) - 1));
-      else if (action === 'next') setCardsCurrentPage(st, Math.min(totalPages, getCardsCurrentPage(st) + 1));
-      else if (action === 'last') setCardsCurrentPage(st, totalPages);
-      renderCardsWithState(st);
-    });
-  });
-}
-
-// Render pivot for a specific instance
-function renderPivotWithState(st) {
-  const container = st.container;
-  const pivotWrapper = container.querySelector('.view-pivot');
-  if (!pivotWrapper || !st.relation) return;
-  
-  const pivotConfig = pivotWrapper.querySelector('.pivot-config');
-  const pivotContainer = pivotWrapper.querySelector('.pivot-table-container');
-  
-  // Populate row and column selects
-  const rowsSelect = pivotConfig.querySelector('.pivot-rows');
-  const colsSelect = pivotConfig.querySelector('.pivot-cols');
-  
-  let optionsHtml = '<option value="">-- Select --</option>';
-  st.columnNames.forEach((name, idx) => {
-    optionsHtml += `<option value="${idx}">${escapeHtml(name)}</option>`;
-  });
-  
-  rowsSelect.innerHTML = optionsHtml;
-  colsSelect.innerHTML = optionsHtml;
-  
-  // Set current values if any
-  const pivotCfg = getPivotConfig(st);
-  if (pivotCfg.rowColumn !== null) rowsSelect.value = pivotCfg.rowColumn;
-  if (pivotCfg.colColumn !== null) colsSelect.value = pivotCfg.colColumn;
-  
-  // Add event listeners
-  rowsSelect.addEventListener('change', (e) => {
-    pivotCfg.rowColumn = e.target.value === '' ? null : parseInt(e.target.value);
-  });
-  
-  colsSelect.addEventListener('change', (e) => {
-    pivotCfg.colColumn = e.target.value === '' ? null : parseInt(e.target.value);
-  });
-  
-  // Generate pivot button
-  pivotConfig.querySelector('.btn-generate-pivot')?.addEventListener('click', () => {
-    generatePivotTableForInstance(st, pivotContainer);
-  });
-}
-
-function generatePivotTableForInstance(st, pivotContainer) {
-  const pivotCfg = getPivotConfig(st);
-  if (pivotCfg.rowColumn === null || pivotCfg.colColumn === null) {
-    pivotContainer.innerHTML = '<p class="text-muted-foreground">Please select both row and column dimensions.</p>';
-    return;
-  }
-  
-  const rowCol = pivotCfg.rowColumn;
-  const colCol = pivotCfg.colColumn;
-  
-  // Get unique values for rows and columns
-  const rowValues = new Set();
-  const colValues = new Set();
-  const data = {};
-  
-  getFilteredIndices(st).forEach(idx => {
-    const row = st.relation.items[idx];
-    const rowVal = row[rowCol] ?? '(null)';
-    const colVal = row[colCol] ?? '(null)';
-    
-    rowValues.add(rowVal);
-    colValues.add(colVal);
-    
-    if (!data[rowVal]) data[rowVal] = {};
-    if (!data[rowVal][colVal]) data[rowVal][colVal] = 0;
-    data[rowVal][colVal]++;
-  });
-  
-  const rowArr = Array.from(rowValues).sort();
-  const colArr = Array.from(colValues).sort();
-  
-  // Build table
-  let html = '<table class="pivot-table"><thead><tr><th></th>';
-  colArr.forEach(c => {
-    html += `<th>${escapeHtml(String(c))}</th>`;
-  });
-  html += '<th>Total</th></tr></thead><tbody>';
-  
-  rowArr.forEach(r => {
-    html += `<tr><th>${escapeHtml(String(r))}</th>`;
-    let rowTotal = 0;
-    colArr.forEach(c => {
-      const count = data[r]?.[c] || 0;
-      rowTotal += count;
-      html += `<td>${count}</td>`;
-    });
-    html += `<td class="pivot-total">${rowTotal}</td></tr>`;
-  });
-  
-  // Grand totals row
-  html += '<tr class="pivot-grand-total"><th>Total</th>';
-  let grandTotal = 0;
-  colArr.forEach(c => {
-    let colTotal = 0;
-    rowArr.forEach(r => {
-      colTotal += data[r]?.[c] || 0;
-    });
-    grandTotal += colTotal;
-    html += `<td>${colTotal}</td>`;
-  });
-  html += `<td>${grandTotal}</td></tr>`;
-  
-  html += '</tbody></table>';
-  pivotContainer.innerHTML = html;
-}
-
-// Format cell value for instance (uses passed options)
-function formatCellValueForInstance(value, type, options, colName) {
-  if (value === null || value === undefined) return '<span class="null-value">null</span>';
-  
-  if (type === 'relation') {
-    const count = value?.items?.length || 0;
-    return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
-  }
-  if (type === 'boolean') {
-    if (value === true) return '<span class="bool-display bool-display-true">✓</span>';
-    if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
-    return '<span class="bool-display bool-display-null">—</span>';
-  }
-  if (type === 'select') {
-    const colOptions = options[colName];
-    if (colOptions && colOptions[value] !== undefined) {
-      return `<span class="select-display">${escapeHtml(colOptions[value])}</span>`;
-    }
-    return `<span class="select-display-key">${escapeHtml(String(value))}</span>`;
-  }
-  
-  return escapeHtml(String(value));
-}
+// Duplicate functions removed - using parametrized versions
 
 function init() {
   // Add unique class to relation container
