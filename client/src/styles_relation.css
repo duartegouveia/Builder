@@ -1799,6 +1799,21 @@ input[type="number"] {
 }
 
 /* Diagram View */
+.diagram-info {
+  padding: var(--space-3);
+  background: var(--blue-50);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+}
+
+.diagram-description {
+  font-size: 0.8125rem;
+  color: var(--slate-700);
+  line-height: 1.5;
+  margin: 0;
+}
+
 .diagram-config {
   display: flex;
   flex-wrap: wrap;
@@ -1807,13 +1822,13 @@ input[type="number"] {
   background: var(--slate-50);
   border-radius: var(--radius);
   margin-bottom: var(--space-4);
-  align-items: center;
+  align-items: flex-start;
 }
 
 .diagram-config-row {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .diagram-config-row label {
@@ -1823,9 +1838,11 @@ input[type="number"] {
   text-transform: uppercase;
 }
 
-.tsne-hint {
+.diagram-field-help {
   font-size: 0.6875rem;
   color: var(--muted-foreground);
+  max-width: 200px;
+  line-height: 1.4;
 }
 
 .tsne-progress {

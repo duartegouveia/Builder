@@ -128,15 +128,19 @@
               </div>
               
               <div class="view-diagram view-content" style="display: none;">
+                <div class="diagram-info">
+                  <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by categorical values.</p>
+                </div>
                 <div class="diagram-config">
                   <div class="diagram-config-row">
                     <label>Perplexity:</label>
                     <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;" data-testid="input-tsne-perplexity">
-                    <span class="tsne-hint">5-50 typical</span>
+                    <span class="diagram-field-help">Balance between local and global structure. Range: 5-100. Typical: 5-50. Lower values focus on local clusters, higher values preserve global structure.</span>
                   </div>
                   <div class="diagram-config-row">
                     <label>Iterations:</label>
                     <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;" data-testid="input-tsne-iterations">
+                    <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
                   </div>
                   <button class="btn-run-clustering btn btn-primary btn-sm" data-testid="button-run-clustering">Run t-SNE</button>
                   <span class="tsne-progress" style="display: none;">Calculating...</span>
