@@ -70,6 +70,177 @@
           </div>
         </section>
 
+        <section class="space-y-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Relation Data</h3>
+            </div>
+            <div class="card-content">
+              <div class="view-tabs" style="display: none;"></div>
+              
+              <div class="view-table view-content">
+                <div class="relation-table-container resizable">
+                  <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
+                  <div class="resize-handle" data-testid="resize-handle"></div>
+                </div>
+              </div>
+              
+              <div class="view-cards view-content" style="display: none;">
+                <div class="cards-view-wrapper">
+                  <div class="cards-content"></div>
+                  <div class="cards-navigation"></div>
+                </div>
+              </div>
+              
+              <div class="view-pivot view-content" style="display: none;">
+                <div class="pivot-config">
+                  <div class="pivot-config-row">
+                    <label>Rows:</label>
+                    <select class="pivot-rows pivot-select" data-testid="select-pivot-rows"></select>
+                  </div>
+                  <div class="pivot-config-row">
+                    <label>Columns:</label>
+                    <select class="pivot-cols pivot-select" data-testid="select-pivot-cols"></select>
+                  </div>
+                  <div class="pivot-config-row">
+                    <label>Values:</label>
+                    <div class="pivot-values-config"></div>
+                    <button class="btn-add-pivot-value btn btn-outline btn-sm">+ Add</button>
+                  </div>
+                  <button class="btn-generate-pivot btn btn-primary btn-sm" data-testid="button-generate-pivot">Generate Pivot</button>
+                </div>
+                <div class="pivot-table-container"></div>
+              </div>
+              
+              <div class="view-correlation view-content" style="display: none;">
+                <div class="correlation-config">
+                  <div class="correlation-section">
+                    <div class="correlation-section-header">Analyze Single Pair</div>
+                    <div class="correlation-config-row">
+                      <label>Column X:</label>
+                      <select class="corr-col-x pivot-select" data-testid="select-corr-x"></select>
+                    </div>
+                    <div class="correlation-config-row">
+                      <label>Column Y:</label>
+                      <select class="corr-col-y pivot-select" data-testid="select-corr-y"></select>
+                    </div>
+                    <div class="correlation-config-row">
+                      <label>Method:</label>
+                      <select class="corr-method pivot-select" data-testid="select-corr-method">
+                        <option value="auto">Auto-detect</option>
+                        <option value="pearson">Pearson (linear, normal)</option>
+                        <option value="spearman">Spearman (monotonic, robust)</option>
+                        <option value="kendall">Kendall's Tau (ordinal, small n)</option>
+                        <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
+                        <option value="phi">Phi (binary × binary)</option>
+                        <option value="cramers">Cramér's V (categorical)</option>
+                      </select>
+                    </div>
+                    <div class="correlation-actions">
+                      <button class="btn-calculate-corr btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
+                      <button class="btn-corr-help btn btn-outline btn-sm" data-testid="button-corr-help">?</button>
+                    </div>
+                  </div>
+                  <div class="correlation-section">
+                    <div class="correlation-section-header">Analyze All Pairs</div>
+                    <div class="correlation-section-desc">Calculate correlations between all column combinations</div>
+                    <button class="btn-corr-all btn btn-primary btn-sm" data-testid="button-corr-all">Analyze All Pairs</button>
+                  </div>
+                </div>
+                <div class="correlation-help" style="display: none;">
+                  <p><strong>Choosing a correlation method:</strong></p>
+                  <ul>
+                    <li><strong>Pearson (r)</strong> - Linear relationship. Assumes normality. Best for continuous data. Range: -1 to +1.</li>
+                    <li><strong>Spearman (ρ)</strong> - Monotonic relationship. No normality assumption. Robust to outliers. Range: -1 to +1.</li>
+                    <li><strong>Kendall's Tau (τ)</strong> - Rank correlation. Better for small samples (n&lt;30) or ordinal data. More robust than Spearman. Range: -1 to +1.</li>
+                    <li><strong>Point-Biserial (r<sub>pb</sub>)</strong> - When one variable is binary (0/1) and other is numeric. Range: -1 to +1.</li>
+                    <li><strong>Phi (φ)</strong> - Association between two binary variables. Special case of Pearson for 2×2 tables. Range: -1 to +1.</li>
+                    <li><strong>Cramér's V</strong> - Categorical association. Based on chi-squared. Range: 0 to 1 (no direction).</li>
+                  </ul>
+                  <p><strong>Auto-detect logic:</strong></p>
+                  <ul>
+                    <li>Both binary → Phi</li>
+                    <li>One binary + one numeric → Point-Biserial</li>
+                    <li>Both numeric, n&lt;30 → Kendall's Tau</li>
+                    <li>Both numeric, n≥30 → Pearson</li>
+                    <li>Either categorical → Cramér's V</li>
+                  </ul>
+                </div>
+                <div class="correlation-result"></div>
+              </div>
+              
+              <div class="view-diagram view-content" style="display: none;">
+                <div class="diagram-info">
+                  <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by cluster assignment. <strong>Recommended clusters:</strong> Use 3-10 clusters for most datasets. A common rule is sqrt(n/2) where n is the number of rows. Too few clusters may oversimplify patterns; too many may create noise.</p>
+                </div>
+                <div class="diagram-config">
+                  <div class="diagram-config-row">
+                    <label>Clusters:</label>
+                    <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;" data-testid="input-tsne-clusters">
+                    <span class="diagram-field-help">Number of color groups. Range: 2-20. Recommended: sqrt(n/2) where n is the number of rows.</span>
+                  </div>
+                  <div class="diagram-config-row">
+                    <label>Perplexity:</label>
+                    <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;" data-testid="input-tsne-perplexity">
+                    <span class="diagram-field-help">Balance between local and global structure. Range: 5-100. Typical: 5-50. Lower values focus on local clusters, higher values preserve global structure.</span>
+                  </div>
+                  <div class="diagram-config-row">
+                    <label>Iterations:</label>
+                    <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;" data-testid="input-tsne-iterations">
+                    <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
+                  </div>
+                  <button class="btn-run-clustering btn btn-primary btn-sm" data-testid="button-run-clustering">Run t-SNE</button>
+                  <span class="tsne-progress" style="display: none;">Calculating...</span>
+                </div>
+                <div class="diagram-container">
+                  <canvas class="diagram-canvas" width="800" height="600"></canvas>
+                </div>
+              </div>
+              
+              <div class="view-ai view-content" style="display: none;">
+                <div class="ai-panel-inline">
+                  <div class="ai-voice-row">
+                    <select class="voice-language pivot-select" data-testid="select-voice-language" title="Voice recognition language">
+                      <option value="pt-PT" selected>Português (PT)</option>
+                      <option value="pt-BR">Português (BR)</option>
+                      <option value="en-US">English (US)</option>
+                      <option value="en-GB">English (UK)</option>
+                      <option value="es-ES">Español (ES)</option>
+                      <option value="es-MX">Español (MX)</option>
+                      <option value="fr-FR">Français</option>
+                      <option value="de-DE">Deutsch</option>
+                      <option value="it-IT">Italiano</option>
+                      <option value="ja-JP">日本語</option>
+                      <option value="zh-CN">中文 (简体)</option>
+                      <option value="zh-TW">中文 (繁體)</option>
+                      <option value="ru-RU">Русский</option>
+                      <option value="ko-KR">한국어</option>
+                      <option value="ar-SA">العربية</option>
+                      <option value="hi-IN">हिन्दी</option>
+                    </select>
+                    <button class="btn-ai-voice btn btn-outline btn-sm" data-testid="button-ai-voice" title="Voice input">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    </button>
+                  </div>
+                  <div class="ai-input-row">
+                    <input type="text" class="ai-question ai-question-input" placeholder="Ask a question about your data..." data-testid="input-ai-question">
+                    <button class="btn-ai-ask btn btn-primary btn-sm" data-testid="button-ai-ask">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                  </div>
+                  <div class="ai-response"></div>
+                </div>
+              </div>
+              
+              <div class="view-saved view-content" style="display: none;">
+                <div class="saved-panel">
+                  <p class="text-muted-foreground text-center py-8">Saved views will appear here</p>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </section>
         </div>
 
       </div>
