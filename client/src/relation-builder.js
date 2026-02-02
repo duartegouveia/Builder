@@ -494,14 +494,14 @@ function parseRelation(jsonStr) {
 }
 
 // Filtering functions
-function applyFilters() {
-  const items = state.relation.items;
+function applyFilters(st = state) {
+  const items = st.relation.items;
   const filteredIndices = [];
   
   for (let i = 0; i < items.length; i++) {
     let passes = true;
     
-    for (const [colIdxStr, filter] of Object.entries(getFilters(state))) {
+    for (const [colIdxStr, filter] of Object.entries(getFilters(st))) {
       const colIdx = parseInt(colIdxStr);
       const value = items[i][colIdx];
       
@@ -522,7 +522,7 @@ function applyFilters() {
           break;
         }
       } else if (filter.type === 'criteria') {
-        if (!matchesCriteria(value, filter.criteria, colIdx)) {
+        if (!matchesCriteria(value, filter.criteria, colIdx, st)) {
           passes = false;
           break;
         }
@@ -531,7 +531,7 @@ function applyFilters() {
     
     // Also check group by selected values
     if (passes) {
-      for (const [colIdxStr, selectedValue] of Object.entries(getGroupBySelectedValues(state))) {
+      for (const [colIdxStr, selectedValue] of Object.entries(getGroupBySelectedValues(st))) {
         const colIdx = parseInt(colIdxStr);
         const value = items[i][colIdx];
         // Compare with proper null handling
@@ -551,12 +551,12 @@ function applyFilters() {
       filteredIndices.push(i);
     }
   }
-  setFilteredIndices(state, filteredIndices);
+  setFilteredIndices(st, filteredIndices);
 }
 
-function getUniqueValuesForColumn(colIdx) {
+function getUniqueValuesForColumn(colIdx, st = state) {
   const values = new Set();
-  state.relation.items.forEach(row => {
+  st.relation.items.forEach(row => {
     values.add(row[colIdx]);
   });
   return Array.from(values).sort((a, b) => {
@@ -566,8 +566,8 @@ function getUniqueValuesForColumn(colIdx) {
   });
 }
 
-function matchesCriteria(value, criteria, colIdx) {
-  const type = state.columnTypes[colIdx];
+function matchesCriteria(value, criteria, colIdx, st = state) {
+  const type = st.columnTypes[colIdx];
   
   if (criteria.nullOnly) {
     return value === null || value === undefined;
@@ -665,30 +665,30 @@ function parseTimeToMs(timeStr) {
 }
 
 // Sorting functions
-function applySorting() {
-  const sortedIndices = [...getFilteredIndices(state)];
+function applySorting(st = state) {
+  const sortedIndices = [...getFilteredIndices(st)];
   
-  if (getSortCriteria(state).length === 0) {
-    setSortedIndices(state, sortedIndices);
+  if (getSortCriteria(st).length === 0) {
+    setSortedIndices(st, sortedIndices);
     return;
   }
   
   sortedIndices.sort((a, b) => {
-    const rowA = state.relation.items[a];
-    const rowB = state.relation.items[b];
+    const rowA = st.relation.items[a];
+    const rowB = st.relation.items[b];
     
-    for (const criterion of getSortCriteria(state)) {
+    for (const criterion of getSortCriteria(st)) {
       const valA = rowA[criterion.column];
       const valB = rowB[criterion.column];
       
-      let cmp = compareValues(valA, valB, state.columnTypes[criterion.column]);
+      let cmp = compareValues(valA, valB, st.columnTypes[criterion.column]);
       if (criterion.direction === 'desc') cmp = -cmp;
       
       if (cmp !== 0) return cmp;
     }
     return 0;
   });
-  setSortedIndices(state, sortedIndices);
+  setSortedIndices(st, sortedIndices);
 }
 
 function compareValues(a, b, type) {
@@ -1874,33 +1874,42 @@ function showToast(message) {
   setTimeout(() => toast.remove(), 2000);
 }
 
-function updateTextarea() {
-  const textarea = el('.relation-json');
-  if (textarea) textarea.value = JSON.stringify(state.relation, null, 2);
+function updateTextarea(st = state) {
+  const textarea = st.container 
+    ? st.container.querySelector('.relation-json')
+    : el('.relation-json');
+  if (textarea) textarea.value = JSON.stringify(st.relation, null, 2);
+}
+
+// Alias for updateTextarea
+function updateJsonOutput(st = state) {
+  updateTextarea(st);
 }
 
 // Pagination functions
-function getTotalPages() {
-  if (getPageSize(state) === 'all') return 1;
-  return Math.ceil(getSortedIndices(state).length / getPageSize(state));
+function getTotalPages(st = state) {
+  if (getPageSize(st) === 'all') return 1;
+  return Math.ceil(getSortedIndices(st).length / getPageSize(st));
 }
 
-function getCurrentPageIndices() {
-  if (getPageSize(state) === 'all') {
-    return getSortedIndices(state);
+function getCurrentPageIndices(st = state) {
+  if (getPageSize(st) === 'all') {
+    return getSortedIndices(st);
   }
-  const start = (getCurrentPage(state) - 1) * getPageSize(state);
-  const end = start + getPageSize(state);
-  return getSortedIndices(state).slice(start, end);
+  const start = (getCurrentPage(st) - 1) * getPageSize(st);
+  const end = start + getPageSize(st);
+  return getSortedIndices(st).slice(start, end);
 }
 
 // Selection functions
-function updateHeaderCheckbox() {
-  const headerCheckbox = el('.select-all-checkbox');
+function updateHeaderCheckbox(st = state, container = null) {
+  const headerCheckbox = container 
+    ? container.querySelector('.select-all-checkbox')
+    : el('.select-all-checkbox');
   if (!headerCheckbox) return;
   
-  const pageIndices = getCurrentPageIndices();
-  const selectedInPage = pageIndices.filter(i => getSelectedRows(state).has(i)).length;
+  const pageIndices = getCurrentPageIndices(st);
+  const selectedInPage = pageIndices.filter(i => getSelectedRows(st).has(i)).length;
   
   if (selectedInPage === 0) {
     headerCheckbox.checked = false;
@@ -1914,69 +1923,69 @@ function updateHeaderCheckbox() {
   }
 }
 
-function toggleSelectAll() {
-  const pageIndices = getCurrentPageIndices();
-  const allSelected = pageIndices.every(i => getSelectedRows(state).has(i));
+function toggleSelectAll(st = state) {
+  const pageIndices = getCurrentPageIndices(st);
+  const allSelected = pageIndices.every(i => getSelectedRows(st).has(i));
   
   if (allSelected) {
-    pageIndices.forEach(i => getSelectedRows(state).delete(i));
+    pageIndices.forEach(i => getSelectedRows(st).delete(i));
   } else {
-    pageIndices.forEach(i => getSelectedRows(state).add(i));
+    pageIndices.forEach(i => getSelectedRows(st).add(i));
   }
   
-  renderTable();
+  renderTable(st);
 }
 
-function invertSelection(pageOnly = false) {
-  const indices = pageOnly ? getCurrentPageIndices() : getSortedIndices(state);
+function invertSelection(pageOnly = false, st = state) {
+  const indices = pageOnly ? getCurrentPageIndices(st) : getSortedIndices(st);
   
   indices.forEach(i => {
-    if (getSelectedRows(state).has(i)) {
-      getSelectedRows(state).delete(i);
+    if (getSelectedRows(st).has(i)) {
+      getSelectedRows(st).delete(i);
     } else {
-      getSelectedRows(state).add(i);
+      getSelectedRows(st).add(i);
     }
   });
   
-  renderTable();
+  renderTable(st);
 }
 
-function removeSelectedRows() {
-  if (getSelectedRows(state).size === 0) return;
+function removeSelectedRows(st = state) {
+  if (getSelectedRows(st).size === 0) return;
   
-  if (!confirm(`Remove ${getSelectedRows(state).size} selected rows from the data?`)) return;
+  if (!confirm(`Remove ${getSelectedRows(st).size} selected rows from the data?`)) return;
   
   // Get sorted indices to remove (descending to preserve indices)
-  const indicesToRemove = [...getSelectedRows(state)].sort((a, b) => b - a);
+  const indicesToRemove = [...getSelectedRows(st)].sort((a, b) => b - a);
   
   indicesToRemove.forEach(idx => {
-    state.relation.items.splice(idx, 1);
+    st.relation.items.splice(idx, 1);
   });
   
-  getSelectedRows(state).clear();
-  setCurrentPage(state, 1);
-  renderTable();
-  updateJsonOutput();
+  getSelectedRows(st).clear();
+  setCurrentPage(st, 1);
+  renderTable(st);
+  updateJsonOutput(st);
 }
 
-function removeUnselectedRows() {
-  if (getSelectedRows(state).size === 0) return;
+function removeUnselectedRows(st = state) {
+  if (getSelectedRows(st).size === 0) return;
   
-  const unselectedCount = getSortedIndices(state).length - getSelectedRows(state).size;
-  if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${getSelectedRows(state).size} selected rows will remain.`)) return;
+  const unselectedCount = getSortedIndices(st).length - getSelectedRows(st).size;
+  if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${getSelectedRows(st).size} selected rows will remain.`)) return;
   
   // Keep only selected rows (create new array with selected items)
-  const selectedIndices = [...getSelectedRows(state)].sort((a, b) => a - b);
-  state.relation.items = selectedIndices.map(idx => state.relation.items[idx]);
+  const selectedIndices = [...getSelectedRows(st)].sort((a, b) => a - b);
+  st.relation.items = selectedIndices.map(idx => st.relation.items[idx]);
   
-  getSelectedRows(state).clear();
-  setCurrentPage(state, 1);
-  renderTable();
-  updateJsonOutput();
+  getSelectedRows(st).clear();
+  setCurrentPage(st, 1);
+  renderTable(st);
+  updateJsonOutput(st);
 }
 
 // Render functions
-function createInputForType(type, value, rowIdx, colIdx, editable) {
+function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
   const wrapper = document.createElement('div');
   wrapper.className = 'relation-cell-input';
   
@@ -2004,8 +2013,8 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
     }
     
     if (type === 'select') {
-      const colName = state.columnNames[colIdx];
-      const colOptions = state.options[colName];
+      const colName = st.columnNames[colIdx];
+      const colOptions = st.options[colName];
       const span = document.createElement('span');
       span.className = 'relation-cell-readonly select-display';
       if (colOptions && colOptions[value] !== undefined) {
@@ -2143,18 +2152,18 @@ function formatValueForInput(type, value) {
   return String(value);
 }
 
-function getSortIndicator(colIdx) {
-  const criterion = getSortCriteria(state).find(c => c.column === colIdx);
+function getSortIndicator(colIdx, st = state) {
+  const criterion = getSortCriteria(st).find(c => c.column === colIdx);
   if (!criterion) return '';
   
-  const priority = getSortCriteria(state).length > 1 ? `<span class="sort-priority">${getSortCriteria(state).indexOf(criterion) + 1}</span>` : '';
+  const priority = getSortCriteria(st).length > 1 ? `<span class="sort-priority">${getSortCriteria(st).indexOf(criterion) + 1}</span>` : '';
   const arrow = criterion.direction === 'asc' ? '↑' : '↓';
   return `<span class="sort-indicator">${arrow}${priority}</span>`;
 }
 
-function applyConditionalFormatting(value, colIdx, cell, rowIdx) {
-  const rules = getFormatting(state)[colIdx];
-  const type = state.columnTypes[colIdx];
+function applyConditionalFormatting(value, colIdx, cell, rowIdx, st = state) {
+  const rules = getFormatting(st)[colIdx];
+  const type = st.columnTypes[colIdx];
   
   if (rules && rules.length > 0) {
     for (const rule of rules) {
@@ -2232,18 +2241,21 @@ function matchesFormattingCondition(value, condition, type) {
   return true;
 }
 
-function renderPagination() {
-  const container = el('.relation-pagination');
-  if (!container) return;
+function renderPagination(st = state) {
+  // Get container - from instance container or pagination container
+  const paginationContainer = st.container
+    ? st.container.querySelector('.relation-pagination')
+    : el('.relation-pagination');
+  if (!paginationContainer) return;
   
-  const totalPages = getTotalPages();
-  const totalRecords = state.relation.items.length;
-  const filteredRecords = getSortedIndices(state).length;
-  const selectedRecords = getSelectedRows(state).size;
+  const totalPages = getTotalPages(st);
+  const totalRecords = st.relation.items.length;
+  const filteredRecords = getSortedIndices(st).length;
+  const selectedRecords = getSelectedRows(st).size;
   
   const hasFilter = filteredRecords !== totalRecords;
   
-  container.innerHTML = `
+  paginationContainer.innerHTML = `
     <div class="pagination-info">
       <span class="pagination-total">${totalRecords} total</span>
       ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
@@ -2252,23 +2264,23 @@ function renderPagination() {
     <div class="pagination-size">
       <label>Per page:</label>
       <select class="page-size-select">
-        <option value="5" ${getPageSize(state) === 5 ? 'selected' : ''}>5</option>
-        <option value="10" ${getPageSize(state) === 10 ? 'selected' : ''}>10</option>
-        <option value="20" ${getPageSize(state) === 20 ? 'selected' : ''}>20</option>
-        <option value="50" ${getPageSize(state) === 50 ? 'selected' : ''}>50</option>
-        <option value="100" ${getPageSize(state) === 100 ? 'selected' : ''}>100</option>
-        <option value="all" ${getPageSize(state) === 'all' ? 'selected' : ''}>All</option>
+        <option value="5" ${getPageSize(st) === 5 ? 'selected' : ''}>5</option>
+        <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10</option>
+        <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20</option>
+        <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50</option>
+        <option value="100" ${getPageSize(st) === 100 ? 'selected' : ''}>100</option>
+        <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''}>All</option>
       </select>
     </div>
     <div class="pagination-nav">
-      <button class="btn-page btn-first" ${getCurrentPage(state) === 1 ? 'disabled' : ''}>⟨⟨</button>
-      <button class="btn-page btn-prev" ${getCurrentPage(state) === 1 ? 'disabled' : ''}>⟨</button>
+      <button class="btn-page btn-first" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>⟨⟨</button>
+      <button class="btn-page btn-prev" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>⟨</button>
       <span class="page-indicator">
-        <input type="number" class="page-input" value="${getCurrentPage(state)}" min="1" max="${totalPages}" />
+        <input type="number" class="page-input" value="${getCurrentPage(st)}" min="1" max="${totalPages}" />
         <span>of ${totalPages}</span>
       </span>
-      <button class="btn-page btn-next" ${getCurrentPage(state) >= totalPages ? 'disabled' : ''}>⟩</button>
-      <button class="btn-page btn-last" ${getCurrentPage(state) >= totalPages ? 'disabled' : ''}>⟩⟩</button>
+      <button class="btn-page btn-next" ${getCurrentPage(st) >= totalPages ? 'disabled' : ''}>⟩</button>
+      <button class="btn-page btn-last" ${getCurrentPage(st) >= totalPages ? 'disabled' : ''}>⟩⟩</button>
     </div>
     <div class="pagination-actions">
       <select class="selection-actions selection-actions-select">
@@ -2281,109 +2293,65 @@ function renderPagination() {
     </div>
   `;
   
+  // Helper to query within container or global
+  const queryEl = (selector) => paginationContainer.querySelector(selector);
+  
   // Event listeners
-  el('.page-size-select')?.addEventListener('change', (e) => {
-    setPageSize(state, e.target.value === 'all' ? 'all' : parseInt(e.target.value));
-    setCurrentPage(state, 1);
-    renderTable();
+  queryEl('.page-size-select')?.addEventListener('change', (e) => {
+    setPageSize(st, e.target.value === 'all' ? 'all' : parseInt(e.target.value));
+    setCurrentPage(st, 1);
+    renderTable(st);
   });
   
-  el('.btn-first')?.addEventListener('click', () => {
-    setCurrentPage(state, 1);
-    renderTable();
+  queryEl('.btn-first')?.addEventListener('click', () => {
+    setCurrentPage(st, 1);
+    renderTable(st);
   });
   
-  el('.btn-prev')?.addEventListener('click', () => {
-    if (getCurrentPage(state) > 1) {
-      setCurrentPage(state, getCurrentPage(state) - 1);
-      renderTable();
+  queryEl('.btn-prev')?.addEventListener('click', () => {
+    if (getCurrentPage(st) > 1) {
+      setCurrentPage(st, getCurrentPage(st) - 1);
+      renderTable(st);
     }
   });
   
-  el('.btn-next')?.addEventListener('click', () => {
-    if (getCurrentPage(state) < getTotalPages()) {
-      setCurrentPage(state, getCurrentPage(state) + 1);
-      renderTable();
+  queryEl('.btn-next')?.addEventListener('click', () => {
+    if (getCurrentPage(st) < getTotalPages(st)) {
+      setCurrentPage(st, getCurrentPage(st) + 1);
+      renderTable(st);
     }
   });
   
-  el('.btn-last')?.addEventListener('click', () => {
-    setCurrentPage(state, getTotalPages());
-    renderTable();
+  queryEl('.btn-last')?.addEventListener('click', () => {
+    setCurrentPage(st, getTotalPages(st));
+    renderTable(st);
   });
   
-  el('.page-input')?.addEventListener('change', (e) => {
+  queryEl('.page-input')?.addEventListener('change', (e) => {
     const page = parseInt(e.target.value);
-    if (page >= 1 && page <= getTotalPages()) {
-      setCurrentPage(state, page);
-      renderTable();
+    if (page >= 1 && page <= getTotalPages(st)) {
+      setCurrentPage(st, page);
+      renderTable(st);
     }
   });
   
-  el('.selection-actions')?.addEventListener('change', (e) => {
+  queryEl('.selection-actions')?.addEventListener('change', (e) => {
     const action = e.target.value;
     e.target.value = ''; // Reset to placeholder
     
     switch (action) {
       case 'invert-page':
-        invertSelection(true);
+        invertSelection(true, st);
         break;
       case 'invert-all':
-        invertSelection(false);
+        invertSelection(false, st);
         break;
       case 'remove-selected':
-        removeSelectedRows();
+        removeSelectedRows(st);
         break;
       case 'remove-unselected':
-        removeUnselectedRows();
+        removeUnselectedRows(st);
         break;
-    }
-  });
-  
-  // Row operations buttons, nested relation buttons, and boolean checkboxes - single click handler
-  el('.relation-table-container')?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-row-ops')) {
-      const rowIdx = parseInt(e.target.dataset.row);
-      const rect = e.target.getBoundingClientRect();
-      showRowOperationsMenu(rowIdx, rect.left, rect.bottom + 5);
-      e.stopPropagation();
-      return;
-    }
-    
-    if (e.target.classList.contains('relation-cell-btn')) {
-      const rowIdx = parseInt(e.target.dataset.row);
-      const colIdx = parseInt(e.target.dataset.col);
-      showNestedRelationDialog(rowIdx, colIdx);
-      e.stopPropagation();
-      return;
-    }
-    
-    // Tri-state boolean checkboxes (cycle: true → false → null → true)
-    if (e.target.matches('.bool-tristate')) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const checkbox = e.target;
-      const rowIdx = parseInt(checkbox.dataset.row);
-      const colIdx = parseInt(checkbox.dataset.col);
-      const currentValue = state.relation.items[rowIdx][colIdx];
-      
-      // Cycle: true → false → null → true
-      let newValue;
-      if (currentValue === true) {
-        newValue = false;
-      } else if (currentValue === false) {
-        newValue = null;
-      } else {
-        newValue = true;
-      }
-      
-      state.relation.items[rowIdx][colIdx] = newValue;
-      updateTextarea();
-      
-      // Update checkbox state immediately
-      updateBoolCheckbox(checkbox, newValue);
-      return;
     }
   });
 }
@@ -2416,27 +2384,32 @@ function syncFooterColumnWidths(mainTable, footerTable) {
   }
 }
 
-function renderTable() {
-  const container = el('.relation-table-container');
+function renderTable(st = state) {
+  // Get container - from instance container or global DOM
+  const container = st.container 
+    ? st.container.querySelector('.relation-table-container')
+    : el('.relation-table-container');
+  
+  if (!container) return;
   container.innerHTML = '';
   
-  if (!state.relation || !state.relation.columns || !state.relation.items) {
+  if (!st.relation || !st.relation.columns || !st.relation.items) {
     container.innerHTML = '<p class="text-muted-foreground">No data to display</p>';
     return;
   }
   
   // Apply filters and sorting
-  applyFilters();
-  applySorting();
+  applyFilters(st);
+  applySorting(st);
   
-  const pageIndices = getCurrentPageIndices();
+  const pageIndices = getCurrentPageIndices(st);
   
   const tableWrapper = document.createElement('div');
   tableWrapper.className = 'relation-table-wrapper';
   
   const table = document.createElement('table');
   table.className = 'relation-table';
-  if (!state.rel_options.editable) {
+  if (!st.rel_options.editable) {
     table.classList.add('relation-table-readonly');
   }
   
@@ -2463,18 +2436,18 @@ function renderTable() {
   headerRow.appendChild(indexTh);
   
   // Group info header (if any groups)
-  if (getGroupByColumns(state).length > 0) {
+  if (getGroupByColumns(st).length > 0) {
     const groupInfo = document.createElement('div');
     groupInfo.className = 'group-by-indicator';
     
     let groupHtml = '<span>Grouped by:</span>';
-    getGroupByColumns(state).forEach(colIdx => {
-      const colName = state.columnNames[colIdx];
-      const uniqueValues = getUniqueValuesForColumn(colIdx);
-      const currentValue = getGroupBySelectedValues(state)[colIdx];
+    getGroupByColumns(st).forEach(colIdx => {
+      const colName = st.columnNames[colIdx];
+      const uniqueValues = getUniqueValuesForColumn(colIdx, st);
+      const currentValue = getGroupBySelectedValues(st)[colIdx];
       const hasSelection = currentValue !== undefined;
       
-      const colType = state.columnTypes[colIdx];
+      const colType = st.columnTypes[colIdx];
       groupHtml += `
         <div class="group-by-col" data-col="${colIdx}">
           <strong>${colName}:</strong>
@@ -2486,7 +2459,7 @@ function renderTable() {
               if (v === null) {
                 label = '(null)';
               } else if (colType === 'select') {
-                const colOptions = state.options[colName];
+                const colOptions = st.options[colName];
                 label = (colOptions && colOptions[v] !== undefined) ? colOptions[v] : String(v);
               } else {
                 label = String(v);
@@ -2504,9 +2477,9 @@ function renderTable() {
     container.appendChild(groupInfo);
     
     groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
-      setGroupByColumns(state, []);
-      setGroupBySelectedValues(state, {});
-      renderTable();
+      setGroupByColumns(st, []);
+      setGroupBySelectedValues(st, {});
+      renderTable(st);
     });
     
     groupInfo.querySelectorAll('.group-value-select').forEach(select => {
@@ -2515,31 +2488,31 @@ function renderTable() {
         const value = e.target.value;
         
         if (value === '__all__') {
-          delete getGroupBySelectedValues(state)[colIdx];
+          delete getGroupBySelectedValues(st)[colIdx];
         } else if (value === '__null__') {
-          getGroupBySelectedValues(state)[colIdx] = null;
+          getGroupBySelectedValues(st)[colIdx] = null;
         } else {
-          getGroupBySelectedValues(state)[colIdx] = value;
+          getGroupBySelectedValues(st)[colIdx] = value;
         }
         
-        setCurrentPage(state, 1);
-        renderTable();
+        setCurrentPage(st, 1);
+        renderTable(st);
       });
     });
   }
   
   // Data columns (skip grouped columns)
-  state.columnNames.forEach((name, idx) => {
-    if (getGroupByColumns(state).includes(idx)) return;
+  st.columnNames.forEach((name, idx) => {
+    if (getGroupByColumns(st).includes(idx)) return;
     
     const th = document.createElement('th');
     th.className = 'relation-th-sortable';
     th.dataset.col = idx;
-    const type = state.columnTypes[idx];
-    const sortIndicator = getSortIndicator(idx);
-    const filterActive = getFilters(state)[idx] ? ' filter-active' : '';
-    const colSelected = getSelectedColumns(state).has(idx) ? ' col-selected' : '';
-    const filterIcon = getFilters(state)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
+    const type = st.columnTypes[idx];
+    const sortIndicator = getSortIndicator(idx, st);
+    const filterActive = getFilters(st)[idx] ? ' filter-active' : '';
+    const colSelected = getSelectedColumns(st).has(idx) ? ' col-selected' : '';
+    const filterIcon = getFilters(st)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
         <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
@@ -2556,11 +2529,11 @@ function renderTable() {
   const tbody = document.createElement('tbody');
   
   pageIndices.forEach((rowIdx) => {
-    const row = state.relation.items[rowIdx];
+    const row = st.relation.items[rowIdx];
     const tr = document.createElement('tr');
     tr.dataset.rowIdx = rowIdx;
     
-    if (getSelectedRows(state).has(rowIdx)) {
+    if (getSelectedRows(st).has(rowIdx)) {
       tr.classList.add('row-selected');
     }
     
@@ -2569,7 +2542,7 @@ function renderTable() {
     selectTd.className = 'relation-td-select';
     const selectCheckbox = document.createElement('input');
     selectCheckbox.type = 'checkbox';
-    selectCheckbox.checked = getSelectedRows(state).has(rowIdx);
+    selectCheckbox.checked = getSelectedRows(st).has(rowIdx);
     selectCheckbox.dataset.rowIdx = rowIdx;
     selectCheckbox.className = 'row-select-checkbox';
     selectTd.appendChild(selectCheckbox);
@@ -2589,12 +2562,12 @@ function renderTable() {
     
     // Data cells (skip grouped columns)
     row.forEach((value, colIdx) => {
-      if (getGroupByColumns(state).includes(colIdx)) return;
+      if (getGroupByColumns(st).includes(colIdx)) return;
       
       const td = document.createElement('td');
-      const type = state.columnTypes[colIdx];
-      td.appendChild(createInputForType(type, value, rowIdx, colIdx, state.rel_options.editable));
-      applyConditionalFormatting(value, colIdx, td, rowIdx);
+      const type = st.columnTypes[colIdx];
+      td.appendChild(createInputForType(type, value, rowIdx, colIdx, st.rel_options.editable, st));
+      applyConditionalFormatting(value, colIdx, td, rowIdx, st);
       tr.appendChild(td);
     });
     
@@ -2608,16 +2581,16 @@ function renderTable() {
   
   // Calculate height based on actual rendered content after DOM insertion
   requestAnimationFrame(() => {
-    if (getManualResizeHeight(state)) {
+    if (getManualResizeHeight(st)) {
       // Use manually set height
-      tableWrapper.style.maxHeight = getManualResizeHeight(state) + 'px';
+      tableWrapper.style.maxHeight = getManualResizeHeight(st) + 'px';
     } else {
       // Calculate based on actual row heights
-      const thead = table.querySelector('thead');
-      const theadHeight = thead ? thead.offsetHeight : 40;
+      const theadEl = table.querySelector('thead');
+      const theadHeight = theadEl ? theadEl.offsetHeight : 40;
       const rows = tbody.querySelectorAll('tr');
       let totalRowHeight = 0;
-      const maxRows = getPageSize(state) === 'all' ? Math.min(rows.length, 20) : getPageSize(state);
+      const maxRows = getPageSize(st) === 'all' ? Math.min(rows.length, 20) : getPageSize(st);
       for (let i = 0; i < Math.min(rows.length, maxRows); i++) {
         totalRowHeight += rows[i].offsetHeight;
       }
@@ -2646,8 +2619,8 @@ function renderTable() {
   footerRow.appendChild(document.createElement('td')); // Operations column
   footerRow.appendChild(document.createElement('td')); // Index column
   
-  state.columnNames.forEach((_, colIdx) => {
-    if (getGroupByColumns(state).includes(colIdx)) return;
+  st.columnNames.forEach((_, colIdx) => {
+    if (getGroupByColumns(st).includes(colIdx)) return;
     
     const td = document.createElement('td');
     td.className = 'relation-td-stats';
@@ -2668,13 +2641,13 @@ function renderTable() {
   paginationDiv.id = 'relation-pagination';
   paginationDiv.className = 'relation-pagination';
   container.appendChild(paginationDiv);
-  renderPagination();
+  renderPagination(st);
   
   // Update header checkbox state
-  updateHeaderCheckbox();
+  updateHeaderCheckbox(st, container);
   
   // Attach event listeners
-  attachTableEventListeners();
+  attachTableEventListeners(st, container);
   
   // Re-add resize handle if it was removed
   const existingHandle = container.querySelector('.resize-handle');
@@ -2683,7 +2656,7 @@ function renderTable() {
     resizeHandle.className = 'resize-handle';
     resizeHandle.dataset.testid = 'resize-handle';
     container.appendChild(resizeHandle);
-    setupResizeHandle();
+    if (st === state) setupResizeHandle();
   }
 }
 
@@ -2730,14 +2703,18 @@ function addLongPressSupport(element, callback, duration = 500) {
   element._wasLongPress = () => longPressTriggered;
 }
 
-function attachTableEventListeners() {
+function attachTableEventListeners(st = state, container = null) {
+  // Get the table container to scope event listener queries
+  const tableContainer = container || el('.relation-table-container');
+  if (!tableContainer) return;
+  
   // Header click for sorting
-  document.querySelectorAll('.relation-th-sortable').forEach(th => {
+  tableContainer.querySelectorAll('.relation-th-sortable').forEach(th => {
     // Add long press support for context menu
     addLongPressSupport(th, (e, clientX, clientY) => {
       e.preventDefault?.();
       const colIdx = parseInt(th.dataset.col);
-      showColumnMenu(colIdx, clientX, clientY);
+      showColumnMenu(colIdx, clientX, clientY, st);
     });
     
     th.addEventListener('click', (e) => {
@@ -2747,64 +2724,64 @@ function attachTableEventListeners() {
       const colIdx = parseInt(th.dataset.col);
       if (e.ctrlKey || e.metaKey) {
         // Ctrl+click toggles column selection
-        if (getSelectedColumns(state).has(colIdx)) {
-          getSelectedColumns(state).delete(colIdx);
+        if (getSelectedColumns(st).has(colIdx)) {
+          getSelectedColumns(st).delete(colIdx);
         } else {
-          getSelectedColumns(state).add(colIdx);
+          getSelectedColumns(st).add(colIdx);
         }
-        renderTable();
+        renderTable(st);
       } else {
         // Normal click or shift+click for sorting
-        handleSort(colIdx, e.shiftKey);
+        handleSort(colIdx, e.shiftKey, st);
       }
     });
     
     th.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       const colIdx = parseInt(th.dataset.col);
-      showColumnMenu(colIdx, e.clientX, e.clientY);
+      showColumnMenu(colIdx, e.clientX, e.clientY, st);
     });
   });
   
   // Filter icon click - opens appropriate filter dialog
-  document.querySelectorAll('.filter-icon').forEach(icon => {
+  tableContainer.querySelectorAll('.filter-icon').forEach(icon => {
     icon.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent header click/sort
       const colIdx = parseInt(icon.dataset.col);
-      openFilterDialogForColumn(colIdx);
+      openFilterDialogForColumn(colIdx, st);
     });
   });
   
   // Select all checkbox
-  el('.select-all-checkbox')?.addEventListener('click', toggleSelectAll);
+  tableContainer.querySelector('.select-all-checkbox')?.addEventListener('click', () => toggleSelectAll(st));
   
   // Row selection
-  document.querySelectorAll('.row-select-checkbox').forEach(checkbox => {
+  tableContainer.querySelectorAll('.row-select-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', (e) => {
       const rowIdx = parseInt(e.target.dataset.rowIdx);
       if (e.target.checked) {
-        getSelectedRows(state).add(rowIdx);
+        getSelectedRows(st).add(rowIdx);
       } else {
-        getSelectedRows(state).delete(rowIdx);
+        getSelectedRows(st).delete(rowIdx);
       }
-      updateHeaderCheckbox();
-      renderPagination();
+      updateHeaderCheckbox(st, tableContainer);
+      renderPagination(st);
       e.target.closest('tr').classList.toggle('row-selected', e.target.checked);
     });
   });
   
   // Statistics buttons
-  document.querySelectorAll('.btn-stats').forEach(btn => {
+  tableContainer.querySelectorAll('.btn-stats').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const colIdx = parseInt(e.target.dataset.col);
-      showStatisticsPanel(colIdx);
+      showStatisticsPanel(colIdx, st);
     });
   });
   
   // Cell editing
-  el('.relation-table-container')?.addEventListener('change', (e) => {
+  tableContainer.addEventListener('change', (e) => {
     if (e.target.matches('.relation-input, .relation-textarea, .relation-select')) {
-      updateRelationFromInput(e.target);
+      updateRelationFromInput(e.target, st);
     }
   });
 }
@@ -2830,24 +2807,24 @@ function updateBoolCheckbox(checkbox, value) {
   }, 0);
 }
 
-function handleSort(colIdx, addToExisting) {
-  const existingIdx = getSortCriteria(state).findIndex(c => c.column === colIdx);
+function handleSort(colIdx, addToExisting, st = state) {
+  const existingIdx = getSortCriteria(st).findIndex(c => c.column === colIdx);
   
   if (existingIdx >= 0) {
-    const existing = getSortCriteria(state)[existingIdx];
+    const existing = getSortCriteria(st)[existingIdx];
     if (existing.direction === 'asc') {
       existing.direction = 'desc';
     } else {
-      getSortCriteria(state).splice(existingIdx, 1);
+      getSortCriteria(st).splice(existingIdx, 1);
     }
   } else {
     if (!addToExisting) {
-      setSortCriteria(state, []);
+      setSortCriteria(st, []);
     }
-    getSortCriteria(state).push({ column: colIdx, direction: 'asc' });
+    getSortCriteria(st).push({ column: colIdx, direction: 'asc' });
   }
   
-  renderTable();
+  renderTable(st);
 }
 
 function adjustMenuPosition(menu) {
@@ -7761,8 +7738,13 @@ function computeJointProbabilities(D, perplexity, n) {
   return Psym;
 }
 
-function renderDiagram() {
-  const canvas = el('.diagram-canvas');
+function renderDiagram(st = state) {
+  const container = st.container;
+  const canvas = container 
+    ? container.querySelector('.diagram-canvas')
+    : el('.diagram-canvas');
+  if (!canvas) return;
+  
   const ctx = canvas.getContext('2d');
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -7772,7 +7754,7 @@ function renderDiagram() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   // Draw nodes
-  getDiagramNodes(state).forEach(node => {
+  getDiagramNodes(st).forEach(node => {
     const radius = node.radius || 8;
     ctx.beginPath();
     ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
@@ -7784,7 +7766,7 @@ function renderDiagram() {
   });
   
   // Draw cluster legend
-  const clusters = [...new Set(getDiagramNodes(state).map(n => n.cluster))].sort((a, b) => a - b);
+  const clusters = [...new Set(getDiagramNodes(st).map(n => n.cluster))].sort((a, b) => a - b);
   const clusterColors = [
     '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
     '#ff7f00', '#ffff33', '#a65628', '#f781bf'
@@ -7807,7 +7789,7 @@ function renderDiagram() {
   // Add info text
   ctx.fillStyle = '#666';
   ctx.font = '12px sans-serif';
-  ctx.fillText('Rows: ' + getDiagramNodes(state).length + ' | Click a point to see data', 10, canvas.height - 40);
+  ctx.fillText('Rows: ' + getDiagramNodes(st).length + ' | Click a point to see data', 10, canvas.height - 40);
 }
 
 function setupDiagramClickHandler() {
@@ -8093,13 +8075,21 @@ function switchViewForInstance(st, view) {
     viewWrapper.style.display = 'block';
   }
   
-  // Render the view
+  // Render the view - use parametrized functions
   if (view === 'table') {
-    renderTableWithState(st);
+    renderTable(st);
   } else if (view === 'cards') {
-    renderCardsWithState(st);
+    renderCards(st);
   } else if (view === 'pivot') {
-    renderPivotWithState(st);
+    renderPivot(st);
+  } else if (view === 'correlation') {
+    renderCorrelation(st);
+  } else if (view === 'diagram') {
+    renderDiagram(st);
+  } else if (view === 'ai') {
+    renderAI(st);
+  } else if (view === 'saved') {
+    renderSaved(st);
   } else {
     // Other views show placeholder for now
     if (viewWrapper) {
@@ -8109,284 +8099,59 @@ function switchViewForInstance(st, view) {
   }
 }
 
-// Render table for a specific instance - full featured version matching renderTable()
-function renderTableWithState(st) {
-  const container = st.container.querySelector('.relation-table-container');
-  if (!container || !st.relation || !st.relation.columns || !st.relation.items) {
-    if (container) container.innerHTML = '<p class="text-muted-foreground">No data to display</p>';
-    return;
-  }
-  
-  // Preserve resize handle
-  const existingHandle = container.querySelector('.resize-handle');
-  container.innerHTML = '';
-  
-  // Apply filters and sorting for this instance
-  applyFiltersWithState(st);
-  applySortingWithState(st);
-  
-  const pageIndices = getCurrentPageIndicesWithState(st);
-  
-  const tableWrapper = document.createElement('div');
-  tableWrapper.className = 'relation-table-wrapper';
-  
-  const table = document.createElement('table');
-  table.className = 'relation-table';
-  if (!st.rel_options.editable) {
-    table.classList.add('relation-table-readonly');
-  }
-  
-  // Header
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
-  
-  // Selection checkbox column
-  const selectTh = document.createElement('th');
-  selectTh.className = 'relation-th-select';
-  selectTh.innerHTML = `<input type="checkbox" class="select-all-checkbox" />`;
-  headerRow.appendChild(selectTh);
-  
-  // Operations column header
-  const opsTh = document.createElement('th');
-  opsTh.className = 'relation-th-ops';
-  opsTh.textContent = '';
-  headerRow.appendChild(opsTh);
-  
-  // Index column
-  const indexTh = document.createElement('th');
-  indexTh.textContent = '#';
-  indexTh.className = 'relation-th-index';
-  headerRow.appendChild(indexTh);
-  
-  // Data columns (skip grouped columns)
-  st.columnNames.forEach((name, idx) => {
-    if (getGroupByColumns(st).includes(idx)) return;
-    
-    const th = document.createElement('th');
-    th.className = 'relation-th-sortable';
-    th.dataset.col = idx;
-    const type = st.columnTypes[idx];
-    const sortIndicator = getSortIndicatorWithState(st, idx);
-    const filterActive = getFilters(st)[idx] ? ' filter-active' : '';
-    const colSelected = getSelectedColumns(st).has(idx) ? ' col-selected' : '';
-    const filterIcon = getFilters(st)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
-    th.innerHTML = `
-      <div class="relation-th-content${filterActive}${colSelected}">
-        <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
-        <span class="relation-col-type">${type}</span>
-      </div>
-    `;
-    headerRow.appendChild(th);
-  });
-  
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-  
-  // Body
-  const tbody = document.createElement('tbody');
-  
-  pageIndices.forEach((rowIdx) => {
-    const row = st.relation.items[rowIdx];
-    const tr = document.createElement('tr');
-    tr.dataset.rowIdx = rowIdx;
-    
-    if (getSelectedRows(st).has(rowIdx)) {
-      tr.classList.add('row-selected');
-    }
-    
-    // Selection checkbox
-    const selectTd = document.createElement('td');
-    selectTd.className = 'relation-td-select';
-    const selectCheckbox = document.createElement('input');
-    selectCheckbox.type = 'checkbox';
-    selectCheckbox.checked = getSelectedRows(st).has(rowIdx);
-    selectCheckbox.dataset.rowIdx = rowIdx;
-    selectCheckbox.className = 'row-select-checkbox';
-    selectTd.appendChild(selectCheckbox);
-    tr.appendChild(selectTd);
-    
-    // Operations button
-    const opsTd = document.createElement('td');
-    opsTd.className = 'relation-td-ops';
-    opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
-    tr.appendChild(opsTd);
-    
-    // Index
-    const indexTd = document.createElement('td');
-    indexTd.textContent = rowIdx + 1;
-    indexTd.className = 'relation-td-index';
-    tr.appendChild(indexTd);
-    
-    // Data cells (skip grouped columns)
-    row.forEach((value, colIdx) => {
-      if (getGroupByColumns(st).includes(colIdx)) return;
-      
-      const td = document.createElement('td');
-      const type = st.columnTypes[colIdx];
-      td.appendChild(createInputForTypeWithState(st, type, value, rowIdx, colIdx, st.rel_options.editable));
-      applyConditionalFormattingWithState(st, value, colIdx, td, rowIdx);
-      tr.appendChild(td);
-    });
-    
-    tbody.appendChild(tr);
-  });
-  
-  table.appendChild(tbody);
-  tableWrapper.appendChild(table);
-  container.appendChild(tableWrapper);
-  
-  // Footer table with stats
-  const footerWrapper = document.createElement('div');
-  footerWrapper.className = 'relation-footer-wrapper';
-  
-  const footerTable = document.createElement('table');
-  footerTable.className = 'relation-table relation-footer-table';
-  
-  const tfoot = document.createElement('tfoot');
-  const footerRow = document.createElement('tr');
-  
-  footerRow.appendChild(document.createElement('td')); // Select column
-  footerRow.appendChild(document.createElement('td')); // Operations column
-  footerRow.appendChild(document.createElement('td')); // Index column
-  
-  st.columnNames.forEach((_, colIdx) => {
-    if (getGroupByColumns(st).includes(colIdx)) return;
-    
-    const td = document.createElement('td');
-    td.className = 'relation-td-stats';
-    td.innerHTML = `<button class="btn-stats" data-col="${colIdx}" title="Statistics">Σ</button>`;
-    footerRow.appendChild(td);
-  });
-  
-  tfoot.appendChild(footerRow);
-  footerTable.appendChild(tfoot);
-  footerWrapper.appendChild(footerTable);
-  container.appendChild(footerWrapper);
-  
-  // Sync column widths
-  syncFooterColumnWidths(table, footerTable);
-  
-  // Pagination
-  const paginationDiv = document.createElement('div');
-  paginationDiv.className = 'relation-pagination';
-  container.appendChild(paginationDiv);
-  renderPaginationWithState(st, paginationDiv);
-  
-  // Update header checkbox state
-  updateHeaderCheckboxWithState(st, container);
-  
-  // Attach event listeners
-  attachTableEventListenersWithState(st, container);
-  
-  // Re-add resize handle
-  if (existingHandle) {
-    container.appendChild(existingHandle);
+// Wrapper functions for parametrized view rendering
+function renderCards(st = state) {
+  if (st.container) {
+    renderCardsWithState(st);
   } else {
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'resize-handle';
-    resizeHandle.dataset.testid = 'resize-handle';
-    container.appendChild(resizeHandle);
+    renderCardsView();
   }
 }
 
-// Helper functions for renderTableWithState
-function applyFiltersWithState(st) {
-  const filters = getFilters(st);
-  let indices = [...Array(st.relation.items.length).keys()];
-  
-  // Apply group filtering first
-  if (getGroupByColumns(st).length > 0) {
-    const selectedValues = getGroupBySelectedValues(st);
-    indices = indices.filter(idx => {
-      const row = st.relation.items[idx];
-      for (const colIdx of getGroupByColumns(st)) {
-        if (selectedValues[colIdx] !== undefined) {
-          const rowValue = row[colIdx];
-          const selectedValue = selectedValues[colIdx];
-          if (selectedValue === null) {
-            if (rowValue !== null) return false;
-          } else if (String(rowValue) !== String(selectedValue)) {
-            return false;
-          }
-        }
-      }
-      return true;
-    });
+function renderPivot(st = state) {
+  if (st.container) {
+    renderPivotWithState(st);
+  } else {
+    initPivotConfig();
   }
-  
-  // Apply column filters
-  for (const colIdx in filters) {
-    const filter = filters[colIdx];
-    if (!filter) continue;
-    
-    const col = parseInt(colIdx);
-    
-    if (filter.type === 'values') {
-      const allowedValues = new Set(filter.values);
-      indices = indices.filter(idx => {
-        const val = st.relation.items[idx][col];
-        const strVal = val === null ? '__null__' : String(val);
-        return allowedValues.has(strVal);
-      });
-    } else if (filter.type === 'condition') {
-      indices = indices.filter(idx => {
-        const val = st.relation.items[idx][col];
-        return evaluateCondition(val, filter.operator, filter.value, filter.caseSensitive);
-      });
-    } else if (filter.type === 'topN') {
-      const colValues = indices.map(idx => ({
-        idx,
-        value: st.relation.items[idx][col]
-      })).filter(item => item.value !== null && item.value !== undefined);
-      
-      colValues.sort((a, b) => {
-        const cmp = compareValues(a.value, b.value, st.columnTypes[col]);
-        return filter.direction === 'top' ? -cmp : cmp;
-      });
-      
-      const topIndices = new Set(colValues.slice(0, filter.n).map(item => item.idx));
-      indices = indices.filter(idx => topIndices.has(idx));
-    } else if (filter.type === 'indices') {
-      const allowedIndices = filter.indices instanceof Set ? filter.indices : new Set(filter.indices);
-      indices = indices.filter(idx => allowedIndices.has(idx));
+}
+
+function renderCorrelation(st = state) {
+  if (st.container) {
+    // For instances, show placeholder (correlation view is complex)
+    const container = st.container.querySelector('.view-correlation');
+    if (container) {
+      const inner = container.querySelector('p');
+      if (inner) inner.textContent = 'Vista "Correlation" - funcionalidade completa em desenvolvimento.';
+    }
+  } else {
+    initCorrelationConfig();
+  }
+}
+
+function renderAI(st = state) {
+  // AI view is always ready, no special initialization needed
+  if (st.container) {
+    const container = st.container.querySelector('.view-ai');
+    if (container) {
+      const inner = container.querySelector('p');
+      if (inner) inner.textContent = 'Vista "AI" - funcionalidade completa em desenvolvimento.';
     }
   }
-  
-  setFilteredIndices(st, indices);
 }
 
-function applySortingWithState(st) {
-  const criteria = getSortCriteria(st);
-  if (criteria.length === 0) {
-    setSortedIndices(st, [...getFilteredIndices(st)]);
-    return;
-  }
-  
-  const sorted = [...getFilteredIndices(st)];
-  sorted.sort((a, b) => {
-    for (const { column, direction } of criteria) {
-      const valA = st.relation.items[a][column];
-      const valB = st.relation.items[b][column];
-      const cmp = compareValues(valA, valB, st.columnTypes[column]);
-      if (cmp !== 0) {
-        return direction === 'asc' ? cmp : -cmp;
-      }
+function renderSaved(st = state) {
+  // Saved view is placeholder for future feature
+  if (st.container) {
+    const container = st.container.querySelector('.view-saved');
+    if (container) {
+      const inner = container.querySelector('p');
+      if (inner) inner.textContent = 'Vista "Saved" - funcionalidade completa em desenvolvimento.';
     }
-    return 0;
-  });
-  setSortedIndices(st, sorted);
+  }
 }
 
-function getCurrentPageIndicesWithState(st) {
-  const indices = getSortedIndices(st);
-  const pageSize = getPageSize(st);
-  const currentPage = getCurrentPage(st);
-  
-  if (pageSize === 'all') return indices;
-  
-  const startIdx = (currentPage - 1) * pageSize;
-  return indices.slice(startIdx, startIdx + pageSize);
-}
+// renderTableWithState removed - using parametrized renderTable(st) directly
 
 function getSortIndicatorWithState(st, colIdx) {
   const criteria = getSortCriteria(st);
@@ -8402,7 +8167,7 @@ function updateHeaderCheckboxWithState(st, container) {
   const headerCheckbox = container.querySelector('.select-all-checkbox');
   if (!headerCheckbox) return;
   
-  const pageIndices = getCurrentPageIndicesWithState(st);
+  const pageIndices = getCurrentPageIndices(st);
   const selectedOnPage = pageIndices.filter(idx => getSelectedRows(st).has(idx)).length;
   
   if (selectedOnPage === 0) {
@@ -8480,7 +8245,7 @@ function attachTableEventListenersWithState(st, container) {
         } else {
           getSelectedColumns(st).add(colIdx);
         }
-        renderTableWithState(st);
+        renderTable(st);
       } else {
         handleSortWithState(st, colIdx, e.shiftKey);
       }
@@ -8526,7 +8291,7 @@ function attachTableEventListenersWithState(st, container) {
     const newSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
     setPageSize(st, newSize);
     setCurrentPage(st, 1);
-    renderTableWithState(st);
+    renderTable(st);
   });
   
   // Pagination buttons
@@ -8537,7 +8302,7 @@ function attachTableEventListenersWithState(st, container) {
       else if (action === 'prev') setCurrentPage(st, Math.max(1, getCurrentPage(st) - 1));
       else if (action === 'next') setCurrentPage(st, Math.min(totalPages, getCurrentPage(st) + 1));
       else if (action === 'last') setCurrentPage(st, totalPages);
-      renderTableWithState(st);
+      renderTable(st);
     });
   });
   
@@ -8575,11 +8340,11 @@ function handleSortWithState(st, colIdx, addToExisting) {
     getSortCriteria(st).push({ column: colIdx, direction: 'asc' });
   }
   
-  renderTableWithState(st);
+  renderTable(st);
 }
 
 function toggleSelectAllWithState(st, container) {
-  const pageIndices = getCurrentPageIndicesWithState(st);
+  const pageIndices = getCurrentPageIndices(st);
   const allSelected = pageIndices.every(idx => getSelectedRows(st).has(idx));
   
   if (allSelected) {
@@ -8588,7 +8353,7 @@ function toggleSelectAllWithState(st, container) {
     pageIndices.forEach(idx => getSelectedRows(st).add(idx));
   }
   
-  renderTableWithState(st);
+  renderTable(st);
 }
 
 function updateRelationFromInputWithState(st, input) {
@@ -8639,14 +8404,14 @@ function showColumnMenuForInstance(st, colIdx, x, y) {
       const action = item.dataset.action;
       if (action === 'sort-asc') {
         setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
-        renderTableWithState(st);
+        renderTable(st);
       } else if (action === 'sort-desc') {
         setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
-        renderTableWithState(st);
+        renderTable(st);
       } else if (action === 'clear-filter') {
         delete getFilters(st)[colIdx];
         setCurrentPage(st, 1);
-        renderTableWithState(st);
+        renderTable(st);
       }
       menu.remove();
     });
@@ -8687,7 +8452,7 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
       } else if (action === 'deselect') {
         getSelectedRows(st).delete(rowIdx);
       }
-      renderTableWithState(st);
+      renderTable(st);
       menu.remove();
     });
   });
