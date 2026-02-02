@@ -2415,7 +2415,11 @@ function addLongPressSupport(element, callback, duration = 500) {
   element.addEventListener('mousedown', startPress);
   element.addEventListener('mouseup', cancelPress);
   element.addEventListener('mouseleave', cancelPress);
-  element.addEventListener('touchstart', startPress, { passive: true });
+  element.addEventListener('touchstart', (e) => {
+    // Prevent default context menu on long press
+    e.target.addEventListener('contextmenu', (ev) => ev.preventDefault(), { once: true });
+    startPress(e);
+  }, { passive: true });
   element.addEventListener('touchend', cancelPress);
   element.addEventListener('touchmove', cancelPress);
   
