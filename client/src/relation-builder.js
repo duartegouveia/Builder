@@ -4921,10 +4921,6 @@ function generatePivotTable() {
   const rowIdx = hasRows ? parseInt(rowColIdx) : null;
   const colIdx = hasCols ? parseInt(colColIdx) : null;
   
-  if (hasRows && hasCols && rowIdx === colIdx) {
-    alert('Row and column dimensions must be different');
-    return;
-  }
   
   // Get aggregation configs (default to id, count if none selected)
   const idColumnIdx = state.columnNames.indexOf('id') !== -1 ? state.columnNames.indexOf('id') : 0;
