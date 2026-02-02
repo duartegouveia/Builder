@@ -2,14 +2,15 @@
 
 ## Overview
 
-Multi-tool web application providing scientific computing and input tools. The application provides four main tools:
+This multi-tool web application provides scientific computing and input utilities. Its primary purpose is to offer advanced tools for data management, scientific calculations, and specialized text input, targeting users who require precise control over data relations, mathematical error analysis, logical expression building, and comprehensive Unicode character access.
 
-1. **Virtual Keyboard** (/) - Comprehensive Unicode character browser with hierarchical navigation, long-press variants, transliteration for non-Latin scripts, multiple keyboard layouts, shift button for case control, collapsed navigation, emoji skin tone modifiers, CJK romanization composition, and output management
-2. **Relation Builder** (/relation.html) - An advanced data table interface for creating, viewing, and editing relational data with JSON input/output, six different views (Table, Cards, Pivot, Correlation, Diagram, AI)
-3. **Error Propagator** (/logic.html) - A scientific calculator that computes error propagation for experimental measurements using partial derivatives and uncertainty analysis
-4. **Logic Builder** (/logic-builder.html) - A visual builder for constructing logical expressions with various operators (AND, OR, XOR, NOT, implications, etc.)
+Key capabilities include:
+- **Virtual Keyboard**: A comprehensive Unicode character browser with hierarchical navigation, transliteration, multiple layouts, and advanced input features.
+- **Relation Builder**: An advanced data table interface for creating and managing relational data with diverse views (Table, Cards, Pivot, Correlation, Diagram, AI).
+- **Error Propagator**: A scientific calculator for error propagation using partial derivatives and uncertainty analysis.
+- **Logic Builder**: A visual tool for constructing complex logical expressions.
 
-The application uses vanilla JavaScript for the frontend and Express.js for the backend.
+The project aims to deliver robust, high-performance web tools using vanilla JavaScript for the frontend and Express.js for the backend.
 
 ## User Preferences
 
@@ -21,263 +22,55 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: None - plain HTML, vanilla JavaScript, standard CSS
-- **Routing**: Multi-page architecture with separate HTML files
-- **State Management**: Plain JavaScript objects with render functions
-- **Styling**: Standard CSS with custom design tokens defined in CSS variables
-- **Build Tool**: Vite
+The frontend is built with plain HTML, vanilla JavaScript, and standard CSS, leveraging Vite as the build tool. It employs a multi-page architecture with distinct HTML files for each major tool. State management is handled via plain JavaScript objects and render functions, with styling defined using standard CSS and custom design tokens in CSS variables.
 
-The frontend uses separate HTML files:
-- `client/keyboard.html` - Virtual Keyboard page (serves at /)
-- `client/relation.html` - Relation Builder page (serves at /relation.html)
-- `client/logic.html` - Error Propagator page (serves at /logic.html)
-- `client/index.html` - Logic Builder page (serves at /logic-builder.html)
-
-JavaScript files in `client/src/`:
-- `virtual-keyboard.js` - Virtual Keyboard with hierarchical Unicode browser
-- `unicode-data.js` - Unicode block definitions, transliterations, accented variants
-- `relation-builder.js` - Relation Builder with advanced table features
-- `experiment-calc.js` - Error Propagator interactivity
-- `logic-builder.js` - Logic Builder interactivity
-- `lib/error-utils.js` - Error propagation calculations using mathjs
-
-CSS files in `client/src/`:
-- `styles.css` - Shared styles, CSS variables, base typography
-- `styles_virtual_keyboard.css` - Virtual Keyboard specific styles
-- `styles_relation.css` - Relation Builder specific styles
-- `styles_logic_builder.css` - Logic Builder specific styles
-- `styles_error_propagator.css` - Error Propagator specific styles
-
-Navigation uses standard anchor links between pages (no SPA, no hash routing).
+The application serves pages at:
+- `/` (Virtual Keyboard)
+- `/relation.html` (Relation Builder)
+- `/logic.html` (Error Propagator)
+- `/logic-builder.html` (Logic Builder)
 
 ### Backend Architecture
-- **Framework**: Express.js
-- **Server**: Node.js HTTP server
-- **API Pattern**: RESTful routes prefixed with `/api`
-- **Development**: Vite dev server middleware for HMR
-
-The backend is located in `server/` with:
-- `index.js` - Server entry point with middleware setup
-- `routes.js` - API route registration
-- `storage.js` - In-memory data storage
-- `vite.js` - Development server integration
-- `static.js` - Static file serving for production
+The backend is powered by Node.js and Express.js, operating as a RESTful API server. It utilizes an in-memory storage solution but is designed for easy migration to PostgreSQL with Drizzle ORM. The development setup integrates Vite's dev server for hot module reloading.
 
 ### Data Storage
-- **Current Storage**: In-memory storage implementation (MemStorage)
-- **Database Ready**: Drizzle ORM with PostgreSQL dialect available for migration
+Currently, data is managed using an in-memory storage implementation (MemStorage). The system is architected to support migration to Drizzle ORM with PostgreSQL.
 
 ### Build System
-- **Client Build**: Vite produces static assets to `dist/public/`
-- **Server Build**: esbuild bundles server code to `dist/index.cjs`
-- **Scripts**: 
-  - `npm run dev` - Development server with hot reload
-  - `npm run build` - Production build
+Vite is used for the client-side build, generating static assets. Server-side code is bundled with esbuild.
 
-### Path Aliases
-- `@/*` - Maps to `client/src/*`
-- `@shared/*` - Maps to `shared/*`
-- `@assets` - Maps to `attached_assets/`
+### Relation Builder Features
+The Relation Builder offers an advanced data table interface with the following core functionalities:
+- **Data Structure**: Relations are JSON objects defining columns (with types like `id`, `string`, `int`, `relation`), relation-level options (`rel_options`), and row data.
+- **State Management**: Uses a centralized system with a `relationsRegistry` and accessor functions for isolated, serializable UI state (`uiState`) per instance, supporting persistence across views.
+- **Table Features**: Includes pagination, row selection, multi-column sorting, advanced filtering (by values, nulls, top N), conditional formatting, and per-column statistics (count, min, max, mean, std dev, quartiles).
+- **Grouping and Nesting**: Supports grouping by columns and infinite nesting of relations, allowing complex data hierarchies.
+- **AI Assistant**: Provides AI-powered data analysis, including natural language queries for insights and filter suggestions, integrated via Replit AI Integrations.
+- **View Tabs**: Offers multiple views:
+    - **Table View**: Standard tabular data display.
+    - **Cards View**: Grid-based display for individual rows.
+    - **Pivot Table View**: Cross-tabulation with aggregation options.
+    - **Correlation View**: Analyzes column correlations (Pearson, Cramér's V).
+    - **Diagram View**: Force-directed clustering visualization.
+    - **AI View**: Dedicated panel for the AI assistant.
 
-## Routing
-
-The application uses multi-page routing with separate HTML files:
-- `/` - Relation Builder (relation.html) - Main page
-- `/logic.html` - Error Propagator (logic.html)
-- `/logic-builder.html` - Logic Builder (index.html)
-
-Navigation uses standard anchor links between HTML pages.
-
-## Relation Builder Features
-
-The Relation Builder provides an advanced data table interface:
-
-### Data Structure
-A relation is a JSON object with:
-- `pot`: "relation" (identifies the object type)
-- `columns`: Object mapping column names to types (e.g., `{"id": "id", "name": "string"}`)
-- `options`: Object mapping column names or special keys to option values
-- `rel_options`: Object with relation-level configuration (see below)
-- `items`: Array of arrays containing row data
-
-Supported column types: `id`, `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`, `relation`, `select`
-
-The `id` type is always the first column in every relation (including nested relations) and represents a unique identifier. The `id` type is treated as a string (even when values are numeric, they are stored as strings).
-
-### rel_options Configuration
-The `rel_options` object controls relation-level behavior:
-- `editable`: Boolean (default: false) - Controls whether table cells are editable
-- `single_item_mode`: String (default: "dialog") - How single items are displayed: "dialog", "right", or "bottom"
-- `general_view_options`: Array of strings - Which view tabs to show and their order. Available options: "Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"
-
-Example:
-```json
-{
-  "pot": "relation",
-  "columns": {"id": "id", "name": "string"},
-  "rel_options": {
-    "editable": true,
-    "single_item_mode": "right",
-    "general_view_options": ["Table", "Cards", "AI"]
-  },
-  "items": [["1", "Test"]]
-}
-```
-
-### options Special Keys
-- `relation.single_item_mode`: Object with display mode options `{"dialog": "dialog", "right": "right", "bottom": "bottom"}`
-
-### Table Features
-1. **Pagination** - 20/50/100/all per page, first/prev/next/last navigation, direct page input
-2. **Selection** - Row checkboxes, three-state header checkbox, invert selection (page/all)
-3. **Sorting** - Click header to sort, Shift+click for multi-column with priority indicators
-4. **Filtering** - Right-click context menu with:
-   - Filter by values (checkbox list)
-   - Null/Not null filters
-   - Top 10 / Top 10% (numeric columns)
-5. **Conditional Formatting** - Data bars, color scales via context menu
-6. **Statistics Footer** - Per-column statistics panel showing:
-   - Count, nulls, min, max, range, sum
-   - Mean, median, mode
-   - Std dev, variance
-   - Q1, Q3, IQR
-   - Skewness, kurtosis (for numeric columns)
-7. **Group By** - Right-click column header to group by column, hides grouped columns with indicator bar
-8. **Row Operations** - Per-row menu (⋮) with View, Edit, Copy, Delete options
-9. **Column Selection** - Select columns via context menu to group into nested relations
-10. **Nested Relations** - Support for `relation` column type with full functionality:
-    - Click relation cells to open nested relation dialogs
-    - Nested dialogs use the same rendering engine as the main relation (`initRelationInstance`)
-    - Full Table and Cards views with sorting, pagination
-    - Infinite nesting depth supported (nested relations can contain nested relations)
-    - Each instance has isolated state management via `createRelationState()` factory
-11. **Cartesian Product** - Expand nested relation columns to flatten data
-12. **Relation Column Statistics** - For `relation` type columns, statistics based on row counts (min, max, mean, median, quartiles, box plot, skewness, kurtosis)
-13. **String Length Statistics** - For `string`/`multilinestring` columns, statistics based on Unicode character length (min, max, mean, median, quartiles, box plot, skewness, kurtosis)
-14. **AI Assistant** - AI-powered data analysis panel that can:
-    - Answer questions about the data
-    - Suggest and apply filters based on natural language queries
-    - Uses OpenAI via Replit AI Integrations (no API key required)
-
-### View Tabs System
-The Relation Builder has 7 different views accessible via tabs (controlled by `rel_options.general_view_options`):
-
-1. **Table View** - Default view showing data in tabular format with all table features
-2. **Cards View** - Grid of equal-sized cards, one per row
-   - Responsive grid layout based on container width
-   - Truncated text with tooltips for full content
-   - Pagination with 3/6/9/12 rows options
-   - Automatic resize handling with ResizeObserver
-3. **Pivot Table View** - Cross-tabulation of two categorical/numeric columns
-   - Row and column dimension selectors
-   - Up to 4 aggregation values: Count, % Total, % Row, % Column
-   - Subtotals and grand totals
-4. **Correlation View** - Two-column correlation analysis
-   - Pearson correlation for numeric/temporal columns (with scatter plot and trend line)
-   - Cramér's V for categorical columns (association measure)
-   - Visual strength indicators
-5. **Diagram View** - Force-directed clustering visualization
-   - Each row represented as a colored circle
-   - Similar rows cluster together based on categorical/numeric values
-   - Uses force-atlas-like algorithm for layout
-6. **AI View** - Natural language data assistant (moved from separate panel)
-
-## Virtual Keyboard Features
-
-The Virtual Keyboard provides comprehensive Unicode character input with:
-
-### Unicode Block Navigation
-- Hierarchical organization by Linguas (Languages) > Continentes > Regions > Scripts
-- 100+ Unicode blocks covering Latin, Greek, Cyrillic, Hebrew, Arabic, CJK, and symbols
-- Expandable/collapsible navigation tree
-- Breadcrumb trail showing current location
-
-### Character Grid
-- Clickable character buttons with Unicode codepoint tooltips
-- Large blocks (2000+ characters) are truncated for performance
-- Support for non-BMP characters (emoji, historic scripts)
-- Characters organized: letters first, then numbers, then symbols
-- Visual separators between character categories
-- Space key (␣) available at the bottom of every page
-
-### Shift Button (Case Control)
-- Three-state shift button for uppercase/lowercase control:
-  - **minúscula** (⇧) - Default lowercase state
-  - **maiúscula** (⬆) - Temporary uppercase, auto-reverts after selecting a letter
-  - **PRESA** (⇪) - Capslock mode, stays locked until clicked again
-- Only letters trigger state transitions; numbers and symbols maintain current state
-
-### Keyboard Layouts
-- Unicode Order (default for non-Latin blocks)
-- QWERTY, AZERTY, QWERTZ (for Latin Basic)
-- Alphabetic (A-Z order)
-- HCESAR (frequency-optimized)
-
-### Long-Press Variants
-- 60+ base characters have accented/related variants
-- Long-press (500ms) on characters like 'a' shows popup with ã, â, á, à, etc.
-- Works on both mouse and touch devices
-
-### Transliteration
-- Non-Latin scripts show Latin transliteration labels
-- Greek: α shows "alpha", β shows "beta"
-- Cyrillic: а shows "a", б shows "b"
-- Hebrew, Arabic, Japanese also have transliterations
-
-### Output Management
-- Editable textarea for collected characters with cursor positioning
-- Text editing controls: Backspace (⌫), Delete (Del), Enter (↵)
-- Copy to clipboard button (copies current textarea content)
-- Clear button to reset
-- End button transfers content to original external field and closes keyboard
-
-### External Field Integration
-- Click any text input or textarea on the page to activate keyboard toggle
-- Toggle button (⌨) appears only when a valid text field is focused
-- Keyboard syncs text and cursor position with the external field
-- End button transfers content back to the original field
-
-### Recent Pages (Unicode Blocks Bar)
-- Tracks last 6 visited Unicode blocks
-- Recent blocks displayed in a separate bar below controls
-- Clicking a recent block does NOT reorder the list
-- Selecting from hierarchy popup adds new blocks to the list
-
-### Floating Keyboard Panel
-- Floating toggle button (⌨) in bottom-right corner (draggable)
-- Toggle button only visible when a text field is focused
-- Keyboard panel with multiple position options:
-  - **Bottom** (default) - full width at bottom of screen
-  - **Top** - full width at top of screen
-  - **Left** - 1/3 width on left side
-  - **Right** - 1/3 width on right side
-- Position controls in panel header
-- Close button to hide panel
-
-### Physical Keyboard Mapping
-- When a non-Latin Unicode block is active (e.g., Cyrillic, Greek), typing on the physical keyboard inserts the corresponding Unicode character
-- Uses transliteration mappings: 'a' → 'а' (Cyrillic), 'b' → 'β' (Greek), etc.
-- Only single-letter transliterations are mapped; multi-letter mappings like "sh" not supported
-- For Basic Latin block, normal typing occurs (no interception)
-- Shift state affects character case
-
-### Autocomplete Dictionary
-- Language selector (Dict:) with options: none, Português, English, Español, Français, Deutsch
-- When a language is selected, typing shows word suggestions based on prefix matching
-- Clicking a suggestion replaces the current word prefix with the complete word
-- Dictionaries contain 100+ most common words per language
-- Suggestions update on character insertion, backspace, delete, and direct typing
-- Enter key clears suggestions (word is considered complete)
-
-### Mobile Responsive
-- On small screens (< 600px), shift and layout controls move to separate line
-- Hierarchy gets full width for easier navigation
+### Virtual Keyboard Features
+The Virtual Keyboard offers comprehensive Unicode character input with:
+- **Unicode Block Navigation**: Hierarchical browsing of Unicode blocks by language, continent, region, and script, with breadcrumbs.
+- **Character Grid**: Clickable character buttons with codepoint tooltips, truncation for large blocks, and support for non-BMP characters.
+- **Shift Button**: Three-state control for uppercase/lowercase (minúscula, maiúscula, PRESA).
+- **Keyboard Layouts**: Supports various layouts like Unicode Order, QWERTY, AZERTY, QWERTZ, Alphabetic, and HCESAR.
+- **Long-Press Variants**: Provides accented and related character variants on long-press.
+- **Transliteration**: Displays Latin transliterations for non-Latin scripts.
+- **Output Management**: Editable textarea with cursor control, copy to clipboard, clear, and integration with external text fields.
+- **External Field Integration**: Activates and syncs with any focused text input/textarea.
+- **Floating Keyboard Panel**: Draggable panel with adjustable positions (bottom, top, left, right).
+- **Physical Keyboard Mapping**: Maps physical key presses to corresponding Unicode characters for active non-Latin blocks using transliteration.
+- **Autocomplete Dictionary**: Language-specific word suggestions based on prefix matching.
+- **Responsiveness**: Optimized for mobile screens.
 
 ## External Dependencies
 
-### Scientific Computing
-- **mathjs** - Mathematical expression parsing, evaluation, and symbolic differentiation for error propagation calculations
-
-### Development Tools
-- **Vite** - Frontend build tool and dev server
-- **esbuild** - Fast JavaScript bundler for server code
+- **mathjs**: Used for mathematical expression parsing, evaluation, and symbolic differentiation in the Error Propagator.
+- **Vite**: Frontend build tool and development server.
+- **esbuild**: Bundler for server-side code.

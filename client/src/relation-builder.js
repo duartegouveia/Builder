@@ -64,50 +64,203 @@ function generateUID() {
   return 'r' + Math.random().toString(36).substr(2, 9);
 }
 
-// Default rel_options
+// Default rel_options (relation-level configuration, persisted in JSON)
 const DEFAULT_REL_OPTIONS = {
   editable: false,
   single_item_mode: 'dialog',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
 };
 
-// Factory function to create a new relation state
+// Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
+const DEFAULT_UI_STATE = {
+  currentView: 'table',
+  pageSize: 5,
+  currentPage: 1,
+  manualResizeHeight: null,
+  cardsPageSize: 12,
+  cardsCurrentPage: 1,
+  selectedRows: [],        // Array for JSON serialization (converted to Set at runtime)
+  sortCriteria: [],
+  filters: {},
+  formatting: {},
+  groupByColumns: [],
+  groupedData: null,
+  expandedGroups: [],      // Array for JSON serialization (converted to Set at runtime)
+  groupBySelectedValues: {},
+  selectedColumns: [],     // Array for JSON serialization (converted to Set at runtime)
+  pivotConfig: { rowColumn: null, colColumn: null, values: [] },
+  diagramNodes: [],
+  filteredIndices: [],
+  sortedIndices: []
+};
+
+// Initialize uiState on a relation (ensures defaults exist)
+function initializeUiState(relation) {
+  if (!relation.rel_options) {
+    relation.rel_options = { ...DEFAULT_REL_OPTIONS };
+  }
+  if (!relation.rel_options.uiState) {
+    relation.rel_options.uiState = { ...DEFAULT_UI_STATE };
+  } else {
+    // Merge with defaults for any missing properties
+    relation.rel_options.uiState = { ...DEFAULT_UI_STATE, ...relation.rel_options.uiState };
+  }
+  return relation;
+}
+
+// Serialize filters object (convert Sets in filters to Arrays)
+function serializeFilters(filters) {
+  if (!filters) return {};
+  const result = {};
+  for (const [key, filter] of Object.entries(filters)) {
+    if (filter && filter.type === 'indices' && filter.indices instanceof Set) {
+      result[key] = { ...filter, indices: Array.from(filter.indices) };
+    } else {
+      result[key] = filter;
+    }
+  }
+  return result;
+}
+
+// Deserialize filters object (convert Arrays in filters back to Sets)
+function deserializeFilters(filters) {
+  if (!filters) return {};
+  const result = {};
+  for (const [key, filter] of Object.entries(filters)) {
+    if (filter && filter.type === 'indices' && Array.isArray(filter.indices)) {
+      result[key] = { ...filter, indices: new Set(filter.indices) };
+    } else {
+      result[key] = filter;
+    }
+  }
+  return result;
+}
+
+// Convert uiState Sets to Arrays for JSON serialization
+// Note: groupedData is runtime-computed and excluded from serialization
+function serializeUiState(uiState) {
+  return {
+    ...uiState,
+    selectedRows: uiState.selectedRows instanceof Set ? Array.from(uiState.selectedRows) : uiState.selectedRows,
+    expandedGroups: uiState.expandedGroups instanceof Set ? Array.from(uiState.expandedGroups) : uiState.expandedGroups,
+    selectedColumns: uiState.selectedColumns instanceof Set ? Array.from(uiState.selectedColumns) : uiState.selectedColumns,
+    filters: serializeFilters(uiState.filters),
+    // Exclude runtime-computed data that cannot be serialized (Map, computed indices)
+    groupedData: null,
+    filteredIndices: [],
+    sortedIndices: []
+  };
+}
+
+// Convert uiState Arrays back to Sets for runtime use
+function deserializeUiState(uiState) {
+  return {
+    ...uiState,
+    selectedRows: new Set(Array.isArray(uiState.selectedRows) ? uiState.selectedRows : []),
+    expandedGroups: new Set(Array.isArray(uiState.expandedGroups) ? uiState.expandedGroups : []),
+    selectedColumns: new Set(Array.isArray(uiState.selectedColumns) ? uiState.selectedColumns : []),
+    filters: deserializeFilters(uiState.filters),
+    // Runtime-computed data will be recalculated on render
+    groupedData: null,
+    filteredIndices: [],
+    sortedIndices: []
+  };
+}
+
+// Global relations registry - array of all active relation instances
+const relationsRegistry = [];
+
+// Register a relation instance
+function registerRelation(instance) {
+  const existing = relationsRegistry.findIndex(r => r.uid === instance.uid);
+  if (existing >= 0) {
+    relationsRegistry[existing] = instance;
+  } else {
+    relationsRegistry.push(instance);
+  }
+}
+
+// Unregister a relation instance
+function unregisterRelation(uid) {
+  const index = relationsRegistry.findIndex(r => r.uid === uid);
+  if (index >= 0) {
+    relationsRegistry.splice(index, 1);
+  }
+}
+
+// Find a relation instance by uid
+function findRelation(uid) {
+  return relationsRegistry.find(r => r.uid === uid);
+}
+
+// Factory function to create a new relation state (instance-level, not persisted)
 function createRelationState() {
   return {
     uid: generateUID(),
     container: null,
-    relation: null,
+    relation: null,            // Reference to the relation data (contains rel_options.uiState)
     columnNames: [],
     columnTypes: [],
     options: {},
-    rel_options: { ...DEFAULT_REL_OPTIONS },
-    currentView: 'table',
-    pageSize: 5,
-    currentPage: 1,
-    manualResizeHeight: null,
-    cardsPageSize: 12,
-    cardsCurrentPage: 1,
-    selectedRows: new Set(),
-    sortCriteria: [],
-    filters: {},
-    formatting: {},
-    groupByColumns: [],
-    groupedData: null,
-    expandedGroups: new Set(),
-    groupBySelectedValues: {},
-    selectedColumns: new Set(),
-    pivotConfig: { rowColumn: null, colColumn: null, values: [] },
-    diagramNodes: [],
-    filteredIndices: [],
-    sortedIndices: [],
+    rel_options: { ...DEFAULT_REL_OPTIONS, uiState: deserializeUiState({ ...DEFAULT_UI_STATE }) },
+    // Runtime-only properties (not persisted)
     cardsResizeObserver: null
   };
 }
 
+// Accessor: get uiState from state (with Set hydration)
+function getUiState(st) {
+  if (!st.rel_options) st.rel_options = { ...DEFAULT_REL_OPTIONS };
+  if (!st.rel_options.uiState) {
+    st.rel_options.uiState = deserializeUiState({ ...DEFAULT_UI_STATE });
+  }
+  return st.rel_options.uiState;
+}
+
+// Accessor shortcuts for commonly used uiState properties
+function getSelectedRows(st) { return getUiState(st).selectedRows; }
+function setSelectedRows(st, value) { getUiState(st).selectedRows = value instanceof Set ? value : new Set(value); }
+function getSortCriteria(st) { return getUiState(st).sortCriteria; }
+function setSortCriteria(st, value) { getUiState(st).sortCriteria = value; }
+function getFilters(st) { return getUiState(st).filters; }
+function setFilters(st, value) { getUiState(st).filters = value; }
+function getFormatting(st) { return getUiState(st).formatting; }
+function setFormatting(st, value) { getUiState(st).formatting = value; }
+function getGroupByColumns(st) { return getUiState(st).groupByColumns; }
+function setGroupByColumns(st, value) { getUiState(st).groupByColumns = value; }
+function getGroupedData(st) { return getUiState(st).groupedData; }
+function setGroupedData(st, value) { getUiState(st).groupedData = value; }
+function getExpandedGroups(st) { return getUiState(st).expandedGroups; }
+function setExpandedGroups(st, value) { getUiState(st).expandedGroups = value instanceof Set ? value : new Set(value); }
+function getGroupBySelectedValues(st) { return getUiState(st).groupBySelectedValues; }
+function setGroupBySelectedValues(st, value) { getUiState(st).groupBySelectedValues = value; }
+function getSelectedColumns(st) { return getUiState(st).selectedColumns; }
+function setSelectedColumns(st, value) { getUiState(st).selectedColumns = value instanceof Set ? value : new Set(value); }
+function getPivotConfig(st) { return getUiState(st).pivotConfig; }
+function setPivotConfig(st, value) { getUiState(st).pivotConfig = value; }
+function getDiagramNodes(st) { return getUiState(st).diagramNodes; }
+function setDiagramNodes(st, value) { getUiState(st).diagramNodes = value; }
+function getFilteredIndices(st) { return getUiState(st).filteredIndices; }
+function setFilteredIndices(st, value) { getUiState(st).filteredIndices = value; }
+function getSortedIndices(st) { return getUiState(st).sortedIndices; }
+function setSortedIndices(st, value) { getUiState(st).sortedIndices = value; }
+function getCurrentView(st) { return getUiState(st).currentView; }
+function setCurrentView(st, value) { getUiState(st).currentView = value; }
+function getPageSize(st) { return getUiState(st).pageSize; }
+function setPageSize(st, value) { getUiState(st).pageSize = value; }
+function getCurrentPage(st) { return getUiState(st).currentPage; }
+function setCurrentPage(st, value) { getUiState(st).currentPage = value; }
+function getManualResizeHeight(st) { return getUiState(st).manualResizeHeight; }
+function setManualResizeHeight(st, value) { getUiState(st).manualResizeHeight = value; }
+function getCardsPageSize(st) { return getUiState(st).cardsPageSize; }
+function setCardsPageSize(st, value) { getUiState(st).cardsPageSize = value; }
+function getCardsCurrentPage(st) { return getUiState(st).cardsCurrentPage; }
+function setCardsCurrentPage(st, value) { getUiState(st).cardsCurrentPage = value; }
+
 // Global state for main relation (backwards compatibility)
 let state = createRelationState();
 
-// Map to store all relation instances
+// Map to store all relation instances (legacy, use relationsRegistry instead)
 const relationInstances = new Map();
 
 // Helper function to get the relation container for a state
@@ -343,12 +496,12 @@ function parseRelation(jsonStr) {
 // Filtering functions
 function applyFilters() {
   const items = state.relation.items;
-  state.filteredIndices = [];
+  const filteredIndices = [];
   
   for (let i = 0; i < items.length; i++) {
     let passes = true;
     
-    for (const [colIdxStr, filter] of Object.entries(state.filters)) {
+    for (const [colIdxStr, filter] of Object.entries(getFilters(state))) {
       const colIdx = parseInt(colIdxStr);
       const value = items[i][colIdx];
       
@@ -378,7 +531,7 @@ function applyFilters() {
     
     // Also check group by selected values
     if (passes) {
-      for (const [colIdxStr, selectedValue] of Object.entries(state.groupBySelectedValues)) {
+      for (const [colIdxStr, selectedValue] of Object.entries(getGroupBySelectedValues(state))) {
         const colIdx = parseInt(colIdxStr);
         const value = items[i][colIdx];
         // Compare with proper null handling
@@ -395,9 +548,10 @@ function applyFilters() {
     }
     
     if (passes) {
-      state.filteredIndices.push(i);
+      filteredIndices.push(i);
     }
   }
+  setFilteredIndices(state, filteredIndices);
 }
 
 function getUniqueValuesForColumn(colIdx) {
@@ -512,15 +666,18 @@ function parseTimeToMs(timeStr) {
 
 // Sorting functions
 function applySorting() {
-  state.sortedIndices = [...state.filteredIndices];
+  const sortedIndices = [...getFilteredIndices(state)];
   
-  if (state.sortCriteria.length === 0) return;
+  if (getSortCriteria(state).length === 0) {
+    setSortedIndices(state, sortedIndices);
+    return;
+  }
   
-  state.sortedIndices.sort((a, b) => {
+  sortedIndices.sort((a, b) => {
     const rowA = state.relation.items[a];
     const rowB = state.relation.items[b];
     
-    for (const criterion of state.sortCriteria) {
+    for (const criterion of getSortCriteria(state)) {
       const valA = rowA[criterion.column];
       const valB = rowB[criterion.column];
       
@@ -531,6 +688,7 @@ function applySorting() {
     }
     return 0;
   });
+  setSortedIndices(state, sortedIndices);
 }
 
 function compareValues(a, b, type) {
@@ -1647,33 +1805,33 @@ function calculateStatistics(colIdx) {
 
 // Group By functions
 function applyGroupBy() {
-  if (state.groupByColumns.length === 0) {
-    state.groupedData = null;
+  if (getGroupByColumns(state).length === 0) {
+    setGroupedData(state, null);
     return;
   }
   
   const groups = new Map();
   
-  state.filteredIndices.forEach(idx => {
+  getFilteredIndices(state).forEach(idx => {
     const row = state.relation.items[idx];
-    const key = state.groupByColumns.map(colIdx => JSON.stringify(row[colIdx])).join('|');
+    const key = getGroupByColumns(state).map(colIdx => JSON.stringify(row[colIdx])).join('|');
     
     if (!groups.has(key)) {
       groups.set(key, {
-        keyValues: state.groupByColumns.map(colIdx => row[colIdx]),
+        keyValues: getGroupByColumns(state).map(colIdx => row[colIdx]),
         indices: []
       });
     }
     groups.get(key).indices.push(idx);
   });
   
-  state.groupedData = groups;
+  setGroupedData(state, groups);
 }
 
 function getVisibleColumns() {
   return state.columnNames
     .map((name, idx) => ({ name, type: state.columnTypes[idx], idx }))
-    .filter((_, idx) => !state.groupByColumns.includes(idx));
+    .filter((_, idx) => !getGroupByColumns(state).includes(idx));
 }
 
 
@@ -1723,17 +1881,17 @@ function updateTextarea() {
 
 // Pagination functions
 function getTotalPages() {
-  if (state.pageSize === 'all') return 1;
-  return Math.ceil(state.sortedIndices.length / state.pageSize);
+  if (getPageSize(state) === 'all') return 1;
+  return Math.ceil(getSortedIndices(state).length / getPageSize(state));
 }
 
 function getCurrentPageIndices() {
-  if (state.pageSize === 'all') {
-    return state.sortedIndices;
+  if (getPageSize(state) === 'all') {
+    return getSortedIndices(state);
   }
-  const start = (state.currentPage - 1) * state.pageSize;
-  const end = start + state.pageSize;
-  return state.sortedIndices.slice(start, end);
+  const start = (getCurrentPage(state) - 1) * getPageSize(state);
+  const end = start + getPageSize(state);
+  return getSortedIndices(state).slice(start, end);
 }
 
 // Selection functions
@@ -1742,7 +1900,7 @@ function updateHeaderCheckbox() {
   if (!headerCheckbox) return;
   
   const pageIndices = getCurrentPageIndices();
-  const selectedInPage = pageIndices.filter(i => state.selectedRows.has(i)).length;
+  const selectedInPage = pageIndices.filter(i => getSelectedRows(state).has(i)).length;
   
   if (selectedInPage === 0) {
     headerCheckbox.checked = false;
@@ -1758,25 +1916,25 @@ function updateHeaderCheckbox() {
 
 function toggleSelectAll() {
   const pageIndices = getCurrentPageIndices();
-  const allSelected = pageIndices.every(i => state.selectedRows.has(i));
+  const allSelected = pageIndices.every(i => getSelectedRows(state).has(i));
   
   if (allSelected) {
-    pageIndices.forEach(i => state.selectedRows.delete(i));
+    pageIndices.forEach(i => getSelectedRows(state).delete(i));
   } else {
-    pageIndices.forEach(i => state.selectedRows.add(i));
+    pageIndices.forEach(i => getSelectedRows(state).add(i));
   }
   
   renderTable();
 }
 
 function invertSelection(pageOnly = false) {
-  const indices = pageOnly ? getCurrentPageIndices() : state.sortedIndices;
+  const indices = pageOnly ? getCurrentPageIndices() : getSortedIndices(state);
   
   indices.forEach(i => {
-    if (state.selectedRows.has(i)) {
-      state.selectedRows.delete(i);
+    if (getSelectedRows(state).has(i)) {
+      getSelectedRows(state).delete(i);
     } else {
-      state.selectedRows.add(i);
+      getSelectedRows(state).add(i);
     }
   });
   
@@ -1784,35 +1942,35 @@ function invertSelection(pageOnly = false) {
 }
 
 function removeSelectedRows() {
-  if (state.selectedRows.size === 0) return;
+  if (getSelectedRows(state).size === 0) return;
   
-  if (!confirm(`Remove ${state.selectedRows.size} selected rows from the data?`)) return;
+  if (!confirm(`Remove ${getSelectedRows(state).size} selected rows from the data?`)) return;
   
   // Get sorted indices to remove (descending to preserve indices)
-  const indicesToRemove = [...state.selectedRows].sort((a, b) => b - a);
+  const indicesToRemove = [...getSelectedRows(state)].sort((a, b) => b - a);
   
   indicesToRemove.forEach(idx => {
     state.relation.items.splice(idx, 1);
   });
   
-  state.selectedRows.clear();
-  state.currentPage = 1;
+  getSelectedRows(state).clear();
+  setCurrentPage(state, 1);
   renderTable();
   updateJsonOutput();
 }
 
 function removeUnselectedRows() {
-  if (state.selectedRows.size === 0) return;
+  if (getSelectedRows(state).size === 0) return;
   
-  const unselectedCount = state.sortedIndices.length - state.selectedRows.size;
-  if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${state.selectedRows.size} selected rows will remain.`)) return;
+  const unselectedCount = getSortedIndices(state).length - getSelectedRows(state).size;
+  if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${getSelectedRows(state).size} selected rows will remain.`)) return;
   
   // Keep only selected rows (create new array with selected items)
-  const selectedIndices = [...state.selectedRows].sort((a, b) => a - b);
+  const selectedIndices = [...getSelectedRows(state)].sort((a, b) => a - b);
   state.relation.items = selectedIndices.map(idx => state.relation.items[idx]);
   
-  state.selectedRows.clear();
-  state.currentPage = 1;
+  getSelectedRows(state).clear();
+  setCurrentPage(state, 1);
   renderTable();
   updateJsonOutput();
 }
@@ -1986,16 +2144,16 @@ function formatValueForInput(type, value) {
 }
 
 function getSortIndicator(colIdx) {
-  const criterion = state.sortCriteria.find(c => c.column === colIdx);
+  const criterion = getSortCriteria(state).find(c => c.column === colIdx);
   if (!criterion) return '';
   
-  const priority = state.sortCriteria.length > 1 ? `<span class="sort-priority">${state.sortCriteria.indexOf(criterion) + 1}</span>` : '';
+  const priority = getSortCriteria(state).length > 1 ? `<span class="sort-priority">${getSortCriteria(state).indexOf(criterion) + 1}</span>` : '';
   const arrow = criterion.direction === 'asc' ? '↑' : '↓';
   return `<span class="sort-indicator">${arrow}${priority}</span>`;
 }
 
 function applyConditionalFormatting(value, colIdx, cell, rowIdx) {
-  const rules = state.formatting[colIdx];
+  const rules = getFormatting(state)[colIdx];
   const type = state.columnTypes[colIdx];
   
   if (rules && rules.length > 0) {
@@ -2080,8 +2238,8 @@ function renderPagination() {
   
   const totalPages = getTotalPages();
   const totalRecords = state.relation.items.length;
-  const filteredRecords = state.sortedIndices.length;
-  const selectedRecords = state.selectedRows.size;
+  const filteredRecords = getSortedIndices(state).length;
+  const selectedRecords = getSelectedRows(state).size;
   
   const hasFilter = filteredRecords !== totalRecords;
   
@@ -2094,23 +2252,23 @@ function renderPagination() {
     <div class="pagination-size">
       <label>Per page:</label>
       <select class="page-size-select">
-        <option value="5" ${state.pageSize === 5 ? 'selected' : ''}>5</option>
-        <option value="10" ${state.pageSize === 10 ? 'selected' : ''}>10</option>
-        <option value="20" ${state.pageSize === 20 ? 'selected' : ''}>20</option>
-        <option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50</option>
-        <option value="100" ${state.pageSize === 100 ? 'selected' : ''}>100</option>
-        <option value="all" ${state.pageSize === 'all' ? 'selected' : ''}>All</option>
+        <option value="5" ${getPageSize(state) === 5 ? 'selected' : ''}>5</option>
+        <option value="10" ${getPageSize(state) === 10 ? 'selected' : ''}>10</option>
+        <option value="20" ${getPageSize(state) === 20 ? 'selected' : ''}>20</option>
+        <option value="50" ${getPageSize(state) === 50 ? 'selected' : ''}>50</option>
+        <option value="100" ${getPageSize(state) === 100 ? 'selected' : ''}>100</option>
+        <option value="all" ${getPageSize(state) === 'all' ? 'selected' : ''}>All</option>
       </select>
     </div>
     <div class="pagination-nav">
-      <button class="btn-page btn-first" ${state.currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>
-      <button class="btn-page btn-prev" ${state.currentPage === 1 ? 'disabled' : ''}>⟨</button>
+      <button class="btn-page btn-first" ${getCurrentPage(state) === 1 ? 'disabled' : ''}>⟨⟨</button>
+      <button class="btn-page btn-prev" ${getCurrentPage(state) === 1 ? 'disabled' : ''}>⟨</button>
       <span class="page-indicator">
-        <input type="number" class="page-input" value="${state.currentPage}" min="1" max="${totalPages}" />
+        <input type="number" class="page-input" value="${getCurrentPage(state)}" min="1" max="${totalPages}" />
         <span>of ${totalPages}</span>
       </span>
-      <button class="btn-page btn-next" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
-      <button class="btn-page btn-last" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
+      <button class="btn-page btn-next" ${getCurrentPage(state) >= totalPages ? 'disabled' : ''}>⟩</button>
+      <button class="btn-page btn-last" ${getCurrentPage(state) >= totalPages ? 'disabled' : ''}>⟩⟩</button>
     </div>
     <div class="pagination-actions">
       <select class="selection-actions selection-actions-select">
@@ -2125,39 +2283,39 @@ function renderPagination() {
   
   // Event listeners
   el('.page-size-select')?.addEventListener('change', (e) => {
-    state.pageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
-    state.currentPage = 1;
+    setPageSize(state, e.target.value === 'all' ? 'all' : parseInt(e.target.value));
+    setCurrentPage(state, 1);
     renderTable();
   });
   
   el('.btn-first')?.addEventListener('click', () => {
-    state.currentPage = 1;
+    setCurrentPage(state, 1);
     renderTable();
   });
   
   el('.btn-prev')?.addEventListener('click', () => {
-    if (state.currentPage > 1) {
-      state.currentPage--;
+    if (getCurrentPage(state) > 1) {
+      setCurrentPage(state, getCurrentPage(state) - 1);
       renderTable();
     }
   });
   
   el('.btn-next')?.addEventListener('click', () => {
-    if (state.currentPage < getTotalPages()) {
-      state.currentPage++;
+    if (getCurrentPage(state) < getTotalPages()) {
+      setCurrentPage(state, getCurrentPage(state) + 1);
       renderTable();
     }
   });
   
   el('.btn-last')?.addEventListener('click', () => {
-    state.currentPage = getTotalPages();
+    setCurrentPage(state, getTotalPages());
     renderTable();
   });
   
   el('.page-input')?.addEventListener('change', (e) => {
     const page = parseInt(e.target.value);
     if (page >= 1 && page <= getTotalPages()) {
-      state.currentPage = page;
+      setCurrentPage(state, page);
       renderTable();
     }
   });
@@ -2305,15 +2463,15 @@ function renderTable() {
   headerRow.appendChild(indexTh);
   
   // Group info header (if any groups)
-  if (state.groupByColumns.length > 0) {
+  if (getGroupByColumns(state).length > 0) {
     const groupInfo = document.createElement('div');
     groupInfo.className = 'group-by-indicator';
     
     let groupHtml = '<span>Grouped by:</span>';
-    state.groupByColumns.forEach(colIdx => {
+    getGroupByColumns(state).forEach(colIdx => {
       const colName = state.columnNames[colIdx];
       const uniqueValues = getUniqueValuesForColumn(colIdx);
-      const currentValue = state.groupBySelectedValues[colIdx];
+      const currentValue = getGroupBySelectedValues(state)[colIdx];
       const hasSelection = currentValue !== undefined;
       
       const colType = state.columnTypes[colIdx];
@@ -2346,8 +2504,8 @@ function renderTable() {
     container.appendChild(groupInfo);
     
     groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
-      state.groupByColumns = [];
-      state.groupBySelectedValues = {};
+      setGroupByColumns(state, []);
+      setGroupBySelectedValues(state, {});
       renderTable();
     });
     
@@ -2357,14 +2515,14 @@ function renderTable() {
         const value = e.target.value;
         
         if (value === '__all__') {
-          delete state.groupBySelectedValues[colIdx];
+          delete getGroupBySelectedValues(state)[colIdx];
         } else if (value === '__null__') {
-          state.groupBySelectedValues[colIdx] = null;
+          getGroupBySelectedValues(state)[colIdx] = null;
         } else {
-          state.groupBySelectedValues[colIdx] = value;
+          getGroupBySelectedValues(state)[colIdx] = value;
         }
         
-        state.currentPage = 1;
+        setCurrentPage(state, 1);
         renderTable();
       });
     });
@@ -2372,16 +2530,16 @@ function renderTable() {
   
   // Data columns (skip grouped columns)
   state.columnNames.forEach((name, idx) => {
-    if (state.groupByColumns.includes(idx)) return;
+    if (getGroupByColumns(state).includes(idx)) return;
     
     const th = document.createElement('th');
     th.className = 'relation-th-sortable';
     th.dataset.col = idx;
     const type = state.columnTypes[idx];
     const sortIndicator = getSortIndicator(idx);
-    const filterActive = state.filters[idx] ? ' filter-active' : '';
-    const colSelected = state.selectedColumns.has(idx) ? ' col-selected' : '';
-    const filterIcon = state.filters[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
+    const filterActive = getFilters(state)[idx] ? ' filter-active' : '';
+    const colSelected = getSelectedColumns(state).has(idx) ? ' col-selected' : '';
+    const filterIcon = getFilters(state)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
         <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
@@ -2402,7 +2560,7 @@ function renderTable() {
     const tr = document.createElement('tr');
     tr.dataset.rowIdx = rowIdx;
     
-    if (state.selectedRows.has(rowIdx)) {
+    if (getSelectedRows(state).has(rowIdx)) {
       tr.classList.add('row-selected');
     }
     
@@ -2411,7 +2569,7 @@ function renderTable() {
     selectTd.className = 'relation-td-select';
     const selectCheckbox = document.createElement('input');
     selectCheckbox.type = 'checkbox';
-    selectCheckbox.checked = state.selectedRows.has(rowIdx);
+    selectCheckbox.checked = getSelectedRows(state).has(rowIdx);
     selectCheckbox.dataset.rowIdx = rowIdx;
     selectCheckbox.className = 'row-select-checkbox';
     selectTd.appendChild(selectCheckbox);
@@ -2431,7 +2589,7 @@ function renderTable() {
     
     // Data cells (skip grouped columns)
     row.forEach((value, colIdx) => {
-      if (state.groupByColumns.includes(colIdx)) return;
+      if (getGroupByColumns(state).includes(colIdx)) return;
       
       const td = document.createElement('td');
       const type = state.columnTypes[colIdx];
@@ -2450,16 +2608,16 @@ function renderTable() {
   
   // Calculate height based on actual rendered content after DOM insertion
   requestAnimationFrame(() => {
-    if (state.manualResizeHeight) {
+    if (getManualResizeHeight(state)) {
       // Use manually set height
-      tableWrapper.style.maxHeight = state.manualResizeHeight + 'px';
+      tableWrapper.style.maxHeight = getManualResizeHeight(state) + 'px';
     } else {
       // Calculate based on actual row heights
       const thead = table.querySelector('thead');
       const theadHeight = thead ? thead.offsetHeight : 40;
       const rows = tbody.querySelectorAll('tr');
       let totalRowHeight = 0;
-      const maxRows = state.pageSize === 'all' ? Math.min(rows.length, 20) : state.pageSize;
+      const maxRows = getPageSize(state) === 'all' ? Math.min(rows.length, 20) : getPageSize(state);
       for (let i = 0; i < Math.min(rows.length, maxRows); i++) {
         totalRowHeight += rows[i].offsetHeight;
       }
@@ -2489,7 +2647,7 @@ function renderTable() {
   footerRow.appendChild(document.createElement('td')); // Index column
   
   state.columnNames.forEach((_, colIdx) => {
-    if (state.groupByColumns.includes(colIdx)) return;
+    if (getGroupByColumns(state).includes(colIdx)) return;
     
     const td = document.createElement('td');
     td.className = 'relation-td-stats';
@@ -2589,10 +2747,10 @@ function attachTableEventListeners() {
       const colIdx = parseInt(th.dataset.col);
       if (e.ctrlKey || e.metaKey) {
         // Ctrl+click toggles column selection
-        if (state.selectedColumns.has(colIdx)) {
-          state.selectedColumns.delete(colIdx);
+        if (getSelectedColumns(state).has(colIdx)) {
+          getSelectedColumns(state).delete(colIdx);
         } else {
-          state.selectedColumns.add(colIdx);
+          getSelectedColumns(state).add(colIdx);
         }
         renderTable();
       } else {
@@ -2625,9 +2783,9 @@ function attachTableEventListeners() {
     checkbox.addEventListener('change', (e) => {
       const rowIdx = parseInt(e.target.dataset.rowIdx);
       if (e.target.checked) {
-        state.selectedRows.add(rowIdx);
+        getSelectedRows(state).add(rowIdx);
       } else {
-        state.selectedRows.delete(rowIdx);
+        getSelectedRows(state).delete(rowIdx);
       }
       updateHeaderCheckbox();
       renderPagination();
@@ -2673,20 +2831,20 @@ function updateBoolCheckbox(checkbox, value) {
 }
 
 function handleSort(colIdx, addToExisting) {
-  const existingIdx = state.sortCriteria.findIndex(c => c.column === colIdx);
+  const existingIdx = getSortCriteria(state).findIndex(c => c.column === colIdx);
   
   if (existingIdx >= 0) {
-    const existing = state.sortCriteria[existingIdx];
+    const existing = getSortCriteria(state)[existingIdx];
     if (existing.direction === 'asc') {
       existing.direction = 'desc';
     } else {
-      state.sortCriteria.splice(existingIdx, 1);
+      getSortCriteria(state).splice(existingIdx, 1);
     }
   } else {
     if (!addToExisting) {
-      state.sortCriteria = [];
+      setSortCriteria(state, []);
     }
-    state.sortCriteria.push({ column: colIdx, direction: 'asc' });
+    getSortCriteria(state).push({ column: colIdx, direction: 'asc' });
   }
   
   renderTable();
@@ -2734,8 +2892,8 @@ function showColumnMenu(colIdx, x, y) {
   const type = state.columnTypes[colIdx];
   const name = state.columnNames[colIdx];
   
-  const isGrouped = state.groupByColumns.includes(colIdx);
-  const isSelected = state.selectedColumns.has(colIdx);
+  const isGrouped = getGroupByColumns(state).includes(colIdx);
+  const isSelected = getSelectedColumns(state).has(colIdx);
   
   menu.innerHTML = `
     <div class="column-menu-header">${name} (${type})</div>
@@ -2785,8 +2943,8 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-content">
           <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
           <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
-          <button class="column-menu-item ${state.selectedColumns.size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${state.selectedColumns.size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
-          <button class="column-menu-item ${state.selectedColumns.size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${state.selectedColumns.size > 0 ? '' : 'disabled'}>Clear Selection</button>
+          <button class="column-menu-item ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
+          <button class="column-menu-item ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}>Clear Selection</button>
         </div>
       </div>
       <div class="accordion-section" data-section="formatting">
@@ -2802,7 +2960,7 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-header">Remove <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item" data-action="remove-column">Remove Column</button>
-          <button class="column-menu-item ${state.selectedColumns.size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${state.selectedColumns.size > 1 ? '' : 'disabled'}>Remove Selected Columns (${state.selectedColumns.size})</button>
+          <button class="column-menu-item ${getSelectedColumns(state).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(state).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(state).size})</button>
         </div>
       </div>
     </div>
@@ -2855,13 +3013,13 @@ function showColumnMenu(colIdx, x, y) {
 function handleColumnMenuAction(colIdx, action) {
   switch (action) {
     case 'sort-asc':
-      state.sortCriteria = [{ column: colIdx, direction: 'asc' }];
+      setSortCriteria(state, [{ column: colIdx, direction: 'asc' }]);
       break;
     case 'sort-desc':
-      state.sortCriteria = [{ column: colIdx, direction: 'desc' }];
+      setSortCriteria(state, [{ column: colIdx, direction: 'desc' }]);
       break;
     case 'sort-clear':
-      state.sortCriteria = state.sortCriteria.filter(c => c.column !== colIdx);
+      setSortCriteria(state, getSortCriteria(state).filter(c => c.column !== colIdx));
       break;
     case 'filter-values':
       showFilterValuesDialog(colIdx);
@@ -2873,10 +3031,10 @@ function handleColumnMenuAction(colIdx, action) {
       showFilterTextCriteriaDialog(colIdx);
       return;
     case 'filter-null':
-      state.filters[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
+      getFilters(state)[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
       break;
     case 'filter-not-null':
-      state.filters[colIdx] = { type: 'criteria', criteria: { notNull: true } };
+      getFilters(state)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
       break;
     case 'filter-top10':
       applyTopFilter(colIdx, 10, false);
@@ -2885,16 +3043,16 @@ function handleColumnMenuAction(colIdx, action) {
       applyTopFilter(colIdx, 10, true);
       break;
     case 'filter-clear':
-      delete state.filters[colIdx];
+      delete getFilters(state)[colIdx];
       break;
     case 'format-databar':
-      state.formatting[colIdx] = [{ condition: {}, style: { dataBar: 'var(--primary-200)' } }];
+      getFormatting(state)[colIdx] = [{ condition: {}, style: { dataBar: 'var(--primary-200)' } }];
       break;
     case 'format-color-scale':
       applyColorScale(colIdx);
       break;
     case 'format-clear':
-      delete state.formatting[colIdx];
+      delete getFormatting(state)[colIdx];
       // Also clear persisted colors for this column
       if (state.relation.colored_items) {
         const colName = state.columnNames[colIdx];
@@ -2905,29 +3063,29 @@ function handleColumnMenuAction(colIdx, action) {
       toggleGroupBy(colIdx);
       return;
     case 'clear-groups':
-      state.groupByColumns = [];
-      state.groupBySelectedValues = {};
+      setGroupByColumns(state, []);
+      setGroupBySelectedValues(state, {});
       break;
     case 'expand-relation':
       expandRelationColumn(colIdx);
       return;
     case 'toggle-select-col':
-      if (state.selectedColumns.has(colIdx)) {
-        state.selectedColumns.delete(colIdx);
+      if (getSelectedColumns(state).has(colIdx)) {
+        getSelectedColumns(state).delete(colIdx);
       } else {
-        state.selectedColumns.add(colIdx);
+        getSelectedColumns(state).add(colIdx);
       }
       break;
     case 'select-all-cols':
       state.columnNames.forEach((_, idx) => {
-        state.selectedColumns.add(idx);
+        getSelectedColumns(state).add(idx);
       });
       break;
     case 'group-selected-cols':
       showGroupColumnsDialog();
       return;
     case 'clear-col-selection':
-      state.selectedColumns.clear();
+      getSelectedColumns(state).clear();
       break;
     case 'format-active-filter':
       showActiveFilterColorDialog(colIdx);
@@ -2940,7 +3098,7 @@ function handleColumnMenuAction(colIdx, action) {
       break;
   }
   
-  state.currentPage = 1;
+  setCurrentPage(state, 1);
   renderTable();
 }
 
@@ -2954,7 +3112,7 @@ function applyTopFilter(colIdx, n, isPercent) {
   const topIndices = new Set(values.slice(0, count).map(item => item.idx));
   
   // Use indices-based filter for accuracy with duplicates
-  state.filters[colIdx] = { type: 'indices', indices: topIndices };
+  getFilters(state)[colIdx] = { type: 'indices', indices: topIndices };
 }
 
 function applyColorScale(colIdx) {
@@ -2977,11 +3135,11 @@ function applyColorScale(colIdx) {
     });
   }
   
-  state.formatting[colIdx] = rules;
+  getFormatting(state)[colIdx] = rules;
 }
 
 function openFilterDialogForColumn(colIdx) {
-  const filter = state.filters[colIdx];
+  const filter = getFilters(state)[colIdx];
   const type = state.columnTypes[colIdx];
   
   if (!filter) {
@@ -3050,7 +3208,7 @@ function showFilterValuesDialog(colIdx) {
     valueCounts.set(v, valueCounts.get(v) + 1);
   });
   
-  const currentFilter = state.filters[colIdx];
+  const currentFilter = getFilters(state)[colIdx];
   const selectedValues = currentFilter?.type === 'values' ? new Set(currentFilter.values) : new Set();
   
   const dialog = document.createElement('div');
@@ -3152,14 +3310,14 @@ function showFilterValuesDialog(colIdx) {
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('.filter-cancel').addEventListener('click', () => dialog.remove());
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
-    delete state.filters[colIdx];
-    state.currentPage = 1;
+    delete getFilters(state)[colIdx];
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
-    state.filters = {};
-    state.currentPage = 1;
+    setFilters(state, {});
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
@@ -3280,12 +3438,12 @@ function showFilterValuesDialog(colIdx) {
   
   dialog.querySelector('.filter-apply').addEventListener('click', () => {
     if (selectedValues.size === 0 || selectedValues.size === naturalOrder.length) {
-      delete state.filters[colIdx];
+      delete getFilters(state)[colIdx];
     } else {
-      state.filters[colIdx] = { type: 'values', values: [...selectedValues] };
+      getFilters(state)[colIdx] = { type: 'values', values: [...selectedValues] };
     }
     
-    state.currentPage = 1;
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
@@ -3296,7 +3454,7 @@ function showFilterComparisonDialog(colIdx) {
   
   const type = state.columnTypes[colIdx];
   const name = state.columnNames[colIdx];
-  const currentFilter = state.filters[colIdx];
+  const currentFilter = getFilters(state)[colIdx];
   
   const isDateTime = type === 'date' || type === 'datetime' || type === 'time';
   let inputType = 'number';
@@ -3354,14 +3512,14 @@ function showFilterComparisonDialog(colIdx) {
   const valueInput = dialog.querySelector('.filter-comparison-value');
   
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
-    delete state.filters[colIdx];
-    state.currentPage = 1;
+    delete getFilters(state)[colIdx];
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
-    state.filters = {};
-    state.currentPage = 1;
+    setFilters(state, {});
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
@@ -3394,8 +3552,8 @@ function showFilterComparisonDialog(colIdx) {
       criteria.value2 = value2;
     }
     
-    state.filters[colIdx] = { type: 'criteria', criteria };
-    state.currentPage = 1;
+    getFilters(state)[colIdx] = { type: 'criteria', criteria };
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
@@ -3405,7 +3563,7 @@ function showFilterTextCriteriaDialog(colIdx) {
   closeAllMenus();
   
   const name = state.columnNames[colIdx];
-  const existingFilter = state.filters[colIdx];
+  const existingFilter = getFilters(state)[colIdx];
   
   // Get current filter values if any
   let currentOp = 'includes';
@@ -3494,14 +3652,14 @@ function showFilterTextCriteriaDialog(colIdx) {
   const textInput = dialog.querySelector('.filter-text-value');
   
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
-    delete state.filters[colIdx];
-    state.currentPage = 1;
+    delete getFilters(state)[colIdx];
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
-    state.filters = {};
-    state.currentPage = 1;
+    setFilters(state, {});
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
@@ -3539,11 +3697,11 @@ function showFilterTextCriteriaDialog(colIdx) {
       }
     }
     
-    state.filters[colIdx] = { 
+    getFilters(state)[colIdx] = { 
       type: 'criteria', 
       criteria: { textOp, textValue, caseSensitive } 
     };
-    state.currentPage = 1;
+    setCurrentPage(state, 1);
     dialog.remove();
     renderTable();
   });
@@ -3834,7 +3992,7 @@ function closeAllMenus() {
 }
 
 function hasActiveFilter() {
-  return Object.keys(state.filters).length > 0;
+  return Object.keys(getFilters(state)).length > 0;
 }
 
 function removeColumn(colIdx) {
@@ -3858,50 +4016,50 @@ function removeColumn(colIdx) {
   });
   state.relation.columns = newColumns;
   
-  state.sortCriteria = state.sortCriteria
+  setSortCriteria(state, getSortCriteria(state)
     .filter(c => c.column !== colIdx)
-    .map(c => ({ ...c, column: c.column > colIdx ? c.column - 1 : c.column }));
+    .map(c => ({ ...c, column: c.column > colIdx ? c.column - 1 : c.column })));
   
   const newFilters = {};
-  for (const [idx, filter] of Object.entries(state.filters)) {
+  for (const [idx, filter] of Object.entries(getFilters(state))) {
     const i = parseInt(idx);
     if (i < colIdx) newFilters[i] = filter;
     else if (i > colIdx) newFilters[i - 1] = filter;
   }
-  state.filters = newFilters;
+  setFilters(state, newFilters);
   
   const newFormatting = {};
-  for (const [idx, fmt] of Object.entries(state.formatting)) {
+  for (const [idx, fmt] of Object.entries(getFormatting(state))) {
     const i = parseInt(idx);
     if (i < colIdx) newFormatting[i] = fmt;
     else if (i > colIdx) newFormatting[i - 1] = fmt;
   }
-  state.formatting = newFormatting;
+  setFormatting(state, newFormatting);
   
-  state.selectedColumns.clear();
-  state.groupByColumns = state.groupByColumns
+  getSelectedColumns(state).clear();
+  setGroupByColumns(state, getGroupByColumns(state)
     .filter(c => c !== colIdx)
-    .map(c => c > colIdx ? c - 1 : c);
+    .map(c => c > colIdx ? c - 1 : c));
   
   const newGroupBySelectedValues = {};
-  for (const [idx, val] of Object.entries(state.groupBySelectedValues)) {
+  for (const [idx, val] of Object.entries(getGroupBySelectedValues(state))) {
     const i = parseInt(idx);
     if (i < colIdx) newGroupBySelectedValues[i] = val;
     else if (i > colIdx) newGroupBySelectedValues[i - 1] = val;
   }
-  state.groupBySelectedValues = newGroupBySelectedValues;
+  setGroupBySelectedValues(state, newGroupBySelectedValues);
   
-  state.selectedRows.clear();
-  state.pivotConfig = { rowDim: null, colDim: null };
-  state.expandedGroups = new Set();
-  state.diagramNodes = [];
+  getSelectedRows(state).clear();
+  setPivotConfig(state, { rowDim: null, colDim: null });
+  setExpandedGroups(state, new Set());
+  setDiagramNodes(state, []);
   
   applyFilters();
   applySorting();
 }
 
 function removeSelectedColumns() {
-  const cols = [...state.selectedColumns].sort((a, b) => b - a);
+  const cols = [...getSelectedColumns(state)].sort((a, b) => b - a);
   cols.forEach(colIdx => removeColumn(colIdx));
 }
 
@@ -3969,7 +4127,7 @@ function applyActiveFilterColor(colIdx, color) {
   
   const coloredItems = state.relation.colored_items[colName];
   
-  state.sortedIndices.forEach(rowIdx => {
+  getSortedIndices(state).forEach(rowIdx => {
     const row = state.relation.items[rowIdx];
     const rowId = row[idColIdx];
     
@@ -3987,15 +4145,15 @@ function applyActiveFilterColor(colIdx, color) {
 }
 
 function toggleGroupBy(colIdx) {
-  const idx = state.groupByColumns.indexOf(colIdx);
+  const idx = getGroupByColumns(state).indexOf(colIdx);
   if (idx >= 0) {
-    state.groupByColumns.splice(idx, 1);
+    getGroupByColumns(state).splice(idx, 1);
     // Also remove selected value for this column
-    delete state.groupBySelectedValues[colIdx];
+    delete getGroupBySelectedValues(state)[colIdx];
   } else {
-    state.groupByColumns.push(colIdx);
+    getGroupByColumns(state).push(colIdx);
   }
-  state.currentPage = 1;
+  setCurrentPage(state, 1);
   renderTable();
 }
 
@@ -4113,15 +4271,15 @@ function expandRelationColumn(colIdx) {
   
   state.columnNames = Object.keys(newColumnsObj);
   state.columnTypes = Object.values(newColumnsObj);
-  state.filteredIndices = [...Array(newItems.length).keys()];
-  state.sortedIndices = [...state.filteredIndices];
-  state.selectedRows = new Set();
-  state.sortCriteria = [];
-  state.filters = {};
-  state.formatting = {};
-  state.groupByColumns = [];
-  state.groupBySelectedValues = {};
-  state.currentPage = 1;
+  setFilteredIndices(state, [...Array(newItems.length).keys()]);
+  setSortedIndices(state, [...getFilteredIndices(state)]);
+  setSelectedRows(state, new Set());
+  setSortCriteria(state, []);
+  setFilters(state, {});
+  setFormatting(state, {});
+  setGroupByColumns(state, []);
+  setGroupBySelectedValues(state, {});
+  setCurrentPage(state, 1);
   
   el('.relation-json').value = JSON.stringify(state.relation, null, 2);
   renderTable();
@@ -4130,7 +4288,7 @@ function expandRelationColumn(colIdx) {
 function showGroupColumnsDialog() {
   closeAllMenus();
   
-  const selectedCols = [...state.selectedColumns];
+  const selectedCols = [...getSelectedColumns(state)];
   if (selectedCols.length === 0) return;
   
   const dialog = document.createElement('div');
@@ -4204,16 +4362,16 @@ function groupColumnsIntoRelation(colIndices, newColName) {
   
   state.columnNames = Object.keys(newColumnsObj);
   state.columnTypes = Object.values(newColumnsObj);
-  state.filteredIndices = [...Array(newItems.length).keys()];
-  state.sortedIndices = [...state.filteredIndices];
-  state.selectedRows = new Set();
-  state.selectedColumns = new Set();
-  state.sortCriteria = [];
-  state.filters = {};
-  state.formatting = {};
-  state.groupByColumns = [];
-  state.groupBySelectedValues = {};
-  state.currentPage = 1;
+  setFilteredIndices(state, [...Array(newItems.length).keys()]);
+  setSortedIndices(state, [...getFilteredIndices(state)]);
+  setSelectedRows(state, new Set());
+  setSelectedColumns(state, new Set());
+  setSortCriteria(state, []);
+  setFilters(state, {});
+  setFormatting(state, {});
+  setGroupByColumns(state, []);
+  setGroupBySelectedValues(state, {});
+  setCurrentPage(state, 1);
   
   el('.relation-json').value = JSON.stringify(state.relation, null, 2);
   renderTable();
@@ -4227,7 +4385,7 @@ function showRowOperationsMenu(rowIdx, x, y) {
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
   
-  const hasSelection = state.selectedRows.size > 0;
+  const hasSelection = getSelectedRows(state).size > 0;
   
   menu.innerHTML = `
     <div class="column-menu-header">Row ${rowIdx + 1}</div>
@@ -4238,7 +4396,7 @@ function showRowOperationsMenu(rowIdx, x, y) {
     <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>
     ${hasSelection ? `
       <div class="column-menu-section">
-        <div class="column-menu-title">Selection (${state.selectedRows.size} rows)</div>
+        <div class="column-menu-title">Selection (${getSelectedRows(state).size} rows)</div>
         <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ Delete Selected</button>
       </div>
     ` : ''}
@@ -4275,28 +4433,28 @@ function handleRowOperation(rowIdx, action) {
     case 'copy-row':
       const rowCopy = [...state.relation.items[rowIdx]];
       state.relation.items.push(rowCopy);
-      state.filteredIndices = [...Array(state.relation.items.length).keys()];
-      state.sortedIndices = [...state.filteredIndices];
+      setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
+      setSortedIndices(state, [...getFilteredIndices(state)]);
       el('.relation-json').value = JSON.stringify(state.relation, null, 2);
       renderTable();
       break;
     case 'delete-row':
       if (confirm('Delete this row?')) {
         state.relation.items.splice(rowIdx, 1);
-        state.selectedRows.delete(rowIdx);
-        state.filteredIndices = [...Array(state.relation.items.length).keys()];
-        state.sortedIndices = [...state.filteredIndices];
+        getSelectedRows(state).delete(rowIdx);
+        setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
+        setSortedIndices(state, [...getFilteredIndices(state)]);
         el('.relation-json').value = JSON.stringify(state.relation, null, 2);
         renderTable();
       }
       break;
     case 'delete-selected':
-      if (confirm(`Delete ${state.selectedRows.size} selected rows?`)) {
-        const indices = [...state.selectedRows].sort((a, b) => b - a);
+      if (confirm(`Delete ${getSelectedRows(state).size} selected rows?`)) {
+        const indices = [...getSelectedRows(state)].sort((a, b) => b - a);
         indices.forEach(i => state.relation.items.splice(i, 1));
-        state.selectedRows.clear();
-        state.filteredIndices = [...Array(state.relation.items.length).keys()];
-        state.sortedIndices = [...state.filteredIndices];
+        getSelectedRows(state).clear();
+        setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
+        setSortedIndices(state, [...getFilteredIndices(state)]);
         el('.relation-json').value = JSON.stringify(state.relation, null, 2);
         renderTable();
       }
@@ -4418,8 +4576,8 @@ function showRowEditDialog(rowIdx) {
     
     if (isNew) {
       state.relation.items.push(newRow);
-      state.filteredIndices = [...Array(state.relation.items.length).keys()];
-      state.sortedIndices = [...state.filteredIndices];
+      setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
+      setSortedIndices(state, [...getFilteredIndices(state)]);
     }
     
     el('.relation-json').value = JSON.stringify(state.relation, null, 2);
@@ -4479,9 +4637,10 @@ function openNestedRelationDialog(relationData) {
   const instanceState = initRelationInstance(builderContainer, relationData, { showJsonEditor: true, isNested: true });
   
   const closeDialog = () => {
-    // Cleanup instance
+    // Cleanup instance from both legacy map and new registry
     if (instanceState) {
       relationInstances.delete(instanceState.uid);
+      unregisterRelation(instanceState.uid);
     }
     overlay.remove();
     dialog.remove();
@@ -4638,15 +4797,15 @@ function applyAIFilter(conditions) {
     }
     
     if (filterType === 'values' && filterValue) {
-      state.filters[colIdx] = { type: 'values', values: filterValue };
+      getFilters(state)[colIdx] = { type: 'values', values: filterValue };
     } else if (filterType === 'null') {
-      state.filters[colIdx] = { type: 'null' };
+      getFilters(state)[colIdx] = { type: 'null' };
     } else if (filterType === 'notNull') {
-      state.filters[colIdx] = { type: 'notNull' };
+      getFilters(state)[colIdx] = { type: 'notNull' };
     }
   });
   
-  state.currentPage = 1;
+  setCurrentPage(state, 1);
   applyFilters();
   renderTable();
   showToast('AI filter applied');
@@ -4778,7 +4937,7 @@ function hideKeyboardHelpTooltip() {
 }
 
 function switchView(viewName) {
-  state.currentView = viewName;
+  setCurrentView(state, viewName);
   
   // Update tab states (scoped to relation container)
   elAll('.view-tab').forEach(tab => {
@@ -4826,12 +4985,12 @@ function renderCardsView() {
   
   if (!wrapper || !cardsContent || !cardsNavigation) return;
   
-  const indices = state.sortedIndices;
+  const indices = getSortedIndices(state);
   
   // Setup resize observer if not already
   if (!cardsResizeObserver) {
     cardsResizeObserver = new ResizeObserver(() => {
-      if (state.currentView === 'cards') {
+      if (getCurrentView(state) === 'cards') {
         renderCardsView();
       }
     });
@@ -4845,12 +5004,12 @@ function renderCardsView() {
   
   // Calculate page sizes (3, 6, 9, 12 rows of cards)
   const pageSizeOptions = [3, 6, 9, 12].map(rows => rows * cardsPerRow);
-  state.cardsPageSize = pageSizeOptions.find(s => s >= state.cardsPageSize) || pageSizeOptions[0];
+  setCardsPageSize(state, pageSizeOptions.find(s => s >= getCardsPageSize(state)) || pageSizeOptions[0]);
   
   const totalItems = indices.length;
-  const totalPages = Math.ceil(totalItems / state.cardsPageSize);
-  const startIdx = (state.cardsCurrentPage - 1) * state.cardsPageSize;
-  const endIdx = Math.min(startIdx + state.cardsPageSize, totalItems);
+  const totalPages = Math.ceil(totalItems / getCardsPageSize(state));
+  const startIdx = (getCardsCurrentPage(state) - 1) * getCardsPageSize(state);
+  const endIdx = Math.min(startIdx + getCardsPageSize(state), totalItems);
   const pageIndices = indices.slice(startIdx, endIdx);
   
   // Render cards grid in first div
@@ -4862,7 +5021,7 @@ function renderCardsView() {
   
   pageIndices.forEach((rowIdx, i) => {
     const row = state.relation.items[rowIdx];
-    const isSelected = state.selectedRows.has(rowIdx);
+    const isSelected = getSelectedRows(state).has(rowIdx);
     
     cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '" style="--card-grid-cols: ' + gridCols + ';">';
     cardsHtml += '<div class="data-card-header">';
@@ -4911,8 +5070,8 @@ function renderCardsView() {
   
   // Render navigation in second div
   const totalRecords = state.relation.items.length;
-  const filteredRecords = state.filteredIndices.length;
-  const selectedRecords = state.selectedRows.size;
+  const filteredRecords = getFilteredIndices(state).length;
+  const selectedRecords = getSelectedRows(state).size;
   const hasFilter = filteredRecords !== totalRecords;
   
   let navHtml = '<div class="cards-info">';
@@ -4924,14 +5083,14 @@ function renderCardsView() {
   navHtml += '</div>';
   
   navHtml += '<div class="cards-pagination">';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
-  navHtml += '<span>Page ' + state.cardsCurrentPage + ' of ' + totalPages + '</span>';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
-  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (getCardsCurrentPage(state) <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (getCardsCurrentPage(state) <= 1 ? 'disabled' : '') + '>⟨</button>';
+  navHtml += '<span>Page ' + getCardsCurrentPage(state) + ' of ' + totalPages + '</span>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (getCardsCurrentPage(state) >= totalPages ? 'disabled' : '') + '>⟩</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (getCardsCurrentPage(state) >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
   navHtml += '<select class="cards-page-size">';
   pageSizeOptions.forEach(size => {
-    navHtml += '<option value="' + size + '" ' + (state.cardsPageSize === size ? 'selected' : '') + '>' + size + ' cards</option>';
+    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(state) === size ? 'selected' : '') + '>' + size + ' cards</option>';
   });
   navHtml += '</select>';
   navHtml += '</div>';
@@ -4953,9 +5112,9 @@ function renderCardsView() {
     cb.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.rowIdx);
       if (e.target.checked) {
-        state.selectedRows.add(idx);
+        getSelectedRows(state).add(idx);
       } else {
-        state.selectedRows.delete(idx);
+        getSelectedRows(state).delete(idx);
       }
       e.target.closest('.data-card').classList.toggle('selected', e.target.checked);
     });
@@ -4974,17 +5133,17 @@ function renderCardsView() {
   cardsNavigation.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const action = e.target.dataset.action;
-      if (action === 'cards-first') state.cardsCurrentPage = 1;
-      else if (action === 'cards-prev') state.cardsCurrentPage = Math.max(1, state.cardsCurrentPage - 1);
-      else if (action === 'cards-next') state.cardsCurrentPage = Math.min(totalPages, state.cardsCurrentPage + 1);
-      else if (action === 'cards-last') state.cardsCurrentPage = totalPages;
+      if (action === 'cards-first') setCardsCurrentPage(state, 1);
+      else if (action === 'cards-prev') setCardsCurrentPage(state, Math.max(1, getCardsCurrentPage(state) - 1));
+      else if (action === 'cards-next') setCardsCurrentPage(state, Math.min(totalPages, getCardsCurrentPage(state) + 1));
+      else if (action === 'cards-last') setCardsCurrentPage(state, totalPages);
       renderCardsView();
     });
   });
   
   cardsNavigation.querySelector('.cards-page-size')?.addEventListener('change', (e) => {
-    state.cardsPageSize = parseInt(e.target.value);
-    state.cardsCurrentPage = 1;
+    setCardsPageSize(state, parseInt(e.target.value));
+    setCardsCurrentPage(state, 1);
     renderCardsView();
   });
   
@@ -4994,24 +5153,24 @@ function renderCardsView() {
     
     if (action === 'invert-page') {
       pageIndices.forEach(idx => {
-        if (state.selectedRows.has(idx)) {
-          state.selectedRows.delete(idx);
+        if (getSelectedRows(state).has(idx)) {
+          getSelectedRows(state).delete(idx);
         } else {
-          state.selectedRows.add(idx);
+          getSelectedRows(state).add(idx);
         }
       });
     } else if (action === 'invert-all') {
       indices.forEach(idx => {
-        if (state.selectedRows.has(idx)) {
-          state.selectedRows.delete(idx);
+        if (getSelectedRows(state).has(idx)) {
+          getSelectedRows(state).delete(idx);
         } else {
-          state.selectedRows.add(idx);
+          getSelectedRows(state).add(idx);
         }
       });
     } else if (action === 'select-all') {
-      indices.forEach(idx => state.selectedRows.add(idx));
+      indices.forEach(idx => getSelectedRows(state).add(idx));
     } else if (action === 'deselect-all') {
-      state.selectedRows.clear();
+      getSelectedRows(state).clear();
     }
     
     renderCardsView();
@@ -5052,7 +5211,7 @@ function renderPivotValuesConfig() {
   const cols = getCategoricalOrNumericColumns();
   
   let html = '';
-  state.pivotConfig.values.forEach((v, i) => {
+  getPivotConfig(state).values.forEach((v, i) => {
     const colName = v.column !== null ? state.columnNames[v.column] : '';
     html += '<div class="pivot-value-item">';
     html += '<select class="pivot-value-col" data-idx="' + i + '">';
@@ -5081,21 +5240,21 @@ function renderPivotValuesConfig() {
   container.querySelectorAll('.pivot-value-col').forEach(sel => {
     sel.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.idx);
-      state.pivotConfig.values[idx].column = e.target.value ? parseInt(e.target.value) : null;
+      getPivotConfig(state).values[idx].column = e.target.value ? parseInt(e.target.value) : null;
     });
   });
   
   container.querySelectorAll('.pivot-value-agg').forEach(sel => {
     sel.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.idx);
-      state.pivotConfig.values[idx].aggregation = e.target.value;
+      getPivotConfig(state).values[idx].aggregation = e.target.value;
     });
   });
   
   container.querySelectorAll('[data-remove-idx]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const idx = parseInt(e.target.dataset.removeIdx);
-      state.pivotConfig.values.splice(idx, 1);
+      getPivotConfig(state).values.splice(idx, 1);
       renderPivotValuesConfig();
     });
   });
@@ -5119,8 +5278,8 @@ function generatePivotTable() {
   
   // Get aggregation configs (default to id, count if none selected)
   const idColumnIdx = state.columnNames.indexOf('id') !== -1 ? state.columnNames.indexOf('id') : 0;
-  const aggregations = state.pivotConfig.values.length > 0 ? 
-    state.pivotConfig.values.filter(v => v.column !== null || v.aggregation === 'count') :
+  const aggregations = getPivotConfig(state).values.length > 0 ? 
+    getPivotConfig(state).values.filter(v => v.column !== null || v.aggregation === 'count') :
     [{ column: idColumnIdx, aggregation: 'count' }];
   
   if (aggregations.length === 0) {
@@ -5131,7 +5290,7 @@ function generatePivotTable() {
   const rowValues = new Set();
   const colValues = new Set();
   
-  state.sortedIndices.forEach(i => {
+  getSortedIndices(state).forEach(i => {
     const row = state.relation.items[i];
     if (hasRows && row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
     if (hasCols && row[colIdx] !== null) colValues.add(String(row[colIdx]));
@@ -5176,7 +5335,7 @@ function generatePivotTable() {
     colTotals[cv] = 0;
   });
   
-  state.sortedIndices.forEach(i => {
+  getSortedIndices(state).forEach(i => {
     const row = state.relation.items[i];
     const rv = hasRows ? (row[rowIdx] !== null ? String(row[rowIdx]) : null) : 'Total';
     const cv = hasCols ? (row[colIdx] !== null ? String(row[colIdx]) : null) : 'Total';
@@ -5463,7 +5622,7 @@ function calculateCorrelation() {
     } else if ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) {
       // Count valid pairs to decide between Kendall and Pearson
       let pairCount = 0;
-      state.sortedIndices.forEach(i => {
+      getSortedIndices(state).forEach(i => {
         const row = state.relation.items[i];
         const x = toNumeric(row[xIdx], xType);
         const y = toNumeric(row[yIdx], yType);
@@ -5478,7 +5637,7 @@ function calculateCorrelation() {
   // For Pearson, Spearman, Kendall need numeric pairs
   if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
     const pairs = [];
-    state.sortedIndices.forEach(i => {
+    getSortedIndices(state).forEach(i => {
       const row = state.relation.items[i];
       const x = toNumeric(row[xIdx], xType);
       const y = toNumeric(row[yIdx], yType);
@@ -5507,7 +5666,7 @@ function calculateCorrelation() {
     const numericType = isBinaryX ? yType : xType;
     
     const pairs = [];
-    state.sortedIndices.forEach(i => {
+    getSortedIndices(state).forEach(i => {
       const row = state.relation.items[i];
       const bVal = row[binaryIdx];
       const nVal = toNumeric(row[numericIdx], numericType);
@@ -5526,7 +5685,7 @@ function calculateCorrelation() {
   } else if (effectiveMethod === 'phi') {
     // Phi coefficient: both binary
     const pairs = [];
-    state.sortedIndices.forEach(i => {
+    getSortedIndices(state).forEach(i => {
       const row = state.relation.items[i];
       const x = row[xIdx];
       const y = row[yIdx];
@@ -5549,7 +5708,7 @@ function calculateCorrelation() {
     const yCounts = {};
     let total = 0;
     
-    state.sortedIndices.forEach(i => {
+    getSortedIndices(state).forEach(i => {
       const row = state.relation.items[i];
       const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
       const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
@@ -6266,7 +6425,7 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
 }
 
 function analyzeAllPairs() {
-  if (!state.relation || state.sortedIndices.length < 2) {
+  if (!state.relation || getSortedIndices(state).length < 2) {
     alert('Not enough data for correlation analysis');
     return;
   }
@@ -6339,7 +6498,7 @@ function analyzeAllPairs() {
       
       if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
         const pairs = [];
-        state.sortedIndices.forEach(idx => {
+        getSortedIndices(state).forEach(idx => {
           const row = state.relation.items[idx];
           const x = toNumeric(row[xIdx], xType);
           const y = toNumeric(row[yIdx], yType);
@@ -6403,7 +6562,7 @@ function analyzeAllPairs() {
       } else if (effectiveMethod === 'pointbiserial') {
         // Point-biserial: one binary, one numeric
         const pairs = [];
-        state.sortedIndices.forEach(idx => {
+        getSortedIndices(state).forEach(idx => {
           const row = state.relation.items[idx];
           const bVal = isBinaryX ? row[xIdx] : row[yIdx];
           const nVal = isBinaryX ? toNumeric(row[yIdx], yType) : toNumeric(row[xIdx], xType);
@@ -6431,7 +6590,7 @@ function analyzeAllPairs() {
       } else if (effectiveMethod === 'phi') {
         // Phi coefficient: both binary
         const pairs = [];
-        state.sortedIndices.forEach(idx => {
+        getSortedIndices(state).forEach(idx => {
           const row = state.relation.items[idx];
           const x = row[xIdx];
           const y = row[yIdx];
@@ -6460,7 +6619,7 @@ function analyzeAllPairs() {
         const yCounts = {};
         let total = 0;
         
-        state.sortedIndices.forEach(idx => {
+        getSortedIndices(state).forEach(idx => {
           const row = state.relation.items[idx];
           const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
           const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
@@ -6654,7 +6813,7 @@ function renderPairContent(container, xIdx, yIdx, method) {
   // Route to appropriate render function based on method
   if (['pearson', 'spearman', 'kendall'].includes(method)) {
     const pairs = [];
-    state.sortedIndices.forEach(idx => {
+    getSortedIndices(state).forEach(idx => {
       const row = state.relation.items[idx];
       const x = toNumeric(row[xIdx], xType);
       const y = toNumeric(row[yIdx], yType);
@@ -6679,7 +6838,7 @@ function renderPairContent(container, xIdx, yIdx, method) {
     const numericIdx = isBinaryX ? yIdx : xIdx;
     const numericType = isBinaryX ? yType : xType;
     
-    state.sortedIndices.forEach(idx => {
+    getSortedIndices(state).forEach(idx => {
       const row = state.relation.items[idx];
       const bVal = row[binaryIdx];
       const nVal = toNumeric(row[numericIdx], numericType);
@@ -6696,7 +6855,7 @@ function renderPairContent(container, xIdx, yIdx, method) {
     renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx);
   } else if (method === 'phi') {
     const pairs = [];
-    state.sortedIndices.forEach(idx => {
+    getSortedIndices(state).forEach(idx => {
       const row = state.relation.items[idx];
       const x = row[xIdx];
       const y = row[yIdx];
@@ -6718,7 +6877,7 @@ function renderPairContent(container, xIdx, yIdx, method) {
     const yCounts = {};
     let total = 0;
     
-    state.sortedIndices.forEach(idx => {
+    getSortedIndices(state).forEach(idx => {
       const row = state.relation.items[idx];
       const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
       const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
@@ -7150,12 +7309,12 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
 }
 
 function runClustering() {
-  if (!state.relation || state.sortedIndices.length === 0) {
+  if (!state.relation || getSortedIndices(state).length === 0) {
     alert('No data to cluster');
     return;
   }
   
-  const n = state.sortedIndices.length;
+  const n = getSortedIndices(state).length;
   const maxPoints = 500;
   
   if (n > maxPoints) {
@@ -7183,7 +7342,7 @@ function runClustering() {
   }
   
   // Prepare data matrix
-  const data = state.sortedIndices.map(i => {
+  const data = getSortedIndices(state).map(i => {
     const row = state.relation.items[i];
     return cols.map(colIdx => {
       const val = row[colIdx];
@@ -7263,7 +7422,7 @@ function runClustering() {
     
     // Create initial nodes
     let nodes = result.map((p, i) => ({
-      idx: state.sortedIndices[i],
+      idx: getSortedIndices(state)[i],
       x: padding + ((p[0] - minX) / rangeX) * (width - 2 * padding),
       y: padding + ((p[1] - minY) / rangeY) * (height - 2 * padding),
       rawData: data[i],
@@ -7289,7 +7448,7 @@ function runClustering() {
     // Apply collision detection to prevent overlapping
     nodes = applyCollisionDetection(nodes, width, height, padding);
     
-    state.diagramNodes = nodes;
+    setDiagramNodes(state, nodes);
     state.diagramBallRadius = ballRadius;
     
     if (progressEl) progressEl.style.display = 'none';
@@ -7613,7 +7772,7 @@ function renderDiagram() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   // Draw nodes
-  state.diagramNodes.forEach(node => {
+  getDiagramNodes(state).forEach(node => {
     const radius = node.radius || 8;
     ctx.beginPath();
     ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
@@ -7625,7 +7784,7 @@ function renderDiagram() {
   });
   
   // Draw cluster legend
-  const clusters = [...new Set(state.diagramNodes.map(n => n.cluster))].sort((a, b) => a - b);
+  const clusters = [...new Set(getDiagramNodes(state).map(n => n.cluster))].sort((a, b) => a - b);
   const clusterColors = [
     '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
     '#ff7f00', '#ffff33', '#a65628', '#f781bf'
@@ -7648,7 +7807,7 @@ function renderDiagram() {
   // Add info text
   ctx.fillStyle = '#666';
   ctx.font = '12px sans-serif';
-  ctx.fillText('Rows: ' + state.diagramNodes.length + ' | Click a point to see data', 10, canvas.height - 40);
+  ctx.fillText('Rows: ' + getDiagramNodes(state).length + ' | Click a point to see data', 10, canvas.height - 40);
 }
 
 function setupDiagramClickHandler() {
@@ -7668,8 +7827,8 @@ function handleDiagramClick(event) {
   
   // Find clicked node
   let clickedNode = null;
-  for (let i = state.diagramNodes.length - 1; i >= 0; i--) {
-    const node = state.diagramNodes[i];
+  for (let i = getDiagramNodes(state).length - 1; i >= 0; i--) {
+    const node = getDiagramNodes(state)[i];
     const dx = x - node.x;
     const dy = y - node.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -7792,6 +7951,9 @@ function closeDiagramPopupOnOutsideClick(event) {
 function initRelationInstance(container, relationData, options = {}) {
   const { showJsonEditor = false, isNested = false } = options;
   
+  // Initialize uiState on relation data if not present
+  initializeUiState(relationData);
+  
   // Create a new state for this instance
   const instanceState = createRelationState();
   instanceState.container = container;
@@ -7804,14 +7966,19 @@ function initRelationInstance(container, relationData, options = {}) {
   instanceState.rel_options = {
     editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
     single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
-    general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
+    general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options],
+    // Deserialize uiState from JSON (convert arrays to Sets)
+    uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
   
-  instanceState.filteredIndices = [...Array((relationData.items || []).length).keys()];
-  instanceState.sortedIndices = [...instanceState.filteredIndices];
+  // Initialize filteredIndices and sortedIndices
+  const itemCount = (relationData.items || []).length;
+  setFilteredIndices(instanceState, [...Array(itemCount).keys()]);
+  setSortedIndices(instanceState, [...getFilteredIndices(instanceState)]);
   
-  // Store instance
+  // Store instance in both legacy map and new registry
   relationInstances.set(instanceState.uid, instanceState);
+  registerRelation(instanceState);
   
   // Add class to container
   container.classList.add('relation_' + instanceState.uid);
@@ -7868,8 +8035,8 @@ function initRelationInstance(container, relationData, options = {}) {
   initInstanceEventListeners(instanceState);
   
   // Render initial view
-  instanceState.currentView = viewOptions[0]?.toLowerCase() || 'table';
-  switchViewForInstance(instanceState, instanceState.currentView);
+  setCurrentView(instanceState, viewOptions[0]?.toLowerCase() || 'table');
+  switchViewForInstance(instanceState, getCurrentView(instanceState));
   
   return instanceState;
 }
@@ -7890,7 +8057,7 @@ function initInstanceEventListeners(st) {
 
 // Switch view for a specific instance
 function switchViewForInstance(st, view) {
-  st.currentView = view;
+  setCurrentView(st, view);
   const container = st.container;
   
   // Hide all view wrappers
@@ -7922,22 +8089,22 @@ function renderTableForInstance(st) {
   if (!tableWrapper || !st.relation) return;
   
   // Apply sorting
-  let indices = [...st.filteredIndices];
-  if (st.sortCriteria.length > 0) {
+  let indices = [...getFilteredIndices(st)];
+  if (getSortCriteria(st).length > 0) {
     indices.sort((a, b) => {
-      for (const { column, direction } of st.sortCriteria) {
+      for (const { column, direction } of getSortCriteria(st)) {
         const cmp = compareValues(st.relation.items[a][column], st.relation.items[b][column], st.columnTypes[column]);
         if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
       }
       return 0;
     });
   }
-  st.sortedIndices = indices;
+  setSortedIndices(st, indices);
   
   const totalItems = indices.length;
-  const effectivePageSize = st.pageSize === 'all' ? totalItems : st.pageSize;
+  const effectivePageSize = getPageSize(st) === 'all' ? totalItems : getPageSize(st);
   const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
-  const startIdx = (st.currentPage - 1) * effectivePageSize;
+  const startIdx = (getCurrentPage(st) - 1) * effectivePageSize;
   const pageIndices = indices.slice(startIdx, startIdx + effectivePageSize);
   
   // Render header
@@ -7945,10 +8112,10 @@ function renderTableForInstance(st) {
   tableHeader.innerHTML = `
     <span class="table-info">${totalItems} rows</span>
     <select class="page-size-select">
-      <option value="10" ${st.pageSize === 10 ? 'selected' : ''}>10</option>
-      <option value="20" ${st.pageSize === 20 ? 'selected' : ''}>20</option>
-      <option value="50" ${st.pageSize === 50 ? 'selected' : ''}>50</option>
-      <option value="all" ${st.pageSize === 'all' ? 'selected' : ''}>All</option>
+      <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10</option>
+      <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20</option>
+      <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50</option>
+      <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''}>All</option>
     </select>
   `;
   
@@ -7956,7 +8123,7 @@ function renderTableForInstance(st) {
   const thead = tableWrapper.querySelector('thead');
   let theadHtml = '<tr>';
   st.columnNames.forEach((name, idx) => {
-    const sortInfo = st.sortCriteria.find(s => s.column === idx);
+    const sortInfo = getSortCriteria(st).find(s => s.column === idx);
     const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
     theadHtml += `<th data-col="${idx}" class="sortable-th">${escapeHtml(name)}${sortIcon}</th>`;
   });
@@ -7984,11 +8151,11 @@ function renderTableForInstance(st) {
   const pagination = tableWrapper.querySelector('.pagination');
   if (totalPages > 1) {
     pagination.innerHTML = `
-      <button class="btn btn-sm page-btn" data-action="first" ${st.currentPage === 1 ? 'disabled' : ''}>«</button>
-      <button class="btn btn-sm page-btn" data-action="prev" ${st.currentPage === 1 ? 'disabled' : ''}>‹</button>
-      <span class="page-info">Página ${st.currentPage} de ${totalPages}</span>
-      <button class="btn btn-sm page-btn" data-action="next" ${st.currentPage === totalPages ? 'disabled' : ''}>›</button>
-      <button class="btn btn-sm page-btn" data-action="last" ${st.currentPage === totalPages ? 'disabled' : ''}>»</button>
+      <button class="btn btn-sm page-btn" data-action="first" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
+      <button class="btn btn-sm page-btn" data-action="prev" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>‹</button>
+      <span class="page-info">Página ${getCurrentPage(st)} de ${totalPages}</span>
+      <button class="btn btn-sm page-btn" data-action="next" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>›</button>
+      <button class="btn btn-sm page-btn" data-action="last" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
     `;
   } else {
     pagination.innerHTML = '';
@@ -7996,8 +8163,8 @@ function renderTableForInstance(st) {
   
   // Add event listeners
   tableHeader.querySelector('.page-size-select')?.addEventListener('change', (e) => {
-    st.pageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
-    st.currentPage = 1;
+    setPageSize(st, e.target.value === 'all' ? 'all' : parseInt(e.target.value));
+    setCurrentPage(st, 1);
     renderTableForInstance(st);
   });
   
@@ -8005,16 +8172,16 @@ function renderTableForInstance(st) {
     th.style.cursor = 'pointer';
     th.addEventListener('click', (e) => {
       const colIdx = parseInt(th.dataset.col);
-      const existing = st.sortCriteria.findIndex(s => s.column === colIdx);
+      const existing = getSortCriteria(st).findIndex(s => s.column === colIdx);
       if (existing >= 0) {
-        if (st.sortCriteria[existing].direction === 'asc') {
-          st.sortCriteria[existing].direction = 'desc';
+        if (getSortCriteria(st)[existing].direction === 'asc') {
+          getSortCriteria(st)[existing].direction = 'desc';
         } else {
-          st.sortCriteria.splice(existing, 1);
+          getSortCriteria(st).splice(existing, 1);
         }
       } else {
-        if (!e.shiftKey) st.sortCriteria = [];
-        st.sortCriteria.push({ column: colIdx, direction: 'asc' });
+        if (!e.shiftKey) setSortCriteria(st, []);
+        getSortCriteria(st).push({ column: colIdx, direction: 'asc' });
       }
       renderTableForInstance(st);
     });
@@ -8023,10 +8190,10 @@ function renderTableForInstance(st) {
   pagination.querySelectorAll('.page-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
-      if (action === 'first') st.currentPage = 1;
-      else if (action === 'prev') st.currentPage = Math.max(1, st.currentPage - 1);
-      else if (action === 'next') st.currentPage = Math.min(totalPages, st.currentPage + 1);
-      else if (action === 'last') st.currentPage = totalPages;
+      if (action === 'first') setCurrentPage(st, 1);
+      else if (action === 'prev') setCurrentPage(st, Math.max(1, getCurrentPage(st) - 1));
+      else if (action === 'next') setCurrentPage(st, Math.min(totalPages, getCurrentPage(st) + 1));
+      else if (action === 'last') setCurrentPage(st, totalPages);
       renderTableForInstance(st);
     });
   });
@@ -8054,11 +8221,11 @@ function renderCardsForInstance(st) {
   const cardsContent = cardsWrapper.querySelector('.cards-content');
   const cardsNav = cardsWrapper.querySelector('.cards-navigation');
   
-  const indices = st.sortedIndices.length > 0 ? st.sortedIndices : [...Array(st.relation.items.length).keys()];
+  const indices = getSortedIndices(st).length > 0 ? getSortedIndices(st) : [...Array(st.relation.items.length).keys()];
   const totalItems = indices.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / st.cardsPageSize));
-  const startIdx = (st.cardsCurrentPage - 1) * st.cardsPageSize;
-  const pageIndices = indices.slice(startIdx, startIdx + st.cardsPageSize);
+  const totalPages = Math.max(1, Math.ceil(totalItems / getCardsPageSize(st)));
+  const startIdx = (getCardsCurrentPage(st) - 1) * getCardsPageSize(st);
+  const pageIndices = indices.slice(startIdx, startIdx + getCardsPageSize(st));
   
   let html = '<div class="instance-cards-grid">';
   pageIndices.forEach(rowIdx => {
@@ -8085,11 +8252,11 @@ function renderCardsForInstance(st) {
   let navHtml = `<span class="cards-info">${totalItems} rows</span>`;
   if (totalPages > 1) {
     navHtml += `
-      <button class="btn btn-sm cards-page-btn" data-action="first" ${st.cardsCurrentPage === 1 ? 'disabled' : ''}>«</button>
-      <button class="btn btn-sm cards-page-btn" data-action="prev" ${st.cardsCurrentPage === 1 ? 'disabled' : ''}>‹</button>
-      <span>Página ${st.cardsCurrentPage} de ${totalPages}</span>
-      <button class="btn btn-sm cards-page-btn" data-action="next" ${st.cardsCurrentPage === totalPages ? 'disabled' : ''}>›</button>
-      <button class="btn btn-sm cards-page-btn" data-action="last" ${st.cardsCurrentPage === totalPages ? 'disabled' : ''}>»</button>
+      <button class="btn btn-sm cards-page-btn" data-action="first" ${getCardsCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
+      <button class="btn btn-sm cards-page-btn" data-action="prev" ${getCardsCurrentPage(st) === 1 ? 'disabled' : ''}>‹</button>
+      <span>Página ${getCardsCurrentPage(st)} de ${totalPages}</span>
+      <button class="btn btn-sm cards-page-btn" data-action="next" ${getCardsCurrentPage(st) === totalPages ? 'disabled' : ''}>›</button>
+      <button class="btn btn-sm cards-page-btn" data-action="last" ${getCardsCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
     `;
   }
   cardsNav.innerHTML = navHtml;
@@ -8097,10 +8264,10 @@ function renderCardsForInstance(st) {
   cardsNav.querySelectorAll('.cards-page-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
-      if (action === 'first') st.cardsCurrentPage = 1;
-      else if (action === 'prev') st.cardsCurrentPage = Math.max(1, st.cardsCurrentPage - 1);
-      else if (action === 'next') st.cardsCurrentPage = Math.min(totalPages, st.cardsCurrentPage + 1);
-      else if (action === 'last') st.cardsCurrentPage = totalPages;
+      if (action === 'first') setCardsCurrentPage(st, 1);
+      else if (action === 'prev') setCardsCurrentPage(st, Math.max(1, getCardsCurrentPage(st) - 1));
+      else if (action === 'next') setCardsCurrentPage(st, Math.min(totalPages, getCardsCurrentPage(st) + 1));
+      else if (action === 'last') setCardsCurrentPage(st, totalPages);
       renderCardsForInstance(st);
     });
   });
@@ -8165,23 +8332,23 @@ function init() {
         general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
       };
       
-      state.currentPage = 1;
-      state.selectedRows = new Set();
-      state.sortCriteria = [];
-      state.filters = {};
-      state.formatting = {};
-      state.filteredIndices = [...Array(result.data.items.length).keys()];
-      state.sortedIndices = [...state.filteredIndices];
-      state.pivotConfig = { rowColumn: null, colColumn: null, values: [] };
-      state.diagramNodes = [];
+      setCurrentPage(state, 1);
+      setSelectedRows(state, new Set());
+      setSortCriteria(state, []);
+      setFilters(state, {});
+      setFormatting(state, {});
+      setFilteredIndices(state, [...Array(result.data.items.length).keys()]);
+      setSortedIndices(state, [...getFilteredIndices(state)]);
+      setPivotConfig(state, { rowColumn: null, colColumn: null, values: [] });
+      setDiagramNodes(state, []);
       
       // Generate view tabs based on general_view_options
       renderViewTabs();
       
       // Reset to table view if available, otherwise first available view
       const availableViews = state.rel_options.general_view_options.map(v => v.toLowerCase());
-      state.currentView = availableViews.includes('table') ? 'table' : availableViews[0] || 'table';
-      switchView(state.currentView);
+      setCurrentView(state, availableViews.includes('table') ? 'table' : availableViews[0] || 'table');
+      switchView(getCurrentView(state));
       
       renderTable();
     } else {
@@ -8192,8 +8359,8 @@ function init() {
   
   // Pivot table events
   el('.btn-add-pivot-value')?.addEventListener('click', () => {
-    if (state.pivotConfig.values.length < 4) {
-      state.pivotConfig.values.push({ column: null, aggregation: 'count' });
+    if (getPivotConfig(state).values.length < 4) {
+      getPivotConfig(state).values.push({ column: null, aggregation: 'count' });
       renderPivotValuesConfig();
     }
   });
@@ -8356,7 +8523,7 @@ function setupResizeHandle() {
       if (wrapper) {
         const currentHeight = parseInt(wrapper.style.maxHeight);
         if (currentHeight) {
-          state.manualResizeHeight = currentHeight;
+          setManualResizeHeight(state, currentHeight);
         }
       }
       isResizing = false;
