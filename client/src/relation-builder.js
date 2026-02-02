@@ -592,15 +592,8 @@ function generateCategoricalHistogramSVG(stats, colName) {
 function generateFrequencyTableHTML(stats, colName) {
   const colOptions = state.options[colName] || {};
   const descData = stats.freqTableDesc;
-  const ascData = stats.freqTableAsc;
   
   if (!descData || descData.length === 0) return '';
-  
-  // Build lookup for ascending cumulative values by key
-  const ascLookup = {};
-  ascData.forEach(item => {
-    ascLookup[item.key] = { cumCount: item.cumCount, cumPercent: item.cumPercent };
-  });
   
   let html = `<table class="freq-table">
     <thead>
@@ -619,15 +612,14 @@ function generateFrequencyTableHTML(stats, colName) {
   descData.forEach(item => {
     const label = colOptions[item.key] || item.key;
     const displayLabel = label.length > 12 ? label.substring(0, 10) + '...' : label;
-    const asc = ascLookup[item.key] || { cumCount: '—', cumPercent: '—' };
     html += `<tr>
       <td title="${label}">${displayLabel}</td>
       <td>${item.count}</td>
       <td>${item.percent}%</td>
       <td>${item.cumCount}</td>
       <td>${item.cumPercent}%</td>
-      <td>${asc.cumCount}</td>
-      <td>${asc.cumPercent}%</td>
+      <td>${item.cumAscCount ?? '—'}</td>
+      <td>${item.cumAscPercent ?? '—'}%</td>
     </tr>`;
   });
   
@@ -670,15 +662,8 @@ function generateBooleanHistogramSVG(stats) {
 // Boolean Frequency Table HTML Generator (combined asc and desc cumulative)
 function generateBooleanFrequencyTableHTML(stats) {
   const descData = stats.freqTableDesc;
-  const ascData = stats.freqTableAsc;
   
   if (!descData || descData.length === 0) return '';
-  
-  // Build lookup for ascending cumulative values by key
-  const ascLookup = {};
-  ascData.forEach(item => {
-    ascLookup[item.key] = { cumCount: item.cumCount, cumPercent: item.cumPercent };
-  });
   
   let html = `<table class="freq-table">
     <thead>
@@ -696,15 +681,14 @@ function generateBooleanFrequencyTableHTML(stats) {
   
   descData.forEach(item => {
     const label = item.key === 'true' ? '✓ True' : '✗ False';
-    const asc = ascLookup[item.key] || { cumCount: '—', cumPercent: '—' };
     html += `<tr>
       <td>${label}</td>
       <td>${item.count}</td>
       <td>${item.percent}%</td>
       <td>${item.cumCount}</td>
       <td>${item.cumPercent}%</td>
-      <td>${asc.cumCount}</td>
-      <td>${asc.cumPercent}%</td>
+      <td>${item.cumAscCount ?? '—'}</td>
+      <td>${item.cumAscPercent ?? '—'}%</td>
     </tr>`;
   });
   
@@ -1229,36 +1213,37 @@ function calculateStatistics(colIdx) {
     const k = Object.keys(freq).length; // Number of categories
     stats.categoryCount = k;
     
-    // Frequency table sorted by count descending
+    // Frequency table sorted by count descending (display order)
     const sortedDesc = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-    const sortedAsc = Object.entries(freq).sort((a, b) => a[1] - b[1]);
-    
-    // Build frequency table with absolute, relative, and cumulative frequencies
-    let cumAsc = 0;
-    let cumDesc = 0;
     const n = nonNull;
     
-    stats.freqTableDesc = sortedDesc.map(([key, count]) => {
-      cumDesc += count;
-      return {
-        key,
-        count,
-        percent: ((count / n) * 100).toFixed(2),
-        cumCount: cumDesc,
-        cumPercent: ((cumDesc / n) * 100).toFixed(2)
-      };
-    });
+    // Build frequency table with absolute, relative frequencies first
+    stats.freqTableDesc = sortedDesc.map(([key, count]) => ({
+      key,
+      count,
+      percent: ((count / n) * 100).toFixed(2),
+      cumCount: 0,
+      cumPercent: '0.00'
+    }));
     
-    stats.freqTableAsc = sortedAsc.map(([key, count]) => {
-      cumAsc += count;
-      return {
-        key,
-        count,
-        percent: ((count / n) * 100).toFixed(2),
-        cumCount: cumAsc,
-        cumPercent: ((cumAsc / n) * 100).toFixed(2)
-      };
-    });
+    // Calculate cumulative descending (top to bottom)
+    let cumDesc = 0;
+    for (let i = 0; i < stats.freqTableDesc.length; i++) {
+      cumDesc += stats.freqTableDesc[i].count;
+      stats.freqTableDesc[i].cumCount = cumDesc;
+      stats.freqTableDesc[i].cumPercent = ((cumDesc / n) * 100).toFixed(2);
+    }
+    
+    // Calculate cumulative ascending (bottom to top, stored as cumAscCount/cumAscPercent)
+    let cumAsc = 0;
+    for (let i = stats.freqTableDesc.length - 1; i >= 0; i--) {
+      cumAsc += stats.freqTableDesc[i].count;
+      stats.freqTableDesc[i].cumAscCount = cumAsc;
+      stats.freqTableDesc[i].cumAscPercent = ((cumAsc / n) * 100).toFixed(2);
+    }
+    
+    // freqTableAsc not needed anymore, but keep for backward compatibility
+    stats.freqTableAsc = stats.freqTableDesc;
     
     // Mode (most frequent category/categories)
     const maxFreq = Math.max(...Object.values(freq));
@@ -1428,32 +1413,33 @@ function calculateStatistics(colIdx) {
     
     const n = nonNull;
     const sortedDesc = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-    const sortedAsc = Object.entries(freq).sort((a, b) => a[1] - b[1]);
     
+    // Build frequency table with absolute, relative frequencies first
+    stats.freqTableDesc = sortedDesc.map(([key, count]) => ({
+      key,
+      count,
+      percent: ((count / n) * 100).toFixed(2),
+      cumCount: 0,
+      cumPercent: '0.00'
+    }));
+    
+    // Calculate cumulative descending (top to bottom)
     let cumDesc = 0;
+    for (let i = 0; i < stats.freqTableDesc.length; i++) {
+      cumDesc += stats.freqTableDesc[i].count;
+      stats.freqTableDesc[i].cumCount = cumDesc;
+      stats.freqTableDesc[i].cumPercent = ((cumDesc / n) * 100).toFixed(2);
+    }
+    
+    // Calculate cumulative ascending (bottom to top)
     let cumAsc = 0;
+    for (let i = stats.freqTableDesc.length - 1; i >= 0; i--) {
+      cumAsc += stats.freqTableDesc[i].count;
+      stats.freqTableDesc[i].cumAscCount = cumAsc;
+      stats.freqTableDesc[i].cumAscPercent = ((cumAsc / n) * 100).toFixed(2);
+    }
     
-    stats.freqTableDesc = sortedDesc.map(([key, count]) => {
-      cumDesc += count;
-      return {
-        key,
-        count,
-        percent: ((count / n) * 100).toFixed(2),
-        cumCount: cumDesc,
-        cumPercent: ((cumDesc / n) * 100).toFixed(2)
-      };
-    });
-    
-    stats.freqTableAsc = sortedAsc.map(([key, count]) => {
-      cumAsc += count;
-      return {
-        key,
-        count,
-        percent: ((count / n) * 100).toFixed(2),
-        cumCount: cumAsc,
-        cumPercent: ((cumAsc / n) * 100).toFixed(2)
-      };
-    });
+    stats.freqTableAsc = stats.freqTableDesc;
     
     // Mode
     const maxFreq = Math.max(...Object.values(freq));
