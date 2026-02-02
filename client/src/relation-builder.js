@@ -3078,8 +3078,31 @@ function showFilterValuesDialog(colIdx) {
     renderTable();
   });
   
+  // Search functionality - declare early so sort handler can use it
+  let lastSearchIndex = -1;
+  let lastSearchTerm = '';
+  
   dialog.querySelector('#filter-sort').addEventListener('change', (e) => {
+    // Get currently highlighted value before re-render
+    const highlightedItem = dialog.querySelector('.filter-value-item.search-highlight input');
+    const highlightedValue = highlightedItem ? highlightedItem.dataset.value : null;
+    
     renderValuesList(e.target.value);
+    
+    // Restore highlight and scroll to preserved item
+    if (highlightedValue !== null) {
+      const listEl = dialog.querySelector('.filter-values-list');
+      const items = listEl.querySelectorAll('.filter-value-item');
+      for (let i = 0; i < items.length; i++) {
+        const input = items[i].querySelector('input');
+        if (input && input.dataset.value === highlightedValue) {
+          items[i].classList.add('search-highlight');
+          items[i].scrollIntoView({ block: 'center', behavior: 'smooth' });
+          lastSearchIndex = i;
+          break;
+        }
+      }
+    }
   });
   
   dialog.querySelector('#filter-select-all').addEventListener('click', () => {
@@ -3094,10 +3117,6 @@ function showFilterValuesDialog(colIdx) {
     dialog.querySelectorAll('.filter-value-item input').forEach(cb => cb.checked = false);
     selectedValues.clear();
   });
-  
-  // Search functionality
-  let lastSearchIndex = -1;
-  let lastSearchTerm = '';
   
   const clearSearch = () => {
     const searchInput = dialog.querySelector('#filter-search');
