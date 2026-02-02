@@ -5191,8 +5191,11 @@ function getCategoricalOrNumericColumns(st = state) {
 function initPivotConfig(st = state) {
   const cols = getCategoricalOrNumericColumns(st);
   
-  const rowSelect = st.container ? st.container.querySelector('.pivot-rows') : el('.pivot-rows');
-  const colSelect = st.container ? st.container.querySelector('.pivot-cols') : el('.pivot-cols');
+  const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
+  if (!pivotView) return;
+  
+  const rowSelect = pivotView.querySelector('.pivot-rows');
+  const colSelect = pivotView.querySelector('.pivot-cols');
   
   if (!rowSelect || !colSelect) return;
   
@@ -5206,6 +5209,25 @@ function initPivotConfig(st = state) {
   
   // Initialize values config
   renderPivotValuesConfig(st);
+  
+  // Add event listeners for Generate Pivot button
+  const generateBtn = pivotView.querySelector('.btn-generate-pivot');
+  if (generateBtn) {
+    const newBtn = generateBtn.cloneNode(true);
+    generateBtn.parentNode.replaceChild(newBtn, generateBtn);
+    newBtn.addEventListener('click', () => generatePivotTable(st));
+  }
+  
+  // Add event listener for Add Value button
+  const addValueBtn = pivotView.querySelector('.btn-add-pivot-value');
+  if (addValueBtn) {
+    const newBtn = addValueBtn.cloneNode(true);
+    addValueBtn.parentNode.replaceChild(newBtn, addValueBtn);
+    newBtn.addEventListener('click', () => {
+      getPivotConfig(st).values.push({ column: null, aggregation: 'count' });
+      renderPivotValuesConfig(st);
+    });
+  }
 }
 
 function renderPivotValuesConfig(st = state) {
@@ -5264,9 +5286,11 @@ function renderPivotValuesConfig(st = state) {
   });
 }
 
-function generatePivotTable() {
-  const rowColIdx = el('.pivot-rows')?.value;
-  const colColIdx = el('.pivot-cols')?.value;
+function generatePivotTable(st = state) {
+  const rowSelect = st.container ? st.container.querySelector('.pivot-rows') : el('.pivot-rows');
+  const colSelect = st.container ? st.container.querySelector('.pivot-cols') : el('.pivot-cols');
+  const rowColIdx = rowSelect?.value;
+  const colColIdx = colSelect?.value;
   
   const hasRows = rowColIdx !== '' && rowColIdx !== null && rowColIdx !== undefined;
   const hasCols = colColIdx !== '' && colColIdx !== null && colColIdx !== undefined;
@@ -5281,9 +5305,9 @@ function generatePivotTable() {
   
   
   // Get aggregation configs (default to id, count if none selected)
-  const idColumnIdx = state.columnNames.indexOf('id') !== -1 ? state.columnNames.indexOf('id') : 0;
-  const aggregations = getPivotConfig(state).values.length > 0 ? 
-    getPivotConfig(state).values.filter(v => v.column !== null || v.aggregation === 'count') :
+  const idColumnIdx = st.columnNames.indexOf('id') !== -1 ? st.columnNames.indexOf('id') : 0;
+  const aggregations = getPivotConfig(st).values.length > 0 ? 
+    getPivotConfig(st).values.filter(v => v.column !== null || v.aggregation === 'count') :
     [{ column: idColumnIdx, aggregation: 'count' }];
   
   if (aggregations.length === 0) {
@@ -5294,8 +5318,8 @@ function generatePivotTable() {
   const rowValues = new Set();
   const colValues = new Set();
   
-  getSortedIndices(state).forEach(i => {
-    const row = state.relation.items[i];
+  getSortedIndices(st).forEach(i => {
+    const row = st.relation.items[i];
     if (hasRows && row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
     if (hasCols && row[colIdx] !== null) colValues.add(String(row[colIdx]));
   });
@@ -5339,8 +5363,8 @@ function generatePivotTable() {
     colTotals[cv] = 0;
   });
   
-  getSortedIndices(state).forEach(i => {
-    const row = state.relation.items[i];
+  getSortedIndices(st).forEach(i => {
+    const row = st.relation.items[i];
     const rv = hasRows ? (row[rowIdx] !== null ? String(row[rowIdx]) : null) : 'Total';
     const cv = hasCols ? (row[colIdx] !== null ? String(row[colIdx]) : null) : 'Total';
     
@@ -5413,8 +5437,8 @@ function generatePivotTable() {
   function formatPivotValue(value, colIndex) {
     if (value === 'Total') return value;
     if (colIndex === null) return escapeHtml(value);
-    const colName = state.columnNames[colIndex];
-    const colOptions = state.options[colName];
+    const colName = st.columnNames[colIndex];
+    const colOptions = st.options[colName];
     if (colOptions && colOptions[value] !== undefined) {
       return escapeHtml(colOptions[value]);
     }
@@ -5425,8 +5449,8 @@ function generatePivotTable() {
   let html = '<table class="pivot-table">';
   
   // Determine header labels
-  const rowLabel = hasRows ? escapeHtml(state.columnNames[rowIdx]) : '';
-  const colLabel = hasCols ? escapeHtml(state.columnNames[colIdx]) : '';
+  const rowLabel = hasRows ? escapeHtml(st.columnNames[rowIdx]) : '';
+  const colLabel = hasCols ? escapeHtml(st.columnNames[colIdx]) : '';
   const headerLabel = hasRows && hasCols ? rowLabel + ' \\ ' + colLabel : (hasRows ? rowLabel : colLabel);
   
   // Header row with column values
@@ -5554,7 +5578,7 @@ function generatePivotTable() {
   
   html += '</tbody></table>';
   
-  const pivotContainer = el('.pivot-table-container');
+  const pivotContainer = st.container ? st.container.querySelector('.pivot-table-container') : el('.pivot-table-container');
   if (pivotContainer) pivotContainer.innerHTML = html;
 }
 
