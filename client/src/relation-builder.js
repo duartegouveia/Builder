@@ -4910,21 +4910,31 @@ function generatePivotTable() {
   const rowColIdx = el('.pivot-rows')?.value;
   const colColIdx = el('.pivot-cols')?.value;
   
-  if (!rowColIdx || !colColIdx) {
-    alert('Please select both row and column dimensions');
+  const hasRows = rowColIdx !== '' && rowColIdx !== null && rowColIdx !== undefined;
+  const hasCols = colColIdx !== '' && colColIdx !== null && colColIdx !== undefined;
+  
+  if (!hasRows && !hasCols) {
+    alert('Please select at least one dimension (Rows or Columns)');
     return;
   }
   
-  const rowIdx = parseInt(rowColIdx);
-  const colIdx = parseInt(colColIdx);
+  const rowIdx = hasRows ? parseInt(rowColIdx) : null;
+  const colIdx = hasCols ? parseInt(colColIdx) : null;
   
-  if (rowIdx === colIdx) {
+  if (hasRows && hasCols && rowIdx === colIdx) {
     alert('Row and column dimensions must be different');
     return;
   }
   
-  // Get aggregation configs (default to count if none selected)
-  const aggregations = state.pivotConfig.values.length > 0 ? state.pivotConfig.values : [{ column: null, aggregation: 'count' }];
+  // Get aggregation configs (default to id, count if none selected)
+  const idColumnIdx = state.columnNames.indexOf('id') !== -1 ? state.columnNames.indexOf('id') : 0;
+  const aggregations = state.pivotConfig.values.length > 0 ? 
+    state.pivotConfig.values.filter(v => v.column !== null || v.aggregation === 'count') :
+    [{ column: idColumnIdx, aggregation: 'count' }];
+  
+  if (aggregations.length === 0) {
+    aggregations.push({ column: idColumnIdx, aggregation: 'count' });
+  }
   
   // Get unique values for rows and columns
   const rowValues = new Set();
@@ -4932,12 +4942,12 @@ function generatePivotTable() {
   
   state.sortedIndices.forEach(i => {
     const row = state.relation.items[i];
-    if (row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
-    if (row[colIdx] !== null) colValues.add(String(row[colIdx]));
+    if (hasRows && row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
+    if (hasCols && row[colIdx] !== null) colValues.add(String(row[colIdx]));
   });
   
-  const rowValuesArr = Array.from(rowValues).sort();
-  const colValuesArr = Array.from(colValues).sort();
+  const rowValuesArr = hasRows ? Array.from(rowValues).sort() : ['Total'];
+  const colValuesArr = hasCols ? Array.from(colValues).sort() : ['Total'];
   
   // Build pivot data for each aggregation - store arrays of values for numeric aggregations
   const pivotData = {}; // { aggIdx: { rowVal: { colVal: [] or count } } }
@@ -4977,10 +4987,13 @@ function generatePivotTable() {
   
   state.sortedIndices.forEach(i => {
     const row = state.relation.items[i];
-    const rv = row[rowIdx] !== null ? String(row[rowIdx]) : null;
-    const cv = row[colIdx] !== null ? String(row[colIdx]) : null;
+    const rv = hasRows ? (row[rowIdx] !== null ? String(row[rowIdx]) : null) : 'Total';
+    const cv = hasCols ? (row[colIdx] !== null ? String(row[colIdx]) : null) : 'Total';
     
-    if (rv !== null && cv !== null) {
+    const rvValid = hasRows ? rv !== null : true;
+    const cvValid = hasCols ? cv !== null : true;
+    
+    if (rvValid && cvValid) {
       aggregations.forEach((agg, aggIdx) => {
         if (numericAggs.includes(agg.aggregation)) {
           if (agg.column !== null) {
@@ -4992,7 +5005,6 @@ function generatePivotTable() {
               grandValuesData[aggIdx].push(val);
             }
           }
-          // If column is null, array stays empty and will show "-"
         } else {
           pivotData[aggIdx][rv][cv]++;
         }
@@ -5046,87 +5058,133 @@ function generatePivotTable() {
   // Render pivot table
   let html = '<table class="pivot-table">';
   
+  // Determine header labels
+  const rowLabel = hasRows ? escapeHtml(state.columnNames[rowIdx]) : '';
+  const colLabel = hasCols ? escapeHtml(state.columnNames[colIdx]) : '';
+  const headerLabel = hasRows && hasCols ? rowLabel + ' \\ ' + colLabel : (hasRows ? rowLabel : colLabel);
+  
   // Header row with column values
   html += '<thead><tr>';
-  html += '<th class="pivot-row-header" rowspan="2">' + escapeHtml(state.columnNames[rowIdx]) + ' \\ ' + escapeHtml(state.columnNames[colIdx]) + '</th>';
-  colValuesArr.forEach(cv => {
-    html += '<th colspan="' + aggregations.length + '">' + escapeHtml(cv) + '</th>';
-  });
-  html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
-  html += '</tr>';
+  html += '<th class="pivot-row-header" rowspan="2">' + headerLabel + '</th>';
   
-  // Sub-header with aggregation labels
-  html += '<tr>';
-  for (let c = 0; c <= colValuesArr.length; c++) {
+  if (hasCols) {
+    colValuesArr.forEach(cv => {
+      html += '<th colspan="' + aggregations.length + '">' + escapeHtml(cv) + '</th>';
+    });
+    html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
+  } else {
     aggregations.forEach(agg => {
       const labels = {
         count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev',
         pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col'
       };
       const label = labels[agg.aggregation] || agg.aggregation;
-      html += '<th style="font-size: 0.75rem; font-weight: normal;">' + label + '</th>';
+      html += '<th>' + label + '</th>';
     });
   }
-  html += '</tr></thead>';
+  html += '</tr>';
+  
+  // Sub-header with aggregation labels (only if we have columns)
+  if (hasCols) {
+    html += '<tr>';
+    for (let c = 0; c <= colValuesArr.length; c++) {
+      aggregations.forEach(agg => {
+        const labels = {
+          count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev',
+          pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col'
+        };
+        const label = labels[agg.aggregation] || agg.aggregation;
+        html += '<th style="font-size: 0.75rem; font-weight: normal;">' + label + '</th>';
+      });
+    }
+    html += '</tr>';
+  }
+  html += '</thead>';
   
   html += '<tbody>';
   
   rowValuesArr.forEach(rv => {
     html += '<tr>';
     html += '<td class="pivot-row-header">' + escapeHtml(rv) + '</td>';
-    colValuesArr.forEach(cv => {
+    
+    if (hasCols) {
+      colValuesArr.forEach(cv => {
+        aggregations.forEach((agg, aggIdx) => {
+          const count = pivotData[aggIdx][rv][cv];
+          const displayVal = formatValue(count, agg.aggregation, rv, cv);
+          html += '<td>' + displayVal + '</td>';
+        });
+      });
+      // Row totals
       aggregations.forEach((agg, aggIdx) => {
-        const count = pivotData[aggIdx][rv][cv];
-        const displayVal = formatValue(count, agg.aggregation, rv, cv);
+        let displayVal;
+        if (numericAggs.includes(agg.aggregation)) {
+          displayVal = computeAggValue(rowValuesData[aggIdx][rv], agg.aggregation);
+        } else {
+          const count = rowTotals[rv];
+          displayVal = agg.aggregation === 'count' ? count : 
+                       agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                       agg.aggregation === 'pctRow' ? '100%' :
+                       (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%');
+        }
+        html += '<td class="pivot-total">' + displayVal + '</td>';
+      });
+    } else {
+      // No columns - just show values for each row
+      aggregations.forEach((agg, aggIdx) => {
+        const count = pivotData[aggIdx][rv]['Total'];
+        const displayVal = formatValue(count, agg.aggregation, rv, 'Total');
         html += '<td>' + displayVal + '</td>';
       });
-    });
-    // Row totals
-    aggregations.forEach((agg, aggIdx) => {
-      let displayVal;
-      if (numericAggs.includes(agg.aggregation)) {
-        displayVal = computeAggValue(rowValuesData[aggIdx][rv], agg.aggregation);
-      } else {
-        const count = rowTotals[rv];
-        displayVal = agg.aggregation === 'count' ? count : 
-                     agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
-                     agg.aggregation === 'pctRow' ? '100%' :
-                     (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%');
-      }
-      html += '<td class="pivot-total">' + displayVal + '</td>';
-    });
+    }
     html += '</tr>';
   });
   
-  // Total row
-  html += '<tr class="pivot-total">';
-  html += '<td class="pivot-row-header pivot-total">Total</td>';
-  colValuesArr.forEach(cv => {
-    aggregations.forEach((agg, aggIdx) => {
-      let displayVal;
-      if (numericAggs.includes(agg.aggregation)) {
-        displayVal = computeAggValue(colValuesData[aggIdx][cv], agg.aggregation);
-      } else {
-        const count = colTotals[cv];
-        displayVal = agg.aggregation === 'count' ? count :
-                     agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
-                     agg.aggregation === 'pctRow' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
-                     '100%';
-      }
-      html += '<td>' + displayVal + '</td>';
-    });
-  });
-  // Grand total
-  aggregations.forEach((agg, aggIdx) => {
-    let displayVal;
-    if (numericAggs.includes(agg.aggregation)) {
-      displayVal = computeAggValue(grandValuesData[aggIdx], agg.aggregation);
+  // Total row (only if we have both or columns)
+  if (hasCols || !hasRows) {
+    html += '<tr class="pivot-total">';
+    html += '<td class="pivot-row-header pivot-total">Total</td>';
+    
+    if (hasCols) {
+      colValuesArr.forEach(cv => {
+        aggregations.forEach((agg, aggIdx) => {
+          let displayVal;
+          if (numericAggs.includes(agg.aggregation)) {
+            displayVal = computeAggValue(colValuesData[aggIdx][cv], agg.aggregation);
+          } else {
+            const count = colTotals[cv];
+            displayVal = agg.aggregation === 'count' ? count :
+                         agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                         agg.aggregation === 'pctRow' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
+                         '100%';
+          }
+          html += '<td>' + displayVal + '</td>';
+        });
+      });
+      // Grand total
+      aggregations.forEach((agg, aggIdx) => {
+        let displayVal;
+        if (numericAggs.includes(agg.aggregation)) {
+          displayVal = computeAggValue(grandValuesData[aggIdx], agg.aggregation);
+        } else {
+          displayVal = agg.aggregation === 'count' ? grandTotal : '100%';
+        }
+        html += '<td>' + displayVal + '</td>';
+      });
     } else {
-      displayVal = agg.aggregation === 'count' ? grandTotal : '100%';
+      // Grand total only
+      aggregations.forEach((agg, aggIdx) => {
+        let displayVal;
+        if (numericAggs.includes(agg.aggregation)) {
+          displayVal = computeAggValue(grandValuesData[aggIdx], agg.aggregation);
+        } else {
+          displayVal = agg.aggregation === 'count' ? grandTotal : '100%';
+        }
+        html += '<td>' + displayVal + '</td>';
+      });
     }
-    html += '<td>' + displayVal + '</td>';
-  });
-  html += '</tr>';
+    html += '</tr>';
+  }
   
   html += '</tbody></table>';
   
