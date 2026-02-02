@@ -1421,6 +1421,12 @@ input[type="number"] {
   font-size: 0.875em;
 }
 
+.ai-voice-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
 .ai-input-row {
   display: flex;
   gap: var(--space-2);
