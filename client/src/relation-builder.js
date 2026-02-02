@@ -4435,41 +4435,221 @@ function showNestedRelationDialog(rowIdx, colIdx) {
   const nestedRelation = state.relation.items[rowIdx][colIdx];
   if (!nestedRelation || !nestedRelation.columns) return;
   
+  const dialogId = `nested-relation-${Date.now()}`;
+  
   const dialog = document.createElement('div');
   dialog.className = 'nested-relation-dialog';
-  
-  const colNames = Object.keys(nestedRelation.columns);
-  const colTypes = Object.values(nestedRelation.columns);
-  
-  let tableHtml = '<table class="nested-relation-table"><thead><tr>';
-  colNames.forEach(name => tableHtml += `<th>${name}</th>`);
-  tableHtml += '</tr></thead><tbody>';
-  
-  (nestedRelation.items || []).forEach(row => {
-    tableHtml += '<tr>';
-    row.forEach((val, i) => {
-      const type = colTypes[i];
-      let display = val === null ? '<em>null</em>' : String(val);
-      if (type === 'relation') display = `<em>${val?.items?.length || 0} rows</em>`;
-      tableHtml += `<td>${display}</td>`;
-    });
-    tableHtml += '</tr>';
-  });
-  
-  tableHtml += '</tbody></table>';
+  dialog.id = dialogId;
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Nested Relation (${nestedRelation.items?.length || 0} rows)</span>
+      <span>Sub-Relation (${nestedRelation.items?.length || 0} rows)</span>
       <button class="btn-close-dialog">✕</button>
     </div>
-    <div class="nested-relation-content">${tableHtml}</div>
+    <div class="nested-relation-content">
+      <div class="nested-relation-builder" id="${dialogId}-builder"></div>
+    </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline close-nested">Close</button>
+      <button class="btn btn-outline close-nested">Fechar</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
+  
+  // Initialize nested relation builder
+  initNestedRelationBuilder(`${dialogId}-builder`, nestedRelation);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.close-nested').addEventListener('click', () => dialog.remove());
+}
+
+// Initialize a nested relation builder inside a container
+function initNestedRelationBuilder(containerId, relation) {
+  const container = document.getElementById(containerId);
+  if (!container || !relation) return;
+  
+  const nestedState = {
+    relation: relation,
+    columnNames: Object.keys(relation.columns || {}),
+    columnTypes: Object.values(relation.columns || {}),
+    options: relation.options || {},
+    relOptions: relation.rel_options || {},
+    currentPage: 1,
+    pageSize: 20,
+    sortConfig: [],
+    filters: {},
+    conditionalFormatting: {},
+    groupedColumns: [],
+    selectedRows: new Set(),
+    containerId: containerId
+  };
+  
+  renderNestedRelationTable(container, nestedState);
+}
+
+// Render a nested relation table
+function renderNestedRelationTable(container, nestedState) {
+  const { relation, columnNames, columnTypes, currentPage, pageSize, sortConfig, filters, groupedColumns } = nestedState;
+  
+  if (!relation || !relation.items) {
+    container.innerHTML = '<p>No data</p>';
+    return;
+  }
+  
+  // Filter items
+  let items = [...relation.items];
+  
+  // Apply filters
+  Object.entries(filters).forEach(([colIdx, filterConfig]) => {
+    const idx = parseInt(colIdx);
+    if (filterConfig.type === 'values') {
+      items = items.filter(row => filterConfig.values.has(String(row[idx])));
+    } else if (filterConfig.type === 'null') {
+      items = items.filter(row => row[idx] === null || row[idx] === undefined);
+    } else if (filterConfig.type === 'notNull') {
+      items = items.filter(row => row[idx] !== null && row[idx] !== undefined);
+    }
+  });
+  
+  // Apply sorting
+  if (sortConfig.length > 0) {
+    items.sort((a, b) => {
+      for (const { colIdx, direction } of sortConfig) {
+        const cmp = compareValues(a[colIdx], b[colIdx], columnTypes[colIdx]);
+        if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
+      }
+      return 0;
+    });
+  }
+  
+  const totalItems = items.length;
+  const totalPages = pageSize === 'all' ? 1 : Math.ceil(totalItems / pageSize);
+  const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
+  const startIdx = (currentPage - 1) * effectivePageSize;
+  const pageItems = items.slice(startIdx, startIdx + effectivePageSize);
+  
+  // Determine visible columns (exclude grouped)
+  const visibleCols = columnNames.map((name, idx) => ({ name, idx }))
+    .filter(c => !groupedColumns.includes(c.idx));
+  
+  let html = `
+    <div class="nested-table-controls">
+      <span class="nested-table-info">${totalItems} rows</span>
+    </div>
+    <div class="nested-table-wrapper">
+      <table class="nested-relation-table-dynamic">
+        <thead><tr>
+  `;
+  
+  visibleCols.forEach(({ name, idx }) => {
+    const sortInfo = sortConfig.find(s => s.colIdx === idx);
+    const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
+    html += `<th data-col="${idx}" class="nested-th-sortable">${name}${sortIcon}</th>`;
+  });
+  
+  html += '</tr></thead><tbody>';
+  
+  pageItems.forEach((row, rowI) => {
+    const actualRowIdx = startIdx + rowI;
+    html += `<tr data-row="${actualRowIdx}">`;
+    visibleCols.forEach(({ idx }) => {
+      const val = row[idx];
+      const type = columnTypes[idx];
+      let display = formatCellValue(val, type, nestedState.options, columnNames[idx]);
+      html += `<td data-col="${idx}">${display}</td>`;
+    });
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table></div>';
+  
+  // Pagination
+  if (totalPages > 1) {
+    html += `
+      <div class="nested-pagination">
+        <button class="btn btn-sm nested-page-btn" data-action="first" ${currentPage === 1 ? 'disabled' : ''}>«</button>
+        <button class="btn btn-sm nested-page-btn" data-action="prev" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+        <span class="nested-page-info">Página ${currentPage} de ${totalPages}</span>
+        <button class="btn btn-sm nested-page-btn" data-action="next" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
+        <button class="btn btn-sm nested-page-btn" data-action="last" ${currentPage === totalPages ? 'disabled' : ''}>»</button>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+  
+  // Add event listeners for sorting
+  container.querySelectorAll('.nested-th-sortable').forEach(th => {
+    th.addEventListener('click', (e) => {
+      const colIdx = parseInt(th.dataset.col);
+      const existing = nestedState.sortConfig.findIndex(s => s.colIdx === colIdx);
+      if (existing >= 0) {
+        if (nestedState.sortConfig[existing].direction === 'asc') {
+          nestedState.sortConfig[existing].direction = 'desc';
+        } else {
+          nestedState.sortConfig.splice(existing, 1);
+        }
+      } else {
+        if (!e.shiftKey) nestedState.sortConfig = [];
+        nestedState.sortConfig.push({ colIdx, direction: 'asc' });
+      }
+      renderNestedRelationTable(container, nestedState);
+    });
+  });
+  
+  // Add event listeners for pagination
+  container.querySelectorAll('.nested-page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'first') nestedState.currentPage = 1;
+      else if (action === 'prev') nestedState.currentPage = Math.max(1, nestedState.currentPage - 1);
+      else if (action === 'next') nestedState.currentPage = Math.min(totalPages, nestedState.currentPage + 1);
+      else if (action === 'last') nestedState.currentPage = totalPages;
+      renderNestedRelationTable(container, nestedState);
+    });
+  });
+  
+  // Add click handler for nested relation cells
+  container.querySelectorAll('td').forEach(td => {
+    const colIdx = parseInt(td.dataset.col);
+    if (columnTypes[colIdx] === 'relation') {
+      td.style.cursor = 'pointer';
+      td.addEventListener('click', () => {
+        const rowIdx = parseInt(td.closest('tr').dataset.row);
+        const nestedRel = nestedState.relation.items[rowIdx][colIdx];
+        if (nestedRel && nestedRel.columns) {
+          showNestedRelationDialogFromData(nestedRel);
+        }
+      });
+    }
+  });
+}
+
+// Show nested relation dialog from data (for deeper nesting)
+function showNestedRelationDialogFromData(relation) {
+  const dialogId = `nested-relation-${Date.now()}`;
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog';
+  dialog.id = dialogId;
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Sub-Relation (${relation.items?.length || 0} rows)</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="nested-relation-content">
+      <div class="nested-relation-builder" id="${dialogId}-builder"></div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline close-nested">Fechar</button>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  initNestedRelationBuilder(`${dialogId}-builder`, relation);
+  
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('.close-nested').addEventListener('click', () => dialog.remove());
 }
