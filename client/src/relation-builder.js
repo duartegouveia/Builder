@@ -10,6 +10,34 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Color palettes for conditional formatting
+const COLOR_PALETTES = {
+  pastel: {
+    name: 'Pastel',
+    colors: ['#ffd1dc', '#ffeeba', '#d4edda', '#d1ecf1', '#e2d4f0', '#ffe0b2', '#c8e6c9', '#bbdefb', '#f8bbd0', '#e1bee7']
+  },
+  vivid: {
+    name: 'Vivid',
+    colors: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+  },
+  dark: {
+    name: 'Dark',
+    colors: ['#7f1d1d', '#78350f', '#713f12', '#14532d', '#134e4a', '#1e3a8a', '#4c1d95', '#831843', '#164e63', '#365314']
+  },
+  neutral: {
+    name: 'Neutral',
+    colors: ['#f5f5f5', '#e5e5e5', '#d4d4d4', '#a3a3a3', '#737373', '#525252', '#404040', '#262626', '#171717', '#0a0a0a']
+  },
+  warm: {
+    name: 'Warm',
+    colors: ['#fef3c7', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f', '#451a03']
+  },
+  cool: {
+    name: 'Cool',
+    colors: ['#ecfeff', '#cffafe', '#a5f3fc', '#67e8f9', '#22d3ee', '#06b6d4', '#0891b2', '#0e7490', '#155e75', '#164e63']
+  }
+};
+
 // State management
 let state = {
   relation: null,
@@ -105,7 +133,8 @@ function generateRandomValue(type, nestedRelationSchema = null) {
       return `${h}:${m}:${s}`;
     case 'relation':
       if (nestedRelationSchema) {
-        return generateNestedRelation(nestedRelationSchema);
+        const defaultCounter = { value: 1 };
+        return generateNestedRelation(nestedRelationSchema, defaultCounter);
       }
       return null;
     default:
@@ -113,13 +142,18 @@ function generateRandomValue(type, nestedRelationSchema = null) {
   }
 }
 
-function generateNestedRelation(schema) {
+function generateNestedRelation(schema, idCounter) {
   const numRows = Math.floor(Math.random() * 4) + 1; // 1-4 rows
+  const columnNames = Object.keys(schema.columns);
   const columnTypes = Object.values(schema.columns);
   const items = [];
   
   for (let i = 0; i < numRows; i++) {
     const row = columnTypes.map((type, idx) => {
+      const colName = columnNames[idx];
+      if (colName.endsWith('_id') || colName === 'id') {
+        return idCounter.value++;
+      }
       if (Math.random() < 0.1) return null; // 10% nulls
       return generateRandomValue(type);
     });
@@ -165,6 +199,9 @@ function generateDemoRelation() {
     tags: 'relation'
   };
   
+  const ordersIdCounter = { value: 1 };
+  const tagsIdCounter = { value: 1 };
+  
   const options = {
     country: {
       pt: '🇵🇹 Portugal',
@@ -195,9 +232,9 @@ function generateDemoRelation() {
       // Handle nested relations with their schemas
       if (type === 'relation') {
         if (colName === 'orders') {
-          return generateRandomValue('relation', ordersSchema);
+          return generateNestedRelation(ordersSchema, ordersIdCounter);
         } else if (colName === 'tags') {
-          return generateRandomValue('relation', tagsSchema);
+          return generateNestedRelation(tagsSchema, tagsIdCounter);
         }
       }
       
@@ -1819,34 +1856,60 @@ function getSortIndicator(colIdx) {
   return `<span class="sort-indicator">${arrow}${priority}</span>`;
 }
 
-function applyConditionalFormatting(value, colIdx, cell) {
+function applyConditionalFormatting(value, colIdx, cell, rowIdx) {
   const rules = state.formatting[colIdx];
-  if (!rules || rules.length === 0) return;
-  
   const type = state.columnTypes[colIdx];
   
-  for (const rule of rules) {
-    if (matchesFormattingCondition(value, rule.condition, type)) {
-      if (rule.style.color) cell.style.color = rule.style.color;
-      if (rule.style.backgroundColor) cell.style.backgroundColor = rule.style.backgroundColor;
-      if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
-      if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
-      
-      if (rule.style.dataBar && (type === 'int' || type === 'float')) {
-        const stats = calculateStatistics(colIdx);
-        if (stats.min !== undefined && stats.max !== undefined && stats.max !== stats.min) {
-          const percent = ((value - stats.min) / (stats.max - stats.min)) * 100;
-          cell.style.background = `linear-gradient(to right, ${rule.style.dataBar} ${percent}%, transparent ${percent}%)`;
+  if (rules && rules.length > 0) {
+    for (const rule of rules) {
+      if (matchesFormattingCondition(value, rule.condition, type)) {
+        if (rule.style.color) cell.style.color = rule.style.color;
+        if (rule.style.backgroundColor) cell.style.backgroundColor = rule.style.backgroundColor;
+        if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
+        if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
+        
+        if (rule.style.dataBar && (type === 'int' || type === 'float')) {
+          const stats = calculateStatistics(colIdx);
+          if (stats.min !== undefined && stats.max !== undefined && stats.max !== stats.min) {
+            const percent = ((value - stats.min) / (stats.max - stats.min)) * 100;
+            cell.style.background = `linear-gradient(to right, ${rule.style.dataBar} ${percent}%, transparent ${percent}%)`;
+          }
+        }
+        
+        if (rule.style.icon) {
+          const iconSpan = document.createElement('span');
+          iconSpan.className = 'format-icon';
+          iconSpan.textContent = rule.style.icon;
+          cell.insertBefore(iconSpan, cell.firstChild);
         }
       }
-      
-      if (rule.style.icon) {
-        const iconSpan = document.createElement('span');
-        iconSpan.className = 'format-icon';
-        iconSpan.textContent = rule.style.icon;
-        cell.insertBefore(iconSpan, cell.firstChild);
-      }
     }
+  }
+  
+  applyPersistedColor(colIdx, cell, rowIdx);
+}
+
+function applyPersistedColor(colIdx, cell, rowIdx) {
+  if (!state.relation || !state.relation.colored_items) return;
+  if (!state.columnNames || !state.relation.items) return;
+  
+  const colName = state.columnNames[colIdx];
+  const coloredItems = state.relation.colored_items[colName];
+  if (!coloredItems || coloredItems.length === 0) return;
+  
+  const idColIdx = state.columnNames.indexOf('id');
+  if (idColIdx < 0) return;
+  
+  const row = state.relation.items[rowIdx];
+  if (!row) return;
+  
+  const rowId = row[idColIdx];
+  
+  if (rowId === null || rowId === undefined) return;
+  
+  const colorItem = coloredItems.find(item => item.id === rowId);
+  if (colorItem) {
+    cell.style.backgroundColor = colorItem.color;
   }
 }
 
@@ -2225,7 +2288,7 @@ function renderTable() {
       const td = document.createElement('td');
       const type = state.columnTypes[colIdx];
       td.appendChild(createInputForType(type, value, rowIdx, colIdx, state.editable));
-      applyConditionalFormatting(value, colIdx, td);
+      applyConditionalFormatting(value, colIdx, td, rowIdx);
       tr.appendChild(td);
     });
     
@@ -2280,6 +2343,16 @@ function renderTable() {
   
   // Attach event listeners
   attachTableEventListeners();
+  
+  // Re-add resize handle if it was removed
+  const existingHandle = container.querySelector('.resize-handle');
+  if (!existingHandle) {
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'resize-handle';
+    resizeHandle.dataset.testid = 'resize-handle';
+    container.appendChild(resizeHandle);
+    setupResizeHandle();
+  }
 }
 
 function attachTableEventListeners() {
@@ -2540,6 +2613,11 @@ function handleColumnMenuAction(colIdx, action) {
       break;
     case 'format-clear':
       delete state.formatting[colIdx];
+      // Also clear persisted colors for this column
+      if (state.relation.colored_items) {
+        const colName = state.columnNames[colIdx];
+        delete state.relation.colored_items[colName];
+      }
       break;
     case 'toggle-group':
       toggleGroupBy(colIdx);
@@ -3128,21 +3206,28 @@ function removeSelectedColumns() {
 function showActiveFilterColorDialog(colIdx) {
   closeAllMenus();
   
-  const colors = [
-    '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', 
-    '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#000000'
-  ];
-  
   const dialog = document.createElement('div');
   dialog.className = 'color-palette-dialog';
   
+  let palettesHtml = '';
+  for (const [key, palette] of Object.entries(COLOR_PALETTES)) {
+    palettesHtml += `
+      <div class="palette-section" data-palette="${key}">
+        <div class="palette-name">${palette.name}</div>
+        <div class="palette-colors">
+          ${palette.colors.map(c => `<button class="color-swatch" data-color="${c}" style="background-color: ${c}"></button>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
   dialog.innerHTML = `
     <div class="color-palette-header">
-      <span>Choose Color for Active Filter</span>
+      <span>Choose Color for Filtered Rows</span>
       <button class="btn-close-dialog">✕</button>
     </div>
-    <div class="color-palette-grid">
-      ${colors.map(c => `<button class="color-swatch" data-color="${c}" style="background-color: ${c}"></button>`).join('')}
+    <div class="color-palettes-container">
+      ${palettesHtml}
     </div>
   `;
   
@@ -3161,16 +3246,37 @@ function showActiveFilterColorDialog(colIdx) {
 function applyActiveFilterColor(colIdx, color) {
   if (!hasActiveFilter()) return;
   
-  const rules = state.formatting[colIdx] || [];
-  const existingActiveIdx = rules.findIndex(r => r.condition?.activeFilter);
+  const colName = state.columnNames[colIdx];
+  const idColIdx = state.columnNames.indexOf('id');
   
-  if (existingActiveIdx >= 0) {
-    rules[existingActiveIdx] = { condition: { activeFilter: true }, style: { backgroundColor: color } };
-  } else {
-    rules.push({ condition: { activeFilter: true }, style: { backgroundColor: color } });
+  if (idColIdx < 0) {
+    alert('No "id" column found. Cannot persist color.');
+    return;
   }
   
-  state.formatting[colIdx] = rules;
+  if (!state.relation.colored_items) {
+    state.relation.colored_items = {};
+  }
+  if (!state.relation.colored_items[colName]) {
+    state.relation.colored_items[colName] = [];
+  }
+  
+  const coloredItems = state.relation.colored_items[colName];
+  
+  state.sortedIndices.forEach(rowIdx => {
+    const row = state.relation.items[rowIdx];
+    const rowId = row[idColIdx];
+    
+    if (rowId === null || rowId === undefined) return;
+    
+    const existingIdx = coloredItems.findIndex(item => item.id === rowId);
+    if (existingIdx >= 0) {
+      coloredItems[existingIdx].color = color;
+    } else {
+      coloredItems.push({ id: rowId, color: color });
+    }
+  });
+  
   renderTable();
 }
 
@@ -5186,6 +5292,9 @@ function init() {
     }
   });
   
+  // Resize handle functionality
+  setupResizeHandle();
+  
   // Voice input button
   const btnVoice = document.getElementById('btn-ai-voice');
   let recognition = null;
@@ -5233,6 +5342,69 @@ function init() {
       alert('Voice input is not supported in this browser. Please use Chrome or Edge.');
     });
   }
+}
+
+function setupResizeHandle() {
+  const container = document.getElementById('relation-table-container');
+  const handle = container?.querySelector('.resize-handle');
+  const wrapper = container?.querySelector('.relation-table-wrapper');
+  
+  if (!handle || !container) return;
+  
+  let isResizing = false;
+  let startY = 0;
+  let startHeight = 0;
+  
+  handle.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isResizing = true;
+    startY = e.clientY;
+    startHeight = wrapper ? wrapper.offsetHeight : container.offsetHeight;
+    document.body.style.cursor = 'nwse-resize';
+    document.body.style.userSelect = 'none';
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    
+    const deltaY = e.clientY - startY;
+    const newHeight = Math.max(200, startHeight + deltaY);
+    
+    if (wrapper) {
+      wrapper.style.maxHeight = newHeight + 'px';
+    }
+    container.style.minHeight = (newHeight + 50) + 'px';
+  });
+  
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+  
+  handle.addEventListener('touchstart', (e) => {
+    isResizing = true;
+    startY = e.touches[0].clientY;
+    startHeight = wrapper ? wrapper.offsetHeight : container.offsetHeight;
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', (e) => {
+    if (!isResizing) return;
+    
+    const deltaY = e.touches[0].clientY - startY;
+    const newHeight = Math.max(200, startHeight + deltaY);
+    
+    if (wrapper) {
+      wrapper.style.maxHeight = newHeight + 'px';
+    }
+    container.style.minHeight = (newHeight + 50) + 'px';
+  }, { passive: true });
+  
+  document.addEventListener('touchend', () => {
+    isResizing = false;
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);
