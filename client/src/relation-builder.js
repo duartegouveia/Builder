@@ -3244,7 +3244,11 @@ function showActiveFilterColorDialog(colIdx) {
       <div class="palette-section" data-palette="${key}">
         <div class="palette-name">${palette.name}</div>
         <div class="palette-colors">
-          ${palette.colors.map(c => `<button class="color-swatch" data-color="${c}" style="background-color: ${c}"></button>`).join('')}
+          ${palette.colors.map(c => {
+            const textColor = getContrastTextColor(c);
+            const showT = textColor === '#ffffff';
+            return `<button class="color-swatch" data-color="${c}" style="background-color: ${c}">${showT ? '<span style="color: white; font-size: 10px; font-weight: bold;">T</span>' : ''}</button>`;
+          }).join('')}
         </div>
       </div>
     `;
