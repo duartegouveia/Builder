@@ -2384,6 +2384,9 @@ function renderTable() {
   }
 }
 
+// Global flag to prevent menu close after long press
+let longPressJustTriggered = false;
+
 function addLongPressSupport(element, callback, duration = 500) {
   let pressTimer = null;
   let longPressTriggered = false;
@@ -2395,7 +2398,10 @@ function addLongPressSupport(element, callback, duration = 500) {
     
     pressTimer = setTimeout(() => {
       longPressTriggered = true;
+      longPressJustTriggered = true;
       callback(e, clientX, clientY);
+      // Reset flag after a short delay to allow click events to be ignored
+      setTimeout(() => { longPressJustTriggered = false; }, 300);
     }, duration);
   };
   
@@ -2675,6 +2681,9 @@ function showColumnMenu(colIdx, x, y) {
   });
   
   document.addEventListener('click', function closeMenu(e) {
+    // Don't close if this click is from a long press release
+    if (longPressJustTriggered) return;
+    
     if (!menu.contains(e.target)) {
       menu.remove();
       document.removeEventListener('click', closeMenu);
