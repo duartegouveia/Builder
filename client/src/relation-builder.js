@@ -10,6 +10,19 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function getContrastTextColor(hexColor) {
+  if (!hexColor || !hexColor.startsWith('#')) return null;
+  
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  return luminance < 0.5 ? '#ffffff' : '#000000';
+}
+
 // Color palettes for conditional formatting
 const COLOR_PALETTES = {
   pastel: {
@@ -42,7 +55,7 @@ const COLOR_PALETTES = {
   },
   highlight: {
     name: 'Highlight',
-    colors: ['#ef4444', '#f59e0b', '#84cc16', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7']
+    colors: ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7']
   }
 };
 
@@ -1872,7 +1885,13 @@ function applyConditionalFormatting(value, colIdx, cell, rowIdx) {
     for (const rule of rules) {
       if (matchesFormattingCondition(value, rule.condition, type)) {
         if (rule.style.color) cell.style.color = rule.style.color;
-        if (rule.style.backgroundColor) cell.style.backgroundColor = rule.style.backgroundColor;
+        if (rule.style.backgroundColor) {
+          cell.style.backgroundColor = rule.style.backgroundColor;
+          if (!rule.style.color) {
+            const textColor = getContrastTextColor(rule.style.backgroundColor);
+            if (textColor) cell.style.color = textColor;
+          }
+        }
         if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
         if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
         
@@ -1918,6 +1937,8 @@ function applyPersistedColor(colIdx, cell, rowIdx) {
   const colorItem = coloredItems.find(item => item.id === rowId);
   if (colorItem) {
     cell.style.backgroundColor = colorItem.color;
+    const textColor = getContrastTextColor(colorItem.color);
+    if (textColor) cell.style.color = textColor;
   }
 }
 
