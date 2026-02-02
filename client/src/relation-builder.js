@@ -22,19 +22,27 @@ const COLOR_PALETTES = {
   },
   dark: {
     name: 'Dark',
-    colors: ['#7f1d1d', '#78350f', '#713f12', '#14532d', '#134e4a', '#1e3a8a', '#4c1d95', '#831843', '#164e63', '#365314']
+    colors: ['#7f1d1d', '#14532d', '#1e3a8a', '#4c1d95', '#164e63']
   },
   neutral: {
     name: 'Neutral',
-    colors: ['#f5f5f5', '#e5e5e5', '#d4d4d4', '#a3a3a3', '#737373', '#525252', '#404040', '#262626', '#171717', '#0a0a0a']
+    colors: ['#e5e5e5', '#a3a3a3', '#525252', '#262626', '#0a0a0a']
   },
   warm: {
     name: 'Warm',
-    colors: ['#fef3c7', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f', '#451a03']
+    colors: ['#fde68a', '#f59e0b', '#d97706', '#b45309', '#dc2626']
   },
   cool: {
     name: 'Cool',
-    colors: ['#ecfeff', '#cffafe', '#a5f3fc', '#67e8f9', '#22d3ee', '#06b6d4', '#0891b2', '#0e7490', '#155e75', '#164e63']
+    colors: ['#cffafe', '#22d3ee', '#0891b2', '#0e7490', '#164e63']
+  },
+  danger: {
+    name: 'Danger',
+    colors: ['#fde047', '#f97316', '#dc2626', '#9333ea']
+  },
+  highlight: {
+    name: 'Highlight',
+    colors: ['#ef4444', '#f59e0b', '#84cc16', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7']
   }
 };
 
@@ -5355,6 +5363,9 @@ function setupResizeHandle() {
   let startY = 0;
   let startHeight = 0;
   
+  // Get the main content area for adding padding
+  const mainContent = document.querySelector('.main-content') || document.body;
+  
   handle.addEventListener('mousedown', (e) => {
     e.preventDefault();
     isResizing = true;
@@ -5374,6 +5385,13 @@ function setupResizeHandle() {
       wrapper.style.maxHeight = newHeight + 'px';
     }
     container.style.minHeight = (newHeight + 50) + 'px';
+    
+    // Add padding to allow page to grow when dragging near bottom
+    const viewportHeight = window.innerHeight;
+    const containerBottom = container.getBoundingClientRect().bottom;
+    if (containerBottom > viewportHeight - 100) {
+      mainContent.style.paddingBottom = (newHeight + 200) + 'px';
+    }
   });
   
   document.addEventListener('mouseup', () => {
@@ -5381,6 +5399,8 @@ function setupResizeHandle() {
       isResizing = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      // Remove extra padding after resize ends
+      mainContent.style.paddingBottom = '';
     }
   });
   
@@ -5400,9 +5420,20 @@ function setupResizeHandle() {
       wrapper.style.maxHeight = newHeight + 'px';
     }
     container.style.minHeight = (newHeight + 50) + 'px';
+    
+    // Add padding to allow page to grow when dragging near bottom
+    const viewportHeight = window.innerHeight;
+    const containerBottom = container.getBoundingClientRect().bottom;
+    if (containerBottom > viewportHeight - 100) {
+      mainContent.style.paddingBottom = (newHeight + 200) + 'px';
+    }
   }, { passive: true });
   
   document.addEventListener('touchend', () => {
+    if (isResizing) {
+      // Remove extra padding after resize ends
+      mainContent.style.paddingBottom = '';
+    }
     isResizing = false;
   });
 }
