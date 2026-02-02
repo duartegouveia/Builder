@@ -2120,14 +2120,6 @@ function renderPagination() {
         <option value="remove-selected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Selected (${selectedRecords})</option>
         <option value="remove-unselected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Unselected (${filteredRecords - selectedRecords})</option>
       </select>
-      <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard">ℹ
-        <span class="keyboard-help-tooltip" data-testid="text-keyboard-shortcuts">
-          <strong>Atalhos de Teclado:</strong><br>
-          <b>Shift+click</b> — ordenar por várias colunas<br>
-          <b>Ctrl+click</b> — selecionar colunas<br>
-          <b>Right-click</b> — menu de contexto
-        </span>
-      </span>
     </div>
   `;
   
@@ -4681,6 +4673,10 @@ function renderViewTabs() {
   
   const viewOptions = state.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
   
+  // Create left section for tabs
+  const tabsLeft = document.createElement('div');
+  tabsLeft.className = 'view-tabs-left';
+  
   viewOptions.forEach((viewName, idx) => {
     const viewKey = viewName.toLowerCase();
     const btn = document.createElement('button');
@@ -4693,8 +4689,25 @@ function renderViewTabs() {
       switchView(viewKey);
     });
     
-    viewTabs.appendChild(btn);
+    tabsLeft.appendChild(btn);
   });
+  
+  viewTabs.appendChild(tabsLeft);
+  
+  // Create right section for help badge
+  const tabsRight = document.createElement('div');
+  tabsRight.className = 'view-tabs-right';
+  tabsRight.innerHTML = `
+    <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard">ℹ
+      <span class="keyboard-help-tooltip" data-testid="text-keyboard-shortcuts">
+        <strong>Atalhos de teclado e rato para o cabeçalho da coluna da tabela</strong><br>
+        <b>Right-click</b> — menu de contexto<br>
+        <b>Shift+click</b> — ordenar por várias colunas<br>
+        <b>Ctrl+click</b> — selecionar colunas
+      </span>
+    </span>
+  `;
+  viewTabs.appendChild(tabsRight);
   
   // Show view tabs
   viewTabs.style.display = 'flex';

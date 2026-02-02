@@ -1700,11 +1700,25 @@ input[type="number"] {
 /* View Tabs */
 .view-tabs {
   display: flex;
-  gap: var(--space-1);
+  justify-content: space-between;
+  align-items: center;
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-4);
   flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.view-tabs-left {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.view-tabs-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .view-tab {
