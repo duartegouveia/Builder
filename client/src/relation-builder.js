@@ -4142,15 +4142,14 @@ function showRowOperationsMenu(rowIdx, x, y) {
   menu.innerHTML = `
     <div class="column-menu-header">Row ${rowIdx + 1}</div>
     <button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>
-    ${state.editable ? `
-      <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏ Edit</button>
-      <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
-      <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑 Delete</button>
-    ` : ''}
+    <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>
+    <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
+    <button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>
+    <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>
     ${hasSelection ? `
       <div class="column-menu-section">
         <div class="column-menu-title">Selection (${state.selectedRows.size} rows)</div>
-        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑 Delete Selected</button>
+        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ Delete Selected</button>
       </div>
     ` : ''}
   `;
@@ -4212,6 +4211,9 @@ function handleRowOperation(rowIdx, action) {
         renderTable();
       }
       break;
+    case 'new-row':
+      showRowEditDialog(-1);
+      break;
   }
 }
 
@@ -4254,7 +4256,8 @@ function showRowViewDialog(rowIdx) {
 function showRowEditDialog(rowIdx) {
   closeAllMenus();
   
-  const row = state.relation.items[rowIdx];
+  const isNew = rowIdx === -1;
+  const row = isNew ? state.columnNames.map(() => null) : state.relation.items[rowIdx];
   const dialog = document.createElement('div');
   dialog.className = 'filter-dialog';
   
@@ -4281,13 +4284,13 @@ function showRowEditDialog(rowIdx) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Edit Row ${rowIdx + 1}</span>
+      <span>${isNew ? 'New Row' : 'Edit Row ' + (rowIdx + 1)}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     ${content}
     <div class="filter-dialog-footer">
       <button class="btn btn-outline" id="cancel-edit">Cancel</button>
-      <button class="btn btn-primary" id="save-edit">Save</button>
+      <button class="btn btn-primary" id="save-edit">${isNew ? 'Create' : 'Save'}</button>
     </div>
   `;
   
@@ -4296,6 +4299,8 @@ function showRowEditDialog(rowIdx) {
   dialog.querySelector('#cancel-edit').addEventListener('click', () => dialog.remove());
   
   dialog.querySelector('#save-edit').addEventListener('click', () => {
+    const newRow = isNew ? state.columnNames.map(() => null) : null;
+    
     state.columnNames.forEach((name, i) => {
       const type = state.columnTypes[i];
       if (type === 'relation') return;
@@ -4311,11 +4316,21 @@ function showRowEditDialog(rowIdx) {
       } else if (type === 'float') {
         value = parseFloat(input.value) || 0;
       } else {
-        value = input.value;
+        value = input.value || null;
       }
       
-      state.relation.items[rowIdx][i] = value;
+      if (isNew) {
+        newRow[i] = value;
+      } else {
+        state.relation.items[rowIdx][i] = value;
+      }
     });
+    
+    if (isNew) {
+      state.relation.items.push(newRow);
+      state.filteredIndices = [...Array(state.relation.items.length).keys()];
+      state.sortedIndices = [...state.filteredIndices];
+    }
     
     document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
     dialog.remove();
