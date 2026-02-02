@@ -5410,6 +5410,150 @@ function detectOutliers(values) {
   return { lowerBound, upperBound, q1, q3, iqr };
 }
 
+function testNormality(values) {
+  const n = values.length;
+  if (n < 3) return null;
+  
+  const mean = values.reduce((s, v) => s + v, 0) / n;
+  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+  const std = Math.sqrt(variance) || 1;
+  
+  // Calculate skewness and kurtosis
+  const m3 = values.reduce((s, v) => s + ((v - mean) / std) ** 3, 0) / n;
+  const m4 = values.reduce((s, v) => s + ((v - mean) / std) ** 4, 0) / n;
+  const skewness = m3;
+  const kurtosis = m4 - 3; // Excess kurtosis (normal = 0)
+  
+  // Jarque-Bera test statistic
+  const jbStat = (n / 6) * (skewness ** 2 + (kurtosis ** 2) / 4);
+  // Approximate p-value using chi-square(2) distribution
+  const jbPValue = Math.exp(-jbStat / 2);
+  
+  // D'Agostino-Pearson K² test (simplified)
+  // Uses skewness and kurtosis z-scores
+  const seSkew = Math.sqrt((6 * n * (n - 1)) / ((n - 2) * (n + 1) * (n + 3)));
+  const seKurt = 2 * seSkew * Math.sqrt((n * n - 1) / ((n - 3) * (n + 5)));
+  const zSkew = skewness / seSkew;
+  const zKurt = kurtosis / seKurt;
+  const dpK2 = zSkew ** 2 + zKurt ** 2;
+  const dpPValue = Math.exp(-dpK2 / 2);
+  
+  // Shapiro-Wilk approximation for small samples (simplified)
+  // Uses correlation between ordered stats and expected normal quantiles
+  const sorted = [...values].sort((a, b) => a - b);
+  let swW = 0;
+  if (n >= 3 && n <= 50) {
+    // Simplified approximation
+    const expectedZ = sorted.map((_, i) => {
+      const p = (i + 0.5) / n;
+      // Approximate inverse normal using Beasley-Springer-Moro algorithm (simplified)
+      return p < 0.5 ? -Math.sqrt(-2 * Math.log(p)) : Math.sqrt(-2 * Math.log(1 - p));
+    });
+    const sumEZ = expectedZ.reduce((s, z) => s + z, 0);
+    const meanEZ = sumEZ / n;
+    const ssEZ = expectedZ.reduce((s, z) => s + (z - meanEZ) ** 2, 0);
+    const ssV = values.reduce((s, v) => s + (v - mean) ** 2, 0);
+    const covar = sorted.reduce((s, v, i) => s + (v - mean) * (expectedZ[i] - meanEZ), 0);
+    swW = ssV > 0 && ssEZ > 0 ? (covar ** 2) / (ssV * ssEZ) : 1;
+  }
+  const swPValue = swW > 0.9 ? 0.5 : swW > 0.8 ? 0.1 : swW > 0.7 ? 0.01 : 0.001;
+  
+  // Determine overall normality conclusion
+  const alpha = 0.05;
+  const jbNormal = jbPValue > alpha;
+  const dpNormal = dpPValue > alpha;
+  const swNormal = swPValue > alpha;
+  
+  // Consensus
+  const normalVotes = (jbNormal ? 1 : 0) + (dpNormal ? 1 : 0) + (swNormal ? 1 : 0);
+  const isNormal = normalVotes >= 2;
+  
+  return {
+    n,
+    skewness,
+    kurtosis,
+    tests: [
+      {
+        name: 'Jarque-Bera',
+        stat: jbStat,
+        pValue: jbPValue,
+        isNormal: jbNormal,
+        when: 'Large samples (n>30). Based on skewness and kurtosis.'
+      },
+      {
+        name: "D'Agostino-Pearson",
+        stat: dpK2,
+        pValue: dpPValue,
+        isNormal: dpNormal,
+        when: 'Medium to large samples (n>20). Omnibus test combining skewness and kurtosis.'
+      },
+      {
+        name: 'Shapiro-Wilk',
+        stat: swW,
+        pValue: swPValue,
+        isNormal: swNormal,
+        when: 'Small samples (n<50). Most powerful test for normality.'
+      }
+    ],
+    isNormal,
+    recommendation: n < 20 ? 'Shapiro-Wilk' : n < 50 ? "D'Agostino-Pearson" : 'Jarque-Bera'
+  };
+}
+
+function renderNormalityPanel(xValues, yValues, xName, yName) {
+  const xNorm = testNormality(xValues);
+  const yNorm = testNormality(yValues);
+  
+  if (!xNorm || !yNorm) return '';
+  
+  let html = '<div class="normality-panel">';
+  html += '<div class="normality-header">Normality Analysis</div>';
+  html += '<div class="normality-note">Pearson correlation assumes both variables are normally distributed.</div>';
+  
+  // X variable
+  html += '<div class="normality-var">';
+  html += '<div class="normality-var-name">' + escapeHtml(xName) + '</div>';
+  html += '<div class="normality-stats">Skewness: ' + xNorm.skewness.toFixed(3) + ' | Kurtosis: ' + xNorm.kurtosis.toFixed(3) + '</div>';
+  html += '<table class="normality-table"><tr><th>Test</th><th>Statistic</th><th>p-value</th><th>Normal?</th><th>Best for</th></tr>';
+  xNorm.tests.forEach(t => {
+    const cls = t.isNormal ? 'norm-pass' : 'norm-fail';
+    const recommended = t.name === xNorm.recommendation ? ' (recommended)' : '';
+    html += '<tr class="' + cls + '"><td>' + t.name + recommended + '</td><td>' + t.stat.toFixed(4) + '</td><td>' + t.pValue.toFixed(4) + '</td><td>' + (t.isNormal ? '✓' : '✗') + '</td><td>' + t.when + '</td></tr>';
+  });
+  html += '</table>';
+  html += '<div class="normality-conclusion ' + (xNorm.isNormal ? 'norm-pass' : 'norm-fail') + '">';
+  html += xNorm.isNormal ? '✓ Data appears normally distributed' : '✗ Data may not be normally distributed';
+  html += '</div></div>';
+  
+  // Y variable
+  html += '<div class="normality-var">';
+  html += '<div class="normality-var-name">' + escapeHtml(yName) + '</div>';
+  html += '<div class="normality-stats">Skewness: ' + yNorm.skewness.toFixed(3) + ' | Kurtosis: ' + yNorm.kurtosis.toFixed(3) + '</div>';
+  html += '<table class="normality-table"><tr><th>Test</th><th>Statistic</th><th>p-value</th><th>Normal?</th><th>Best for</th></tr>';
+  yNorm.tests.forEach(t => {
+    const cls = t.isNormal ? 'norm-pass' : 'norm-fail';
+    const recommended = t.name === yNorm.recommendation ? ' (recommended)' : '';
+    html += '<tr class="' + cls + '"><td>' + t.name + recommended + '</td><td>' + t.stat.toFixed(4) + '</td><td>' + t.pValue.toFixed(4) + '</td><td>' + (t.isNormal ? '✓' : '✗') + '</td><td>' + t.when + '</td></tr>';
+  });
+  html += '</table>';
+  html += '<div class="normality-conclusion ' + (yNorm.isNormal ? 'norm-pass' : 'norm-fail') + '">';
+  html += yNorm.isNormal ? '✓ Data appears normally distributed' : '✗ Data may not be normally distributed';
+  html += '</div></div>';
+  
+  // Overall conclusion
+  const bothNormal = xNorm.isNormal && yNorm.isNormal;
+  html += '<div class="normality-overall ' + (bothNormal ? 'norm-pass' : 'norm-fail') + '">';
+  if (bothNormal) {
+    html += '<strong>Conclusion:</strong> Both variables appear normally distributed. Pearson correlation is appropriate.';
+  } else {
+    html += '<strong>Conclusion:</strong> One or both variables may not be normally distributed. Consider using Spearman or Kendall correlation instead.';
+  }
+  html += '</div>';
+  html += '</div>';
+  
+  return html;
+}
+
 function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   const n = pairs.length;
   const sumX = pairs.reduce((s, p) => s + p.x, 0);
@@ -5480,6 +5624,9 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   if (rSquared < 0.5 && absR > 0.3) {
     html += '<div class="correlation-warning">⚠️ Low R² suggests non-linear relationship: Consider Spearman (monotonic) or transform data</div>';
   }
+  
+  // Normality analysis panel
+  html += renderNormalityPanel(xValues, yValues, state.columnNames[xIdx], state.columnNames[yIdx]);
   
   // SVG scatter plot
   const width = 400;

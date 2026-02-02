@@ -2040,6 +2040,112 @@ input[type="number"] {
   margin-top: var(--space-2);
 }
 
+.normality-panel {
+  background: var(--slate-50);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.normality-header {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-1);
+}
+
+.normality-note {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-bottom: var(--space-3);
+}
+
+.normality-var {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.normality-var:last-of-type {
+  border-bottom: none;
+}
+
+.normality-var-name {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  margin-bottom: var(--space-1);
+}
+
+.normality-stats {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-bottom: var(--space-2);
+}
+
+.normality-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  margin-bottom: var(--space-2);
+}
+
+.normality-table th,
+.normality-table td {
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.normality-table th {
+  background: var(--slate-100);
+  font-weight: 500;
+}
+
+.normality-table tr.norm-pass td:nth-child(4) {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.normality-table tr.norm-fail td:nth-child(4) {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.normality-conclusion {
+  font-size: 0.8125rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: 4px;
+}
+
+.normality-conclusion.norm-pass {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.normality-conclusion.norm-fail {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.normality-overall {
+  font-size: 0.8125rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 4px;
+  margin-top: var(--space-2);
+}
+
+.normality-overall.norm-pass {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.normality-overall.norm-fail {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
 .correlation-result {
   padding: var(--space-4);
 }
