@@ -2528,6 +2528,37 @@ function handleSort(colIdx, addToExisting) {
   renderTable();
 }
 
+function adjustMenuPosition(menu) {
+  const rect = menu.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  let left = parseFloat(menu.style.left) || rect.left;
+  let top = parseFloat(menu.style.top) || rect.top;
+  
+  // Adjust if menu goes beyond right edge
+  if (rect.right > viewportWidth - 10) {
+    left = Math.max(10, viewportWidth - rect.width - 10);
+    menu.style.left = left + 'px';
+  }
+  
+  // Adjust if menu goes beyond bottom edge
+  if (rect.bottom > viewportHeight - 10) {
+    top = Math.max(10, viewportHeight - rect.height - 10);
+    menu.style.top = top + 'px';
+  }
+  
+  // Adjust if menu goes beyond left edge
+  if (rect.left < 10) {
+    menu.style.left = '10px';
+  }
+  
+  // Adjust if menu goes beyond top edge
+  if (rect.top < 10) {
+    menu.style.top = '10px';
+  }
+}
+
 function showColumnMenu(colIdx, x, y) {
   closeAllMenus();
   
@@ -2626,8 +2657,14 @@ function showColumnMenu(colIdx, x, y) {
       if (!isOpen) {
         section.classList.add('open');
       }
+      
+      // Adjust position after size change
+      requestAnimationFrame(() => adjustMenuPosition(menu));
     });
   });
+  
+  // Initial position adjustment
+  requestAnimationFrame(() => adjustMenuPosition(menu));
   
   menu.addEventListener('click', (e) => {
     const action = e.target.dataset.action;
