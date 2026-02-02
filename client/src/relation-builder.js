@@ -4940,20 +4940,6 @@ function renderCardsView() {
     cardsHtml += '<input type="checkbox" class="data-card-checkbox" ' + (isSelected ? 'checked' : '') + ' data-row-idx="' + rowIdx + '">';
     cardsHtml += '<span class="data-card-id">#' + (rowIdx + 1) + '</span>';
     cardsHtml += '</div>';
-    
-    // Build tagline with "label: value" format
-    const taglineParts = [];
-    state.columnNames.forEach((colName, colIdx) => {
-      const value = row[colIdx];
-      const type = state.columnTypes[colIdx];
-      if (value !== null && value !== undefined && type !== 'relation') {
-        const displayValue = type === 'boolean' ? (value ? 'true' : 'false') : String(value);
-        const truncatedValue = displayValue.length > 50 ? displayValue.substring(0, 47) + '...' : displayValue;
-        taglineParts.push('<span class="tagline-item"><span class="tagline-label">' + escapeHtml(colName) + ':</span> <span class="tagline-value">' + escapeHtml(truncatedValue) + '</span></span>');
-      }
-    });
-    cardsHtml += '<div class="data-card-tagline">' + taglineParts.join(' ') + '</div>';
-    
     cardsHtml += '<div class="data-card-body">';
     
     state.columnNames.forEach((colName, colIdx) => {
@@ -4967,7 +4953,11 @@ function renderCardsView() {
       const fieldClass = 'data-card-field data-card-col-' + colIdx + (isWide ? ' data-card-field-wide' : '');
       
       cardsHtml += '<div class="' + fieldClass + '">';
-      cardsHtml += '<span class="data-card-value data-card-value-' + colIdx + '" title="' + escapeHtml(fullValue) + '">' + displayValue + '</span>';
+      // Each field has its own tagline with "label: value" format
+      cardsHtml += '<div class="field-tagline" title="' + escapeHtml(colName) + ': ' + escapeHtml(fullValue) + '">';
+      cardsHtml += '<span class="field-tagline-label">' + escapeHtml(colName) + ':</span> ';
+      cardsHtml += '<span class="field-tagline-value">' + displayValue + '</span>';
+      cardsHtml += '</div>';
       cardsHtml += '</div>';
     });
     
