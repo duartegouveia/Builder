@@ -2843,9 +2843,21 @@ function showFilterValuesDialog(colIdx) {
         return String(b).localeCompare(String(a), undefined, { numeric: true });
       });
     } else if (order === 'histogram-desc') {
-      sorted.sort((a, b) => valueCounts.get(b) - valueCounts.get(a));
+      sorted.sort((a, b) => {
+        const countDiff = valueCounts.get(b) - valueCounts.get(a);
+        if (countDiff !== 0) return countDiff;
+        if (a === null) return 1;
+        if (b === null) return -1;
+        return String(a).localeCompare(String(b), undefined, { numeric: true });
+      });
     } else if (order === 'histogram-asc') {
-      sorted.sort((a, b) => valueCounts.get(a) - valueCounts.get(b));
+      sorted.sort((a, b) => {
+        const countDiff = valueCounts.get(a) - valueCounts.get(b);
+        if (countDiff !== 0) return countDiff;
+        if (a === null) return -1;
+        if (b === null) return 1;
+        return String(a).localeCompare(String(b), undefined, { numeric: true });
+      });
     }
     return sorted;
   }
