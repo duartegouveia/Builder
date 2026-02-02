@@ -1777,7 +1777,7 @@ input[type="number"] {
   color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  min-width: 60px;
+  min-width: 80px;
   flex-shrink: 0;
 }
 
