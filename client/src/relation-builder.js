@@ -2848,8 +2848,8 @@ function showFilterValuesDialog(colIdx) {
       <button class="btn btn-sm" id="filter-select-none">Select None</button>
       <select class="filter-sort-select" id="filter-sort">
         <option value="natural">Natural Order</option>
-        <option value="asc">Ascending</option>
-        <option value="desc">Descending</option>
+        <option value="asc">Ascending ↑</option>
+        <option value="desc">Descending ↓</option>
         <option value="histogram-desc">Histogram ↓</option>
         <option value="histogram-asc">Histogram ↑</option>
       </select>
