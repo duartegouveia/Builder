@@ -2805,8 +2805,10 @@ function showFilterValuesDialog(colIdx) {
         if (b === null) return -1;
         return String(b).localeCompare(String(a), undefined, { numeric: true });
       });
-    } else if (order === 'histogram') {
+    } else if (order === 'histogram-desc') {
       sorted.sort((a, b) => valueCounts.get(b) - valueCounts.get(a));
+    } else if (order === 'histogram-asc') {
+      sorted.sort((a, b) => valueCounts.get(a) - valueCounts.get(b));
     }
     return sorted;
   }
@@ -2848,7 +2850,8 @@ function showFilterValuesDialog(colIdx) {
         <option value="natural">Natural Order</option>
         <option value="asc">Ascending</option>
         <option value="desc">Descending</option>
-        <option value="histogram">Histogram</option>
+        <option value="histogram-desc">Histogram ↓</option>
+        <option value="histogram-asc">Histogram ↑</option>
       </select>
     </div>
     <div class="filter-values-list"></div>
