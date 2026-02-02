@@ -2147,6 +2147,50 @@ input[type="number"] {
   color: #166534;
 }
 
+.stat-explanations {
+  margin-top: var(--space-2);
+  font-size: 0.8125rem;
+}
+
+.stat-explanations details {
+  background: var(--slate-50);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: var(--space-1) var(--space-2);
+}
+
+.stat-explanations summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 500;
+  padding: var(--space-1) 0;
+}
+
+.stat-explanations summary:hover {
+  text-decoration: underline;
+}
+
+.stat-definitions {
+  margin: var(--space-2) 0 0 0;
+  padding: 0;
+}
+
+.stat-definitions dt {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: var(--space-2);
+}
+
+.stat-definitions dt:first-child {
+  margin-top: 0;
+}
+
+.stat-definitions dd {
+  margin: var(--space-1) 0 0 0;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
 .normality-conclusion.norm-fail {
   background: #fef2f2;
   color: #991b1b;

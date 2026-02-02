@@ -6532,6 +6532,14 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<div class="correlation-label">' + strength + ' ' + (r > 0 ? 'positive' : r < 0 ? 'negative' : '') + ' correlation</div>';
   html += '<div class="correlation-label">n = ' + n + ' pairs | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
   
+  html += '<div class="stat-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stat-definitions">';
+  html += '<dt>r (Pearson coefficient)</dt><dd>Measures linear relationship between two variables. Ranges from -1 (perfect negative) to +1 (perfect positive). 0 means no linear relationship.</dd>';
+  html += '<dt>R² (Coefficient of determination)</dt><dd>Percentage of variance in Y explained by X. R²=70% means 70% of Y\'s variation can be predicted from X.</dd>';
+  html += '<dt>n (Sample size)</dt><dd>Number of valid data pairs used in the calculation.</dd>';
+  html += '</dl></details></div>';
+  
   if (n < 30) {
     html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Consider Kendall\'s Tau</div>';
   }
@@ -6615,6 +6623,14 @@ function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<div class="correlation-label">n = ' + n + ' pairs</div>';
   html += '<div class="correlation-note">Spearman measures monotonic relationship. Robust to outliers.</div>';
   
+  html += '<div class="stat-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stat-definitions">';
+  html += '<dt>ρ (Spearman\'s rho)</dt><dd>Measures monotonic relationship (both variables move in the same direction, not necessarily at a constant rate). Based on ranks, not actual values. Ranges from -1 to +1.</dd>';
+  html += '<dt>Monotonic relationship</dt><dd>When one variable increases, the other consistently increases (or decreases). Unlike Pearson, works for curved relationships as long as they are consistently increasing or decreasing.</dd>';
+  html += '<dt>Robust to outliers</dt><dd>Extreme values have less impact because the calculation uses ranks instead of actual values.</dd>';
+  html += '</dl></details></div>';
+  
   if (n < 30) {
     html += '<div class="correlation-warning">⚠️ Small sample: Kendall\'s Tau may be more appropriate</div>';
   }
@@ -6670,6 +6686,15 @@ function renderKendallCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<div class="correlation-label">' + strength + ' ' + (tau > 0 ? 'positive' : tau < 0 ? 'negative' : '') + ' correlation</div>';
   html += '<div class="correlation-label">n = ' + n + ' | Concordant: ' + concordant + ' | Discordant: ' + discordant + '</div>';
   html += '<div class="correlation-note">Kendall\'s Tau is recommended for small samples and ordinal data.</div>';
+  
+  html += '<div class="stat-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stat-definitions">';
+  html += '<dt>τ (Kendall\'s Tau)</dt><dd>Measures association based on concordant and discordant pairs. Ranges from -1 to +1. More robust than Spearman for small samples.</dd>';
+  html += '<dt>Concordant pairs</dt><dd>Two observations where if one has a higher X, it also has a higher Y (or both lower). They "agree" on the direction.</dd>';
+  html += '<dt>Discordant pairs</dt><dd>Two observations where one has higher X but lower Y (or vice versa). They "disagree" on the direction.</dd>';
+  html += '<dt>Formula</dt><dd>τ = (Concordant - Discordant) / Total pairs. τ=1 means all pairs agree; τ=-1 means all disagree.</dd>';
+  html += '</dl></details></div>';
   
   if (n >= 30) {
     html += '<div class="correlation-warning">ℹ️ Large sample: Pearson or Spearman may be more efficient</div>';
@@ -6731,6 +6756,14 @@ function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryId
   html += '<div class="correlation-label">' + strength + ' correlation</div>';
   html += '<div class="correlation-label">n = ' + n + ' | Group 0: ' + n0 + ' (μ=' + mean0.toFixed(2) + ') | Group 1: ' + n1 + ' (μ=' + mean1.toFixed(2) + ')</div>';
   
+  html += '<div class="stat-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stat-definitions">';
+  html += '<dt>r<sub>pb</sub> (Point-Biserial)</dt><dd>Measures correlation between a binary variable (0/1) and a continuous variable. Ranges from -1 to +1. Equivalent to Pearson for this special case.</dd>';
+  html += '<dt>μ (Mean)</dt><dd>Average value of the numeric variable for each group. μ₀ is the mean for group 0, μ₁ for group 1.</dd>';
+  html += '<dt>Group 0 / Group 1</dt><dd>The two categories of the binary variable. The diagram shows the distribution of numeric values for each group.</dd>';
+  html += '</dl></details></div>';
+  
   if (n < 30) {
     html += '<div class="correlation-warning">⚠️ Small sample: Limited statistical power</div>';
   }
@@ -6784,6 +6817,14 @@ function renderPhiCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<div class="correlation-label">' + strength + ' association</div>';
   html += '<div class="correlation-label">n = ' + n + '</div>';
   
+  html += '<div class="stat-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stat-definitions">';
+  html += '<dt>φ (Phi coefficient)</dt><dd>Measures association between two binary (yes/no) variables. Ranges from -1 to +1. Positive means both tend to be true/false together; negative means they tend to be opposite.</dd>';
+  html += '<dt>Contingency table</dt><dd>2×2 table showing the count of observations for each combination of values. Cell "a" = both true, "d" = both false, "b" and "c" = one true and one false.</dd>';
+  html += '<dt>Formula</dt><dd>φ = (ad - bc) / √[(a+b)(c+d)(a+c)(b+d)]</dd>';
+  html += '</dl></details></div>';
+  
   if (n < 30) {
     html += '<div class="correlation-warning">⚠️ Small sample</div>';
   }
@@ -6830,7 +6871,16 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
   html += '<div class="correlation-label">Cramér\'s V</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + v.toFixed(4) + '</div>';
   html += '<div class="correlation-label">' + strength + ' association</div>';
-  html += '<div class="correlation-label">n = ' + total + ' | ' + xCategories + ' × ' + yCategories + ' categories</div>';
+  html += '<div class="correlation-label">n = ' + total + ' | ' + xCategories + ' × ' + yCategories + ' categories | χ² = ' + chiSquared.toFixed(2) + '</div>';
+  
+  html += '<div class="stat-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stat-definitions">';
+  html += '<dt>V (Cramér\'s V)</dt><dd>Measures association between two categorical variables with any number of categories. Ranges from 0 (no association) to 1 (perfect association). Cannot be negative.</dd>';
+  html += '<dt>χ² (Chi-squared)</dt><dd>Measures how much the observed frequencies differ from expected frequencies (if variables were independent). Higher χ² = stronger association.</dd>';
+  html += '<dt>Categories</dt><dd>Number of unique values in each variable. A 3×4 contingency table has 3 categories in one variable and 4 in the other.</dd>';
+  html += '<dt>Formula</dt><dd>V = √(χ² / (n × min(r-1, c-1))) where r and c are the number of rows/columns.</dd>';
+  html += '</dl></details></div>';
   
   const width = 300, barHeight = 30;
   html += '<svg viewBox="0 0 ' + width + ' ' + (barHeight + 20) + '" style="width: 300px; height: 50px;">';
