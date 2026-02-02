@@ -95,12 +95,37 @@ The Relation Builder provides an advanced data table interface:
 ### Data Structure
 A relation is a JSON object with:
 - `pot`: "relation" (identifies the object type)
-- `columns`: Object mapping column names to types (e.g., `{"id": "int", "name": "string"}`)
+- `columns`: Object mapping column names to types (e.g., `{"id": "id", "name": "string"}`)
+- `options`: Object mapping column names or special keys to option values
+- `rel_options`: Object with relation-level configuration (see below)
 - `items`: Array of arrays containing row data
 
 Supported column types: `id`, `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`, `relation`, `select`
 
 The `id` type is always the first column in every relation (including nested relations) and represents a unique identifier. The `id` type is treated as a string (even when values are numeric, they are stored as strings).
+
+### rel_options Configuration
+The `rel_options` object controls relation-level behavior:
+- `editable`: Boolean (default: false) - Controls whether table cells are editable
+- `single_item_mode`: String (default: "dialog") - How single items are displayed: "dialog", "right", or "bottom"
+- `general_view_options`: Array of strings - Which view tabs to show and their order. Available options: "Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"
+
+Example:
+```json
+{
+  "pot": "relation",
+  "columns": {"id": "id", "name": "string"},
+  "rel_options": {
+    "editable": true,
+    "single_item_mode": "right",
+    "general_view_options": ["Table", "Cards", "AI"]
+  },
+  "items": [["1", "Test"]]
+}
+```
+
+### options Special Keys
+- `relation.single_item_mode`: Object with display mode options `{"dialog": "dialog", "right": "right", "bottom": "bottom"}`
 
 ### Table Features
 1. **Pagination** - 20/50/100/all per page, first/prev/next/last navigation, direct page input
@@ -130,7 +155,7 @@ The `id` type is always the first column in every relation (including nested rel
     - Uses OpenAI via Replit AI Integrations (no API key required)
 
 ### View Tabs System
-The Relation Builder has 6 different views accessible via tabs:
+The Relation Builder has 7 different views accessible via tabs (controlled by `rel_options.general_view_options`):
 
 1. **Table View** - Default view showing data in tabular format with all table features
 2. **Cards View** - Grid of equal-sized cards, one per row

@@ -83,6 +83,13 @@ function elAll(selector) {
   return container.querySelectorAll(selector);
 }
 
+// Default rel_options
+const DEFAULT_REL_OPTIONS = {
+  editable: false,
+  single_item_mode: 'dialog',
+  general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
+};
+
 // State management
 let state = {
   uid: generateUID(), // Unique identifier for this relation instance
@@ -90,7 +97,7 @@ let state = {
   columnNames: [],
   columnTypes: [],
   options: {}, // {columnName: {key: htmlValue}}
-  editable: false,
+  rel_options: { ...DEFAULT_REL_OPTIONS },
   
   // Current view
   currentView: 'table', // 'table', 'cards', 'pivot', 'correlation', 'diagram', 'ai'
@@ -262,7 +269,18 @@ function generateDemoRelation() {
       br: '🇧🇷 Brasil',
       jp: '🇯🇵 Japan',
       cn: '🇨🇳 China'
+    },
+    'relation.single_item_mode': {
+      dialog: 'dialog',
+      right: 'right',
+      bottom: 'bottom'
     }
+  };
+  
+  const rel_options = {
+    editable: false,
+    single_item_mode: 'dialog',
+    general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
   };
   
   const countryKeys = Object.keys(options.country);
@@ -300,6 +318,7 @@ function generateDemoRelation() {
     pot: 'relation',
     columns: columns,
     options: options,
+    rel_options: rel_options,
     items: items
   };
 }
@@ -2219,7 +2238,7 @@ function renderTable() {
   
   const table = document.createElement('table');
   table.className = 'relation-table';
-  if (!state.editable) {
+  if (!state.rel_options.editable) {
     table.classList.add('relation-table-readonly');
   }
   
@@ -2376,7 +2395,7 @@ function renderTable() {
       
       const td = document.createElement('td');
       const type = state.columnTypes[colIdx];
-      td.appendChild(createInputForType(type, value, rowIdx, colIdx, state.editable));
+      td.appendChild(createInputForType(type, value, rowIdx, colIdx, state.rel_options.editable));
       applyConditionalFormatting(value, colIdx, td, rowIdx);
       tr.appendChild(td);
     });
@@ -4554,16 +4573,56 @@ function applyAIFilter(conditions) {
   showToast('AI filter applied');
 }
 
+// View tab icons SVG definitions
+const VIEW_TAB_ICONS = {
+  table: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
+  cards: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>',
+  pivot: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v18h18V3Z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+  correlation: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
+  diagram: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" x2="12" y1="8" y2="8"/><line x1="3.95" x2="8.54" y1="6.06" y2="14"/><line x1="10.88" x2="15.46" y1="21.94" y2="14"/></svg>',
+  ai: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>',
+  saved: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>'
+};
+
+// Render view tabs dynamically based on general_view_options
+function renderViewTabs() {
+  const viewTabs = el('.view-tabs');
+  if (!viewTabs) return;
+  
+  // Clear existing tabs
+  viewTabs.innerHTML = '';
+  
+  const viewOptions = state.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
+  
+  viewOptions.forEach((viewName, idx) => {
+    const viewKey = viewName.toLowerCase();
+    const btn = document.createElement('button');
+    btn.className = 'view-tab' + (idx === 0 ? ' active' : '');
+    btn.dataset.view = viewKey;
+    btn.dataset.testid = 'tab-' + viewKey;
+    btn.innerHTML = (VIEW_TAB_ICONS[viewKey] || '') + ' ' + viewName;
+    
+    btn.addEventListener('click', () => {
+      switchView(viewKey);
+    });
+    
+    viewTabs.appendChild(btn);
+  });
+  
+  // Show view tabs
+  viewTabs.style.display = 'flex';
+}
+
 function switchView(viewName) {
   state.currentView = viewName;
   
-  // Update tab states
-  document.querySelectorAll('.view-tab').forEach(tab => {
+  // Update tab states (scoped to relation container)
+  elAll('.view-tab').forEach(tab => {
     tab.classList.toggle('active', tab.dataset.view === viewName);
   });
   
-  // Show/hide view content
-  document.querySelectorAll('.view-content').forEach(content => {
+  // Show/hide view content (scoped to relation container)
+  elAll('.view-content').forEach(content => {
     content.style.display = 'none';
   });
   const viewEl = el('.view-' + viewName);
@@ -4581,6 +4640,8 @@ function switchView(viewName) {
     setupDiagramClickHandler();
   } else if (viewName === 'ai') {
     // AI view is always ready
+  } else if (viewName === 'saved') {
+    // Saved view placeholder - future feature
   }
 }
 
@@ -5888,14 +5949,21 @@ function init() {
   
   btnParse?.addEventListener('click', () => {
     const result = parseRelation(textarea.value);
-    const editable = el('.relation-editable')?.checked || false;
     
     if (result.success) {
       state.relation = result.data;
       state.columnNames = Object.keys(result.data.columns);
       state.columnTypes = Object.values(result.data.columns);
       state.options = result.data.options || {};
-      state.editable = editable;
+      
+      // Parse rel_options with defaults
+      const parsedRelOptions = result.data.rel_options || {};
+      state.rel_options = {
+        editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
+        single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
+        general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
+      };
+      
       state.currentPage = 1;
       state.selectedRows = new Set();
       state.sortCriteria = [];
@@ -5906,13 +5974,13 @@ function init() {
       state.pivotConfig = { rowColumn: null, colColumn: null, values: [] };
       state.diagramNodes = [];
       
-      // Show view tabs when data is loaded
-      const viewTabs = el('.view-tabs');
-      if (viewTabs) viewTabs.style.display = 'flex';
+      // Generate view tabs based on general_view_options
+      renderViewTabs();
       
-      // Reset to table view
-      state.currentView = 'table';
-      switchView('table');
+      // Reset to table view if available, otherwise first available view
+      const availableViews = state.rel_options.general_view_options.map(v => v.toLowerCase());
+      state.currentView = availableViews.includes('table') ? 'table' : availableViews[0] || 'table';
+      switchView(state.currentView);
       
       renderTable();
     } else {
@@ -5920,13 +5988,6 @@ function init() {
     }
   });
   
-  // View tabs event listeners
-  elAll('.view-tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      const view = e.currentTarget.dataset.view;
-      switchView(view);
-    });
-  });
   
   // Pivot table events
   el('.btn-add-pivot-value')?.addEventListener('click', () => {
