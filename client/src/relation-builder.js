@@ -3054,12 +3054,17 @@ function showFilterComparisonDialog(colIdx) {
   const opSelect = dialog.querySelector('#filter-comparison-op');
   const value2Row = dialog.querySelector('#filter-value2-row');
   const valueLabel = dialog.querySelector('#filter-value-label');
+  const valueInput = dialog.querySelector('#filter-comparison-value');
   
   opSelect.addEventListener('change', () => {
     const isBetween = opSelect.value === 'between';
     value2Row.style.display = isBetween ? 'flex' : 'none';
     valueLabel.textContent = isBetween ? 'From:' : 'Value:';
+    valueInput.focus();
   });
+  
+  // Focus value input by default
+  valueInput.focus();
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
@@ -3174,11 +3179,17 @@ function showFilterTextCriteriaDialog(colIdx) {
   const regexHint = dialog.querySelector('#filter-regex-hint');
   const valueLabel = dialog.querySelector('#filter-text-value-label');
   
+  const textInput = dialog.querySelector('#filter-text-value');
+  
   opSelect.addEventListener('change', () => {
     const isRegex = opSelect.value === 'regex';
     regexHint.style.display = isRegex ? 'block' : 'none';
     valueLabel.textContent = isRegex ? 'Pattern:' : 'Text:';
+    textInput.focus();
   });
+  
+  // Focus text input by default
+  textInput.focus();
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
