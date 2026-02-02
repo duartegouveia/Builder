@@ -217,6 +217,8 @@ function generateNestedRelation(schema, idCounter) {
   return {
     pot: 'relation',
     columns: schema.columns,
+    options: schema.options || {},
+    rel_options: { ...DEFAULT_REL_OPTIONS },
     items: items
   };
 }
@@ -335,6 +337,20 @@ function parseRelation(jsonStr) {
     if (!Array.isArray(data.items)) {
       throw new Error('Invalid relation: items must be an array');
     }
+    
+    // Apply default rel_options if not present or incomplete
+    const parsedRelOptions = data.rel_options || {};
+    data.rel_options = {
+      editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
+      single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
+      general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
+    };
+    
+    // Ensure options exists
+    if (!data.options) {
+      data.options = {};
+    }
+    
     return { success: true, data };
   } catch (e) {
     return { success: false, error: e.message };
