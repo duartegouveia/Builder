@@ -5406,10 +5406,19 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   
   html += '<line x1="' + xScale(lineX1) + '" y1="' + yScale(lineY1) + '" x2="' + xScale(lineX2) + '" y2="' + yScale(lineY2) + '" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"/>';
   html += '</svg>';
+  html += '<div class="correlation-alternatives">';
+  html += '<span class="correlation-alt-label">Try alternative:</span>';
+  html += '<button class="btn-alt-spearman btn btn-outline btn-sm" data-testid="button-alt-spearman">Spearman (no normality assumption)</button>';
+  html += '</div>';
   html += '</div>';
   
   const corrResultEl = el('.correlation-result');
-  if (corrResultEl) corrResultEl.innerHTML = html;
+  if (corrResultEl) {
+    corrResultEl.innerHTML = html;
+    corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => {
+      renderSpearmanCorrelation(pairs, xIdx, yIdx);
+    });
+  }
 }
 
 function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
@@ -5490,10 +5499,19 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
   });
   
   html += '</svg>';
+  html += '<div class="correlation-alternatives">';
+  html += '<span class="correlation-alt-label">Try alternative:</span>';
+  html += '<button class="btn-alt-pearson btn btn-outline btn-sm" data-testid="button-alt-pearson">Pearson (assumes normality)</button>';
+  html += '</div>';
   html += '</div>';
   
   const corrResultEl = el('.correlation-result');
-  if (corrResultEl) corrResultEl.innerHTML = html;
+  if (corrResultEl) {
+    corrResultEl.innerHTML = html;
+    corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => {
+      renderPearsonCorrelation(pairs, xIdx, yIdx);
+    });
+  }
 }
 
 function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
