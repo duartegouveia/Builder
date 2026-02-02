@@ -3011,6 +3011,7 @@ function showFilterValuesDialog(colIdx) {
     </div>
     <div class="filter-values-list"></div>
     <div class="filter-dialog-footer">
+      <button class="btn btn-outline btn-danger" id="filter-clear">Clear Filter</button>
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
     </div>
@@ -3021,6 +3022,12 @@ function showFilterValuesDialog(colIdx) {
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('#filter-clear').addEventListener('click', () => {
+    delete state.filters[colIdx];
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
   
   dialog.querySelector('#filter-sort').addEventListener('change', (e) => {
     renderValuesList(e.target.value);
@@ -3100,6 +3107,7 @@ function showFilterComparisonDialog(colIdx) {
       </div>
     </div>
     <div class="filter-dialog-footer">
+      <button class="btn btn-outline btn-danger" id="filter-clear">Clear Filter</button>
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
     </div>
@@ -3111,6 +3119,13 @@ function showFilterComparisonDialog(colIdx) {
   const value2Row = dialog.querySelector('#filter-value2-row');
   const valueLabel = dialog.querySelector('#filter-value-label');
   const valueInput = dialog.querySelector('#filter-comparison-value');
+  
+  dialog.querySelector('#filter-clear').addEventListener('click', () => {
+    delete state.filters[colIdx];
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
   
   opSelect.addEventListener('change', () => {
     const isBetween = opSelect.value === 'between';
@@ -3224,6 +3239,7 @@ function showFilterTextCriteriaDialog(colIdx) {
       </div>
     </div>
     <div class="filter-dialog-footer">
+      <button class="btn btn-outline btn-danger" id="filter-clear">Clear Filter</button>
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
     </div>
@@ -3236,6 +3252,13 @@ function showFilterTextCriteriaDialog(colIdx) {
   const valueLabel = dialog.querySelector('#filter-text-value-label');
   
   const textInput = dialog.querySelector('#filter-text-value');
+  
+  dialog.querySelector('#filter-clear').addEventListener('click', () => {
+    delete state.filters[colIdx];
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
   
   opSelect.addEventListener('change', () => {
     const isRegex = opSelect.value === 'regex';
