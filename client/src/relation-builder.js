@@ -4945,14 +4945,29 @@ function renderCardsView() {
     state.columnNames.forEach((colName, colIdx) => {
       const value = row[colIdx];
       const type = state.columnTypes[colIdx];
-      let displayValue = formatCellValue(value, type, colIdx);
-      const fullValue = value !== null && value !== undefined ? String(value) : '';
+      let displayValue = formatCellValue(value, type, colName);
+      
+      // Get display value for tooltip (use option label for select type)
+      let tooltipValue = '';
+      if (value !== null && value !== undefined) {
+        if (type === 'select') {
+          const colOptions = state.options[colName];
+          tooltipValue = (colOptions && colOptions[value] !== undefined) ? colOptions[value] : String(value);
+        } else if (type === 'relation') {
+          tooltipValue = (value?.items?.length || 0) + ' rows';
+        } else {
+          tooltipValue = String(value);
+        }
+      }
       
       // Determine if field should span full width (multiline, relation, long text)
       const isWide = type === 'multilinestring' || type === 'relation' || type === 'string';
       const fieldClass = 'data-card-field data-card-col-' + colIdx + (isWide ? ' data-card-field-wide' : '');
       
-      cardsHtml += '<div class="' + fieldClass + '" title="' + escapeHtml(colName) + ': ' + escapeHtml(fullValue) + '">';
+      // Add data attributes for relation columns to enable click handling
+      const dataAttrs = type === 'relation' ? ' data-row-idx="' + rowIdx + '" data-col-idx="' + colIdx + '" data-type="relation"' : '';
+      
+      cardsHtml += '<div class="' + fieldClass + '" title="' + escapeHtml(colName) + ': ' + escapeHtml(tooltipValue) + '"' + dataAttrs + '>';
       // Value only - label appears in tooltip
       cardsHtml += '<span class="data-card-value">' + displayValue + '</span>';
       cardsHtml += '</div>';
@@ -5014,6 +5029,16 @@ function renderCardsView() {
         state.selectedRows.delete(idx);
       }
       e.target.closest('.data-card').classList.toggle('selected', e.target.checked);
+    });
+  });
+  
+  // Event listeners for relation columns in cards
+  cardsContent.querySelectorAll('[data-type="relation"]').forEach(field => {
+    field.style.cursor = 'pointer';
+    field.addEventListener('click', (e) => {
+      const rowIdx = parseInt(field.dataset.rowIdx);
+      const colIdx = parseInt(field.dataset.colIdx);
+      showNestedRelationDialog(rowIdx, colIdx);
     });
   });
   
