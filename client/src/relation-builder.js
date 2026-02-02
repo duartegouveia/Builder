@@ -6368,8 +6368,15 @@ function analyzeAllPairs() {
 }
 
 function renderPairDetail(container, xIdx, yIdx, method) {
+  // Render the same content as single pair analysis inside the accordion container
   const xType = state.columnTypes[xIdx];
   const yType = state.columnTypes[yIdx];
+  const isNumericX = ['int', 'float'].includes(xType);
+  const isNumericY = ['int', 'float'].includes(yType);
+  const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
+  const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
+  const isBinaryX = xType === 'boolean';
+  const isBinaryY = yType === 'boolean';
   
   function toNumeric(val, type) {
     if (val === null) return null;
@@ -6388,7 +6395,8 @@ function renderPairDetail(container, xIdx, yIdx, method) {
     return null;
   }
   
-  if (method === 'pearson' || method === 'spearman') {
+  // Route to appropriate render function based on method
+  if (['pearson', 'spearman', 'kendall'].includes(method)) {
     const pairs = [];
     state.sortedIndices.forEach(idx => {
       const row = state.relation.items[idx];
@@ -6402,34 +6410,53 @@ function renderPairDetail(container, xIdx, yIdx, method) {
       return;
     }
     
-    // Build inline scatter plot
-    const width = 350;
-    const height = 250;
-    const padding = 35;
+    if (method === 'pearson') {
+      renderPearsonCorrelationTo(container, pairs, xIdx, yIdx);
+    } else if (method === 'spearman') {
+      renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx);
+    } else {
+      renderKendallCorrelationTo(container, pairs, xIdx, yIdx);
+    }
+  } else if (method === 'pointbiserial') {
+    const pairs = [];
+    const binaryIdx = isBinaryX ? xIdx : yIdx;
+    const numericIdx = isBinaryX ? yIdx : xIdx;
+    const numericType = isBinaryX ? yType : xType;
     
-    const xMin = Math.min(...pairs.map(p => p.x));
-    const xMax = Math.max(...pairs.map(p => p.x));
-    const yMin = Math.min(...pairs.map(p => p.y));
-    const yMax = Math.max(...pairs.map(p => p.y));
-    
-    const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
-    const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
-    
-    let html = '<svg class="correlation-scatter-small" viewBox="0 0 ' + width + ' ' + height + '">';
-    html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
-    html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
-    html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-    html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
-    
-    const color = method === 'spearman' ? '#10b981' : '#3b82f6';
-    pairs.forEach(p => {
-      html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="3" fill="' + color + '" opacity="0.5"/>';
+    state.sortedIndices.forEach(idx => {
+      const row = state.relation.items[idx];
+      const bVal = row[binaryIdx];
+      const nVal = toNumeric(row[numericIdx], numericType);
+      if (bVal !== null && nVal !== null) {
+        pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
+      }
     });
     
-    html += '</svg>';
-    container.innerHTML = html;
+    if (pairs.length < 2) {
+      container.innerHTML = '<p class="text-muted-foreground">Not enough data pairs.</p>';
+      return;
+    }
+    
+    renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx);
+  } else if (method === 'phi') {
+    const pairs = [];
+    state.sortedIndices.forEach(idx => {
+      const row = state.relation.items[idx];
+      const x = row[xIdx];
+      const y = row[yIdx];
+      if (x !== null && y !== null) {
+        pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
+      }
+    });
+    
+    if (pairs.length < 2) {
+      container.innerHTML = '<p class="text-muted-foreground">Not enough data pairs.</p>';
+      return;
+    }
+    
+    renderPhiCorrelationTo(container, pairs, xIdx, yIdx);
   } else {
-    // Cramér's V - show contingency info
+    // Cramér's V
     const contingency = {};
     const xCounts = {};
     const yCounts = {};
@@ -6452,11 +6479,368 @@ function renderPairDetail(container, xIdx, yIdx, method) {
     const xKeys = Object.keys(xCounts);
     const yKeys = Object.keys(yCounts);
     
-    let html = '<div class="corr-detail-cramers">';
-    html += '<p>' + xKeys.length + ' × ' + yKeys.length + ' categories, ' + total + ' observations</p>';
-    html += '</div>';
-    container.innerHTML = html;
+    renderCramersVTo(container, contingency, total, xIdx, yIdx, xKeys.length, yKeys.length, xCounts, yCounts);
   }
+}
+
+// Render functions that accept a target container
+function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  const sumX = pairs.reduce((s, p) => s + p.x, 0);
+  const sumY = pairs.reduce((s, p) => s + p.y, 0);
+  const sumXY = pairs.reduce((s, p) => s + p.x * p.y, 0);
+  const sumX2 = pairs.reduce((s, p) => s + p.x * p.x, 0);
+  const sumY2 = pairs.reduce((s, p) => s + p.y * p.y, 0);
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  const r = denominator === 0 ? 0 : numerator / denominator;
+  
+  const xValues = pairs.map(p => p.x);
+  const yValues = pairs.map(p => p.y);
+  const xOutlierBounds = detectOutliers(xValues);
+  const yOutlierBounds = detectOutliers(yValues);
+  
+  const outlierCount = pairs.filter(p => 
+    p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+    p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound
+  ).length;
+  
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  const slope = numerator / (n * sumX2 - sumX * sumX || 1);
+  const intercept = meanY - slope * meanX;
+  
+  const residuals = pairs.map(p => p.y - (slope * p.x + intercept));
+  const ssRes = residuals.reduce((s, r) => s + r * r, 0);
+  const ssTot = pairs.reduce((s, p) => s + (p.y - meanY) ** 2, 0);
+  const rSquared = ssTot === 0 ? 0 : 1 - ssRes / ssTot;
+  
+  const absR = Math.abs(r);
+  let strength = 'No correlation';
+  if (absR >= 0.9) strength = 'Very strong';
+  else if (absR >= 0.7) strength = 'Strong';
+  else if (absR >= 0.5) strength = 'Moderate';
+  else if (absR >= 0.3) strength = 'Weak';
+  else if (absR >= 0.1) strength = 'Very weak';
+  
+  const colorClass = r > 0.1 ? 'correlation-positive' : r < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Pearson Correlation (r)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + r.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (r > 0 ? 'positive' : r < 0 ? 'negative' : '') + ' correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' pairs | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Consider Kendall\'s Tau</div>';
+  }
+  if (outlierCount > 0) {
+    html += '<div class="correlation-warning">⚠️ ' + outlierCount + ' outliers detected: Consider Spearman</div>';
+  }
+  if (rSquared < 0.5 && absR > 0.3) {
+    html += '<div class="correlation-warning">⚠️ Low R²: Consider Spearman or transform data</div>';
+  }
+  
+  html += renderNormalityPanel(xValues, yValues, state.columnNames[xIdx], state.columnNames[yIdx]);
+  
+  const width = 350, height = 250, padding = 35;
+  const xMin = Math.min(...xValues), xMax = Math.max(...xValues);
+  const yMin = Math.min(...yValues), yMax = Math.max(...yValues);
+  const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+  const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
+  html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
+  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  
+  pairs.forEach(p => {
+    const isOutlier = p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound || p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound;
+    html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="' + (isOutlier ? 5 : 3) + '" fill="' + (isOutlier ? '#ef4444' : '#3b82f6') + '" opacity="0.6"/>';
+  });
+  
+  const lineY1 = slope * xMin + intercept, lineY2 = slope * xMax + intercept;
+  html += '<line x1="' + xScale(xMin) + '" y1="' + yScale(lineY1) + '" x2="' + xScale(xMax) + '" y2="' + yScale(lineY2) + '" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5"/>';
+  html += '</svg></div>';
+  
+  container.innerHTML = html;
+}
+
+function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  
+  function rank(arr) {
+    const sorted = arr.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+    const ranks = new Array(arr.length);
+    let i = 0;
+    while (i < sorted.length) {
+      let j = i;
+      while (j < sorted.length && sorted[j].v === sorted[i].v) j++;
+      const avgRank = (i + 1 + j) / 2;
+      for (let k = i; k < j; k++) ranks[sorted[k].i] = avgRank;
+      i = j;
+    }
+    return ranks;
+  }
+  
+  const xRanks = rank(pairs.map(p => p.x));
+  const yRanks = rank(pairs.map(p => p.y));
+  
+  const sumRx = xRanks.reduce((s, r) => s + r, 0);
+  const sumRy = yRanks.reduce((s, r) => s + r, 0);
+  const sumRxRy = xRanks.reduce((s, r, i) => s + r * yRanks[i], 0);
+  const sumRx2 = xRanks.reduce((s, r) => s + r * r, 0);
+  const sumRy2 = yRanks.reduce((s, r) => s + r * r, 0);
+  
+  const numerator = n * sumRxRy - sumRx * sumRy;
+  const denominator = Math.sqrt((n * sumRx2 - sumRx * sumRx) * (n * sumRy2 - sumRy * sumRy));
+  const rho = denominator === 0 ? 0 : numerator / denominator;
+  
+  const absRho = Math.abs(rho);
+  let strength = 'No correlation';
+  if (absRho >= 0.9) strength = 'Very strong';
+  else if (absRho >= 0.7) strength = 'Strong';
+  else if (absRho >= 0.5) strength = 'Moderate';
+  else if (absRho >= 0.3) strength = 'Weak';
+  else if (absRho >= 0.1) strength = 'Very weak';
+  
+  const colorClass = rho > 0.1 ? 'correlation-positive' : rho < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Spearman Correlation (ρ)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + rho.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (rho > 0 ? 'positive' : rho < 0 ? 'negative' : '') + ' monotonic correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' pairs</div>';
+  html += '<div class="correlation-note">Spearman measures monotonic relationship. Robust to outliers.</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample: Kendall\'s Tau may be more appropriate</div>';
+  }
+  
+  const width = 350, height = 250, padding = 35;
+  const xMin = Math.min(...pairs.map(p => p.x)), xMax = Math.max(...pairs.map(p => p.x));
+  const yMin = Math.min(...pairs.map(p => p.y)), yMax = Math.max(...pairs.map(p => p.y));
+  const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+  const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
+  html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
+  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  
+  pairs.forEach(p => {
+    html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="3" fill="#10b981" opacity="0.6"/>';
+  });
+  html += '</svg></div>';
+  
+  container.innerHTML = html;
+}
+
+function renderKendallCorrelationTo(container, pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  let concordant = 0, discordant = 0;
+  
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const product = (pairs[j].x - pairs[i].x) * (pairs[j].y - pairs[i].y);
+      if (product > 0) concordant++;
+      else if (product < 0) discordant++;
+    }
+  }
+  
+  const totalPairs = (n * (n - 1)) / 2;
+  const tau = totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
+  
+  const absTau = Math.abs(tau);
+  let strength = 'No correlation';
+  if (absTau >= 0.9) strength = 'Very strong';
+  else if (absTau >= 0.7) strength = 'Strong';
+  else if (absTau >= 0.5) strength = 'Moderate';
+  else if (absTau >= 0.3) strength = 'Weak';
+  else if (absTau >= 0.1) strength = 'Very weak';
+  
+  const colorClass = tau > 0.1 ? 'correlation-positive' : tau < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Kendall\'s Tau (τ)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + tau.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (tau > 0 ? 'positive' : tau < 0 ? 'negative' : '') + ' correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' | Concordant: ' + concordant + ' | Discordant: ' + discordant + '</div>';
+  html += '<div class="correlation-note">Kendall\'s Tau is recommended for small samples and ordinal data.</div>';
+  
+  if (n >= 30) {
+    html += '<div class="correlation-warning">ℹ️ Large sample: Pearson or Spearman may be more efficient</div>';
+  }
+  
+  const width = 350, height = 250, padding = 35;
+  const xMin = Math.min(...pairs.map(p => p.x)), xMax = Math.max(...pairs.map(p => p.x));
+  const yMin = Math.min(...pairs.map(p => p.y)), yMax = Math.max(...pairs.map(p => p.y));
+  const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+  const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
+  html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
+  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  
+  pairs.forEach(p => {
+    html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="3" fill="#8b5cf6" opacity="0.6"/>';
+  });
+  html += '</svg></div>';
+  
+  container.innerHTML = html;
+}
+
+function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx) {
+  const n = pairs.length;
+  const group0 = pairs.filter(p => p.binary === 0).map(p => p.numeric);
+  const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
+  
+  if (group0.length === 0 || group1.length === 0) {
+    container.innerHTML = '<p class="text-muted-foreground">Both groups need at least one observation</p>';
+    return;
+  }
+  
+  const n0 = group0.length, n1 = group1.length;
+  const mean0 = group0.reduce((s, v) => s + v, 0) / n0;
+  const mean1 = group1.reduce((s, v) => s + v, 0) / n1;
+  const allValues = pairs.map(p => p.numeric);
+  const meanAll = allValues.reduce((s, v) => s + v, 0) / n;
+  const variance = allValues.reduce((s, v) => s + (v - meanAll) ** 2, 0) / n;
+  const std = Math.sqrt(variance) || 1;
+  
+  const rpb = ((mean1 - mean0) / std) * Math.sqrt((n0 * n1) / (n * n));
+  
+  const absRpb = Math.abs(rpb);
+  let strength = 'No correlation';
+  if (absRpb >= 0.9) strength = 'Very strong';
+  else if (absRpb >= 0.7) strength = 'Strong';
+  else if (absRpb >= 0.5) strength = 'Moderate';
+  else if (absRpb >= 0.3) strength = 'Weak';
+  else if (absRpb >= 0.1) strength = 'Very weak';
+  
+  const colorClass = rpb > 0.1 ? 'correlation-positive' : rpb < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Point-Biserial (r<sub>pb</sub>)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + rpb.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' | Group 0: ' + n0 + ' (μ=' + mean0.toFixed(2) + ') | Group 1: ' + n1 + ' (μ=' + mean1.toFixed(2) + ')</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample: Limited statistical power</div>';
+  }
+  if (Math.min(n0, n1) < 5) {
+    html += '<div class="correlation-warning">⚠️ Unbalanced groups</div>';
+  }
+  
+  const width = 350, height = 150, padding = 50;
+  const allMin = Math.min(...allValues), allMax = Math.max(...allValues);
+  const scale = (v) => padding + ((v - allMin) / (allMax - allMin || 1)) * (width - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - 20) + '" x2="' + (width - padding) + '" y2="' + (height - 20) + '" stroke="#ccc"/>';
+  group0.forEach(v => { html += '<circle cx="' + scale(v) + '" cy="40" r="4" fill="#f59e0b" opacity="0.6"/>'; });
+  html += '<line x1="' + scale(mean0) + '" y1="30" x2="' + scale(mean0) + '" y2="50" stroke="#f59e0b" stroke-width="3"/>';
+  html += '<text x="20" y="45" font-size="10">0</text>';
+  group1.forEach(v => { html += '<circle cx="' + scale(v) + '" cy="80" r="4" fill="#06b6d4" opacity="0.6"/>'; });
+  html += '<line x1="' + scale(mean1) + '" y1="70" x2="' + scale(mean1) + '" y2="90" stroke="#06b6d4" stroke-width="3"/>';
+  html += '<text x="20" y="85" font-size="10">1</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[numericIdx]) + '</text>';
+  html += '</svg></div>';
+  
+  container.innerHTML = html;
+}
+
+function renderPhiCorrelationTo(container, pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  let a = 0, b = 0, c = 0, d = 0;
+  pairs.forEach(p => {
+    if (p.x === 1 && p.y === 1) a++;
+    else if (p.x === 1 && p.y === 0) b++;
+    else if (p.x === 0 && p.y === 1) c++;
+    else d++;
+  });
+  
+  const numerator = (a * d) - (b * c);
+  const denominator = Math.sqrt((a + b) * (c + d) * (a + c) * (b + d));
+  const phi = denominator === 0 ? 0 : numerator / denominator;
+  
+  const absPhi = Math.abs(phi);
+  let strength = 'No association';
+  if (absPhi >= 0.5) strength = 'Strong';
+  else if (absPhi >= 0.3) strength = 'Moderate';
+  else if (absPhi >= 0.1) strength = 'Weak';
+  
+  const colorClass = phi > 0.1 ? 'correlation-positive' : phi < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Phi Coefficient (φ)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + phi.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' association</div>';
+  html += '<div class="correlation-label">n = ' + n + '</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample</div>';
+  }
+  if (Math.min(a, b, c, d) < 5) {
+    html += '<div class="correlation-warning">⚠️ Some cells have &lt;5 observations</div>';
+  }
+  
+  html += '<table class="phi-table">';
+  html += '<tr><th></th><th>' + escapeHtml(state.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(state.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
+  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a+b) + '</td></tr>';
+  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c+d) + '</td></tr>';
+  html += '<tr><th>Total</th><td>' + (a+c) + '</td><td>' + (b+d) + '</td><td>' + n + '</td></tr>';
+  html += '</table></div>';
+  
+  container.innerHTML = html;
+}
+
+function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories, yCategories, xCounts, yCounts) {
+  const xKeys = Object.keys(xCounts);
+  const yKeys = Object.keys(yCounts);
+  
+  let chiSquared = 0;
+  xKeys.forEach(xVal => {
+    yKeys.forEach(yVal => {
+      const observed = (contingency[xVal] && contingency[xVal][yVal]) || 0;
+      const expected = (xCounts[xVal] * yCounts[yVal]) / total;
+      if (expected > 0) {
+        chiSquared += ((observed - expected) ** 2) / expected;
+      }
+    });
+  });
+  
+  const minDim = Math.min(xCategories, yCategories) - 1;
+  const v = minDim > 0 ? Math.sqrt(chiSquared / (total * minDim)) : 0;
+  
+  let strength = 'No association';
+  if (v >= 0.5) strength = 'Strong';
+  else if (v >= 0.3) strength = 'Moderate';
+  else if (v >= 0.1) strength = 'Weak';
+  
+  const colorClass = v >= 0.3 ? 'correlation-positive' : v >= 0.1 ? 'correlation-neutral' : '';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Cramér\'s V</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + v.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' association</div>';
+  html += '<div class="correlation-label">n = ' + total + ' | ' + xCategories + ' × ' + yCategories + ' categories</div>';
+  
+  const width = 300, barHeight = 30;
+  html += '<svg viewBox="0 0 ' + width + ' ' + (barHeight + 20) + '" style="width: 300px; height: 50px;">';
+  html += '<rect x="0" y="0" width="' + width + '" height="' + barHeight + '" fill="#e5e7eb" rx="4"/>';
+  html += '<rect x="0" y="0" width="' + (v * width) + '" height="' + barHeight + '" fill="#10b981" rx="4"/>';
+  html += '<text x="10" y="' + (barHeight + 15) + '" font-size="11" fill="#666">0</text>';
+  html += '<text x="' + (width - 10) + '" y="' + (barHeight + 15) + '" font-size="11" fill="#666" text-anchor="end">1</text>';
+  html += '</svg></div>';
+  
+  container.innerHTML = html;
 }
 
 function runClustering() {
