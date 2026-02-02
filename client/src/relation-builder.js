@@ -71,7 +71,7 @@ let state = {
   currentView: 'table', // 'table', 'cards', 'pivot', 'correlation', 'diagram', 'ai'
   
   // Pagination
-  pageSize: 10,
+  pageSize: 5,
   currentPage: 1,
   
   // Cards view pagination
@@ -2008,6 +2008,7 @@ function renderPagination() {
     <div class="pagination-size">
       <label>Per page:</label>
       <select id="page-size-select">
+        <option value="5" ${state.pageSize === 5 ? 'selected' : ''}>5</option>
         <option value="10" ${state.pageSize === 10 ? 'selected' : ''}>10</option>
         <option value="20" ${state.pageSize === 20 ? 'selected' : ''}>20</option>
         <option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50</option>
@@ -2357,6 +2358,13 @@ function renderTable() {
   });
   
   table.appendChild(tbody);
+  
+  // Set wrapper height based on pageSize (approx 36px per row + header)
+  const rowHeight = 36;
+  const headerHeight = 50;
+  const rowCount = state.pageSize === 'all' ? Math.min(pageIndices.length, 20) : state.pageSize;
+  const calculatedHeight = headerHeight + (rowCount * rowHeight);
+  tableWrapper.style.maxHeight = calculatedHeight + 'px';
   
   tableWrapper.appendChild(table);
   container.appendChild(tableWrapper);
