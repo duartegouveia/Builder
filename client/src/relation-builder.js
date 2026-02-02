@@ -2784,6 +2784,23 @@ function attachTableEventListeners(st = state, container = null) {
       updateRelationFromInput(e.target, st);
     }
   });
+  
+  // Row operations button
+  tableContainer.querySelectorAll('.btn-row-ops').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const rowIdx = parseInt(btn.dataset.row);
+      showRowMenuForInstance(st, rowIdx, e.clientX, e.clientY);
+    });
+  });
+  
+  // Relation cell buttons (for nested relations)
+  tableContainer.querySelectorAll('.relation-cell-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const rowIdx = parseInt(btn.dataset.row);
+      const colIdx = parseInt(btn.dataset.col);
+      showNestedRelationDialog(rowIdx, colIdx, st);
+    });
+  });
 }
 
 function updateBoolCheckbox(checkbox, value) {
@@ -4563,10 +4580,10 @@ function showRowEditDialog(rowIdx) {
   });
 }
 
-function showNestedRelationDialog(rowIdx, colIdx) {
+function showNestedRelationDialog(rowIdx, colIdx, st = state) {
   closeAllMenus();
   
-  const nestedRelation = state.relation.items[rowIdx][colIdx];
+  const nestedRelation = st.relation.items[rowIdx][colIdx];
   if (!nestedRelation || !nestedRelation.columns) return;
   
   // Ensure nested relation has default rel_options
@@ -5109,7 +5126,7 @@ function renderCardsView(st = state) {
     field.addEventListener('click', (e) => {
       const rowIdx = parseInt(field.dataset.rowIdx);
       const colIdx = parseInt(field.dataset.colIdx);
-      showNestedRelationDialog(rowIdx, colIdx);
+      showNestedRelationDialog(rowIdx, colIdx, st);
     });
   });
   
@@ -8371,6 +8388,15 @@ function attachTableEventListenersWithState(st, container) {
     btn.addEventListener('click', (e) => {
       const rowIdx = parseInt(btn.dataset.row);
       showRowMenuForInstance(st, rowIdx, e.clientX, e.clientY);
+    });
+  });
+  
+  // Relation cell buttons (for nested relations)
+  container.querySelectorAll('.relation-cell-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const rowIdx = parseInt(btn.dataset.row);
+      const colIdx = parseInt(btn.dataset.col);
+      showNestedRelationDialog(rowIdx, colIdx, st);
     });
   });
 }
