@@ -612,6 +612,22 @@ input[type="number"] {
   white-space: nowrap;
 }
 
+.filter-value-count {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  margin-left: var(--space-1);
+}
+
+.filter-sort-select {
+  margin-left: auto;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  cursor: pointer;
+}
+
 .filter-dialog-footer {
   display: flex;
   justify-content: flex-end;

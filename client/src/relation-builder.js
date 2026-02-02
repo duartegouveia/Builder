@@ -2730,18 +2730,68 @@ function applyColorScale(colIdx) {
 function showFilterValuesDialog(colIdx) {
   closeAllMenus();
   
-  const values = [...new Set(state.relation.items.map(row => row[colIdx]))];
+  // Count occurrences of each value
+  const valueCounts = new Map();
+  const naturalOrder = [];
+  state.relation.items.forEach(row => {
+    const v = row[colIdx];
+    if (!valueCounts.has(v)) {
+      valueCounts.set(v, 0);
+      naturalOrder.push(v);
+    }
+    valueCounts.set(v, valueCounts.get(v) + 1);
+  });
+  
   const currentFilter = state.filters[colIdx];
-  const selectedValues = currentFilter?.type === 'values' ? new Set(currentFilter.values) : new Set(values);
+  const selectedValues = currentFilter?.type === 'values' ? new Set(currentFilter.values) : new Set();
   
   const dialog = document.createElement('div');
   dialog.className = 'filter-dialog';
   
-  let valuesHtml = values.map(v => {
-    const label = v === null ? '(null)' : String(v).substring(0, 50);
-    const checked = selectedValues.has(v) ? 'checked' : '';
-    return `<label class="filter-value-item"><input type="checkbox" value="${v === null ? '__null__' : v}" ${checked}><span>${label}</span></label>`;
-  }).join('');
+  function sortValues(order) {
+    let sorted = [...naturalOrder];
+    if (order === 'asc') {
+      sorted.sort((a, b) => {
+        if (a === null) return -1;
+        if (b === null) return 1;
+        return String(a).localeCompare(String(b), undefined, { numeric: true });
+      });
+    } else if (order === 'desc') {
+      sorted.sort((a, b) => {
+        if (a === null) return 1;
+        if (b === null) return -1;
+        return String(b).localeCompare(String(a), undefined, { numeric: true });
+      });
+    } else if (order === 'histogram') {
+      sorted.sort((a, b) => valueCounts.get(b) - valueCounts.get(a));
+    }
+    return sorted;
+  }
+  
+  function renderValuesList(order) {
+    const sorted = sortValues(order);
+    const listEl = dialog.querySelector('.filter-values-list');
+    listEl.innerHTML = sorted.map(v => {
+      const label = v === null ? '(null)' : String(v).substring(0, 50);
+      const count = valueCounts.get(v);
+      const countLabel = count > 1 ? ` <span class="filter-value-count">#${count}</span>` : '';
+      const checked = selectedValues.has(v) ? 'checked' : '';
+      const dataValue = v === null ? '__null__' : String(v).replace(/"/g, '&quot;');
+      return `<label class="filter-value-item"><input type="checkbox" data-value="${dataValue}" ${checked}><span>${label}${countLabel}</span></label>`;
+    }).join('');
+    
+    // Re-attach checkbox listeners
+    listEl.querySelectorAll('.filter-value-item input').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const val = cb.dataset.value === '__null__' ? null : cb.dataset.value;
+        if (cb.checked) {
+          selectedValues.add(val);
+        } else {
+          selectedValues.delete(val);
+        }
+      });
+    });
+  }
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
@@ -2751,8 +2801,14 @@ function showFilterValuesDialog(colIdx) {
     <div class="filter-dialog-actions">
       <button class="btn btn-sm" id="filter-select-all">Select All</button>
       <button class="btn btn-sm" id="filter-select-none">Select None</button>
+      <select class="filter-sort-select" id="filter-sort">
+        <option value="natural">Natural Order</option>
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+        <option value="histogram">Histogram</option>
+      </select>
     </div>
-    <div class="filter-values-list">${valuesHtml}</div>
+    <div class="filter-values-list"></div>
     <div class="filter-dialog-footer">
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
@@ -2760,28 +2816,33 @@ function showFilterValuesDialog(colIdx) {
   `;
   
   document.body.appendChild(dialog);
+  renderValuesList('natural');
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
   
+  dialog.querySelector('#filter-sort').addEventListener('change', (e) => {
+    renderValuesList(e.target.value);
+  });
+  
   dialog.querySelector('#filter-select-all').addEventListener('click', () => {
-    dialog.querySelectorAll('.filter-value-item input').forEach(cb => cb.checked = true);
+    dialog.querySelectorAll('.filter-value-item input').forEach(cb => {
+      cb.checked = true;
+      const val = cb.dataset.value === '__null__' ? null : cb.dataset.value;
+      selectedValues.add(val);
+    });
   });
   
   dialog.querySelector('#filter-select-none').addEventListener('click', () => {
     dialog.querySelectorAll('.filter-value-item input').forEach(cb => cb.checked = false);
+    selectedValues.clear();
   });
   
   dialog.querySelector('#filter-apply').addEventListener('click', () => {
-    const selected = [];
-    dialog.querySelectorAll('.filter-value-item input:checked').forEach(cb => {
-      selected.push(cb.value === '__null__' ? null : cb.value);
-    });
-    
-    if (selected.length === values.length) {
+    if (selectedValues.size === 0 || selectedValues.size === naturalOrder.length) {
       delete state.filters[colIdx];
     } else {
-      state.filters[colIdx] = { type: 'values', values: selected };
+      state.filters[colIdx] = { type: 'values', values: [...selectedValues] };
     }
     
     state.currentPage = 1;
