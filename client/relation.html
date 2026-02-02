@@ -122,7 +122,31 @@
                     <label>Column Y:</label>
                     <select class="corr-col-y pivot-select" data-testid="select-corr-y"></select>
                   </div>
+                  <div class="correlation-config-row">
+                    <label>Method:</label>
+                    <select class="corr-method pivot-select" data-testid="select-corr-method">
+                      <option value="auto">Auto-detect</option>
+                      <option value="pearson">Pearson (linear, normal)</option>
+                      <option value="spearman">Spearman (monotonic, any)</option>
+                      <option value="cramers">Cramér's V (categorical)</option>
+                    </select>
+                  </div>
                   <button class="btn-calculate-corr btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
+                  <button class="btn-corr-help btn btn-outline btn-sm" data-testid="button-corr-help">?</button>
+                </div>
+                <div class="correlation-help" style="display: none;">
+                  <p><strong>Choosing a correlation method:</strong></p>
+                  <ul>
+                    <li><strong>Pearson (r)</strong> - Measures linear relationship. Assumes normal distribution. Best for continuous numeric data with linear trends. Range: -1 to +1.</li>
+                    <li><strong>Spearman (ρ)</strong> - Measures monotonic relationship (always increasing or decreasing, not necessarily linear). Does not assume normality. More robust to outliers. Range: -1 to +1.</li>
+                    <li><strong>Cramér's V</strong> - Measures association between categorical variables. Based on chi-squared. Range: 0 to 1 (no direction).</li>
+                  </ul>
+                  <p><strong>Auto-detect logic:</strong></p>
+                  <ul>
+                    <li>Both columns numeric/temporal → Pearson (assumes normality)</li>
+                    <li>Either column categorical → Cramér's V</li>
+                  </ul>
+                  <p><em>Tip: If your data has outliers or non-linear trends, consider using Spearman instead of Pearson.</em></p>
                 </div>
                 <div class="correlation-result"></div>
               </div>

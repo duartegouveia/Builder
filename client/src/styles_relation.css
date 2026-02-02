@@ -1833,6 +1833,36 @@ input[type="number"] {
   text-transform: uppercase;
 }
 
+.correlation-help {
+  background: var(--blue-50);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.correlation-help p {
+  margin: 0 0 0.5em 0;
+}
+
+.correlation-help ul {
+  margin: 0.5em 0;
+  padding-left: 1.25em;
+}
+
+.correlation-help li {
+  margin: 0.25em 0;
+}
+
+.correlation-note {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+  margin-top: var(--space-2);
+}
+
 .correlation-result {
   padding: var(--space-4);
 }
