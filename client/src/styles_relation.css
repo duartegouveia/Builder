@@ -2011,8 +2011,17 @@ input[type="number"] {
   background: #3b82f6;
 }
 
+.correlation-config {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .correlation-section {
-  padding: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
 }
 
 .correlation-section-header {
@@ -2028,11 +2037,6 @@ input[type="number"] {
   margin-bottom: var(--space-2);
 }
 
-.correlation-divider {
-  height: 1px;
-  background: var(--border);
-  margin: var(--space-2) 0;
-}
 
 .correlation-actions {
   display: flex;
