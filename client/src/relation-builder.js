@@ -2384,10 +2384,53 @@ function renderTable() {
   }
 }
 
+function addLongPressSupport(element, callback, duration = 500) {
+  let pressTimer = null;
+  let longPressTriggered = false;
+  
+  const startPress = (e) => {
+    longPressTriggered = false;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    pressTimer = setTimeout(() => {
+      longPressTriggered = true;
+      callback(e, clientX, clientY);
+    }, duration);
+  };
+  
+  const cancelPress = () => {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  };
+  
+  element.addEventListener('mousedown', startPress);
+  element.addEventListener('mouseup', cancelPress);
+  element.addEventListener('mouseleave', cancelPress);
+  element.addEventListener('touchstart', startPress, { passive: true });
+  element.addEventListener('touchend', cancelPress);
+  element.addEventListener('touchmove', cancelPress);
+  
+  // Return a function to check if long press was triggered (to prevent click)
+  element._wasLongPress = () => longPressTriggered;
+}
+
 function attachTableEventListeners() {
   // Header click for sorting
   document.querySelectorAll('.relation-th-sortable').forEach(th => {
+    // Add long press support for context menu
+    addLongPressSupport(th, (e, clientX, clientY) => {
+      e.preventDefault?.();
+      const colIdx = parseInt(th.dataset.col);
+      showColumnMenu(colIdx, clientX, clientY);
+    });
+    
     th.addEventListener('click', (e) => {
+      // Skip if this was a long press
+      if (th._wasLongPress && th._wasLongPress()) return;
+      
       const colIdx = parseInt(th.dataset.col);
       if (e.ctrlKey || e.metaKey) {
         // Ctrl+click toggles column selection
