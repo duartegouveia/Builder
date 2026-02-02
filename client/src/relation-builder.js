@@ -4952,12 +4952,9 @@ function renderCardsView() {
       const isWide = type === 'multilinestring' || type === 'relation' || type === 'string';
       const fieldClass = 'data-card-field data-card-col-' + colIdx + (isWide ? ' data-card-field-wide' : '');
       
-      cardsHtml += '<div class="' + fieldClass + '">';
-      // Each field has its own tagline with "label: value" format
-      cardsHtml += '<div class="field-tagline" title="' + escapeHtml(colName) + ': ' + escapeHtml(fullValue) + '">';
-      cardsHtml += '<span class="field-tagline-label">' + escapeHtml(colName) + ':</span> ';
-      cardsHtml += '<span class="field-tagline-value">' + displayValue + '</span>';
-      cardsHtml += '</div>';
+      cardsHtml += '<div class="' + fieldClass + '" title="' + escapeHtml(colName) + ': ' + escapeHtml(fullValue) + '">';
+      // Value only - label appears in tooltip
+      cardsHtml += '<span class="data-card-value">' + displayValue + '</span>';
       cardsHtml += '</div>';
     });
     
