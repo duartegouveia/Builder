@@ -38,13 +38,13 @@ export async function setupVite(server, app) {
     const url = req.originalUrl;
 
     try {
-      let htmlFile = "keyboard.html";
+      let htmlFile = "relation.html";
       if (url === "/logic.html" || url.startsWith("/logic.html?")) {
         htmlFile = "logic.html";
       } else if (url === "/logic-builder.html" || url.startsWith("/logic-builder.html?")) {
         htmlFile = "index.html";
-      } else if (url === "/relation.html" || url.startsWith("/relation.html?")) {
-        htmlFile = "relation.html";
+      } else if (url === "/keyboard.html" || url.startsWith("/keyboard.html?")) {
+        htmlFile = "keyboard.html";
       }
       
       const clientTemplate = path.resolve(__dirname, "..", "client", htmlFile);

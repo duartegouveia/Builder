@@ -1851,6 +1851,7 @@ function applyConditionalFormatting(value, colIdx, cell) {
 }
 
 function matchesFormattingCondition(value, condition, type) {
+  if (condition.activeFilter) return hasActiveFilter();
   if (condition.equals !== undefined) return value === condition.equals;
   if (condition.gt !== undefined && value <= condition.gt) return false;
   if (condition.gte !== undefined && value < condition.gte) return false;
@@ -2441,18 +2442,24 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-content">
           <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
           <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
-          ${state.selectedColumns.size > 0 ? `
-            <button class="column-menu-item" data-action="group-selected-cols">Group Selected → Relation</button>
-            <button class="column-menu-item" data-action="clear-col-selection">Clear Selection</button>
-          ` : ''}
+          <button class="column-menu-item ${state.selectedColumns.size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${state.selectedColumns.size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
+          <button class="column-menu-item ${state.selectedColumns.size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${state.selectedColumns.size > 0 ? '' : 'disabled'}>Clear Selection</button>
         </div>
       </div>
       <div class="accordion-section" data-section="formatting">
         <div class="accordion-header">Conditional Formatting <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="format-databar">Data Bar</button>
+          <button class="column-menu-item" data-action="format-databar">Color Bar</button>
           <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
+          <button class="column-menu-item ${hasActiveFilter() ? '' : 'disabled'}" data-action="format-active-filter" ${hasActiveFilter() ? '' : 'disabled'}>Active Filter Color...</button>
           <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
+        </div>
+      </div>
+      <div class="accordion-section" data-section="remove">
+        <div class="accordion-header">Remove <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <button class="column-menu-item" data-action="remove-column">Remove Column</button>
+          <button class="column-menu-item ${state.selectedColumns.size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${state.selectedColumns.size > 1 ? '' : 'disabled'}>Remove Selected Columns (${state.selectedColumns.size})</button>
         </div>
       </div>
     </div>
@@ -2561,6 +2568,15 @@ function handleColumnMenuAction(colIdx, action) {
       return;
     case 'clear-col-selection':
       state.selectedColumns.clear();
+      break;
+    case 'format-active-filter':
+      showActiveFilterColorDialog(colIdx);
+      return;
+    case 'remove-column':
+      removeColumn(colIdx);
+      break;
+    case 'remove-selected-cols':
+      removeSelectedColumns();
       break;
   }
   
@@ -3034,7 +3050,128 @@ function showStatisticsPanel(colIdx) {
 }
 
 function closeAllMenus() {
-  document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog, .group-cols-dialog').forEach(el => el.remove());
+  document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog, .group-cols-dialog, .color-palette-dialog').forEach(el => el.remove());
+}
+
+function hasActiveFilter() {
+  return Object.keys(state.filters).length > 0;
+}
+
+function removeColumn(colIdx) {
+  if (state.columnNames.length <= 1) return;
+  
+  const colName = state.columnNames[colIdx];
+  
+  state.columnNames.splice(colIdx, 1);
+  state.columnTypes.splice(colIdx, 1);
+  delete state.options[colName];
+  
+  state.relation.items = state.relation.items.map(row => {
+    const newRow = [...row];
+    newRow.splice(colIdx, 1);
+    return newRow;
+  });
+  
+  const newColumns = {};
+  state.columnNames.forEach((name, idx) => {
+    newColumns[name] = state.columnTypes[idx];
+  });
+  state.relation.columns = newColumns;
+  
+  state.sortCriteria = state.sortCriteria
+    .filter(c => c.column !== colIdx)
+    .map(c => ({ ...c, column: c.column > colIdx ? c.column - 1 : c.column }));
+  
+  const newFilters = {};
+  for (const [idx, filter] of Object.entries(state.filters)) {
+    const i = parseInt(idx);
+    if (i < colIdx) newFilters[i] = filter;
+    else if (i > colIdx) newFilters[i - 1] = filter;
+  }
+  state.filters = newFilters;
+  
+  const newFormatting = {};
+  for (const [idx, fmt] of Object.entries(state.formatting)) {
+    const i = parseInt(idx);
+    if (i < colIdx) newFormatting[i] = fmt;
+    else if (i > colIdx) newFormatting[i - 1] = fmt;
+  }
+  state.formatting = newFormatting;
+  
+  state.selectedColumns.clear();
+  state.groupByColumns = state.groupByColumns
+    .filter(c => c !== colIdx)
+    .map(c => c > colIdx ? c - 1 : c);
+  
+  const newGroupBySelectedValues = {};
+  for (const [idx, val] of Object.entries(state.groupBySelectedValues)) {
+    const i = parseInt(idx);
+    if (i < colIdx) newGroupBySelectedValues[i] = val;
+    else if (i > colIdx) newGroupBySelectedValues[i - 1] = val;
+  }
+  state.groupBySelectedValues = newGroupBySelectedValues;
+  
+  state.selectedRows.clear();
+  state.pivotConfig = { rowDim: null, colDim: null };
+  state.expandedGroups = new Set();
+  state.diagramNodes = [];
+  
+  applyFilters();
+  applySorting();
+}
+
+function removeSelectedColumns() {
+  const cols = [...state.selectedColumns].sort((a, b) => b - a);
+  cols.forEach(colIdx => removeColumn(colIdx));
+}
+
+function showActiveFilterColorDialog(colIdx) {
+  closeAllMenus();
+  
+  const colors = [
+    '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', 
+    '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#000000'
+  ];
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'color-palette-dialog';
+  
+  dialog.innerHTML = `
+    <div class="color-palette-header">
+      <span>Choose Color for Active Filter</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="color-palette-grid">
+      ${colors.map(c => `<button class="color-swatch" data-color="${c}" style="background-color: ${c}"></button>`).join('')}
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelectorAll('.color-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      applyActiveFilterColor(colIdx, swatch.dataset.color);
+      dialog.remove();
+    });
+  });
+}
+
+function applyActiveFilterColor(colIdx, color) {
+  if (!hasActiveFilter()) return;
+  
+  const rules = state.formatting[colIdx] || [];
+  const existingActiveIdx = rules.findIndex(r => r.condition?.activeFilter);
+  
+  if (existingActiveIdx >= 0) {
+    rules[existingActiveIdx] = { condition: { activeFilter: true }, style: { backgroundColor: color } };
+  } else {
+    rules.push({ condition: { activeFilter: true }, style: { backgroundColor: color } });
+  }
+  
+  state.formatting[colIdx] = rules;
+  renderTable();
 }
 
 function toggleGroupBy(colIdx) {
