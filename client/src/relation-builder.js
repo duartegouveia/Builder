@@ -7998,34 +7998,58 @@ function initRelationInstance(container, relationData, options = {}) {
   }
   
   html += `
-    <div class="view-tabs-section">
-      <div class="view-tabs">
-        ${viewOptions.map((view, idx) => `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${view.toLowerCase()}">${view}</button>`).join('')}
+    <div class="view-tabs" style="margin-bottom: 1rem;">
+      ${viewOptions.map((view, idx) => `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${view.toLowerCase()}">${view}</button>`).join('')}
+    </div>
+    
+    <div class="view-table view-content">
+      <div class="relation-table-container resizable">
+        <p class="text-muted-foreground text-center py-8">Loading...</p>
+        <div class="resize-handle" data-testid="resize-handle"></div>
       </div>
     </div>
-    <div class="view-wrapper">
-      <div class="table-view-wrapper" style="display: block;">
-        <div class="table-header"></div>
-        <div class="table-scroll-container">
-          <table class="data-table">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="table-footer">
-          <div class="pagination"></div>
-          <div class="stats-toggle"></div>
-        </div>
-      </div>
-      <div class="cards-view-wrapper" style="display: none;">
+    
+    <div class="view-cards view-content" style="display: none;">
+      <div class="cards-view-wrapper">
         <div class="cards-content"></div>
         <div class="cards-navigation"></div>
       </div>
-      <div class="pivot-view-wrapper" style="display: none;"></div>
-      <div class="correlation-view-wrapper" style="display: none;"></div>
-      <div class="diagram-view-wrapper" style="display: none;"></div>
-      <div class="ai-view-wrapper" style="display: none;"></div>
-      <div class="saved-view-wrapper" style="display: none;"></div>
+    </div>
+    
+    <div class="view-pivot view-content" style="display: none;">
+      <div class="pivot-config">
+        <div class="pivot-config-row">
+          <label>Rows:</label>
+          <select class="pivot-rows pivot-select"></select>
+        </div>
+        <div class="pivot-config-row">
+          <label>Columns:</label>
+          <select class="pivot-cols pivot-select"></select>
+        </div>
+        <div class="pivot-config-row">
+          <label>Values:</label>
+          <div class="pivot-values-config"></div>
+          <button class="btn-add-pivot-value btn btn-outline btn-sm">+ Add</button>
+        </div>
+        <button class="btn-generate-pivot btn btn-primary btn-sm">Generate Pivot</button>
+      </div>
+      <div class="pivot-table-container"></div>
+    </div>
+    
+    <div class="view-correlation view-content" style="display: none;">
+      <p class="text-muted-foreground">Correlation view</p>
+    </div>
+    
+    <div class="view-diagram view-content" style="display: none;">
+      <p class="text-muted-foreground">Diagram view</p>
+    </div>
+    
+    <div class="view-ai view-content" style="display: none;">
+      <p class="text-muted-foreground">AI view</p>
+    </div>
+    
+    <div class="view-saved view-content" style="display: none;">
+      <p class="text-muted-foreground">Saved view</p>
     </div>
   `;
   
@@ -8060,160 +8084,659 @@ function switchViewForInstance(st, view) {
   setCurrentView(st, view);
   const container = st.container;
   
-  // Hide all view wrappers
-  container.querySelectorAll('.table-view-wrapper, .cards-view-wrapper, .pivot-view-wrapper, .correlation-view-wrapper, .diagram-view-wrapper, .ai-view-wrapper, .saved-view-wrapper').forEach(w => w.style.display = 'none');
+  // Hide all view wrappers (using .view-content class pattern)
+  container.querySelectorAll('.view-content').forEach(w => w.style.display = 'none');
   
   // Show the selected view
-  const viewWrapper = container.querySelector(`.${view}-view-wrapper`);
+  const viewWrapper = container.querySelector(`.view-${view}`);
   if (viewWrapper) {
     viewWrapper.style.display = 'block';
   }
   
   // Render the view
   if (view === 'table') {
-    renderTableForInstance(st);
+    renderTableWithState(st);
   } else if (view === 'cards') {
-    renderCardsForInstance(st);
+    renderCardsWithState(st);
+  } else if (view === 'pivot') {
+    renderPivotWithState(st);
   } else {
-    // Other views show placeholder
+    // Other views show placeholder for now
     if (viewWrapper) {
-      viewWrapper.innerHTML = `<div class="view-placeholder"><p>Vista "${view}" disponível apenas na relation principal.</p></div>`;
+      const inner = viewWrapper.querySelector('p');
+      if (inner) inner.textContent = `Vista "${view}" - funcionalidade completa em desenvolvimento.`;
     }
   }
 }
 
-// Render table for a specific instance
-function renderTableForInstance(st) {
-  const container = st.container;
-  const tableWrapper = container.querySelector('.table-view-wrapper');
-  if (!tableWrapper || !st.relation) return;
-  
-  // Apply sorting
-  let indices = [...getFilteredIndices(st)];
-  if (getSortCriteria(st).length > 0) {
-    indices.sort((a, b) => {
-      for (const { column, direction } of getSortCriteria(st)) {
-        const cmp = compareValues(st.relation.items[a][column], st.relation.items[b][column], st.columnTypes[column]);
-        if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
-      }
-      return 0;
-    });
+// Render table for a specific instance - full featured version matching renderTable()
+function renderTableWithState(st) {
+  const container = st.container.querySelector('.relation-table-container');
+  if (!container || !st.relation || !st.relation.columns || !st.relation.items) {
+    if (container) container.innerHTML = '<p class="text-muted-foreground">No data to display</p>';
+    return;
   }
-  setSortedIndices(st, indices);
   
-  const totalItems = indices.length;
-  const effectivePageSize = getPageSize(st) === 'all' ? totalItems : getPageSize(st);
-  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
-  const startIdx = (getCurrentPage(st) - 1) * effectivePageSize;
-  const pageIndices = indices.slice(startIdx, startIdx + effectivePageSize);
+  // Preserve resize handle
+  const existingHandle = container.querySelector('.resize-handle');
+  container.innerHTML = '';
   
-  // Render header
-  const tableHeader = tableWrapper.querySelector('.table-header');
-  tableHeader.innerHTML = `
-    <span class="table-info">${totalItems} rows</span>
-    <select class="page-size-select">
-      <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10</option>
-      <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20</option>
-      <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50</option>
-      <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''}>All</option>
-    </select>
-  `;
+  // Apply filters and sorting for this instance
+  applyFiltersWithState(st);
+  applySortingWithState(st);
   
-  // Render table head
-  const thead = tableWrapper.querySelector('thead');
-  let theadHtml = '<tr>';
+  const pageIndices = getCurrentPageIndicesWithState(st);
+  
+  const tableWrapper = document.createElement('div');
+  tableWrapper.className = 'relation-table-wrapper';
+  
+  const table = document.createElement('table');
+  table.className = 'relation-table';
+  if (!st.rel_options.editable) {
+    table.classList.add('relation-table-readonly');
+  }
+  
+  // Header
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  
+  // Selection checkbox column
+  const selectTh = document.createElement('th');
+  selectTh.className = 'relation-th-select';
+  selectTh.innerHTML = `<input type="checkbox" class="select-all-checkbox" />`;
+  headerRow.appendChild(selectTh);
+  
+  // Operations column header
+  const opsTh = document.createElement('th');
+  opsTh.className = 'relation-th-ops';
+  opsTh.textContent = '';
+  headerRow.appendChild(opsTh);
+  
+  // Index column
+  const indexTh = document.createElement('th');
+  indexTh.textContent = '#';
+  indexTh.className = 'relation-th-index';
+  headerRow.appendChild(indexTh);
+  
+  // Data columns (skip grouped columns)
   st.columnNames.forEach((name, idx) => {
-    const sortInfo = getSortCriteria(st).find(s => s.column === idx);
-    const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
-    theadHtml += `<th data-col="${idx}" class="sortable-th">${escapeHtml(name)}${sortIcon}</th>`;
-  });
-  theadHtml += '</tr>';
-  thead.innerHTML = theadHtml;
-  
-  // Render table body
-  const tbody = tableWrapper.querySelector('tbody');
-  let tbodyHtml = '';
-  pageIndices.forEach(rowIdx => {
-    const row = st.relation.items[rowIdx];
-    tbodyHtml += `<tr data-row="${rowIdx}">`;
-    st.columnNames.forEach((colName, colIdx) => {
-      const val = row[colIdx];
-      const type = st.columnTypes[colIdx];
-      const display = formatCellValueForInstance(val, type, st.options, colName);
-      const dataAttr = type === 'relation' ? ` data-row="${rowIdx}" data-col="${colIdx}" data-type="relation"` : '';
-      tbodyHtml += `<td data-col="${colIdx}"${dataAttr}>${display}</td>`;
-    });
-    tbodyHtml += '</tr>';
-  });
-  tbody.innerHTML = tbodyHtml;
-  
-  // Render pagination
-  const pagination = tableWrapper.querySelector('.pagination');
-  if (totalPages > 1) {
-    pagination.innerHTML = `
-      <button class="btn btn-sm page-btn" data-action="first" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
-      <button class="btn btn-sm page-btn" data-action="prev" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>‹</button>
-      <span class="page-info">Página ${getCurrentPage(st)} de ${totalPages}</span>
-      <button class="btn btn-sm page-btn" data-action="next" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>›</button>
-      <button class="btn btn-sm page-btn" data-action="last" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
+    if (getGroupByColumns(st).includes(idx)) return;
+    
+    const th = document.createElement('th');
+    th.className = 'relation-th-sortable';
+    th.dataset.col = idx;
+    const type = st.columnTypes[idx];
+    const sortIndicator = getSortIndicatorWithState(st, idx);
+    const filterActive = getFilters(st)[idx] ? ' filter-active' : '';
+    const colSelected = getSelectedColumns(st).has(idx) ? ' col-selected' : '';
+    const filterIcon = getFilters(st)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
+    th.innerHTML = `
+      <div class="relation-th-content${filterActive}${colSelected}">
+        <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
+        <span class="relation-col-type">${type}</span>
+      </div>
     `;
+    headerRow.appendChild(th);
+  });
+  
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  
+  // Body
+  const tbody = document.createElement('tbody');
+  
+  pageIndices.forEach((rowIdx) => {
+    const row = st.relation.items[rowIdx];
+    const tr = document.createElement('tr');
+    tr.dataset.rowIdx = rowIdx;
+    
+    if (getSelectedRows(st).has(rowIdx)) {
+      tr.classList.add('row-selected');
+    }
+    
+    // Selection checkbox
+    const selectTd = document.createElement('td');
+    selectTd.className = 'relation-td-select';
+    const selectCheckbox = document.createElement('input');
+    selectCheckbox.type = 'checkbox';
+    selectCheckbox.checked = getSelectedRows(st).has(rowIdx);
+    selectCheckbox.dataset.rowIdx = rowIdx;
+    selectCheckbox.className = 'row-select-checkbox';
+    selectTd.appendChild(selectCheckbox);
+    tr.appendChild(selectTd);
+    
+    // Operations button
+    const opsTd = document.createElement('td');
+    opsTd.className = 'relation-td-ops';
+    opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
+    tr.appendChild(opsTd);
+    
+    // Index
+    const indexTd = document.createElement('td');
+    indexTd.textContent = rowIdx + 1;
+    indexTd.className = 'relation-td-index';
+    tr.appendChild(indexTd);
+    
+    // Data cells (skip grouped columns)
+    row.forEach((value, colIdx) => {
+      if (getGroupByColumns(st).includes(colIdx)) return;
+      
+      const td = document.createElement('td');
+      const type = st.columnTypes[colIdx];
+      td.appendChild(createInputForTypeWithState(st, type, value, rowIdx, colIdx, st.rel_options.editable));
+      applyConditionalFormattingWithState(st, value, colIdx, td, rowIdx);
+      tr.appendChild(td);
+    });
+    
+    tbody.appendChild(tr);
+  });
+  
+  table.appendChild(tbody);
+  tableWrapper.appendChild(table);
+  container.appendChild(tableWrapper);
+  
+  // Footer table with stats
+  const footerWrapper = document.createElement('div');
+  footerWrapper.className = 'relation-footer-wrapper';
+  
+  const footerTable = document.createElement('table');
+  footerTable.className = 'relation-table relation-footer-table';
+  
+  const tfoot = document.createElement('tfoot');
+  const footerRow = document.createElement('tr');
+  
+  footerRow.appendChild(document.createElement('td')); // Select column
+  footerRow.appendChild(document.createElement('td')); // Operations column
+  footerRow.appendChild(document.createElement('td')); // Index column
+  
+  st.columnNames.forEach((_, colIdx) => {
+    if (getGroupByColumns(st).includes(colIdx)) return;
+    
+    const td = document.createElement('td');
+    td.className = 'relation-td-stats';
+    td.innerHTML = `<button class="btn-stats" data-col="${colIdx}" title="Statistics">Σ</button>`;
+    footerRow.appendChild(td);
+  });
+  
+  tfoot.appendChild(footerRow);
+  footerTable.appendChild(tfoot);
+  footerWrapper.appendChild(footerTable);
+  container.appendChild(footerWrapper);
+  
+  // Sync column widths
+  syncFooterColumnWidths(table, footerTable);
+  
+  // Pagination
+  const paginationDiv = document.createElement('div');
+  paginationDiv.className = 'relation-pagination';
+  container.appendChild(paginationDiv);
+  renderPaginationWithState(st, paginationDiv);
+  
+  // Update header checkbox state
+  updateHeaderCheckboxWithState(st, container);
+  
+  // Attach event listeners
+  attachTableEventListenersWithState(st, container);
+  
+  // Re-add resize handle
+  if (existingHandle) {
+    container.appendChild(existingHandle);
   } else {
-    pagination.innerHTML = '';
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'resize-handle';
+    resizeHandle.dataset.testid = 'resize-handle';
+    container.appendChild(resizeHandle);
+  }
+}
+
+// Helper functions for renderTableWithState
+function applyFiltersWithState(st) {
+  const filters = getFilters(st);
+  let indices = [...Array(st.relation.items.length).keys()];
+  
+  // Apply group filtering first
+  if (getGroupByColumns(st).length > 0) {
+    const selectedValues = getGroupBySelectedValues(st);
+    indices = indices.filter(idx => {
+      const row = st.relation.items[idx];
+      for (const colIdx of getGroupByColumns(st)) {
+        if (selectedValues[colIdx] !== undefined) {
+          const rowValue = row[colIdx];
+          const selectedValue = selectedValues[colIdx];
+          if (selectedValue === null) {
+            if (rowValue !== null) return false;
+          } else if (String(rowValue) !== String(selectedValue)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    });
   }
   
-  // Add event listeners
-  tableHeader.querySelector('.page-size-select')?.addEventListener('change', (e) => {
-    setPageSize(st, e.target.value === 'all' ? 'all' : parseInt(e.target.value));
-    setCurrentPage(st, 1);
-    renderTableForInstance(st);
-  });
+  // Apply column filters
+  for (const colIdx in filters) {
+    const filter = filters[colIdx];
+    if (!filter) continue;
+    
+    const col = parseInt(colIdx);
+    
+    if (filter.type === 'values') {
+      const allowedValues = new Set(filter.values);
+      indices = indices.filter(idx => {
+        const val = st.relation.items[idx][col];
+        const strVal = val === null ? '__null__' : String(val);
+        return allowedValues.has(strVal);
+      });
+    } else if (filter.type === 'condition') {
+      indices = indices.filter(idx => {
+        const val = st.relation.items[idx][col];
+        return evaluateCondition(val, filter.operator, filter.value, filter.caseSensitive);
+      });
+    } else if (filter.type === 'topN') {
+      const colValues = indices.map(idx => ({
+        idx,
+        value: st.relation.items[idx][col]
+      })).filter(item => item.value !== null && item.value !== undefined);
+      
+      colValues.sort((a, b) => {
+        const cmp = compareValues(a.value, b.value, st.columnTypes[col]);
+        return filter.direction === 'top' ? -cmp : cmp;
+      });
+      
+      const topIndices = new Set(colValues.slice(0, filter.n).map(item => item.idx));
+      indices = indices.filter(idx => topIndices.has(idx));
+    } else if (filter.type === 'indices') {
+      const allowedIndices = filter.indices instanceof Set ? filter.indices : new Set(filter.indices);
+      indices = indices.filter(idx => allowedIndices.has(idx));
+    }
+  }
   
-  thead.querySelectorAll('.sortable-th').forEach(th => {
-    th.style.cursor = 'pointer';
+  setFilteredIndices(st, indices);
+}
+
+function applySortingWithState(st) {
+  const criteria = getSortCriteria(st);
+  if (criteria.length === 0) {
+    setSortedIndices(st, [...getFilteredIndices(st)]);
+    return;
+  }
+  
+  const sorted = [...getFilteredIndices(st)];
+  sorted.sort((a, b) => {
+    for (const { column, direction } of criteria) {
+      const valA = st.relation.items[a][column];
+      const valB = st.relation.items[b][column];
+      const cmp = compareValues(valA, valB, st.columnTypes[column]);
+      if (cmp !== 0) {
+        return direction === 'asc' ? cmp : -cmp;
+      }
+    }
+    return 0;
+  });
+  setSortedIndices(st, sorted);
+}
+
+function getCurrentPageIndicesWithState(st) {
+  const indices = getSortedIndices(st);
+  const pageSize = getPageSize(st);
+  const currentPage = getCurrentPage(st);
+  
+  if (pageSize === 'all') return indices;
+  
+  const startIdx = (currentPage - 1) * pageSize;
+  return indices.slice(startIdx, startIdx + pageSize);
+}
+
+function getSortIndicatorWithState(st, colIdx) {
+  const criteria = getSortCriteria(st);
+  const sortInfo = criteria.find(c => c.column === colIdx);
+  if (!sortInfo) return '';
+  
+  const position = criteria.findIndex(c => c.column === colIdx) + 1;
+  const arrow = sortInfo.direction === 'asc' ? '▲' : '▼';
+  return criteria.length > 1 ? ` <span class="sort-indicator">${arrow}<sub>${position}</sub></span>` : ` <span class="sort-indicator">${arrow}</span>`;
+}
+
+function updateHeaderCheckboxWithState(st, container) {
+  const headerCheckbox = container.querySelector('.select-all-checkbox');
+  if (!headerCheckbox) return;
+  
+  const pageIndices = getCurrentPageIndicesWithState(st);
+  const selectedOnPage = pageIndices.filter(idx => getSelectedRows(st).has(idx)).length;
+  
+  if (selectedOnPage === 0) {
+    headerCheckbox.checked = false;
+    headerCheckbox.indeterminate = false;
+  } else if (selectedOnPage === pageIndices.length) {
+    headerCheckbox.checked = true;
+    headerCheckbox.indeterminate = false;
+  } else {
+    headerCheckbox.checked = false;
+    headerCheckbox.indeterminate = true;
+  }
+}
+
+function renderPaginationWithState(st, paginationDiv) {
+  const totalItems = getSortedIndices(st).length;
+  const pageSize = getPageSize(st);
+  const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
+  const selectedCount = getSelectedRows(st).size;
+  
+  paginationDiv.innerHTML = `
+    <span class="pagination-info">${totalItems} rows</span>
+    <span class="pagination-selected">${selectedCount} selected</span>
+    <select class="page-size-select">
+      <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
+      <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
+      <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+      <option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option>
+      <option value="all" ${pageSize === 'all' ? 'selected' : ''}>All</option>
+    </select>
+    <button class="btn btn-sm page-btn" data-action="first" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
+    <button class="btn btn-sm page-btn" data-action="prev" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>‹</button>
+    <span class="page-info">Página ${getCurrentPage(st)} de ${totalPages}</span>
+    <button class="btn btn-sm page-btn" data-action="next" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>›</button>
+    <button class="btn btn-sm page-btn" data-action="last" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
+  `;
+}
+
+function createInputForTypeWithState(st, type, value, rowIdx, colIdx, editable) {
+  const colName = st.columnNames[colIdx];
+  const options = st.options;
+  
+  // Reuse the existing createInputForType logic but with st context
+  return createInputForType(type, value, rowIdx, colIdx, editable);
+}
+
+function applyConditionalFormattingWithState(st, value, colIdx, td, rowIdx) {
+  const formatting = getFormatting(st);
+  if (!formatting[colIdx]) return;
+  
+  const rules = formatting[colIdx];
+  for (const rule of rules) {
+    if (evaluateCondition(value, rule.operator, rule.value)) {
+      td.style.backgroundColor = rule.bgColor || '';
+      td.style.color = rule.textColor || '';
+      break;
+    }
+  }
+}
+
+function attachTableEventListenersWithState(st, container) {
+  const totalItems = getSortedIndices(st).length;
+  const pageSize = getPageSize(st);
+  const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
+  
+  // Header click for sorting
+  container.querySelectorAll('.relation-th-sortable').forEach(th => {
     th.addEventListener('click', (e) => {
       const colIdx = parseInt(th.dataset.col);
-      const existing = getSortCriteria(st).findIndex(s => s.column === colIdx);
-      if (existing >= 0) {
-        if (getSortCriteria(st)[existing].direction === 'asc') {
-          getSortCriteria(st)[existing].direction = 'desc';
+      if (e.ctrlKey || e.metaKey) {
+        if (getSelectedColumns(st).has(colIdx)) {
+          getSelectedColumns(st).delete(colIdx);
         } else {
-          getSortCriteria(st).splice(existing, 1);
+          getSelectedColumns(st).add(colIdx);
         }
+        renderTableWithState(st);
       } else {
-        if (!e.shiftKey) setSortCriteria(st, []);
-        getSortCriteria(st).push({ column: colIdx, direction: 'asc' });
+        handleSortWithState(st, colIdx, e.shiftKey);
       }
-      renderTableForInstance(st);
+    });
+    
+    th.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const colIdx = parseInt(th.dataset.col);
+      showColumnMenuForInstance(st, colIdx, e.clientX, e.clientY);
     });
   });
   
-  pagination.querySelectorAll('.page-btn').forEach(btn => {
+  // Select all checkbox
+  container.querySelector('.select-all-checkbox')?.addEventListener('click', () => {
+    toggleSelectAllWithState(st, container);
+  });
+  
+  // Row selection
+  container.querySelectorAll('.row-select-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      const rowIdx = parseInt(e.target.dataset.rowIdx);
+      if (e.target.checked) {
+        getSelectedRows(st).add(rowIdx);
+      } else {
+        getSelectedRows(st).delete(rowIdx);
+      }
+      updateHeaderCheckboxWithState(st, container);
+      renderPaginationWithState(st, container.querySelector('.relation-pagination'));
+      e.target.closest('tr').classList.toggle('row-selected', e.target.checked);
+    });
+  });
+  
+  // Statistics buttons
+  container.querySelectorAll('.btn-stats').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const colIdx = parseInt(e.target.dataset.col);
+      showStatisticsPanelForInstance(st, colIdx);
+    });
+  });
+  
+  // Page size change
+  container.querySelector('.page-size-select')?.addEventListener('change', (e) => {
+    const newSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
+    setPageSize(st, newSize);
+    setCurrentPage(st, 1);
+    renderTableWithState(st);
+  });
+  
+  // Pagination buttons
+  container.querySelectorAll('.page-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
       if (action === 'first') setCurrentPage(st, 1);
       else if (action === 'prev') setCurrentPage(st, Math.max(1, getCurrentPage(st) - 1));
       else if (action === 'next') setCurrentPage(st, Math.min(totalPages, getCurrentPage(st) + 1));
       else if (action === 'last') setCurrentPage(st, totalPages);
-      renderTableForInstance(st);
+      renderTableWithState(st);
     });
   });
   
-  // Relation cell clicks
-  tbody.querySelectorAll('[data-type="relation"]').forEach(td => {
-    td.style.cursor = 'pointer';
-    td.addEventListener('click', () => {
-      const rowIdx = parseInt(td.dataset.row);
-      const colIdx = parseInt(td.dataset.col);
-      const nestedRel = st.relation.items[rowIdx][colIdx];
-      if (nestedRel && nestedRel.columns) {
-        showNestedRelationDialogFromData(nestedRel);
-      }
+  // Cell editing
+  container.addEventListener('change', (e) => {
+    if (e.target.matches('.relation-input, .relation-textarea, .relation-select')) {
+      updateRelationFromInputWithState(st, e.target);
+    }
+  });
+  
+  // Row operations button
+  container.querySelectorAll('.btn-row-ops').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const rowIdx = parseInt(btn.dataset.row);
+      showRowMenuForInstance(st, rowIdx, e.clientX, e.clientY);
     });
   });
 }
 
-// Render cards for a specific instance
-function renderCardsForInstance(st) {
+function handleSortWithState(st, colIdx, addToExisting) {
+  const criteria = getSortCriteria(st);
+  const existingIdx = criteria.findIndex(c => c.column === colIdx);
+  
+  if (existingIdx >= 0) {
+    const existing = criteria[existingIdx];
+    if (existing.direction === 'asc') {
+      existing.direction = 'desc';
+    } else {
+      criteria.splice(existingIdx, 1);
+    }
+  } else {
+    if (!addToExisting) {
+      setSortCriteria(st, []);
+    }
+    getSortCriteria(st).push({ column: colIdx, direction: 'asc' });
+  }
+  
+  renderTableWithState(st);
+}
+
+function toggleSelectAllWithState(st, container) {
+  const pageIndices = getCurrentPageIndicesWithState(st);
+  const allSelected = pageIndices.every(idx => getSelectedRows(st).has(idx));
+  
+  if (allSelected) {
+    pageIndices.forEach(idx => getSelectedRows(st).delete(idx));
+  } else {
+    pageIndices.forEach(idx => getSelectedRows(st).add(idx));
+  }
+  
+  renderTableWithState(st);
+}
+
+function updateRelationFromInputWithState(st, input) {
+  const rowIdx = parseInt(input.dataset.row);
+  const colIdx = parseInt(input.dataset.col);
+  const type = st.columnTypes[colIdx];
+  
+  let value;
+  if (type === 'boolean') {
+    if (input.indeterminate) value = null;
+    else value = input.checked;
+  } else if (type === 'int') {
+    value = input.value === '' ? null : parseInt(input.value);
+  } else if (type === 'float') {
+    value = input.value === '' ? null : parseFloat(input.value);
+  } else {
+    value = input.value === '' ? null : input.value;
+  }
+  
+  st.relation.items[rowIdx][colIdx] = value;
+}
+
+function showColumnMenuForInstance(st, colIdx, x, y) {
+  closeAllMenus();
+  
+  const menu = document.createElement('div');
+  menu.className = 'column-menu';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  
+  const type = st.columnTypes[colIdx];
+  const name = st.columnNames[colIdx];
+  
+  menu.innerHTML = `
+    <div class="column-menu-header">${name} (${type})</div>
+    <div class="column-menu-item" data-action="sort-asc">Sort Ascending</div>
+    <div class="column-menu-item" data-action="sort-desc">Sort Descending</div>
+    <div class="column-menu-separator"></div>
+    <div class="column-menu-item" data-action="filter">Filter...</div>
+    <div class="column-menu-item" data-action="clear-filter" ${!getFilters(st)[colIdx] ? 'style="display:none"' : ''}>Clear Filter</div>
+  `;
+  
+  document.body.appendChild(menu);
+  adjustMenuPosition(menu);
+  
+  menu.querySelectorAll('.column-menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const action = item.dataset.action;
+      if (action === 'sort-asc') {
+        setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
+        renderTableWithState(st);
+      } else if (action === 'sort-desc') {
+        setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
+        renderTableWithState(st);
+      } else if (action === 'clear-filter') {
+        delete getFilters(st)[colIdx];
+        setCurrentPage(st, 1);
+        renderTableWithState(st);
+      }
+      menu.remove();
+    });
+  });
+  
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 10);
+}
+
+function showRowMenuForInstance(st, rowIdx, x, y) {
+  closeAllMenus();
+  
+  const menu = document.createElement('div');
+  menu.className = 'column-menu';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  
+  menu.innerHTML = `
+    <div class="column-menu-header">Row ${rowIdx + 1}</div>
+    <div class="column-menu-item" data-action="select">Select Row</div>
+    <div class="column-menu-item" data-action="deselect">Deselect Row</div>
+  `;
+  
+  document.body.appendChild(menu);
+  adjustMenuPosition(menu);
+  
+  menu.querySelectorAll('.column-menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const action = item.dataset.action;
+      if (action === 'select') {
+        getSelectedRows(st).add(rowIdx);
+      } else if (action === 'deselect') {
+        getSelectedRows(st).delete(rowIdx);
+      }
+      renderTableWithState(st);
+      menu.remove();
+    });
+  });
+  
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 10);
+}
+
+function showStatisticsPanelForInstance(st, colIdx) {
+  // Use the global statistics panel function but with instance data
+  const type = st.columnTypes[colIdx];
+  const name = st.columnNames[colIdx];
+  const values = getFilteredIndices(st).map(idx => st.relation.items[idx][colIdx]).filter(v => v !== null && v !== undefined);
+  
+  // Create a simple stats popup
+  const popup = document.createElement('div');
+  popup.className = 'stats-popup';
+  popup.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; z-index: 1000; min-width: 200px;';
+  
+  let statsHtml = `<h4 style="margin-bottom: 0.5rem;">${name} Statistics</h4>`;
+  statsHtml += `<p>Count: ${values.length}</p>`;
+  
+  if (['int', 'float'].includes(type) && values.length > 0) {
+    const numValues = values.map(Number).filter(n => !isNaN(n));
+    if (numValues.length > 0) {
+      const sum = numValues.reduce((a, b) => a + b, 0);
+      const mean = sum / numValues.length;
+      const min = Math.min(...numValues);
+      const max = Math.max(...numValues);
+      statsHtml += `<p>Min: ${min.toFixed(2)}</p>`;
+      statsHtml += `<p>Max: ${max.toFixed(2)}</p>`;
+      statsHtml += `<p>Mean: ${mean.toFixed(2)}</p>`;
+    }
+  }
+  
+  statsHtml += `<button class="btn btn-sm" onclick="this.parentElement.remove()">Close</button>`;
+  popup.innerHTML = statsHtml;
+  
+  document.body.appendChild(popup);
+}
+
+// Render cards for a specific instance - uses same CSS classes as main cards view
+function renderCardsWithState(st) {
   const container = st.container;
   const cardsWrapper = container.querySelector('.cards-view-wrapper');
   if (!cardsWrapper || !st.relation) return;
@@ -8221,35 +8744,46 @@ function renderCardsForInstance(st) {
   const cardsContent = cardsWrapper.querySelector('.cards-content');
   const cardsNav = cardsWrapper.querySelector('.cards-navigation');
   
-  const indices = getSortedIndices(st).length > 0 ? getSortedIndices(st) : [...Array(st.relation.items.length).keys()];
+  // Ensure indices are populated
+  if (getSortedIndices(st).length === 0 && getFilteredIndices(st).length === 0) {
+    setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+    setSortedIndices(st, [...getFilteredIndices(st)]);
+  }
+  
+  const indices = getSortedIndices(st).length > 0 ? getSortedIndices(st) : getFilteredIndices(st);
   const totalItems = indices.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / getCardsPageSize(st)));
   const startIdx = (getCardsCurrentPage(st) - 1) * getCardsPageSize(st);
   const pageIndices = indices.slice(startIdx, startIdx + getCardsPageSize(st));
   
-  let html = '<div class="instance-cards-grid">';
+  // Use the same data-cards-grid class as main view
+  let html = '<div class="data-cards-grid">';
   pageIndices.forEach(rowIdx => {
     const row = st.relation.items[rowIdx];
-    html += `<div class="instance-card" data-row="${rowIdx}">`;
-    html += `<div class="instance-card-header">#${rowIdx + 1}</div>`;
-    html += '<div class="instance-card-body">';
+    const isSelected = getSelectedRows(st).has(rowIdx);
+    
+    html += `<div class="data-card ${isSelected ? 'card-selected' : ''}" data-row-idx="${rowIdx}">`;
+    html += `<input type="checkbox" class="data-card-checkbox" ${isSelected ? 'checked' : ''} data-row-idx="${rowIdx}">`;
+    html += `<span class="card-id">#${rowIdx + 1}</span>`;
+    
     st.columnNames.forEach((colName, colIdx) => {
       const value = row[colIdx];
       const type = st.columnTypes[colIdx];
-      let tooltipValue = value !== null && value !== undefined ? String(value) : '';
-      if (type === 'select' && st.options[colName] && st.options[colName][value]) {
-        tooltipValue = st.options[colName][value];
-      }
       const displayValue = formatCellValueForInstance(value, type, st.options, colName);
-      html += `<div class="instance-card-field" title="${escapeHtml(colName)}: ${escapeHtml(tooltipValue)}">${displayValue}</div>`;
+      html += `<div class="card-field"><span class="card-field-label">${escapeHtml(colName)}:</span> ${displayValue}</div>`;
     });
-    html += '</div></div>';
+    
+    html += '</div>';
   });
   html += '</div>';
   cardsContent.innerHTML = html;
   
-  // Navigation
-  let navHtml = `<span class="cards-info">${totalItems} rows</span>`;
+  // Navigation with selection info
+  const selectedCount = getSelectedRows(st).size;
+  let navHtml = `
+    <span class="cards-info">${totalItems} total</span>
+    <span class="cards-info-selected">${selectedCount} selected</span>
+  `;
   if (totalPages > 1) {
     navHtml += `
       <button class="btn btn-sm cards-page-btn" data-action="first" ${getCardsCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
@@ -8259,8 +8793,37 @@ function renderCardsForInstance(st) {
       <button class="btn btn-sm cards-page-btn" data-action="last" ${getCardsCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
     `;
   }
+  navHtml += `
+    <select class="cards-page-size-select">
+      <option value="12" ${getCardsPageSize(st) === 12 ? 'selected' : ''}>12 cards</option>
+      <option value="24" ${getCardsPageSize(st) === 24 ? 'selected' : ''}>24 cards</option>
+      <option value="48" ${getCardsPageSize(st) === 48 ? 'selected' : ''}>48 cards</option>
+    </select>
+  `;
   cardsNav.innerHTML = navHtml;
   
+  // Card selection
+  cardsContent.querySelectorAll('.data-card-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      const rowIdx = parseInt(e.target.dataset.rowIdx);
+      if (e.target.checked) {
+        getSelectedRows(st).add(rowIdx);
+      } else {
+        getSelectedRows(st).delete(rowIdx);
+      }
+      e.target.closest('.data-card').classList.toggle('card-selected', e.target.checked);
+      cardsNav.querySelector('.cards-info-selected').textContent = `${getSelectedRows(st).size} selected`;
+    });
+  });
+  
+  // Page size change
+  cardsNav.querySelector('.cards-page-size-select')?.addEventListener('change', (e) => {
+    setCardsPageSize(st, parseInt(e.target.value));
+    setCardsCurrentPage(st, 1);
+    renderCardsWithState(st);
+  });
+  
+  // Navigation buttons
   cardsNav.querySelectorAll('.cards-page-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
@@ -8268,9 +8831,116 @@ function renderCardsForInstance(st) {
       else if (action === 'prev') setCardsCurrentPage(st, Math.max(1, getCardsCurrentPage(st) - 1));
       else if (action === 'next') setCardsCurrentPage(st, Math.min(totalPages, getCardsCurrentPage(st) + 1));
       else if (action === 'last') setCardsCurrentPage(st, totalPages);
-      renderCardsForInstance(st);
+      renderCardsWithState(st);
     });
   });
+}
+
+// Render pivot for a specific instance
+function renderPivotWithState(st) {
+  const container = st.container;
+  const pivotWrapper = container.querySelector('.view-pivot');
+  if (!pivotWrapper || !st.relation) return;
+  
+  const pivotConfig = pivotWrapper.querySelector('.pivot-config');
+  const pivotContainer = pivotWrapper.querySelector('.pivot-table-container');
+  
+  // Populate row and column selects
+  const rowsSelect = pivotConfig.querySelector('.pivot-rows');
+  const colsSelect = pivotConfig.querySelector('.pivot-cols');
+  
+  let optionsHtml = '<option value="">-- Select --</option>';
+  st.columnNames.forEach((name, idx) => {
+    optionsHtml += `<option value="${idx}">${escapeHtml(name)}</option>`;
+  });
+  
+  rowsSelect.innerHTML = optionsHtml;
+  colsSelect.innerHTML = optionsHtml;
+  
+  // Set current values if any
+  const pivotCfg = getPivotConfig(st);
+  if (pivotCfg.rowColumn !== null) rowsSelect.value = pivotCfg.rowColumn;
+  if (pivotCfg.colColumn !== null) colsSelect.value = pivotCfg.colColumn;
+  
+  // Add event listeners
+  rowsSelect.addEventListener('change', (e) => {
+    pivotCfg.rowColumn = e.target.value === '' ? null : parseInt(e.target.value);
+  });
+  
+  colsSelect.addEventListener('change', (e) => {
+    pivotCfg.colColumn = e.target.value === '' ? null : parseInt(e.target.value);
+  });
+  
+  // Generate pivot button
+  pivotConfig.querySelector('.btn-generate-pivot')?.addEventListener('click', () => {
+    generatePivotTableForInstance(st, pivotContainer);
+  });
+}
+
+function generatePivotTableForInstance(st, pivotContainer) {
+  const pivotCfg = getPivotConfig(st);
+  if (pivotCfg.rowColumn === null || pivotCfg.colColumn === null) {
+    pivotContainer.innerHTML = '<p class="text-muted-foreground">Please select both row and column dimensions.</p>';
+    return;
+  }
+  
+  const rowCol = pivotCfg.rowColumn;
+  const colCol = pivotCfg.colColumn;
+  
+  // Get unique values for rows and columns
+  const rowValues = new Set();
+  const colValues = new Set();
+  const data = {};
+  
+  getFilteredIndices(st).forEach(idx => {
+    const row = st.relation.items[idx];
+    const rowVal = row[rowCol] ?? '(null)';
+    const colVal = row[colCol] ?? '(null)';
+    
+    rowValues.add(rowVal);
+    colValues.add(colVal);
+    
+    if (!data[rowVal]) data[rowVal] = {};
+    if (!data[rowVal][colVal]) data[rowVal][colVal] = 0;
+    data[rowVal][colVal]++;
+  });
+  
+  const rowArr = Array.from(rowValues).sort();
+  const colArr = Array.from(colValues).sort();
+  
+  // Build table
+  let html = '<table class="pivot-table"><thead><tr><th></th>';
+  colArr.forEach(c => {
+    html += `<th>${escapeHtml(String(c))}</th>`;
+  });
+  html += '<th>Total</th></tr></thead><tbody>';
+  
+  rowArr.forEach(r => {
+    html += `<tr><th>${escapeHtml(String(r))}</th>`;
+    let rowTotal = 0;
+    colArr.forEach(c => {
+      const count = data[r]?.[c] || 0;
+      rowTotal += count;
+      html += `<td>${count}</td>`;
+    });
+    html += `<td class="pivot-total">${rowTotal}</td></tr>`;
+  });
+  
+  // Grand totals row
+  html += '<tr class="pivot-grand-total"><th>Total</th>';
+  let grandTotal = 0;
+  colArr.forEach(c => {
+    let colTotal = 0;
+    rowArr.forEach(r => {
+      colTotal += data[r]?.[c] || 0;
+    });
+    grandTotal += colTotal;
+    html += `<td>${colTotal}</td>`;
+  });
+  html += `<td>${grandTotal}</td></tr>`;
+  
+  html += '</tbody></table>';
+  pivotContainer.innerHTML = html;
 }
 
 // Format cell value for instance (uses passed options)
