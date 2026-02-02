@@ -803,8 +803,9 @@ input[type="number"] {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  width: 360px;
-  max-height: 80vh;
+  width: 680px;
+  max-width: 90vw;
+  max-height: 85vh;
   z-index: 1001;
   display: flex;
   flex-direction: column;
@@ -2217,6 +2218,59 @@ input[type="number"] {
 .try-alt-btn {
   font-size: 0.75rem;
   padding: var(--space-1) var(--space-2);
+}
+
+.stats-explanations {
+  border-top: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  background: var(--slate-50);
+}
+
+.stats-explanations details {
+  margin: 0;
+}
+
+.stats-explanations summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  padding: var(--space-1) 0;
+}
+
+.stats-explanations summary:hover {
+  text-decoration: underline;
+}
+
+.stats-definitions {
+  margin: var(--space-2) 0 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.stats-definitions dt {
+  font-weight: 600;
+  color: var(--foreground);
+  font-size: 0.75rem;
+  padding: var(--space-1) var(--space-2);
+  background: var(--slate-100);
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-definitions dd {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  padding: var(--space-1) var(--space-2);
+  line-height: 1.4;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-definitions dt:nth-of-type(odd),
+.stats-definitions dd:nth-of-type(odd) {
+  background: var(--card);
 }
 
 .normality-conclusion.norm-fail {

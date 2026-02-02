@@ -713,6 +713,61 @@ function generateBooleanFrequencyTableHTML(stats) {
 }
 
 // Box Plot SVG Generator
+function generateStatsExplanationsHTML(type) {
+  let explanations = [];
+  
+  // Common explanations
+  explanations.push({ term: 'Total Records', def: 'Total number of rows in the dataset.' });
+  explanations.push({ term: 'Non-null / Null', def: 'Count of rows with/without values. Nulls may indicate missing data.' });
+  
+  if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' || type === 'relation') {
+    explanations.push({ term: 'Min / Max', def: 'Smallest and largest values in the data.' });
+    explanations.push({ term: 'Range', def: 'Difference between maximum and minimum values.' });
+    explanations.push({ term: 'Mean (μ)', def: 'Arithmetic average: sum of all values divided by count. Sensitive to outliers.' });
+    explanations.push({ term: 'Median', def: 'Middle value when data is sorted. 50% of values are below, 50% above. Robust to outliers.' });
+    explanations.push({ term: 'Mode', def: 'Most frequently occurring value(s). A dataset can have multiple modes.' });
+    explanations.push({ term: 'Std Dev (σ)', def: 'Standard deviation measures how spread out values are from the mean. Low σ = values clustered near mean.' });
+    explanations.push({ term: 'Variance (σ²)', def: 'Square of standard deviation. Same interpretation but in squared units.' });
+    explanations.push({ term: 'Q1 (25%)', def: 'First quartile: 25% of values are below this point.' });
+    explanations.push({ term: 'Q3 (75%)', def: 'Third quartile: 75% of values are below this point.' });
+    explanations.push({ term: 'IQR', def: 'Interquartile range (Q3-Q1). Contains the middle 50% of values. Used to detect outliers.' });
+    explanations.push({ term: 'Outliers', def: 'Values below Q1-1.5×IQR or above Q3+1.5×IQR. Unusual but not extreme.' });
+    explanations.push({ term: 'Far Outliers', def: 'Values below Q1-3×IQR or above Q3+3×IQR. Potentially erroneous or exceptional data.' });
+    explanations.push({ term: 'Skewness', def: 'Measures asymmetry. Positive = tail extends right (more low values). Negative = tail extends left. Zero = symmetric.' });
+    explanations.push({ term: 'Kurtosis', def: 'Measures "tailedness". High = more outliers. Low = fewer outliers. Normal distribution has kurtosis ≈ 0.' });
+  }
+  
+  if (type === 'select' || type === 'boolean') {
+    explanations.push({ term: 'Categories', def: 'Number of unique values/options in the data.' });
+    explanations.push({ term: 'Mode', def: 'Most frequently occurring category.' });
+    explanations.push({ term: 'Mode Count', def: 'How many times the mode appears.' });
+    explanations.push({ term: 'Variation Ratio', def: 'Proportion of values that are NOT the mode. 0 = all same value. Higher = more dispersed.' });
+    explanations.push({ term: 'Entropy H(X)', def: 'Measures uncertainty/disorder. 0 = all values identical. Higher = more evenly distributed.' });
+    explanations.push({ term: 'Max Entropy', def: 'Maximum possible entropy if all categories were equally likely.' });
+    explanations.push({ term: 'Normalized Entropy', def: 'Entropy divided by max entropy. 0 to 1 scale. 1 = perfectly uniform distribution.' });
+    explanations.push({ term: 'Gini-Simpson', def: 'Probability that two random values are different. 0 = all same. Higher = more diverse.' });
+    explanations.push({ term: 'IQV', def: 'Index of Qualitative Variation. Normalized Gini-Simpson. 0 = no variation. 1 = maximum variation.' });
+  }
+  
+  if (type === 'string' || type === 'multilinestring') {
+    explanations.push({ term: 'Unique Values', def: 'Number of distinct text values.' });
+    explanations.push({ term: 'Length Statistics', def: 'Statistics based on character count of each text value.' });
+    if (type === 'multilinestring') {
+      explanations.push({ term: 'Line Statistics', def: 'Statistics based on number of lines in each text value.' });
+    }
+  }
+  
+  let html = '<div class="stats-explanations">';
+  html += '<details><summary>What do these values mean?</summary>';
+  html += '<dl class="stats-definitions">';
+  explanations.forEach(e => {
+    html += '<dt>' + e.term + '</dt><dd>' + e.def + '</dd>';
+  });
+  html += '</dl></details></div>';
+  
+  return html;
+}
+
 function generateBoxPlotSVG(stats) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
   
@@ -3765,12 +3820,16 @@ function showStatisticsPanel(colIdx) {
     `;
   }
   
+  // Add explanations section
+  const explanationsHtml = generateStatsExplanationsHTML(type);
+  
   panel.innerHTML = `
     <div class="stats-panel-header">
       <span>Statistics: ${name}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="stats-panel-content">${statsHtml}</div>
+    ${explanationsHtml}
   `;
   
   document.body.appendChild(panel);
