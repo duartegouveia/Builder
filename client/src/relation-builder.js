@@ -3030,7 +3030,8 @@ function showFilterValuesDialog(colIdx) {
     </div>
     <div class="filter-values-list"></div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline btn-danger" id="filter-clear">Clear Filter</button>
+      <button class="btn btn-outline" id="filter-clear">Clear Column Filter</button>
+      <button class="btn btn-outline" id="filter-clear-all">Clear All Filters</button>
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
     </div>
@@ -3043,6 +3044,12 @@ function showFilterValuesDialog(colIdx) {
   dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
   dialog.querySelector('#filter-clear').addEventListener('click', () => {
     delete state.filters[colIdx];
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
+  dialog.querySelector('#filter-clear-all').addEventListener('click', () => {
+    state.filters = {};
     state.currentPage = 1;
     dialog.remove();
     renderTable();
@@ -3126,7 +3133,8 @@ function showFilterComparisonDialog(colIdx) {
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline btn-danger" id="filter-clear">Clear Filter</button>
+      <button class="btn btn-outline" id="filter-clear">Clear Column Filter</button>
+      <button class="btn btn-outline" id="filter-clear-all">Clear All Filters</button>
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
     </div>
@@ -3141,6 +3149,12 @@ function showFilterComparisonDialog(colIdx) {
   
   dialog.querySelector('#filter-clear').addEventListener('click', () => {
     delete state.filters[colIdx];
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
+  dialog.querySelector('#filter-clear-all').addEventListener('click', () => {
+    state.filters = {};
     state.currentPage = 1;
     dialog.remove();
     renderTable();
@@ -3258,7 +3272,8 @@ function showFilterTextCriteriaDialog(colIdx) {
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline btn-danger" id="filter-clear">Clear Filter</button>
+      <button class="btn btn-outline" id="filter-clear">Clear Column Filter</button>
+      <button class="btn btn-outline" id="filter-clear-all">Clear All Filters</button>
       <button class="btn btn-outline" id="filter-cancel">Cancel</button>
       <button class="btn btn-primary" id="filter-apply">Apply</button>
     </div>
@@ -3274,6 +3289,12 @@ function showFilterTextCriteriaDialog(colIdx) {
   
   dialog.querySelector('#filter-clear').addEventListener('click', () => {
     delete state.filters[colIdx];
+    state.currentPage = 1;
+    dialog.remove();
+    renderTable();
+  });
+  dialog.querySelector('#filter-clear-all').addEventListener('click', () => {
+    state.filters = {};
     state.currentPage = 1;
     dialog.remove();
     renderTable();
