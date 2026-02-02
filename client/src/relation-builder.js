@@ -635,13 +635,13 @@ function generateBooleanHistogramSVG(stats) {
   const maxCount = Math.max(...data.map(d => d.count));
   
   const barHeight = 28;
-  const labelWidth = 60;
-  const barMaxWidth = 150;
-  const padding = { top: 10, bottom: 10, left: 10, right: 50 };
+  const labelWidth = 70;
+  const barMaxWidth = 200;
+  const padding = { top: 10, bottom: 10, left: 10, right: 120 };
   const width = labelWidth + barMaxWidth + padding.left + padding.right;
   const height = data.length * barHeight + padding.top + padding.bottom;
   
-  let svg = `<svg width="${width}" height="${height}" class="histogram-svg">`;
+  let svg = `<svg width="100%" viewBox="0 0 ${width} ${height}" class="histogram-svg" preserveAspectRatio="xMinYMin meet">`;
   
   data.forEach((item, i) => {
     const y = padding.top + i * barHeight;
