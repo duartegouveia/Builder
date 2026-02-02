@@ -98,7 +98,9 @@ A relation is a JSON object with:
 - `columns`: Object mapping column names to types (e.g., `{"id": "int", "name": "string"}`)
 - `items`: Array of arrays containing row data
 
-Supported column types: `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`, `relation`
+Supported column types: `id`, `boolean`, `string`, `multilinestring`, `int`, `float`, `date`, `datetime`, `time`, `relation`, `select`
+
+The `id` type is always the first column in every relation (including nested relations) and represents a unique identifier.
 
 ### Table Features
 1. **Pagination** - 20/50/100/all per page, first/prev/next/last navigation, direct page input
