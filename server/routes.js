@@ -54,10 +54,10 @@ Based on this data, answer the user's question. If the question asks to filter d
 If the question is asking for analysis or information, respond with:
 {
   "type": "answer",
-  "text": "Your analysis or answer here"
+  "text": "Your analysis or answer here in HTML format. Use <p>, <ul>, <li>, <strong>, <em>, <table>, <tr>, <th>, <td> tags for formatting."
 }
 
-Always respond with valid JSON.`;
+Always respond with valid JSON. For the "text" field, use HTML formatting to make the response readable.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4.1-mini",

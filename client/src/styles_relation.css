@@ -1334,7 +1334,6 @@ input[type="number"] {
 
 .ai-response {
   min-height: 60px;
-  max-height: 300px;
   overflow-y: auto;
   margin-bottom: var(--space-3);
   padding: var(--space-3);
@@ -1361,6 +1360,65 @@ input[type="number"] {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* AI Response HTML content styles */
+.ai-response p {
+  margin: 0 0 0.75em 0;
+}
+
+.ai-response p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-response ul,
+.ai-response ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.ai-response li {
+  margin: 0.25em 0;
+}
+
+.ai-response strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.ai-response em {
+  font-style: italic;
+}
+
+.ai-response table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.8125rem;
+}
+
+.ai-response th,
+.ai-response td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+.ai-response th {
+  background: var(--slate-100);
+  font-weight: 600;
+}
+
+.ai-response tr:nth-child(even) td {
+  background: var(--slate-50);
+}
+
+.ai-response code {
+  background: var(--slate-100);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.875em;
 }
 
 .ai-input-row {
