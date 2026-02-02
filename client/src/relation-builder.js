@@ -6377,6 +6377,67 @@ function renderPairDetail(container, xIdx, yIdx, method) {
   const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
   const isBinaryX = xType === 'boolean';
   const isBinaryY = yType === 'boolean';
+  const bothNumericOrTemporal = (isNumericX || isTemporalX) && (isNumericY || isTemporalY);
+  const bothBinary = isBinaryX && isBinaryY;
+  const oneBinaryOneNumeric = (isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX));
+  
+  // Create content container and alternatives container
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'pair-detail-content';
+  
+  const altDiv = document.createElement('div');
+  altDiv.className = 'pair-detail-alternatives';
+  
+  // Build alternative methods buttons based on column types
+  let altHtml = '<div class="try-alternatives-row"><span class="try-alt-label">Try alternative:</span>';
+  const alternatives = [];
+  
+  if (bothNumericOrTemporal) {
+    if (method !== 'pearson') alternatives.push({ id: 'pearson', label: 'Pearson' });
+    if (method !== 'spearman') alternatives.push({ id: 'spearman', label: 'Spearman' });
+    if (method !== 'kendall') alternatives.push({ id: 'kendall', label: "Kendall's τ" });
+  }
+  if (bothBinary && method !== 'phi') {
+    alternatives.push({ id: 'phi', label: 'Phi' });
+  }
+  if (oneBinaryOneNumeric && method !== 'pointbiserial') {
+    alternatives.push({ id: 'pointbiserial', label: 'Point-Biserial' });
+  }
+  if (method !== 'cramers') {
+    alternatives.push({ id: 'cramers', label: "Cramér's V" });
+  }
+  
+  alternatives.forEach(alt => {
+    altHtml += '<button class="btn btn-outline btn-sm try-alt-btn" data-method="' + alt.id + '">' + alt.label + '</button>';
+  });
+  altHtml += '</div>';
+  
+  if (alternatives.length > 0) {
+    altDiv.innerHTML = altHtml;
+  }
+  
+  container.innerHTML = '';
+  container.appendChild(contentDiv);
+  container.appendChild(altDiv);
+  
+  // Render the correlation content
+  renderPairContent(contentDiv, xIdx, yIdx, method);
+  
+  // Add event listeners to alternative buttons
+  altDiv.querySelectorAll('.try-alt-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const newMethod = this.dataset.method;
+      // Re-render with new method
+      renderPairDetail(container, xIdx, yIdx, newMethod);
+    });
+  });
+}
+
+function renderPairContent(container, xIdx, yIdx, method) {
+  const xType = state.columnTypes[xIdx];
+  const yType = state.columnTypes[yIdx];
+  const isBinaryX = xType === 'boolean';
+  const isBinaryY = yType === 'boolean';
   
   function toNumeric(val, type) {
     if (val === null) return null;

@@ -2191,6 +2191,34 @@ input[type="number"] {
   line-height: 1.5;
 }
 
+.pair-detail-content {
+  margin-bottom: var(--space-3);
+}
+
+.pair-detail-alternatives {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.try-alternatives-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.try-alt-label {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.try-alt-btn {
+  font-size: 0.75rem;
+  padding: var(--space-1) var(--space-2);
+}
+
 .normality-conclusion.norm-fail {
   background: #fef2f2;
   color: #991b1b;
