@@ -8319,38 +8319,30 @@ function init() {
     const result = parseRelation(textarea.value);
     
     if (result.success) {
-      state.relation = result.data;
-      state.columnNames = Object.keys(result.data.columns);
-      state.columnTypes = Object.values(result.data.columns);
-      state.options = result.data.options || {};
+      // Create or get the relation wrapper at the bottom of the page
+      let wrapper = document.querySelector('.relation-wrapper');
+      if (!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = 'relation-wrapper';
+        wrapper.innerHTML = `
+          <div class="relation-primary"></div>
+          <div class="relation-secondary"></div>
+        `;
+        // Append to the main app container
+        const appContainer = document.querySelector('#app .max-w-3xl');
+        if (appContainer) {
+          appContainer.appendChild(wrapper);
+        } else {
+          document.body.appendChild(wrapper);
+        }
+      }
       
-      // Parse rel_options with defaults
-      const parsedRelOptions = result.data.rel_options || {};
-      state.rel_options = {
-        editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
-        single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
-        general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
-      };
+      // Get the primary container for the relation
+      const primaryContainer = wrapper.querySelector('.relation-primary');
+      primaryContainer.innerHTML = ''; // Clear previous content
       
-      setCurrentPage(state, 1);
-      setSelectedRows(state, new Set());
-      setSortCriteria(state, []);
-      setFilters(state, {});
-      setFormatting(state, {});
-      setFilteredIndices(state, [...Array(result.data.items.length).keys()]);
-      setSortedIndices(state, [...getFilteredIndices(state)]);
-      setPivotConfig(state, { rowColumn: null, colColumn: null, values: [] });
-      setDiagramNodes(state, []);
-      
-      // Generate view tabs based on general_view_options
-      renderViewTabs();
-      
-      // Reset to table view if available, otherwise first available view
-      const availableViews = state.rel_options.general_view_options.map(v => v.toLowerCase());
-      setCurrentView(state, availableViews.includes('table') ? 'table' : availableViews[0] || 'table');
-      switchView(getCurrentView(state));
-      
-      renderTable();
+      // Use initRelationInstance to render in the new container
+      initRelationInstance(primaryContainer, result.data, { showJsonEditor: false, isNested: false });
     } else {
       alert('Parse error: ' + result.error);
     }

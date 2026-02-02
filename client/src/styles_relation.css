@@ -1,6 +1,25 @@
 /* ===== Relation Builder Specific Styles ===== */
 /* Styles for the Relation Builder page (relation.html) */
 
+/* Relation wrapper - container for relation instances */
+.relation-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.relation-wrapper > .relation-primary {
+  flex: 1;
+  min-height: 0;
+}
+
+.relation-wrapper > .relation-secondary {
+  flex: 0 0 auto;
+}
+
 .relation-json-textarea {
   width: 100%;
   min-height: 200px;
