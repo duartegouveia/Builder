@@ -2120,6 +2120,14 @@ function renderPagination() {
         <option value="remove-selected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Selected (${selectedRecords})</option>
         <option value="remove-unselected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Unselected (${filteredRecords - selectedRecords})</option>
       </select>
+      <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard">ℹ
+        <span class="keyboard-help-tooltip" data-testid="text-keyboard-shortcuts">
+          <strong>Atalhos de Teclado:</strong><br>
+          <b>Shift+click</b> — ordenar por várias colunas<br>
+          <b>Ctrl+click</b> — selecionar colunas<br>
+          <b>Right-click</b> — menu de contexto
+        </span>
+      </span>
     </div>
   `;
   
