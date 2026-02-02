@@ -2935,6 +2935,23 @@ function openFilterDialogForColumn(colIdx) {
 function showFilterValuesDialog(colIdx) {
   closeAllMenus();
   
+  const colName = state.columnNames[colIdx];
+  const colOptions = state.options[colName] || {};
+  const hasOptions = Object.keys(colOptions).length > 0;
+  
+  // Helper to get display label for a value
+  const getDisplayLabel = (v) => {
+    if (v === null) return '(null)';
+    if (hasOptions && colOptions[v] !== undefined) {
+      // Strip HTML tags for text display
+      const html = colOptions[v];
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+      return temp.textContent || temp.innerText || String(v);
+    }
+    return String(v);
+  };
+  
   // Count occurrences of each value
   const valueCounts = new Map();
   const naturalOrder = [];
@@ -2959,13 +2976,14 @@ function showFilterValuesDialog(colIdx) {
       sorted.sort((a, b) => {
         if (a === null) return -1;
         if (b === null) return 1;
-        return String(a).localeCompare(String(b), undefined, { numeric: true });
+        // Sort by display label, not key
+        return getDisplayLabel(a).localeCompare(getDisplayLabel(b), undefined, { numeric: true });
       });
     } else if (order === 'desc') {
       sorted.sort((a, b) => {
         if (a === null) return 1;
         if (b === null) return -1;
-        return String(b).localeCompare(String(a), undefined, { numeric: true });
+        return getDisplayLabel(b).localeCompare(getDisplayLabel(a), undefined, { numeric: true });
       });
     } else if (order === 'histogram-desc') {
       sorted.sort((a, b) => {
@@ -2973,7 +2991,7 @@ function showFilterValuesDialog(colIdx) {
         if (countDiff !== 0) return countDiff;
         if (a === null) return 1;
         if (b === null) return -1;
-        return String(a).localeCompare(String(b), undefined, { numeric: true });
+        return getDisplayLabel(a).localeCompare(getDisplayLabel(b), undefined, { numeric: true });
       });
     } else if (order === 'histogram-asc') {
       sorted.sort((a, b) => {
@@ -2981,7 +2999,7 @@ function showFilterValuesDialog(colIdx) {
         if (countDiff !== 0) return countDiff;
         if (a === null) return -1;
         if (b === null) return 1;
-        return String(a).localeCompare(String(b), undefined, { numeric: true });
+        return getDisplayLabel(a).localeCompare(getDisplayLabel(b), undefined, { numeric: true });
       });
     }
     return sorted;
@@ -2991,12 +3009,12 @@ function showFilterValuesDialog(colIdx) {
     const sorted = sortValues(order);
     const listEl = dialog.querySelector('.filter-values-list');
     listEl.innerHTML = sorted.map(v => {
-      const label = v === null ? '(null)' : String(v).substring(0, 50);
+      const displayLabel = getDisplayLabel(v).substring(0, 50);
       const count = valueCounts.get(v);
       const countLabel = count > 1 ? ` <span class="filter-value-count">#${count}</span>` : '';
       const checked = selectedValues.has(v) ? 'checked' : '';
       const dataValue = v === null ? '__null__' : String(v).replace(/"/g, '&quot;');
-      return `<label class="filter-value-item"><input type="checkbox" data-value="${dataValue}" ${checked}><span>${label}${countLabel}</span></label>`;
+      return `<label class="filter-value-item"><input type="checkbox" data-value="${dataValue}" ${checked}><span>${displayLabel}${countLabel}</span></label>`;
     }).join('');
     
     // Re-attach checkbox listeners
