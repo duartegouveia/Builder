@@ -1711,22 +1711,19 @@ input[type="number"] {
 }
 
 .data-card-label {
-  display: none;
-  font-size: 0.625rem;
+  display: inline;
+  font-size: 0.6875rem;
   font-weight: 600;
   color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   flex-shrink: 0;
   white-space: nowrap;
+  margin-right: var(--space-1);
 }
 
 .data-card-label::after {
   content: ':';
-}
-
-.data-card-field.show-label .data-card-label {
-  display: inline;
 }
 
 .data-card-value {
