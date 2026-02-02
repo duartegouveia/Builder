@@ -2294,9 +2294,10 @@ function renderTable() {
     const sortIndicator = getSortIndicator(idx);
     const filterActive = state.filters[idx] ? ' filter-active' : '';
     const colSelected = state.selectedColumns.has(idx) ? ' col-selected' : '';
+    const filterIcon = state.filters[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
-        <span class="relation-col-name">${name}${sortIndicator}</span>
+        <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
         <span class="relation-col-type">${type}</span>
       </div>
     `;
@@ -2491,6 +2492,15 @@ function attachTableEventListeners() {
       e.preventDefault();
       const colIdx = parseInt(th.dataset.col);
       showColumnMenu(colIdx, e.clientX, e.clientY);
+    });
+  });
+  
+  // Filter icon click - opens appropriate filter dialog
+  document.querySelectorAll('.filter-icon').forEach(icon => {
+    icon.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent header click/sort
+      const colIdx = parseInt(icon.dataset.col);
+      openFilterDialogForColumn(colIdx);
     });
   });
   
@@ -2855,6 +2865,44 @@ function applyColorScale(colIdx) {
   }
   
   state.formatting[colIdx] = rules;
+}
+
+function openFilterDialogForColumn(colIdx) {
+  const filter = state.filters[colIdx];
+  const type = state.columnTypes[colIdx];
+  
+  if (!filter) {
+    // No filter, open appropriate default dialog based on column type
+    if (type === 'string' || type === 'multilinestring') {
+      showFilterTextCriteriaDialog(colIdx);
+    } else if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') {
+      showFilterComparisonDialog(colIdx);
+    } else {
+      showFilterValuesDialog(colIdx);
+    }
+    return;
+  }
+  
+  // Open dialog based on current filter type
+  if (filter.type === 'values') {
+    showFilterValuesDialog(colIdx);
+  } else if (filter.type === 'indices') {
+    // Top 10 / Top 10% - show values dialog to see selected items
+    showFilterValuesDialog(colIdx);
+  } else if (filter.type === 'criteria') {
+    if (filter.criteria.textOp) {
+      showFilterTextCriteriaDialog(colIdx);
+    } else if (filter.criteria.comparison) {
+      showFilterComparisonDialog(colIdx);
+    } else if (filter.criteria.nullOnly || filter.criteria.notNull) {
+      // Null filters - show values dialog
+      showFilterValuesDialog(colIdx);
+    } else {
+      showFilterValuesDialog(colIdx);
+    }
+  } else {
+    showFilterValuesDialog(colIdx);
+  }
 }
 
 function showFilterValuesDialog(colIdx) {
