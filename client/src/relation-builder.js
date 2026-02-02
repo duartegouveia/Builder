@@ -3038,6 +3038,7 @@ function showFilterValuesDialog(colIdx) {
     <div class="filter-search-row">
       <input type="text" id="filter-search" class="filter-input" placeholder="Search...">
       <button class="btn btn-sm" id="filter-search-btn">Find</button>
+      <button class="btn btn-sm" id="filter-search-clear">Clear</button>
     </div>
     <div class="filter-dialog-actions">
       <button class="btn btn-sm" id="filter-select-all">Select All</button>
@@ -3098,10 +3099,25 @@ function showFilterValuesDialog(colIdx) {
   let lastSearchIndex = -1;
   let lastSearchTerm = '';
   
+  const clearSearch = () => {
+    const searchInput = dialog.querySelector('#filter-search');
+    const listEl = dialog.querySelector('.filter-values-list');
+    const items = listEl.querySelectorAll('.filter-value-item');
+    
+    searchInput.value = '';
+    lastSearchIndex = -1;
+    lastSearchTerm = '';
+    items.forEach(item => item.classList.remove('search-highlight'));
+    listEl.scrollTop = 0;
+  };
+  
   const performSearch = () => {
     const searchInput = dialog.querySelector('#filter-search');
     const searchTerm = searchInput.value.toLowerCase().trim();
-    if (!searchTerm) return;
+    if (!searchTerm) {
+      clearSearch();
+      return;
+    }
     
     const listEl = dialog.querySelector('.filter-values-list');
     const items = listEl.querySelectorAll('.filter-value-item');
@@ -3149,6 +3165,7 @@ function showFilterValuesDialog(colIdx) {
   };
   
   dialog.querySelector('#filter-search-btn').addEventListener('click', performSearch);
+  dialog.querySelector('#filter-search-clear').addEventListener('click', clearSearch);
   dialog.querySelector('#filter-search').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
