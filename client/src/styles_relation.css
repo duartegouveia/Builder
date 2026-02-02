@@ -2782,3 +2782,188 @@ input[type="number"] {
   align-items: center;
   justify-content: center;
 }
+
+/* ===== Relation Instance Styles ===== */
+
+.relation-instance {
+  width: 100%;
+}
+
+.nested-relation-builder-container {
+  width: 100%;
+  max-height: 500px;
+  overflow: auto;
+}
+
+.nested-relation-builder-container .json-section {
+  margin-bottom: var(--space-2);
+}
+
+.nested-relation-builder-container .relation-json {
+  width: 100%;
+  font-size: 0.75rem;
+  font-family: var(--font-mono, monospace);
+  resize: vertical;
+  min-height: 80px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+.nested-relation-builder-container .view-tabs-section {
+  margin-bottom: var(--space-2);
+}
+
+.nested-relation-builder-container .view-tabs {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-1);
+}
+
+.nested-relation-builder-container .view-tab {
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.nested-relation-builder-container .view-tab:hover {
+  color: var(--foreground);
+}
+
+.nested-relation-builder-container .view-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.nested-relation-builder-container .table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) 0;
+  font-size: 0.8rem;
+}
+
+.nested-relation-builder-container .table-scroll-container {
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.nested-relation-builder-container .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.nested-relation-builder-container .data-table th,
+.nested-relation-builder-container .data-table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.nested-relation-builder-container .data-table th {
+  background: var(--muted);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.nested-relation-builder-container .sortable-th {
+  cursor: pointer;
+}
+
+.nested-relation-builder-container .sortable-th:hover {
+  background: var(--accent);
+}
+
+.nested-relation-builder-container .table-footer {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) 0;
+}
+
+.nested-relation-builder-container .pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nested-relation-builder-container .page-size-select {
+  padding: var(--space-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+/* Instance Cards Grid */
+.instance-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+.instance-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.instance-card-header {
+  padding: var(--space-1) var(--space-2);
+  background: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.instance-card-body {
+  padding: var(--space-2);
+}
+
+.instance-card-field {
+  font-size: 0.8rem;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.instance-card-field:last-child {
+  border-bottom: none;
+}
+
+.nested-relation-builder-container .cards-content {
+  max-height: 350px;
+  overflow: auto;
+}
+
+.nested-relation-builder-container .cards-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-size: 0.8rem;
+}
+
+.nested-relation-builder-container .cards-info {
+  color: var(--muted-foreground);
+}
+
+.nested-relation-builder-container .view-placeholder {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--muted-foreground);
+}

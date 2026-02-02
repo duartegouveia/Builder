@@ -145,7 +145,12 @@ Example:
 7. **Group By** - Right-click column header to group by column, hides grouped columns with indicator bar
 8. **Row Operations** - Per-row menu (⋮) with View, Edit, Copy, Delete options
 9. **Column Selection** - Select columns via context menu to group into nested relations
-10. **Nested Relations** - Support for `relation` column type with expandable cell views
+10. **Nested Relations** - Support for `relation` column type with full functionality:
+    - Click relation cells to open nested relation dialogs
+    - Nested dialogs use the same rendering engine as the main relation (`initRelationInstance`)
+    - Full Table and Cards views with sorting, pagination
+    - Infinite nesting depth supported (nested relations can contain nested relations)
+    - Each instance has isolated state management via `createRelationState()` factory
 11. **Cartesian Product** - Expand nested relation columns to flatten data
 12. **Relation Column Statistics** - For `relation` type columns, statistics based on row counts (min, max, mean, median, quartiles, box plot, skewness, kurtosis)
 13. **String Length Statistics** - For `string`/`multilinestring` columns, statistics based on Unicode character length (min, max, mean, median, quartiles, box plot, skewness, kurtosis)

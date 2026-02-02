@@ -64,25 +64,6 @@ function generateUID() {
   return 'r' + Math.random().toString(36).substr(2, 9);
 }
 
-// Helper function to get the relation container
-function getRelationContainer() {
-  return document.querySelector('.relation_' + state.uid);
-}
-
-// Helper function to query elements within the relation container
-function el(selector) {
-  const container = getRelationContainer();
-  if (!container) return null;
-  return container.querySelector(selector);
-}
-
-// Helper function to query all elements within the relation container
-function elAll(selector) {
-  const container = getRelationContainer();
-  if (!container) return [];
-  return container.querySelectorAll(selector);
-}
-
 // Default rel_options
 const DEFAULT_REL_OPTIONS = {
   editable: false,
@@ -90,62 +71,64 @@ const DEFAULT_REL_OPTIONS = {
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
 };
 
-// State management
-let state = {
-  uid: generateUID(), // Unique identifier for this relation instance
-  relation: null,
-  columnNames: [],
-  columnTypes: [],
-  options: {}, // {columnName: {key: htmlValue}}
-  rel_options: { ...DEFAULT_REL_OPTIONS },
-  
-  // Current view
-  currentView: 'table', // 'table', 'cards', 'pivot', 'correlation', 'diagram', 'ai'
-  
-  // Pagination
-  pageSize: 5,
-  currentPage: 1,
-  manualResizeHeight: null, // User manually resized table height
-  
-  // Cards view pagination
-  cardsPageSize: 12, // Default: 4 cards per row * 3 rows
-  cardsCurrentPage: 1,
-  
-  // Selection
-  selectedRows: new Set(),
-  
-  // Sorting
-  sortCriteria: [], // [{column: idx, direction: 'asc'|'desc'}]
-  
-  // Filtering
-  filters: {}, // {columnIdx: {type: 'values'|'criteria'|'indices', values: [], criteria: {}, indices: Set}}
-  
-  // Conditional formatting
-  formatting: {}, // {columnIdx: [{condition: {}, style: {}}]}
-  
-  // Group By
-  groupByColumns: [], // Column indices to group by
-  groupedData: null, // Grouped data structure
-  expandedGroups: new Set(), // Set of expanded group keys
-  groupBySelectedValues: {}, // {columnIdx: selectedValue} - the value selected for each grouped column
-  
-  // Column selection (for multi-column operations)
-  selectedColumns: new Set(),
-  
-  // Pivot table config
-  pivotConfig: {
-    rowColumn: null,
-    colColumn: null,
-    values: [] // [{column: idx, aggregation: 'count'|'pctTotal'|'pctRow'|'pctCol'}]
-  },
-  
-  // Diagram/Clustering
-  diagramNodes: [],
-  
-  // Computed
-  filteredIndices: [],
-  sortedIndices: []
-};
+// Factory function to create a new relation state
+function createRelationState() {
+  return {
+    uid: generateUID(),
+    container: null,
+    relation: null,
+    columnNames: [],
+    columnTypes: [],
+    options: {},
+    rel_options: { ...DEFAULT_REL_OPTIONS },
+    currentView: 'table',
+    pageSize: 5,
+    currentPage: 1,
+    manualResizeHeight: null,
+    cardsPageSize: 12,
+    cardsCurrentPage: 1,
+    selectedRows: new Set(),
+    sortCriteria: [],
+    filters: {},
+    formatting: {},
+    groupByColumns: [],
+    groupedData: null,
+    expandedGroups: new Set(),
+    groupBySelectedValues: {},
+    selectedColumns: new Set(),
+    pivotConfig: { rowColumn: null, colColumn: null, values: [] },
+    diagramNodes: [],
+    filteredIndices: [],
+    sortedIndices: [],
+    cardsResizeObserver: null
+  };
+}
+
+// Global state for main relation (backwards compatibility)
+let state = createRelationState();
+
+// Map to store all relation instances
+const relationInstances = new Map();
+
+// Helper function to get the relation container for a state
+function getRelationContainer(st) {
+  if (st.container) return st.container;
+  return document.querySelector('.relation_' + st.uid);
+}
+
+// Helper function to query elements within a relation container
+function el(selector, st = state) {
+  const container = getRelationContainer(st);
+  if (!container) return null;
+  return container.querySelector(selector);
+}
+
+// Helper function to query all elements within a relation container
+function elAll(selector, st = state) {
+  const container = getRelationContainer(st);
+  if (!container) return [];
+  return container.querySelectorAll(selector);
+}
 
 function generateRandomString(length = 8) {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -4459,6 +4442,11 @@ function showNestedRelationDialog(rowIdx, colIdx) {
     nestedRelation.options = {};
   }
   
+  openNestedRelationDialog(nestedRelation);
+}
+
+// Open a nested relation dialog using the shared initRelationInstance function
+function openNestedRelationDialog(relationData) {
   const dialogId = `nested-relation-${Date.now()}`;
   
   // Create overlay backdrop
@@ -4472,19 +4460,11 @@ function showNestedRelationDialog(rowIdx, colIdx) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Sub-Relation (${nestedRelation.items?.length || 0} rows)</span>
+      <span>Sub-Relation (${relationData.items?.length || 0} rows)</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="nested-relation-content">
-      <div class="nested-relation-full-builder" id="${dialogId}-builder">
-        <div class="nested-json-section">
-          <textarea class="nested-relation-json" rows="6" readonly>${JSON.stringify(nestedRelation, null, 2)}</textarea>
-        </div>
-        <div class="nested-view-section">
-          <div class="nested-view-tabs"></div>
-          <div class="nested-view-content"></div>
-        </div>
-      </div>
+      <div class="nested-relation-builder-container" id="${dialogId}-builder"></div>
     </div>
     <div class="filter-dialog-footer">
       <button class="btn btn-outline close-nested">Fechar</button>
@@ -4494,10 +4474,15 @@ function showNestedRelationDialog(rowIdx, colIdx) {
   document.body.appendChild(overlay);
   document.body.appendChild(dialog);
   
-  // Initialize full nested relation builder
-  initFullNestedRelationBuilder(`${dialogId}-builder`, nestedRelation);
+  // Use the shared initRelationInstance function
+  const builderContainer = document.getElementById(`${dialogId}-builder`);
+  const instanceState = initRelationInstance(builderContainer, relationData, { showJsonEditor: true, isNested: true });
   
   const closeDialog = () => {
+    // Cleanup instance
+    if (instanceState) {
+      relationInstances.delete(instanceState.uid);
+    }
     overlay.remove();
     dialog.remove();
   };
@@ -4507,446 +4492,7 @@ function showNestedRelationDialog(rowIdx, colIdx) {
   dialog.querySelector('.close-nested').addEventListener('click', closeDialog);
 }
 
-// Initialize a full nested relation builder with all features
-function initFullNestedRelationBuilder(containerId, relation) {
-  const container = document.getElementById(containerId);
-  if (!container || !relation) return;
-  
-  const nestedState = {
-    uid: generateUID(),
-    relation: relation,
-    columnNames: Object.keys(relation.columns || {}),
-    columnTypes: Object.values(relation.columns || {}),
-    options: relation.options || {},
-    rel_options: relation.rel_options || { ...DEFAULT_REL_OPTIONS },
-    currentPage: 1,
-    pageSize: 20,
-    cardsPageSize: 12,
-    cardsCurrentPage: 1,
-    sortCriteria: [],
-    filters: {},
-    formatting: {},
-    filteredIndices: [...Array((relation.items || []).length).keys()],
-    sortedIndices: [...Array((relation.items || []).length).keys()],
-    selectedRows: new Set(),
-    groupedColumns: [],
-    currentView: 'table',
-    containerId: containerId
-  };
-  
-  // Render view tabs
-  const tabsContainer = container.querySelector('.nested-view-tabs');
-  const contentContainer = container.querySelector('.nested-view-content');
-  
-  const viewOptions = nestedState.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
-  
-  let tabsHtml = '';
-  viewOptions.forEach((view, idx) => {
-    const viewLower = view.toLowerCase();
-    const isActive = idx === 0;
-    tabsHtml += `<button class="nested-view-tab${isActive ? ' active' : ''}" data-view="${viewLower}">${view}</button>`;
-  });
-  tabsContainer.innerHTML = tabsHtml;
-  
-  // Set initial view
-  nestedState.currentView = viewOptions[0]?.toLowerCase() || 'table';
-  
-  // Render initial view
-  renderNestedView(contentContainer, nestedState);
-  
-  // Add tab click handlers
-  tabsContainer.querySelectorAll('.nested-view-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabsContainer.querySelectorAll('.nested-view-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      nestedState.currentView = tab.dataset.view;
-      renderNestedView(contentContainer, nestedState);
-    });
-  });
-}
-
-// Render the current view for nested relation
-function renderNestedView(container, nestedState) {
-  const view = nestedState.currentView;
-  
-  if (view === 'table') {
-    renderNestedTableView(container, nestedState);
-  } else if (view === 'cards') {
-    renderNestedCardsView(container, nestedState);
-  } else {
-    container.innerHTML = `<div class="nested-view-placeholder"><p>Vista "${view}" em desenvolvimento para sub-relations.</p></div>`;
-  }
-}
-
-// Render nested table view
-function renderNestedTableView(container, nestedState) {
-  const { relation, columnNames, columnTypes, currentPage, pageSize, sortCriteria, filters, groupedColumns, options } = nestedState;
-  
-  if (!relation || !relation.items) {
-    container.innerHTML = '<p>No data</p>';
-    return;
-  }
-  
-  // Apply filters and sorting
-  let indices = [...Array(relation.items.length).keys()];
-  
-  // Apply sorting
-  if (sortCriteria.length > 0) {
-    indices.sort((a, b) => {
-      for (const { column, direction } of sortCriteria) {
-        const cmp = compareValues(relation.items[a][column], relation.items[b][column], columnTypes[column]);
-        if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
-      }
-      return 0;
-    });
-  }
-  
-  nestedState.sortedIndices = indices;
-  
-  const totalItems = indices.length;
-  const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
-  const totalPages = Math.ceil(totalItems / effectivePageSize);
-  const startIdx = (currentPage - 1) * effectivePageSize;
-  const pageIndices = indices.slice(startIdx, startIdx + effectivePageSize);
-  
-  // Determine visible columns
-  const visibleCols = columnNames.map((name, idx) => ({ name, idx }))
-    .filter(c => !groupedColumns.includes(c.idx));
-  
-  let html = `
-    <div class="nested-table-controls">
-      <span class="nested-table-info">${totalItems} rows</span>
-      <select class="nested-page-size-select">
-        <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
-        <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
-        <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
-        <option value="all" ${pageSize === 'all' ? 'selected' : ''}>All</option>
-      </select>
-    </div>
-    <div class="nested-table-wrapper">
-      <table class="nested-relation-table-dynamic">
-        <thead><tr>
-  `;
-  
-  visibleCols.forEach(({ name, idx }) => {
-    const sortInfo = sortCriteria.find(s => s.column === idx);
-    const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
-    html += `<th data-col="${idx}" class="nested-th-sortable">${name}${sortIcon}</th>`;
-  });
-  
-  html += '</tr></thead><tbody>';
-  
-  pageIndices.forEach((rowIdx) => {
-    const row = relation.items[rowIdx];
-    html += `<tr data-row="${rowIdx}">`;
-    visibleCols.forEach(({ name, idx }) => {
-      const val = row[idx];
-      const type = columnTypes[idx];
-      let display = formatNestedCellValue(val, type, options, name);
-      const dataAttr = type === 'relation' ? ` data-row="${rowIdx}" data-col="${idx}" data-type="relation"` : '';
-      html += `<td data-col="${idx}"${dataAttr}>${display}</td>`;
-    });
-    html += '</tr>';
-  });
-  
-  html += '</tbody></table></div>';
-  
-  // Pagination
-  if (totalPages > 1) {
-    html += `
-      <div class="nested-pagination">
-        <button class="btn btn-sm nested-page-btn" data-action="first" ${currentPage === 1 ? 'disabled' : ''}>«</button>
-        <button class="btn btn-sm nested-page-btn" data-action="prev" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
-        <span class="nested-page-info">Página ${currentPage} de ${totalPages}</span>
-        <button class="btn btn-sm nested-page-btn" data-action="next" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
-        <button class="btn btn-sm nested-page-btn" data-action="last" ${currentPage === totalPages ? 'disabled' : ''}>»</button>
-      </div>
-    `;
-  }
-  
-  container.innerHTML = html;
-  
-  // Add event listeners
-  container.querySelectorAll('.nested-th-sortable').forEach(th => {
-    th.addEventListener('click', (e) => {
-      const colIdx = parseInt(th.dataset.col);
-      const existing = nestedState.sortCriteria.findIndex(s => s.column === colIdx);
-      if (existing >= 0) {
-        if (nestedState.sortCriteria[existing].direction === 'asc') {
-          nestedState.sortCriteria[existing].direction = 'desc';
-        } else {
-          nestedState.sortCriteria.splice(existing, 1);
-        }
-      } else {
-        if (!e.shiftKey) nestedState.sortCriteria = [];
-        nestedState.sortCriteria.push({ column: colIdx, direction: 'asc' });
-      }
-      renderNestedTableView(container, nestedState);
-    });
-  });
-  
-  container.querySelectorAll('.nested-page-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const action = btn.dataset.action;
-      const totalPages = Math.ceil(nestedState.sortedIndices.length / (nestedState.pageSize === 'all' ? nestedState.sortedIndices.length : nestedState.pageSize));
-      if (action === 'first') nestedState.currentPage = 1;
-      else if (action === 'prev') nestedState.currentPage = Math.max(1, nestedState.currentPage - 1);
-      else if (action === 'next') nestedState.currentPage = Math.min(totalPages, nestedState.currentPage + 1);
-      else if (action === 'last') nestedState.currentPage = totalPages;
-      renderNestedTableView(container, nestedState);
-    });
-  });
-  
-  container.querySelector('.nested-page-size-select')?.addEventListener('change', (e) => {
-    nestedState.pageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
-    nestedState.currentPage = 1;
-    renderNestedTableView(container, nestedState);
-  });
-  
-  // Handle nested relation clicks
-  container.querySelectorAll('[data-type="relation"]').forEach(td => {
-    td.style.cursor = 'pointer';
-    td.addEventListener('click', () => {
-      const rowIdx = parseInt(td.dataset.row);
-      const colIdx = parseInt(td.dataset.col);
-      const nestedRel = nestedState.relation.items[rowIdx][colIdx];
-      if (nestedRel && nestedRel.columns) {
-        showNestedRelationDialogFromData(nestedRel);
-      }
-    });
-  });
-}
-
-// Render nested cards view
-function renderNestedCardsView(container, nestedState) {
-  const { relation, columnNames, columnTypes, cardsCurrentPage, cardsPageSize, sortedIndices, options } = nestedState;
-  
-  if (!relation || !relation.items) {
-    container.innerHTML = '<p>No data</p>';
-    return;
-  }
-  
-  const indices = sortedIndices || [...Array(relation.items.length).keys()];
-  const totalItems = indices.length;
-  const totalPages = Math.ceil(totalItems / cardsPageSize);
-  const startIdx = (cardsCurrentPage - 1) * cardsPageSize;
-  const pageIndices = indices.slice(startIdx, startIdx + cardsPageSize);
-  
-  let html = '<div class="nested-cards-grid">';
-  
-  pageIndices.forEach((rowIdx) => {
-    const row = relation.items[rowIdx];
-    html += `<div class="nested-data-card" data-row="${rowIdx}">`;
-    html += `<div class="nested-card-header">#${rowIdx + 1}</div>`;
-    html += '<div class="nested-card-body">';
-    
-    columnNames.forEach((colName, colIdx) => {
-      const value = row[colIdx];
-      const type = columnTypes[colIdx];
-      let tooltipValue = value !== null && value !== undefined ? String(value) : '';
-      if (type === 'select' && options[colName] && options[colName][value]) {
-        tooltipValue = options[colName][value];
-      }
-      const displayValue = formatNestedCellValue(value, type, options, colName);
-      
-      html += `<div class="nested-card-field" title="${escapeHtml(colName)}: ${escapeHtml(tooltipValue)}">`;
-      html += `<span class="nested-card-value">${displayValue}</span>`;
-      html += '</div>';
-    });
-    
-    html += '</div></div>';
-  });
-  
-  html += '</div>';
-  
-  if (totalPages > 1) {
-    html += `
-      <div class="nested-pagination">
-        <button class="btn btn-sm nested-page-btn" data-action="cards-first" ${cardsCurrentPage === 1 ? 'disabled' : ''}>«</button>
-        <button class="btn btn-sm nested-page-btn" data-action="cards-prev" ${cardsCurrentPage === 1 ? 'disabled' : ''}>‹</button>
-        <span class="nested-page-info">Página ${cardsCurrentPage} de ${totalPages}</span>
-        <button class="btn btn-sm nested-page-btn" data-action="cards-next" ${cardsCurrentPage === totalPages ? 'disabled' : ''}>›</button>
-        <button class="btn btn-sm nested-page-btn" data-action="cards-last" ${cardsCurrentPage === totalPages ? 'disabled' : ''}>»</button>
-      </div>
-    `;
-  }
-  
-  container.innerHTML = html;
-  
-  // Add pagination listeners
-  container.querySelectorAll('.nested-page-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const action = btn.dataset.action;
-      if (action === 'cards-first') nestedState.cardsCurrentPage = 1;
-      else if (action === 'cards-prev') nestedState.cardsCurrentPage = Math.max(1, nestedState.cardsCurrentPage - 1);
-      else if (action === 'cards-next') nestedState.cardsCurrentPage = Math.min(totalPages, nestedState.cardsCurrentPage + 1);
-      else if (action === 'cards-last') nestedState.cardsCurrentPage = totalPages;
-      renderNestedCardsView(container, nestedState);
-    });
-  });
-}
-
-// Format cell value for nested relation
-function formatNestedCellValue(value, type, options, colName) {
-  if (value === null || value === undefined) return '<span class="null-value">null</span>';
-  
-  if (type === 'relation') {
-    const count = value?.items?.length || 0;
-    return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
-  }
-  if (type === 'boolean') {
-    if (value === true) return '<span class="bool-display bool-display-true">✓</span>';
-    if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
-    return '<span class="bool-display bool-display-null">—</span>';
-  }
-  if (type === 'select') {
-    const colOptions = options[colName];
-    if (colOptions && colOptions[value] !== undefined) {
-      return `<span class="select-display">${colOptions[value]}</span>`;
-    }
-    return `<span class="select-display-key">${value}</span>`;
-  }
-  
-  return escapeHtml(String(value));
-}
-
-// Render a nested relation table
-function renderNestedRelationTable(container, nestedState) {
-  const { relation, columnNames, columnTypes, currentPage, pageSize, sortConfig, filters, groupedColumns } = nestedState;
-  
-  if (!relation || !relation.items) {
-    container.innerHTML = '<p>No data</p>';
-    return;
-  }
-  
-  // Filter items
-  let items = [...relation.items];
-  
-  // Apply filters
-  Object.entries(filters).forEach(([colIdx, filterConfig]) => {
-    const idx = parseInt(colIdx);
-    if (filterConfig.type === 'values') {
-      items = items.filter(row => filterConfig.values.has(String(row[idx])));
-    } else if (filterConfig.type === 'null') {
-      items = items.filter(row => row[idx] === null || row[idx] === undefined);
-    } else if (filterConfig.type === 'notNull') {
-      items = items.filter(row => row[idx] !== null && row[idx] !== undefined);
-    }
-  });
-  
-  // Apply sorting
-  if (sortConfig.length > 0) {
-    items.sort((a, b) => {
-      for (const { colIdx, direction } of sortConfig) {
-        const cmp = compareValues(a[colIdx], b[colIdx], columnTypes[colIdx]);
-        if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
-      }
-      return 0;
-    });
-  }
-  
-  const totalItems = items.length;
-  const totalPages = pageSize === 'all' ? 1 : Math.ceil(totalItems / pageSize);
-  const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
-  const startIdx = (currentPage - 1) * effectivePageSize;
-  const pageItems = items.slice(startIdx, startIdx + effectivePageSize);
-  
-  // Determine visible columns (exclude grouped)
-  const visibleCols = columnNames.map((name, idx) => ({ name, idx }))
-    .filter(c => !groupedColumns.includes(c.idx));
-  
-  let html = `
-    <div class="nested-table-controls">
-      <span class="nested-table-info">${totalItems} rows</span>
-    </div>
-    <div class="nested-table-wrapper">
-      <table class="nested-relation-table-dynamic">
-        <thead><tr>
-  `;
-  
-  visibleCols.forEach(({ name, idx }) => {
-    const sortInfo = sortConfig.find(s => s.colIdx === idx);
-    const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
-    html += `<th data-col="${idx}" class="nested-th-sortable">${name}${sortIcon}</th>`;
-  });
-  
-  html += '</tr></thead><tbody>';
-  
-  pageItems.forEach((row, rowI) => {
-    const actualRowIdx = startIdx + rowI;
-    html += `<tr data-row="${actualRowIdx}">`;
-    visibleCols.forEach(({ idx }) => {
-      const val = row[idx];
-      const type = columnTypes[idx];
-      let display = formatCellValue(val, type, nestedState.options, columnNames[idx]);
-      html += `<td data-col="${idx}">${display}</td>`;
-    });
-    html += '</tr>';
-  });
-  
-  html += '</tbody></table></div>';
-  
-  // Pagination
-  if (totalPages > 1) {
-    html += `
-      <div class="nested-pagination">
-        <button class="btn btn-sm nested-page-btn" data-action="first" ${currentPage === 1 ? 'disabled' : ''}>«</button>
-        <button class="btn btn-sm nested-page-btn" data-action="prev" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
-        <span class="nested-page-info">Página ${currentPage} de ${totalPages}</span>
-        <button class="btn btn-sm nested-page-btn" data-action="next" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
-        <button class="btn btn-sm nested-page-btn" data-action="last" ${currentPage === totalPages ? 'disabled' : ''}>»</button>
-      </div>
-    `;
-  }
-  
-  container.innerHTML = html;
-  
-  // Add event listeners for sorting
-  container.querySelectorAll('.nested-th-sortable').forEach(th => {
-    th.addEventListener('click', (e) => {
-      const colIdx = parseInt(th.dataset.col);
-      const existing = nestedState.sortConfig.findIndex(s => s.colIdx === colIdx);
-      if (existing >= 0) {
-        if (nestedState.sortConfig[existing].direction === 'asc') {
-          nestedState.sortConfig[existing].direction = 'desc';
-        } else {
-          nestedState.sortConfig.splice(existing, 1);
-        }
-      } else {
-        if (!e.shiftKey) nestedState.sortConfig = [];
-        nestedState.sortConfig.push({ colIdx, direction: 'asc' });
-      }
-      renderNestedRelationTable(container, nestedState);
-    });
-  });
-  
-  // Add event listeners for pagination
-  container.querySelectorAll('.nested-page-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const action = btn.dataset.action;
-      if (action === 'first') nestedState.currentPage = 1;
-      else if (action === 'prev') nestedState.currentPage = Math.max(1, nestedState.currentPage - 1);
-      else if (action === 'next') nestedState.currentPage = Math.min(totalPages, nestedState.currentPage + 1);
-      else if (action === 'last') nestedState.currentPage = totalPages;
-      renderNestedRelationTable(container, nestedState);
-    });
-  });
-  
-  // Add click handler for nested relation cells
-  container.querySelectorAll('td').forEach(td => {
-    const colIdx = parseInt(td.dataset.col);
-    if (columnTypes[colIdx] === 'relation') {
-      td.style.cursor = 'pointer';
-      td.addEventListener('click', () => {
-        const rowIdx = parseInt(td.closest('tr').dataset.row);
-        const nestedRel = nestedState.relation.items[rowIdx][colIdx];
-        if (nestedRel && nestedRel.columns) {
-          showNestedRelationDialogFromData(nestedRel);
-        }
-      });
-    }
-  });
-}
+// Legacy functions removed - now using initRelationInstance for nested relations
 
 // Show nested relation dialog from data (for deeper nesting)
 function showNestedRelationDialogFromData(relation) {
@@ -4958,51 +4504,8 @@ function showNestedRelationDialogFromData(relation) {
     relation.options = {};
   }
   
-  const dialogId = `nested-relation-${Date.now()}`;
-  
-  // Create overlay backdrop
-  const overlay = document.createElement('div');
-  overlay.className = 'nested-relation-overlay';
-  overlay.id = `${dialogId}-overlay`;
-  
-  const dialog = document.createElement('div');
-  dialog.className = 'nested-relation-dialog';
-  dialog.id = dialogId;
-  
-  dialog.innerHTML = `
-    <div class="filter-dialog-header">
-      <span>Sub-Relation (${relation.items?.length || 0} rows)</span>
-      <button class="btn-close-dialog">✕</button>
-    </div>
-    <div class="nested-relation-content">
-      <div class="nested-relation-full-builder" id="${dialogId}-builder">
-        <div class="nested-json-section">
-          <textarea class="nested-relation-json" rows="6" readonly>${JSON.stringify(relation, null, 2)}</textarea>
-        </div>
-        <div class="nested-view-section">
-          <div class="nested-view-tabs"></div>
-          <div class="nested-view-content"></div>
-        </div>
-      </div>
-    </div>
-    <div class="filter-dialog-footer">
-      <button class="btn btn-outline close-nested">Fechar</button>
-    </div>
-  `;
-  
-  document.body.appendChild(overlay);
-  document.body.appendChild(dialog);
-  
-  initFullNestedRelationBuilder(`${dialogId}-builder`, relation);
-  
-  const closeDialog = () => {
-    overlay.remove();
-    dialog.remove();
-  };
-  
-  overlay.addEventListener('click', closeDialog);
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', closeDialog);
-  dialog.querySelector('.close-nested').addEventListener('click', closeDialog);
+  // Reuse the same dialog function
+  openNestedRelationDialog(relation);
 }
 
 function updateRelationFromInput(input) {
@@ -8192,6 +7695,348 @@ function closeDiagramPopupOnOutsideClick(event) {
   if (popup && !popup.contains(event.target)) {
     hideDiagramPopup();
   }
+}
+
+// Initialize a relation instance in a container with given data
+function initRelationInstance(container, relationData, options = {}) {
+  const { showJsonEditor = false, isNested = false } = options;
+  
+  // Create a new state for this instance
+  const instanceState = createRelationState();
+  instanceState.container = container;
+  instanceState.relation = relationData;
+  instanceState.columnNames = Object.keys(relationData.columns || {});
+  instanceState.columnTypes = Object.values(relationData.columns || {});
+  instanceState.options = relationData.options || {};
+  
+  const parsedRelOptions = relationData.rel_options || {};
+  instanceState.rel_options = {
+    editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
+    single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
+    general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
+  };
+  
+  instanceState.filteredIndices = [...Array((relationData.items || []).length).keys()];
+  instanceState.sortedIndices = [...instanceState.filteredIndices];
+  
+  // Store instance
+  relationInstances.set(instanceState.uid, instanceState);
+  
+  // Add class to container
+  container.classList.add('relation_' + instanceState.uid);
+  container.classList.add('relation-instance');
+  
+  // Generate HTML structure
+  const viewOptions = instanceState.rel_options.general_view_options;
+  
+  let html = '';
+  
+  if (showJsonEditor) {
+    html += `
+      <div class="json-section">
+        <textarea class="relation-json" rows="6" readonly>${JSON.stringify(relationData, null, 2)}</textarea>
+      </div>
+    `;
+  }
+  
+  html += `
+    <div class="view-tabs-section">
+      <div class="view-tabs">
+        ${viewOptions.map((view, idx) => `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${view.toLowerCase()}">${view}</button>`).join('')}
+      </div>
+    </div>
+    <div class="view-wrapper">
+      <div class="table-view-wrapper" style="display: block;">
+        <div class="table-header"></div>
+        <div class="table-scroll-container">
+          <table class="data-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <div class="pagination"></div>
+          <div class="stats-toggle"></div>
+        </div>
+      </div>
+      <div class="cards-view-wrapper" style="display: none;">
+        <div class="cards-content"></div>
+        <div class="cards-navigation"></div>
+      </div>
+      <div class="pivot-view-wrapper" style="display: none;"></div>
+      <div class="correlation-view-wrapper" style="display: none;"></div>
+      <div class="diagram-view-wrapper" style="display: none;"></div>
+      <div class="ai-view-wrapper" style="display: none;"></div>
+      <div class="saved-view-wrapper" style="display: none;"></div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+  
+  // Initialize event listeners
+  initInstanceEventListeners(instanceState);
+  
+  // Render initial view
+  instanceState.currentView = viewOptions[0]?.toLowerCase() || 'table';
+  switchViewForInstance(instanceState, instanceState.currentView);
+  
+  return instanceState;
+}
+
+// Initialize event listeners for a relation instance
+function initInstanceEventListeners(st) {
+  const container = st.container;
+  
+  // View tab clicks
+  container.querySelectorAll('.view-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      container.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      switchViewForInstance(st, tab.dataset.view);
+    });
+  });
+}
+
+// Switch view for a specific instance
+function switchViewForInstance(st, view) {
+  st.currentView = view;
+  const container = st.container;
+  
+  // Hide all view wrappers
+  container.querySelectorAll('.table-view-wrapper, .cards-view-wrapper, .pivot-view-wrapper, .correlation-view-wrapper, .diagram-view-wrapper, .ai-view-wrapper, .saved-view-wrapper').forEach(w => w.style.display = 'none');
+  
+  // Show the selected view
+  const viewWrapper = container.querySelector(`.${view}-view-wrapper`);
+  if (viewWrapper) {
+    viewWrapper.style.display = 'block';
+  }
+  
+  // Render the view
+  if (view === 'table') {
+    renderTableForInstance(st);
+  } else if (view === 'cards') {
+    renderCardsForInstance(st);
+  } else {
+    // Other views show placeholder
+    if (viewWrapper) {
+      viewWrapper.innerHTML = `<div class="view-placeholder"><p>Vista "${view}" disponível apenas na relation principal.</p></div>`;
+    }
+  }
+}
+
+// Render table for a specific instance
+function renderTableForInstance(st) {
+  const container = st.container;
+  const tableWrapper = container.querySelector('.table-view-wrapper');
+  if (!tableWrapper || !st.relation) return;
+  
+  // Apply sorting
+  let indices = [...st.filteredIndices];
+  if (st.sortCriteria.length > 0) {
+    indices.sort((a, b) => {
+      for (const { column, direction } of st.sortCriteria) {
+        const cmp = compareValues(st.relation.items[a][column], st.relation.items[b][column], st.columnTypes[column]);
+        if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
+      }
+      return 0;
+    });
+  }
+  st.sortedIndices = indices;
+  
+  const totalItems = indices.length;
+  const effectivePageSize = st.pageSize === 'all' ? totalItems : st.pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
+  const startIdx = (st.currentPage - 1) * effectivePageSize;
+  const pageIndices = indices.slice(startIdx, startIdx + effectivePageSize);
+  
+  // Render header
+  const tableHeader = tableWrapper.querySelector('.table-header');
+  tableHeader.innerHTML = `
+    <span class="table-info">${totalItems} rows</span>
+    <select class="page-size-select">
+      <option value="10" ${st.pageSize === 10 ? 'selected' : ''}>10</option>
+      <option value="20" ${st.pageSize === 20 ? 'selected' : ''}>20</option>
+      <option value="50" ${st.pageSize === 50 ? 'selected' : ''}>50</option>
+      <option value="all" ${st.pageSize === 'all' ? 'selected' : ''}>All</option>
+    </select>
+  `;
+  
+  // Render table head
+  const thead = tableWrapper.querySelector('thead');
+  let theadHtml = '<tr>';
+  st.columnNames.forEach((name, idx) => {
+    const sortInfo = st.sortCriteria.find(s => s.column === idx);
+    const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
+    theadHtml += `<th data-col="${idx}" class="sortable-th">${escapeHtml(name)}${sortIcon}</th>`;
+  });
+  theadHtml += '</tr>';
+  thead.innerHTML = theadHtml;
+  
+  // Render table body
+  const tbody = tableWrapper.querySelector('tbody');
+  let tbodyHtml = '';
+  pageIndices.forEach(rowIdx => {
+    const row = st.relation.items[rowIdx];
+    tbodyHtml += `<tr data-row="${rowIdx}">`;
+    st.columnNames.forEach((colName, colIdx) => {
+      const val = row[colIdx];
+      const type = st.columnTypes[colIdx];
+      const display = formatCellValueForInstance(val, type, st.options, colName);
+      const dataAttr = type === 'relation' ? ` data-row="${rowIdx}" data-col="${colIdx}" data-type="relation"` : '';
+      tbodyHtml += `<td data-col="${colIdx}"${dataAttr}>${display}</td>`;
+    });
+    tbodyHtml += '</tr>';
+  });
+  tbody.innerHTML = tbodyHtml;
+  
+  // Render pagination
+  const pagination = tableWrapper.querySelector('.pagination');
+  if (totalPages > 1) {
+    pagination.innerHTML = `
+      <button class="btn btn-sm page-btn" data-action="first" ${st.currentPage === 1 ? 'disabled' : ''}>«</button>
+      <button class="btn btn-sm page-btn" data-action="prev" ${st.currentPage === 1 ? 'disabled' : ''}>‹</button>
+      <span class="page-info">Página ${st.currentPage} de ${totalPages}</span>
+      <button class="btn btn-sm page-btn" data-action="next" ${st.currentPage === totalPages ? 'disabled' : ''}>›</button>
+      <button class="btn btn-sm page-btn" data-action="last" ${st.currentPage === totalPages ? 'disabled' : ''}>»</button>
+    `;
+  } else {
+    pagination.innerHTML = '';
+  }
+  
+  // Add event listeners
+  tableHeader.querySelector('.page-size-select')?.addEventListener('change', (e) => {
+    st.pageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
+    st.currentPage = 1;
+    renderTableForInstance(st);
+  });
+  
+  thead.querySelectorAll('.sortable-th').forEach(th => {
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', (e) => {
+      const colIdx = parseInt(th.dataset.col);
+      const existing = st.sortCriteria.findIndex(s => s.column === colIdx);
+      if (existing >= 0) {
+        if (st.sortCriteria[existing].direction === 'asc') {
+          st.sortCriteria[existing].direction = 'desc';
+        } else {
+          st.sortCriteria.splice(existing, 1);
+        }
+      } else {
+        if (!e.shiftKey) st.sortCriteria = [];
+        st.sortCriteria.push({ column: colIdx, direction: 'asc' });
+      }
+      renderTableForInstance(st);
+    });
+  });
+  
+  pagination.querySelectorAll('.page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'first') st.currentPage = 1;
+      else if (action === 'prev') st.currentPage = Math.max(1, st.currentPage - 1);
+      else if (action === 'next') st.currentPage = Math.min(totalPages, st.currentPage + 1);
+      else if (action === 'last') st.currentPage = totalPages;
+      renderTableForInstance(st);
+    });
+  });
+  
+  // Relation cell clicks
+  tbody.querySelectorAll('[data-type="relation"]').forEach(td => {
+    td.style.cursor = 'pointer';
+    td.addEventListener('click', () => {
+      const rowIdx = parseInt(td.dataset.row);
+      const colIdx = parseInt(td.dataset.col);
+      const nestedRel = st.relation.items[rowIdx][colIdx];
+      if (nestedRel && nestedRel.columns) {
+        showNestedRelationDialogFromData(nestedRel);
+      }
+    });
+  });
+}
+
+// Render cards for a specific instance
+function renderCardsForInstance(st) {
+  const container = st.container;
+  const cardsWrapper = container.querySelector('.cards-view-wrapper');
+  if (!cardsWrapper || !st.relation) return;
+  
+  const cardsContent = cardsWrapper.querySelector('.cards-content');
+  const cardsNav = cardsWrapper.querySelector('.cards-navigation');
+  
+  const indices = st.sortedIndices.length > 0 ? st.sortedIndices : [...Array(st.relation.items.length).keys()];
+  const totalItems = indices.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / st.cardsPageSize));
+  const startIdx = (st.cardsCurrentPage - 1) * st.cardsPageSize;
+  const pageIndices = indices.slice(startIdx, startIdx + st.cardsPageSize);
+  
+  let html = '<div class="instance-cards-grid">';
+  pageIndices.forEach(rowIdx => {
+    const row = st.relation.items[rowIdx];
+    html += `<div class="instance-card" data-row="${rowIdx}">`;
+    html += `<div class="instance-card-header">#${rowIdx + 1}</div>`;
+    html += '<div class="instance-card-body">';
+    st.columnNames.forEach((colName, colIdx) => {
+      const value = row[colIdx];
+      const type = st.columnTypes[colIdx];
+      let tooltipValue = value !== null && value !== undefined ? String(value) : '';
+      if (type === 'select' && st.options[colName] && st.options[colName][value]) {
+        tooltipValue = st.options[colName][value];
+      }
+      const displayValue = formatCellValueForInstance(value, type, st.options, colName);
+      html += `<div class="instance-card-field" title="${escapeHtml(colName)}: ${escapeHtml(tooltipValue)}">${displayValue}</div>`;
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  cardsContent.innerHTML = html;
+  
+  // Navigation
+  let navHtml = `<span class="cards-info">${totalItems} rows</span>`;
+  if (totalPages > 1) {
+    navHtml += `
+      <button class="btn btn-sm cards-page-btn" data-action="first" ${st.cardsCurrentPage === 1 ? 'disabled' : ''}>«</button>
+      <button class="btn btn-sm cards-page-btn" data-action="prev" ${st.cardsCurrentPage === 1 ? 'disabled' : ''}>‹</button>
+      <span>Página ${st.cardsCurrentPage} de ${totalPages}</span>
+      <button class="btn btn-sm cards-page-btn" data-action="next" ${st.cardsCurrentPage === totalPages ? 'disabled' : ''}>›</button>
+      <button class="btn btn-sm cards-page-btn" data-action="last" ${st.cardsCurrentPage === totalPages ? 'disabled' : ''}>»</button>
+    `;
+  }
+  cardsNav.innerHTML = navHtml;
+  
+  cardsNav.querySelectorAll('.cards-page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'first') st.cardsCurrentPage = 1;
+      else if (action === 'prev') st.cardsCurrentPage = Math.max(1, st.cardsCurrentPage - 1);
+      else if (action === 'next') st.cardsCurrentPage = Math.min(totalPages, st.cardsCurrentPage + 1);
+      else if (action === 'last') st.cardsCurrentPage = totalPages;
+      renderCardsForInstance(st);
+    });
+  });
+}
+
+// Format cell value for instance (uses passed options)
+function formatCellValueForInstance(value, type, options, colName) {
+  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  
+  if (type === 'relation') {
+    const count = value?.items?.length || 0;
+    return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
+  }
+  if (type === 'boolean') {
+    if (value === true) return '<span class="bool-display bool-display-true">✓</span>';
+    if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
+    return '<span class="bool-display bool-display-null">—</span>';
+  }
+  if (type === 'select') {
+    const colOptions = options[colName];
+    if (colOptions && colOptions[value] !== undefined) {
+      return `<span class="select-display">${escapeHtml(colOptions[value])}</span>`;
+    }
+    return `<span class="select-display-key">${escapeHtml(String(value))}</span>`;
+  }
+  
+  return escapeHtml(String(value));
 }
 
 function init() {
