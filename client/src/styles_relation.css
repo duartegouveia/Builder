@@ -145,6 +145,13 @@
   width: 100%;
 }
 
+/* Boolean checkbox cell - centered horizontally, aligned with text field top */
+.relation-cell-input:has(.bool-tristate) {
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+
 .relation-input,
 .relation-textarea,
 .relation-select {
