@@ -5729,25 +5729,26 @@ function setupResizeHandle() {
   if (!handle || !container) return;
   
   let isResizing = false;
-  let startY = 0;
+  let startPageY = 0;  // Use page coordinates (includes scroll)
   let startHeight = 0;
+  let scrollInterval = null;
   
   // Get the main content area for adding padding
   const mainContent = document.querySelector('.main-content') || document.body;
   
-  handle.addEventListener('mousedown', (e) => {
-    e.preventDefault();
+  const startResize = (pageY) => {
     isResizing = true;
-    startY = e.clientY;
+    startPageY = pageY;
     startHeight = wrapper ? wrapper.offsetHeight : container.offsetHeight;
     document.body.style.cursor = 'nwse-resize';
     document.body.style.userSelect = 'none';
-  });
+  };
   
-  document.addEventListener('mousemove', (e) => {
+  const updateSize = (pageY) => {
     if (!isResizing) return;
     
-    const deltaY = e.clientY - startY;
+    // Use page coordinates to account for scroll
+    const deltaY = pageY - startPageY;
     const newHeight = Math.max(200, startHeight + deltaY);
     
     if (wrapper) {
@@ -5757,60 +5758,69 @@ function setupResizeHandle() {
     
     // Add large padding to allow page to grow
     mainContent.style.paddingBottom = (newHeight + 500) + 'px';
-    
-    // Auto-scroll page when dragging near bottom of viewport
-    const viewportHeight = window.innerHeight;
-    const mouseY = e.clientY;
-    if (mouseY > viewportHeight - 80) {
-      window.scrollBy(0, 15);
-    }
-  });
+  };
   
-  document.addEventListener('mouseup', () => {
+  const startAutoScroll = () => {
+    if (scrollInterval) return;
+    scrollInterval = setInterval(() => {
+      window.scrollBy({ top: 5, behavior: 'instant' });
+    }, 30);
+  };
+  
+  const stopAutoScroll = () => {
+    if (scrollInterval) {
+      clearInterval(scrollInterval);
+      scrollInterval = null;
+    }
+  };
+  
+  const handleMove = (clientY, pageY) => {
+    if (!isResizing) return;
+    
+    updateSize(pageY);
+    
+    // Auto-scroll when near bottom of viewport
+    const viewportHeight = window.innerHeight;
+    if (clientY > viewportHeight - 80) {
+      startAutoScroll();
+    } else {
+      stopAutoScroll();
+    }
+  };
+  
+  const endResize = () => {
     if (isResizing) {
       isResizing = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      // Remove extra padding after resize ends
       mainContent.style.paddingBottom = '';
+      stopAutoScroll();
     }
+  };
+  
+  handle.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startResize(e.pageY);
   });
   
+  document.addEventListener('mousemove', (e) => {
+    handleMove(e.clientY, e.pageY);
+  });
+  
+  document.addEventListener('mouseup', endResize);
+  
   handle.addEventListener('touchstart', (e) => {
-    isResizing = true;
-    startY = e.touches[0].clientY;
-    startHeight = wrapper ? wrapper.offsetHeight : container.offsetHeight;
+    const touch = e.touches[0];
+    startResize(touch.pageY);
   }, { passive: true });
   
   document.addEventListener('touchmove', (e) => {
     if (!isResizing) return;
-    
-    const deltaY = e.touches[0].clientY - startY;
-    const newHeight = Math.max(200, startHeight + deltaY);
-    
-    if (wrapper) {
-      wrapper.style.maxHeight = newHeight + 'px';
-    }
-    container.style.minHeight = (newHeight + 50) + 'px';
-    
-    // Add large padding to allow page to grow
-    mainContent.style.paddingBottom = (newHeight + 500) + 'px';
-    
-    // Auto-scroll page when dragging near bottom of viewport
-    const viewportHeight = window.innerHeight;
-    const touchY = e.touches[0].clientY;
-    if (touchY > viewportHeight - 80) {
-      window.scrollBy(0, 15);
-    }
+    const touch = e.touches[0];
+    handleMove(touch.clientY, touch.pageY);
   }, { passive: true });
   
-  document.addEventListener('touchend', () => {
-    if (isResizing) {
-      // Remove extra padding after resize ends
-      mainContent.style.paddingBottom = '';
-    }
-    isResizing = false;
-  });
+  document.addEventListener('touchend', endResize);
 }
 
 document.addEventListener('DOMContentLoaded', init);
