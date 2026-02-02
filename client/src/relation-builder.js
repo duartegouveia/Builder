@@ -3035,6 +3035,10 @@ function showFilterValuesDialog(colIdx) {
       <span>Filter: ${state.columnNames[colIdx]}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
+    <div class="filter-search-row">
+      <input type="text" id="filter-search" class="filter-input" placeholder="Search...">
+      <button class="btn btn-sm" id="filter-search-btn">Find</button>
+    </div>
     <div class="filter-dialog-actions">
       <button class="btn btn-sm" id="filter-select-all">Select All</button>
       <button class="btn btn-sm" id="filter-select-none">Select None</button>
@@ -3088,6 +3092,68 @@ function showFilterValuesDialog(colIdx) {
   dialog.querySelector('#filter-select-none').addEventListener('click', () => {
     dialog.querySelectorAll('.filter-value-item input').forEach(cb => cb.checked = false);
     selectedValues.clear();
+  });
+  
+  // Search functionality
+  let lastSearchIndex = -1;
+  let lastSearchTerm = '';
+  
+  const performSearch = () => {
+    const searchInput = dialog.querySelector('#filter-search');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    if (!searchTerm) return;
+    
+    const listEl = dialog.querySelector('.filter-values-list');
+    const items = listEl.querySelectorAll('.filter-value-item');
+    
+    // If search term changed, reset
+    if (searchTerm !== lastSearchTerm) {
+      lastSearchIndex = -1;
+      lastSearchTerm = searchTerm;
+      // Remove previous highlights
+      items.forEach(item => item.classList.remove('search-highlight'));
+    }
+    
+    // Find next matching item starting from lastSearchIndex + 1
+    let foundIndex = -1;
+    for (let i = lastSearchIndex + 1; i < items.length; i++) {
+      const text = items[i].textContent.toLowerCase();
+      if (text.includes(searchTerm)) {
+        foundIndex = i;
+        break;
+      }
+    }
+    
+    // If not found, wrap around to beginning
+    if (foundIndex === -1) {
+      for (let i = 0; i <= lastSearchIndex && i < items.length; i++) {
+        const text = items[i].textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          foundIndex = i;
+          break;
+        }
+      }
+    }
+    
+    if (foundIndex !== -1) {
+      // Remove previous highlights
+      items.forEach(item => item.classList.remove('search-highlight'));
+      
+      // Highlight and scroll to found item
+      const foundItem = items[foundIndex];
+      foundItem.classList.add('search-highlight');
+      foundItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      foundItem.querySelector('input')?.focus();
+      lastSearchIndex = foundIndex;
+    }
+  };
+  
+  dialog.querySelector('#filter-search-btn').addEventListener('click', performSearch);
+  dialog.querySelector('#filter-search').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      performSearch();
+    }
   });
   
   dialog.querySelector('#filter-apply').addEventListener('click', () => {

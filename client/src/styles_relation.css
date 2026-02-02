@@ -648,6 +648,25 @@ input[type="number"] {
   cursor: pointer;
 }
 
+.filter-search-row {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-search-row .filter-input {
+  flex: 1;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+}
+
+.filter-value-item.search-highlight {
+  background: var(--primary-100);
+  outline: 2px solid var(--primary-400);
+  outline-offset: -2px;
+}
+
 .filter-dialog-footer {
   display: flex;
   flex-wrap: wrap;
