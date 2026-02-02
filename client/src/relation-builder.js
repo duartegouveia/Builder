@@ -8325,7 +8325,7 @@ function init() {
         wrapper = document.createElement('div');
         wrapper.className = 'relation-wrapper';
         wrapper.innerHTML = `
-          <div class="relation-primary"></div>
+          <div class="relation-primary card-content"></div>
           <div class="relation-secondary"></div>
         `;
         // Append to the main app container
