@@ -6173,7 +6173,6 @@ function init() {
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
     
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
@@ -6200,6 +6199,8 @@ function init() {
       if (btnVoice.classList.contains('recording')) {
         recognition.stop();
       } else {
+        const langSelect = el('.voice-language');
+        recognition.lang = langSelect?.value || 'en-US';
         btnVoice.classList.add('recording');
         btnVoice.querySelector('svg').style.color = '#ef4444';
         recognition.start();
