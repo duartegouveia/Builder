@@ -5255,18 +5255,33 @@ function calculateCorrelation() {
     return null;
   }
   
-  // Determine effective method
+  const isBinaryX = xType === 'boolean';
+  const isBinaryY = yType === 'boolean';
+  
+  // Determine effective method with smart auto-detect
   let effectiveMethod = method;
   if (method === 'auto') {
-    if ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) {
-      effectiveMethod = 'pearson';
+    if (isBinaryX && isBinaryY) {
+      effectiveMethod = 'phi';
+    } else if ((isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX))) {
+      effectiveMethod = 'pointbiserial';
+    } else if ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) {
+      // Count valid pairs to decide between Kendall and Pearson
+      let pairCount = 0;
+      state.sortedIndices.forEach(i => {
+        const row = state.relation.items[i];
+        const x = toNumeric(row[xIdx], xType);
+        const y = toNumeric(row[yIdx], yType);
+        if (x !== null && y !== null) pairCount++;
+      });
+      effectiveMethod = pairCount < 30 ? 'kendall' : 'pearson';
     } else {
       effectiveMethod = 'cramers';
     }
   }
   
-  // For Pearson or Spearman, need numeric pairs
-  if (effectiveMethod === 'pearson' || effectiveMethod === 'spearman') {
+  // For Pearson, Spearman, Kendall need numeric pairs
+  if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
     const pairs = [];
     state.sortedIndices.forEach(i => {
       const row = state.relation.items[i];
@@ -5285,9 +5300,53 @@ function calculateCorrelation() {
     
     if (effectiveMethod === 'spearman') {
       renderSpearmanCorrelation(pairs, xIdx, yIdx);
+    } else if (effectiveMethod === 'kendall') {
+      renderKendallCorrelation(pairs, xIdx, yIdx);
     } else {
       renderPearsonCorrelation(pairs, xIdx, yIdx);
     }
+  } else if (effectiveMethod === 'pointbiserial') {
+    // Point-biserial: one binary, one numeric
+    const binaryIdx = isBinaryX ? xIdx : yIdx;
+    const numericIdx = isBinaryX ? yIdx : xIdx;
+    const numericType = isBinaryX ? yType : xType;
+    
+    const pairs = [];
+    state.sortedIndices.forEach(i => {
+      const row = state.relation.items[i];
+      const bVal = row[binaryIdx];
+      const nVal = toNumeric(row[numericIdx], numericType);
+      if (bVal !== null && nVal !== null) {
+        pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
+      }
+    });
+    
+    if (pairs.length < 2) {
+      const corrResultEl = el('.correlation-result');
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
+      return;
+    }
+    
+    renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx);
+  } else if (effectiveMethod === 'phi') {
+    // Phi coefficient: both binary
+    const pairs = [];
+    state.sortedIndices.forEach(i => {
+      const row = state.relation.items[i];
+      const x = row[xIdx];
+      const y = row[yIdx];
+      if (x !== null && y !== null) {
+        pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
+      }
+    });
+    
+    if (pairs.length < 2) {
+      const corrResultEl = el('.correlation-result');
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
+      return;
+    }
+    
+    renderPhiCorrelation(pairs, xIdx, yIdx);
   } else {
     // Categorical: use Cramér's V
     const contingency = {};
@@ -5340,6 +5399,17 @@ function calculateCorrelation() {
   }
 }
 
+function detectOutliers(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const n = sorted.length;
+  const q1 = sorted[Math.floor(n * 0.25)];
+  const q3 = sorted[Math.floor(n * 0.75)];
+  const iqr = q3 - q1;
+  const lowerBound = q1 - 1.5 * iqr;
+  const upperBound = q3 + 1.5 * iqr;
+  return { lowerBound, upperBound, q1, q3, iqr };
+}
+
 function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   const n = pairs.length;
   const sumX = pairs.reduce((s, p) => s + p.x, 0);
@@ -5352,6 +5422,32 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
   
   const r = denominator === 0 ? 0 : numerator / denominator;
+  
+  // Detect outliers using IQR method
+  const xValues = pairs.map(p => p.x);
+  const yValues = pairs.map(p => p.y);
+  const xOutlierBounds = detectOutliers(xValues);
+  const yOutlierBounds = detectOutliers(yValues);
+  
+  const outlierPairs = pairs.filter(p => 
+    p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+    p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound
+  );
+  const outlierCount = outlierPairs.length;
+  
+  // Calculate residuals for linearity assessment
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  const slope = numerator / (n * sumX2 - sumX * sumX || 1);
+  const intercept = meanY - slope * meanX;
+  
+  const residuals = pairs.map(p => {
+    const predicted = slope * p.x + intercept;
+    return p.y - predicted;
+  });
+  const ssRes = residuals.reduce((s, r) => s + r * r, 0);
+  const ssTot = pairs.reduce((s, p) => s + (p.y - meanY) ** 2, 0);
+  const rSquared = ssTot === 0 ? 0 : 1 - ssRes / ssTot;
   
   const absR = Math.abs(r);
   let strength = 'No correlation';
@@ -5367,7 +5463,23 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   html += '<div class="correlation-label">Pearson Correlation (r)</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + r.toFixed(4) + '</div>';
   html += '<div class="correlation-label">' + strength + ' ' + (r > 0 ? 'positive' : r < 0 ? 'negative' : '') + ' correlation</div>';
-  html += '<div class="correlation-label">n = ' + n + ' pairs</div>';
+  html += '<div class="correlation-label">n = ' + n + ' pairs | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
+  
+  // Sample size warning
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Consider using Kendall\'s Tau for more robust results</div>';
+  }
+  
+  // Outlier warning
+  if (outlierCount > 0) {
+    const outlierPct = ((outlierCount / n) * 100).toFixed(1);
+    html += '<div class="correlation-warning">⚠️ ' + outlierCount + ' outliers detected (' + outlierPct + '%): Consider using Spearman for robust analysis</div>';
+  }
+  
+  // Linearity indicator
+  if (rSquared < 0.5 && absR > 0.3) {
+    html += '<div class="correlation-warning">⚠️ Low R² suggests non-linear relationship: Consider Spearman (monotonic) or transform data</div>';
+  }
   
   // SVG scatter plot
   const width = 400;
@@ -5388,27 +5500,32 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
   html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
   
+  // Draw points with outliers in different color
   pairs.forEach(p => {
     const cx = xScale(p.x);
     const cy = yScale(p.y);
-    html += '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="#3b82f6" opacity="0.6"/>';
+    const isOutlier = p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+                      p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound;
+    const color = isOutlier ? '#ef4444' : '#3b82f6';
+    const radius = isOutlier ? 6 : 4;
+    html += '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="' + color + '" opacity="0.7"/>';
   });
   
-  const meanX = sumX / n;
-  const meanY = sumY / n;
-  const slope = numerator / (n * sumX2 - sumX * sumX || 1);
-  const intercept = meanY - slope * meanX;
-  
+  // Trend line (using already calculated slope/intercept)
   const lineX1 = xMin;
   const lineY1 = slope * lineX1 + intercept;
   const lineX2 = xMax;
   const lineY2 = slope * lineX2 + intercept;
   
-  html += '<line x1="' + xScale(lineX1) + '" y1="' + yScale(lineY1) + '" x2="' + xScale(lineX2) + '" y2="' + yScale(lineY2) + '" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"/>';
+  html += '<line x1="' + xScale(lineX1) + '" y1="' + yScale(lineY1) + '" x2="' + xScale(lineX2) + '" y2="' + yScale(lineY2) + '" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5"/>';
   html += '</svg>';
+  if (outlierCount > 0) {
+    html += '<div class="correlation-legend"><span class="legend-dot outlier"></span> Outliers (IQR method) <span class="legend-dot normal"></span> Normal points</div>';
+  }
   html += '<div class="correlation-alternatives">';
   html += '<span class="correlation-alt-label">Try alternative:</span>';
-  html += '<button class="btn-alt-spearman btn btn-outline btn-sm" data-testid="button-alt-spearman">Spearman (no normality assumption)</button>';
+  html += '<button class="btn-alt-spearman btn btn-outline btn-sm" data-testid="button-alt-spearman">Spearman</button>';
+  html += '<button class="btn-alt-kendall btn btn-outline btn-sm" data-testid="button-alt-kendall">Kendall</button>';
   html += '</div>';
   html += '</div>';
   
@@ -5417,6 +5534,9 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
     corrResultEl.innerHTML = html;
     corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => {
       renderSpearmanCorrelation(pairs, xIdx, yIdx);
+    });
+    corrResultEl.querySelector('.btn-alt-kendall')?.addEventListener('click', () => {
+      renderKendallCorrelation(pairs, xIdx, yIdx);
     });
   }
 }
@@ -5466,12 +5586,30 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
   
   const colorClass = rho > 0.1 ? 'correlation-positive' : rho < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
+  // Detect outliers using IQR method
+  const xValues = pairs.map(p => p.x);
+  const yValues = pairs.map(p => p.y);
+  const xOutlierBounds = detectOutliers(xValues);
+  const yOutlierBounds = detectOutliers(yValues);
+  
+  const outlierCount = pairs.filter(p => 
+    p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+    p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound
+  ).length;
+  
   let html = '<div class="correlation-chart">';
   html += '<div class="correlation-label">Spearman Correlation (ρ)</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + rho.toFixed(4) + '</div>';
   html += '<div class="correlation-label">' + strength + ' ' + (rho > 0 ? 'positive' : rho < 0 ? 'negative' : '') + ' monotonic correlation</div>';
   html += '<div class="correlation-label">n = ' + n + ' pairs</div>';
   html += '<div class="correlation-note">Spearman measures monotonic (rank-based) relationship. More robust to outliers than Pearson.</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Kendall\'s Tau may be more appropriate</div>';
+  }
+  if (outlierCount > 0) {
+    html += '<div class="correlation-warning">ℹ️ ' + outlierCount + ' potential outliers detected (marked in red) - Spearman is robust to these</div>';
+  }
   
   // SVG scatter plot
   const width = 400;
@@ -5495,13 +5633,18 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
   pairs.forEach(p => {
     const cx = xScale(p.x);
     const cy = yScale(p.y);
-    html += '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="#10b981" opacity="0.6"/>';
+    const isOutlier = p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+                      p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound;
+    const color = isOutlier ? '#ef4444' : '#10b981';
+    const radius = isOutlier ? 6 : 4;
+    html += '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="' + color + '" opacity="0.7"/>';
   });
   
   html += '</svg>';
   html += '<div class="correlation-alternatives">';
   html += '<span class="correlation-alt-label">Try alternative:</span>';
-  html += '<button class="btn-alt-pearson btn btn-outline btn-sm" data-testid="button-alt-pearson">Pearson (assumes normality)</button>';
+  html += '<button class="btn-alt-pearson btn btn-outline btn-sm" data-testid="button-alt-pearson">Pearson</button>';
+  html += '<button class="btn-alt-kendall btn btn-outline btn-sm" data-testid="button-alt-kendall">Kendall</button>';
   html += '</div>';
   html += '</div>';
   
@@ -5511,7 +5654,241 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
     corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => {
       renderPearsonCorrelation(pairs, xIdx, yIdx);
     });
+    corrResultEl.querySelector('.btn-alt-kendall')?.addEventListener('click', () => {
+      renderKendallCorrelation(pairs, xIdx, yIdx);
+    });
   }
+}
+
+function renderKendallCorrelation(pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  
+  // Calculate Kendall's Tau
+  let concordant = 0;
+  let discordant = 0;
+  
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const xDiff = pairs[j].x - pairs[i].x;
+      const yDiff = pairs[j].y - pairs[i].y;
+      const product = xDiff * yDiff;
+      if (product > 0) concordant++;
+      else if (product < 0) discordant++;
+    }
+  }
+  
+  const totalPairs = (n * (n - 1)) / 2;
+  const tau = totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
+  
+  const absTau = Math.abs(tau);
+  let strength = 'No correlation';
+  if (absTau >= 0.9) strength = 'Very strong';
+  else if (absTau >= 0.7) strength = 'Strong';
+  else if (absTau >= 0.5) strength = 'Moderate';
+  else if (absTau >= 0.3) strength = 'Weak';
+  else if (absTau >= 0.1) strength = 'Very weak';
+  
+  const colorClass = tau > 0.1 ? 'correlation-positive' : tau < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  // Detect outliers using IQR method
+  const xValues = pairs.map(p => p.x);
+  const yValues = pairs.map(p => p.y);
+  const xOutlierBounds = detectOutliers(xValues);
+  const yOutlierBounds = detectOutliers(yValues);
+  
+  const outlierCount = pairs.filter(p => 
+    p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+    p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound
+  ).length;
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Kendall\'s Tau (τ)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + tau.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (tau > 0 ? 'positive' : tau < 0 ? 'negative' : '') + ' correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' pairs | Concordant: ' + concordant + ' | Discordant: ' + discordant + '</div>';
+  html += '<div class="correlation-note">Kendall\'s Tau is recommended for small samples (n&lt;30) and ordinal data. Robust to outliers.</div>';
+  
+  if (n >= 30) {
+    html += '<div class="correlation-warning">ℹ️ Large sample (n≥30): Pearson or Spearman may be more efficient</div>';
+  }
+  if (outlierCount > 0) {
+    html += '<div class="correlation-warning">⚠️ ' + outlierCount + ' outliers detected (marked in red below)</div>';
+  }
+  
+  // SVG scatter plot
+  const width = 400;
+  const height = 300;
+  const padding = 40;
+  
+  const xMin = Math.min(...xValues);
+  const xMax = Math.max(...xValues);
+  const yMin = Math.min(...yValues);
+  const yMax = Math.max(...yValues);
+  
+  const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+  const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+  html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
+  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  
+  pairs.forEach(p => {
+    const isOutlier = p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
+                      p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound;
+    const color = isOutlier ? '#ef4444' : '#8b5cf6';
+    const radius = isOutlier ? 6 : 4;
+    html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="' + radius + '" fill="' + color + '" opacity="0.7"/>';
+  });
+  
+  html += '</svg>';
+  html += '<div class="correlation-alternatives">';
+  html += '<span class="correlation-alt-label">Try alternative:</span>';
+  html += '<button class="btn-alt-pearson btn btn-outline btn-sm">Pearson</button>';
+  html += '<button class="btn-alt-spearman btn btn-outline btn-sm">Spearman</button>';
+  html += '</div>';
+  html += '</div>';
+  
+  const corrResultEl = el('.correlation-result');
+  if (corrResultEl) {
+    corrResultEl.innerHTML = html;
+    corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => renderPearsonCorrelation(pairs, xIdx, yIdx));
+    corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => renderSpearmanCorrelation(pairs, xIdx, yIdx));
+  }
+}
+
+function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx) {
+  const n = pairs.length;
+  const group0 = pairs.filter(p => p.binary === 0).map(p => p.numeric);
+  const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
+  
+  if (group0.length === 0 || group1.length === 0) {
+    const corrResultEl = el('.correlation-result');
+    if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Both binary groups need at least one observation</p>';
+    return;
+  }
+  
+  const n0 = group0.length;
+  const n1 = group1.length;
+  const mean0 = group0.reduce((s, v) => s + v, 0) / n0;
+  const mean1 = group1.reduce((s, v) => s + v, 0) / n1;
+  const allValues = pairs.map(p => p.numeric);
+  const meanAll = allValues.reduce((s, v) => s + v, 0) / n;
+  const variance = allValues.reduce((s, v) => s + (v - meanAll) ** 2, 0) / n;
+  const std = Math.sqrt(variance) || 1;
+  
+  const rpb = ((mean1 - mean0) / std) * Math.sqrt((n0 * n1) / (n * n));
+  
+  const absRpb = Math.abs(rpb);
+  let strength = 'No correlation';
+  if (absRpb >= 0.9) strength = 'Very strong';
+  else if (absRpb >= 0.7) strength = 'Strong';
+  else if (absRpb >= 0.5) strength = 'Moderate';
+  else if (absRpb >= 0.3) strength = 'Weak';
+  else if (absRpb >= 0.1) strength = 'Very weak';
+  
+  const colorClass = rpb > 0.1 ? 'correlation-positive' : rpb < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Point-Biserial Correlation (r<sub>pb</sub>)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + rpb.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (rpb > 0 ? 'positive' : rpb < 0 ? 'negative' : '') + ' correlation</div>';
+  html += '<div class="correlation-label">n = ' + n + ' | Group 0: ' + n0 + ' (mean=' + mean0.toFixed(2) + ') | Group 1: ' + n1 + ' (mean=' + mean1.toFixed(2) + ')</div>';
+  html += '<div class="correlation-note">Point-Biserial measures association between a binary variable and a continuous variable.</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Results may have limited statistical power</div>';
+  }
+  if (Math.min(n0, n1) < 5) {
+    html += '<div class="correlation-warning">⚠️ Unbalanced groups: One group has fewer than 5 observations</div>';
+  }
+  
+  // Box plot visualization
+  const width = 400;
+  const height = 200;
+  const padding = 50;
+  
+  const allMin = Math.min(...allValues);
+  const allMax = Math.max(...allValues);
+  const scale = (v) => padding + ((v - allMin) / (allMax - allMin || 1)) * (width - 2 * padding);
+  
+  html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  html += '<line x1="' + padding + '" y1="' + (height - 30) + '" x2="' + (width - padding) + '" y2="' + (height - 30) + '" stroke="#ccc" stroke-width="1"/>';
+  
+  // Draw group 0 points
+  group0.forEach(v => {
+    html += '<circle cx="' + scale(v) + '" cy="50" r="4" fill="#f59e0b" opacity="0.6"/>';
+  });
+  html += '<line x1="' + scale(mean0) + '" y1="40" x2="' + scale(mean0) + '" y2="60" stroke="#f59e0b" stroke-width="3"/>';
+  html += '<text x="' + 20 + '" y="55" font-size="11" fill="#666">0</text>';
+  
+  // Draw group 1 points
+  group1.forEach(v => {
+    html += '<circle cx="' + scale(v) + '" cy="100" r="4" fill="#06b6d4" opacity="0.6"/>';
+  });
+  html += '<line x1="' + scale(mean1) + '" y1="90" x2="' + scale(mean1) + '" y2="110" stroke="#06b6d4" stroke-width="3"/>';
+  html += '<text x="' + 20 + '" y="105" font-size="11" fill="#666">1</text>';
+  
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[numericIdx]) + '</text>';
+  html += '</svg>';
+  html += '</div>';
+  
+  const corrResultEl = el('.correlation-result');
+  if (corrResultEl) corrResultEl.innerHTML = html;
+}
+
+function renderPhiCorrelation(pairs, xIdx, yIdx) {
+  const n = pairs.length;
+  
+  // Build 2x2 contingency table
+  let a = 0, b = 0, c = 0, d = 0;
+  pairs.forEach(p => {
+    if (p.x === 1 && p.y === 1) a++;
+    else if (p.x === 1 && p.y === 0) b++;
+    else if (p.x === 0 && p.y === 1) c++;
+    else d++;
+  });
+  
+  const numerator = (a * d) - (b * c);
+  const denominator = Math.sqrt((a + b) * (c + d) * (a + c) * (b + d));
+  const phi = denominator === 0 ? 0 : numerator / denominator;
+  
+  const absPhi = Math.abs(phi);
+  let strength = 'No association';
+  if (absPhi >= 0.5) strength = 'Strong';
+  else if (absPhi >= 0.3) strength = 'Moderate';
+  else if (absPhi >= 0.1) strength = 'Weak';
+  else if (absPhi >= 0.05) strength = 'Very weak';
+  
+  const colorClass = phi > 0.1 ? 'correlation-positive' : phi < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+  
+  let html = '<div class="correlation-chart">';
+  html += '<div class="correlation-label">Phi Coefficient (φ)</div>';
+  html += '<div class="correlation-value ' + colorClass + '">' + phi.toFixed(4) + '</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + (phi > 0 ? 'positive' : phi < 0 ? 'negative' : '') + ' association</div>';
+  html += '<div class="correlation-label">n = ' + n + '</div>';
+  html += '<div class="correlation-note">Phi coefficient measures association between two binary variables. Equivalent to Pearson for 2×2 tables.</div>';
+  
+  if (n < 30) {
+    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Results may have limited statistical power</div>';
+  }
+  const minCell = Math.min(a, b, c, d);
+  if (minCell < 5) {
+    html += '<div class="correlation-warning">⚠️ Some cells have fewer than 5 observations: Consider Fisher\'s exact test</div>';
+  }
+  
+  // 2x2 table visualization
+  html += '<table class="phi-table">';
+  html += '<tr><th></th><th>' + escapeHtml(state.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(state.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
+  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a + b) + '</td></tr>';
+  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c + d) + '</td></tr>';
+  html += '<tr><th>Total</th><td>' + (a + c) + '</td><td>' + (b + d) + '</td><td>' + n + '</td></tr>';
+  html += '</table>';
+  html += '</div>';
+  
+  const corrResultEl = el('.correlation-result');
+  if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
 function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
@@ -5598,17 +5975,27 @@ function analyzeAllPairs() {
       const isNumericY = ['int', 'float'].includes(yType);
       const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
       const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
+      const isBinaryX = xType === 'boolean';
+      const isBinaryY = yType === 'boolean';
       
       let effectiveMethod = method;
       if (method === 'auto') {
-        effectiveMethod = ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) ? 'pearson' : 'cramers';
+        if (isBinaryX && isBinaryY) {
+          effectiveMethod = 'phi';
+        } else if ((isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX))) {
+          effectiveMethod = 'pointbiserial';
+        } else if ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) {
+          effectiveMethod = 'pearson';
+        } else {
+          effectiveMethod = 'cramers';
+        }
       }
       
       let correlation = 0;
       let methodUsed = effectiveMethod;
       let n = 0;
       
-      if (effectiveMethod === 'pearson' || effectiveMethod === 'spearman') {
+      if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
         const pairs = [];
         state.sortedIndices.forEach(idx => {
           const row = state.relation.items[idx];
@@ -5619,7 +6006,22 @@ function analyzeAllPairs() {
         
         if (pairs.length >= 2) {
           n = pairs.length;
-          if (effectiveMethod === 'spearman') {
+          if (effectiveMethod === 'kendall') {
+            // Kendall's Tau
+            let concordant = 0;
+            let discordant = 0;
+            for (let ii = 0; ii < n - 1; ii++) {
+              for (let jj = ii + 1; jj < n; jj++) {
+                const xDiff = pairs[jj].x - pairs[ii].x;
+                const yDiff = pairs[jj].y - pairs[ii].y;
+                const product = xDiff * yDiff;
+                if (product > 0) concordant++;
+                else if (product < 0) discordant++;
+              }
+            }
+            const totalPairs = (n * (n - 1)) / 2;
+            correlation = totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
+          } else if (effectiveMethod === 'spearman') {
             // Rank values
             function rank(arr) {
               const sorted = arr.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
@@ -5655,6 +6057,59 @@ function analyzeAllPairs() {
             const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
             correlation = den === 0 ? 0 : num / den;
           }
+        }
+      } else if (effectiveMethod === 'pointbiserial') {
+        // Point-biserial: one binary, one numeric
+        const pairs = [];
+        state.sortedIndices.forEach(idx => {
+          const row = state.relation.items[idx];
+          const bVal = isBinaryX ? row[xIdx] : row[yIdx];
+          const nVal = isBinaryX ? toNumeric(row[yIdx], yType) : toNumeric(row[xIdx], xType);
+          if (bVal !== null && nVal !== null) {
+            pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
+          }
+        });
+        
+        if (pairs.length >= 2) {
+          n = pairs.length;
+          const group0 = pairs.filter(p => p.binary === 0).map(p => p.numeric);
+          const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
+          if (group0.length > 0 && group1.length > 0) {
+            const n0 = group0.length;
+            const n1 = group1.length;
+            const mean0 = group0.reduce((s, v) => s + v, 0) / n0;
+            const mean1 = group1.reduce((s, v) => s + v, 0) / n1;
+            const allValues = pairs.map(p => p.numeric);
+            const meanAll = allValues.reduce((s, v) => s + v, 0) / n;
+            const variance = allValues.reduce((s, v) => s + (v - meanAll) ** 2, 0) / n;
+            const std = Math.sqrt(variance) || 1;
+            correlation = ((mean1 - mean0) / std) * Math.sqrt((n0 * n1) / (n * n));
+          }
+        }
+      } else if (effectiveMethod === 'phi') {
+        // Phi coefficient: both binary
+        const pairs = [];
+        state.sortedIndices.forEach(idx => {
+          const row = state.relation.items[idx];
+          const x = row[xIdx];
+          const y = row[yIdx];
+          if (x !== null && y !== null) {
+            pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
+          }
+        });
+        
+        if (pairs.length >= 2) {
+          n = pairs.length;
+          let a = 0, b = 0, c = 0, d = 0;
+          pairs.forEach(p => {
+            if (p.x === 1 && p.y === 1) a++;
+            else if (p.x === 1 && p.y === 0) b++;
+            else if (p.x === 0 && p.y === 1) c++;
+            else d++;
+          });
+          const numerator = (a * d) - (b * c);
+          const denominator = Math.sqrt((a + b) * (c + d) * (a + c) * (b + d));
+          correlation = denominator === 0 ? 0 : numerator / denominator;
         }
       } else {
         // Cramér's V

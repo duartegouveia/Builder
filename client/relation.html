@@ -127,7 +127,10 @@
                     <select class="corr-method pivot-select" data-testid="select-corr-method">
                       <option value="auto">Auto-detect</option>
                       <option value="pearson">Pearson (linear, normal)</option>
-                      <option value="spearman">Spearman (monotonic, any)</option>
+                      <option value="spearman">Spearman (monotonic, robust)</option>
+                      <option value="kendall">Kendall's Tau (ordinal, small n)</option>
+                      <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
+                      <option value="phi">Phi (binary × binary)</option>
                       <option value="cramers">Cramér's V (categorical)</option>
                     </select>
                   </div>
@@ -138,16 +141,21 @@
                 <div class="correlation-help" style="display: none;">
                   <p><strong>Choosing a correlation method:</strong></p>
                   <ul>
-                    <li><strong>Pearson (r)</strong> - Measures linear relationship. Assumes normal distribution. Best for continuous numeric data with linear trends. Range: -1 to +1.</li>
-                    <li><strong>Spearman (ρ)</strong> - Measures monotonic relationship (always increasing or decreasing, not necessarily linear). Does not assume normality. More robust to outliers. Range: -1 to +1.</li>
-                    <li><strong>Cramér's V</strong> - Measures association between categorical variables. Based on chi-squared. Range: 0 to 1 (no direction).</li>
+                    <li><strong>Pearson (r)</strong> - Linear relationship. Assumes normality. Best for continuous data. Range: -1 to +1.</li>
+                    <li><strong>Spearman (ρ)</strong> - Monotonic relationship. No normality assumption. Robust to outliers. Range: -1 to +1.</li>
+                    <li><strong>Kendall's Tau (τ)</strong> - Rank correlation. Better for small samples (n&lt;30) or ordinal data. More robust than Spearman. Range: -1 to +1.</li>
+                    <li><strong>Point-Biserial (r<sub>pb</sub>)</strong> - When one variable is binary (0/1) and other is numeric. Range: -1 to +1.</li>
+                    <li><strong>Phi (φ)</strong> - Association between two binary variables. Special case of Pearson for 2×2 tables. Range: -1 to +1.</li>
+                    <li><strong>Cramér's V</strong> - Categorical association. Based on chi-squared. Range: 0 to 1 (no direction).</li>
                   </ul>
                   <p><strong>Auto-detect logic:</strong></p>
                   <ul>
-                    <li>Both columns numeric/temporal → Pearson (assumes normality)</li>
-                    <li>Either column categorical → Cramér's V</li>
+                    <li>Both binary → Phi</li>
+                    <li>One binary + one numeric → Point-Biserial</li>
+                    <li>Both numeric, n&lt;30 → Kendall's Tau</li>
+                    <li>Both numeric, n≥30 → Pearson</li>
+                    <li>Either categorical → Cramér's V</li>
                   </ul>
-                  <p><em>Tip: If your data has outliers or non-linear trends, consider using Spearman instead of Pearson.</em></p>
                 </div>
                 <div class="correlation-result"></div>
               </div>
