@@ -8351,10 +8351,43 @@ function init() {
       switchView(getCurrentView(state));
       
       renderTable();
+      
+      // Create a second relation instance at the bottom of the page
+      createSecondRelationInstance(result.data);
     } else {
       alert('Parse error: ' + result.error);
     }
   });
+  
+  // Create a second relation instance at the bottom of the body
+  function createSecondRelationInstance(relationData) {
+    // Remove existing second instance if present
+    const existingSecond = document.querySelector('.relation-second-instance');
+    if (existingSecond) {
+      // Unregister the old instance
+      const oldUid = existingSecond.dataset.relationUid;
+      if (oldUid) {
+        relationInstances.delete(oldUid);
+        unregisterRelation(oldUid);
+      }
+      existingSecond.remove();
+    }
+    
+    // Create new container at bottom of body
+    const secondContainer = document.createElement('div');
+    secondContainer.className = 'relation relation-second-instance';
+    secondContainer.style.cssText = 'width: 100%; margin-top: 2rem; padding: 1rem; background: var(--card); border-radius: var(--radius);';
+    document.body.appendChild(secondContainer);
+    
+    // Deep clone the relation data to avoid shared state
+    const clonedData = JSON.parse(JSON.stringify(relationData));
+    
+    // Initialize the second instance
+    const secondState = initRelationInstance(secondContainer, clonedData, { showJsonEditor: false, isNested: false });
+    
+    // Store uid for cleanup
+    secondContainer.dataset.relationUid = secondState.uid;
+  }
   
   
   // Pivot table events
