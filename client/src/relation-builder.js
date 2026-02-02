@@ -35,11 +35,11 @@ const COLOR_PALETTES = {
   },
   dark: {
     name: 'Dark',
-    colors: ['#7f1d1d', '#14532d', '#1e3a8a', '#4c1d95', '#164e63']
+    colors: ['#991b1b', '#854d0e', '#166534', '#1e40af', '#6b21a8']
   },
   neutral: {
     name: 'Neutral',
-    colors: ['#e5e5e5', '#a3a3a3', '#525252', '#262626', '#0a0a0a']
+    colors: ['#f5f5f5', '#d4d4d4', '#a3a3a3', '#737373', '#404040']
   },
   warm: {
     name: 'Warm',
@@ -55,7 +55,7 @@ const COLOR_PALETTES = {
   },
   highlight: {
     name: 'Highlight',
-    colors: ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7']
+    colors: ['#ff0000', '#ff8000', '#ffff00', '#00ff00', '#00ffff', '#0080ff', '#8000ff']
   }
 };
 
