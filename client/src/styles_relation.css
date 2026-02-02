@@ -3070,3 +3070,126 @@
     display: none;
   }
 }
+
+/* ===== Missing Classes - Checkboxes ===== */
+.select-all-checkbox,
+.row-select-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+  margin: 0;
+}
+
+.select-all-checkbox:hover,
+.row-select-checkbox:hover {
+  transform: scale(1.1);
+}
+
+/* ===== Utility Classes ===== */
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+
+/* ===== AI View Styles ===== */
+.ai-view-wrapper {
+  padding: var(--space-4);
+}
+
+.ai-input-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.ai-input-row input[type="text"] {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.ai-input-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.ai-input-row button {
+  padding: var(--space-2) var(--space-4);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.ai-input-row button:hover {
+  background: var(--primary-600);
+}
+
+.ai-response {
+  padding: var(--space-3);
+  background: var(--slate-50);
+  border-radius: var(--radius-md);
+  min-height: 100px;
+}
+
+.ai-answer-text {
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.ai-filter-suggestion {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--primary-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--primary-200);
+}
+
+.ai-filter-suggestion p {
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+}
+
+.btn-apply-ai-filter {
+  margin-top: var(--space-2);
+}
+
+/* ===== Correlation View Select Styles ===== */
+.corr-col-x,
+.corr-col-y,
+.corr-method {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  font-size: 0.875rem;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.corr-col-x:focus,
+.corr-col-y:focus,
+.corr-method:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.correlation-neutral {
+  color: var(--slate-500);
+}
+
+.correlation-label {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  margin-bottom: var(--space-1);
+}
+
+/* ===== Card Content Wrapper ===== */
+.card-content {
+  padding: var(--space-4);
+}
