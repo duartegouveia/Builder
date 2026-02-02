@@ -4628,7 +4628,7 @@ function openNestedRelationDialog(relationData) {
   
   // Use the shared initRelationInstance function
   const builderContainer = document.getElementById(`${dialogId}-builder`);
-  const instanceState = initRelationInstance(builderContainer, relationData, { showJsonEditor: true, isNested: true });
+  const instanceState = initRelationInstance(builderContainer, relationData, { showJsonEditor: false, isNested: true });
   
   const closeDialog = () => {
     // Cleanup instance from both legacy map and new registry
