@@ -1547,6 +1547,7 @@ input[type="number"] {
 }
 
 .data-card-label {
+  display: none;
   font-size: 0.625rem;
   font-weight: 600;
   color: var(--muted-foreground);
@@ -1558,6 +1559,10 @@ input[type="number"] {
 
 .data-card-label::after {
   content: ':';
+}
+
+.data-card-field.show-label .data-card-label {
+  display: inline;
 }
 
 .data-card-value {
