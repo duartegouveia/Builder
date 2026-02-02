@@ -5567,11 +5567,14 @@ function setupResizeHandle() {
     }
     container.style.minHeight = (newHeight + 50) + 'px';
     
-    // Add padding to allow page to grow when dragging near bottom
+    // Add large padding to allow page to grow
+    mainContent.style.paddingBottom = (newHeight + 500) + 'px';
+    
+    // Auto-scroll page when dragging near bottom of viewport
     const viewportHeight = window.innerHeight;
-    const containerBottom = container.getBoundingClientRect().bottom;
-    if (containerBottom > viewportHeight - 100) {
-      mainContent.style.paddingBottom = (newHeight + 200) + 'px';
+    const mouseY = e.clientY;
+    if (mouseY > viewportHeight - 80) {
+      window.scrollBy(0, 15);
     }
   });
   
@@ -5602,11 +5605,14 @@ function setupResizeHandle() {
     }
     container.style.minHeight = (newHeight + 50) + 'px';
     
-    // Add padding to allow page to grow when dragging near bottom
+    // Add large padding to allow page to grow
+    mainContent.style.paddingBottom = (newHeight + 500) + 'px';
+    
+    // Auto-scroll page when dragging near bottom of viewport
     const viewportHeight = window.innerHeight;
-    const containerBottom = container.getBoundingClientRect().bottom;
-    if (containerBottom > viewportHeight - 100) {
-      mainContent.style.paddingBottom = (newHeight + 200) + 'px';
+    const touchY = e.touches[0].clientY;
+    if (touchY > viewportHeight - 80) {
+      window.scrollBy(0, 15);
     }
   }, { passive: true });
   
