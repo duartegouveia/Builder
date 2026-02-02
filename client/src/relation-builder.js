@@ -4451,7 +4451,20 @@ function showNestedRelationDialog(rowIdx, colIdx) {
   const nestedRelation = state.relation.items[rowIdx][colIdx];
   if (!nestedRelation || !nestedRelation.columns) return;
   
+  // Ensure nested relation has default rel_options
+  if (!nestedRelation.rel_options) {
+    nestedRelation.rel_options = { ...DEFAULT_REL_OPTIONS };
+  }
+  if (!nestedRelation.options) {
+    nestedRelation.options = {};
+  }
+  
   const dialogId = `nested-relation-${Date.now()}`;
+  
+  // Create overlay backdrop
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
   
   const dialog = document.createElement('div');
   dialog.className = 'nested-relation-dialog';
@@ -4463,44 +4476,338 @@ function showNestedRelationDialog(rowIdx, colIdx) {
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="nested-relation-content">
-      <div class="nested-relation-builder" id="${dialogId}-builder"></div>
+      <div class="nested-relation-full-builder" id="${dialogId}-builder">
+        <div class="nested-json-section">
+          <textarea class="nested-relation-json" rows="6" readonly>${JSON.stringify(nestedRelation, null, 2)}</textarea>
+        </div>
+        <div class="nested-view-section">
+          <div class="nested-view-tabs"></div>
+          <div class="nested-view-content"></div>
+        </div>
+      </div>
     </div>
     <div class="filter-dialog-footer">
       <button class="btn btn-outline close-nested">Fechar</button>
     </div>
   `;
   
+  document.body.appendChild(overlay);
   document.body.appendChild(dialog);
   
-  // Initialize nested relation builder
-  initNestedRelationBuilder(`${dialogId}-builder`, nestedRelation);
+  // Initialize full nested relation builder
+  initFullNestedRelationBuilder(`${dialogId}-builder`, nestedRelation);
   
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.close-nested').addEventListener('click', () => dialog.remove());
+  const closeDialog = () => {
+    overlay.remove();
+    dialog.remove();
+  };
+  
+  overlay.addEventListener('click', closeDialog);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', closeDialog);
+  dialog.querySelector('.close-nested').addEventListener('click', closeDialog);
 }
 
-// Initialize a nested relation builder inside a container
-function initNestedRelationBuilder(containerId, relation) {
+// Initialize a full nested relation builder with all features
+function initFullNestedRelationBuilder(containerId, relation) {
   const container = document.getElementById(containerId);
   if (!container || !relation) return;
   
   const nestedState = {
+    uid: generateUID(),
     relation: relation,
     columnNames: Object.keys(relation.columns || {}),
     columnTypes: Object.values(relation.columns || {}),
     options: relation.options || {},
-    relOptions: relation.rel_options || {},
+    rel_options: relation.rel_options || { ...DEFAULT_REL_OPTIONS },
     currentPage: 1,
     pageSize: 20,
-    sortConfig: [],
+    cardsPageSize: 12,
+    cardsCurrentPage: 1,
+    sortCriteria: [],
     filters: {},
-    conditionalFormatting: {},
-    groupedColumns: [],
+    formatting: {},
+    filteredIndices: [...Array((relation.items || []).length).keys()],
+    sortedIndices: [...Array((relation.items || []).length).keys()],
     selectedRows: new Set(),
+    groupedColumns: [],
+    currentView: 'table',
     containerId: containerId
   };
   
-  renderNestedRelationTable(container, nestedState);
+  // Render view tabs
+  const tabsContainer = container.querySelector('.nested-view-tabs');
+  const contentContainer = container.querySelector('.nested-view-content');
+  
+  const viewOptions = nestedState.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
+  
+  let tabsHtml = '';
+  viewOptions.forEach((view, idx) => {
+    const viewLower = view.toLowerCase();
+    const isActive = idx === 0;
+    tabsHtml += `<button class="nested-view-tab${isActive ? ' active' : ''}" data-view="${viewLower}">${view}</button>`;
+  });
+  tabsContainer.innerHTML = tabsHtml;
+  
+  // Set initial view
+  nestedState.currentView = viewOptions[0]?.toLowerCase() || 'table';
+  
+  // Render initial view
+  renderNestedView(contentContainer, nestedState);
+  
+  // Add tab click handlers
+  tabsContainer.querySelectorAll('.nested-view-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabsContainer.querySelectorAll('.nested-view-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      nestedState.currentView = tab.dataset.view;
+      renderNestedView(contentContainer, nestedState);
+    });
+  });
+}
+
+// Render the current view for nested relation
+function renderNestedView(container, nestedState) {
+  const view = nestedState.currentView;
+  
+  if (view === 'table') {
+    renderNestedTableView(container, nestedState);
+  } else if (view === 'cards') {
+    renderNestedCardsView(container, nestedState);
+  } else {
+    container.innerHTML = `<div class="nested-view-placeholder"><p>Vista "${view}" em desenvolvimento para sub-relations.</p></div>`;
+  }
+}
+
+// Render nested table view
+function renderNestedTableView(container, nestedState) {
+  const { relation, columnNames, columnTypes, currentPage, pageSize, sortCriteria, filters, groupedColumns, options } = nestedState;
+  
+  if (!relation || !relation.items) {
+    container.innerHTML = '<p>No data</p>';
+    return;
+  }
+  
+  // Apply filters and sorting
+  let indices = [...Array(relation.items.length).keys()];
+  
+  // Apply sorting
+  if (sortCriteria.length > 0) {
+    indices.sort((a, b) => {
+      for (const { column, direction } of sortCriteria) {
+        const cmp = compareValues(relation.items[a][column], relation.items[b][column], columnTypes[column]);
+        if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
+      }
+      return 0;
+    });
+  }
+  
+  nestedState.sortedIndices = indices;
+  
+  const totalItems = indices.length;
+  const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
+  const totalPages = Math.ceil(totalItems / effectivePageSize);
+  const startIdx = (currentPage - 1) * effectivePageSize;
+  const pageIndices = indices.slice(startIdx, startIdx + effectivePageSize);
+  
+  // Determine visible columns
+  const visibleCols = columnNames.map((name, idx) => ({ name, idx }))
+    .filter(c => !groupedColumns.includes(c.idx));
+  
+  let html = `
+    <div class="nested-table-controls">
+      <span class="nested-table-info">${totalItems} rows</span>
+      <select class="nested-page-size-select">
+        <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
+        <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
+        <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+        <option value="all" ${pageSize === 'all' ? 'selected' : ''}>All</option>
+      </select>
+    </div>
+    <div class="nested-table-wrapper">
+      <table class="nested-relation-table-dynamic">
+        <thead><tr>
+  `;
+  
+  visibleCols.forEach(({ name, idx }) => {
+    const sortInfo = sortCriteria.find(s => s.column === idx);
+    const sortIcon = sortInfo ? (sortInfo.direction === 'asc' ? ' ▲' : ' ▼') : '';
+    html += `<th data-col="${idx}" class="nested-th-sortable">${name}${sortIcon}</th>`;
+  });
+  
+  html += '</tr></thead><tbody>';
+  
+  pageIndices.forEach((rowIdx) => {
+    const row = relation.items[rowIdx];
+    html += `<tr data-row="${rowIdx}">`;
+    visibleCols.forEach(({ name, idx }) => {
+      const val = row[idx];
+      const type = columnTypes[idx];
+      let display = formatNestedCellValue(val, type, options, name);
+      const dataAttr = type === 'relation' ? ` data-row="${rowIdx}" data-col="${idx}" data-type="relation"` : '';
+      html += `<td data-col="${idx}"${dataAttr}>${display}</td>`;
+    });
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table></div>';
+  
+  // Pagination
+  if (totalPages > 1) {
+    html += `
+      <div class="nested-pagination">
+        <button class="btn btn-sm nested-page-btn" data-action="first" ${currentPage === 1 ? 'disabled' : ''}>«</button>
+        <button class="btn btn-sm nested-page-btn" data-action="prev" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+        <span class="nested-page-info">Página ${currentPage} de ${totalPages}</span>
+        <button class="btn btn-sm nested-page-btn" data-action="next" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
+        <button class="btn btn-sm nested-page-btn" data-action="last" ${currentPage === totalPages ? 'disabled' : ''}>»</button>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+  
+  // Add event listeners
+  container.querySelectorAll('.nested-th-sortable').forEach(th => {
+    th.addEventListener('click', (e) => {
+      const colIdx = parseInt(th.dataset.col);
+      const existing = nestedState.sortCriteria.findIndex(s => s.column === colIdx);
+      if (existing >= 0) {
+        if (nestedState.sortCriteria[existing].direction === 'asc') {
+          nestedState.sortCriteria[existing].direction = 'desc';
+        } else {
+          nestedState.sortCriteria.splice(existing, 1);
+        }
+      } else {
+        if (!e.shiftKey) nestedState.sortCriteria = [];
+        nestedState.sortCriteria.push({ column: colIdx, direction: 'asc' });
+      }
+      renderNestedTableView(container, nestedState);
+    });
+  });
+  
+  container.querySelectorAll('.nested-page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      const totalPages = Math.ceil(nestedState.sortedIndices.length / (nestedState.pageSize === 'all' ? nestedState.sortedIndices.length : nestedState.pageSize));
+      if (action === 'first') nestedState.currentPage = 1;
+      else if (action === 'prev') nestedState.currentPage = Math.max(1, nestedState.currentPage - 1);
+      else if (action === 'next') nestedState.currentPage = Math.min(totalPages, nestedState.currentPage + 1);
+      else if (action === 'last') nestedState.currentPage = totalPages;
+      renderNestedTableView(container, nestedState);
+    });
+  });
+  
+  container.querySelector('.nested-page-size-select')?.addEventListener('change', (e) => {
+    nestedState.pageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
+    nestedState.currentPage = 1;
+    renderNestedTableView(container, nestedState);
+  });
+  
+  // Handle nested relation clicks
+  container.querySelectorAll('[data-type="relation"]').forEach(td => {
+    td.style.cursor = 'pointer';
+    td.addEventListener('click', () => {
+      const rowIdx = parseInt(td.dataset.row);
+      const colIdx = parseInt(td.dataset.col);
+      const nestedRel = nestedState.relation.items[rowIdx][colIdx];
+      if (nestedRel && nestedRel.columns) {
+        showNestedRelationDialogFromData(nestedRel);
+      }
+    });
+  });
+}
+
+// Render nested cards view
+function renderNestedCardsView(container, nestedState) {
+  const { relation, columnNames, columnTypes, cardsCurrentPage, cardsPageSize, sortedIndices, options } = nestedState;
+  
+  if (!relation || !relation.items) {
+    container.innerHTML = '<p>No data</p>';
+    return;
+  }
+  
+  const indices = sortedIndices || [...Array(relation.items.length).keys()];
+  const totalItems = indices.length;
+  const totalPages = Math.ceil(totalItems / cardsPageSize);
+  const startIdx = (cardsCurrentPage - 1) * cardsPageSize;
+  const pageIndices = indices.slice(startIdx, startIdx + cardsPageSize);
+  
+  let html = '<div class="nested-cards-grid">';
+  
+  pageIndices.forEach((rowIdx) => {
+    const row = relation.items[rowIdx];
+    html += `<div class="nested-data-card" data-row="${rowIdx}">`;
+    html += `<div class="nested-card-header">#${rowIdx + 1}</div>`;
+    html += '<div class="nested-card-body">';
+    
+    columnNames.forEach((colName, colIdx) => {
+      const value = row[colIdx];
+      const type = columnTypes[colIdx];
+      let tooltipValue = value !== null && value !== undefined ? String(value) : '';
+      if (type === 'select' && options[colName] && options[colName][value]) {
+        tooltipValue = options[colName][value];
+      }
+      const displayValue = formatNestedCellValue(value, type, options, colName);
+      
+      html += `<div class="nested-card-field" title="${escapeHtml(colName)}: ${escapeHtml(tooltipValue)}">`;
+      html += `<span class="nested-card-value">${displayValue}</span>`;
+      html += '</div>';
+    });
+    
+    html += '</div></div>';
+  });
+  
+  html += '</div>';
+  
+  if (totalPages > 1) {
+    html += `
+      <div class="nested-pagination">
+        <button class="btn btn-sm nested-page-btn" data-action="cards-first" ${cardsCurrentPage === 1 ? 'disabled' : ''}>«</button>
+        <button class="btn btn-sm nested-page-btn" data-action="cards-prev" ${cardsCurrentPage === 1 ? 'disabled' : ''}>‹</button>
+        <span class="nested-page-info">Página ${cardsCurrentPage} de ${totalPages}</span>
+        <button class="btn btn-sm nested-page-btn" data-action="cards-next" ${cardsCurrentPage === totalPages ? 'disabled' : ''}>›</button>
+        <button class="btn btn-sm nested-page-btn" data-action="cards-last" ${cardsCurrentPage === totalPages ? 'disabled' : ''}>»</button>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+  
+  // Add pagination listeners
+  container.querySelectorAll('.nested-page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'cards-first') nestedState.cardsCurrentPage = 1;
+      else if (action === 'cards-prev') nestedState.cardsCurrentPage = Math.max(1, nestedState.cardsCurrentPage - 1);
+      else if (action === 'cards-next') nestedState.cardsCurrentPage = Math.min(totalPages, nestedState.cardsCurrentPage + 1);
+      else if (action === 'cards-last') nestedState.cardsCurrentPage = totalPages;
+      renderNestedCardsView(container, nestedState);
+    });
+  });
+}
+
+// Format cell value for nested relation
+function formatNestedCellValue(value, type, options, colName) {
+  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  
+  if (type === 'relation') {
+    const count = value?.items?.length || 0;
+    return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
+  }
+  if (type === 'boolean') {
+    if (value === true) return '<span class="bool-display bool-display-true">✓</span>';
+    if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
+    return '<span class="bool-display bool-display-null">—</span>';
+  }
+  if (type === 'select') {
+    const colOptions = options[colName];
+    if (colOptions && colOptions[value] !== undefined) {
+      return `<span class="select-display">${colOptions[value]}</span>`;
+    }
+    return `<span class="select-display-key">${value}</span>`;
+  }
+  
+  return escapeHtml(String(value));
 }
 
 // Render a nested relation table
@@ -4643,7 +4950,20 @@ function renderNestedRelationTable(container, nestedState) {
 
 // Show nested relation dialog from data (for deeper nesting)
 function showNestedRelationDialogFromData(relation) {
+  // Ensure nested relation has default rel_options
+  if (!relation.rel_options) {
+    relation.rel_options = { ...DEFAULT_REL_OPTIONS };
+  }
+  if (!relation.options) {
+    relation.options = {};
+  }
+  
   const dialogId = `nested-relation-${Date.now()}`;
+  
+  // Create overlay backdrop
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
   
   const dialog = document.createElement('div');
   dialog.className = 'nested-relation-dialog';
@@ -4655,19 +4975,34 @@ function showNestedRelationDialogFromData(relation) {
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="nested-relation-content">
-      <div class="nested-relation-builder" id="${dialogId}-builder"></div>
+      <div class="nested-relation-full-builder" id="${dialogId}-builder">
+        <div class="nested-json-section">
+          <textarea class="nested-relation-json" rows="6" readonly>${JSON.stringify(relation, null, 2)}</textarea>
+        </div>
+        <div class="nested-view-section">
+          <div class="nested-view-tabs"></div>
+          <div class="nested-view-content"></div>
+        </div>
+      </div>
     </div>
     <div class="filter-dialog-footer">
       <button class="btn btn-outline close-nested">Fechar</button>
     </div>
   `;
   
+  document.body.appendChild(overlay);
   document.body.appendChild(dialog);
   
-  initNestedRelationBuilder(`${dialogId}-builder`, relation);
+  initFullNestedRelationBuilder(`${dialogId}-builder`, relation);
   
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.close-nested').addEventListener('click', () => dialog.remove());
+  const closeDialog = () => {
+    overlay.remove();
+    dialog.remove();
+  };
+  
+  overlay.addEventListener('click', closeDialog);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', closeDialog);
+  dialog.querySelector('.close-nested').addEventListener('click', closeDialog);
 }
 
 function updateRelationFromInput(input) {
