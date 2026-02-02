@@ -241,14 +241,14 @@
   font-style: italic;
 }
 
-/* Hide number input spinners */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
+/* Hide number input spinners (scoped to relation tables) */
+.relation-table input[type="number"]::-webkit-outer-spin-button,
+.relation-table input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+.relation-table input[type="number"] {
   -moz-appearance: textfield;
 }
 
