@@ -4694,20 +4694,26 @@ function renderViewTabs() {
   
   viewTabs.appendChild(tabsLeft);
   
-  // Create right section for help badge
-  const tabsRight = document.createElement('div');
-  tabsRight.className = 'view-tabs-right';
-  tabsRight.innerHTML = `
-    <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard">ℹ
-      <span class="keyboard-help-tooltip" data-testid="text-keyboard-shortcuts">
-        <strong>Atalhos de teclado e rato para o cabeçalho da coluna da tabela</strong><br>
-        <b>Right-click</b> — menu de contexto<br>
-        <b>Shift+click</b> — ordenar por várias colunas<br>
-        <b>Ctrl+click</b> — selecionar colunas
+  // Create right section for help badge (only if table view is available)
+  const hasTableView = viewOptions.some(v => v.toLowerCase() === 'table');
+  if (hasTableView) {
+    const tabsRight = document.createElement('div');
+    tabsRight.className = 'view-tabs-right';
+    // Show badge only if table is the initial view
+    const initialView = viewOptions[0]?.toLowerCase() || 'table';
+    const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
+    tabsRight.innerHTML = `
+      <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ
+        <span class="keyboard-help-tooltip" data-testid="text-keyboard-shortcuts">
+          <strong>Atalhos de teclado e rato para o cabeçalho da coluna da tabela</strong><br>
+          <b>Right-click</b> — menu de contexto<br>
+          <b>Shift+click</b> — ordenar por várias colunas<br>
+          <b>Ctrl+click</b> — selecionar colunas
+        </span>
       </span>
-    </span>
-  `;
-  viewTabs.appendChild(tabsRight);
+    `;
+    viewTabs.appendChild(tabsRight);
+  }
   
   // Show view tabs
   viewTabs.style.display = 'flex';
@@ -4720,6 +4726,12 @@ function switchView(viewName) {
   elAll('.view-tab').forEach(tab => {
     tab.classList.toggle('active', tab.dataset.view === viewName);
   });
+  
+  // Show/hide keyboard help badge based on view (only show for table view)
+  const helpBadge = el('.keyboard-help-badge');
+  if (helpBadge) {
+    helpBadge.style.display = viewName === 'table' ? '' : 'none';
+  }
   
   // Show/hide view content (scoped to relation container)
   elAll('.view-content').forEach(content => {
