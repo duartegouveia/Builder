@@ -129,9 +129,14 @@
               
               <div class="view-diagram view-content" style="display: none;">
                 <div class="diagram-info">
-                  <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by categorical values.</p>
+                  <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by cluster assignment. <strong>Recommended clusters:</strong> Use 3-10 clusters for most datasets. A common rule is sqrt(n/2) where n is the number of rows. Too few clusters may oversimplify patterns; too many may create noise.</p>
                 </div>
                 <div class="diagram-config">
+                  <div class="diagram-config-row">
+                    <label>Clusters:</label>
+                    <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;" data-testid="input-tsne-clusters">
+                    <span class="diagram-field-help">Number of color groups. Range: 2-20. Recommended: sqrt(n/2) where n is the number of rows.</span>
+                  </div>
                   <div class="diagram-config-row">
                     <label>Perplexity:</label>
                     <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;" data-testid="input-tsne-perplexity">

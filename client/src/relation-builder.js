@@ -5445,6 +5445,7 @@ function runClustering() {
   }
   
   // Get t-SNE parameters from UI
+  const numClusters = parseInt(el('.tsne-clusters')?.value) || 5;
   const perplexity = parseInt(el('.tsne-perplexity')?.value) || 30;
   const iterations = parseInt(el('.tsne-iterations')?.value) || 500;
   
@@ -5550,13 +5551,16 @@ function runClustering() {
     }));
     
     // Apply k-means clustering for colors
-    const numClusters = Math.min(8, Math.max(2, Math.floor(Math.sqrt(nRows / 2))));
+    const effectiveClusters = Math.min(numClusters, nRows);
     const clusterColors = [
       '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
-      '#ff7f00', '#ffff33', '#a65628', '#f781bf'
+      '#ff7f00', '#ffff33', '#a65628', '#f781bf',
+      '#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3',
+      '#a6d854', '#ffd92f', '#e5c494', '#b3b3b3',
+      '#1b9e77', '#d95f02', '#7570b3', '#e7298a'
     ];
     
-    const clusterAssignments = kMeansClustering(result, numClusters);
+    const clusterAssignments = kMeansClustering(result, effectiveClusters);
     nodes.forEach((node, i) => {
       node.cluster = clusterAssignments[i];
       node.color = clusterColors[clusterAssignments[i] % clusterColors.length];
