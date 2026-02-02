@@ -199,7 +199,7 @@ function generateNestedRelation(schema, idCounter) {
     const row = columnTypes.map((type, idx) => {
       const colName = columnNames[idx];
       if (type === 'id' || colName === 'id') {
-        return idCounter.value++;
+        return String(idCounter.value++);
       }
       if (Math.random() < 0.1) return null; // 10% nulls
       return generateRandomValue(type);
@@ -274,7 +274,7 @@ function generateDemoRelation() {
   for (let i = 0; i < 50; i++) {
     const row = columnTypes.map((type, idx) => {
       const colName = columnKeys[idx];
-      if (colName === 'id') return i + 1;
+      if (colName === 'id') return String(i + 1);
       if (Math.random() < 0.05) return null; // 5% nulls
       
       // Handle nested relations with their schemas
@@ -452,7 +452,7 @@ function matchesCriteria(value, criteria, colIdx) {
     let compValue2 = criteria.value2;
     
     // Convert to comparable numbers
-    if (type === 'id' || type === 'int' || type === 'float') {
+    if (type === 'int' || type === 'float') {
       numValue = Number(value);
       compValue = Number(compValue);
       if (compValue2 !== undefined) compValue2 = Number(compValue2);
@@ -519,7 +519,7 @@ function compareValues(a, b, type) {
   if (a === null || a === undefined) return b === null || b === undefined ? 0 : 1;
   if (b === null || b === undefined) return -1;
   
-  if (type === 'id' || type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float') {
     return a - b;
   }
   if (type === 'boolean') {
@@ -1083,7 +1083,7 @@ function calculateStatistics(colIdx) {
     nullPercent: ((nullCount / total) * 100).toFixed(2)
   };
   
-  if (type === 'id' || type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float') {
     const nums = values.map(Number).filter(n => !isNaN(n));
     if (nums.length > 0) {
       nums.sort((a, b) => a - b);
@@ -1893,7 +1893,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
     input.dataset.row = rowIdx;
     input.dataset.col = colIdx;
     input.className = 'relation-input';
-    if (type === 'id' || type === 'int' || type === 'float') {
+    if (type === 'int' || type === 'float') {
       input.step = type === 'float' ? '0.001' : '1';
     }
     wrapper.appendChild(input);
@@ -1904,7 +1904,6 @@ function createInputForType(type, value, rowIdx, colIdx, editable) {
 
 function getInputType(type) {
   switch (type) {
-    case 'id':
     case 'int':
     case 'float':
       return 'number';
@@ -1954,7 +1953,7 @@ function applyConditionalFormatting(value, colIdx, cell, rowIdx) {
         if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
         if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
         
-        if (rule.style.dataBar && (type === 'id' || type === 'int' || type === 'float')) {
+        if (rule.style.dataBar && (type === 'int' || type === 'float')) {
           const stats = calculateStatistics(colIdx);
           if (stats.min !== undefined && stats.max !== undefined && stats.max !== stats.min) {
             const percent = ((value - stats.min) / (stats.max - stats.min)) * 100;
@@ -2694,7 +2693,7 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-header">Filter <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item" data-action="filter-values">By Values...</button>
-          ${type === 'id' || type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
+          ${type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
             <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
             <button class="column-menu-item" data-action="filter-top10">Top 10</button>
             <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
@@ -2930,7 +2929,7 @@ function openFilterDialogForColumn(colIdx) {
     // No filter, open appropriate default dialog based on column type
     if (type === 'string' || type === 'multilinestring') {
       showFilterTextCriteriaDialog(colIdx);
-    } else if (type === 'id' || type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') {
+    } else if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') {
       showFilterComparisonDialog(colIdx);
     } else {
       showFilterValuesDialog(colIdx);
@@ -3517,7 +3516,7 @@ function showStatisticsPanel(colIdx) {
     <div class="stats-row"><span>Null:</span><span>${stats.nullCount} (${stats.nullPercent}%)</span></div>
   `;
   
-  if (type === 'id' || type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float') {
     // Add box plot visualization
     statsHtml += generateBoxPlotSVG(stats);
     
@@ -4302,7 +4301,7 @@ function showRowEditDialog(rowIdx) {
     } else if (type === 'multilinestring') {
       input = `<textarea data-col="${i}" rows="3">${val || ''}</textarea>`;
     } else {
-      const inputType = type === 'id' || type === 'int' || type === 'float' ? 'number' : type === 'date' ? 'date' : type === 'time' ? 'time' : type === 'datetime' ? 'datetime-local' : 'text';
+      const inputType = type === 'int' || type === 'float' ? 'number' : type === 'date' ? 'date' : type === 'time' ? 'time' : type === 'datetime' ? 'datetime-local' : 'text';
       input = `<input type="${inputType}" data-col="${i}" value="${val || ''}" />`;
     }
     
@@ -4339,7 +4338,7 @@ function showRowEditDialog(rowIdx) {
       let value;
       if (type === 'boolean') {
         value = input.checked;
-      } else if (type === 'id' || type === 'int') {
+      } else if (type === 'int') {
         value = parseInt(input.value) || 0;
       } else if (type === 'float') {
         value = parseFloat(input.value) || 0;
@@ -4419,7 +4418,7 @@ function updateRelationFromInput(input) {
   let value;
   if (type === 'boolean') {
     value = input.checked;
-  } else if (type === 'id' || type === 'int') {
+  } else if (type === 'int') {
     value = parseInt(input.value) || 0;
   } else if (type === 'float') {
     value = parseFloat(input.value) || 0;
@@ -5274,7 +5273,7 @@ function runClustering() {
       const type = state.columnTypes[colIdx];
       if (val === null) return 0;
       if (type === 'boolean') return val ? 1 : 0;
-      if (type === 'id' || type === 'int' || type === 'float') return val;
+      if (type === 'int' || type === 'float') return val;
       if (type === 'string' || type === 'select') {
         let hash = 0;
         const str = String(val);
