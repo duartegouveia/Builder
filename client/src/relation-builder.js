@@ -4686,15 +4686,20 @@ function renderCardsView() {
   // Render cards grid in first div
   let cardsHtml = '<div class="cards-grid" style="display: grid; grid-template-columns: repeat(' + cardsPerRow + ', 1fr); gap: 16px;">';
   
+  // Calculate grid layout based on number of columns
+  const numCols = state.columnNames.length;
+  const gridCols = Math.min(numCols, 4); // Max 4 columns in grid
+  
   pageIndices.forEach((rowIdx, i) => {
     const row = state.relation.items[rowIdx];
     const isSelected = state.selectedRows.has(rowIdx);
     
-    cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '">';
+    cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '" style="--card-grid-cols: ' + gridCols + ';">';
     cardsHtml += '<div class="data-card-header">';
     cardsHtml += '<input type="checkbox" class="data-card-checkbox" ' + (isSelected ? 'checked' : '') + ' data-row-idx="' + rowIdx + '">';
     cardsHtml += '<span class="data-card-id">#' + (rowIdx + 1) + '</span>';
     cardsHtml += '</div>';
+    cardsHtml += '<div class="data-card-body">';
     
     state.columnNames.forEach((colName, colIdx) => {
       const value = row[colIdx];
@@ -4702,12 +4707,17 @@ function renderCardsView() {
       let displayValue = formatCellValue(value, type, colIdx);
       const fullValue = value !== null && value !== undefined ? String(value) : '';
       
-      cardsHtml += '<div class="data-card-field">';
-      cardsHtml += '<div class="data-card-label">' + escapeHtml(colName) + '</div>';
-      cardsHtml += '<div class="data-card-value" title="' + escapeHtml(fullValue) + '">' + displayValue + '</div>';
+      // Determine if field should span full width (multiline, relation, long text)
+      const isWide = type === 'multilinestring' || type === 'relation' || type === 'string';
+      const fieldClass = 'data-card-field data-card-col-' + colIdx + (isWide ? ' data-card-field-wide' : '');
+      
+      cardsHtml += '<div class="' + fieldClass + '">';
+      cardsHtml += '<span class="data-card-label data-card-label-' + colIdx + '">' + escapeHtml(colName) + '</span>';
+      cardsHtml += '<span class="data-card-value data-card-value-' + colIdx + '" title="' + escapeHtml(fullValue) + '">' + displayValue + '</span>';
       cardsHtml += '</div>';
     });
     
+    cardsHtml += '</div>';
     cardsHtml += '</div>';
   });
   
