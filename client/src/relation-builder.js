@@ -35,7 +35,7 @@ const COLOR_PALETTES = {
   },
   dark: {
     name: 'Dark',
-    colors: ['#991b1b', '#854d0e', '#166534', '#1e40af', '#6b21a8']
+    colors: ['#991b1b', '#9a3412', '#854d0e', '#166534', '#115e59', '#1e40af', '#5b21b6', '#9d174d', '#0e7490', '#3f6212']
   },
   neutral: {
     name: 'Neutral',
