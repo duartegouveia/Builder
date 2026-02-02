@@ -558,14 +558,14 @@ function generateCategoricalHistogramSVG(stats, colName) {
   const data = stats.freqTableDesc;
   const maxCount = Math.max(...data.map(d => d.count));
   
-  const barHeight = 22;
-  const labelWidth = 100;
-  const barMaxWidth = 120;
-  const padding = { top: 10, bottom: 10, left: 10, right: 40 };
+  const barHeight = 24;
+  const labelWidth = 200;
+  const barMaxWidth = 280;
+  const padding = { top: 10, bottom: 10, left: 10, right: 50 };
   const width = labelWidth + barMaxWidth + padding.left + padding.right;
   const height = data.length * barHeight + padding.top + padding.bottom;
   
-  let svg = `<svg width="${width}" height="${height}" class="histogram-svg">`;
+  let svg = `<svg width="100%" viewBox="0 0 ${width} ${height}" class="histogram-svg" preserveAspectRatio="xMinYMin meet">`;
   
   data.forEach((item, i) => {
     const y = padding.top + i * barHeight;
@@ -575,9 +575,9 @@ function generateCategoricalHistogramSVG(stats, colName) {
     // Bar
     svg += `<rect x="${padding.left + labelWidth}" y="${y + 2}" width="${barWidth}" height="${barHeight - 4}" fill="rgba(74, 144, 226, 0.6)" rx="2"/>`;
     
-    // Label (truncate if too long)
-    const displayLabel = label.length > 15 ? label.substring(0, 12) + '...' : label;
-    svg += `<text x="${padding.left + labelWidth - 5}" y="${y + barHeight/2 + 4}" text-anchor="end" font-size="11" fill="#333">${displayLabel}</text>`;
+    // Label (truncate only if very long)
+    const displayLabel = label.length > 30 ? label.substring(0, 27) + '...' : label;
+    svg += `<text x="${padding.left + labelWidth - 5}" y="${y + barHeight/2 + 4}" text-anchor="end" font-size="11" fill="#333"><title>${label}</title>${displayLabel}</text>`;
     
     // Count
     svg += `<text x="${padding.left + labelWidth + barWidth + 4}" y="${y + barHeight/2 + 4}" text-anchor="start" font-size="10" fill="#666">${item.count}</text>`;
