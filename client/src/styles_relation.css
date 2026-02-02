@@ -1470,8 +1470,17 @@ input[type="number"] {
 
 .cards-navigation {
   flex-shrink: 0;
-  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
   background: var(--slate-50);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  font-size: 0.8125rem;
+  flex-wrap: wrap;
 }
 
 .data-card {
@@ -1545,10 +1554,32 @@ input[type="number"] {
 
 .cards-pagination {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3);
+  gap: var(--space-1);
+}
+
+.cards-pagination button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+}
+
+.cards-pagination span {
+  padding: 0 var(--space-2);
+  color: var(--muted-foreground);
+}
+
+.cards-page-size {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  font-size: 0.8125rem;
+  margin-left: var(--space-2);
 }
 
 /* Pivot Table */
