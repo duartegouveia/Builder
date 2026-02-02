@@ -2011,6 +2011,35 @@ input[type="number"] {
   background: #3b82f6;
 }
 
+.correlation-section {
+  padding: var(--space-3) 0;
+}
+
+.correlation-section-header {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-2);
+  color: var(--foreground);
+}
+
+.correlation-section-desc {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  margin-bottom: var(--space-2);
+}
+
+.correlation-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-2) 0;
+}
+
+.correlation-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
 .correlation-result {
   padding: var(--space-4);
 }

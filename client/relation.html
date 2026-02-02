@@ -114,29 +114,39 @@
               
               <div class="view-correlation view-content" style="display: none;">
                 <div class="correlation-config">
-                  <div class="correlation-config-row">
-                    <label>Column X:</label>
-                    <select class="corr-col-x pivot-select" data-testid="select-corr-x"></select>
+                  <div class="correlation-section">
+                    <div class="correlation-section-header">Analyze Single Pair</div>
+                    <div class="correlation-config-row">
+                      <label>Column X:</label>
+                      <select class="corr-col-x pivot-select" data-testid="select-corr-x"></select>
+                    </div>
+                    <div class="correlation-config-row">
+                      <label>Column Y:</label>
+                      <select class="corr-col-y pivot-select" data-testid="select-corr-y"></select>
+                    </div>
+                    <div class="correlation-config-row">
+                      <label>Method:</label>
+                      <select class="corr-method pivot-select" data-testid="select-corr-method">
+                        <option value="auto">Auto-detect</option>
+                        <option value="pearson">Pearson (linear, normal)</option>
+                        <option value="spearman">Spearman (monotonic, robust)</option>
+                        <option value="kendall">Kendall's Tau (ordinal, small n)</option>
+                        <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
+                        <option value="phi">Phi (binary × binary)</option>
+                        <option value="cramers">Cramér's V (categorical)</option>
+                      </select>
+                    </div>
+                    <div class="correlation-actions">
+                      <button class="btn-calculate-corr btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
+                      <button class="btn-corr-help btn btn-outline btn-sm" data-testid="button-corr-help">?</button>
+                    </div>
                   </div>
-                  <div class="correlation-config-row">
-                    <label>Column Y:</label>
-                    <select class="corr-col-y pivot-select" data-testid="select-corr-y"></select>
+                  <div class="correlation-divider"></div>
+                  <div class="correlation-section">
+                    <div class="correlation-section-header">Analyze All Pairs</div>
+                    <div class="correlation-section-desc">Calculate correlations between all column combinations</div>
+                    <button class="btn-corr-all btn btn-primary btn-sm" data-testid="button-corr-all">Analyze All Pairs</button>
                   </div>
-                  <div class="correlation-config-row">
-                    <label>Method:</label>
-                    <select class="corr-method pivot-select" data-testid="select-corr-method">
-                      <option value="auto">Auto-detect</option>
-                      <option value="pearson">Pearson (linear, normal)</option>
-                      <option value="spearman">Spearman (monotonic, robust)</option>
-                      <option value="kendall">Kendall's Tau (ordinal, small n)</option>
-                      <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
-                      <option value="phi">Phi (binary × binary)</option>
-                      <option value="cramers">Cramér's V (categorical)</option>
-                    </select>
-                  </div>
-                  <button class="btn-calculate-corr btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
-                  <button class="btn-corr-all btn btn-outline btn-sm" data-testid="button-corr-all">Analyze All Pairs</button>
-                  <button class="btn-corr-help btn btn-outline btn-sm" data-testid="button-corr-help">?</button>
                 </div>
                 <div class="correlation-help" style="display: none;">
                   <p><strong>Choosing a correlation method:</strong></p>
