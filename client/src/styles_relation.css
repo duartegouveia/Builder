@@ -1569,6 +1569,25 @@ input[type="number"] {
   min-width: 0;
 }
 
+.cards-info {
+  display: flex;
+  gap: var(--space-3);
+  color: var(--muted-foreground);
+}
+
+.cards-info-total {
+  font-weight: 500;
+}
+
+.cards-info-filtered {
+  color: var(--amber-600);
+}
+
+.cards-info-selected {
+  color: var(--primary);
+  font-weight: 500;
+}
+
 .cards-pagination {
   display: flex;
   align-items: center;
@@ -1597,6 +1616,20 @@ input[type="number"] {
   background: var(--white);
   font-size: 0.8125rem;
   margin-left: var(--space-2);
+}
+
+.cards-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cards-selection-actions {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  font-size: 0.8125rem;
+  cursor: pointer;
 }
 
 /* Pivot Table */

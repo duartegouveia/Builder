@@ -4724,11 +4724,24 @@ function renderCardsView() {
   cardsHtml += '</div>';
   cardsContent.innerHTML = cardsHtml;
   
-  // Render pagination in second div
-  let navHtml = '<div class="cards-pagination">';
+  // Render navigation in second div
+  const totalRecords = state.relation.items.length;
+  const filteredRecords = state.filteredIndices.length;
+  const selectedRecords = state.selectedRows.size;
+  const hasFilter = filteredRecords !== totalRecords;
+  
+  let navHtml = '<div class="cards-info">';
+  navHtml += '<span class="cards-info-total">' + totalRecords + ' total</span>';
+  if (hasFilter) {
+    navHtml += '<span class="cards-info-filtered">' + filteredRecords + ' filtered</span>';
+  }
+  navHtml += '<span class="cards-info-selected">' + selectedRecords + ' selected</span>';
+  navHtml += '</div>';
+  
+  navHtml += '<div class="cards-pagination">';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
-  navHtml += '<span>Page ' + state.cardsCurrentPage + ' of ' + totalPages + ' (' + totalItems + ' items)</span>';
+  navHtml += '<span>Page ' + state.cardsCurrentPage + ' of ' + totalPages + '</span>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
   navHtml += '<select class="cards-page-size">';
@@ -4737,6 +4750,17 @@ function renderCardsView() {
   });
   navHtml += '</select>';
   navHtml += '</div>';
+  
+  navHtml += '<div class="cards-actions">';
+  navHtml += '<select class="cards-selection-actions">';
+  navHtml += '<option value="" disabled selected>Selection Actions...</option>';
+  navHtml += '<option value="invert-page">↔ Invert Page</option>';
+  navHtml += '<option value="invert-all">↔ Invert All</option>';
+  navHtml += '<option value="select-all">✓ Select All</option>';
+  navHtml += '<option value="deselect-all">✗ Deselect All</option>';
+  navHtml += '</select>';
+  navHtml += '</div>';
+  
   cardsNavigation.innerHTML = navHtml;
   
   // Event listeners for cards
@@ -4766,6 +4790,35 @@ function renderCardsView() {
   cardsNavigation.querySelector('.cards-page-size')?.addEventListener('change', (e) => {
     state.cardsPageSize = parseInt(e.target.value);
     state.cardsCurrentPage = 1;
+    renderCardsView();
+  });
+  
+  cardsNavigation.querySelector('.cards-selection-actions')?.addEventListener('change', (e) => {
+    const action = e.target.value;
+    e.target.value = '';
+    
+    if (action === 'invert-page') {
+      pageIndices.forEach(idx => {
+        if (state.selectedRows.has(idx)) {
+          state.selectedRows.delete(idx);
+        } else {
+          state.selectedRows.add(idx);
+        }
+      });
+    } else if (action === 'invert-all') {
+      indices.forEach(idx => {
+        if (state.selectedRows.has(idx)) {
+          state.selectedRows.delete(idx);
+        } else {
+          state.selectedRows.add(idx);
+        }
+      });
+    } else if (action === 'select-all') {
+      indices.forEach(idx => state.selectedRows.add(idx));
+    } else if (action === 'deselect-all') {
+      state.selectedRows.clear();
+    }
+    
     renderCardsView();
   });
 }
