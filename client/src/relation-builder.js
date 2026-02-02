@@ -73,6 +73,7 @@ let state = {
   // Pagination
   pageSize: 5,
   currentPage: 1,
+  manualResizeHeight: null, // User manually resized table height
   
   // Cards view pagination
   cardsPageSize: 12, // Default: 4 cards per row * 3 rows
@@ -2359,15 +2360,33 @@ function renderTable() {
   
   table.appendChild(tbody);
   
-  // Set wrapper height based on pageSize (approx 36px per row + header)
-  const rowHeight = 36;
-  const headerHeight = 50;
-  const rowCount = state.pageSize === 'all' ? Math.min(pageIndices.length, 20) : state.pageSize;
-  const calculatedHeight = headerHeight + (rowCount * rowHeight);
-  tableWrapper.style.maxHeight = calculatedHeight + 'px';
-  
   tableWrapper.appendChild(table);
   container.appendChild(tableWrapper);
+  
+  // Calculate height based on actual rendered content after DOM insertion
+  requestAnimationFrame(() => {
+    if (state.manualResizeHeight) {
+      // Use manually set height
+      tableWrapper.style.maxHeight = state.manualResizeHeight + 'px';
+    } else {
+      // Calculate based on actual row heights
+      const thead = table.querySelector('thead');
+      const theadHeight = thead ? thead.offsetHeight : 40;
+      const rows = tbody.querySelectorAll('tr');
+      let totalRowHeight = 0;
+      const maxRows = state.pageSize === 'all' ? Math.min(rows.length, 20) : state.pageSize;
+      for (let i = 0; i < Math.min(rows.length, maxRows); i++) {
+        totalRowHeight += rows[i].offsetHeight;
+      }
+      // If fewer rows than pageSize, estimate remaining
+      if (rows.length < maxRows && rows.length > 0) {
+        const avgRowHeight = totalRowHeight / rows.length;
+        totalRowHeight = avgRowHeight * maxRows;
+      }
+      const calculatedHeight = theadHeight + totalRowHeight + 2; // +2 for borders
+      tableWrapper.style.maxHeight = calculatedHeight + 'px';
+    }
+  });
   
   // Footer table (separate, outside scroll area)
   const footerWrapper = document.createElement('div');
@@ -5869,6 +5888,13 @@ function setupResizeHandle() {
   
   const endResize = () => {
     if (isResizing) {
+      // Save the manual resize height
+      if (wrapper) {
+        const currentHeight = parseInt(wrapper.style.maxHeight);
+        if (currentHeight) {
+          state.manualResizeHeight = currentHeight;
+        }
+      }
       isResizing = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
