@@ -1456,11 +1456,22 @@ input[type="number"] {
 }
 
 /* Cards View */
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-4);
+.cards-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cards-content {
+  flex: 1;
+  overflow-y: auto;
   padding: var(--space-2);
+}
+
+.cards-navigation {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--slate-50);
 }
 
 .data-card {
@@ -1538,8 +1549,6 @@ input[type="number"] {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3);
-  border-top: 1px solid var(--border);
-  margin-top: var(--space-4);
 }
 
 /* Pivot Table */

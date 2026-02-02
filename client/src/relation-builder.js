@@ -4650,7 +4650,12 @@ let cardsResizeObserver = null;
 function renderCardsView() {
   if (!state.relation) return;
   
-  const container = el('.cards-container');
+  const wrapper = el('.cards-view-wrapper');
+  const cardsContent = el('.cards-content');
+  const cardsNavigation = el('.cards-navigation');
+  
+  if (!wrapper || !cardsContent || !cardsNavigation) return;
+  
   const indices = state.sortedIndices;
   
   // Setup resize observer if not already
@@ -4660,11 +4665,11 @@ function renderCardsView() {
         renderCardsView();
       }
     });
-    cardsResizeObserver.observe(container.parentElement);
+    cardsResizeObserver.observe(wrapper);
   }
   
   // Calculate cards per row based on container width
-  const containerWidth = container.parentElement.offsetWidth || 900;
+  const containerWidth = wrapper.offsetWidth || 900;
   const cardMinWidth = 200;
   const cardsPerRow = Math.max(2, Math.floor(containerWidth / cardMinWidth));
   
@@ -4678,17 +4683,18 @@ function renderCardsView() {
   const endIdx = Math.min(startIdx + state.cardsPageSize, totalItems);
   const pageIndices = indices.slice(startIdx, endIdx);
   
-  let html = '<div class="cards-grid" style="display: grid; grid-template-columns: repeat(' + cardsPerRow + ', 1fr); gap: 16px;">';
+  // Render cards grid in first div
+  let cardsHtml = '<div class="cards-grid" style="display: grid; grid-template-columns: repeat(' + cardsPerRow + ', 1fr); gap: 16px;">';
   
   pageIndices.forEach((rowIdx, i) => {
     const row = state.relation.items[rowIdx];
     const isSelected = state.selectedRows.has(rowIdx);
     
-    html += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '">';
-    html += '<div class="data-card-header">';
-    html += '<input type="checkbox" class="data-card-checkbox" ' + (isSelected ? 'checked' : '') + ' data-row-idx="' + rowIdx + '">';
-    html += '<span class="data-card-id">#' + (rowIdx + 1) + '</span>';
-    html += '</div>';
+    cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '">';
+    cardsHtml += '<div class="data-card-header">';
+    cardsHtml += '<input type="checkbox" class="data-card-checkbox" ' + (isSelected ? 'checked' : '') + ' data-row-idx="' + rowIdx + '">';
+    cardsHtml += '<span class="data-card-id">#' + (rowIdx + 1) + '</span>';
+    cardsHtml += '</div>';
     
     state.columnNames.forEach((colName, colIdx) => {
       const value = row[colIdx];
@@ -4696,35 +4702,35 @@ function renderCardsView() {
       let displayValue = formatCellValue(value, type, colIdx);
       const fullValue = value !== null && value !== undefined ? String(value) : '';
       
-      html += '<div class="data-card-field">';
-      html += '<div class="data-card-label">' + escapeHtml(colName) + '</div>';
-      html += '<div class="data-card-value" title="' + escapeHtml(fullValue) + '">' + displayValue + '</div>';
-      html += '</div>';
+      cardsHtml += '<div class="data-card-field">';
+      cardsHtml += '<div class="data-card-label">' + escapeHtml(colName) + '</div>';
+      cardsHtml += '<div class="data-card-value" title="' + escapeHtml(fullValue) + '">' + displayValue + '</div>';
+      cardsHtml += '</div>';
     });
     
-    html += '</div>';
+    cardsHtml += '</div>';
   });
   
-  html += '</div>';
+  cardsHtml += '</div>';
+  cardsContent.innerHTML = cardsHtml;
   
-  // Pagination for cards
-  html += '<div class="cards-pagination">';
-  html += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
-  html += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
-  html += '<span>Page ' + state.cardsCurrentPage + ' of ' + totalPages + ' (' + totalItems + ' items)</span>';
-  html += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
-  html += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
-  html += '<select class="cards-page-size">';
+  // Render pagination in second div
+  let navHtml = '<div class="cards-pagination">';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (state.cardsCurrentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
+  navHtml += '<span>Page ' + state.cardsCurrentPage + ' of ' + totalPages + ' (' + totalItems + ' items)</span>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
+  navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (state.cardsCurrentPage >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
+  navHtml += '<select class="cards-page-size">';
   pageSizeOptions.forEach(size => {
-    html += '<option value="' + size + '" ' + (state.cardsPageSize === size ? 'selected' : '') + '>' + size + ' cards</option>';
+    navHtml += '<option value="' + size + '" ' + (state.cardsPageSize === size ? 'selected' : '') + '>' + size + ' cards</option>';
   });
-  html += '</select>';
-  html += '</div>';
-  
-  container.innerHTML = html;
+  navHtml += '</select>';
+  navHtml += '</div>';
+  cardsNavigation.innerHTML = navHtml;
   
   // Event listeners for cards
-  container.querySelectorAll('.data-card-checkbox').forEach(cb => {
+  cardsContent.querySelectorAll('.data-card-checkbox').forEach(cb => {
     cb.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.rowIdx);
       if (e.target.checked) {
@@ -4736,7 +4742,7 @@ function renderCardsView() {
     });
   });
   
-  container.querySelectorAll('[data-action]').forEach(btn => {
+  cardsNavigation.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const action = e.target.dataset.action;
       if (action === 'cards-first') state.cardsCurrentPage = 1;
@@ -4747,7 +4753,7 @@ function renderCardsView() {
     });
   });
   
-  container.querySelector('.cards-page-size')?.addEventListener('change', (e) => {
+  cardsNavigation.querySelector('.cards-page-size')?.addEventListener('change', (e) => {
     state.cardsPageSize = parseInt(e.target.value);
     state.cardsCurrentPage = 1;
     renderCardsView();
