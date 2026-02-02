@@ -680,6 +680,48 @@ input[type="number"] {
   font-style: italic;
 }
 
+.filter-regex-help {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background: var(--muted);
+  border-radius: var(--radius);
+  font-size: 0.7rem;
+}
+
+.regex-help-title {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.regex-help-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr;
+  gap: 2px 8px;
+  color: var(--muted-foreground);
+}
+
+.regex-code {
+  font-family: monospace;
+  background: var(--background);
+  padding: 0 4px;
+  border-radius: 2px;
+  color: var(--primary-600);
+}
+
+.regex-examples {
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.regex-examples code {
+  font-family: monospace;
+  background: var(--background);
+  padding: 0 4px;
+  border-radius: 2px;
+  color: var(--primary-600);
+}
+
 .filter-select {
   flex: 1;
   padding: var(--space-2);

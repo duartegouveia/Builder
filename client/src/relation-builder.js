@@ -3133,9 +3133,33 @@ function showFilterTextCriteriaDialog(colIdx) {
           Case sensitive
         </label>
       </div>
-      <div class="filter-form-row" id="filter-regex-hint" style="display: ${currentOp === 'regex' ? 'flex' : 'none'}">
-        <label></label>
-        <span class="hint-text">Example: ^[A-Z].*$ (starts with uppercase)</span>
+      <div class="filter-regex-help" id="filter-regex-hint" style="display: ${currentOp === 'regex' ? 'block' : 'none'}">
+        <div class="regex-help-title">Special Codes:</div>
+        <div class="regex-help-grid">
+          <span class="regex-code">\\d</span><span>digit (0-9)</span>
+          <span class="regex-code">\\D</span><span>non-digit</span>
+          <span class="regex-code">\\w</span><span>word char (a-z, A-Z, 0-9, _)</span>
+          <span class="regex-code">\\W</span><span>non-word char</span>
+          <span class="regex-code">\\s</span><span>whitespace</span>
+          <span class="regex-code">\\S</span><span>non-whitespace</span>
+          <span class="regex-code">.</span><span>any character</span>
+          <span class="regex-code">^</span><span>start of text</span>
+          <span class="regex-code">$</span><span>end of text</span>
+          <span class="regex-code">*</span><span>0 or more</span>
+          <span class="regex-code">+</span><span>1 or more</span>
+          <span class="regex-code">?</span><span>0 or 1</span>
+          <span class="regex-code">{n}</span><span>exactly n times</span>
+          <span class="regex-code">{n,m}</span><span>n to m times</span>
+          <span class="regex-code">[abc]</span><span>a, b, or c</span>
+          <span class="regex-code">[^abc]</span><span>not a, b, or c</span>
+          <span class="regex-code">(a|b)</span><span>a or b</span>
+        </div>
+        <div class="regex-help-title" style="margin-top: 6px;">Examples:</div>
+        <div class="regex-examples">
+          <code>^[A-Z]</code> starts with uppercase<br>
+          <code>\\d{3}-\\d{4}</code> phone like 123-4567<br>
+          <code>@.*\\.com$</code> ends with @...com
+        </div>
       </div>
     </div>
     <div class="filter-dialog-footer">
@@ -3152,7 +3176,7 @@ function showFilterTextCriteriaDialog(colIdx) {
   
   opSelect.addEventListener('change', () => {
     const isRegex = opSelect.value === 'regex';
-    regexHint.style.display = isRegex ? 'flex' : 'none';
+    regexHint.style.display = isRegex ? 'block' : 'none';
     valueLabel.textContent = isRegex ? 'Pattern:' : 'Text:';
   });
   
