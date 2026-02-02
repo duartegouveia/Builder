@@ -681,7 +681,7 @@ input[type="number"] {
   font-size: 0.75rem;
 }
 
-.filter-dialog-footer #filter-clear-all {
+.filter-dialog-footer .filter-clear-all {
   margin-right: auto;
 }
 
@@ -1805,7 +1805,7 @@ input[type="number"] {
   overflow: hidden;
 }
 
-#diagram-canvas {
+.diagram-canvas {
   max-width: 100%;
   height: auto;
 }

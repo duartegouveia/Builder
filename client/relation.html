@@ -48,25 +48,26 @@
           </p>
         </header>
 
+        <div class="relation">
         <section class="space-y-4">
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">Relation JSON</h3>
               <div class="flex gap-2">
-                <button id="btn-generate-demo" class="btn btn-outline btn-sm gap-2" data-testid="button-generate-demo">
+                <button class="btn-generate-demo btn btn-outline btn-sm gap-2" data-testid="button-generate-demo">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
                   Generate Demo
                 </button>
-                <button id="btn-parse-relation" class="btn btn-primary btn-sm gap-2" data-testid="button-parse-relation">
+                <button class="btn-parse-relation btn btn-primary btn-sm gap-2" data-testid="button-parse-relation">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                   Parse & Display
                 </button>
               </div>
             </div>
             <div class="card-content">
-              <textarea id="relation-json" class="relation-json-textarea" placeholder='{"pot": "relation", "columns": {"id": "int", "name": "string", "active": "boolean"}, "items": [[1, "test", true]]}' data-testid="textarea-relation-json"></textarea>
+              <textarea class="relation-json relation-json-textarea" placeholder='{"pot": "relation", "columns": {"id": "int", "name": "string", "active": "boolean"}, "items": [[1, "test", true]]}' data-testid="textarea-relation-json"></textarea>
               <label class="relation-editable-label">
-                <input type="checkbox" id="relation-editable" data-testid="checkbox-editable">
+                <input type="checkbox" class="relation-editable" data-testid="checkbox-editable">
                 <span>Editable table</span>
               </label>
             </div>
@@ -79,7 +80,7 @@
               <h3 class="card-title">Relation Data</h3>
             </div>
             <div class="card-content">
-              <div id="view-tabs" class="view-tabs" style="display: none;">
+              <div class="view-tabs" style="display: none;">
                 <button class="view-tab active" data-view="table" data-testid="tab-table">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
                   Table
@@ -106,89 +107,90 @@
                 </button>
               </div>
               
-              <div id="view-table" class="view-content">
-                <div id="relation-table-container" class="relation-table-container resizable">
+              <div class="view-table view-content">
+                <div class="relation-table-container resizable">
                   <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
                   <div class="resize-handle" data-testid="resize-handle"></div>
                 </div>
               </div>
               
-              <div id="view-cards" class="view-content" style="display: none;">
-                <div id="cards-container" class="cards-container"></div>
+              <div class="view-cards view-content" style="display: none;">
+                <div class="cards-container"></div>
               </div>
               
-              <div id="view-pivot" class="view-content" style="display: none;">
+              <div class="view-pivot view-content" style="display: none;">
                 <div class="pivot-config">
                   <div class="pivot-config-row">
                     <label>Rows:</label>
-                    <select id="pivot-rows" class="pivot-select" data-testid="select-pivot-rows"></select>
+                    <select class="pivot-rows pivot-select" data-testid="select-pivot-rows"></select>
                   </div>
                   <div class="pivot-config-row">
                     <label>Columns:</label>
-                    <select id="pivot-cols" class="pivot-select" data-testid="select-pivot-cols"></select>
+                    <select class="pivot-cols pivot-select" data-testid="select-pivot-cols"></select>
                   </div>
                   <div class="pivot-config-row">
                     <label>Values:</label>
-                    <div id="pivot-values-config" class="pivot-values-config"></div>
-                    <button id="btn-add-pivot-value" class="btn btn-outline btn-sm">+ Add</button>
+                    <div class="pivot-values-config"></div>
+                    <button class="btn-add-pivot-value btn btn-outline btn-sm">+ Add</button>
                   </div>
-                  <button id="btn-generate-pivot" class="btn btn-primary btn-sm" data-testid="button-generate-pivot">Generate Pivot</button>
+                  <button class="btn-generate-pivot btn btn-primary btn-sm" data-testid="button-generate-pivot">Generate Pivot</button>
                 </div>
-                <div id="pivot-table-container" class="pivot-table-container"></div>
+                <div class="pivot-table-container"></div>
               </div>
               
-              <div id="view-correlation" class="view-content" style="display: none;">
+              <div class="view-correlation view-content" style="display: none;">
                 <div class="correlation-config">
                   <div class="correlation-config-row">
                     <label>Column X:</label>
-                    <select id="corr-col-x" class="pivot-select" data-testid="select-corr-x"></select>
+                    <select class="corr-col-x pivot-select" data-testid="select-corr-x"></select>
                   </div>
                   <div class="correlation-config-row">
                     <label>Column Y:</label>
-                    <select id="corr-col-y" class="pivot-select" data-testid="select-corr-y"></select>
+                    <select class="corr-col-y pivot-select" data-testid="select-corr-y"></select>
                   </div>
-                  <button id="btn-calculate-corr" class="btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
+                  <button class="btn-calculate-corr btn btn-primary btn-sm" data-testid="button-calculate-corr">Calculate</button>
                 </div>
-                <div id="correlation-result" class="correlation-result"></div>
+                <div class="correlation-result"></div>
               </div>
               
-              <div id="view-diagram" class="view-content" style="display: none;">
+              <div class="view-diagram view-content" style="display: none;">
                 <div class="diagram-config">
                   <div class="diagram-config-row">
                     <label>Perplexity:</label>
-                    <input type="number" id="tsne-perplexity" class="pivot-select" value="30" min="5" max="100" style="width: 80px;" data-testid="input-tsne-perplexity">
+                    <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;" data-testid="input-tsne-perplexity">
                     <span class="tsne-hint">5-50 typical</span>
                   </div>
                   <div class="diagram-config-row">
                     <label>Iterations:</label>
-                    <input type="number" id="tsne-iterations" class="pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;" data-testid="input-tsne-iterations">
+                    <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;" data-testid="input-tsne-iterations">
                   </div>
-                  <button id="btn-run-clustering" class="btn btn-primary btn-sm" data-testid="button-run-clustering">Run t-SNE</button>
-                  <span id="tsne-progress" class="tsne-progress" style="display: none;">Calculating...</span>
+                  <button class="btn-run-clustering btn btn-primary btn-sm" data-testid="button-run-clustering">Run t-SNE</button>
+                  <span class="tsne-progress" style="display: none;">Calculating...</span>
                 </div>
-                <div id="diagram-container" class="diagram-container">
-                  <canvas id="diagram-canvas" width="800" height="600"></canvas>
+                <div class="diagram-container">
+                  <canvas class="diagram-canvas" width="800" height="600"></canvas>
                 </div>
               </div>
               
-              <div id="view-ai" class="view-content" style="display: none;">
+              <div class="view-ai view-content" style="display: none;">
                 <div class="ai-panel-inline">
                   <div class="ai-input-row">
-                    <input type="text" id="ai-question" class="ai-question-input" placeholder="Ask a question about your data..." data-testid="input-ai-question">
-                    <button id="btn-ai-voice" class="btn btn-outline btn-sm" data-testid="button-ai-voice" title="Voice input">
+                    <input type="text" class="ai-question ai-question-input" placeholder="Ask a question about your data..." data-testid="input-ai-question">
+                    <button class="btn-ai-voice btn btn-outline btn-sm" data-testid="button-ai-voice" title="Voice input">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
                     </button>
-                    <button id="btn-ai-ask" class="btn btn-primary btn-sm" data-testid="button-ai-ask">
+                    <button class="btn-ai-ask btn btn-primary btn-sm" data-testid="button-ai-ask">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                     </button>
                   </div>
-                  <div id="ai-response" class="ai-response"></div>
+                  <div class="ai-response"></div>
                 </div>
               </div>
               
             </div>
           </div>
         </section>
+        </div>
 
       </div>
     </div>

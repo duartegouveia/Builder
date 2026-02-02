@@ -59,8 +59,33 @@ const COLOR_PALETTES = {
   }
 };
 
+// Generate unique ID for relation instance
+function generateUID() {
+  return 'r' + Math.random().toString(36).substr(2, 9);
+}
+
+// Helper function to get the relation container
+function getRelationContainer() {
+  return document.querySelector('.relation_' + state.uid);
+}
+
+// Helper function to query elements within the relation container
+function el(selector) {
+  const container = getRelationContainer();
+  if (!container) return null;
+  return container.querySelector(selector);
+}
+
+// Helper function to query all elements within the relation container
+function elAll(selector) {
+  const container = getRelationContainer();
+  if (!container) return [];
+  return container.querySelectorAll(selector);
+}
+
 // State management
 let state = {
+  uid: generateUID(), // Unique identifier for this relation instance
   relation: null,
   columnNames: [],
   columnTypes: [],
@@ -1632,8 +1657,8 @@ function showToast(message) {
 }
 
 function updateTextarea() {
-  const textarea = document.getElementById('relation-json');
-  textarea.value = JSON.stringify(state.relation, null, 2);
+  const textarea = el('.relation-json');
+  if (textarea) textarea.value = JSON.stringify(state.relation, null, 2);
 }
 
 // Pagination functions
@@ -1653,7 +1678,7 @@ function getCurrentPageIndices() {
 
 // Selection functions
 function updateHeaderCheckbox() {
-  const headerCheckbox = document.getElementById('select-all-checkbox');
+  const headerCheckbox = el('.select-all-checkbox');
   if (!headerCheckbox) return;
   
   const pageIndices = getCurrentPageIndices();
@@ -1990,7 +2015,7 @@ function matchesFormattingCondition(value, condition, type) {
 }
 
 function renderPagination() {
-  const container = document.getElementById('relation-pagination');
+  const container = el('.relation-pagination');
   if (!container) return;
   
   const totalPages = getTotalPages();
@@ -2008,7 +2033,7 @@ function renderPagination() {
     </div>
     <div class="pagination-size">
       <label>Per page:</label>
-      <select id="page-size-select">
+      <select class="page-size-select">
         <option value="5" ${state.pageSize === 5 ? 'selected' : ''}>5</option>
         <option value="10" ${state.pageSize === 10 ? 'selected' : ''}>10</option>
         <option value="20" ${state.pageSize === 20 ? 'selected' : ''}>20</option>
@@ -2018,17 +2043,17 @@ function renderPagination() {
       </select>
     </div>
     <div class="pagination-nav">
-      <button class="btn-page" id="btn-first" ${state.currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>
-      <button class="btn-page" id="btn-prev" ${state.currentPage === 1 ? 'disabled' : ''}>⟨</button>
+      <button class="btn-page btn-first" ${state.currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>
+      <button class="btn-page btn-prev" ${state.currentPage === 1 ? 'disabled' : ''}>⟨</button>
       <span class="page-indicator">
-        <input type="number" id="page-input" value="${state.currentPage}" min="1" max="${totalPages}" />
+        <input type="number" class="page-input" value="${state.currentPage}" min="1" max="${totalPages}" />
         <span>of ${totalPages}</span>
       </span>
-      <button class="btn-page" id="btn-next" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
-      <button class="btn-page" id="btn-last" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
+      <button class="btn-page btn-next" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
+      <button class="btn-page btn-last" ${state.currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
     </div>
     <div class="pagination-actions">
-      <select id="selection-actions" class="selection-actions-select">
+      <select class="selection-actions selection-actions-select">
         <option value="" disabled selected>Selection Actions...</option>
         <option value="invert-page">↔ Invert Page</option>
         <option value="invert-all">↔ Invert All</option>
@@ -2039,37 +2064,37 @@ function renderPagination() {
   `;
   
   // Event listeners
-  document.getElementById('page-size-select').addEventListener('change', (e) => {
+  el('.page-size-select')?.addEventListener('change', (e) => {
     state.pageSize = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
     state.currentPage = 1;
     renderTable();
   });
   
-  document.getElementById('btn-first').addEventListener('click', () => {
+  el('.btn-first')?.addEventListener('click', () => {
     state.currentPage = 1;
     renderTable();
   });
   
-  document.getElementById('btn-prev').addEventListener('click', () => {
+  el('.btn-prev')?.addEventListener('click', () => {
     if (state.currentPage > 1) {
       state.currentPage--;
       renderTable();
     }
   });
   
-  document.getElementById('btn-next').addEventListener('click', () => {
+  el('.btn-next')?.addEventListener('click', () => {
     if (state.currentPage < getTotalPages()) {
       state.currentPage++;
       renderTable();
     }
   });
   
-  document.getElementById('btn-last').addEventListener('click', () => {
+  el('.btn-last')?.addEventListener('click', () => {
     state.currentPage = getTotalPages();
     renderTable();
   });
   
-  document.getElementById('page-input').addEventListener('change', (e) => {
+  el('.page-input')?.addEventListener('change', (e) => {
     const page = parseInt(e.target.value);
     if (page >= 1 && page <= getTotalPages()) {
       state.currentPage = page;
@@ -2077,7 +2102,7 @@ function renderPagination() {
     }
   });
   
-  document.getElementById('selection-actions').addEventListener('change', (e) => {
+  el('.selection-actions')?.addEventListener('change', (e) => {
     const action = e.target.value;
     e.target.value = ''; // Reset to placeholder
     
@@ -2098,7 +2123,7 @@ function renderPagination() {
   });
   
   // Row operations buttons, nested relation buttons, and boolean checkboxes - single click handler
-  document.getElementById('relation-table-container').addEventListener('click', (e) => {
+  el('.relation-table-container')?.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-row-ops')) {
       const rowIdx = parseInt(e.target.dataset.row);
       const rect = e.target.getBoundingClientRect();
@@ -2174,7 +2199,7 @@ function syncFooterColumnWidths(mainTable, footerTable) {
 }
 
 function renderTable() {
-  const container = document.getElementById('relation-table-container');
+  const container = el('.relation-table-container');
   container.innerHTML = '';
   
   if (!state.relation || !state.relation.columns || !state.relation.items) {
@@ -2204,7 +2229,7 @@ function renderTable() {
   // Selection checkbox column
   const selectTh = document.createElement('th');
   selectTh.className = 'relation-th-select';
-  selectTh.innerHTML = `<input type="checkbox" id="select-all-checkbox" />`;
+  selectTh.innerHTML = `<input type="checkbox" class="select-all-checkbox" />`;
   headerRow.appendChild(selectTh);
   
   // Operations column header (position 2)
@@ -2533,7 +2558,7 @@ function attachTableEventListeners() {
   });
   
   // Select all checkbox
-  document.getElementById('select-all-checkbox')?.addEventListener('click', toggleSelectAll);
+  el('.select-all-checkbox')?.addEventListener('click', toggleSelectAll);
   
   // Row selection
   document.querySelectorAll('.row-select-checkbox').forEach(checkbox => {
@@ -2559,7 +2584,7 @@ function attachTableEventListeners() {
   });
   
   // Cell editing
-  document.getElementById('relation-table-container').addEventListener('change', (e) => {
+  el('.relation-table-container')?.addEventListener('change', (e) => {
     if (e.target.matches('.relation-input, .relation-textarea, .relation-select')) {
       updateRelationFromInput(e.target);
     }
@@ -3037,14 +3062,14 @@ function showFilterValuesDialog(colIdx) {
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="filter-search-row">
-      <input type="text" id="filter-search" class="filter-input" placeholder="Search...">
-      <button class="btn btn-sm" id="filter-search-btn">Find</button>
-      <button class="btn btn-sm" id="filter-search-clear">Clear</button>
+      <input type="text" class="filter-search filter-input" placeholder="Search...">
+      <button class="btn btn-sm filter-search-btn">Find</button>
+      <button class="btn btn-sm filter-search-clear">Clear</button>
     </div>
     <div class="filter-dialog-actions">
-      <button class="btn btn-sm" id="filter-select-all">Select All</button>
-      <button class="btn btn-sm" id="filter-select-none">Select None</button>
-      <select class="filter-sort-select" id="filter-sort">
+      <button class="btn btn-sm filter-select-all">Select All</button>
+      <button class="btn btn-sm filter-select-none">Select None</button>
+      <select class="filter-sort-select filter-sort">
         <option value="natural">Natural Order</option>
         <option value="asc">Ascending ↑</option>
         <option value="desc">Descending ↓</option>
@@ -3054,10 +3079,10 @@ function showFilterValuesDialog(colIdx) {
     </div>
     <div class="filter-values-list"></div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="filter-clear">Clear Column Filter</button>
-      <button class="btn btn-outline" id="filter-clear-all">Clear All Filters</button>
-      <button class="btn btn-outline" id="filter-cancel">Cancel</button>
-      <button class="btn btn-primary" id="filter-apply">Apply</button>
+      <button class="btn btn-outline filter-clear">Clear Column Filter</button>
+      <button class="btn btn-outline filter-clear-all">Clear All Filters</button>
+      <button class="btn btn-outline filter-cancel">Cancel</button>
+      <button class="btn btn-primary filter-apply">Apply</button>
     </div>
   `;
   
@@ -3065,14 +3090,14 @@ function showFilterValuesDialog(colIdx) {
   renderValuesList('natural');
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#filter-clear').addEventListener('click', () => {
+  dialog.querySelector('.filter-cancel').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.filter-clear').addEventListener('click', () => {
     delete state.filters[colIdx];
     state.currentPage = 1;
     dialog.remove();
     renderTable();
   });
-  dialog.querySelector('#filter-clear-all').addEventListener('click', () => {
+  dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
     state.filters = {};
     state.currentPage = 1;
     dialog.remove();
@@ -3083,7 +3108,7 @@ function showFilterValuesDialog(colIdx) {
   let lastSearchIndex = -1;
   let lastSearchTerm = '';
   
-  dialog.querySelector('#filter-sort').addEventListener('change', (e) => {
+  dialog.querySelector('.filter-sort').addEventListener('change', (e) => {
     // Get currently highlighted value before re-render
     const highlightedItem = dialog.querySelector('.filter-value-item.search-highlight input');
     const highlightedValue = highlightedItem ? highlightedItem.dataset.value : null;
@@ -3106,7 +3131,7 @@ function showFilterValuesDialog(colIdx) {
     }
   });
   
-  dialog.querySelector('#filter-select-all').addEventListener('click', () => {
+  dialog.querySelector('.filter-select-all').addEventListener('click', () => {
     dialog.querySelectorAll('.filter-value-item input').forEach(cb => {
       cb.checked = true;
       const val = cb.dataset.value === '__null__' ? null : cb.dataset.value;
@@ -3114,13 +3139,13 @@ function showFilterValuesDialog(colIdx) {
     });
   });
   
-  dialog.querySelector('#filter-select-none').addEventListener('click', () => {
+  dialog.querySelector('.filter-select-none').addEventListener('click', () => {
     dialog.querySelectorAll('.filter-value-item input').forEach(cb => cb.checked = false);
     selectedValues.clear();
   });
   
   const clearSearch = () => {
-    const searchInput = dialog.querySelector('#filter-search');
+    const searchInput = dialog.querySelector('.filter-search');
     const listEl = dialog.querySelector('.filter-values-list');
     const items = listEl.querySelectorAll('.filter-value-item');
     
@@ -3132,7 +3157,7 @@ function showFilterValuesDialog(colIdx) {
   };
   
   const performSearch = () => {
-    const searchInput = dialog.querySelector('#filter-search');
+    const searchInput = dialog.querySelector('.filter-search');
     const searchTerm = searchInput.value.toLowerCase().trim();
     if (!searchTerm) {
       clearSearch();
@@ -3184,16 +3209,16 @@ function showFilterValuesDialog(colIdx) {
     }
   };
   
-  dialog.querySelector('#filter-search-btn').addEventListener('click', performSearch);
-  dialog.querySelector('#filter-search-clear').addEventListener('click', clearSearch);
-  dialog.querySelector('#filter-search').addEventListener('keydown', (e) => {
+  dialog.querySelector('.filter-search-btn').addEventListener('click', performSearch);
+  dialog.querySelector('.filter-search-clear').addEventListener('click', clearSearch);
+  dialog.querySelector('.filter-search').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       performSearch();
     }
   });
   
-  dialog.querySelector('#filter-apply').addEventListener('click', () => {
+  dialog.querySelector('.filter-apply').addEventListener('click', () => {
     if (selectedValues.size === 0 || selectedValues.size === naturalOrder.length) {
       delete state.filters[colIdx];
     } else {
@@ -3234,7 +3259,7 @@ function showFilterComparisonDialog(colIdx) {
     <div class="filter-comparison-form">
       <div class="filter-form-row">
         <label>Operator:</label>
-        <select id="filter-comparison-op" class="filter-select">
+        <select class="filter-comparison-op filter-select">
           <option value="eq" ${currentComparison === 'eq' ? 'selected' : ''}>=  Equal</option>
           <option value="neq" ${currentComparison === 'neq' ? 'selected' : ''}>≠  Not Equal</option>
           <option value="gt" ${currentComparison === 'gt' ? 'selected' : ''}>>  Greater Than</option>
@@ -3245,36 +3270,36 @@ function showFilterComparisonDialog(colIdx) {
         </select>
       </div>
       <div class="filter-form-row">
-        <label id="filter-value-label">Value:</label>
-        <input type="${inputType}" id="filter-comparison-value" class="filter-input" value="${currentValue}" ${type === 'float' ? 'step="0.001"' : ''}>
+        <label class="filter-value-label">Value:</label>
+        <input type="${inputType}" class="filter-comparison-value filter-input" value="${currentValue}" ${type === 'float' ? 'step="0.001"' : ''}>
       </div>
-      <div class="filter-form-row" id="filter-value2-row" style="display: ${currentComparison === 'between' ? 'flex' : 'none'}">
+      <div class="filter-form-row filter-value2-row" style="display: ${currentComparison === 'between' ? 'flex' : 'none'}">
         <label>To:</label>
-        <input type="${inputType}" id="filter-comparison-value2" class="filter-input" value="${currentValue2}" ${type === 'float' ? 'step="0.001"' : ''}>
+        <input type="${inputType}" class="filter-comparison-value2 filter-input" value="${currentValue2}" ${type === 'float' ? 'step="0.001"' : ''}>
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="filter-clear">Clear Column Filter</button>
-      <button class="btn btn-outline" id="filter-clear-all">Clear All Filters</button>
-      <button class="btn btn-outline" id="filter-cancel">Cancel</button>
-      <button class="btn btn-primary" id="filter-apply">Apply</button>
+      <button class="btn btn-outline filter-clear">Clear Column Filter</button>
+      <button class="btn btn-outline filter-clear-all">Clear All Filters</button>
+      <button class="btn btn-outline filter-cancel">Cancel</button>
+      <button class="btn btn-primary filter-apply">Apply</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
   
-  const opSelect = dialog.querySelector('#filter-comparison-op');
-  const value2Row = dialog.querySelector('#filter-value2-row');
-  const valueLabel = dialog.querySelector('#filter-value-label');
-  const valueInput = dialog.querySelector('#filter-comparison-value');
+  const opSelect = dialog.querySelector('.filter-comparison-op');
+  const value2Row = dialog.querySelector('.filter-value2-row');
+  const valueLabel = dialog.querySelector('.filter-value-label');
+  const valueInput = dialog.querySelector('.filter-comparison-value');
   
-  dialog.querySelector('#filter-clear').addEventListener('click', () => {
+  dialog.querySelector('.filter-clear').addEventListener('click', () => {
     delete state.filters[colIdx];
     state.currentPage = 1;
     dialog.remove();
     renderTable();
   });
-  dialog.querySelector('#filter-clear-all').addEventListener('click', () => {
+  dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
     state.filters = {};
     state.currentPage = 1;
     dialog.remove();
@@ -3292,12 +3317,12 @@ function showFilterComparisonDialog(colIdx) {
   valueInput.focus();
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.filter-cancel').addEventListener('click', () => dialog.remove());
   
-  dialog.querySelector('#filter-apply').addEventListener('click', () => {
+  dialog.querySelector('.filter-apply').addEventListener('click', () => {
     const comparison = opSelect.value;
-    const value = dialog.querySelector('#filter-comparison-value').value;
-    const value2 = dialog.querySelector('#filter-comparison-value2').value;
+    const value = dialog.querySelector('.filter-comparison-value').value;
+    const value2 = dialog.querySelector('.filter-comparison-value2').value;
     
     if (!value) {
       dialog.remove();
@@ -3344,7 +3369,7 @@ function showFilterTextCriteriaDialog(colIdx) {
     <div class="filter-comparison-form">
       <div class="filter-form-row">
         <label>Operator:</label>
-        <select id="filter-text-op" class="filter-select">
+        <select class="filter-text-op filter-select">
           <option value="includes" ${currentOp === 'includes' ? 'selected' : ''}>includes</option>
           <option value="equals" ${currentOp === 'equals' ? 'selected' : ''}>equal to</option>
           <option value="startsWith" ${currentOp === 'startsWith' ? 'selected' : ''}>starts with</option>
@@ -3353,17 +3378,17 @@ function showFilterTextCriteriaDialog(colIdx) {
         </select>
       </div>
       <div class="filter-form-row">
-        <label id="filter-text-value-label">Text:</label>
-        <input type="text" id="filter-text-value" class="filter-input" value="${currentValue.replace(/"/g, '&quot;')}" placeholder="Enter text...">
+        <label class="filter-text-value-label">Text:</label>
+        <input type="text" class="filter-text-value filter-input" value="${currentValue.replace(/"/g, '&quot;')}" placeholder="Enter text...">
       </div>
-      <div class="filter-form-row" id="filter-case-row">
+      <div class="filter-form-row filter-case-row">
         <label></label>
         <label class="checkbox-label">
-          <input type="checkbox" id="filter-case-sensitive" ${currentCaseSensitive ? 'checked' : ''}>
+          <input type="checkbox" class="filter-case-sensitive" ${currentCaseSensitive ? 'checked' : ''}>
           Case sensitive
         </label>
       </div>
-      <div class="filter-regex-help" id="filter-regex-hint" style="display: ${currentOp === 'regex' ? 'block' : 'none'}">
+      <div class="filter-regex-help filter-regex-hint" style="display: ${currentOp === 'regex' ? 'block' : 'none'}">
         <div class="regex-help-title">Special Codes:</div>
         <div class="regex-help-grid">
           <span class="regex-code">\\d</span><span>digit (0-9)</span>
@@ -3393,28 +3418,28 @@ function showFilterTextCriteriaDialog(colIdx) {
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="filter-clear">Clear Column Filter</button>
-      <button class="btn btn-outline" id="filter-clear-all">Clear All Filters</button>
-      <button class="btn btn-outline" id="filter-cancel">Cancel</button>
-      <button class="btn btn-primary" id="filter-apply">Apply</button>
+      <button class="btn btn-outline filter-clear">Clear Column Filter</button>
+      <button class="btn btn-outline filter-clear-all">Clear All Filters</button>
+      <button class="btn btn-outline filter-cancel">Cancel</button>
+      <button class="btn btn-primary filter-apply">Apply</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
   
-  const opSelect = dialog.querySelector('#filter-text-op');
-  const regexHint = dialog.querySelector('#filter-regex-hint');
-  const valueLabel = dialog.querySelector('#filter-text-value-label');
+  const opSelect = dialog.querySelector('.filter-text-op');
+  const regexHint = dialog.querySelector('.filter-regex-hint');
+  const valueLabel = dialog.querySelector('.filter-text-value-label');
   
-  const textInput = dialog.querySelector('#filter-text-value');
+  const textInput = dialog.querySelector('.filter-text-value');
   
-  dialog.querySelector('#filter-clear').addEventListener('click', () => {
+  dialog.querySelector('.filter-clear').addEventListener('click', () => {
     delete state.filters[colIdx];
     state.currentPage = 1;
     dialog.remove();
     renderTable();
   });
-  dialog.querySelector('#filter-clear-all').addEventListener('click', () => {
+  dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
     state.filters = {};
     state.currentPage = 1;
     dialog.remove();
@@ -3432,12 +3457,12 @@ function showFilterTextCriteriaDialog(colIdx) {
   textInput.focus();
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#filter-cancel').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.filter-cancel').addEventListener('click', () => dialog.remove());
   
-  dialog.querySelector('#filter-apply').addEventListener('click', () => {
+  dialog.querySelector('.filter-apply').addEventListener('click', () => {
     const textOp = opSelect.value;
-    const textValue = dialog.querySelector('#filter-text-value').value;
-    const caseSensitive = dialog.querySelector('#filter-case-sensitive').checked;
+    const textValue = dialog.querySelector('.filter-text-value').value;
+    const caseSensitive = dialog.querySelector('.filter-case-sensitive').checked;
     
     if (!textValue) {
       dialog.remove();
@@ -4034,7 +4059,7 @@ function expandRelationColumn(colIdx) {
   state.groupBySelectedValues = {};
   state.currentPage = 1;
   
-  document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+  el('.relation-json').value = JSON.stringify(state.relation, null, 2);
   renderTable();
 }
 
@@ -4057,21 +4082,21 @@ function showGroupColumnsDialog() {
     <div class="group-cols-content">
       <p>Selected columns: <strong>${colNames}</strong></p>
       <label>New relation column name:</label>
-      <input type="text" id="group-col-name" value="nested_data" class="relation-input" />
+      <input type="text" class="group-col-name relation-input" value="nested_data" />
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="group-cancel">Cancel</button>
-      <button class="btn btn-primary" id="group-apply">Group</button>
+      <button class="btn btn-outline group-cancel">Cancel</button>
+      <button class="btn btn-primary group-apply">Group</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
   
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#group-cancel').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.group-cancel').addEventListener('click', () => dialog.remove());
   
-  dialog.querySelector('#group-apply').addEventListener('click', () => {
-    const newColName = dialog.querySelector('#group-col-name').value.trim() || 'nested_data';
+  dialog.querySelector('.group-apply').addEventListener('click', () => {
+    const newColName = dialog.querySelector('.group-col-name').value.trim() || 'nested_data';
     groupColumnsIntoRelation(selectedCols, newColName);
     dialog.remove();
   });
@@ -4126,7 +4151,7 @@ function groupColumnsIntoRelation(colIndices, newColName) {
   state.groupBySelectedValues = {};
   state.currentPage = 1;
   
-  document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+  el('.relation-json').value = JSON.stringify(state.relation, null, 2);
   renderTable();
 }
 
@@ -4188,7 +4213,7 @@ function handleRowOperation(rowIdx, action) {
       state.relation.items.push(rowCopy);
       state.filteredIndices = [...Array(state.relation.items.length).keys()];
       state.sortedIndices = [...state.filteredIndices];
-      document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+      el('.relation-json').value = JSON.stringify(state.relation, null, 2);
       renderTable();
       break;
     case 'delete-row':
@@ -4197,7 +4222,7 @@ function handleRowOperation(rowIdx, action) {
         state.selectedRows.delete(rowIdx);
         state.filteredIndices = [...Array(state.relation.items.length).keys()];
         state.sortedIndices = [...state.filteredIndices];
-        document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+        el('.relation-json').value = JSON.stringify(state.relation, null, 2);
         renderTable();
       }
       break;
@@ -4208,7 +4233,7 @@ function handleRowOperation(rowIdx, action) {
         state.selectedRows.clear();
         state.filteredIndices = [...Array(state.relation.items.length).keys()];
         state.sortedIndices = [...state.filteredIndices];
-        document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+        el('.relation-json').value = JSON.stringify(state.relation, null, 2);
         renderTable();
       }
       break;
@@ -4245,13 +4270,13 @@ function showRowViewDialog(rowIdx) {
     </div>
     ${content}
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="close-view">Close</button>
+      <button class="btn btn-outline close-view">Close</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#close-view').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.close-view').addEventListener('click', () => dialog.remove());
 }
 
 function showRowEditDialog(rowIdx) {
@@ -4290,16 +4315,16 @@ function showRowEditDialog(rowIdx) {
     </div>
     ${content}
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="cancel-edit">Cancel</button>
-      <button class="btn btn-primary" id="save-edit">${isNew ? 'Create' : 'Save'}</button>
+      <button class="btn btn-outline cancel-edit">Cancel</button>
+      <button class="btn btn-primary save-edit">${isNew ? 'Create' : 'Save'}</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#cancel-edit').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.cancel-edit').addEventListener('click', () => dialog.remove());
   
-  dialog.querySelector('#save-edit').addEventListener('click', () => {
+  dialog.querySelector('.save-edit').addEventListener('click', () => {
     const newRow = isNew ? state.columnNames.map(() => null) : null;
     
     state.columnNames.forEach((name, i) => {
@@ -4333,7 +4358,7 @@ function showRowEditDialog(rowIdx) {
       state.sortedIndices = [...state.filteredIndices];
     }
     
-    document.getElementById('relation-json').value = JSON.stringify(state.relation, null, 2);
+    el('.relation-json').value = JSON.stringify(state.relation, null, 2);
     dialog.remove();
     renderTable();
   });
@@ -4375,13 +4400,13 @@ function showNestedRelationDialog(rowIdx, colIdx) {
     </div>
     <div class="nested-relation-content">${tableHtml}</div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline" id="close-nested">Close</button>
+      <button class="btn btn-outline close-nested">Close</button>
     </div>
   `;
   
   document.body.appendChild(dialog);
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('#close-nested').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.close-nested').addEventListener('click', () => dialog.remove());
 }
 
 function updateRelationFromInput(input) {
@@ -4406,13 +4431,13 @@ function updateRelationFromInput(input) {
   
   state.relation.items[rowIdx][colIdx] = value;
   
-  const textarea = document.getElementById('relation-json');
-  textarea.value = JSON.stringify(state.relation, null, 2);
+  const textarea = el('.relation-json');
+  if (textarea) textarea.value = JSON.stringify(state.relation, null, 2);
 }
 
 // AI Panel functions
 async function askAI(question) {
-  const responseDiv = document.getElementById('ai-response');
+  const responseDiv = el('.ai-response');
   responseDiv.innerHTML = '';
   responseDiv.classList.add('loading');
   
@@ -4437,11 +4462,11 @@ async function askAI(question) {
         <div>${result.description || 'Filter suggestion:'}</div>
         <div class="ai-filter-result">
           <span>Filter: ${result.conditions.map(c => `${c.column} ${c.operator} ${c.value ?? ''}`).join(' AND ')}</span>
-          <button id="btn-apply-ai-filter">Apply Filter</button>
+          <button class="btn-apply-ai-filter">Apply Filter</button>
         </div>
       `;
       
-      document.getElementById('btn-apply-ai-filter').addEventListener('click', () => {
+      el('.btn-apply-ai-filter')?.addEventListener('click', () => {
         applyAIFilter(result.conditions);
       });
     } else if (result.type === 'answer') {
@@ -4540,7 +4565,7 @@ function switchView(viewName) {
   document.querySelectorAll('.view-content').forEach(content => {
     content.style.display = 'none';
   });
-  const viewEl = document.getElementById('view-' + viewName);
+  const viewEl = el('.view-' + viewName);
   if (viewEl) viewEl.style.display = 'block';
   
   // Render specific view content
@@ -4563,7 +4588,7 @@ let cardsResizeObserver = null;
 function renderCardsView() {
   if (!state.relation) return;
   
-  const container = document.getElementById('cards-container');
+  const container = el('.cards-container');
   const indices = state.sortedIndices;
   
   // Setup resize observer if not already
@@ -4681,8 +4706,8 @@ function getCategoricalOrNumericColumns() {
 function initPivotConfig() {
   const cols = getCategoricalOrNumericColumns();
   
-  const rowSelect = document.getElementById('pivot-rows');
-  const colSelect = document.getElementById('pivot-cols');
+  const rowSelect = el('.pivot-rows');
+  const colSelect = el('.pivot-cols');
   
   let options = '<option value="">Select column...</option>';
   cols.forEach(c => {
@@ -4697,7 +4722,7 @@ function initPivotConfig() {
 }
 
 function renderPivotValuesConfig() {
-  const container = document.getElementById('pivot-values-config');
+  const container = el('.pivot-values-config');
   const cols = getCategoricalOrNumericColumns();
   
   let html = '';
@@ -4751,8 +4776,8 @@ function renderPivotValuesConfig() {
 }
 
 function generatePivotTable() {
-  const rowColIdx = document.getElementById('pivot-rows').value;
-  const colColIdx = document.getElementById('pivot-cols').value;
+  const rowColIdx = el('.pivot-rows')?.value;
+  const colColIdx = el('.pivot-cols')?.value;
   
   if (!rowColIdx || !colColIdx) {
     alert('Please select both row and column dimensions');
@@ -4974,14 +4999,15 @@ function generatePivotTable() {
   
   html += '</tbody></table>';
   
-  document.getElementById('pivot-table-container').innerHTML = html;
+  const pivotContainer = el('.pivot-table-container');
+  if (pivotContainer) pivotContainer.innerHTML = html;
 }
 
 function initCorrelationConfig() {
   const cols = getCategoricalOrNumericColumns();
   
-  const xSelect = document.getElementById('corr-col-x');
-  const ySelect = document.getElementById('corr-col-y');
+  const xSelect = el('.corr-col-x');
+  const ySelect = el('.corr-col-y');
   
   let options = '<option value="">Select column...</option>';
   cols.forEach(c => {
@@ -4995,8 +5021,8 @@ function initCorrelationConfig() {
 }
 
 function calculateCorrelation() {
-  const xColIdx = document.getElementById('corr-col-x').value;
-  const yColIdx = document.getElementById('corr-col-y').value;
+  const xColIdx = el('.corr-col-x')?.value;
+  const yColIdx = el('.corr-col-y')?.value;
   
   if (!xColIdx || !yColIdx) {
     alert('Please select both X and Y columns');
@@ -5044,7 +5070,8 @@ function calculateCorrelation() {
     });
     
     if (pairs.length < 2) {
-      document.getElementById('correlation-result').innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
+      const corrResultEl = el('.correlation-result');
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
       return;
     }
     
@@ -5073,7 +5100,8 @@ function calculateCorrelation() {
     });
     
     if (total < 2) {
-      document.getElementById('correlation-result').innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
+      const corrResultEl = el('.correlation-result');
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
       return;
     }
     
@@ -5168,7 +5196,8 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   html += '</svg>';
   html += '</div>';
   
-  document.getElementById('correlation-result').innerHTML = html;
+  const corrResultEl = el('.correlation-result');
+  if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
 function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
@@ -5199,7 +5228,8 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
   
   html += '</div>';
   
-  document.getElementById('correlation-result').innerHTML = html;
+  const corrResultEl = el('.correlation-result');
+  if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
 function runClustering() {
@@ -5218,8 +5248,8 @@ function runClustering() {
   }
   
   // Get t-SNE parameters from UI
-  const perplexity = parseInt(document.getElementById('tsne-perplexity')?.value) || 30;
-  const iterations = parseInt(document.getElementById('tsne-iterations')?.value) || 500;
+  const perplexity = parseInt(el('.tsne-perplexity')?.value) || 30;
+  const iterations = parseInt(el('.tsne-iterations')?.value) || 500;
   
   // Get categorical/numeric columns for similarity calculation
   const cols = [];
@@ -5276,7 +5306,7 @@ function runClustering() {
   }
   
   // Show progress
-  const progressEl = document.getElementById('tsne-progress');
+  const progressEl = el('.tsne-progress');
   if (progressEl) progressEl.style.display = 'block';
   
   // Run t-SNE asynchronously
@@ -5293,7 +5323,7 @@ function runClustering() {
     });
     
     // Convert to nodes for rendering
-    const canvas = document.getElementById('diagram-canvas');
+    const canvas = el('.diagram-canvas');
     const width = canvas.width;
     const height = canvas.height;
     const padding = 40;
@@ -5652,7 +5682,7 @@ function computeJointProbabilities(D, perplexity, n) {
 }
 
 function renderDiagram() {
-  const canvas = document.getElementById('diagram-canvas');
+  const canvas = el('.diagram-canvas');
   const ctx = canvas.getContext('2d');
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -5701,7 +5731,7 @@ function renderDiagram() {
 }
 
 function setupDiagramClickHandler() {
-  const canvas = document.getElementById('diagram-canvas');
+  const canvas = el('.diagram-canvas');
   if (!canvas) return;
   
   // Remove existing listener if any
@@ -5745,8 +5775,7 @@ function showDiagramPopup(node, clientX, clientY) {
   
   // Create popup using DOM methods for security
   const popup = document.createElement('div');
-  popup.id = 'diagram-popup';
-  popup.className = 'diagram-popup';
+  popup.className = 'diagram-popup diagram-popup-instance';
   
   // Header
   const header = document.createElement('div');
@@ -5826,33 +5855,39 @@ function showDiagramPopup(node, clientX, clientY) {
 }
 
 function hideDiagramPopup() {
-  const existing = document.getElementById('diagram-popup');
+  const existing = document.querySelector('.diagram-popup-instance');
   if (existing) existing.remove();
   document.removeEventListener('click', closeDiagramPopupOnOutsideClick);
 }
 
 function closeDiagramPopupOnOutsideClick(event) {
-  const popup = document.getElementById('diagram-popup');
+  const popup = document.querySelector('.diagram-popup-instance');
   if (popup && !popup.contains(event.target)) {
     hideDiagramPopup();
   }
 }
 
 function init() {
-  const textarea = document.getElementById('relation-json');
-  const btnGenerate = document.getElementById('btn-generate-demo');
-  const btnParse = document.getElementById('btn-parse-relation');
-  const btnAiAsk = document.getElementById('btn-ai-ask');
-  const aiQuestion = document.getElementById('ai-question');
+  // Add unique class to relation container
+  const relationContainer = document.querySelector('.relation');
+  if (relationContainer) {
+    relationContainer.classList.add('relation_' + state.uid);
+  }
   
-  btnGenerate.addEventListener('click', () => {
+  const textarea = el('.relation-json');
+  const btnGenerate = el('.btn-generate-demo');
+  const btnParse = el('.btn-parse-relation');
+  const btnAiAsk = el('.btn-ai-ask');
+  const aiQuestion = el('.ai-question');
+  
+  btnGenerate?.addEventListener('click', () => {
     const demo = generateDemoRelation();
     textarea.value = JSON.stringify(demo, null, 2);
   });
   
-  btnParse.addEventListener('click', () => {
+  btnParse?.addEventListener('click', () => {
     const result = parseRelation(textarea.value);
-    const editable = document.getElementById('relation-editable').checked;
+    const editable = el('.relation-editable')?.checked || false;
     
     if (result.success) {
       state.relation = result.data;
@@ -5871,7 +5906,8 @@ function init() {
       state.diagramNodes = [];
       
       // Show view tabs when data is loaded
-      document.getElementById('view-tabs').style.display = 'flex';
+      const viewTabs = el('.view-tabs');
+      if (viewTabs) viewTabs.style.display = 'flex';
       
       // Reset to table view
       state.currentView = 'table';
@@ -5884,7 +5920,7 @@ function init() {
   });
   
   // View tabs event listeners
-  document.querySelectorAll('.view-tab').forEach(tab => {
+  elAll('.view-tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
       const view = e.currentTarget.dataset.view;
       switchView(view);
@@ -5892,24 +5928,24 @@ function init() {
   });
   
   // Pivot table events
-  document.getElementById('btn-add-pivot-value')?.addEventListener('click', () => {
+  el('.btn-add-pivot-value')?.addEventListener('click', () => {
     if (state.pivotConfig.values.length < 4) {
       state.pivotConfig.values.push({ column: null, aggregation: 'count' });
       renderPivotValuesConfig();
     }
   });
   
-  document.getElementById('btn-generate-pivot')?.addEventListener('click', generatePivotTable);
+  el('.btn-generate-pivot')?.addEventListener('click', generatePivotTable);
   
   // Correlation events
-  document.getElementById('btn-calculate-corr')?.addEventListener('click', calculateCorrelation);
+  el('.btn-calculate-corr')?.addEventListener('click', calculateCorrelation);
   
   // Diagram events
-  document.getElementById('btn-run-clustering')?.addEventListener('click', runClustering);
+  el('.btn-run-clustering')?.addEventListener('click', runClustering);
   
   // AI events
   btnAiAsk?.addEventListener('click', () => {
-    const question = aiQuestion.value.trim();
+    const question = aiQuestion?.value.trim();
     if (question) {
       askAI(question);
     }
@@ -5928,7 +5964,7 @@ function init() {
   setupResizeHandle();
   
   // Voice input button
-  const btnVoice = document.getElementById('btn-ai-voice');
+  const btnVoice = el('.btn-ai-voice');
   let recognition = null;
   
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -5977,7 +6013,7 @@ function init() {
 }
 
 function setupResizeHandle() {
-  const container = document.getElementById('relation-table-container');
+  const container = el('.relation-table-container');
   const handle = container?.querySelector('.resize-handle');
   const wrapper = container?.querySelector('.relation-table-wrapper');
   
