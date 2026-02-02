@@ -5055,6 +5055,18 @@ function generatePivotTable() {
     return count;
   }
   
+  // Helper to format pivot dimension values using options
+  function formatPivotValue(value, colIndex) {
+    if (value === 'Total') return value;
+    if (colIndex === null) return escapeHtml(value);
+    const colName = state.columnNames[colIndex];
+    const colOptions = state.options[colName];
+    if (colOptions && colOptions[value] !== undefined) {
+      return escapeHtml(colOptions[value]);
+    }
+    return escapeHtml(value);
+  }
+  
   // Render pivot table
   let html = '<table class="pivot-table">';
   
@@ -5069,7 +5081,7 @@ function generatePivotTable() {
   
   if (hasCols) {
     colValuesArr.forEach(cv => {
-      html += '<th colspan="' + aggregations.length + '">' + escapeHtml(cv) + '</th>';
+      html += '<th colspan="' + aggregations.length + '">' + formatPivotValue(cv, colIdx) + '</th>';
     });
     html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
   } else {
@@ -5105,7 +5117,7 @@ function generatePivotTable() {
   
   rowValuesArr.forEach(rv => {
     html += '<tr>';
-    html += '<td class="pivot-row-header">' + escapeHtml(rv) + '</td>';
+    html += '<td class="pivot-row-header">' + formatPivotValue(rv, rowIdx) + '</td>';
     
     if (hasCols) {
       colValuesArr.forEach(cv => {
