@@ -5603,20 +5603,18 @@ function initCorrelationConfig(st = state) {
   xSelect.innerHTML = options;
   ySelect.innerHTML = options;
   
-  // Add event listeners for Calculate button
   const calcBtn = corrView.querySelector('.btn-calculate-corr');
   if (calcBtn) {
     const newBtn = calcBtn.cloneNode(true);
     calcBtn.parentNode.replaceChild(newBtn, calcBtn);
-    newBtn.addEventListener('click', () => calculateCorrelationForInstance(st));
+    newBtn.addEventListener('click', () => calculateCorrelation(st));
   }
   
-  // Add event listener for Analyze All Pairs button
   const allBtn = corrView.querySelector('.btn-corr-all');
   if (allBtn) {
     const newBtn = allBtn.cloneNode(true);
     allBtn.parentNode.replaceChild(newBtn, allBtn);
-    newBtn.addEventListener('click', () => analyzeAllPairsForInstance(st));
+    newBtn.addEventListener('click', () => analyzeAllPairs(st));
   }
   
   // Add event listener for Help button
@@ -5633,14 +5631,13 @@ function initCorrelationConfig(st = state) {
   }
 }
 
-function calculateCorrelationForInstance(st) {
+function calculateCorrelation(st = state) {
   const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
   if (!corrView) return;
   
   const xColIdx = corrView.querySelector('.corr-col-x')?.value;
   const yColIdx = corrView.querySelector('.corr-col-y')?.value;
   const method = corrView.querySelector('.corr-method')?.value || 'auto';
-  const corrResultEl = corrView.querySelector('.correlation-result');
   
   if (!xColIdx || !yColIdx) {
     alert('Please select both X and Y columns');
@@ -5656,8 +5653,7 @@ function calculateCorrelationForInstance(st) {
   const isNumericY = ['int', 'float'].includes(yType);
   const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
   const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
-  const isBinaryX = xType === 'boolean';
-  const isBinaryY = yType === 'boolean';
+  const corrResultEl = corrView.querySelector('.correlation-result');
   
   function toNumeric(val, type) {
     if (val === null) return null;
@@ -5675,6 +5671,9 @@ function calculateCorrelationForInstance(st) {
     }
     return null;
   }
+  
+  const isBinaryX = xType === 'boolean';
+  const isBinaryY = yType === 'boolean';
   
   let effectiveMethod = method;
   if (method === 'auto') {
@@ -5696,11 +5695,6 @@ function calculateCorrelationForInstance(st) {
     }
   }
   
-  // Calculate correlation based on method
-  let correlation = 0;
-  let n = 0;
-  let resultHtml = '';
-  
   if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
     const pairs = [];
     getSortedIndices(st).forEach(i => {
@@ -5715,421 +5709,55 @@ function calculateCorrelationForInstance(st) {
       return;
     }
     
-    n = pairs.length;
-    
-    if (effectiveMethod === 'kendall') {
-      let concordant = 0, discordant = 0;
-      for (let i = 0; i < n - 1; i++) {
-        for (let j = i + 1; j < n; j++) {
-          const product = (pairs[j].x - pairs[i].x) * (pairs[j].y - pairs[i].y);
-          if (product > 0) concordant++;
-          else if (product < 0) discordant++;
-        }
-      }
-      const totalPairs = (n * (n - 1)) / 2;
-      correlation = totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
-    } else if (effectiveMethod === 'spearman') {
-      function rank(arr) {
-        const sorted = arr.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
-        const ranks = new Array(arr.length);
-        let k = 0;
-        while (k < sorted.length) {
-          let l = k;
-          while (l < sorted.length && sorted[l].v === sorted[k].v) l++;
-          const avgRank = (k + 1 + l) / 2;
-          for (let m = k; m < l; m++) ranks[sorted[m].i] = avgRank;
-          k = l;
-        }
-        return ranks;
-      }
-      const xRanks = rank(pairs.map(p => p.x));
-      const yRanks = rank(pairs.map(p => p.y));
-      const sumRx = xRanks.reduce((s, r) => s + r, 0);
-      const sumRy = yRanks.reduce((s, r) => s + r, 0);
-      const sumRxRy = xRanks.reduce((s, r, idx) => s + r * yRanks[idx], 0);
-      const sumRx2 = xRanks.reduce((s, r) => s + r * r, 0);
-      const sumRy2 = yRanks.reduce((s, r) => s + r * r, 0);
-      const num = n * sumRxRy - sumRx * sumRy;
-      const den = Math.sqrt((n * sumRx2 - sumRx * sumRx) * (n * sumRy2 - sumRy * sumRy));
-      correlation = den === 0 ? 0 : num / den;
-    } else {
-      const sumX = pairs.reduce((s, p) => s + p.x, 0);
-      const sumY = pairs.reduce((s, p) => s + p.y, 0);
-      const sumXY = pairs.reduce((s, p) => s + p.x * p.y, 0);
-      const sumX2 = pairs.reduce((s, p) => s + p.x * p.x, 0);
-      const sumY2 = pairs.reduce((s, p) => s + p.y * p.y, 0);
-      const num = n * sumXY - sumX * sumY;
-      const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-      correlation = den === 0 ? 0 : num / den;
-    }
-    
-    const methodNames = { pearson: 'Pearson (r)', spearman: 'Spearman (ρ)', kendall: "Kendall's τ" };
-    const strength = Math.abs(correlation) < 0.3 ? 'Weak' : Math.abs(correlation) < 0.7 ? 'Moderate' : 'Strong';
-    const direction = correlation > 0 ? 'positive' : correlation < 0 ? 'negative' : 'no';
-    
-    resultHtml = `
-      <div class="correlation-result-card">
-        <div class="corr-method-label">${methodNames[effectiveMethod]}</div>
-        <div class="corr-value">${correlation.toFixed(4)}</div>
-        <div class="corr-interpretation">${strength} ${direction} correlation</div>
-        <div class="corr-meta">n = ${n} pairs</div>
-        <div class="corr-columns">${escapeHtml(st.columnNames[xIdx])} × ${escapeHtml(st.columnNames[yIdx])}</div>
-      </div>
-    `;
-  } else if (effectiveMethod === 'pointbiserial' || effectiveMethod === 'phi') {
-    const pairs = [];
-    getSortedIndices(st).forEach(i => {
-      const row = st.relation.items[i];
-      if (effectiveMethod === 'phi') {
-        const x = row[xIdx], y = row[yIdx];
-        if (x !== null && y !== null) pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
-      } else {
-        const bVal = isBinaryX ? row[xIdx] : row[yIdx];
-        const nVal = isBinaryX ? toNumeric(row[yIdx], yType) : toNumeric(row[xIdx], xType);
-        if (bVal !== null && nVal !== null) pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
-      }
-    });
-    
-    if (pairs.length < 2) {
-      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs</p>';
-      return;
-    }
-    
-    n = pairs.length;
-    
-    if (effectiveMethod === 'phi') {
-      const a = pairs.filter(p => p.x === 1 && p.y === 1).length;
-      const b = pairs.filter(p => p.x === 1 && p.y === 0).length;
-      const c = pairs.filter(p => p.x === 0 && p.y === 1).length;
-      const d = pairs.filter(p => p.x === 0 && p.y === 0).length;
-      const num = a * d - b * c;
-      const den = Math.sqrt((a + b) * (c + d) * (a + c) * (b + d));
-      correlation = den === 0 ? 0 : num / den;
-    } else {
-      const group0 = pairs.filter(p => p.binary === 0).map(p => p.numeric);
-      const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
-      if (group0.length > 0 && group1.length > 0) {
-        const mean0 = group0.reduce((s, v) => s + v, 0) / group0.length;
-        const mean1 = group1.reduce((s, v) => s + v, 0) / group1.length;
-        const allVals = pairs.map(p => p.numeric);
-        const meanAll = allVals.reduce((s, v) => s + v, 0) / n;
-        const stdAll = Math.sqrt(allVals.reduce((s, v) => s + (v - meanAll) ** 2, 0) / n);
-        const p0 = group0.length / n, p1 = group1.length / n;
-        correlation = stdAll === 0 ? 0 : ((mean1 - mean0) / stdAll) * Math.sqrt(p0 * p1);
-      }
-    }
-    
-    const methodName = effectiveMethod === 'phi' ? 'Phi (φ)' : 'Point-Biserial (rpb)';
-    const strength = Math.abs(correlation) < 0.3 ? 'Weak' : Math.abs(correlation) < 0.7 ? 'Moderate' : 'Strong';
-    
-    resultHtml = `
-      <div class="correlation-result-card">
-        <div class="corr-method-label">${methodName}</div>
-        <div class="corr-value">${correlation.toFixed(4)}</div>
-        <div class="corr-interpretation">${strength} association</div>
-        <div class="corr-meta">n = ${n} pairs</div>
-        <div class="corr-columns">${escapeHtml(st.columnNames[xIdx])} × ${escapeHtml(st.columnNames[yIdx])}</div>
-      </div>
-    `;
-  } else {
-    // Cramér's V
-    const contingency = {}, xCounts = {}, yCounts = {};
-    let total = 0;
-    
-    getSortedIndices(st).forEach(i => {
-      const row = st.relation.items[i];
-      const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
-      const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
-      if (xVal !== null && yVal !== null) {
-        if (!contingency[xVal]) contingency[xVal] = {};
-        if (!contingency[xVal][yVal]) contingency[xVal][yVal] = 0;
-        contingency[xVal][yVal]++;
-        xCounts[xVal] = (xCounts[xVal] || 0) + 1;
-        yCounts[yVal] = (yCounts[yVal] || 0) + 1;
-        total++;
-      }
-    });
-    
-    if (total < 2) {
-      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs</p>';
-      return;
-    }
-    
-    let chiSquared = 0;
-    Object.keys(xCounts).forEach(xVal => {
-      Object.keys(yCounts).forEach(yVal => {
-        const observed = (contingency[xVal] && contingency[xVal][yVal]) || 0;
-        const expected = (xCounts[xVal] * yCounts[yVal]) / total;
-        if (expected > 0) chiSquared += Math.pow(observed - expected, 2) / expected;
-      });
-    });
-    
-    const k = Math.min(Object.keys(xCounts).length, Object.keys(yCounts).length);
-    correlation = k > 1 ? Math.sqrt(chiSquared / (total * (k - 1))) : 0;
-    
-    const strength = correlation < 0.1 ? 'Negligible' : correlation < 0.3 ? 'Weak' : correlation < 0.5 ? 'Moderate' : 'Strong';
-    
-    resultHtml = `
-      <div class="correlation-result-card">
-        <div class="corr-method-label">Cramér's V</div>
-        <div class="corr-value">${correlation.toFixed(4)}</div>
-        <div class="corr-interpretation">${strength} association</div>
-        <div class="corr-meta">n = ${total} | χ² = ${chiSquared.toFixed(2)}</div>
-        <div class="corr-columns">${escapeHtml(st.columnNames[xIdx])} × ${escapeHtml(st.columnNames[yIdx])}</div>
-      </div>
-    `;
-  }
-  
-  if (corrResultEl) corrResultEl.innerHTML = resultHtml;
-}
-
-function analyzeAllPairsForInstance(st) {
-  if (!st.relation || getSortedIndices(st).length < 2) {
-    alert('Not enough data for correlation analysis');
-    return;
-  }
-  
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
-  if (!corrView) return;
-  
-  const method = corrView.querySelector('.corr-method')?.value || 'auto';
-  const corrResultEl = corrView.querySelector('.correlation-result');
-  
-  const validCols = [];
-  st.columnTypes.forEach((type, idx) => {
-    if (['int', 'float', 'date', 'datetime', 'time', 'boolean', 'string', 'select'].includes(type)) {
-      validCols.push(idx);
-    }
-  });
-  
-  if (validCols.length < 2) {
-    alert('Need at least 2 columns for correlation analysis');
-    return;
-  }
-  
-  function toNumeric(val, type) {
-    if (val === null) return null;
-    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
-    if (['date', 'datetime'].includes(type)) {
-      const d = new Date(val);
-      return isNaN(d.getTime()) ? null : d.getTime();
-    }
-    return null;
-  }
-  
-  const results = [];
-  
-  for (let i = 0; i < validCols.length; i++) {
-    for (let j = i + 1; j < validCols.length; j++) {
-      const xIdx = validCols[i];
-      const yIdx = validCols[j];
-      const xType = st.columnTypes[xIdx];
-      const yType = st.columnTypes[yIdx];
-      
-      const isNumericX = ['int', 'float'].includes(xType);
-      const isNumericY = ['int', 'float'].includes(yType);
-      const isBinaryX = xType === 'boolean';
-      const isBinaryY = yType === 'boolean';
-      
-      let effectiveMethod = method;
-      if (method === 'auto') {
-        if (isBinaryX && isBinaryY) effectiveMethod = 'phi';
-        else if ((isBinaryX && isNumericY) || (isBinaryY && isNumericX)) effectiveMethod = 'pointbiserial';
-        else if (isNumericX && isNumericY) effectiveMethod = 'pearson';
-        else effectiveMethod = 'cramers';
-      }
-      
-      let correlation = 0, n = 0;
-      
-      if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
-        const pairs = [];
-        getSortedIndices(st).forEach(idx => {
-          const row = st.relation.items[idx];
-          const x = toNumeric(row[xIdx], xType);
-          const y = toNumeric(row[yIdx], yType);
-          if (x !== null && y !== null) pairs.push({ x, y });
-        });
-        
-        if (pairs.length >= 2) {
-          n = pairs.length;
-          const sumX = pairs.reduce((s, p) => s + p.x, 0);
-          const sumY = pairs.reduce((s, p) => s + p.y, 0);
-          const sumXY = pairs.reduce((s, p) => s + p.x * p.y, 0);
-          const sumX2 = pairs.reduce((s, p) => s + p.x * p.x, 0);
-          const sumY2 = pairs.reduce((s, p) => s + p.y * p.y, 0);
-          const num = n * sumXY - sumX * sumY;
-          const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-          correlation = den === 0 ? 0 : num / den;
-        }
-      }
-      
-      if (n > 0) {
-        results.push({
-          xIdx, yIdx,
-          xName: st.columnNames[xIdx],
-          yName: st.columnNames[yIdx],
-          correlation,
-          absCorr: Math.abs(correlation),
-          method: effectiveMethod,
-          n
-        });
-      }
-    }
-  }
-  
-  results.sort((a, b) => b.absCorr - a.absCorr);
-  
-  let html = '<div class="all-pairs-results"><h4>All Pairs Correlation</h4><table class="correlation-matrix"><thead><tr><th>Column X</th><th>Column Y</th><th>Correlation</th><th>Method</th><th>n</th></tr></thead><tbody>';
-  
-  results.forEach(r => {
-    const strength = r.absCorr < 0.3 ? 'weak' : r.absCorr < 0.7 ? 'moderate' : 'strong';
-    html += `<tr class="corr-${strength}"><td>${escapeHtml(r.xName)}</td><td>${escapeHtml(r.yName)}</td><td>${r.correlation.toFixed(4)}</td><td>${r.method}</td><td>${r.n}</td></tr>`;
-  });
-  
-  html += '</tbody></table></div>';
-  
-  if (corrResultEl) corrResultEl.innerHTML = html;
-}
-
-function calculateCorrelation() {
-  const xColIdx = el('.corr-col-x')?.value;
-  const yColIdx = el('.corr-col-y')?.value;
-  const method = el('.corr-method')?.value || 'auto';
-  
-  if (!xColIdx || !yColIdx) {
-    alert('Please select both X and Y columns');
-    return;
-  }
-  
-  const xIdx = parseInt(xColIdx);
-  const yIdx = parseInt(yColIdx);
-  const xType = state.columnTypes[xIdx];
-  const yType = state.columnTypes[yIdx];
-  
-  const isNumericX = ['int', 'float'].includes(xType);
-  const isNumericY = ['int', 'float'].includes(yType);
-  const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
-  const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
-  
-  // Convert temporal to numeric (timestamp)
-  function toNumeric(val, type) {
-    if (val === null) return null;
-    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
-    if (['date', 'datetime'].includes(type)) {
-      const d = new Date(val);
-      return isNaN(d.getTime()) ? null : d.getTime();
-    }
-    if (type === 'time') {
-      const parts = String(val).split(':');
-      if (parts.length >= 2) {
-        return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + (parseInt(parts[2]) || 0);
-      }
-      return null;
-    }
-    return null;
-  }
-  
-  const isBinaryX = xType === 'boolean';
-  const isBinaryY = yType === 'boolean';
-  
-  // Determine effective method with smart auto-detect
-  let effectiveMethod = method;
-  if (method === 'auto') {
-    if (isBinaryX && isBinaryY) {
-      effectiveMethod = 'phi';
-    } else if ((isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX))) {
-      effectiveMethod = 'pointbiserial';
-    } else if ((isNumericX || isTemporalX) && (isNumericY || isTemporalY)) {
-      // Count valid pairs to decide between Kendall and Pearson
-      let pairCount = 0;
-      getSortedIndices(state).forEach(i => {
-        const row = state.relation.items[i];
-        const x = toNumeric(row[xIdx], xType);
-        const y = toNumeric(row[yIdx], yType);
-        if (x !== null && y !== null) pairCount++;
-      });
-      effectiveMethod = pairCount < 30 ? 'kendall' : 'pearson';
-    } else {
-      effectiveMethod = 'cramers';
-    }
-  }
-  
-  // For Pearson, Spearman, Kendall need numeric pairs
-  if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
-    const pairs = [];
-    getSortedIndices(state).forEach(i => {
-      const row = state.relation.items[i];
-      const x = toNumeric(row[xIdx], xType);
-      const y = toNumeric(row[yIdx], yType);
-      if (x !== null && y !== null) {
-        pairs.push({ x, y });
-      }
-    });
-    
-    if (pairs.length < 2) {
-      const corrResultEl = el('.correlation-result');
-      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
-      return;
-    }
-    
     if (effectiveMethod === 'spearman') {
-      renderSpearmanCorrelation(pairs, xIdx, yIdx);
+      renderSpearmanCorrelation(pairs, xIdx, yIdx, st);
     } else if (effectiveMethod === 'kendall') {
-      renderKendallCorrelation(pairs, xIdx, yIdx);
+      renderKendallCorrelation(pairs, xIdx, yIdx, st);
     } else {
-      renderPearsonCorrelation(pairs, xIdx, yIdx);
+      renderPearsonCorrelation(pairs, xIdx, yIdx, st);
     }
   } else if (effectiveMethod === 'pointbiserial') {
-    // Point-biserial: one binary, one numeric
     const binaryIdx = isBinaryX ? xIdx : yIdx;
     const numericIdx = isBinaryX ? yIdx : xIdx;
     const numericType = isBinaryX ? yType : xType;
     
     const pairs = [];
-    getSortedIndices(state).forEach(i => {
-      const row = state.relation.items[i];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
       const bVal = row[binaryIdx];
       const nVal = toNumeric(row[numericIdx], numericType);
-      if (bVal !== null && nVal !== null) {
-        pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
-      }
+      if (bVal !== null && nVal !== null) pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
     });
     
     if (pairs.length < 2) {
-      const corrResultEl = el('.correlation-result');
       if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
       return;
     }
     
-    renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx);
+    renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx, st);
   } else if (effectiveMethod === 'phi') {
-    // Phi coefficient: both binary
     const pairs = [];
-    getSortedIndices(state).forEach(i => {
-      const row = state.relation.items[i];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
       const x = row[xIdx];
       const y = row[yIdx];
-      if (x !== null && y !== null) {
-        pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
-      }
+      if (x !== null && y !== null) pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
     });
     
     if (pairs.length < 2) {
-      const corrResultEl = el('.correlation-result');
       if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
       return;
     }
     
-    renderPhiCorrelation(pairs, xIdx, yIdx);
+    renderPhiCorrelation(pairs, xIdx, yIdx, st);
   } else {
-    // Categorical: use Cramér's V
     const contingency = {};
     const xCounts = {};
     const yCounts = {};
     let total = 0;
     
-    getSortedIndices(state).forEach(i => {
-      const row = state.relation.items[i];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
       const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
       const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
       
@@ -6137,7 +5765,6 @@ function calculateCorrelation() {
         if (!contingency[xVal]) contingency[xVal] = {};
         if (!contingency[xVal][yVal]) contingency[xVal][yVal] = 0;
         contingency[xVal][yVal]++;
-        
         xCounts[xVal] = (xCounts[xVal] || 0) + 1;
         yCounts[yVal] = (yCounts[yVal] || 0) + 1;
         total++;
@@ -6145,12 +5772,10 @@ function calculateCorrelation() {
     });
     
     if (total < 2) {
-      const corrResultEl = el('.correlation-result');
       if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for correlation</p>';
       return;
     }
     
-    // Calculate Chi-squared
     let chiSquared = 0;
     const xKeys = Object.keys(xCounts);
     const yKeys = Object.keys(yCounts);
@@ -6159,17 +5784,14 @@ function calculateCorrelation() {
       yKeys.forEach(yVal => {
         const observed = (contingency[xVal] && contingency[xVal][yVal]) || 0;
         const expected = (xCounts[xVal] * yCounts[yVal]) / total;
-        if (expected > 0) {
-          chiSquared += Math.pow(observed - expected, 2) / expected;
-        }
+        if (expected > 0) chiSquared += Math.pow(observed - expected, 2) / expected;
       });
     });
     
-    // Calculate Cramér's V
     const k = Math.min(xKeys.length, yKeys.length);
     const cramersV = k > 1 ? Math.sqrt(chiSquared / (total * (k - 1))) : 0;
     
-    renderCramersV(cramersV, total, xIdx, yIdx, xKeys.length, yKeys.length);
+    renderCramersV(cramersV, total, xIdx, yIdx, xKeys.length, yKeys.length, st);
   }
 }
 
@@ -6328,7 +5950,7 @@ function renderNormalityPanel(xValues, yValues, xName, yName) {
   return html;
 }
 
-function renderPearsonCorrelation(pairs, xIdx, yIdx) {
+function renderPearsonCorrelation(pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   const sumX = pairs.reduce((s, p) => s + p.x, 0);
   const sumY = pairs.reduce((s, p) => s + p.y, 0);
@@ -6399,10 +6021,8 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
     html += '<div class="correlation-warning">⚠️ Low R² suggests non-linear relationship: Consider Spearman (monotonic) or transform data</div>';
   }
   
-  // Normality analysis panel
-  html += renderNormalityPanel(xValues, yValues, state.columnNames[xIdx], state.columnNames[yIdx]);
+  html += renderNormalityPanel(xValues, yValues, st.columnNames[xIdx], st.columnNames[yIdx]);
   
-  // SVG scatter plot
   const width = 400;
   const height = 300;
   const padding = 40;
@@ -6418,8 +6038,8 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
   html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
   html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
   
   // Draw points with outliers in different color
   pairs.forEach(p => {
@@ -6450,19 +6070,20 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx) {
   html += '</div>';
   html += '</div>';
   
-  const corrResultEl = el('.correlation-result');
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
     corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => {
-      renderSpearmanCorrelation(pairs, xIdx, yIdx);
+      renderSpearmanCorrelation(pairs, xIdx, yIdx, st);
     });
     corrResultEl.querySelector('.btn-alt-kendall')?.addEventListener('click', () => {
-      renderKendallCorrelation(pairs, xIdx, yIdx);
+      renderKendallCorrelation(pairs, xIdx, yIdx, st);
     });
   }
 }
 
-function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
+function renderSpearmanCorrelation(pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   
   // Rank the values
@@ -6548,8 +6169,8 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
   html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
   html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
   html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
   
   pairs.forEach(p => {
     const cx = xScale(p.x);
@@ -6569,19 +6190,20 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx) {
   html += '</div>';
   html += '</div>';
   
-  const corrResultEl = el('.correlation-result');
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
     corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => {
-      renderPearsonCorrelation(pairs, xIdx, yIdx);
+      renderPearsonCorrelation(pairs, xIdx, yIdx, st);
     });
     corrResultEl.querySelector('.btn-alt-kendall')?.addEventListener('click', () => {
-      renderKendallCorrelation(pairs, xIdx, yIdx);
+      renderKendallCorrelation(pairs, xIdx, yIdx, st);
     });
   }
 }
 
-function renderKendallCorrelation(pairs, xIdx, yIdx) {
+function renderKendallCorrelation(pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   
   // Calculate Kendall's Tau
@@ -6652,8 +6274,8 @@ function renderKendallCorrelation(pairs, xIdx, yIdx) {
   html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
   html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
   html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  html += '<text x="15" y="' + (height/2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height/2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
   
   pairs.forEach(p => {
     const isOutlier = p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound ||
@@ -6671,21 +6293,23 @@ function renderKendallCorrelation(pairs, xIdx, yIdx) {
   html += '</div>';
   html += '</div>';
   
-  const corrResultEl = el('.correlation-result');
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
-    corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => renderPearsonCorrelation(pairs, xIdx, yIdx));
-    corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => renderSpearmanCorrelation(pairs, xIdx, yIdx));
+    corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => renderPearsonCorrelation(pairs, xIdx, yIdx, st));
+    corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => renderSpearmanCorrelation(pairs, xIdx, yIdx, st));
   }
 }
 
-function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx) {
+function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx, st = state) {
   const n = pairs.length;
   const group0 = pairs.filter(p => p.binary === 0).map(p => p.numeric);
   const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
   
   if (group0.length === 0 || group1.length === 0) {
-    const corrResultEl = el('.correlation-result');
+    const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+    const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
     if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Both binary groups need at least one observation</p>';
     return;
   }
@@ -6751,15 +6375,16 @@ function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx
   html += '<line x1="' + scale(mean1) + '" y1="90" x2="' + scale(mean1) + '" y2="110" stroke="#06b6d4" stroke-width="3"/>';
   html += '<text x="' + 20 + '" y="105" font-size="11" fill="#666">1</text>';
   
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(state.columnNames[numericIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(st.columnNames[numericIdx]) + '</text>';
   html += '</svg>';
   html += '</div>';
   
-  const corrResultEl = el('.correlation-result');
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
-function renderPhiCorrelation(pairs, xIdx, yIdx) {
+function renderPhiCorrelation(pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   
   // Build 2x2 contingency table
@@ -6799,20 +6424,20 @@ function renderPhiCorrelation(pairs, xIdx, yIdx) {
     html += '<div class="correlation-warning">⚠️ Some cells have fewer than 5 observations: Consider Fisher\'s exact test</div>';
   }
   
-  // 2x2 table visualization
   html += '<table class="phi-table">';
-  html += '<tr><th></th><th>' + escapeHtml(state.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(state.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
-  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a + b) + '</td></tr>';
-  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c + d) + '</td></tr>';
+  html += '<tr><th></th><th>' + escapeHtml(st.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(st.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
+  html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a + b) + '</td></tr>';
+  html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c + d) + '</td></tr>';
   html += '<tr><th>Total</th><td>' + (a + c) + '</td><td>' + (b + d) + '</td><td>' + n + '</td></tr>';
   html += '</table>';
   html += '</div>';
   
-  const corrResultEl = el('.correlation-result');
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
-function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
+function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories, st = state) {
   let strength = 'No association';
   if (v >= 0.5) strength = 'Strong';
   else if (v >= 0.3) strength = 'Moderate';
@@ -6840,22 +6465,26 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories) {
   
   html += '</div>';
   
-  const corrResultEl = el('.correlation-result');
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) corrResultEl.innerHTML = html;
 }
 
-function analyzeAllPairs() {
-  if (!state.relation || getSortedIndices(state).length < 2) {
+function analyzeAllPairs(st = state) {
+  if (!st.relation || getSortedIndices(st).length < 2) {
     alert('Not enough data for correlation analysis');
     return;
   }
   
-  const method = el('.corr-method')?.value || 'auto';
+  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  if (!corrView) return;
+  
+  const method = corrView.querySelector('.corr-method')?.value || 'auto';
+  const corrResultEl = corrView.querySelector('.correlation-result');
   const results = [];
   
-  // Get all valid column indices
   const validCols = [];
-  state.columnTypes.forEach((type, idx) => {
+  st.columnTypes.forEach((type, idx) => {
     if (['int', 'float', 'date', 'datetime', 'time', 'boolean', 'string', 'select'].includes(type)) {
       validCols.push(idx);
     }
@@ -6884,13 +6513,12 @@ function analyzeAllPairs() {
     return null;
   }
   
-  // Calculate correlation for each pair
   for (let i = 0; i < validCols.length; i++) {
     for (let j = i + 1; j < validCols.length; j++) {
       const xIdx = validCols[i];
       const yIdx = validCols[j];
-      const xType = state.columnTypes[xIdx];
-      const yType = state.columnTypes[yIdx];
+      const xType = st.columnTypes[xIdx];
+      const yType = st.columnTypes[yIdx];
       
       const isNumericX = ['int', 'float'].includes(xType);
       const isNumericY = ['int', 'float'].includes(yType);
@@ -6918,8 +6546,8 @@ function analyzeAllPairs() {
       
       if (['pearson', 'spearman', 'kendall'].includes(effectiveMethod)) {
         const pairs = [];
-        getSortedIndices(state).forEach(idx => {
-          const row = state.relation.items[idx];
+        getSortedIndices(st).forEach(idx => {
+          const row = st.relation.items[idx];
           const x = toNumeric(row[xIdx], xType);
           const y = toNumeric(row[yIdx], yType);
           if (x !== null && y !== null) pairs.push({ x, y });
@@ -6980,10 +6608,9 @@ function analyzeAllPairs() {
           }
         }
       } else if (effectiveMethod === 'pointbiserial') {
-        // Point-biserial: one binary, one numeric
         const pairs = [];
-        getSortedIndices(state).forEach(idx => {
-          const row = state.relation.items[idx];
+        getSortedIndices(st).forEach(idx => {
+          const row = st.relation.items[idx];
           const bVal = isBinaryX ? row[xIdx] : row[yIdx];
           const nVal = isBinaryX ? toNumeric(row[yIdx], yType) : toNumeric(row[xIdx], xType);
           if (bVal !== null && nVal !== null) {
@@ -7008,10 +6635,9 @@ function analyzeAllPairs() {
           }
         }
       } else if (effectiveMethod === 'phi') {
-        // Phi coefficient: both binary
         const pairs = [];
-        getSortedIndices(state).forEach(idx => {
-          const row = state.relation.items[idx];
+        getSortedIndices(st).forEach(idx => {
+          const row = st.relation.items[idx];
           const x = row[xIdx];
           const y = row[yIdx];
           if (x !== null && y !== null) {
@@ -7033,14 +6659,13 @@ function analyzeAllPairs() {
           correlation = denominator === 0 ? 0 : numerator / denominator;
         }
       } else {
-        // Cramér's V
         const contingency = {};
         const xCounts = {};
         const yCounts = {};
         let total = 0;
         
-        getSortedIndices(state).forEach(idx => {
-          const row = state.relation.items[idx];
+        getSortedIndices(st).forEach(idx => {
+          const row = st.relation.items[idx];
           const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
           const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
           if (xVal !== null && yVal !== null) {
@@ -7073,8 +6698,8 @@ function analyzeAllPairs() {
       if (n >= 2) {
         results.push({
           xIdx, yIdx,
-          xName: state.columnNames[xIdx],
-          yName: state.columnNames[yIdx],
+          xName: st.columnNames[xIdx],
+          yName: st.columnNames[yIdx],
           method: methodUsed,
           correlation: correlation,
           absCorrelation: Math.abs(correlation),
@@ -7109,11 +6734,9 @@ function analyzeAllPairs() {
     html = '<p class="text-muted-foreground">No valid column pairs found for correlation analysis.</p>';
   }
   
-  const corrResultEl = el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
     
-    // Add accordion click handlers
     corrResultEl.querySelectorAll('.corr-accordion-header').forEach(header => {
       header.addEventListener('click', function() {
         const content = this.nextElementSibling;
@@ -7127,12 +6750,11 @@ function analyzeAllPairs() {
           content.style.display = 'block';
           arrow.textContent = '▼';
           
-          // Load detailed view if not already loaded
           if (!content.dataset.loaded) {
             const xIdx = parseInt(content.dataset.x);
             const yIdx = parseInt(content.dataset.y);
             const method = content.dataset.method;
-            renderPairDetail(content, xIdx, yIdx, method);
+            renderPairDetail(content, xIdx, yIdx, method, st);
             content.dataset.loaded = 'true';
           }
         }
@@ -7141,10 +6763,9 @@ function analyzeAllPairs() {
   }
 }
 
-function renderPairDetail(container, xIdx, yIdx, method) {
-  // Render the same content as single pair analysis inside the accordion container
-  const xType = state.columnTypes[xIdx];
-  const yType = state.columnTypes[yIdx];
+function renderPairDetail(container, xIdx, yIdx, method, st = state) {
+  const xType = st.columnTypes[xIdx];
+  const yType = st.columnTypes[yIdx];
   const isNumericX = ['int', 'float'].includes(xType);
   const isNumericY = ['int', 'float'].includes(yType);
   const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
@@ -7155,14 +6776,12 @@ function renderPairDetail(container, xIdx, yIdx, method) {
   const bothBinary = isBinaryX && isBinaryY;
   const oneBinaryOneNumeric = (isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX));
   
-  // Create content container and alternatives container
   const contentDiv = document.createElement('div');
   contentDiv.className = 'pair-detail-content';
   
   const altDiv = document.createElement('div');
   altDiv.className = 'pair-detail-alternatives';
   
-  // Build alternative methods buttons based on column types
   let altHtml = '<div class="try-alternatives-row"><span class="try-alt-label">Try alternative:</span>';
   const alternatives = [];
   
@@ -7194,22 +6813,19 @@ function renderPairDetail(container, xIdx, yIdx, method) {
   container.appendChild(contentDiv);
   container.appendChild(altDiv);
   
-  // Render the correlation content
-  renderPairContent(contentDiv, xIdx, yIdx, method);
+  renderPairContent(contentDiv, xIdx, yIdx, method, st);
   
-  // Add event listeners to alternative buttons
   altDiv.querySelectorAll('.try-alt-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       const newMethod = this.dataset.method;
-      // Re-render with new method
-      renderPairDetail(container, xIdx, yIdx, newMethod);
+      renderPairDetail(container, xIdx, yIdx, newMethod, st);
     });
   });
 }
 
-function renderPairContent(container, xIdx, yIdx, method) {
-  const xType = state.columnTypes[xIdx];
-  const yType = state.columnTypes[yIdx];
+function renderPairContent(container, xIdx, yIdx, method, st = state) {
+  const xType = st.columnTypes[xIdx];
+  const yType = st.columnTypes[yIdx];
   const isBinaryX = xType === 'boolean';
   const isBinaryY = yType === 'boolean';
   
@@ -7230,11 +6846,10 @@ function renderPairContent(container, xIdx, yIdx, method) {
     return null;
   }
   
-  // Route to appropriate render function based on method
   if (['pearson', 'spearman', 'kendall'].includes(method)) {
     const pairs = [];
-    getSortedIndices(state).forEach(idx => {
-      const row = state.relation.items[idx];
+    getSortedIndices(st).forEach(idx => {
+      const row = st.relation.items[idx];
       const x = toNumeric(row[xIdx], xType);
       const y = toNumeric(row[yIdx], yType);
       if (x !== null && y !== null) pairs.push({ x, y });
@@ -7246,11 +6861,11 @@ function renderPairContent(container, xIdx, yIdx, method) {
     }
     
     if (method === 'pearson') {
-      renderPearsonCorrelationTo(container, pairs, xIdx, yIdx);
+      renderPearsonCorrelationTo(container, pairs, xIdx, yIdx, st);
     } else if (method === 'spearman') {
-      renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx);
+      renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx, st);
     } else {
-      renderKendallCorrelationTo(container, pairs, xIdx, yIdx);
+      renderKendallCorrelationTo(container, pairs, xIdx, yIdx, st);
     }
   } else if (method === 'pointbiserial') {
     const pairs = [];
@@ -7258,13 +6873,11 @@ function renderPairContent(container, xIdx, yIdx, method) {
     const numericIdx = isBinaryX ? yIdx : xIdx;
     const numericType = isBinaryX ? yType : xType;
     
-    getSortedIndices(state).forEach(idx => {
-      const row = state.relation.items[idx];
+    getSortedIndices(st).forEach(idx => {
+      const row = st.relation.items[idx];
       const bVal = row[binaryIdx];
       const nVal = toNumeric(row[numericIdx], numericType);
-      if (bVal !== null && nVal !== null) {
-        pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
-      }
+      if (bVal !== null && nVal !== null) pairs.push({ binary: bVal ? 1 : 0, numeric: nVal });
     });
     
     if (pairs.length < 2) {
@@ -7272,16 +6885,14 @@ function renderPairContent(container, xIdx, yIdx, method) {
       return;
     }
     
-    renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx);
+    renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx, st);
   } else if (method === 'phi') {
     const pairs = [];
-    getSortedIndices(state).forEach(idx => {
-      const row = state.relation.items[idx];
+    getSortedIndices(st).forEach(idx => {
+      const row = st.relation.items[idx];
       const x = row[xIdx];
       const y = row[yIdx];
-      if (x !== null && y !== null) {
-        pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
-      }
+      if (x !== null && y !== null) pairs.push({ x: x ? 1 : 0, y: y ? 1 : 0 });
     });
     
     if (pairs.length < 2) {
@@ -7289,16 +6900,15 @@ function renderPairContent(container, xIdx, yIdx, method) {
       return;
     }
     
-    renderPhiCorrelationTo(container, pairs, xIdx, yIdx);
+    renderPhiCorrelationTo(container, pairs, xIdx, yIdx, st);
   } else {
-    // Cramér's V
     const contingency = {};
     const xCounts = {};
     const yCounts = {};
     let total = 0;
     
-    getSortedIndices(state).forEach(idx => {
-      const row = state.relation.items[idx];
+    getSortedIndices(st).forEach(idx => {
+      const row = st.relation.items[idx];
       const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
       const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
       if (xVal !== null && yVal !== null) {
@@ -7314,12 +6924,11 @@ function renderPairContent(container, xIdx, yIdx, method) {
     const xKeys = Object.keys(xCounts);
     const yKeys = Object.keys(yCounts);
     
-    renderCramersVTo(container, contingency, total, xIdx, yIdx, xKeys.length, yKeys.length, xCounts, yCounts);
+    renderCramersVTo(container, contingency, total, xIdx, yIdx, xKeys.length, yKeys.length, xCounts, yCounts, st);
   }
 }
 
-// Render functions that accept a target container
-function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx) {
+function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   const sumX = pairs.reduce((s, p) => s + p.x, 0);
   const sumY = pairs.reduce((s, p) => s + p.y, 0);
@@ -7385,7 +6994,7 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx) {
     html += '<div class="correlation-warning">⚠️ Low R²: Consider Spearman or transform data</div>';
   }
   
-  html += renderNormalityPanel(xValues, yValues, state.columnNames[xIdx], state.columnNames[yIdx]);
+  html += renderNormalityPanel(xValues, yValues, st.columnNames[xIdx], st.columnNames[yIdx]);
   
   const width = 350, height = 250, padding = 35;
   const xMin = Math.min(...xValues), xMax = Math.max(...xValues);
@@ -7396,8 +7005,8 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
   html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
   html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
   
   pairs.forEach(p => {
     const isOutlier = p.x < xOutlierBounds.lowerBound || p.x > xOutlierBounds.upperBound || p.y < yOutlierBounds.lowerBound || p.y > yOutlierBounds.upperBound;
@@ -7411,7 +7020,7 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx) {
   container.innerHTML = html;
 }
 
-function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx) {
+function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   
   function rank(arr) {
@@ -7479,8 +7088,8 @@ function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
   html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
   html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
   
   pairs.forEach(p => {
     html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="3" fill="#10b981" opacity="0.6"/>';
@@ -7490,7 +7099,7 @@ function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx) {
   container.innerHTML = html;
 }
 
-function renderKendallCorrelationTo(container, pairs, xIdx, yIdx) {
+function renderKendallCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   let concordant = 0, discordant = 0;
   
@@ -7544,8 +7153,8 @@ function renderKendallCorrelationTo(container, pairs, xIdx, yIdx) {
   html += '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
   html += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
   html += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc"/>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[xIdx]) + '</text>';
-  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(state.columnNames[yIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  html += '<text x="12" y="' + (height/2) + '" text-anchor="middle" font-size="10" transform="rotate(-90 12 ' + (height/2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
   
   pairs.forEach(p => {
     html += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="3" fill="#8b5cf6" opacity="0.6"/>';
@@ -7555,7 +7164,7 @@ function renderKendallCorrelationTo(container, pairs, xIdx, yIdx) {
   container.innerHTML = html;
 }
 
-function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx) {
+function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryIdx, numericIdx, st = state) {
   const n = pairs.length;
   const group0 = pairs.filter(p => p.binary === 0).map(p => p.numeric);
   const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
@@ -7618,13 +7227,13 @@ function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryId
   group1.forEach(v => { html += '<circle cx="' + scale(v) + '" cy="80" r="4" fill="#06b6d4" opacity="0.6"/>'; });
   html += '<line x1="' + scale(mean1) + '" y1="70" x2="' + scale(mean1) + '" y2="90" stroke="#06b6d4" stroke-width="3"/>';
   html += '<text x="20" y="85" font-size="10">1</text>';
-  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(state.columnNames[numericIdx]) + '</text>';
+  html += '<text x="' + (width/2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="10">' + escapeHtml(st.columnNames[numericIdx]) + '</text>';
   html += '</svg></div>';
   
   container.innerHTML = html;
 }
 
-function renderPhiCorrelationTo(container, pairs, xIdx, yIdx) {
+function renderPhiCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const n = pairs.length;
   let a = 0, b = 0, c = 0, d = 0;
   pairs.forEach(p => {
@@ -7668,16 +7277,16 @@ function renderPhiCorrelationTo(container, pairs, xIdx, yIdx) {
   }
   
   html += '<table class="phi-table">';
-  html += '<tr><th></th><th>' + escapeHtml(state.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(state.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
-  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a+b) + '</td></tr>';
-  html += '<tr><th>' + escapeHtml(state.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c+d) + '</td></tr>';
+  html += '<tr><th></th><th>' + escapeHtml(st.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(st.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
+  html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a+b) + '</td></tr>';
+  html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c+d) + '</td></tr>';
   html += '<tr><th>Total</th><td>' + (a+c) + '</td><td>' + (b+d) + '</td><td>' + n + '</td></tr>';
   html += '</table></div>';
   
   container.innerHTML = html;
 }
 
-function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories, yCategories, xCounts, yCounts) {
+function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories, yCategories, xCounts, yCounts, st = state) {
   const xKeys = Object.keys(xCounts);
   const yKeys = Object.keys(yCounts);
   
