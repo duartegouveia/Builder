@@ -328,6 +328,46 @@ const PRICELISTS_JSON = {
   ]
 };
 
+const USERS_JSON = {
+  "pot": "relation",
+  "name": "",
+  "columns": {
+    "ID": "id",
+    "IntegrationID": "string",
+    "UserName": "string",
+    "Password": "string",
+    "Name": "string",
+    "Email": "string",
+    "Phone": "string",
+    "Active": "boolean",
+    "LastLogin": "datetime",
+    "Locale": "string",
+    "PasswordDate": "datetime",
+    "PasswordExpired": "boolean",
+    "IsExternal": "boolean",
+    "ExternalUser": "string",
+    "Notes": "multilinestring",
+    "UserCode": "string",
+    "HasMFA": "boolean",
+    "MFAKey": "string",
+    "FailedAttempts": "int",
+    "FailedAttemptDate": "datetime"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
 const DEFAULT_UI_STATE = {
   currentView: 'table',
@@ -9218,6 +9258,13 @@ function init() {
   const btnLoadPriceLists = el('.btn-load-pricelists');
   btnLoadPriceLists?.addEventListener('click', () => {
     textarea.value = JSON.stringify(PRICELISTS_JSON, null, 2);
+  });
+  
+  // Menu item event listeners
+  const menuUsers = document.querySelector('[data-testid="menu-users"]');
+  menuUsers?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(USERS_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
