@@ -60,7 +60,17 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   padding: 0.25rem 0;
-  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+  background: transparent;
 }
 
 .nav-item:hover .nav-dropdown,
