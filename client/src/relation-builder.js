@@ -82,7 +82,6 @@ const PRODUCTS_JSON = {
     "subbrand": "string",
     "ean": "string",
     "min_stock": "int",
-    "start_time": "time",
     "category": "string"
   },
   "options": {
