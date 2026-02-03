@@ -9260,7 +9260,17 @@ function init() {
     textarea.value = JSON.stringify(PRICELISTS_JSON, null, 2);
   });
   
-  // Menu item event listeners
+  // Menu item event listeners - close dropdown on click
+  document.querySelectorAll('.nav-dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const dropdown = item.closest('.nav-item');
+      if (dropdown) {
+        dropdown.classList.add('menu-closed');
+        setTimeout(() => dropdown.classList.remove('menu-closed'), 100);
+      }
+    });
+  });
+  
   const menuUsers = document.querySelector('[data-testid="menu-users"]');
   menuUsers?.addEventListener('click', (e) => {
     e.preventDefault();

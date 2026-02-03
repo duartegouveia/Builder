@@ -78,6 +78,10 @@
   display: block;
 }
 
+.nav-item.menu-closed .nav-dropdown {
+  display: none !important;
+}
+
 .nav-dropdown-item {
   display: block;
   padding: 0.5rem 1rem;
