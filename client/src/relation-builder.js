@@ -8072,19 +8072,101 @@ function initRelationInstance(container, relationData, options = {}) {
     </div>
     
     <div class="view-correlation view-content" style="display: none;">
-      <p class="text-muted-foreground">Correlation view</p>
+      <div class="correlation-config">
+        <div class="correlation-section">
+          <div class="correlation-section-header">Analyze Single Pair</div>
+          <div class="correlation-config-row">
+            <label>Column X:</label>
+            <select class="corr-col-x pivot-select"></select>
+          </div>
+          <div class="correlation-config-row">
+            <label>Column Y:</label>
+            <select class="corr-col-y pivot-select"></select>
+          </div>
+          <div class="correlation-config-row">
+            <label>Method:</label>
+            <select class="corr-method pivot-select">
+              <option value="auto">Auto-detect</option>
+              <option value="pearson">Pearson (linear, normal)</option>
+              <option value="spearman">Spearman (monotonic, robust)</option>
+              <option value="kendall">Kendall's Tau (ordinal, small n)</option>
+              <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
+              <option value="phi">Phi (binary × binary)</option>
+              <option value="cramers">Cramér's V (categorical)</option>
+            </select>
+          </div>
+          <div class="correlation-actions">
+            <button class="btn-calculate-corr btn btn-primary btn-sm">Calculate</button>
+            <button class="btn-corr-help btn btn-outline btn-sm">?</button>
+          </div>
+        </div>
+        <div class="correlation-section">
+          <div class="correlation-section-header">Analyze All Pairs</div>
+          <div class="correlation-section-desc">Calculate correlations between all column combinations</div>
+          <button class="btn-corr-all btn btn-primary btn-sm">Analyze All Pairs</button>
+        </div>
+      </div>
+      <div class="correlation-help" style="display: none;">
+        <p><strong>Choosing a correlation method:</strong></p>
+        <ul>
+          <li><strong>Pearson (r)</strong> - Linear relationship. Assumes normality. Best for continuous data. Range: -1 to +1.</li>
+          <li><strong>Spearman (ρ)</strong> - Monotonic relationship. No normality assumption. Robust to outliers. Range: -1 to +1.</li>
+          <li><strong>Kendall's Tau (τ)</strong> - Rank correlation. Better for small samples (n&lt;30) or ordinal data. More robust than Spearman. Range: -1 to +1.</li>
+          <li><strong>Point-Biserial (r<sub>pb</sub>)</strong> - When one variable is binary (0/1) and other is numeric. Range: -1 to +1.</li>
+          <li><strong>Phi (φ)</strong> - Association between two binary variables. Special case of Pearson for 2×2 tables. Range: -1 to +1.</li>
+          <li><strong>Cramér's V</strong> - Categorical association. Based on chi-squared. Range: 0 to 1 (no direction).</li>
+        </ul>
+        <p><strong>Auto-detect logic:</strong></p>
+        <ul>
+          <li>Both binary → Phi</li>
+          <li>One binary + one numeric → Point-Biserial</li>
+          <li>Both numeric, n&lt;30 → Kendall's Tau</li>
+          <li>Both numeric, n≥30 → Pearson</li>
+          <li>Either categorical → Cramér's V</li>
+        </ul>
+      </div>
+      <div class="correlation-result"></div>
     </div>
     
     <div class="view-diagram view-content" style="display: none;">
-      <p class="text-muted-foreground">Diagram view</p>
+      <div class="diagram-info">
+        <p class="diagram-description">This diagram uses <strong>t-SNE</strong> to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart.</p>
+      </div>
+      <div class="diagram-config">
+        <div class="diagram-config-row">
+          <label>Clusters:</label>
+          <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;">
+        </div>
+        <div class="diagram-config-row">
+          <label>Perplexity:</label>
+          <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;">
+        </div>
+        <div class="diagram-config-row">
+          <label>Iterations:</label>
+          <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;">
+        </div>
+        <button class="btn-run-clustering btn btn-primary btn-sm">Run t-SNE</button>
+        <span class="tsne-progress" style="display: none;">Calculating...</span>
+      </div>
+      <div class="diagram-container">
+        <canvas class="diagram-canvas" width="800" height="600"></canvas>
+      </div>
     </div>
     
     <div class="view-ai view-content" style="display: none;">
-      <p class="text-muted-foreground">AI view</p>
+      <div class="ai-panel-inline">
+        <div class="ai-input-row">
+          <input type="text" class="ai-question ai-question-input" placeholder="Ask a question about your data...">
+          <button class="btn-ai-ask btn btn-primary btn-sm">Ask</button>
+        </div>
+        <div class="ai-response"></div>
+      </div>
     </div>
     
     <div class="view-saved view-content" style="display: none;">
-      <p class="text-muted-foreground">Saved view</p>
+      <div class="saved-panel">
+        <p class="text-muted-foreground text-center py-8">Saved views will appear here</p>
+      </div>
     </div>
   `;
   
