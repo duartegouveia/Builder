@@ -71,6 +71,51 @@ const DEFAULT_REL_OPTIONS = {
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
 };
 
+// Sample Products JSON for quick loading
+const PRODUCTS_JSON = {
+  "pot": "relation",
+  "columns": {
+    "id": "id",
+    "external_ref": "string",
+    "name": "string",
+    "brand": "string",
+    "subbrand": "string",
+    "ean": "string",
+    "min_stock": "int",
+    "start_time": "time",
+    "category": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": [
+    ['1','1','PURINA DOG Chow Adulto','Nestle','PURINA','7613036584307',10,'1'],
+    ['2','2','Purina ONE Supreme Adult','Nestle','PURINA','7613036584312',10,'2'],
+    ['3','3','Garden Gourmet à base de proteína vegetal','Nestle','Garden Gourmet','7613036584313',5,'3'],
+    ['4','4','Tablete de Chocolate Nestlé Classic','Nestle','Nestle','7613036584314',5,'4'],
+    ['5','5','Bombons Nestlé Sensations','Nestle','Nestle','7613036584315',0,'4'],
+    ['6','6','Barras de Chocolate Nestlé Crunch','Nestle','Nestle','7613036584316',0,'4'],
+    ['7','7','CINI MINIS Churros','Nestle','Nestle','7613036584317',5,'5'],
+    ['8','8','CHEERIOS Mel 375 g','Nestle','Nestle','7613034626847',10,'5'],
+    ['9','9','NESCAFÉ Classic 200 mg','Nestle','NESCAFÉ','7613035304003',10,'6'],
+    ['10','10','SICAL Torrado','Nestle','SICAL','7613035304008',10,'6'],
+    ['11','11','Bolero Bebida de Cevada','Nestle','Bolero','7613035304013',10,'6'],
+    ['12','12','Natas Longa Vida','Nestle','Longa Vida','7613035304018',10,'7'],
+    ['13','13','Iogurte grego Lindahls rico em proteína','Nestle','Lindahls','7613035304023',10,'7'],
+    ['14','14','Arroz de Marisco Longa Vida','Nestle','Longa Vida','7613035304028',5,'9'],
+    ['15','15','Miúdos Nutrição Infantil NAN','Nestle','NAN','7613035304033',10,'11']
+  ]
+};
+
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
 const DEFAULT_UI_STATE = {
   currentView: 'table',
@@ -7337,9 +7382,14 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
 }
 
 function runClustering(st = state) {
-  if (!st.relation || getSortedIndices(st).length === 0) {
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
     alert('No data to cluster');
     return;
+  }
+  
+  if (getSortedIndices(st).length === 0 && getFilteredIndices(st).length === 0) {
+    setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+    setSortedIndices(st, [...getFilteredIndices(st)]);
   }
   
   const n = getSortedIndices(st).length;
@@ -8119,20 +8169,23 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-diagram view-content" style="display: none;">
       <div class="diagram-info">
-        <p class="diagram-description">This diagram uses <strong>t-SNE</strong> to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart.</p>
+        <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by cluster assignment. <strong>Recommended clusters:</strong> Use 3-10 clusters for most datasets. A common rule is sqrt(n/2) where n is the number of rows. Too few clusters may oversimplify patterns; too many may create noise.</p>
       </div>
       <div class="diagram-config">
         <div class="diagram-config-row">
           <label>Clusters:</label>
           <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;">
+          <span class="diagram-field-help">Number of color groups. Range: 2-20. Recommended: sqrt(n/2) where n is the number of rows.</span>
         </div>
         <div class="diagram-config-row">
           <label>Perplexity:</label>
           <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;">
+          <span class="diagram-field-help">Balance between local and global structure. Range: 5-100. Typical: 5-50. Lower values focus on local clusters, higher values preserve global structure.</span>
         </div>
         <div class="diagram-config-row">
           <label>Iterations:</label>
           <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;">
+          <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
         </div>
         <button class="btn-run-clustering btn btn-primary btn-sm">Run t-SNE</button>
         <span class="tsne-progress" style="display: none;">Calculating...</span>
@@ -8144,9 +8197,34 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-ai view-content" style="display: none;">
       <div class="ai-panel-inline">
+        <div class="ai-voice-row">
+          <select class="voice-language pivot-select" title="Voice recognition language">
+            <option value="pt-PT" selected>Português (PT)</option>
+            <option value="pt-BR">Português (BR)</option>
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Español (ES)</option>
+            <option value="es-MX">Español (MX)</option>
+            <option value="fr-FR">Français</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="it-IT">Italiano</option>
+            <option value="ja-JP">日本語</option>
+            <option value="zh-CN">中文 (简体)</option>
+            <option value="zh-TW">中文 (繁體)</option>
+            <option value="ru-RU">Русский</option>
+            <option value="ko-KR">한국어</option>
+            <option value="ar-SA">العربية</option>
+            <option value="hi-IN">हिन्दी</option>
+          </select>
+          <button class="btn-ai-voice btn btn-outline btn-sm" title="Voice input">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+          </button>
+        </div>
         <div class="ai-input-row">
           <input type="text" class="ai-question ai-question-input" placeholder="Ask a question about your data...">
-          <button class="btn-ai-ask btn btn-primary btn-sm">Ask</button>
+          <button class="btn-ai-ask btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </button>
         </div>
         <div class="ai-response"></div>
       </div>
@@ -8260,27 +8338,27 @@ function initDiagramView(st = state) {
 }
 
 function initAIView(st = state) {
-  const container = st.container ? st.container.querySelector('.ai-assistant') : el('.ai-assistant');
-  if (!container) return;
+  const aiView = st.container ? st.container.querySelector('.view-ai') : el('.view-ai');
+  if (!aiView) return;
   
-  // AI view is ready in HTML, just ensure event handlers work with correct state
-  const input = container.querySelector('.ai-input');
-  const submitBtn = container.querySelector('.ai-submit');
+  const input = aiView.querySelector('.ai-question');
+  const submitBtn = aiView.querySelector('.btn-ai-ask');
+  const voiceBtn = aiView.querySelector('.btn-ai-voice');
+  const languageSelect = aiView.querySelector('.voice-language');
   
   if (input && submitBtn) {
-    // Re-attach handlers to use correct state
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+    
     const newSubmitBtn = submitBtn.cloneNode(true);
     submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
     
     newSubmitBtn.addEventListener('click', () => {
-      const question = input.value.trim();
+      const question = newInput.value.trim();
       if (question) {
         askAI(question, st);
       }
     });
-    
-    const newInput = input.cloneNode(true);
-    input.parentNode.replaceChild(newInput, input);
     
     newInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
@@ -8290,6 +8368,43 @@ function initAIView(st = state) {
         }
       }
     });
+    
+    if (voiceBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      const newVoiceBtn = voiceBtn.cloneNode(true);
+      voiceBtn.parentNode.replaceChild(newVoiceBtn, voiceBtn);
+      
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const currentInput = aiView.querySelector('.ai-question');
+        if (currentInput) currentInput.value = transcript;
+        newVoiceBtn.classList.remove('recording');
+      };
+      
+      recognition.onerror = () => {
+        newVoiceBtn.classList.remove('recording');
+      };
+      
+      recognition.onend = () => {
+        newVoiceBtn.classList.remove('recording');
+      };
+      
+      newVoiceBtn.addEventListener('click', () => {
+        if (newVoiceBtn.classList.contains('recording')) {
+          recognition.stop();
+          newVoiceBtn.classList.remove('recording');
+        } else {
+          const lang = languageSelect ? languageSelect.value : 'pt-PT';
+          recognition.lang = lang;
+          recognition.start();
+          newVoiceBtn.classList.add('recording');
+        }
+      });
+    }
   }
 }
 
@@ -8872,6 +8987,32 @@ function init() {
     textarea.value = JSON.stringify(demo, null, 2);
   });
   
+  const btnLoadProducts = el('.btn-load-products');
+  btnLoadProducts?.addEventListener('click', () => {
+    textarea.value = JSON.stringify(PRODUCTS_JSON, null, 2);
+  });
+  
+  const btnLoadCategories = el('.btn-load-categories');
+  btnLoadCategories?.addEventListener('click', () => {
+    if (typeof CATEGORIES_JSON !== 'undefined') {
+      textarea.value = JSON.stringify(CATEGORIES_JSON, null, 2);
+    }
+  });
+  
+  const btnLoadStocks = el('.btn-load-stocks');
+  btnLoadStocks?.addEventListener('click', () => {
+    if (typeof STOCKS_JSON !== 'undefined') {
+      textarea.value = JSON.stringify(STOCKS_JSON, null, 2);
+    }
+  });
+  
+  const btnLoadPriceLists = el('.btn-load-pricelists');
+  btnLoadPriceLists?.addEventListener('click', () => {
+    if (typeof PRICELISTS_JSON !== 'undefined') {
+      textarea.value = JSON.stringify(PRICELISTS_JSON, null, 2);
+    }
+  });
+  
   btnParse?.addEventListener('click', () => {
     const result = parseRelation(textarea.value);
     
@@ -8955,20 +9096,20 @@ function init() {
     }
   });
   
-  el('.btn-generate-pivot')?.addEventListener('click', generatePivotTable);
+  el('.btn-generate-pivot')?.addEventListener('click', () => generatePivotTable());
   
   // Correlation events
-  el('.btn-calculate-corr')?.addEventListener('click', calculateCorrelation);
+  el('.btn-calculate-corr')?.addEventListener('click', () => calculateCorrelation());
   el('.btn-corr-help')?.addEventListener('click', () => {
     const helpDiv = el('.correlation-help');
     if (helpDiv) {
       helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
     }
   });
-  el('.btn-corr-all')?.addEventListener('click', analyzeAllPairs);
+  el('.btn-corr-all')?.addEventListener('click', () => analyzeAllPairs());
   
   // Diagram events
-  el('.btn-run-clustering')?.addEventListener('click', runClustering);
+  el('.btn-run-clustering')?.addEventListener('click', () => runClustering());
   
   // AI events
   btnAiAsk?.addEventListener('click', () => {
