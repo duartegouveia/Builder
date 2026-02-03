@@ -74,6 +74,7 @@ const DEFAULT_REL_OPTIONS = {
 // Sample Products JSON for quick loading
 const PRODUCTS_JSON = {
   "pot": "relation",
+  "name": "",
   "columns": {
     "id": "id",
     "external_ref": "string",
@@ -117,6 +118,7 @@ const PRODUCTS_JSON = {
 
 const CATEGORIES_JSON = {
   "pot": "relation",
+  "name": "",
   "columns": {
     "id": "id",
     "external_ref": "string",
@@ -160,6 +162,7 @@ const CATEGORIES_JSON = {
 
 const STOCKS_JSON = {
   "pot": "relation",
+  "name": "",
   "columns": {
     "id": "id",
     "stock_date": "date",
@@ -270,6 +273,7 @@ const STOCKS_JSON = {
 
 const PRICELISTS_JSON = {
   "pot": "relation",
+  "name": "",
   "columns": {
     "id": "id",
     "start_date": "date",
@@ -707,6 +711,7 @@ function generateDemoRelation() {
   
   return {
     pot: 'relation',
+    name: '',
     columns: columns,
     options: options,
     rel_options: rel_options,
