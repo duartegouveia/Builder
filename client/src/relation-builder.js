@@ -368,6 +368,34 @@ const USERS_JSON = {
   "items": []
 };
 
+const AUDITLOG_JSON = {
+  "pot": "relation",
+  "name": "admin_auditlog",
+  "columns": {
+    "ID": "id",
+    "CompanyID": "string",
+    "UserID": "string",
+    "Date": "datetime",
+    "Context": "string",
+    "Action": "string",
+    "EndDate": "datetime",
+    "Error": "multilinestring"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
 const DEFAULT_UI_STATE = {
   currentView: 'table',
@@ -9275,6 +9303,12 @@ function init() {
   menuUsers?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(USERS_JSON, null, 2);
+  });
+  
+  const menuAuditLog = document.querySelector('[data-testid="menu-audit-log"]');
+  menuAuditLog?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(AUDITLOG_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
