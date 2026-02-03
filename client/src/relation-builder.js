@@ -330,7 +330,7 @@ const PRICELISTS_JSON = {
 
 const USERS_JSON = {
   "pot": "relation",
-  "name": "",
+  "name": "admin_user",
   "columns": {
     "ID": "id",
     "IntegrationID": "string",
