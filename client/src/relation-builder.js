@@ -116,6 +116,49 @@ const PRODUCTS_JSON = {
   ]
 };
 
+const CATEGORIES_JSON = {
+  "pot": "relation",
+  "columns": {
+    "id": "id",
+    "external_ref": "string",
+    "name": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "single_item_mode": "dialog",
+    "general_view_options": [
+      "Table",
+      "Cards",
+      "Pivot",
+      "Correlation",
+      "Diagram",
+      "AI",
+      "Saved"
+    ]
+  },
+  "items": [
+    ['1','1','Dog Food'],
+    ['2','2','Cat Food'],
+    ['3','3','Vegetarian Food'],
+    ['4','4','Chocolate'],
+    ['5','5','Cereals'],
+    ['6','6','Cofee and Beverages'],
+    ['7','7','Milk and Deserts'],
+    ['8','8','Clinical Nutricion'],
+    ['9','9','Cooking'],
+    ['10','10','Cofee machines'],
+    ['11','11','Child nutrition'],
+    ['12','12','Proteins and Vitamins']
+  ]
+};
+
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
 const DEFAULT_UI_STATE = {
   currentView: 'table',
@@ -8994,9 +9037,7 @@ function init() {
   
   const btnLoadCategories = el('.btn-load-categories');
   btnLoadCategories?.addEventListener('click', () => {
-    if (typeof CATEGORIES_JSON !== 'undefined') {
-      textarea.value = JSON.stringify(CATEGORIES_JSON, null, 2);
-    }
+    textarea.value = JSON.stringify(CATEGORIES_JSON, null, 2);
   });
   
   const btnLoadStocks = el('.btn-load-stocks');
