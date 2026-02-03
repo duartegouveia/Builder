@@ -4688,8 +4688,11 @@ function updateRelationFromInput(input) {
 }
 
 // AI Panel functions
-async function askAI(question) {
-  const responseDiv = el('.ai-response');
+async function askAI(question, st = state) {
+  const aiView = st.container ? st.container.querySelector('.view-ai') : el('.view-ai');
+  const responseDiv = aiView ? aiView.querySelector('.ai-response') : el('.ai-response');
+  if (!responseDiv) return;
+  
   responseDiv.innerHTML = '';
   responseDiv.classList.add('loading');
   
@@ -4699,7 +4702,7 @@ async function askAI(question) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question,
-        relation: state.relation
+        relation: st.relation
       })
     });
     
@@ -4709,7 +4712,6 @@ async function askAI(question) {
     responseDiv.classList.remove('loading');
     
     if (result.type === 'filter' && result.conditions) {
-      // Display filter result with apply button
       responseDiv.innerHTML = `
         <div>${result.description || 'Filter suggestion:'}</div>
         <div class="ai-filter-result">
@@ -4718,8 +4720,8 @@ async function askAI(question) {
         </div>
       `;
       
-      el('.btn-apply-ai-filter')?.addEventListener('click', () => {
-        applyAIFilter(result.conditions);
+      responseDiv.querySelector('.btn-apply-ai-filter')?.addEventListener('click', () => {
+        applyAIFilter(result.conditions, st);
       });
     } else if (result.type === 'answer') {
       responseDiv.innerHTML = `<div>${result.text}</div>`;
@@ -4732,15 +4734,13 @@ async function askAI(question) {
   }
 }
 
-function applyAIFilter(conditions) {
-  // Apply AI-suggested filters to the table
+function applyAIFilter(conditions, st = state) {
   conditions.forEach(cond => {
-    const colIdx = state.columnNames.indexOf(cond.column);
+    const colIdx = st.columnNames.indexOf(cond.column);
     if (colIdx === -1) return;
     
-    const colType = state.columnTypes[colIdx];
+    const colType = st.columnTypes[colIdx];
     
-    // Map AI operators to filter format
     let filterType, filterValue;
     switch (cond.operator) {
       case 'equals':
@@ -4749,9 +4749,8 @@ function applyAIFilter(conditions) {
         break;
       case 'contains':
         filterType = 'values';
-        // Find matching values
         const matchingValues = new Set();
-        state.relation.items.forEach(row => {
+        st.relation.items.forEach(row => {
           const val = row[colIdx];
           if (val && String(val).toLowerCase().includes(String(cond.value).toLowerCase())) {
             matchingValues.add(val);
@@ -4765,7 +4764,7 @@ function applyAIFilter(conditions) {
       case 'lte':
         filterType = 'values';
         const numericMatches = new Set();
-        state.relation.items.forEach(row => {
+        st.relation.items.forEach(row => {
           const val = row[colIdx];
           const numVal = parseFloat(val);
           const condVal = parseFloat(cond.value);
@@ -4791,17 +4790,17 @@ function applyAIFilter(conditions) {
     }
     
     if (filterType === 'values' && filterValue) {
-      getFilters(state)[colIdx] = { type: 'values', values: filterValue };
+      getFilters(st)[colIdx] = { type: 'values', values: filterValue };
     } else if (filterType === 'null') {
-      getFilters(state)[colIdx] = { type: 'null' };
+      getFilters(st)[colIdx] = { type: 'null' };
     } else if (filterType === 'notNull') {
-      getFilters(state)[colIdx] = { type: 'notNull' };
+      getFilters(st)[colIdx] = { type: 'notNull' };
     }
   });
   
-  setCurrentPage(state, 1);
-  applyFilters();
-  renderTable();
+  setCurrentPage(st, 1);
+  applyFilters(st);
+  renderTable(st);
   showToast('AI filter applied');
 }
 
@@ -7337,13 +7336,13 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
   container.innerHTML = html;
 }
 
-function runClustering() {
-  if (!state.relation || getSortedIndices(state).length === 0) {
+function runClustering(st = state) {
+  if (!st.relation || getSortedIndices(st).length === 0) {
     alert('No data to cluster');
     return;
   }
   
-  const n = getSortedIndices(state).length;
+  const n = getSortedIndices(st).length;
   const maxPoints = 500;
   
   if (n > maxPoints) {
@@ -7352,14 +7351,13 @@ function runClustering() {
     }
   }
   
-  // Get t-SNE parameters from UI
-  const numClusters = parseInt(el('.tsne-clusters')?.value) || 5;
-  const perplexity = parseInt(el('.tsne-perplexity')?.value) || 30;
-  const iterations = parseInt(el('.tsne-iterations')?.value) || 500;
+  const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+  const numClusters = parseInt(diagramView?.querySelector('.tsne-clusters')?.value) || 5;
+  const perplexity = parseInt(diagramView?.querySelector('.tsne-perplexity')?.value) || 30;
+  const iterations = parseInt(diagramView?.querySelector('.tsne-iterations')?.value) || 500;
   
-  // Get categorical/numeric columns for similarity calculation
   const cols = [];
-  state.columnTypes.forEach((type, idx) => {
+  st.columnTypes.forEach((type, idx) => {
     if (['boolean', 'string', 'select', 'int', 'float'].includes(type)) {
       cols.push(idx);
     }
@@ -7370,20 +7368,19 @@ function runClustering() {
     return;
   }
   
-  // Prepare data matrix
-  const data = getSortedIndices(state).map(i => {
-    const row = state.relation.items[i];
+  const data = getSortedIndices(st).map(i => {
+    const row = st.relation.items[i];
     return cols.map(colIdx => {
       const val = row[colIdx];
-      const type = state.columnTypes[colIdx];
+      const type = st.columnTypes[colIdx];
       if (val === null) return 0;
       if (type === 'boolean') return val ? 1 : 0;
       if (type === 'int' || type === 'float') return val;
       if (type === 'string' || type === 'select') {
         let hash = 0;
         const str = String(val);
-        for (let i = 0; i < str.length; i++) {
-          hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        for (let j = 0; j < str.length; j++) {
+          hash = ((hash << 5) - hash) + str.charCodeAt(j);
           hash |= 0;
         }
         return hash;
@@ -7392,7 +7389,6 @@ function runClustering() {
     });
   });
   
-  // Normalize each column to zero mean and unit variance
   const nCols = cols.length;
   const nRows = data.length;
   
@@ -7411,11 +7407,9 @@ function runClustering() {
     }
   }
   
-  // Show progress
-  const progressEl = el('.tsne-progress');
+  const progressEl = diagramView?.querySelector('.tsne-progress');
   if (progressEl) progressEl.style.display = 'block';
   
-  // Run t-SNE asynchronously
   setTimeout(() => {
     const result = tSNE(data, {
       perplexity: Math.min(perplexity, Math.floor(nRows / 3)),
@@ -7428,13 +7422,12 @@ function runClustering() {
       }
     });
     
-    // Convert to nodes for rendering
-    const canvas = el('.diagram-canvas');
+    const canvas = diagramView?.querySelector('.diagram-canvas');
+    if (!canvas) return;
     const width = canvas.width;
     const height = canvas.height;
     const padding = 40;
     
-    // Find bounds
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     result.forEach(p => {
       minX = Math.min(minX, p[0]);
@@ -7446,12 +7439,10 @@ function runClustering() {
     const rangeX = maxX - minX || 1;
     const rangeY = maxY - minY || 1;
     
-    // Calculate ball radius based on number of records
     const ballRadius = Math.max(4, Math.min(12, 200 / Math.sqrt(nRows)));
     
-    // Create initial nodes
     let nodes = result.map((p, i) => ({
-      idx: getSortedIndices(state)[i],
+      idx: getSortedIndices(st)[i],
       x: padding + ((p[0] - minX) / rangeX) * (width - 2 * padding),
       y: padding + ((p[1] - minY) / rangeY) * (height - 2 * padding),
       rawData: data[i],
@@ -7477,11 +7468,11 @@ function runClustering() {
     // Apply collision detection to prevent overlapping
     nodes = applyCollisionDetection(nodes, width, height, padding);
     
-    setDiagramNodes(state, nodes);
-    state.diagramBallRadius = ballRadius;
+    setDiagramNodes(st, nodes);
+    st.diagramBallRadius = ballRadius;
     
     if (progressEl) progressEl.style.display = 'none';
-    renderDiagram();
+    renderDiagram(st);
   }, 50);
 }
 
@@ -7844,25 +7835,29 @@ function renderDiagram(st = state) {
   ctx.fillText('Rows: ' + getDiagramNodes(st).length + ' | Click a point to see data', 10, canvas.height - 40);
 }
 
-function setupDiagramClickHandler() {
-  const canvas = el('.diagram-canvas');
+function setupDiagramClickHandler(st = state) {
+  const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+  const canvas = diagramView?.querySelector('.diagram-canvas');
   if (!canvas) return;
   
-  // Remove existing listener if any
-  canvas.removeEventListener('click', handleDiagramClick);
-  canvas.addEventListener('click', handleDiagramClick);
+  if (canvas._diagramClickHandler) {
+    canvas.removeEventListener('click', canvas._diagramClickHandler);
+  }
+  
+  const handler = (event) => handleDiagramClick(event, st);
+  canvas._diagramClickHandler = handler;
+  canvas.addEventListener('click', handler);
 }
 
-function handleDiagramClick(event) {
+function handleDiagramClick(event, st = state) {
   const canvas = event.target;
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
   
-  // Find clicked node
   let clickedNode = null;
-  for (let i = getDiagramNodes(state).length - 1; i >= 0; i--) {
-    const node = getDiagramNodes(state)[i];
+  for (let i = getDiagramNodes(st).length - 1; i >= 0; i--) {
+    const node = getDiagramNodes(st)[i];
     const dx = x - node.x;
     const dy = y - node.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -7873,25 +7868,21 @@ function handleDiagramClick(event) {
   }
   
   if (clickedNode) {
-    showDiagramPopup(clickedNode, event.clientX, event.clientY);
+    showDiagramPopup(clickedNode, event.clientX, event.clientY, st);
   } else {
     hideDiagramPopup();
   }
 }
 
-function showDiagramPopup(node, clientX, clientY) {
-  // Remove existing popup
+function showDiagramPopup(node, clientX, clientY, st = state) {
   hideDiagramPopup();
   
-  // Get row data
   const rowIdx = node.idx;
-  const rowData = state.relation.items[rowIdx];
+  const rowData = st.relation.items[rowIdx];
   
-  // Create popup using DOM methods for security
   const popup = document.createElement('div');
   popup.className = 'diagram-popup diagram-popup-instance';
   
-  // Header
   const header = document.createElement('div');
   header.className = 'diagram-popup-header';
   header.textContent = 'Row ' + (rowIdx + 1) + ' ';
@@ -7904,13 +7895,12 @@ function showDiagramPopup(node, clientX, clientY) {
   
   popup.appendChild(header);
   
-  // Content
   const content = document.createElement('div');
   content.className = 'diagram-popup-content';
   
-  state.columnNames.forEach((col, i) => {
+  st.columnNames.forEach((col, i) => {
     const value = rowData[i];
-    const type = state.columnTypes[i];
+    const type = st.columnTypes[i];
     
     const field = document.createElement('div');
     field.className = 'popup-field';
@@ -8219,7 +8209,7 @@ function switchViewForInstance(st, view) {
   } else if (view === 'correlation') {
     renderCorrelation(st);
   } else if (view === 'diagram') {
-    renderDiagram(st);
+    initDiagramView(st);
   } else if (view === 'ai') {
     renderAI(st);
   } else if (view === 'saved') {
@@ -8254,6 +8244,21 @@ function renderSaved(st = state) {
   initSavedView(st);
 }
 
+function initDiagramView(st = state) {
+  renderDiagram(st);
+  setupDiagramClickHandler(st);
+  
+  const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+  if (!diagramView) return;
+  
+  const clusterBtn = diagramView.querySelector('.btn-run-clustering');
+  if (clusterBtn) {
+    const newBtn = clusterBtn.cloneNode(true);
+    clusterBtn.parentNode.replaceChild(newBtn, clusterBtn);
+    newBtn.addEventListener('click', () => runClustering(st));
+  }
+}
+
 function initAIView(st = state) {
   const container = st.container ? st.container.querySelector('.ai-assistant') : el('.ai-assistant');
   if (!container) return;
@@ -8270,7 +8275,7 @@ function initAIView(st = state) {
     newSubmitBtn.addEventListener('click', () => {
       const question = input.value.trim();
       if (question) {
-        askAIWithState(question, st);
+        askAI(question, st);
       }
     });
     
@@ -8281,7 +8286,7 @@ function initAIView(st = state) {
       if (e.key === 'Enter') {
         const question = newInput.value.trim();
         if (question) {
-          askAIWithState(question, st);
+          askAI(question, st);
         }
       }
     });
