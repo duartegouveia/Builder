@@ -8616,30 +8616,36 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
   closeAllMenus();
   
   const menu = document.createElement('div');
-  menu.className = 'column-menu';
+  menu.className = 'row-ops-menu';
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
   
+  const hasSelection = getSelectedRows(st).size > 0;
+  
   menu.innerHTML = `
     <div class="column-menu-header">Row ${rowIdx + 1}</div>
-    <div class="column-menu-item" data-action="select">Select Row</div>
-    <div class="column-menu-item" data-action="deselect">Deselect Row</div>
+    <button class="column-menu-item" data-action="view-row">👁 View</button>
+    <button class="column-menu-item" data-action="edit-row">✏️ Edit</button>
+    <button class="column-menu-item" data-action="copy-row">📋 Copy</button>
+    <button class="column-menu-item" data-action="new-row">➕ New</button>
+    <button class="column-menu-item" data-action="delete-row">🗑️ Delete</button>
+    ${hasSelection ? `
+      <div class="column-menu-section">
+        <div class="column-menu-title">Selection (${getSelectedRows(st).size} rows)</div>
+        <button class="column-menu-item" data-action="delete-selected">🗑️ Delete Selected</button>
+      </div>
+    ` : ''}
   `;
   
   document.body.appendChild(menu);
   adjustMenuPosition(menu);
   
-  menu.querySelectorAll('.column-menu-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const action = item.dataset.action;
-      if (action === 'select') {
-        getSelectedRows(st).add(rowIdx);
-      } else if (action === 'deselect') {
-        getSelectedRows(st).delete(rowIdx);
-      }
-      renderTable(st);
-      menu.remove();
-    });
+  menu.addEventListener('click', (e) => {
+    const action = e.target.dataset.action;
+    if (!action) return;
+    
+    handleRowOperationForInstance(st, rowIdx, action);
+    menu.remove();
   });
   
   setTimeout(() => {
@@ -8650,6 +8656,163 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
       }
     });
   }, 10);
+}
+
+function handleRowOperationForInstance(st, rowIdx, action) {
+  switch (action) {
+    case 'view-row':
+      showRowViewDialogForInstance(st, rowIdx);
+      break;
+    case 'edit-row':
+      showRowEditDialogForInstance(st, rowIdx);
+      break;
+    case 'copy-row':
+      const rowCopy = [...st.relation.items[rowIdx]];
+      st.relation.items.push(rowCopy);
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+      break;
+    case 'new-row':
+      const newRow = st.columnTypes.map(type => {
+        if (type === 'id') return String(st.relation.items.length + 1);
+        if (type === 'boolean') return false;
+        if (type === 'int' || type === 'float') return 0;
+        return '';
+      });
+      st.relation.items.push(newRow);
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+      break;
+    case 'delete-row':
+      if (confirm('Delete this row?')) {
+        st.relation.items.splice(rowIdx, 1);
+        getSelectedRows(st).delete(rowIdx);
+        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+        setSortedIndices(st, [...getFilteredIndices(st)]);
+        renderTable(st);
+      }
+      break;
+    case 'delete-selected':
+      if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
+        const indices = [...getSelectedRows(st)].sort((a, b) => b - a);
+        indices.forEach(i => st.relation.items.splice(i, 1));
+        getSelectedRows(st).clear();
+        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+        setSortedIndices(st, [...getFilteredIndices(st)]);
+        renderTable(st);
+      }
+      break;
+  }
+}
+
+function showRowViewDialogForInstance(st, rowIdx) {
+  closeAllMenus();
+  const row = st.relation.items[rowIdx];
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'filter-dialog';
+  dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; max-height: 80vh; overflow-y: auto;';
+  
+  let html = `<div class="filter-dialog-header"><span>View Row ${rowIdx + 1}</span><button class="btn-close-dialog">✕</button></div>`;
+  html += '<div class="filter-dialog-content">';
+  
+  st.columnNames.forEach((name, colIdx) => {
+    const type = st.columnTypes[colIdx];
+    const value = row[colIdx];
+    html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label><span class="view-value">${formatValueForDisplay(value, type)}</span></div>`;
+  });
+  
+  html += '</div>';
+  html += '<div class="filter-dialog-footer"><button class="btn btn-outline close-dialog">Close</button></div>';
+  
+  dialog.innerHTML = html;
+  document.body.appendChild(dialog);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.remove());
+}
+
+function showRowEditDialogForInstance(st, rowIdx) {
+  closeAllMenus();
+  const row = st.relation.items[rowIdx];
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'filter-dialog';
+  dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; max-height: 80vh; overflow-y: auto;';
+  
+  let html = `<div class="filter-dialog-header"><span>Edit Row ${rowIdx + 1}</span><button class="btn-close-dialog">✕</button></div>`;
+  html += '<div class="filter-dialog-content">';
+  
+  st.columnNames.forEach((name, colIdx) => {
+    const type = st.columnTypes[colIdx];
+    const value = row[colIdx];
+    html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label>`;
+    html += createEditInputHtml(type, value, colIdx, st);
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  html += '<div class="filter-dialog-footer"><button class="btn btn-primary save-row">Save</button><button class="btn btn-outline close-dialog">Cancel</button></div>';
+  
+  dialog.innerHTML = html;
+  document.body.appendChild(dialog);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelector('.save-row').addEventListener('click', () => {
+    st.columnNames.forEach((name, colIdx) => {
+      const type = st.columnTypes[colIdx];
+      const input = dialog.querySelector(`[data-col="${colIdx}"]`);
+      if (input) {
+        let value;
+        if (type === 'boolean') {
+          value = input.checked;
+        } else if (type === 'int') {
+          value = input.value === '' ? null : parseInt(input.value);
+        } else if (type === 'float') {
+          value = input.value === '' ? null : parseFloat(input.value);
+        } else {
+          value = input.value === '' ? null : input.value;
+        }
+        st.relation.items[rowIdx][colIdx] = value;
+      }
+    });
+    renderTable(st);
+    dialog.remove();
+  });
+}
+
+function formatValueForDisplay(value, type) {
+  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  if (type === 'boolean') return value ? '✓ true' : '✗ false';
+  if (type === 'relation') return `📋 ${value?.items?.length || 0} rows`;
+  return escapeHtml(String(value));
+}
+
+function createEditInputHtml(type, value, colIdx, st) {
+  if (type === 'boolean') {
+    return `<input type="checkbox" data-col="${colIdx}" ${value ? 'checked' : ''}>`;
+  } else if (type === 'int' || type === 'float') {
+    return `<input type="number" class="relation-input" data-col="${colIdx}" value="${value !== null ? value : ''}" ${type === 'float' ? 'step="any"' : ''}>`;
+  } else if (type === 'select' && st.options[st.columnNames[colIdx]]) {
+    const options = st.options[st.columnNames[colIdx]];
+    let html = `<select class="relation-select" data-col="${colIdx}">`;
+    html += '<option value="">Select...</option>';
+    Object.entries(options).forEach(([k, v]) => {
+      html += `<option value="${escapeHtml(k)}" ${value === k ? 'selected' : ''}>${escapeHtml(v)}</option>`;
+    });
+    html += '</select>';
+    return html;
+  } else if (type === 'multilinestring') {
+    return `<textarea class="relation-textarea" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
+  } else if (type === 'relation') {
+    return `<span class="view-value">📋 ${value?.items?.length || 0} rows (not editable here)</span>`;
+  } else {
+    return `<input type="text" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+  }
 }
 
 function showStatisticsPanelForInstance(st, colIdx) {
