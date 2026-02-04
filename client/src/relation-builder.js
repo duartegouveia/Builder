@@ -458,6 +458,37 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const PRODUCT_FAMILIES_JSON = {
+  "pot": "relation",
+  "name": "company_product_family",
+  "columns": {
+    "ID": "id",
+    "OwnerID": "int",
+    "Level": "int",
+    "ParentID": "int",
+    "IntegrationID": "string",
+    "Name": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "ParentID",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const PRODUCT_CATEGORY_JSON = {
   "pot": "relation",
   "name": "product_category",
@@ -9622,6 +9653,12 @@ function init() {
   menuProductCategory?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(PRODUCT_CATEGORY_JSON, null, 2);
+  });
+  
+  const menuProductFamilies = document.querySelector('[data-testid="menu-product-families"]');
+  menuProductFamilies?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(PRODUCT_FAMILIES_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
