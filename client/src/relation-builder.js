@@ -458,6 +458,39 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const STOCK_WAREHOUSE_JSON = {
+  "pot": "relation",
+  "name": "stock_warehouse",
+  "columns": {
+    "ID": "id",
+    "IdentifierGLNCode": "string",
+    "IdentifierPostalCode": "string",
+    "Name": "string",
+    "AddressCity": "string",
+    "AddressCountryCode": "string",
+    "AddressPostalCode": "string",
+    "AddressStreet": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
   "pot": "relation",
   "name": "stock_historic_inventory_detail",
@@ -10135,6 +10168,12 @@ function init() {
   menuHistoricInventoryDetail?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_HISTORIC_INVENTORY_DETAIL_JSON, null, 2);
+  });
+  
+  const menuWarehouses = document.querySelector('[data-testid="menu-wharehouses"]');
+  menuWarehouses?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(STOCK_WAREHOUSE_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
