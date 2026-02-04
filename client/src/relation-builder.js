@@ -458,6 +458,45 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const ALL_COMPANIES_JSON = {
+  "pot": "relation",
+  "name": "company",
+  "columns": {
+    "ID": "id",
+    "Name": "string",
+    "InternalID": "string",
+    "Street": "string",
+    "City": "string",
+    "PostalCode": "string",
+    "Country": "string",
+    "TaxNumber": "string",
+    "GLNCode": "string",
+    "Inactive": "boolean",
+    "IntegrationCode": "string",
+    "CompanyTypeID": "int",
+    "StateID": "int",
+    "LastUpdated": "datetime"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
 const DEFAULT_UI_STATE = {
   currentView: 'table',
@@ -9435,6 +9474,11 @@ function init() {
   const btnLoadCompanyTypes = el('.btn-load-companytypes');
   btnLoadCompanyTypes?.addEventListener('click', () => {
     textarea.value = JSON.stringify(COMPANY_TYPES_JSON, null, 2);
+  });
+  
+  const btnLoadAllCompanies = el('.btn-load-allcompanies');
+  btnLoadAllCompanies?.addEventListener('click', () => {
+    textarea.value = JSON.stringify(ALL_COMPANIES_JSON, null, 2);
   });
   
   // Menu item event listeners - close dropdown on click
