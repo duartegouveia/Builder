@@ -458,6 +458,117 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const ALL_STOCKS_JSON = {
+  "pot": "relation",
+  "name": "stock",
+  "columns": {
+    "id": "id",
+    "stock_date": "date",
+    "distributor_id": "string",
+    "distributor_name": "string",
+    "postal_code": "string",
+    "dist_wharehouse_id": "string",
+    "wharehouse_name": "string",
+    "postal_code_wharehouse": "string",
+    "product_code": "string",
+    "product_name": "string",
+    "available_stock": "int",
+    "blocked_stock": "int",
+    "batch": "string",
+    "batch_expiration_date": "date",
+    "category": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": [
+    ["1", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584307", "PURINA DOG Chow Adulto", 23, 0, "0521", "25/10/2026", "1"],
+    ["2", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584312", "Purina ONE Supreme Adult", 333, 0, "09467", "26/10/2026", "2"],
+    ["3", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584313", "Garden Gourmet à base de proteína vegetal", 33, 0, "237823", "27/10/2026", "3"],
+    ["4", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584314", "Tablete de Chocolate Nestlé Classic", 33, 0, "23832", "28/10/2026", "4"],
+    ["5", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584315", "Bombons Nestlé Sensations", 33, 0, "2732", "29/10/2026", "4"],
+    ["6", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584316", "Barras de Chocolate Nestlé Crunch", 4, 0, "234", "30/10/2026", "4"],
+    ["7", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584317", "CINI MINIS Churros", 33, 0, "123", "31/10/2026", "5"],
+    ["8", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613034626847", "CHEERIOS Mel 375 g", 33, 0, "123", "1/11/2026", "5"],
+    ["9", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304003", "NESCAFÉ Classic 200 mg", 33, 0, "3d324", "2/11/2026", "6"],
+    ["10", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304008", "SICAL Torrado", 33, 0, "3234x", "3/11/2026", "6"],
+    ["11", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304013", "Bolero Bebida de Cevada", 33, 0, "x234", "4/11/2026", "6"],
+    ["12", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304018", "Natas Longa Vida", 23, 0, "32x", "15/11/2025", "7"],
+    ["13", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304023", "Iogurte grego Lindahls rico em proteína", 33, 0, "32xc", "16/11/2025", "7"],
+    ["14", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304028", "Arroz de Marisco Longa Vida", 1, 0, "42234", "7/11/2026", "9"],
+    ["15", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304033", "Miúdos Nutrição Infantil NAN", 10, 0, "42243", "8/11/2026", "11"],
+    ["16", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584307", "PURINA DOG Chow Adulto", 45, 0, "0521", "25/10/2026", "1"],
+    ["17", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584312", "Purina ONE Supreme Adult", 40, 0, "09467", "26/10/2026", "2"],
+    ["18", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584313", "Garden Gourmet à base de proteína vegetal", 9, 0, "237823", "27/10/2026", "3"],
+    ["19", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584314", "Tablete de Chocolate Nestlé Classic", 30, 0, "23832", "28/10/2026", "4"],
+    ["20", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584315", "Bombons Nestlé Sensations", 3, 0, "2732", "29/10/2026", "4"],
+    ["21", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584316", "Barras de Chocolate Nestlé Crunch", 3, 0, "234", "30/10/2026", "4"],
+    ["22", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584317", "CINI MINIS Churros", 3, 0, "123", "31/10/2026", "5"],
+    ["23", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613034626847", "CHEERIOS Mel 375 g", 50, 0, "123", "1/11/2026", "5"],
+    ["24", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304003", "NESCAFÉ Classic 200 mg", 50, 0, "3d324", "2/11/2026", "6"],
+    ["25", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304008", "SICAL Torrado", 25, 0, "3234x", "3/11/2026", "6"],
+    ["26", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304013", "Bolero Bebida de Cevada", 15, 0, "x234", "4/11/2026", "6"],
+    ["27", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304018", "Natas Longa Vida", 15, 0, "32x", "15/11/2025", "7"],
+    ["28", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304023", "Iogurte grego Lindahls rico em proteína", 13, 0, "32xc", "16/11/2025", "7"],
+    ["29", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304028", "Arroz de Marisco Longa Vida", 1, 0, "42234", "7/11/2026", "9"],
+    ["30", "30/9/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304033", "Miúdos Nutrição Infantil NAN", 30, 0, "3373737", "8/12/2026", "11"],
+    ["31", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584307", "PURINA DOG Chow Adulto", 40, 0, "0521", "25/10/2026", "1"],
+    ["32", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584312", "Purina ONE Supreme Adult", 45, 0, "09467", "26/10/2026", "2"],
+    ["33", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584313", "Garden Gourmet à base de proteína vegetal", 6, 0, "237823", "27/10/2026", "3"],
+    ["34", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584314", "Tablete de Chocolate Nestlé Classic", 25, 0, "23832", "28/10/2026", "4"],
+    ["35", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584315", "Bombons Nestlé Sensations", 4, 0, "2732", "29/10/2026", "4"],
+    ["36", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584316", "Barras de Chocolate Nestlé Crunch", 4, 0, "234", "30/10/2026", "4"],
+    ["37", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584317", "CINI MINIS Churros", 10, 0, "123", "31/10/2026", "5"],
+    ["38", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613034626847", "CHEERIOS Mel 375 g", 8, 0, "123", "1/11/2026", "5"],
+    ["39", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304003", "NESCAFÉ Classic 200 mg", 9, 0, "3d324", "2/11/2026", "6"],
+    ["40", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304008", "SICAL Torrado", 4, 0, "3234x", "3/11/2026", "6"],
+    ["41", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304013", "Bolero Bebida de Cevada", 4, 0, "x234", "4/11/2026", "6"],
+    ["42", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304018", "Natas Longa Vida", 23, 0, "32x", "15/11/2025", "7"],
+    ["43", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304023", "Iogurte grego Lindahls rico em proteína", 30, 0, "32xc", "16/11/2025", "7"],
+    ["44", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304028", "Arroz de Marisco Longa Vida", 1, 0, "42234", "7/11/2026", "9"],
+    ["45", "31/10/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613035304033", "Miúdos Nutrição Infantil NAN", 10, 0, "42243", "8/11/2026", "11"],
+    ["46", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584307", "PURINA DOG Chow Adulto", 500, 0, "0521", "25/10/2026", "1"],
+    ["47", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584312", "Purina ONE Supreme Adult", 450, 0, "09467", "26/10/2026", "2"],
+    ["48", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584313", "Garden Gourmet à base de proteína vegetal", 6, 0, "237823", "27/10/2026", "3"],
+    ["49", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584314", "Tablete de Chocolate Nestlé Classic", 50, 0, "23832", "28/10/2026", "4"],
+    ["50", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584315", "Bombons Nestlé Sensations", 0, 0, "2732", "29/10/2026", "4"],
+    ["51", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584316", "Barras de Chocolate Nestlé Crunch", 0, 0, "234", "30/10/2026", "4"],
+    ["52", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613036584317", "CINI MINIS Churros", 30, 0, "123", "31/10/2026", "5"],
+    ["53", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613034626847", "CHEERIOS Mel 375 g", 90, 0, "123", "1/11/2026", "5"],
+    ["54", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304003", "NESCAFÉ Classic 200 mg", 90, 0, "3d324", "2/11/2026", "6"],
+    ["55", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304008", "SICAL Torrado", 50, 0, "3234x", "3/11/2026", "6"],
+    ["56", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304013", "Bolero Bebida de Cevada", 25, 0, "x234", "4/11/2026", "6"],
+    ["57", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304018", "Natas Longa Vida", 25, 0, "32x", "15/11/2025", "7"],
+    ["58", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304023", "Iogurte grego Lindahls rico em proteína", 23, 0, "32xc", "16/11/2025", "7"],
+    ["59", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304028", "Arroz de Marisco Longa Vida", 5, 0, "42234", "7/11/2026", "9"],
+    ["60", "31/10/2025", "1", "Modelo", "2000", "010", "AZAMBUJA", "2050-522", "7613035304033", "Miúdos Nutrição Infantil NAN", 50, 0, "3373737", "8/12/2026", "11"],
+    ["61", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584307", "PURINA DOG Chow Adulto", 234, 0, "0521", "25/10/2026", "1"],
+    ["62", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584312", "Purina ONE Supreme Adult", 243, 0, "09467", "26/10/2026", "2"],
+    ["63", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584313", "Garden Gourmet à base de proteína vegetal", 23, 0, "237823", "27/10/2026", "3"],
+    ["64", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584314", "Tablete de Chocolate Nestlé Classic", 4, 0, "23832", "28/10/2026", "4"],
+    ["65", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584315", "Bombons Nestlé Sensations", 0, 0, "2732", "29/10/2026", "4"],
+    ["66", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584316", "Barras de Chocolate Nestlé Crunch", 4, 0, "234", "30/10/2026", "4"],
+    ["67", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613036584317", "CINI MINIS Churros", 34, 0, "123", "31/10/2026", "5"],
+    ["68", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613034626847", "CHEERIOS Mel 375 g", 423, 0, "123", "1/11/2026", "5"],
+    ["69", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304003", "NESCAFÉ Classic 200 mg", 24, 0, "3d324", "2/11/2026", "6"],
+    ["70", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304008", "SICAL Torrado", 24, 0, "3234x", "3/11/2026", "6"],
+    ["71", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304013", "Bolero Bebida de Cevada", 21, 0, "x234", "4/11/2026", "6"],
+    ["72", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304018", "Natas Longa Vida", 13, 0, "32x", "15/11/2025", "7"],
+    ["73", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304023", "Iogurte grego Lindahls rico em proteína", 13, 0, "32xc", "16/11/2025", "7"],
+    ["74", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304028", "Arroz de Marisco Longa Vida", 13, 0, "42234", "7/11/2026", "9"],
+    ["75", "31/10/2025", "1", "Modelo", "2000", "010", "MAIA", "4470-177", "7613035304033", "Miúdos Nutrição Infantil NAN", 30, 0, "3373737", "8/12/2026", "11"]
+  ]
+};
+
 const DISTRIBUTOR_JSON = {
   "pot": "relation",
   "name": "distributor",
@@ -10446,6 +10557,12 @@ function init() {
   menuDistributor?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(DISTRIBUTOR_JSON, null, 2);
+  });
+  
+  const menuAllStocks = document.querySelector('[data-testid="menu-all-stocks"]');
+  menuAllStocks?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(ALL_STOCKS_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
