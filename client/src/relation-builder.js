@@ -2621,11 +2621,12 @@ function renderPagination(st = state) {
   
   const hasFilter = filteredRecords !== totalRecords;
   
+  const showMulticheck = st.rel_options.show_multicheck;
   paginationContainer.innerHTML = `
     <div class="pagination-info">
       <span class="pagination-total">${totalRecords} total</span>
       ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
-      <span class="pagination-selected">${selectedRecords} selected</span>
+      <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedRecords} selected</span>
     </div>
     <div class="pagination-size">
       <label>Per page:</label>
@@ -2648,7 +2649,7 @@ function renderPagination(st = state) {
       <button class="btn-page btn-next" ${getCurrentPage(st) >= totalPages ? 'disabled' : ''}>⟩</button>
       <button class="btn-page btn-last" ${getCurrentPage(st) >= totalPages ? 'disabled' : ''}>⟩⟩</button>
     </div>
-    <div class="pagination-actions">
+    <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
       <select class="selection-actions selection-actions-select">
         <option value="" disabled selected>Selection Actions...</option>
         <option value="invert-page">↔ Invert Page</option>
@@ -2785,7 +2786,7 @@ function renderTable(st = state) {
   
   // Selection checkbox column
   const selectTh = document.createElement('th');
-  selectTh.className = 'relation-th-select';
+  selectTh.className = 'relation-th-select' + (st.rel_options.show_multicheck ? '' : ' hidden');
   selectTh.innerHTML = `<input type="checkbox" class="select-all-checkbox" />`;
   headerRow.appendChild(selectTh);
   
@@ -2798,7 +2799,7 @@ function renderTable(st = state) {
   // Index column
   const indexTh = document.createElement('th');
   indexTh.textContent = '#';
-  indexTh.className = 'relation-th-index';
+  indexTh.className = 'relation-th-index' + (st.rel_options.show_natural_order ? '' : ' hidden');
   headerRow.appendChild(indexTh);
   
   // Group info header (if any groups)
@@ -2872,9 +2873,10 @@ function renderTable(st = state) {
     if (getGroupByColumns(st).includes(idx)) return;
     
     const th = document.createElement('th');
-    th.className = 'relation-th-sortable';
-    th.dataset.col = idx;
     const type = st.columnTypes[idx];
+    const isHiddenId = type === 'id' && !st.rel_options.show_id;
+    th.className = 'relation-th-sortable' + (isHiddenId ? ' hidden' : '');
+    th.dataset.col = idx;
     const sortIndicator = getSortIndicator(idx, st);
     const filterActive = getFilters(st)[idx] ? ' filter-active' : '';
     const colSelected = getSelectedColumns(st).has(idx) ? ' col-selected' : '';
@@ -2890,14 +2892,14 @@ function renderTable(st = state) {
   
   // Parent row (above header, no click handlers)
   const parentRow = document.createElement('tr');
-  parentRow.className = 'relation-parent-row';
+  parentRow.className = 'relation-parent-row' + (st.rel_options.show_hierarchy ? '' : ' hidden');
   
   // Parent row cells with first item data (temporary example)
   const firstItem = st.relation.items.length > 0 ? st.relation.items[0] : null;
   
   // Select column - empty
   const parentSelectTh = document.createElement('th');
-  parentSelectTh.className = 'relation-th-parent';
+  parentSelectTh.className = 'relation-th-parent' + (st.rel_options.show_multicheck ? '' : ' hidden');
   parentRow.appendChild(parentSelectTh);
   
   // Ops column - up button here
@@ -2913,17 +2915,18 @@ function renderTable(st = state) {
   
   // Index column - always empty
   const parentIndexTh = document.createElement('th');
-  parentIndexTh.className = 'relation-th-parent';
+  parentIndexTh.className = 'relation-th-parent' + (st.rel_options.show_natural_order ? '' : ' hidden');
   parentRow.appendChild(parentIndexTh);
   
   // Data columns
   st.columnNames.forEach((name, idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
     const th = document.createElement('th');
-    th.className = 'relation-th-parent';
+    const type = st.columnTypes[idx];
+    const isHiddenId = type === 'id' && !st.rel_options.show_id;
+    th.className = 'relation-th-parent' + (isHiddenId ? ' hidden' : '');
     if (firstItem) {
       const value = firstItem[idx];
-      const type = st.columnTypes[idx];
       
       if (type === 'relation') {
         const btn = document.createElement('button');
@@ -2960,7 +2963,7 @@ function renderTable(st = state) {
     
     // Selection checkbox
     const selectTd = document.createElement('td');
-    selectTd.className = 'relation-td-select';
+    selectTd.className = 'relation-td-select' + (st.rel_options.show_multicheck ? '' : ' hidden');
     const selectCheckbox = document.createElement('input');
     selectCheckbox.type = 'checkbox';
     selectCheckbox.checked = getSelectedRows(st).has(rowIdx);
@@ -2978,7 +2981,7 @@ function renderTable(st = state) {
     // Index
     const indexTd = document.createElement('td');
     indexTd.textContent = rowIdx + 1;
-    indexTd.className = 'relation-td-index';
+    indexTd.className = 'relation-td-index' + (st.rel_options.show_natural_order ? '' : ' hidden');
     tr.appendChild(indexTd);
     
     // Data cells (skip grouped columns)
@@ -2987,6 +2990,8 @@ function renderTable(st = state) {
       
       const td = document.createElement('td');
       const type = st.columnTypes[colIdx];
+      const isHiddenId = type === 'id' && !st.rel_options.show_id;
+      if (isHiddenId) td.classList.add('hidden');
       td.appendChild(createInputForType(type, value, rowIdx, colIdx, st.rel_options.editable, st));
       applyConditionalFormatting(value, colIdx, td, rowIdx, st);
       tr.appendChild(td);
@@ -3036,15 +3041,21 @@ function renderTable(st = state) {
   const tfoot = document.createElement('tfoot');
   const footerRow = document.createElement('tr');
   
-  footerRow.appendChild(document.createElement('td')); // Select column
+  const footerSelectTd = document.createElement('td');
+  if (!st.rel_options.show_multicheck) footerSelectTd.classList.add('hidden');
+  footerRow.appendChild(footerSelectTd); // Select column
   footerRow.appendChild(document.createElement('td')); // Operations column
-  footerRow.appendChild(document.createElement('td')); // Index column
+  const footerIndexTd = document.createElement('td');
+  if (!st.rel_options.show_natural_order) footerIndexTd.classList.add('hidden');
+  footerRow.appendChild(footerIndexTd); // Index column
   
   st.columnNames.forEach((_, colIdx) => {
     if (getGroupByColumns(st).includes(colIdx)) return;
     
     const td = document.createElement('td');
-    td.className = 'relation-td-stats';
+    const type = st.columnTypes[colIdx];
+    const isHiddenId = type === 'id' && !st.rel_options.show_id;
+    td.className = 'relation-td-stats' + (isHiddenId ? ' hidden' : '');
     td.innerHTML = `<button class="btn-stats" data-col="${colIdx}" title="Statistics">Σ</button>`;
     footerRow.appendChild(td);
   });
@@ -8864,10 +8875,11 @@ function renderPaginationWithState(st, paginationDiv) {
   const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
   const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
   const selectedCount = getSelectedRows(st).size;
+  const showMulticheck = st.rel_options.show_multicheck;
   
   paginationDiv.innerHTML = `
     <span class="pagination-info">${totalItems} rows</span>
-    <span class="pagination-selected">${selectedCount} selected</span>
+    <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedCount} selected</span>
     <select class="page-size-select">
       <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
       <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
