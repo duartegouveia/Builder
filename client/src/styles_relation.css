@@ -6,6 +6,52 @@
   display: none !important;
 }
 
+/* ===== Relation Flex Wrapper ===== */
+/* Wrapper structure for relation instances with detail panel */
+
+.relation-flex-wrapper {
+  width: 100%;
+}
+
+/* Vertical flex: each child takes natural space */
+.flex-wrapper-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.flex-wrapper-vertical > .relation-main-panel,
+.flex-wrapper-vertical > .relation-detail-panel {
+  flex: 0 0 auto;
+}
+
+/* Horizontal flex: second child empty = first 100%, both have content = 50/50 */
+.flex-wrapper-horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-4);
+}
+
+.flex-wrapper-horizontal > .relation-main-panel {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.flex-wrapper-horizontal > .relation-detail-panel {
+  flex: 0 0 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* When detail panel has content, add .has-detail class to wrapper via JS */
+.flex-wrapper-horizontal.has-detail > .relation-main-panel {
+  flex: 1 1 50%;
+}
+
+.flex-wrapper-horizontal.has-detail > .relation-detail-panel {
+  flex: 1 1 50%;
+}
+
 /* ===== Main Navigation Menu ===== */
 .main-nav-menu {
   display: flex;

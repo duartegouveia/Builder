@@ -1633,6 +1633,25 @@ function elAll(selector, st = state) {
   return container.querySelectorAll(selector);
 }
 
+// Helper function to get the detail panel for a relation instance
+function getDetailPanel(st = state) {
+  return el('.relation-detail-panel', st);
+}
+
+// Helper function to update the flex wrapper state based on detail panel content
+// Call this after adding/removing content to the detail panel
+function updateDetailPanelState(st = state) {
+  const wrapper = el('.relation-flex-wrapper', st);
+  const detailPanel = getDetailPanel(st);
+  if (!wrapper || !detailPanel) return;
+  
+  if (detailPanel.children.length > 0 || detailPanel.textContent.trim()) {
+    wrapper.classList.add('has-detail');
+  } else {
+    wrapper.classList.remove('has-detail');
+  }
+}
+
 // Helper function to check if hierarchy should be shown
 // Returns true only if show_hierarchy is true AND the hierarchy_column exists
 function shouldShowHierarchy(st) {
@@ -9575,10 +9594,14 @@ function initRelationInstance(container, relationData, options = {}) {
   // Generate HTML structure
   const viewOptions = instanceState.rel_options.general_view_options;
   
-  let html = '';
+  // Determine flex wrapper class based on single_item_mode
+  const singleItemMode = instanceState.rel_options.single_item_mode || 'dialog';
+  const flexWrapperClass = singleItemMode === 'right' ? 'flex-wrapper-horizontal' : 'flex-wrapper-vertical';
+  
+  let mainPanelHtml = '';
   
   if (showJsonEditor) {
-    html += `
+    mainPanelHtml += `
       <div class="json-section">
         <textarea class="relation-json" rows="6" readonly>${JSON.stringify(relationData, null, 2)}</textarea>
       </div>
@@ -9589,7 +9612,7 @@ function initRelationInstance(container, relationData, options = {}) {
   const initialView = viewOptions[0]?.toLowerCase() || 'table';
   const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
   
-  html += `
+  mainPanelHtml += `
     <div class="view-tabs" style="margin-bottom: 1rem;">
       <div class="view-tabs-left">
         ${viewOptions.map((view, idx) => {
@@ -9762,7 +9785,26 @@ function initRelationInstance(container, relationData, options = {}) {
     </div>
   `;
   
+  // Wrap in flex structure with main panel and detail panel
+  const html = `
+    <div class="relation-flex-wrapper ${flexWrapperClass}">
+      <div class="relation-main-panel">
+        ${mainPanelHtml}
+      </div>
+      <div class="relation-detail-panel"></div>
+    </div>
+  `;
+  
   container.innerHTML = html;
+  
+  // Set up MutationObserver on detail panel to auto-toggle .has-detail class
+  const detailPanel = container.querySelector('.relation-detail-panel');
+  if (detailPanel) {
+    const observer = new MutationObserver(() => {
+      updateDetailPanelState(instanceState);
+    });
+    observer.observe(detailPanel, { childList: true, subtree: true, characterData: true });
+  }
   
   // Initialize event listeners
   initInstanceEventListeners(instanceState);
