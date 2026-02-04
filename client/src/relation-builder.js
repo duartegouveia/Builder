@@ -777,6 +777,11 @@ function generateDemoRelation() {
   
   const rel_options = {
     editable: false,
+    show_multicheck: true,
+    show_natural_order: true,
+    show_id: true,
+    show_hierarchy: true,
+    hierarchy_column: 'parent',
     single_item_mode: 'dialog',
     general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
   };
