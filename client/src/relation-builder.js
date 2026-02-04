@@ -458,6 +458,33 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const STOCK_IMPORTS_STATES_DETAILS_JSON = {
+  "pot": "relation",
+  "name": "stock_imports_states_details",
+  "columns": {
+    "ID": "id",
+    "Name": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_IMPORTS_STATES_JSON = {
   "pot": "relation",
   "name": "stock_imports_states",
@@ -10327,6 +10354,12 @@ function init() {
   menuImportsStates?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_IMPORTS_STATES_JSON, null, 2);
+  });
+  
+  const menuImportsDetailStates = document.querySelector('[data-testid="menu-imports-detail-states"]');
+  menuImportsDetailStates?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(STOCK_IMPORTS_STATES_DETAILS_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
