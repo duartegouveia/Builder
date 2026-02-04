@@ -499,6 +499,18 @@
   background: var(--slate-250, #c9d1da) !important;
 }
 
+.relation-table tbody tr.row-highlighted .relation-input,
+.relation-table tbody tr.row-highlighted .relation-textarea,
+.relation-table tbody tr.row-highlighted .relation-select {
+  background: var(--slate-200);
+}
+
+.relation-table tbody tr.row-highlighted:hover .relation-input,
+.relation-table tbody tr.row-highlighted:hover .relation-textarea,
+.relation-table tbody tr.row-highlighted:hover .relation-select {
+  background: var(--slate-250, #c9d1da);
+}
+
 /* Pagination */
 .relation-pagination {
   display: flex;
