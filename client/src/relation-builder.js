@@ -458,6 +458,56 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
+  "pot": "relation",
+  "name": "stock_historic_inventory_detail",
+  "columns": {
+    "ID": "id",
+    "InventoryReportID": "int",
+    "LineNumber": "int",
+    "StandardProductCode": "string",
+    "BuyersProductCode": "string",
+    "SuppliersProductCode": "string",
+    "ProductDescription": "string",
+    "AvailableQuantityValue": "float",
+    "AvailableQuantityUOMCoded": "string",
+    "BlockedQuantityValue": "float",
+    "BlockedQuantityUOMCoded": "string",
+    "BatchNumber": "string",
+    "BatchExpiryDate": "date",
+    "ProductID": "int",
+    "TotalQuantityValue": "float",
+    "BatchLatestExpiryDate": "date",
+    "CalculatedTotalValue": "float",
+    "NetUnitPrice": "float",
+    "WareHouseIdentifierGLNCode": "string",
+    "WareHouseIdentifierPostalCode": "string",
+    "WareHouseName": "string",
+    "WareHouseAddressCity": "string",
+    "WareHouseAddressCountryCode": "string",
+    "WareHouseAddressPostalCode": "string",
+    "WareHouseAddressStreet": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_HISTORIC_INVENTORY_JSON = {
   "pot": "relation",
   "name": "stock_historic_inventory",
@@ -10079,6 +10129,12 @@ function init() {
   menuHistoricInventory?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_HISTORIC_INVENTORY_JSON, null, 2);
+  });
+  
+  const menuHistoricInventoryDetail = document.querySelector('[data-testid="menu-historic-inventory-detail"]');
+  menuHistoricInventoryDetail?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(STOCK_HISTORIC_INVENTORY_DETAIL_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
