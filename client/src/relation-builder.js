@@ -458,6 +458,45 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const DISTRIBUTOR_JSON = {
+  "pot": "relation",
+  "name": "distributor",
+  "columns": {
+    "ID": "id",
+    "Name": "string",
+    "InternalID": "string",
+    "Street": "string",
+    "City": "string",
+    "PostalCode": "string",
+    "Country": "string",
+    "TaxNumber": "string",
+    "GLNCode": "string",
+    "Inactive": "boolean",
+    "IntegrationCode": "string",
+    "CompanyTypeID": "int",
+    "StateID": "int",
+    "LastUpdated": "datetime"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const ADMIN_DATA_MANAGEMENT_JSON = {
   "pot": "relation",
   "name": "admin_data_management",
@@ -10401,6 +10440,12 @@ function init() {
   menuDataManagement?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(ADMIN_DATA_MANAGEMENT_JSON, null, 2);
+  });
+  
+  const menuDistributor = document.querySelector('[data-testid="menu-distributor"]');
+  menuDistributor?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(DISTRIBUTOR_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
