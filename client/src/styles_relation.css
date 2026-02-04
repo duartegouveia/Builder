@@ -411,12 +411,28 @@
 .relation-parent-row {
   background: var(--slate-50);
   height: 32px;
+  font-weight: normal;
 }
 
-.relation-th-parent {
+.relation-table th.relation-th-parent {
   padding: 4px 8px;
   border-bottom: 1px solid var(--border);
   font-weight: normal;
+}
+
+.btn-parent-up {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.btn-parent-up:hover {
+  background: var(--slate-200);
 }
 
 .relation-th-sortable {

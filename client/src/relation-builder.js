@@ -2857,6 +2857,12 @@ function renderTable(st = state) {
   
   const parentSelectTh = document.createElement('th');
   parentSelectTh.className = 'relation-th-parent';
+  const btnParentUp = document.createElement('button');
+  btnParentUp.className = 'btn-parent-up';
+  btnParentUp.title = 'Go to parent';
+  btnParentUp.textContent = '↑';
+  btnParentUp.dataset.testid = 'button-parent-up';
+  parentSelectTh.appendChild(btnParentUp);
   parentRow.appendChild(parentSelectTh);
   
   const parentOpsTh = document.createElement('th');
