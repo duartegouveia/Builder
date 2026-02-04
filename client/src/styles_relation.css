@@ -421,6 +421,10 @@
   background: #d8f2da;
 }
 
+.relation-table thead .relation-th-select input[type="checkbox"] {
+  margin-top: 5px;
+}
+
 .relation-table tbody .relation-td-select input[type="checkbox"] {
   margin-top: 10px;
 }
