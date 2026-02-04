@@ -458,6 +458,53 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const STOCK_HISTORIC_INVENTORY_JSON = {
+  "pot": "relation",
+  "name": "stock_historic_inventory",
+  "columns": {
+    "ID": "id",
+    "MessageID": "int",
+    "MessageDate": "datetime",
+    "MessageSender": "string",
+    "MessageReceiver": "string",
+    "InventoryReportNumber": "string",
+    "InventoryReportDate": "date",
+    "AgentGLNCode": "string",
+    "AgentPostalCode": "string",
+    "AgentName": "string",
+    "AgentAddressStreet": "string",
+    "AgentAddressCity": "string",
+    "AgentAddressPostalCode": "string",
+    "AgentAddressCountryCode": "string",
+    "NumberOfLines": "int",
+    "ImportDate": "datetime",
+    "SuplierGLNCode": "string",
+    "SupplierName": "string",
+    "InventoryReportYear": "string",
+    "InventoryReportMonth": "string",
+    "AgentID": "int",
+    "SupplierID": "int"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_INVENTORY_DETAIL_JSON = {
   "pot": "relation",
   "name": "stock_inventory_detail",
@@ -10026,6 +10073,12 @@ function init() {
   menuInventoryDetail?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_INVENTORY_DETAIL_JSON, null, 2);
+  });
+  
+  const menuHistoricInventory = document.querySelector('[data-testid="menu-historic-inventory"]');
+  menuHistoricInventory?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(STOCK_HISTORIC_INVENTORY_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
