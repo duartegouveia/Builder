@@ -458,6 +458,71 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const ALL_PRODUCTS_JSON = {
+  "pot": "relation",
+  "name": "product",
+  "columns": {
+    "ID": "id",
+    "OwnerID": "int",
+    "IntegrationID": "string",
+    "StandardCode": "string",
+    "Name": "string",
+    "ProductCategoryID": "int",
+    "NetUnitPrice": "float",
+    "Notes": "textarea",
+    "UOMCode": "string",
+    "VATRate": "float",
+    "MinimumQuantity": "float",
+    "QuantityIncrement": "float",
+    "PackSize": "int",
+    "ShortName": "string",
+    "Presentation": "string",
+    "LastUpdated": "datetime",
+    "IsActive": "boolean",
+    "IsDeprecated": "boolean",
+    "ProductFamilyID": "int",
+    "ProductSpecieID": "int",
+    "ProductBrandID": "int",
+    "GLNCode": "string",
+    "Countries": "string",
+    "IsSeasonItem": "boolean",
+    "IsPromotionItem": "boolean",
+    "PromotionType": "string",
+    "NoPromotionIGTIN": "string",
+    "CurrencyCode": "string",
+    "StartAvailabilityDate": "date",
+    "EndAvailabilityDate": "date",
+    "IsBuy": "boolean",
+    "IsSale": "boolean",
+    "NetUnitBuyPrice": "float",
+    "BuyCurrencyCode": "string",
+    "VatID": "string",
+    "VatExemptReasonID": "string",
+    "MinimumStockQuantity": "float",
+    "MaximumStockQuantity": "float",
+    "InfoHTML": "string",
+    "Doses": "int"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const ALL_COMPANIES_JSON = {
   "pot": "relation",
   "name": "company",
@@ -9504,6 +9569,12 @@ function init() {
   menuCompanyTypes?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(COMPANY_TYPES_JSON, null, 2);
+  });
+  
+  const menuAllProducts = document.querySelector('[data-testid="menu-all-products"]');
+  menuAllProducts?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(ALL_PRODUCTS_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
