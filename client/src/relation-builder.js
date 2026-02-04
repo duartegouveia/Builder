@@ -2870,7 +2870,7 @@ function renderTable(st = state) {
   parentRow.appendChild(parentOpsTh);
   
   const parentIndexTh = document.createElement('th');
-  parentIndexTh.className = 'relation-th-parent';
+  parentIndexTh.className = 'relation-th-parent relation-th-parent-index';
   parentIndexTh.textContent = firstItem ? '1' : '';
   parentRow.appendChild(parentIndexTh);
   

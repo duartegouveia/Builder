@@ -421,6 +421,10 @@
   background: #d8f2da;
 }
 
+.relation-table th.relation-th-parent-index {
+  padding-top: 5px;
+}
+
 .btn-parent-up {
   background: #2e7d32;
   border: none;
