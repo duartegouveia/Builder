@@ -1427,6 +1427,7 @@ const DEFAULT_UI_STATE = {
   cardsPageSize: 12,
   cardsCurrentPage: 1,
   selectedRows: [],        // Array for JSON serialization (converted to Set at runtime)
+  highlightedRow: null,    // Currently highlighted/focused row index
   sortCriteria: [],
   filters: {},
   formatting: {},
@@ -1603,6 +1604,8 @@ function getCardsPageSize(st) { return getUiState(st).cardsPageSize; }
 function setCardsPageSize(st, value) { getUiState(st).cardsPageSize = value; }
 function getCardsCurrentPage(st) { return getUiState(st).cardsCurrentPage; }
 function setCardsCurrentPage(st, value) { getUiState(st).cardsCurrentPage = value; }
+function getHighlightedRow(st) { return getUiState(st).highlightedRow; }
+function setHighlightedRow(st, value) { getUiState(st).highlightedRow = value; }
 
 // Global state for main relation (backwards compatibility)
 let state = createRelationState();
@@ -3967,6 +3970,9 @@ function renderTable(st = state) {
     if (getSelectedRows(st).has(rowIdx)) {
       tr.classList.add('row-selected');
     }
+    if (getHighlightedRow(st) === rowIdx) {
+      tr.classList.add('row-highlighted');
+    }
     
     // Selection checkbox
     const selectTd = document.createElement('td');
@@ -4206,6 +4212,29 @@ function attachTableEventListeners(st = state, container = null) {
       updateHeaderCheckbox(st, tableContainer);
       renderPagination(st);
       e.target.closest('tr').classList.toggle('row-selected', e.target.checked);
+    });
+  });
+  
+  // Row click for highlighting
+  tableContainer.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('click', (e) => {
+      // Don't highlight if clicking on checkbox, button, or input
+      if (e.target.closest('input, button, select, textarea, .btn-row-ops')) return;
+      
+      const rowIdx = parseInt(tr.dataset.rowIdx);
+      // Toggle highlight: if same row clicked again, unhighlight
+      const currentHighlight = getHighlightedRow(st);
+      if (currentHighlight === rowIdx) {
+        setHighlightedRow(st, null);
+        tr.classList.remove('row-highlighted');
+      } else {
+        // Remove highlight from previous row
+        tableContainer.querySelectorAll('tbody tr.row-highlighted').forEach(row => {
+          row.classList.remove('row-highlighted');
+        });
+        setHighlightedRow(st, rowIdx);
+        tr.classList.add('row-highlighted');
+      }
     });
   });
   
@@ -6473,8 +6502,9 @@ function renderCardsView(st = state) {
   pageIndices.forEach((rowIdx, i) => {
     const row = st.relation.items[rowIdx];
     const isSelected = getSelectedRows(st).has(rowIdx);
+    const isHighlighted = getHighlightedRow(st) === rowIdx;
     
-    cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + '" data-row-idx="' + rowIdx + '" style="--card-grid-cols: ' + gridCols + ';">';
+    cardsHtml += '<div class="data-card' + (isSelected ? ' selected' : '') + (isHighlighted ? ' highlighted' : '') + '" data-row-idx="' + rowIdx + '" style="--card-grid-cols: ' + gridCols + ';">';
     cardsHtml += '<div class="data-card-header">';
     cardsHtml += '<input type="checkbox" class="data-card-checkbox" ' + (isSelected ? 'checked' : '') + ' data-row-idx="' + rowIdx + '">';
     cardsHtml += '<span class="data-card-id">#' + (rowIdx + 1) + '</span>';
@@ -6568,6 +6598,29 @@ function renderCardsView(st = state) {
         getSelectedRows(st).delete(idx);
       }
       e.target.closest('.data-card').classList.toggle('selected', e.target.checked);
+    });
+  });
+  
+  // Card click for highlighting
+  cardsContent.querySelectorAll('.data-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Don't highlight if clicking on checkbox or relation field
+      if (e.target.closest('input, [data-type="relation"]')) return;
+      
+      const rowIdx = parseInt(card.dataset.rowIdx);
+      // Toggle highlight: if same card clicked again, unhighlight
+      const currentHighlight = getHighlightedRow(st);
+      if (currentHighlight === rowIdx) {
+        setHighlightedRow(st, null);
+        card.classList.remove('highlighted');
+      } else {
+        // Remove highlight from previous card
+        cardsContent.querySelectorAll('.data-card.highlighted').forEach(c => {
+          c.classList.remove('highlighted');
+        });
+        setHighlightedRow(st, rowIdx);
+        card.classList.add('highlighted');
+      }
     });
   });
   

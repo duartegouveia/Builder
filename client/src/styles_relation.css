@@ -491,6 +491,14 @@
   background: var(--primary-100) !important;
 }
 
+.row-highlighted {
+  background: var(--slate-200) !important;
+}
+
+.row-highlighted:hover {
+  background: var(--slate-250, #c9d1da) !important;
+}
+
 /* Pagination */
 .relation-pagination {
   display: flex;
@@ -1951,6 +1959,12 @@
 .data-card.selected {
   border-color: var(--primary-400);
   background: var(--primary-50);
+}
+
+.data-card.highlighted {
+  border-color: var(--slate-400);
+  background: var(--slate-100);
+  box-shadow: 0 0 0 2px var(--slate-300);
 }
 
 .data-card-header {
