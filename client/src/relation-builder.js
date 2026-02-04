@@ -6117,6 +6117,12 @@ async function askAI(question, st = state) {
   const responseDiv = aiView ? aiView.querySelector('.ai-response') : el('.ai-response');
   if (!responseDiv) return;
   
+  // Check for empty items
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
+    responseDiv.innerHTML = '<p class="text-muted-foreground">Não existem dados para analisar com IA.</p>';
+    return;
+  }
+  
   responseDiv.innerHTML = '';
   responseDiv.classList.add('loading');
   
@@ -6402,6 +6408,13 @@ function renderCardsView(st = state) {
   
   if (!wrapper || !cardsContent || !cardsNavigation) return;
   
+  // Check for empty items
+  if (!st.relation.items || st.relation.items.length === 0) {
+    cardsContent.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para mostrar na vista de cards.</p>';
+    cardsNavigation.innerHTML = '';
+    return;
+  }
+  
   // Ensure indices are populated for this state
   if (getSortedIndices(st).length === 0 && getFilteredIndices(st).length === 0) {
     setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
@@ -6612,10 +6625,19 @@ function getCategoricalOrNumericColumns(st = state) {
 }
 
 function initPivotConfig(st = state) {
-  const cols = getCategoricalOrNumericColumns(st);
-  
   const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
   if (!pivotView) return;
+  
+  // Check for empty items
+  const pivotContainer = pivotView.querySelector('.pivot-table-container');
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
+    if (pivotContainer) {
+      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para gerar uma tabela pivot.</p>';
+    }
+    return;
+  }
+  
+  const cols = getCategoricalOrNumericColumns(st);
   
   const rowSelect = pivotView.querySelector('.pivot-rows');
   const colSelect = pivotView.querySelector('.pivot-cols');
@@ -6710,6 +6732,16 @@ function renderPivotValuesConfig(st = state) {
 }
 
 function generatePivotTable(st = state) {
+  // Check for empty items
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
+    const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
+    const pivotContainer = pivotView?.querySelector('.pivot-table-container');
+    if (pivotContainer) {
+      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para gerar uma tabela pivot.</p>';
+    }
+    return;
+  }
+  
   const rowSelect = st.container ? st.container.querySelector('.pivot-rows') : el('.pivot-rows');
   const colSelect = st.container ? st.container.querySelector('.pivot-cols') : el('.pivot-cols');
   const rowColIdx = rowSelect?.value;
@@ -7006,10 +7038,19 @@ function generatePivotTable(st = state) {
 }
 
 function initCorrelationConfig(st = state) {
-  const cols = getCategoricalOrNumericColumns(st);
-  
   const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
   if (!corrView) return;
+  
+  // Check for empty items
+  const corrResult = corrView.querySelector('.correlation-result');
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
+    if (corrResult) {
+      corrResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para calcular correlações.</p>';
+    }
+    return;
+  }
+  
+  const cols = getCategoricalOrNumericColumns(st);
   
   const xSelect = corrView.querySelector('.corr-col-x');
   const ySelect = corrView.querySelector('.corr-col-y');
@@ -7057,6 +7098,15 @@ function initCorrelationConfig(st = state) {
 function calculateCorrelation(st = state) {
   const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
   if (!corrView) return;
+  
+  // Check for empty items
+  const corrResult = corrView.querySelector('.correlation-result');
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
+    if (corrResult) {
+      corrResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para calcular correlações.</p>';
+    }
+    return;
+  }
   
   const xColIdx = corrView.querySelector('.corr-col-x')?.value;
   const yColIdx = corrView.querySelector('.corr-col-y')?.value;
@@ -7894,16 +7944,20 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories, st = state) 
 }
 
 function analyzeAllPairs(st = state) {
-  if (!st.relation || getSortedIndices(st).length < 2) {
-    alert('Not enough data for correlation analysis');
-    return;
-  }
-  
   const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
   if (!corrView) return;
   
-  const method = corrView.querySelector('.corr-method')?.value || 'auto';
   const corrResultEl = corrView.querySelector('.correlation-result');
+  
+  // Check for empty items
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0 || getSortedIndices(st).length < 2) {
+    if (corrResultEl) {
+      corrResultEl.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados suficientes para análise de correlações.</p>';
+    }
+    return;
+  }
+  
+  const method = corrView.querySelector('.corr-method')?.value || 'auto';
   const results = [];
   
   const validCols = [];
@@ -8762,7 +8816,11 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
 
 function runClustering(st = state) {
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
-    alert('No data to cluster');
+    const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+    const diagramResult = diagramView?.querySelector('.diagram-result');
+    if (diagramResult) {
+      diagramResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para executar clustering.</p>';
+    }
     return;
   }
   
