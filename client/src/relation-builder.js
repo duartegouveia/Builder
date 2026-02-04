@@ -2848,6 +2848,31 @@ function renderTable(st = state) {
     headerRow.appendChild(th);
   });
   
+  // Parent row (above header, no click handlers)
+  const parentRow = document.createElement('tr');
+  parentRow.className = 'relation-parent-row';
+  
+  // Empty cells matching header columns: select, ops, index, data columns
+  const parentSelectTh = document.createElement('th');
+  parentSelectTh.className = 'relation-th-parent';
+  parentRow.appendChild(parentSelectTh);
+  
+  const parentOpsTh = document.createElement('th');
+  parentOpsTh.className = 'relation-th-parent';
+  parentRow.appendChild(parentOpsTh);
+  
+  const parentIndexTh = document.createElement('th');
+  parentIndexTh.className = 'relation-th-parent';
+  parentRow.appendChild(parentIndexTh);
+  
+  st.columnNames.forEach((name, idx) => {
+    if (getGroupByColumns(st).includes(idx)) return;
+    const th = document.createElement('th');
+    th.className = 'relation-th-parent';
+    parentRow.appendChild(th);
+  });
+  
+  thead.appendChild(parentRow);
   thead.appendChild(headerRow);
   table.appendChild(thead);
   

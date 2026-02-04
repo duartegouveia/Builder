@@ -408,6 +408,15 @@
   padding: 2px;
 }
 
+.relation-parent-row {
+  background: var(--slate-50);
+}
+
+.relation-th-parent {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
 .relation-th-sortable {
   cursor: pointer;
   user-select: none;
