@@ -3727,7 +3727,9 @@ function renderPagination(st = state) {
 function syncFooterColumnWidths(mainTable, footerTable) {
   // Wait for DOM to render, then sync widths
   requestAnimationFrame(() => {
-    const mainCells = mainTable.querySelectorAll('thead th');
+    // Select only header row th cells, not parent row (relation-parent-row) cells
+    const headerRow = mainTable.querySelector('thead tr:not(.relation-parent-row)');
+    const mainCells = headerRow ? headerRow.querySelectorAll('th') : [];
     const footerCells = footerTable.querySelectorAll('tfoot td');
     
     mainCells.forEach((th, idx) => {
