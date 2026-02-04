@@ -458,6 +458,37 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const PRICELIST_PRODUCTS_JSON = {
+  "pot": "relation",
+  "name": "pricelist_product",
+  "columns": {
+    "ID": "id",
+    "PriceListID": "int",
+    "ProductID": "int",
+    "NetUnitPrice": "float",
+    "LastUpdated": "datetime",
+    "Discount": "float"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const ALL_PRICELISTS_JSON = {
   "pot": "relation",
   "name": "pricelist",
@@ -9769,6 +9800,12 @@ function init() {
   menuAllPricelists?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(ALL_PRICELISTS_JSON, null, 2);
+  });
+  
+  const menuPricelistProducts = document.querySelector('[data-testid="menu-pricelist-products"]');
+  menuPricelistProducts?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(PRICELIST_PRODUCTS_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
