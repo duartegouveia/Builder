@@ -458,6 +458,47 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const PRODUCT_CATEGORY_JSON = {
+  "pot": "relation",
+  "name": "product_category",
+  "columns": {
+    "id": "id",
+    "external_ref": "string",
+    "name": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": [
+    ['1','1','Dog Food'],
+    ['2','2','Cat Food'],
+    ['3','3','Vegetarian Food'],
+    ['4','4','Chocolate'],
+    ['5','5','Cereals'],
+    ['6','6','Cofee and Beverages'],
+    ['7','7','Milk and Deserts'],
+    ['8','8','Clinical Nutricion'],
+    ['9','9','Cooking'],
+    ['10','10','Cofee machines'],
+    ['11','11','Child nutrition'],
+    ['12','12','Proteins and Vitamins']
+  ]
+};
+
 const ALL_PRODUCTS_JSON = {
   "pot": "relation",
   "name": "product",
@@ -9575,6 +9616,12 @@ function init() {
   menuAllProducts?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(ALL_PRODUCTS_JSON, null, 2);
+  });
+  
+  const menuProductCategory = document.querySelector('[data-testid="menu-product-category"]');
+  menuProductCategory?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(PRODUCT_CATEGORY_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
