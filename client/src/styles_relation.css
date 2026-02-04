@@ -1,6 +1,11 @@
 /* ===== Relation Builder Specific Styles ===== */
 /* Styles for the Relation Builder page (relation.html) */
 
+/* Hidden class for conditional visibility */
+.hidden {
+  display: none !important;
+}
+
 /* ===== Main Navigation Menu ===== */
 .main-nav-menu {
   display: flex;
