@@ -3615,10 +3615,14 @@ function renderPagination(st = state) {
     : el('.relation-pagination');
   if (!paginationContainer) return;
   
-  const totalPages = getTotalPages(st);
   const totalRecords = st.relation.items.length;
   const filteredRecords = getSortedIndices(st).length;
   const selectedRecords = getSelectedRows(st).size;
+  
+  // Handle empty results: show 0 of 0 with disabled controls
+  const hasResults = filteredRecords > 0;
+  const totalPages = hasResults ? getTotalPages(st) : 0;
+  const currentPage = hasResults ? getCurrentPage(st) : 0;
   
   const hasFilter = filteredRecords !== totalRecords;
   
@@ -3631,7 +3635,7 @@ function renderPagination(st = state) {
     </div>
     <div class="pagination-size">
       <label>Per page:</label>
-      <select class="page-size-select">
+      <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
         <option value="5" ${getPageSize(st) === 5 ? 'selected' : ''}>5</option>
         <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10</option>
         <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20</option>
@@ -3641,17 +3645,17 @@ function renderPagination(st = state) {
       </select>
     </div>
     <div class="pagination-nav">
-      <button class="btn-page btn-first" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>⟨⟨</button>
-      <button class="btn-page btn-prev" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>⟨</button>
+      <button class="btn-page btn-first" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>
+      <button class="btn-page btn-prev" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨</button>
       <span class="page-indicator">
-        <input type="number" class="page-input" value="${getCurrentPage(st)}" min="1" max="${totalPages}" />
+        <input type="number" class="page-input" value="${currentPage}" min="${hasResults ? 1 : 0}" max="${totalPages}" ${!hasResults ? 'disabled' : ''} />
         <span>of ${totalPages}</span>
       </span>
-      <button class="btn-page btn-next" ${getCurrentPage(st) >= totalPages ? 'disabled' : ''}>⟩</button>
-      <button class="btn-page btn-last" ${getCurrentPage(st) >= totalPages ? 'disabled' : ''}>⟩⟩</button>
+      <button class="btn-page btn-next" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
+      <button class="btn-page btn-last" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
     </div>
     <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
-      <select class="selection-actions selection-actions-select">
+      <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
         <option value="" disabled selected>Selection Actions...</option>
         <option value="invert-page">↔ Invert Page</option>
         <option value="invert-all">↔ Invert All</option>
@@ -9958,25 +9962,30 @@ function renderPaginationWithState(st, paginationDiv) {
   const totalItems = getSortedIndices(st).length;
   const pageSize = getPageSize(st);
   const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
-  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
+  
+  // Handle empty results: show 0 of 0 with disabled controls
+  const hasResults = totalItems > 0;
+  const totalPages = hasResults ? Math.max(1, Math.ceil(totalItems / effectivePageSize)) : 0;
+  const currentPage = hasResults ? getCurrentPage(st) : 0;
+  
   const selectedCount = getSelectedRows(st).size;
   const showMulticheck = st.rel_options.show_multicheck;
   
   paginationDiv.innerHTML = `
     <span class="pagination-info">${totalItems} rows</span>
     <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedCount} selected</span>
-    <select class="page-size-select">
+    <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
       <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
       <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
       <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
       <option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option>
       <option value="all" ${pageSize === 'all' ? 'selected' : ''}>All</option>
     </select>
-    <button class="btn btn-sm page-btn" data-action="first" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>«</button>
-    <button class="btn btn-sm page-btn" data-action="prev" ${getCurrentPage(st) === 1 ? 'disabled' : ''}>‹</button>
-    <span class="page-info">Página ${getCurrentPage(st)} de ${totalPages}</span>
-    <button class="btn btn-sm page-btn" data-action="next" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>›</button>
-    <button class="btn btn-sm page-btn" data-action="last" ${getCurrentPage(st) === totalPages ? 'disabled' : ''}>»</button>
+    <button class="btn btn-sm page-btn" data-action="first" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>«</button>
+    <button class="btn btn-sm page-btn" data-action="prev" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>‹</button>
+    <span class="page-info">Página ${currentPage} de ${totalPages}</span>
+    <button class="btn btn-sm page-btn" data-action="next" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>›</button>
+    <button class="btn btn-sm page-btn" data-action="last" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>»</button>
   `;
 }
 
