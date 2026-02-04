@@ -5890,10 +5890,11 @@ function showRowOperationsMenu(rowIdx, x, y) {
   document.body.appendChild(menu);
   
   menu.addEventListener('click', (e) => {
-    const action = e.target.dataset.action;
-    if (!action) return;
+    const actionBtn = e.target.closest('[data-action]');
+    if (!actionBtn) return;
+    const action = actionBtn.dataset.action;
     
-    handleRowOperation(rowIdx, action);
+    handleRowOperation(state, rowIdx, action);
     menu.remove();
   });
   
@@ -5907,154 +5908,134 @@ function showRowOperationsMenu(rowIdx, x, y) {
   }, 0);
 }
 
-function handleRowOperation(rowIdx, action) {
+function handleRowOperation(st, rowIdx, action) {
   switch (action) {
     case 'view-row':
-      showRowViewDialog(rowIdx);
+      showRowViewDialog(st, rowIdx);
       break;
     case 'edit-row':
-      showRowEditDialog(rowIdx);
+      showRowEditDialog(st, rowIdx);
       break;
     case 'copy-row':
-      const rowCopy = [...state.relation.items[rowIdx]];
-      state.relation.items.push(rowCopy);
-      setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
-      setSortedIndices(state, [...getFilteredIndices(state)]);
-      el('.relation-json').value = JSON.stringify(state.relation, null, 2);
-      renderTable();
+      const rowCopy = [...st.relation.items[rowIdx]];
+      st.relation.items.push(rowCopy);
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+      break;
+    case 'new-row':
+      showRowEditDialog(st, -1);
       break;
     case 'delete-row':
       if (confirm('Delete this row?')) {
-        state.relation.items.splice(rowIdx, 1);
-        getSelectedRows(state).delete(rowIdx);
-        setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
-        setSortedIndices(state, [...getFilteredIndices(state)]);
-        el('.relation-json').value = JSON.stringify(state.relation, null, 2);
-        renderTable();
+        st.relation.items.splice(rowIdx, 1);
+        getSelectedRows(st).delete(rowIdx);
+        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+        setSortedIndices(st, [...getFilteredIndices(st)]);
+        renderTable(st);
       }
       break;
     case 'delete-selected':
-      if (confirm(`Delete ${getSelectedRows(state).size} selected rows?`)) {
-        const indices = [...getSelectedRows(state)].sort((a, b) => b - a);
-        indices.forEach(i => state.relation.items.splice(i, 1));
-        getSelectedRows(state).clear();
-        setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
-        setSortedIndices(state, [...getFilteredIndices(state)]);
-        el('.relation-json').value = JSON.stringify(state.relation, null, 2);
-        renderTable();
+      if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
+        const indices = [...getSelectedRows(st)].sort((a, b) => b - a);
+        indices.forEach(i => st.relation.items.splice(i, 1));
+        getSelectedRows(st).clear();
+        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+        setSortedIndices(st, [...getFilteredIndices(st)]);
+        renderTable(st);
       }
-      break;
-    case 'new-row':
-      showRowEditDialog(-1);
       break;
   }
 }
 
-function showRowViewDialog(rowIdx) {
+function showRowViewDialog(st, rowIdx) {
   closeAllMenus();
   
-  const row = state.relation.items[rowIdx];
-  const title = `Row ${rowIdx + 1} Details`;
+  const row = st.relation.items[rowIdx];
+  const title = `View Row ${rowIdx + 1}`;
   
-  showContentBasedOnMode(state, (container) => {
-    let content = '<div class="row-view-content">';
-    state.columnNames.forEach((name, i) => {
-      const type = state.columnTypes[i];
-      let val = row[i];
-      if (type === 'relation' && val) {
-        val = `<em>${val.items?.length || 0} nested rows</em>`;
-      } else {
-        val = val === null ? '<em>null</em>' : String(val);
-      }
-      content += `<div class="row-view-item"><strong>${name}:</strong> ${val}</div>`;
+  showContentBasedOnMode(st, (container) => {
+    let html = '<div class="row-view-content">';
+    
+    st.columnNames.forEach((name, colIdx) => {
+      const type = st.columnTypes[colIdx];
+      const value = row[colIdx];
+      html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label><span class="view-value">${formatValueForDisplay(value, type)}</span></div>`;
     });
-    content += '</div>';
-    container.innerHTML = content;
+    
+    html += '</div>';
+    container.innerHTML = html;
   }, title);
 }
 
-function showRowEditDialog(rowIdx) {
+function showRowEditDialog(st, rowIdx) {
   closeAllMenus();
   
   const isNew = rowIdx === -1;
-  const row = isNew ? state.columnNames.map(() => null) : state.relation.items[rowIdx];
+  const row = isNew ? st.columnTypes.map(type => {
+    if (type === 'id') return String(st.relation.items.length + 1);
+    if (type === 'boolean') return false;
+    if (type === 'int' || type === 'float') return 0;
+    return '';
+  }) : st.relation.items[rowIdx];
+  
   const dialog = document.createElement('div');
   dialog.className = 'filter-dialog';
+  dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; max-height: 80vh; overflow-y: auto;';
   
-  let content = '<div class="row-edit-content">';
-  state.columnNames.forEach((name, i) => {
-    const type = state.columnTypes[i];
-    const val = row[i];
-    let input = '';
-    
-    if (type === 'relation') {
-      input = `<span class="text-muted-foreground">(nested relation - edit in JSON)</span>`;
-    } else if (type === 'boolean') {
-      input = `<input type="checkbox" data-col="${i}" ${val ? 'checked' : ''} />`;
-    } else if (type === 'multilinestring') {
-      input = `<textarea data-col="${i}" rows="3">${val || ''}</textarea>`;
-    } else {
-      const inputType = type === 'int' || type === 'float' ? 'number' : type === 'date' ? 'date' : type === 'time' ? 'time' : type === 'datetime' ? 'datetime-local' : 'text';
-      input = `<input type="${inputType}" data-col="${i}" value="${val || ''}" />`;
-    }
-    
-    content += `<div class="row-edit-item"><label>${name} (${type}):</label>${input}</div>`;
+  let html = `<div class="filter-dialog-header"><span>${isNew ? 'New Row' : 'Edit Row ' + (rowIdx + 1)}</span><button class="btn-close-dialog">✕</button></div>`;
+  html += '<div class="filter-dialog-content">';
+  
+  st.columnNames.forEach((name, colIdx) => {
+    const type = st.columnTypes[colIdx];
+    const value = row[colIdx];
+    html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label>`;
+    html += createEditInputHtml(type, value, colIdx, st);
+    html += '</div>';
   });
-  content += '</div>';
   
-  dialog.innerHTML = `
-    <div class="filter-dialog-header">
-      <span>${isNew ? 'New Row' : 'Edit Row ' + (rowIdx + 1)}</span>
-      <button class="btn-close-dialog">✕</button>
-    </div>
-    ${content}
-    <div class="filter-dialog-footer">
-      <button class="btn btn-outline cancel-edit">Cancel</button>
-      <button class="btn btn-primary save-edit">${isNew ? 'Create' : 'Save'}</button>
-    </div>
-  `;
+  html += '</div>';
+  html += `<div class="filter-dialog-footer"><button class="btn btn-primary save-row">${isNew ? 'Create' : 'Save'}</button><button class="btn btn-outline close-dialog">Cancel</button></div>`;
   
+  dialog.innerHTML = html;
   document.body.appendChild(dialog);
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.cancel-edit').addEventListener('click', () => dialog.remove());
   
-  dialog.querySelector('.save-edit').addEventListener('click', () => {
-    const newRow = isNew ? state.columnNames.map(() => null) : null;
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelector('.save-row').addEventListener('click', () => {
+    const targetRow = isNew ? st.columnTypes.map(() => null) : st.relation.items[rowIdx];
     
-    state.columnNames.forEach((name, i) => {
-      const type = state.columnTypes[i];
-      if (type === 'relation') return;
-      
-      const input = dialog.querySelector(`[data-col="${i}"]`);
-      if (!input) return;
-      
-      let value;
-      if (type === 'boolean') {
-        value = input.checked;
-      } else if (type === 'int') {
-        value = parseInt(input.value) || 0;
-      } else if (type === 'float') {
-        value = parseFloat(input.value) || 0;
-      } else {
-        value = input.value || null;
-      }
-      
-      if (isNew) {
-        newRow[i] = value;
-      } else {
-        state.relation.items[rowIdx][i] = value;
+    st.columnNames.forEach((name, colIdx) => {
+      const type = st.columnTypes[colIdx];
+      const input = dialog.querySelector(`[data-col="${colIdx}"]`);
+      if (input) {
+        let value;
+        if (type === 'boolean') {
+          value = input.checked;
+        } else if (type === 'int') {
+          value = input.value === '' ? null : parseInt(input.value);
+        } else if (type === 'float') {
+          value = input.value === '' ? null : parseFloat(input.value);
+        } else {
+          value = input.value === '' ? null : input.value;
+        }
+        if (isNew) {
+          targetRow[colIdx] = value;
+        } else {
+          st.relation.items[rowIdx][colIdx] = value;
+        }
       }
     });
     
     if (isNew) {
-      state.relation.items.push(newRow);
-      setFilteredIndices(state, [...Array(state.relation.items.length).keys()]);
-      setSortedIndices(state, [...getFilteredIndices(state)]);
+      st.relation.items.push(targetRow);
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
     }
     
-    el('.relation-json').value = JSON.stringify(state.relation, null, 2);
+    renderTable(st);
     dialog.remove();
-    renderTable();
   });
 }
 
@@ -10449,10 +10430,11 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
   adjustMenuPosition(menu);
   
   menu.addEventListener('click', (e) => {
-    const action = e.target.dataset.action;
-    if (!action) return;
+    const actionBtn = e.target.closest('[data-action]');
+    if (!actionBtn) return;
+    const action = actionBtn.dataset.action;
     
-    handleRowOperationForInstance(st, rowIdx, action);
+    handleRowOperation(st, rowIdx, action);
     menu.remove();
   });
   
@@ -10464,125 +10446,6 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
       }
     });
   }, 10);
-}
-
-function handleRowOperationForInstance(st, rowIdx, action) {
-  switch (action) {
-    case 'view-row':
-      showRowViewDialogForInstance(st, rowIdx);
-      break;
-    case 'edit-row':
-      showRowEditDialogForInstance(st, rowIdx);
-      break;
-    case 'copy-row':
-      const rowCopy = [...st.relation.items[rowIdx]];
-      st.relation.items.push(rowCopy);
-      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-      setSortedIndices(st, [...getFilteredIndices(st)]);
-      renderTable(st);
-      break;
-    case 'new-row':
-      const newRow = st.columnTypes.map(type => {
-        if (type === 'id') return String(st.relation.items.length + 1);
-        if (type === 'boolean') return false;
-        if (type === 'int' || type === 'float') return 0;
-        return '';
-      });
-      st.relation.items.push(newRow);
-      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-      setSortedIndices(st, [...getFilteredIndices(st)]);
-      renderTable(st);
-      break;
-    case 'delete-row':
-      if (confirm('Delete this row?')) {
-        st.relation.items.splice(rowIdx, 1);
-        getSelectedRows(st).delete(rowIdx);
-        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-        setSortedIndices(st, [...getFilteredIndices(st)]);
-        renderTable(st);
-      }
-      break;
-    case 'delete-selected':
-      if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
-        const indices = [...getSelectedRows(st)].sort((a, b) => b - a);
-        indices.forEach(i => st.relation.items.splice(i, 1));
-        getSelectedRows(st).clear();
-        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-        setSortedIndices(st, [...getFilteredIndices(st)]);
-        renderTable(st);
-      }
-      break;
-  }
-}
-
-function showRowViewDialogForInstance(st, rowIdx) {
-  closeAllMenus();
-  const row = st.relation.items[rowIdx];
-  const title = `View Row ${rowIdx + 1}`;
-  
-  showContentBasedOnMode(st, (container) => {
-    let html = '<div class="row-view-content">';
-    
-    st.columnNames.forEach((name, colIdx) => {
-      const type = st.columnTypes[colIdx];
-      const value = row[colIdx];
-      html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label><span class="view-value">${formatValueForDisplay(value, type)}</span></div>`;
-    });
-    
-    html += '</div>';
-    container.innerHTML = html;
-  }, title);
-}
-
-function showRowEditDialogForInstance(st, rowIdx) {
-  closeAllMenus();
-  const row = st.relation.items[rowIdx];
-  
-  const dialog = document.createElement('div');
-  dialog.className = 'filter-dialog';
-  dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; max-height: 80vh; overflow-y: auto;';
-  
-  let html = `<div class="filter-dialog-header"><span>Edit Row ${rowIdx + 1}</span><button class="btn-close-dialog">✕</button></div>`;
-  html += '<div class="filter-dialog-content">';
-  
-  st.columnNames.forEach((name, colIdx) => {
-    const type = st.columnTypes[colIdx];
-    const value = row[colIdx];
-    html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label>`;
-    html += createEditInputHtml(type, value, colIdx, st);
-    html += '</div>';
-  });
-  
-  html += '</div>';
-  html += '<div class="filter-dialog-footer"><button class="btn btn-primary save-row">Save</button><button class="btn btn-outline close-dialog">Cancel</button></div>';
-  
-  dialog.innerHTML = html;
-  document.body.appendChild(dialog);
-  
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.remove());
-  
-  dialog.querySelector('.save-row').addEventListener('click', () => {
-    st.columnNames.forEach((name, colIdx) => {
-      const type = st.columnTypes[colIdx];
-      const input = dialog.querySelector(`[data-col="${colIdx}"]`);
-      if (input) {
-        let value;
-        if (type === 'boolean') {
-          value = input.checked;
-        } else if (type === 'int') {
-          value = input.value === '' ? null : parseInt(input.value);
-        } else if (type === 'float') {
-          value = input.value === '' ? null : parseFloat(input.value);
-        } else {
-          value = input.value === '' ? null : input.value;
-        }
-        st.relation.items[rowIdx][colIdx] = value;
-      }
-    });
-    renderTable(st);
-    dialog.remove();
-  });
 }
 
 function formatValueForDisplay(value, type) {
