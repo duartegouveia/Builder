@@ -418,6 +418,7 @@
   padding: 4px 8px;
   border-bottom: 1px solid var(--border);
   font-weight: normal;
+  background: #d8f2da;
 }
 
 .btn-parent-up {
