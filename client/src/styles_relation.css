@@ -101,6 +101,23 @@
   color: var(--accent-foreground);
 }
 
+/* JSON Editor Layout */
+.json-editor-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-4);
+}
+
+.json-textarea-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.json-preview-panel {
+  flex: 1;
+  min-width: 0;
+}
+
 .relation-json-textarea {
   width: 100%;
   min-height: 200px;
