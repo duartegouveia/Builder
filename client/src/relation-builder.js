@@ -2852,7 +2852,9 @@ function renderTable(st = state) {
   const parentRow = document.createElement('tr');
   parentRow.className = 'relation-parent-row';
   
-  // Empty cells matching header columns: select, ops, index, data columns
+  // Parent row cells with first item data (temporary example)
+  const firstItem = st.relation.items.length > 0 ? st.relation.items[0] : null;
+  
   const parentSelectTh = document.createElement('th');
   parentSelectTh.className = 'relation-th-parent';
   parentRow.appendChild(parentSelectTh);
@@ -2863,12 +2865,17 @@ function renderTable(st = state) {
   
   const parentIndexTh = document.createElement('th');
   parentIndexTh.className = 'relation-th-parent';
+  parentIndexTh.textContent = firstItem ? '1' : '';
   parentRow.appendChild(parentIndexTh);
   
   st.columnNames.forEach((name, idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
     const th = document.createElement('th');
     th.className = 'relation-th-parent';
+    if (firstItem) {
+      const value = firstItem[idx];
+      th.textContent = value !== null && value !== undefined ? String(value) : '';
+    }
     parentRow.appendChild(th);
   });
   

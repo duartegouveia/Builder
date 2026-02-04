@@ -410,11 +410,13 @@
 
 .relation-parent-row {
   background: var(--slate-50);
+  height: 32px;
 }
 
 .relation-th-parent {
   padding: 4px 8px;
   border-bottom: 1px solid var(--border);
+  font-weight: normal;
 }
 
 .relation-th-sortable {
