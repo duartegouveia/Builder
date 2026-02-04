@@ -491,11 +491,13 @@
   background: var(--primary-100) !important;
 }
 
-.relation-table tbody tr.row-highlighted {
+.relation-table tbody tr.row-highlighted,
+.relation-table tbody tr.row-highlighted td {
   background: var(--slate-200) !important;
 }
 
-.relation-table tbody tr.row-highlighted:hover {
+.relation-table tbody tr.row-highlighted:hover,
+.relation-table tbody tr.row-highlighted:hover td {
   background: var(--slate-250, #c9d1da) !important;
 }
 
