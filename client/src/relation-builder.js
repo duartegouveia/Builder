@@ -9471,16 +9471,6 @@ function init() {
     textarea.value = JSON.stringify(PRICELISTS_JSON, null, 2);
   });
   
-  const btnLoadCompanyTypes = el('.btn-load-companytypes');
-  btnLoadCompanyTypes?.addEventListener('click', () => {
-    textarea.value = JSON.stringify(COMPANY_TYPES_JSON, null, 2);
-  });
-  
-  const btnLoadAllCompanies = el('.btn-load-allcompanies');
-  btnLoadAllCompanies?.addEventListener('click', () => {
-    textarea.value = JSON.stringify(ALL_COMPANIES_JSON, null, 2);
-  });
-  
   // Menu item event listeners - close dropdown on click
   document.querySelectorAll('.nav-dropdown-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -9502,6 +9492,18 @@ function init() {
   menuAuditLog?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(AUDITLOG_JSON, null, 2);
+  });
+  
+  const menuAllCompanies = document.querySelector('[data-testid="menu-all-companies"]');
+  menuAllCompanies?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(ALL_COMPANIES_JSON, null, 2);
+  });
+  
+  const menuCompanyTypes = document.querySelector('[data-testid="menu-company-types"]');
+  menuCompanyTypes?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(COMPANY_TYPES_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
