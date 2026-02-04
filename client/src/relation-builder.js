@@ -1652,13 +1652,13 @@ function generateDateTimeBoxPlotSVG(stats, type) {
 }
 
 // Statistics functions
-function calculateStatistics(colIdx) {
-  const values = state.relation.items
+function calculateStatistics(colIdx, st = state) {
+  const values = st.relation.items
     .map(row => row[colIdx])
     .filter(v => v !== null && v !== undefined);
   
-  const type = state.columnTypes[colIdx];
-  const total = state.relation.items.length;
+  const type = st.columnTypes[colIdx];
+  const total = st.relation.items.length;
   const nonNull = values.length;
   const nullCount = total - nonNull;
   
@@ -3312,7 +3312,7 @@ function adjustMenuPosition(menu) {
   }
 }
 
-function showColumnMenu(colIdx, x, y) {
+function showColumnMenu(colIdx, x, y, st = state) {
   closeAllMenus();
   
   const menu = document.createElement('div');
@@ -3320,11 +3320,11 @@ function showColumnMenu(colIdx, x, y) {
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
   
-  const type = state.columnTypes[colIdx];
-  const name = state.columnNames[colIdx];
+  const type = st.columnTypes[colIdx];
+  const name = st.columnNames[colIdx];
   
-  const isGrouped = getGroupByColumns(state).includes(colIdx);
-  const isSelected = getSelectedColumns(state).has(colIdx);
+  const isGrouped = getGroupByColumns(st).includes(colIdx);
+  const isSelected = getSelectedColumns(st).has(colIdx);
   
   menu.innerHTML = `
     <div class="column-menu-header">${name} (${type})</div>
@@ -3374,8 +3374,8 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-content">
           <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
           <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
-          <button class="column-menu-item ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
-          <button class="column-menu-item ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(state).size > 0 ? '' : 'disabled'}>Clear Selection</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Clear Selection</button>
         </div>
       </div>
       <div class="accordion-section" data-section="formatting">
@@ -3383,7 +3383,7 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-content">
           <button class="column-menu-item" data-action="format-databar">Color Bar</button>
           <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
-          <button class="column-menu-item ${hasActiveFilter() ? '' : 'disabled'}" data-action="format-active-filter" ${hasActiveFilter() ? '' : 'disabled'}>Active Filter Color...</button>
+          <button class="column-menu-item ${hasActiveFilter(st) ? '' : 'disabled'}" data-action="format-active-filter" ${hasActiveFilter(st) ? '' : 'disabled'}>Active Filter Color...</button>
           <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
         </div>
       </div>
@@ -3391,7 +3391,7 @@ function showColumnMenu(colIdx, x, y) {
         <div class="accordion-header">Remove <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item" data-action="remove-column">Remove Column</button>
-          <button class="column-menu-item ${getSelectedColumns(state).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(state).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(state).size})</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(st).size})</button>
         </div>
       </div>
     </div>
@@ -3426,7 +3426,7 @@ function showColumnMenu(colIdx, x, y) {
     const action = e.target.dataset.action;
     if (!action) return;
     
-    handleColumnMenuAction(colIdx, action);
+    handleColumnMenuAction(colIdx, action, st);
     menu.remove();
   });
   
@@ -3441,100 +3441,100 @@ function showColumnMenu(colIdx, x, y) {
   }, { once: false });
 }
 
-function handleColumnMenuAction(colIdx, action) {
+function handleColumnMenuAction(colIdx, action, st = state) {
   switch (action) {
     case 'sort-asc':
-      setSortCriteria(state, [{ column: colIdx, direction: 'asc' }]);
+      setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
       break;
     case 'sort-desc':
-      setSortCriteria(state, [{ column: colIdx, direction: 'desc' }]);
+      setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
       break;
     case 'sort-clear':
-      setSortCriteria(state, getSortCriteria(state).filter(c => c.column !== colIdx));
+      setSortCriteria(st, getSortCriteria(st).filter(c => c.column !== colIdx));
       break;
     case 'filter-values':
-      showFilterValuesDialog(colIdx);
+      showFilterValuesDialog(colIdx, st);
       return;
     case 'filter-comparison':
-      showFilterComparisonDialog(colIdx);
+      showFilterComparisonDialog(colIdx, st);
       return;
     case 'filter-text-criteria':
-      showFilterTextCriteriaDialog(colIdx);
+      showFilterTextCriteriaDialog(colIdx, st);
       return;
     case 'filter-null':
-      getFilters(state)[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
+      getFilters(st)[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
       break;
     case 'filter-not-null':
-      getFilters(state)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
+      getFilters(st)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
       break;
     case 'filter-top10':
-      applyTopFilter(colIdx, 10, false);
+      applyTopFilter(colIdx, 10, false, st);
       break;
     case 'filter-top10p':
-      applyTopFilter(colIdx, 10, true);
+      applyTopFilter(colIdx, 10, true, st);
       break;
     case 'filter-clear':
-      delete getFilters(state)[colIdx];
+      delete getFilters(st)[colIdx];
       break;
     case 'format-databar':
-      getFormatting(state)[colIdx] = [{ condition: {}, style: { dataBar: 'var(--primary-200)' } }];
+      getFormatting(st)[colIdx] = [{ condition: {}, style: { dataBar: 'var(--primary-200)' } }];
       break;
     case 'format-color-scale':
-      applyColorScale(colIdx);
+      applyColorScale(colIdx, st);
       break;
     case 'format-clear':
-      delete getFormatting(state)[colIdx];
+      delete getFormatting(st)[colIdx];
       // Also clear persisted colors for this column
-      if (state.relation.colored_items) {
-        const colName = state.columnNames[colIdx];
-        delete state.relation.colored_items[colName];
+      if (st.relation.colored_items) {
+        const colName = st.columnNames[colIdx];
+        delete st.relation.colored_items[colName];
       }
       break;
     case 'toggle-group':
-      toggleGroupBy(colIdx);
+      toggleGroupBy(colIdx, st);
       return;
     case 'clear-groups':
-      setGroupByColumns(state, []);
-      setGroupBySelectedValues(state, {});
+      setGroupByColumns(st, []);
+      setGroupBySelectedValues(st, {});
       break;
     case 'expand-relation':
-      expandRelationColumn(colIdx);
+      expandRelationColumn(colIdx, st);
       return;
     case 'toggle-select-col':
-      if (getSelectedColumns(state).has(colIdx)) {
-        getSelectedColumns(state).delete(colIdx);
+      if (getSelectedColumns(st).has(colIdx)) {
+        getSelectedColumns(st).delete(colIdx);
       } else {
-        getSelectedColumns(state).add(colIdx);
+        getSelectedColumns(st).add(colIdx);
       }
       break;
     case 'select-all-cols':
-      state.columnNames.forEach((_, idx) => {
-        getSelectedColumns(state).add(idx);
+      st.columnNames.forEach((_, idx) => {
+        getSelectedColumns(st).add(idx);
       });
       break;
     case 'group-selected-cols':
-      showGroupColumnsDialog();
+      showGroupColumnsDialog(st);
       return;
     case 'clear-col-selection':
-      getSelectedColumns(state).clear();
+      getSelectedColumns(st).clear();
       break;
     case 'format-active-filter':
-      showActiveFilterColorDialog(colIdx);
+      showActiveFilterColorDialog(colIdx, st);
       return;
     case 'remove-column':
-      removeColumn(colIdx);
+      removeColumn(colIdx, st);
       break;
     case 'remove-selected-cols':
-      removeSelectedColumns();
+      removeSelectedColumns(st);
       break;
   }
   
-  setCurrentPage(state, 1);
-  renderTable();
+  setCurrentPage(st, 1);
+  renderTable(st);
 }
 
-function applyTopFilter(colIdx, n, isPercent) {
-  const values = state.relation.items
+function applyTopFilter(colIdx, n, isPercent, st = state) {
+  const values = st.relation.items
     .map((row, idx) => ({ value: row[colIdx], idx }))
     .filter(item => item.value !== null && item.value !== undefined)
     .sort((a, b) => b.value - a.value);
@@ -3543,11 +3543,11 @@ function applyTopFilter(colIdx, n, isPercent) {
   const topIndices = new Set(values.slice(0, count).map(item => item.idx));
   
   // Use indices-based filter for accuracy with duplicates
-  getFilters(state)[colIdx] = { type: 'indices', indices: topIndices };
+  getFilters(st)[colIdx] = { type: 'indices', indices: topIndices };
 }
 
-function applyColorScale(colIdx) {
-  const stats = calculateStatistics(colIdx);
+function applyColorScale(colIdx, st = state) {
+  const stats = calculateStatistics(colIdx, st);
   if (stats.min === undefined || stats.max === undefined) return;
   
   const range = stats.max - stats.min;
@@ -3566,52 +3566,52 @@ function applyColorScale(colIdx) {
     });
   }
   
-  getFormatting(state)[colIdx] = rules;
+  getFormatting(st)[colIdx] = rules;
 }
 
-function openFilterDialogForColumn(colIdx) {
-  const filter = getFilters(state)[colIdx];
-  const type = state.columnTypes[colIdx];
+function openFilterDialogForColumn(colIdx, st = state) {
+  const filter = getFilters(st)[colIdx];
+  const type = st.columnTypes[colIdx];
   
   if (!filter) {
     // No filter, open appropriate default dialog based on column type
     if (type === 'string' || type === 'multilinestring') {
-      showFilterTextCriteriaDialog(colIdx);
+      showFilterTextCriteriaDialog(colIdx, st);
     } else if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') {
-      showFilterComparisonDialog(colIdx);
+      showFilterComparisonDialog(colIdx, st);
     } else {
-      showFilterValuesDialog(colIdx);
+      showFilterValuesDialog(colIdx, st);
     }
     return;
   }
   
   // Open dialog based on current filter type
   if (filter.type === 'values') {
-    showFilterValuesDialog(colIdx);
+    showFilterValuesDialog(colIdx, st);
   } else if (filter.type === 'indices') {
     // Top 10 / Top 10% - show values dialog to see selected items
-    showFilterValuesDialog(colIdx);
+    showFilterValuesDialog(colIdx, st);
   } else if (filter.type === 'criteria') {
     if (filter.criteria.textOp) {
-      showFilterTextCriteriaDialog(colIdx);
+      showFilterTextCriteriaDialog(colIdx, st);
     } else if (filter.criteria.comparison) {
-      showFilterComparisonDialog(colIdx);
+      showFilterComparisonDialog(colIdx, st);
     } else if (filter.criteria.nullOnly || filter.criteria.notNull) {
       // Null filters - show values dialog
-      showFilterValuesDialog(colIdx);
+      showFilterValuesDialog(colIdx, st);
     } else {
-      showFilterValuesDialog(colIdx);
+      showFilterValuesDialog(colIdx, st);
     }
   } else {
-    showFilterValuesDialog(colIdx);
+    showFilterValuesDialog(colIdx, st);
   }
 }
 
-function showFilterValuesDialog(colIdx) {
+function showFilterValuesDialog(colIdx, st = state) {
   closeAllMenus();
   
-  const colName = state.columnNames[colIdx];
-  const colOptions = state.options[colName] || {};
+  const colName = st.columnNames[colIdx];
+  const colOptions = st.options[colName] || {};
   const hasOptions = Object.keys(colOptions).length > 0;
   
   // Helper to get display label for a value
@@ -3630,7 +3630,7 @@ function showFilterValuesDialog(colIdx) {
   // Count occurrences of each value
   const valueCounts = new Map();
   const naturalOrder = [];
-  state.relation.items.forEach(row => {
+  st.relation.items.forEach(row => {
     const v = row[colIdx];
     if (!valueCounts.has(v)) {
       valueCounts.set(v, 0);
@@ -3639,7 +3639,7 @@ function showFilterValuesDialog(colIdx) {
     valueCounts.set(v, valueCounts.get(v) + 1);
   });
   
-  const currentFilter = getFilters(state)[colIdx];
+  const currentFilter = getFilters(st)[colIdx];
   const selectedValues = currentFilter?.type === 'values' ? new Set(currentFilter.values) : new Set();
   
   const dialog = document.createElement('div');
@@ -3707,7 +3707,7 @@ function showFilterValuesDialog(colIdx) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Filter: ${state.columnNames[colIdx]}</span>
+      <span>Filter: ${st.columnNames[colIdx]}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="filter-search-row">
@@ -3741,16 +3741,16 @@ function showFilterValuesDialog(colIdx) {
   dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
   dialog.querySelector('.filter-cancel').addEventListener('click', () => dialog.remove());
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
-    delete getFilters(state)[colIdx];
-    setCurrentPage(state, 1);
+    delete getFilters(st)[colIdx];
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
-    setFilters(state, {});
-    setCurrentPage(state, 1);
+    setFilters(st, {});
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
   
   // Search functionality - declare early so sort handler can use it
@@ -3869,23 +3869,23 @@ function showFilterValuesDialog(colIdx) {
   
   dialog.querySelector('.filter-apply').addEventListener('click', () => {
     if (selectedValues.size === 0 || selectedValues.size === naturalOrder.length) {
-      delete getFilters(state)[colIdx];
+      delete getFilters(st)[colIdx];
     } else {
-      getFilters(state)[colIdx] = { type: 'values', values: [...selectedValues] };
+      getFilters(st)[colIdx] = { type: 'values', values: [...selectedValues] };
     }
     
-    setCurrentPage(state, 1);
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
 }
 
-function showFilterComparisonDialog(colIdx) {
+function showFilterComparisonDialog(colIdx, st = state) {
   closeAllMenus();
   
-  const type = state.columnTypes[colIdx];
-  const name = state.columnNames[colIdx];
-  const currentFilter = getFilters(state)[colIdx];
+  const type = st.columnTypes[colIdx];
+  const name = st.columnNames[colIdx];
+  const currentFilter = getFilters(st)[colIdx];
   
   const isDateTime = type === 'date' || type === 'datetime' || type === 'time';
   let inputType = 'number';
@@ -3943,16 +3943,16 @@ function showFilterComparisonDialog(colIdx) {
   const valueInput = dialog.querySelector('.filter-comparison-value');
   
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
-    delete getFilters(state)[colIdx];
-    setCurrentPage(state, 1);
+    delete getFilters(st)[colIdx];
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
-    setFilters(state, {});
-    setCurrentPage(state, 1);
+    setFilters(st, {});
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
   
   opSelect.addEventListener('change', () => {
@@ -3983,18 +3983,18 @@ function showFilterComparisonDialog(colIdx) {
       criteria.value2 = value2;
     }
     
-    getFilters(state)[colIdx] = { type: 'criteria', criteria };
-    setCurrentPage(state, 1);
+    getFilters(st)[colIdx] = { type: 'criteria', criteria };
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
 }
 
-function showFilterTextCriteriaDialog(colIdx) {
+function showFilterTextCriteriaDialog(colIdx, st = state) {
   closeAllMenus();
   
-  const name = state.columnNames[colIdx];
-  const existingFilter = getFilters(state)[colIdx];
+  const name = st.columnNames[colIdx];
+  const existingFilter = getFilters(st)[colIdx];
   
   // Get current filter values if any
   let currentOp = 'includes';
@@ -4083,16 +4083,16 @@ function showFilterTextCriteriaDialog(colIdx) {
   const textInput = dialog.querySelector('.filter-text-value');
   
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
-    delete getFilters(state)[colIdx];
-    setCurrentPage(state, 1);
+    delete getFilters(st)[colIdx];
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
-    setFilters(state, {});
-    setCurrentPage(state, 1);
+    setFilters(st, {});
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
   
   opSelect.addEventListener('change', () => {
@@ -4128,13 +4128,13 @@ function showFilterTextCriteriaDialog(colIdx) {
       }
     }
     
-    getFilters(state)[colIdx] = { 
+    getFilters(st)[colIdx] = { 
       type: 'criteria', 
       criteria: { textOp, textValue, caseSensitive } 
     };
-    setCurrentPage(state, 1);
+    setCurrentPage(st, 1);
     dialog.remove();
-    renderTable();
+    renderTable(st);
   });
 }
 
@@ -4422,79 +4422,79 @@ function closeAllMenus() {
   document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog, .group-cols-dialog, .color-palette-dialog').forEach(el => el.remove());
 }
 
-function hasActiveFilter() {
-  return Object.keys(getFilters(state)).length > 0;
+function hasActiveFilter(st = state) {
+  return Object.keys(getFilters(st)).length > 0;
 }
 
-function removeColumn(colIdx) {
-  if (state.columnNames.length <= 1) return;
+function removeColumn(colIdx, st = state) {
+  if (st.columnNames.length <= 1) return;
   
-  const colName = state.columnNames[colIdx];
+  const colName = st.columnNames[colIdx];
   
-  state.columnNames.splice(colIdx, 1);
-  state.columnTypes.splice(colIdx, 1);
-  delete state.options[colName];
+  st.columnNames.splice(colIdx, 1);
+  st.columnTypes.splice(colIdx, 1);
+  delete st.options[colName];
   
-  state.relation.items = state.relation.items.map(row => {
+  st.relation.items = st.relation.items.map(row => {
     const newRow = [...row];
     newRow.splice(colIdx, 1);
     return newRow;
   });
   
   const newColumns = {};
-  state.columnNames.forEach((name, idx) => {
-    newColumns[name] = state.columnTypes[idx];
+  st.columnNames.forEach((name, idx) => {
+    newColumns[name] = st.columnTypes[idx];
   });
-  state.relation.columns = newColumns;
+  st.relation.columns = newColumns;
   
-  setSortCriteria(state, getSortCriteria(state)
+  setSortCriteria(st, getSortCriteria(st)
     .filter(c => c.column !== colIdx)
     .map(c => ({ ...c, column: c.column > colIdx ? c.column - 1 : c.column })));
   
   const newFilters = {};
-  for (const [idx, filter] of Object.entries(getFilters(state))) {
+  for (const [idx, filter] of Object.entries(getFilters(st))) {
     const i = parseInt(idx);
     if (i < colIdx) newFilters[i] = filter;
     else if (i > colIdx) newFilters[i - 1] = filter;
   }
-  setFilters(state, newFilters);
+  setFilters(st, newFilters);
   
   const newFormatting = {};
-  for (const [idx, fmt] of Object.entries(getFormatting(state))) {
+  for (const [idx, fmt] of Object.entries(getFormatting(st))) {
     const i = parseInt(idx);
     if (i < colIdx) newFormatting[i] = fmt;
     else if (i > colIdx) newFormatting[i - 1] = fmt;
   }
-  setFormatting(state, newFormatting);
+  setFormatting(st, newFormatting);
   
-  getSelectedColumns(state).clear();
-  setGroupByColumns(state, getGroupByColumns(state)
+  getSelectedColumns(st).clear();
+  setGroupByColumns(st, getGroupByColumns(st)
     .filter(c => c !== colIdx)
     .map(c => c > colIdx ? c - 1 : c));
   
   const newGroupBySelectedValues = {};
-  for (const [idx, val] of Object.entries(getGroupBySelectedValues(state))) {
+  for (const [idx, val] of Object.entries(getGroupBySelectedValues(st))) {
     const i = parseInt(idx);
     if (i < colIdx) newGroupBySelectedValues[i] = val;
     else if (i > colIdx) newGroupBySelectedValues[i - 1] = val;
   }
-  setGroupBySelectedValues(state, newGroupBySelectedValues);
+  setGroupBySelectedValues(st, newGroupBySelectedValues);
   
-  getSelectedRows(state).clear();
-  setPivotConfig(state, { rowDim: null, colDim: null });
-  setExpandedGroups(state, new Set());
-  setDiagramNodes(state, []);
+  getSelectedRows(st).clear();
+  setPivotConfig(st, { rowDim: null, colDim: null });
+  setExpandedGroups(st, new Set());
+  setDiagramNodes(st, []);
   
-  applyFilters();
-  applySorting();
+  applyFilters(st);
+  applySorting(st);
 }
 
-function removeSelectedColumns() {
-  const cols = [...getSelectedColumns(state)].sort((a, b) => b - a);
-  cols.forEach(colIdx => removeColumn(colIdx));
+function removeSelectedColumns(st = state) {
+  const cols = [...getSelectedColumns(st)].sort((a, b) => b - a);
+  cols.forEach(colIdx => removeColumn(colIdx, st));
 }
 
-function showActiveFilterColorDialog(colIdx) {
+function showActiveFilterColorDialog(colIdx, st = state) {
   closeAllMenus();
   
   const dialog = document.createElement('div');
@@ -4532,34 +4532,34 @@ function showActiveFilterColorDialog(colIdx) {
   
   dialog.querySelectorAll('.color-swatch').forEach(swatch => {
     swatch.addEventListener('click', () => {
-      applyActiveFilterColor(colIdx, swatch.dataset.color);
+      applyActiveFilterColor(colIdx, swatch.dataset.color, st);
       dialog.remove();
     });
   });
 }
 
-function applyActiveFilterColor(colIdx, color) {
-  if (!hasActiveFilter()) return;
+function applyActiveFilterColor(colIdx, color, st = state) {
+  if (!hasActiveFilter(st)) return;
   
-  const colName = state.columnNames[colIdx];
-  const idColIdx = state.columnNames.indexOf('id');
+  const colName = st.columnNames[colIdx];
+  const idColIdx = st.columnNames.indexOf('id');
   
   if (idColIdx < 0) {
     alert('No "id" column found. Cannot persist color.');
     return;
   }
   
-  if (!state.relation.colored_items) {
-    state.relation.colored_items = {};
+  if (!st.relation.colored_items) {
+    st.relation.colored_items = {};
   }
-  if (!state.relation.colored_items[colName]) {
-    state.relation.colored_items[colName] = [];
+  if (!st.relation.colored_items[colName]) {
+    st.relation.colored_items[colName] = [];
   }
   
-  const coloredItems = state.relation.colored_items[colName];
+  const coloredItems = st.relation.colored_items[colName];
   
-  getSortedIndices(state).forEach(rowIdx => {
-    const row = state.relation.items[rowIdx];
+  getSortedIndices(st).forEach(rowIdx => {
+    const row = st.relation.items[rowIdx];
     const rowId = row[idColIdx];
     
     if (rowId === null || rowId === undefined) return;
@@ -4572,26 +4572,26 @@ function applyActiveFilterColor(colIdx, color) {
     }
   });
   
-  renderTable();
+  renderTable(st);
 }
 
-function toggleGroupBy(colIdx) {
-  const idx = getGroupByColumns(state).indexOf(colIdx);
+function toggleGroupBy(colIdx, st = state) {
+  const idx = getGroupByColumns(st).indexOf(colIdx);
   if (idx >= 0) {
-    getGroupByColumns(state).splice(idx, 1);
+    getGroupByColumns(st).splice(idx, 1);
     // Also remove selected value for this column
-    delete getGroupBySelectedValues(state)[colIdx];
+    delete getGroupBySelectedValues(st)[colIdx];
   } else {
-    getGroupByColumns(state).push(colIdx);
+    getGroupByColumns(st).push(colIdx);
   }
-  setCurrentPage(state, 1);
-  renderTable();
+  setCurrentPage(st, 1);
+  renderTable(st);
 }
 
-function expandRelationColumn(colIdx) {
+function expandRelationColumn(colIdx, st = state) {
   // Find ALL relation columns
   const relationColIndices = [];
-  state.columnTypes.forEach((type, idx) => {
+  st.columnTypes.forEach((type, idx) => {
     if (type === 'relation') {
       relationColIndices.push(idx);
     }
@@ -4601,7 +4601,7 @@ function expandRelationColumn(colIdx) {
   
   // Collect all nested columns from all relation columns
   const allNestedColumns = {};
-  state.relation.items.forEach(row => {
+  st.relation.items.forEach(row => {
     relationColIndices.forEach(relColIdx => {
       const nestedRelation = row[relColIdx];
       if (nestedRelation && nestedRelation.columns) {
@@ -4612,16 +4612,16 @@ function expandRelationColumn(colIdx) {
   
   // Build new column structure: non-relation columns + all nested columns
   const newColumnsObj = {};
-  state.columnNames.forEach((name, idx) => {
-    if (state.columnTypes[idx] !== 'relation') {
-      newColumnsObj[name] = state.columnTypes[idx];
+  st.columnNames.forEach((name, idx) => {
+    if (st.columnTypes[idx] !== 'relation') {
+      newColumnsObj[name] = st.columnTypes[idx];
     }
   });
   Object.assign(newColumnsObj, allNestedColumns);
   
   const nestedColNames = Object.keys(allNestedColumns);
   const nonRelationColIndices = [];
-  state.columnTypes.forEach((type, idx) => {
+  st.columnTypes.forEach((type, idx) => {
     if (type !== 'relation') {
       nonRelationColIndices.push(idx);
     }
@@ -4630,7 +4630,7 @@ function expandRelationColumn(colIdx) {
   // Generate Cartesian product of all relation columns
   let newItems = [];
   
-  state.relation.items.forEach(row => {
+  st.relation.items.forEach(row => {
     // Start with base row (non-relation values)
     const baseValues = nonRelationColIndices.map(idx => row[idx]);
     
@@ -4694,38 +4694,38 @@ function expandRelationColumn(colIdx) {
     });
   });
   
-  state.relation = {
+  st.relation = {
     pot: 'relation',
     columns: newColumnsObj,
     items: newItems
   };
   
-  state.columnNames = Object.keys(newColumnsObj);
-  state.columnTypes = Object.values(newColumnsObj);
-  setFilteredIndices(state, [...Array(newItems.length).keys()]);
-  setSortedIndices(state, [...getFilteredIndices(state)]);
-  setSelectedRows(state, new Set());
-  setSortCriteria(state, []);
-  setFilters(state, {});
-  setFormatting(state, {});
-  setGroupByColumns(state, []);
-  setGroupBySelectedValues(state, {});
-  setCurrentPage(state, 1);
+  st.columnNames = Object.keys(newColumnsObj);
+  st.columnTypes = Object.values(newColumnsObj);
+  setFilteredIndices(st, [...Array(newItems.length).keys()]);
+  setSortedIndices(st, [...getFilteredIndices(st)]);
+  setSelectedRows(st, new Set());
+  setSortCriteria(st, []);
+  setFilters(st, {});
+  setFormatting(st, {});
+  setGroupByColumns(st, []);
+  setGroupBySelectedValues(st, {});
+  setCurrentPage(st, 1);
   
-  el('.relation-json').value = JSON.stringify(state.relation, null, 2);
-  renderTable();
+  el('.relation-json').value = JSON.stringify(st.relation, null, 2);
+  renderTable(st);
 }
 
-function showGroupColumnsDialog() {
+function showGroupColumnsDialog(st = state) {
   closeAllMenus();
   
-  const selectedCols = [...getSelectedColumns(state)];
+  const selectedCols = [...getSelectedColumns(st)];
   if (selectedCols.length === 0) return;
   
   const dialog = document.createElement('div');
   dialog.className = 'group-cols-dialog';
   
-  const colNames = selectedCols.map(i => state.columnNames[i]).join(', ');
+  const colNames = selectedCols.map(i => st.columnNames[i]).join(', ');
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
@@ -4750,21 +4750,21 @@ function showGroupColumnsDialog() {
   
   dialog.querySelector('.group-apply').addEventListener('click', () => {
     const newColName = dialog.querySelector('.group-col-name').value.trim() || 'nested_data';
-    groupColumnsIntoRelation(selectedCols, newColName);
+    groupColumnsIntoRelation(selectedCols, newColName, st);
     dialog.remove();
   });
 }
 
-function groupColumnsIntoRelation(colIndices, newColName) {
-  const nestedColumnNames = colIndices.map(i => state.columnNames[i]);
-  const nestedColumnTypes = colIndices.map(i => state.columnTypes[i]);
+function groupColumnsIntoRelation(colIndices, newColName, st = state) {
+  const nestedColumnNames = colIndices.map(i => st.columnNames[i]);
+  const nestedColumnTypes = colIndices.map(i => st.columnTypes[i]);
   
   const nestedColumns = {};
   nestedColumnNames.forEach((name, i) => {
     nestedColumns[name] = nestedColumnTypes[i];
   });
   
-  const newItems = state.relation.items.map(row => {
+  const newItems = st.relation.items.map(row => {
     const nestedRow = colIndices.map(i => row[i]);
     const nestedRelation = {
       pot: 'relation',
@@ -4778,34 +4778,34 @@ function groupColumnsIntoRelation(colIndices, newColName) {
   });
   
   const newColumnsObj = {};
-  state.columnNames.forEach((name, i) => {
+  st.columnNames.forEach((name, i) => {
     if (!colIndices.includes(i)) {
-      newColumnsObj[name] = state.columnTypes[i];
+      newColumnsObj[name] = st.columnTypes[i];
     }
   });
   newColumnsObj[newColName] = 'relation';
   
-  state.relation = {
+  st.relation = {
     pot: 'relation',
     columns: newColumnsObj,
     items: newItems
   };
   
-  state.columnNames = Object.keys(newColumnsObj);
-  state.columnTypes = Object.values(newColumnsObj);
-  setFilteredIndices(state, [...Array(newItems.length).keys()]);
-  setSortedIndices(state, [...getFilteredIndices(state)]);
-  setSelectedRows(state, new Set());
-  setSelectedColumns(state, new Set());
-  setSortCriteria(state, []);
-  setFilters(state, {});
-  setFormatting(state, {});
-  setGroupByColumns(state, []);
-  setGroupBySelectedValues(state, {});
-  setCurrentPage(state, 1);
+  st.columnNames = Object.keys(newColumnsObj);
+  st.columnTypes = Object.values(newColumnsObj);
+  setFilteredIndices(st, [...Array(newItems.length).keys()]);
+  setSortedIndices(st, [...getFilteredIndices(st)]);
+  setSelectedRows(st, new Set());
+  setSelectedColumns(st, new Set());
+  setSortCriteria(st, []);
+  setFilters(st, {});
+  setFormatting(st, {});
+  setGroupByColumns(st, []);
+  setGroupBySelectedValues(st, {});
+  setCurrentPage(st, 1);
   
-  el('.relation-json').value = JSON.stringify(state.relation, null, 2);
-  renderTable();
+  el('.relation-json').value = JSON.stringify(st.relation, null, 2);
+  renderTable(st);
 }
 
 function showRowOperationsMenu(rowIdx, x, y) {

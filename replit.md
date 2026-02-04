@@ -42,7 +42,7 @@ Vite is used for the client-side build, generating static assets. Server-side co
 ### Relation Builder Features
 The Relation Builder offers an advanced data table interface with the following core functionalities:
 - **Data Structure**: Relations are JSON objects defining columns (with types like `id`, `string`, `int`, `relation`), relation-level options (`rel_options`), and row data.
-- **State Management**: Uses a centralized system with a `relationsRegistry` and accessor functions for isolated, serializable UI state (`uiState`) per instance, supporting persistence across views.
+- **State Management**: Uses a centralized system with a `relationsRegistry` and accessor functions for isolated, serializable UI state (`uiState`) per instance, supporting persistence across views. Nested relations have their own independent state - all column menu operations (sorting, filtering, formatting, grouping) properly use instance-specific state (`st` parameter) to ensure operations in nested tables don't affect parent tables.
 - **Table Features**: Includes pagination, row selection, multi-column sorting, advanced filtering (by values, nulls, top N), conditional formatting, and per-column statistics (count, min, max, mean, std dev, quartiles).
 - **Grouping and Nesting**: Supports grouping by columns and infinite nesting of relations, allowing complex data hierarchies.
 - **AI Assistant**: Provides AI-powered data analysis, including natural language queries for insights and filter suggestions, integrated via Replit AI Integrations.
