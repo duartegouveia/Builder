@@ -1630,6 +1630,15 @@ function elAll(selector, st = state) {
   return container.querySelectorAll(selector);
 }
 
+// Helper function to check if hierarchy should be shown
+// Returns true only if show_hierarchy is true AND the hierarchy_column exists
+function shouldShowHierarchy(st) {
+  if (!st.rel_options.show_hierarchy) return false;
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  if (!hierarchyColumn) return false;
+  return st.columnNames.includes(hierarchyColumn);
+}
+
 function generateRandomString(length = 8) {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -3884,7 +3893,7 @@ function renderTable(st = state) {
   
   // Parent row (above header, no click handlers)
   const parentRow = document.createElement('tr');
-  parentRow.className = 'relation-parent-row' + (st.rel_options.show_hierarchy ? '' : ' hidden');
+  parentRow.className = 'relation-parent-row' + (shouldShowHierarchy(st) ? '' : ' hidden');
   
   // Parent row cells with first item data (temporary example)
   const firstItem = st.relation.items.length > 0 ? st.relation.items[0] : null;
