@@ -839,6 +839,11 @@ function parseRelation(jsonStr) {
     const parsedRelOptions = data.rel_options || {};
     data.rel_options = {
       editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
+      show_multicheck: parsedRelOptions.show_multicheck ?? DEFAULT_REL_OPTIONS.show_multicheck,
+      show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
+      show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
+      show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
+      hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
       single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
       general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
     };
@@ -8410,6 +8415,11 @@ function initRelationInstance(container, relationData, options = {}) {
   const parsedRelOptions = relationData.rel_options || {};
   instanceState.rel_options = {
     editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
+    show_multicheck: parsedRelOptions.show_multicheck ?? DEFAULT_REL_OPTIONS.show_multicheck,
+    show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
+    show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
+    show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
+    hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
     single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
     general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options],
     // Deserialize uiState from JSON (convert arrays to Sets)
@@ -9414,6 +9424,11 @@ function init() {
       const parsedRelOptions = result.data.rel_options || {};
       state.rel_options = {
         editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
+        show_multicheck: parsedRelOptions.show_multicheck ?? DEFAULT_REL_OPTIONS.show_multicheck,
+        show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
+        show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
+        show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
+        hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
         single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
         general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
       };
