@@ -9455,9 +9455,20 @@ function initRelationInstance(container, relationData, options = {}) {
     `;
   }
   
+  const hasTableView = viewOptions.some(v => v.toLowerCase() === 'table');
+  const initialView = viewOptions[0]?.toLowerCase() || 'table';
+  const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
+  
   html += `
     <div class="view-tabs" style="margin-bottom: 1rem;">
-      ${viewOptions.map((view, idx) => `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${view.toLowerCase()}">${view}</button>`).join('')}
+      <div class="view-tabs-left">
+        ${viewOptions.map((view, idx) => {
+          const viewKey = view.toLowerCase();
+          const icon = VIEW_TAB_ICONS[viewKey] || '';
+          return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${view}</button>`;
+        }).join('')}
+      </div>
+      ${hasTableView ? `<div class="view-tabs-right"><span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span></div>` : ''}
     </div>
     
     <div class="view-table view-content">
@@ -9643,8 +9654,21 @@ function initInstanceEventListeners(st) {
       container.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       switchViewForInstance(st, tab.dataset.view);
+      
+      // Show/hide keyboard help badge based on view
+      const helpBadge = container.querySelector('.keyboard-help-badge');
+      if (helpBadge) {
+        helpBadge.style.display = tab.dataset.view === 'table' ? '' : 'none';
+      }
     });
   });
+  
+  // Keyboard help badge hover events
+  const badge = container.querySelector('.keyboard-help-badge');
+  if (badge) {
+    badge.addEventListener('mouseenter', showKeyboardHelpTooltip);
+    badge.addEventListener('mouseleave', hideKeyboardHelpTooltip);
+  }
 }
 
 // Switch view for a specific instance
