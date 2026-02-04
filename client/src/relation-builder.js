@@ -5954,36 +5954,23 @@ function showRowViewDialog(rowIdx) {
   closeAllMenus();
   
   const row = state.relation.items[rowIdx];
-  const dialog = document.createElement('div');
-  dialog.className = 'filter-dialog';
+  const title = `Row ${rowIdx + 1} Details`;
   
-  let content = '<div class="row-view-content">';
-  state.columnNames.forEach((name, i) => {
-    const type = state.columnTypes[i];
-    let val = row[i];
-    if (type === 'relation' && val) {
-      val = `<em>${val.items?.length || 0} nested rows</em>`;
-    } else {
-      val = val === null ? '<em>null</em>' : String(val);
-    }
-    content += `<div class="row-view-item"><strong>${name}:</strong> ${val}</div>`;
-  });
-  content += '</div>';
-  
-  dialog.innerHTML = `
-    <div class="filter-dialog-header">
-      <span>Row ${rowIdx + 1} Details</span>
-      <button class="btn-close-dialog">✕</button>
-    </div>
-    ${content}
-    <div class="filter-dialog-footer">
-      <button class="btn btn-outline close-view">Close</button>
-    </div>
-  `;
-  
-  document.body.appendChild(dialog);
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.close-view').addEventListener('click', () => dialog.remove());
+  showContentBasedOnMode(state, (container) => {
+    let content = '<div class="row-view-content">';
+    state.columnNames.forEach((name, i) => {
+      const type = state.columnTypes[i];
+      let val = row[i];
+      if (type === 'relation' && val) {
+        val = `<em>${val.items?.length || 0} nested rows</em>`;
+      } else {
+        val = val === null ? '<em>null</em>' : String(val);
+      }
+      content += `<div class="row-view-item"><strong>${name}:</strong> ${val}</div>`;
+    });
+    content += '</div>';
+    container.innerHTML = content;
+  }, title);
 }
 
 function showRowEditDialog(rowIdx) {
@@ -6085,7 +6072,14 @@ function showNestedRelationDialog(rowIdx, colIdx, st = state) {
     nestedRelation.options = {};
   }
   
-  openNestedRelationDialog(nestedRelation);
+  const title = `Sub-Relation (${nestedRelation.items?.length || 0} rows)`;
+  
+  // Use mode-based display based on parent's single_item_mode
+  showContentBasedOnMode(st, (container) => {
+    // Create a nested relation builder inside the container
+    container.classList.add('nested-relation-builder-container');
+    initRelationInstance(container, nestedRelation, { showJsonEditor: false, isNested: true });
+  }, title);
 }
 
 // Open a nested relation dialog using the shared initRelationInstance function
@@ -6137,6 +6131,115 @@ function openNestedRelationDialog(relationData) {
 }
 
 // Legacy functions removed - now using initRelationInstance for nested relations
+
+// Show content based on single_item_mode setting
+// Returns a cleanup function if content is displayed in detail panel
+function showContentBasedOnMode(st, contentBuilder, title = '') {
+  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  
+  if (singleItemMode === 'dialog') {
+    // Show in popup dialog
+    return showContentInPopup(contentBuilder, title);
+  } else {
+    // Show in detail panel (right or bottom based on flex class already set)
+    return showContentInDetailPanel(st, contentBuilder, title);
+  }
+}
+
+// Show content in the detail panel (for single_item_mode: 'right' or 'bottom')
+function showContentInDetailPanel(st, contentBuilder, title = '') {
+  const detailPanel = getDetailPanel(st);
+  if (!detailPanel) {
+    // Fallback to popup if no detail panel exists
+    return showContentInPopup(contentBuilder, title);
+  }
+  
+  // Clear existing content
+  detailPanel.innerHTML = '';
+  
+  // Create content wrapper with header and close button
+  const wrapper = document.createElement('div');
+  wrapper.className = 'detail-panel-content';
+  
+  wrapper.innerHTML = `
+    <div class="detail-panel-header">
+      <span class="detail-panel-title">${title}</span>
+      <button class="btn-close-detail-panel" title="Fechar">✕</button>
+    </div>
+    <div class="detail-panel-body"></div>
+  `;
+  
+  detailPanel.appendChild(wrapper);
+  
+  // Build content into the body
+  const body = wrapper.querySelector('.detail-panel-body');
+  contentBuilder(body);
+  
+  // Toggle .has-detail class on wrapper for proper layout
+  updateDetailPanelState(st);
+  
+  // Set up close handler
+  const closeHandler = () => {
+    clearDetailPanel(st);
+  };
+  
+  wrapper.querySelector('.btn-close-detail-panel').addEventListener('click', closeHandler);
+  
+  return closeHandler;
+}
+
+// Show content in a popup dialog (for single_item_mode: 'dialog')
+function showContentInPopup(contentBuilder, title = '') {
+  const dialogId = `content-dialog-${Date.now()}`;
+  
+  // Create overlay backdrop
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog';
+  dialog.id = dialogId;
+  
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>${title}</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="popup-content-body"></div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline close-popup">Fechar</button>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  document.body.appendChild(dialog);
+  
+  // Build content into the body
+  const body = dialog.querySelector('.popup-content-body');
+  contentBuilder(body);
+  
+  const closeDialog = () => {
+    overlay.remove();
+    dialog.remove();
+  };
+  
+  overlay.addEventListener('click', closeDialog);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', closeDialog);
+  dialog.querySelector('.close-popup').addEventListener('click', closeDialog);
+  
+  return closeDialog;
+}
+
+// Clear the detail panel content and update layout state
+function clearDetailPanel(st) {
+  const detailPanel = getDetailPanel(st);
+  if (detailPanel) {
+    detailPanel.innerHTML = '';
+    // Update layout state to remove .has-detail class
+    updateDetailPanelState(st);
+  }
+}
 
 // Show nested relation dialog from data (for deeper nesting)
 function showNestedRelationDialogFromData(relation) {
@@ -10415,28 +10518,20 @@ function handleRowOperationForInstance(st, rowIdx, action) {
 function showRowViewDialogForInstance(st, rowIdx) {
   closeAllMenus();
   const row = st.relation.items[rowIdx];
+  const title = `View Row ${rowIdx + 1}`;
   
-  const dialog = document.createElement('div');
-  dialog.className = 'filter-dialog';
-  dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; max-height: 80vh; overflow-y: auto;';
-  
-  let html = `<div class="filter-dialog-header"><span>View Row ${rowIdx + 1}</span><button class="btn-close-dialog">✕</button></div>`;
-  html += '<div class="filter-dialog-content">';
-  
-  st.columnNames.forEach((name, colIdx) => {
-    const type = st.columnTypes[colIdx];
-    const value = row[colIdx];
-    html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label><span class="view-value">${formatValueForDisplay(value, type)}</span></div>`;
-  });
-  
-  html += '</div>';
-  html += '<div class="filter-dialog-footer"><button class="btn btn-outline close-dialog">Close</button></div>';
-  
-  dialog.innerHTML = html;
-  document.body.appendChild(dialog);
-  
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.remove());
+  showContentBasedOnMode(st, (container) => {
+    let html = '<div class="row-view-content">';
+    
+    st.columnNames.forEach((name, colIdx) => {
+      const type = st.columnTypes[colIdx];
+      const value = row[colIdx];
+      html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label><span class="view-value">${formatValueForDisplay(value, type)}</span></div>`;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+  }, title);
 }
 
 function showRowEditDialogForInstance(st, rowIdx) {
