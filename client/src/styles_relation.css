@@ -491,25 +491,25 @@
   background: var(--primary-100) !important;
 }
 
-.relation-table tbody tr.row-highlighted,
-.relation-table tbody tr.row-highlighted td {
-  background: var(--slate-200) !important;
-}
-
-.relation-table tbody tr.row-highlighted:hover,
-.relation-table tbody tr.row-highlighted:hover td {
-  background: var(--slate-250, #c9d1da) !important;
-}
-
-.relation-table tbody tr.row-highlighted .relation-input,
-.relation-table tbody tr.row-highlighted .relation-textarea,
-.relation-table tbody tr.row-highlighted .relation-select {
+table.relation-table tbody tr.row-highlighted,
+table.relation-table tbody tr.row-highlighted td {
   background: var(--slate-200);
 }
 
-.relation-table tbody tr.row-highlighted:hover .relation-input,
-.relation-table tbody tr.row-highlighted:hover .relation-textarea,
-.relation-table tbody tr.row-highlighted:hover .relation-select {
+table.relation-table tbody tr.row-highlighted:hover,
+table.relation-table tbody tr.row-highlighted:hover td {
+  background: var(--slate-250, #c9d1da);
+}
+
+table.relation-table tbody tr.row-highlighted .relation-input,
+table.relation-table tbody tr.row-highlighted .relation-textarea,
+table.relation-table tbody tr.row-highlighted .relation-select {
+  background: var(--slate-200);
+}
+
+table.relation-table tbody tr.row-highlighted:hover .relation-input,
+table.relation-table tbody tr.row-highlighted:hover .relation-textarea,
+table.relation-table tbody tr.row-highlighted:hover .relation-select {
   background: var(--slate-250, #c9d1da);
 }
 
