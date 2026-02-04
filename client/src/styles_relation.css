@@ -491,11 +491,11 @@
   background: var(--primary-100) !important;
 }
 
-.row-highlighted {
+.relation-table tbody tr.row-highlighted {
   background: var(--slate-200) !important;
 }
 
-.row-highlighted:hover {
+.relation-table tbody tr.row-highlighted:hover {
   background: var(--slate-250, #c9d1da) !important;
 }
 
