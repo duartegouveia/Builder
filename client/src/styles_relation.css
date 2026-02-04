@@ -421,8 +421,12 @@
   background: #d8f2da;
 }
 
-.relation-table th.relation-th-parent-index {
-  padding-top: 10px;
+.relation-table tbody td {
+  padding-top: 5px;
+}
+
+.relation-table tbody .relation-td-select input[type="checkbox"] {
+  margin-top: 5px;
 }
 
 .btn-parent-up {

@@ -2855,32 +2855,49 @@ function renderTable(st = state) {
   // Parent row cells with first item data (temporary example)
   const firstItem = st.relation.items.length > 0 ? st.relation.items[0] : null;
   
+  // Select column - empty
   const parentSelectTh = document.createElement('th');
   parentSelectTh.className = 'relation-th-parent';
+  parentRow.appendChild(parentSelectTh);
+  
+  // Ops column - up button here
+  const parentOpsTh = document.createElement('th');
+  parentOpsTh.className = 'relation-th-parent';
   const btnParentUp = document.createElement('button');
   btnParentUp.className = 'btn-parent-up';
   btnParentUp.title = 'Move to the upper level';
   btnParentUp.textContent = '↑';
   btnParentUp.dataset.testid = 'button-parent-up';
-  parentSelectTh.appendChild(btnParentUp);
-  parentRow.appendChild(parentSelectTh);
-  
-  const parentOpsTh = document.createElement('th');
-  parentOpsTh.className = 'relation-th-parent';
+  parentOpsTh.appendChild(btnParentUp);
   parentRow.appendChild(parentOpsTh);
   
+  // Index column - always empty
   const parentIndexTh = document.createElement('th');
-  parentIndexTh.className = 'relation-th-parent relation-th-parent-index';
-  parentIndexTh.textContent = firstItem ? '1' : '';
+  parentIndexTh.className = 'relation-th-parent';
   parentRow.appendChild(parentIndexTh);
   
+  // Data columns
   st.columnNames.forEach((name, idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
     const th = document.createElement('th');
     th.className = 'relation-th-parent';
     if (firstItem) {
       const value = firstItem[idx];
-      th.textContent = value !== null && value !== undefined ? String(value) : '';
+      const type = st.columnTypes[idx];
+      
+      if (type === 'relation') {
+        const btn = document.createElement('button');
+        btn.className = 'relation-cell-btn';
+        const count = value?.items?.length || 0;
+        btn.innerHTML = `📋 ${count}`;
+        btn.title = `View nested relation (${count} rows)`;
+        btn.dataset.row = '0';
+        btn.dataset.col = idx;
+        btn.dataset.testid = `button-parent-relation-${idx}`;
+        th.appendChild(btn);
+      } else {
+        th.textContent = value !== null && value !== undefined ? String(value) : '';
+      }
     }
     parentRow.appendChild(th);
   });
