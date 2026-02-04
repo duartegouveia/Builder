@@ -458,6 +458,41 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const ADMIN_DATA_MANAGEMENT_JSON = {
+  "pot": "relation",
+  "name": "admin_data_management",
+  "columns": {
+    "ID": "id",
+    "ClientCompanyID": "int",
+    "DataType": "int",
+    "StartDate": "datetime",
+    "OriginalLoadID": "string",
+    "Source": "int",
+    "EDITableID": "int",
+    "HistoryID": "int",
+    "FileName": "string",
+    "NumberOfLines": "int"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_IMPORTS_STATES_DETAILS_JSON = {
   "pot": "relation",
   "name": "stock_imports_states_details",
@@ -10360,6 +10395,12 @@ function init() {
   menuImportsDetailStates?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_IMPORTS_STATES_DETAILS_JSON, null, 2);
+  });
+  
+  const menuDataManagement = document.querySelector('[data-testid="menu-data-management"]');
+  menuDataManagement?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(ADMIN_DATA_MANAGEMENT_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
