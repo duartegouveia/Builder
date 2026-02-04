@@ -67,6 +67,11 @@ function generateUID() {
 // Default rel_options (relation-level configuration, persisted in JSON)
 const DEFAULT_REL_OPTIONS = {
   editable: false,
+  show_multicheck: false,
+  show_natural_order: false,
+  show_id: true,
+  show_hierarchy: false,
+  hierarchy_column: 'parent',
   single_item_mode: 'dialog',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
 };
@@ -94,6 +99,11 @@ const PRODUCTS_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -133,6 +143,11 @@ const CATEGORIES_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
     "single_item_mode": "dialog",
     "general_view_options": [
       "Table",
@@ -189,6 +204,11 @@ const STOCKS_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -291,6 +311,11 @@ const PRICELISTS_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -362,6 +387,11 @@ const USERS_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -390,6 +420,11 @@ const AUDITLOG_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
