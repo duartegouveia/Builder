@@ -458,6 +458,37 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const PRODUCT_BRANDS_JSON = {
+  "pot": "relation",
+  "name": "company_product_brand",
+  "columns": {
+    "ID": "id",
+    "OwnerID": "int",
+    "Url": "string",
+    "ParentID": "int",
+    "IntegrationID": "string",
+    "Name": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "ParentID",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const PRODUCT_SPECIES_JSON = {
   "pot": "relation",
   "name": "company_product_specie",
@@ -9694,6 +9725,12 @@ function init() {
   menuProductSpecies?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(PRODUCT_SPECIES_JSON, null, 2);
+  });
+  
+  const menuProductBrands = document.querySelector('[data-testid="menu-product-brands"]');
+  menuProductBrands?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(PRODUCT_BRANDS_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
