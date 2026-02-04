@@ -422,18 +422,18 @@
 }
 
 .btn-parent-up {
-  background: none;
-  border: 1px solid var(--border);
+  background: #2e7d32;
+  border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 12px;
   line-height: 1;
-  color: var(--foreground);
+  color: white;
 }
 
 .btn-parent-up:hover {
-  background: var(--slate-200);
+  background: #1b5e20;
 }
 
 .relation-th-sortable {
