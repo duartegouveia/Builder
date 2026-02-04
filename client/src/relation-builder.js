@@ -4218,10 +4218,14 @@ function attachTableEventListeners(st = state, container = null) {
   // Row click for highlighting
   tableContainer.querySelectorAll('tbody tr').forEach(tr => {
     tr.addEventListener('click', (e) => {
-      // Don't highlight if clicking on checkbox, button, or input
-      if (e.target.closest('input, button, select, textarea, .btn-row-ops')) return;
+      // Don't highlight if clicking directly on interactive elements
+      if (e.target.matches('input, button, select, textarea, .btn-row-ops')) return;
+      // Also skip if clicking on a nested table or its contents
+      if (e.target.closest('.nested-relation-table-dynamic')) return;
       
       const rowIdx = parseInt(tr.dataset.rowIdx);
+      if (isNaN(rowIdx)) return;
+      
       // Toggle highlight: if same row clicked again, unhighlight
       const currentHighlight = getHighlightedRow(st);
       if (currentHighlight === rowIdx) {
