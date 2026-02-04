@@ -458,6 +458,47 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const STOCK_IMPORT_JSON = {
+  "pot": "relation",
+  "name": "stock_import",
+  "columns": {
+    "ID": "id",
+    "OwnerID": "int",
+    "TypeID": "int",
+    "StateID": "int",
+    "OriginalFileName": "string",
+    "ServerFilePath": "string",
+    "CreationDate": "datetime",
+    "CreationUserID": "int",
+    "ProcessedDate": "string",
+    "MessageResult": "textarea",
+    "ProfileID": "int",
+    "CompanyID": "int",
+    "StartDate": "datetime",
+    "EndDate": "datetime",
+    "ComplexFileDetailID": "int",
+    "ResultServerFilePath": "textarea"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_WAREHOUSE_JSON = {
   "pot": "relation",
   "name": "stock_warehouse",
@@ -10174,6 +10215,12 @@ function init() {
   menuWarehouses?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_WAREHOUSE_JSON, null, 2);
+  });
+  
+  const menuImports = document.querySelector('[data-testid="menu-imports"]');
+  menuImports?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(STOCK_IMPORT_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
