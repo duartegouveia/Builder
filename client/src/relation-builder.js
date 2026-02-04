@@ -1661,6 +1661,62 @@ function shouldShowHierarchy(st) {
   return st.columnNames.includes(hierarchyColumn);
 }
 
+// Setup flex wrapper structure for the main relation to support single_item_mode
+function setupMainRelationFlexWrapper(st) {
+  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  
+  // Get the view-table container that holds the table
+  const viewTable = document.querySelector('.view-table');
+  if (!viewTable) return;
+  
+  // Check if flex wrapper already exists
+  const existingWrapper = viewTable.querySelector('.relation-flex-wrapper');
+  if (existingWrapper) {
+    // Update the flex class based on current mode
+    existingWrapper.classList.remove('flex-horizontal', 'flex-vertical');
+    if (singleItemMode === 'right') {
+      existingWrapper.classList.add('flex-horizontal');
+    } else if (singleItemMode === 'bottom') {
+      existingWrapper.classList.add('flex-vertical');
+    }
+    return;
+  }
+  
+  // Get the table container
+  const tableContainer = viewTable.querySelector('.relation-table-container');
+  if (!tableContainer) return;
+  
+  // Determine flex class based on single_item_mode
+  let flexWrapperClass = '';
+  if (singleItemMode === 'right') {
+    flexWrapperClass = 'flex-horizontal';
+  } else if (singleItemMode === 'bottom') {
+    flexWrapperClass = 'flex-vertical';
+  }
+  
+  // Create the flex wrapper structure
+  const flexWrapper = document.createElement('div');
+  flexWrapper.className = 'relation-flex-wrapper ' + flexWrapperClass;
+  
+  const mainPanel = document.createElement('div');
+  mainPanel.className = 'relation-main-panel';
+  
+  const detailPanel = document.createElement('div');
+  detailPanel.className = 'relation-detail-panel';
+  
+  // Move the table container into the main panel
+  tableContainer.parentNode.insertBefore(flexWrapper, tableContainer);
+  mainPanel.appendChild(tableContainer);
+  flexWrapper.appendChild(mainPanel);
+  flexWrapper.appendChild(detailPanel);
+  
+  // Set up MutationObserver on detail panel to auto-toggle .has-detail class
+  const observer = new MutationObserver(() => {
+    updateDetailPanelState(st);
+  });
+  observer.observe(detailPanel, { childList: true, subtree: true, characterData: true });
+}
+
 function generateRandomString(length = 8) {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -10755,6 +10811,9 @@ function init() {
       setSortedIndices(state, [...getFilteredIndices(state)]);
       setPivotConfig(state, { rowColumn: null, colColumn: null, values: [] });
       setDiagramNodes(state, []);
+      
+      // Setup flex wrapper structure for single_item_mode support
+      setupMainRelationFlexWrapper(state);
       
       // Generate view tabs based on general_view_options
       renderViewTabs();
