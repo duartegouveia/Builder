@@ -458,6 +458,38 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const PRODUCT_CATALOG_JSON = {
+  "pot": "relation",
+  "name": "company_product_catalog",
+  "columns": {
+    "ID": "id",
+    "OwnerID": "int",
+    "Name": "string",
+    "BeginDate": "date",
+    "EndDate": "date",
+    "IntegrationID": "string",
+    "LastUpdated": "datetime"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const PRICELIST_PARTNER_JSON = {
   "pot": "relation",
   "name": "pricelist_partner",
@@ -9822,6 +9854,12 @@ function init() {
   menuProductBrands?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(PRODUCT_BRANDS_JSON, null, 2);
+  });
+  
+  const menuProductCatalog = document.querySelector('[data-testid="menu-product-catalog"]');
+  menuProductCatalog?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(PRODUCT_CATALOG_JSON, null, 2);
   });
   
   const menuAllPricelists = document.querySelector('[data-testid="menu-all-pricelists"]');
