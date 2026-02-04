@@ -458,6 +458,37 @@ const COMPANY_TYPES_JSON = {
   "items": []
 };
 
+const STOCK_IMPORTS_TYPES_JSON = {
+  "pot": "relation",
+  "name": "stock_imports_types",
+  "columns": {
+    "ID": "id",
+    "Name": "string",
+    "RoleID": "int",
+    "ServiceProvider": "int",
+    "Active": "boolean",
+    "Template": "string"
+  },
+  "options": {
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "dialog",
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+  },
+  "items": []
+};
+
 const STOCK_IMPORTS_DETAILS_JSON = {
   "pot": "relation",
   "name": "stock_imports_details",
@@ -10257,6 +10288,12 @@ function init() {
   menuImportsDetails?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(STOCK_IMPORTS_DETAILS_JSON, null, 2);
+  });
+  
+  const menuImportsTypes = document.querySelector('[data-testid="menu-imports-types"]');
+  menuImportsTypes?.addEventListener('click', (e) => {
+    e.preventDefault();
+    textarea.value = JSON.stringify(STOCK_IMPORTS_TYPES_JSON, null, 2);
   });
   
   btnParse?.addEventListener('click', () => {
