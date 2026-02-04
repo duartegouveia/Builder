@@ -1661,62 +1661,6 @@ function shouldShowHierarchy(st) {
   return st.columnNames.includes(hierarchyColumn);
 }
 
-// Setup flex wrapper structure for the main relation to support single_item_mode
-function setupMainRelationFlexWrapper(st) {
-  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
-  
-  // Get the view-table container that holds the table
-  const viewTable = document.querySelector('.view-table');
-  if (!viewTable) return;
-  
-  // Check if flex wrapper already exists
-  const existingWrapper = viewTable.querySelector('.relation-flex-wrapper');
-  if (existingWrapper) {
-    // Update the flex class based on current mode
-    existingWrapper.classList.remove('flex-horizontal', 'flex-vertical');
-    if (singleItemMode === 'right') {
-      existingWrapper.classList.add('flex-horizontal');
-    } else if (singleItemMode === 'bottom') {
-      existingWrapper.classList.add('flex-vertical');
-    }
-    return;
-  }
-  
-  // Get the table container
-  const tableContainer = viewTable.querySelector('.relation-table-container');
-  if (!tableContainer) return;
-  
-  // Determine flex class based on single_item_mode
-  let flexWrapperClass = '';
-  if (singleItemMode === 'right') {
-    flexWrapperClass = 'flex-horizontal';
-  } else if (singleItemMode === 'bottom') {
-    flexWrapperClass = 'flex-vertical';
-  }
-  
-  // Create the flex wrapper structure
-  const flexWrapper = document.createElement('div');
-  flexWrapper.className = 'relation-flex-wrapper ' + flexWrapperClass;
-  
-  const mainPanel = document.createElement('div');
-  mainPanel.className = 'relation-main-panel';
-  
-  const detailPanel = document.createElement('div');
-  detailPanel.className = 'relation-detail-panel';
-  
-  // Move the table container into the main panel
-  tableContainer.parentNode.insertBefore(flexWrapper, tableContainer);
-  mainPanel.appendChild(tableContainer);
-  flexWrapper.appendChild(mainPanel);
-  flexWrapper.appendChild(detailPanel);
-  
-  // Set up MutationObserver on detail panel to auto-toggle .has-detail class
-  const observer = new MutationObserver(() => {
-    updateDetailPanelState(st);
-  });
-  observer.observe(detailPanel, { childList: true, subtree: true, characterData: true });
-}
-
 function generateRandomString(length = 8) {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -10784,46 +10728,8 @@ function init() {
     const result = parseRelation(textarea.value);
     
     if (result.success) {
-      state.relation = result.data;
-      state.columnNames = Object.keys(result.data.columns);
-      state.columnTypes = Object.values(result.data.columns);
-      state.options = result.data.options || {};
-      
-      // Parse rel_options with defaults
-      const parsedRelOptions = result.data.rel_options || {};
-      state.rel_options = {
-        editable: parsedRelOptions.editable ?? DEFAULT_REL_OPTIONS.editable,
-        show_multicheck: parsedRelOptions.show_multicheck ?? DEFAULT_REL_OPTIONS.show_multicheck,
-        show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
-        show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
-        show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
-        hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
-        single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
-        general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
-      };
-      
-      setCurrentPage(state, 1);
-      setSelectedRows(state, new Set());
-      setSortCriteria(state, []);
-      setFilters(state, {});
-      setFormatting(state, {});
-      setFilteredIndices(state, [...Array(result.data.items.length).keys()]);
-      setSortedIndices(state, [...getFilteredIndices(state)]);
-      setPivotConfig(state, { rowColumn: null, colColumn: null, values: [] });
-      setDiagramNodes(state, []);
-      
-      // Setup flex wrapper structure for single_item_mode support
-      setupMainRelationFlexWrapper(state);
-      
-      // Generate view tabs based on general_view_options
-      renderViewTabs();
-      
-      // Reset to table view if available, otherwise first available view
-      const availableViews = state.rel_options.general_view_options.map(v => v.toLowerCase());
-      setCurrentView(state, availableViews.includes('table') ? 'table' : availableViews[0] || 'table');
-      switchView(getCurrentView(state));
-      
-      renderTable();
+      // Create main relation instance using unified code
+      createMainRelationInstance(result.data);
       
       // Create a second relation instance at the bottom of the page
       createSecondRelationInstance(result.data);
@@ -10831,6 +10737,33 @@ function init() {
       alert('Parse error: ' + result.error);
     }
   });
+  
+  // Create or update the main relation instance
+  function createMainRelationInstance(relationData) {
+    const mainContainer = document.querySelector('.relation-main-instance');
+    if (!mainContainer) return;
+    
+    // Clear existing content and unregister old instance
+    const oldUid = mainContainer.dataset.relationUid;
+    if (oldUid) {
+      relationInstances.delete(oldUid);
+      unregisterRelation(oldUid);
+    }
+    mainContainer.innerHTML = '';
+    
+    // Deep clone the relation data to avoid shared state
+    const clonedData = JSON.parse(JSON.stringify(relationData));
+    
+    // Initialize the main instance using the same code as all other instances
+    const mainState = initRelationInstance(mainContainer, clonedData, { showJsonEditor: false, isNested: false });
+    
+    // Store uid for cleanup
+    mainContainer.dataset.relationUid = mainState.uid;
+    
+    // Update the global state reference to point to the main instance
+    // This maintains backward compatibility with any code still using global state
+    Object.assign(state, mainState);
+  }
   
   // Create a second relation instance at the bottom of the body
   function createSecondRelationInstance(relationData) {
