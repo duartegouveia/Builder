@@ -27,11 +27,7 @@
       "jp": "🇯🇵 Japan",
       "cn": "🇨🇳 China"
     },
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,

@@ -110,11 +110,7 @@ const PRODUCTS_JSON = {
     "category": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -160,11 +156,7 @@ const CATEGORIES_JSON = {
     "name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -219,11 +211,7 @@ const STOCKS_JSON = {
     "category": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -332,11 +320,7 @@ const PRICELISTS_JSON = {
     "price": "float"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -414,11 +398,7 @@ const USERS_JSON = {
     "FailedAttemptDate": "datetime"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -448,11 +428,7 @@ const AUDITLOG_JSON = {
     "Error": "multilinestring"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -476,11 +452,7 @@ const COMPANY_TYPES_JSON = {
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -517,11 +489,7 @@ const ALL_STOCKS_JSON = {
     "category": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -627,11 +595,7 @@ const DISTRIBUTOR_JSON = {
     "LastUpdated": "datetime"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -663,11 +627,7 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
     "NumberOfLines": "int"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -691,11 +651,7 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -719,11 +675,7 @@ const STOCK_IMPORTS_STATES_JSON = {
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -751,11 +703,7 @@ const STOCK_IMPORTS_TYPES_JSON = {
     "Template": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -782,11 +730,7 @@ const STOCK_IMPORTS_DETAILS_JSON = {
     "MessageResult": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -824,11 +768,7 @@ const STOCK_IMPORT_JSON = {
     "ResultServerFilePath": "textarea"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -858,11 +798,7 @@ const STOCK_WAREHOUSE_JSON = {
     "AddressStreet": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -909,11 +845,7 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
     "WareHouseAddressStreet": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -957,11 +889,7 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
     "SupplierID": "int"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1007,11 +935,7 @@ const STOCK_INVENTORY_DETAIL_JSON = {
     "WareHouseAddressStreet": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1056,11 +980,7 @@ const STOCK_INVENTORY_JSON = {
     "StateID": "int"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1090,11 +1010,7 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
     "EndDate": "datetime"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1123,11 +1039,7 @@ const PRODUCT_CATALOG_JSON = {
     "LastUpdated": "datetime"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1152,11 +1064,7 @@ const PRICELIST_PARTNER_JSON = {
     "PartnerID": "int"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1184,11 +1092,7 @@ const PRICELIST_PRODUCTS_JSON = {
     "Discount": "float"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1217,11 +1121,7 @@ const ALL_PRICELISTS_JSON = {
     "DefaultPriceList": "boolean"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1249,11 +1149,7 @@ const PRODUCT_BRANDS_JSON = {
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1291,11 +1187,7 @@ const PRODUCT_SPECIES_JSON = {
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1323,11 +1215,7 @@ const PRODUCT_FAMILIES_JSON = {
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1352,11 +1240,7 @@ const PRODUCT_CATEGORY_JSON = {
     "name": "string"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1431,11 +1315,7 @@ const ALL_PRODUCTS_JSON = {
     "Doses": "int"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1471,11 +1351,7 @@ const ALL_COMPANIES_JSON = {
     "LastUpdated": "datetime"
   },
   "options": {
-    "relation.single_item_mode": {
-      "dialog": "dialog",
-      "right": "right",
-      "bottom": "bottom"
-    }
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
     "editable": false,
@@ -1935,11 +1811,7 @@ function generateDemoRelation() {
       jp: '🇯🇵 Japan',
       cn: '🇨🇳 China'
     },
-    'relation.single_item_mode': {
-      dialog: 'dialog',
-      right: 'right',
-      bottom: 'bottom'
-    }
+    'relation.single_item_mode': [ 'dialog', 'right', 'bottom' ]
   };
   
   const rel_options = {
