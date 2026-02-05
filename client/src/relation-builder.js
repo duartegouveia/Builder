@@ -6043,34 +6043,31 @@ function showRowViewDialog(st, rowIdx) {
   const row = st.relation.items[rowIdx];
   const title = `Ver Registo ${rowIdx + 1}`;
   
+  const footerButtons = `
+    <button class="btn btn-outline btn-action" data-action="edit">✏️ Edit</button>
+    <button class="btn btn-outline btn-action" data-action="copy">📋 Copy</button>
+    <button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">🗑️ Delete</button>
+  `;
+  
   showContentBasedOnMode(st, (container) => {
-    let html = generateRowFormattedContent(st, row, 'view');
-    
-    html += `<div class="row-operation-footer">`;
-    html += `<div class="footer-left">`;
-    html += `<button class="btn btn-outline btn-action" data-action="edit">✏️ Edit</button>`;
-    html += `<button class="btn btn-outline btn-action" data-action="copy">📋 Copy</button>`;
-    html += `<button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">🗑️ Delete</button>`;
-    html += `</div>`;
-    html += `<div class="footer-right">`;
-    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
-    html += `</div>`;
-    html += `</div>`;
-    
-    container.innerHTML = html;
+    container.innerHTML = generateRowFormattedContent(st, row, 'view');
     initRelationFieldsInContainer(container, st, row);
     
-    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
-    
-    container.querySelectorAll('.btn-action').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const action = btn.dataset.action;
-        if (action === 'edit') showRowEditDialog(st, rowIdx);
-        else if (action === 'copy') showRowCopyDialog(st, rowIdx);
-        else if (action === 'delete') showRowDeleteDialog(st, rowIdx);
-      });
-    });
-  }, title);
+    // Set up footer button handlers (buttons are in parent footer)
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelectorAll('.btn-action').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            if (action === 'edit') showRowEditDialog(st, rowIdx);
+            else if (action === 'copy') showRowCopyDialog(st, rowIdx);
+            else if (action === 'delete') showRowDeleteDialog(st, rowIdx);
+          });
+        });
+      }
+    }, 0);
+  }, title, footerButtons);
 }
 
 function showRowCopyDialog(st, rowIdx) {
@@ -6079,45 +6076,41 @@ function showRowCopyDialog(st, rowIdx) {
   const row = st.relation.items[rowIdx];
   const title = `Copiar Registo ${rowIdx + 1}`;
   
+  const footerButtons = `
+    <input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">
+    <button class="btn btn-primary generate-copies">Gera Cópias</button>
+  `;
+  
   showContentBasedOnMode(st, (container) => {
-    let html = generateRowFormattedContent(st, row, 'view');
-    
-    html += `<div class="row-operation-footer">`;
-    html += `<div class="footer-left">`;
-    html += `<input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">`;
-    html += `<button class="btn btn-primary generate-copies">Gera Cópias</button>`;
-    html += `</div>`;
-    html += `<div class="footer-right">`;
-    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
-    html += `</div>`;
-    html += `</div>`;
-    
-    container.innerHTML = html;
+    container.innerHTML = generateRowFormattedContent(st, row, 'view');
     initRelationFieldsInContainer(container, st, row);
     
-    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
-    
-    container.querySelector('.generate-copies')?.addEventListener('click', () => {
-      const countInput = container.querySelector('.copy-count-input');
-      const count = Math.max(1, parseInt(countInput.value) || 1);
-      const idColIdx = st.columnTypes.findIndex(t => t === 'id');
-      
-      for (let i = 0; i < count; i++) {
-        const newRow = [...row];
-        if (idColIdx !== -1) {
-          newRow[idColIdx] = getNextNegativeId(st);
-          st.relation.items.push(newRow);
-        } else {
-          st.relation.items.push(newRow);
-        }
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelector('.generate-copies')?.addEventListener('click', () => {
+          const countInput = footer.querySelector('.copy-count-input');
+          const count = Math.max(1, parseInt(countInput.value) || 1);
+          const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+          
+          for (let i = 0; i < count; i++) {
+            const newRow = [...row];
+            if (idColIdx !== -1) {
+              newRow[idColIdx] = getNextNegativeId(st);
+              st.relation.items.push(newRow);
+            } else {
+              st.relation.items.push(newRow);
+            }
+          }
+          
+          setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+          setSortedIndices(st, [...getFilteredIndices(st)]);
+          renderTable(st);
+          closeRowOperationPanel(st);
+        });
       }
-      
-      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-      setSortedIndices(st, [...getFilteredIndices(st)]);
-      renderTable(st);
-      closeRowOperationPanel(st);
-    });
-  }, title);
+    }, 0);
+  }, title, footerButtons);
 }
 
 function showRowDeleteDialog(st, rowIdx) {
@@ -6126,34 +6119,28 @@ function showRowDeleteDialog(st, rowIdx) {
   const row = st.relation.items[rowIdx];
   const title = `Eliminar Registo ${rowIdx + 1}`;
   
+  const footerButtons = `<button class="btn btn-danger delete-record">Elimina Registo</button>`;
+  
   showContentBasedOnMode(st, (container) => {
-    let html = generateRowFormattedContent(st, row, 'view');
-    
-    html += `<div class="row-operation-footer">`;
-    html += `<div class="footer-left">`;
-    html += `<button class="btn btn-danger delete-record">Elimina Registo</button>`;
-    html += `</div>`;
-    html += `<div class="footer-right">`;
-    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
-    html += `</div>`;
-    html += `</div>`;
-    
-    container.innerHTML = html;
+    container.innerHTML = generateRowFormattedContent(st, row, 'view');
     initRelationFieldsInContainer(container, st, row);
     
-    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
-    
-    container.querySelector('.delete-record')?.addEventListener('click', () => {
-      if (confirm('Tem a certeza que pretende eliminar este registo?')) {
-        st.relation.items.splice(rowIdx, 1);
-        getSelectedRows(st).delete(rowIdx);
-        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-        setSortedIndices(st, [...getFilteredIndices(st)]);
-        renderTable(st);
-        closeRowOperationPanel(st);
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelector('.delete-record')?.addEventListener('click', () => {
+          if (confirm('Tem a certeza que pretende eliminar este registo?')) {
+            st.relation.items.splice(rowIdx, 1);
+            getSelectedRows(st).delete(rowIdx);
+            setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+            setSortedIndices(st, [...getFilteredIndices(st)]);
+            renderTable(st);
+            closeRowOperationPanel(st);
+          }
+        });
       }
-    });
-  }, title);
+    }, 0);
+  }, title, footerButtons);
 }
 
 function showRowNewDialog(st, rowIdx, mode = 'new') {
@@ -6168,23 +6155,15 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
   
   const title = mode === 'new-fast' ? 'Novo Registo Rápido' : 'Novo Registo';
   
+  let footerButtons = '';
+  if (mode === 'new') {
+    footerButtons += `<button class="btn btn-outline clear-form">Limpar</button>`;
+  }
+  footerButtons += `<button class="btn btn-primary save-record">Gravar</button>`;
+  footerButtons += `<button class="btn btn-primary save-and-new">Gravar e Novo</button>`;
+  
   showContentBasedOnMode(st, (container) => {
-    let html = generateRowFormattedContent(st, defaultRow, 'edit');
-    
-    html += `<div class="row-operation-footer">`;
-    html += `<div class="footer-left">`;
-    if (mode === 'new') {
-      html += `<button class="btn btn-outline clear-form">Limpar</button>`;
-    }
-    html += `<button class="btn btn-primary save-record">Gravar</button>`;
-    html += `<button class="btn btn-primary save-and-new">Gravar e Novo</button>`;
-    html += `</div>`;
-    html += `<div class="footer-right">`;
-    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
-    html += `</div>`;
-    html += `</div>`;
-    
-    container.innerHTML = html;
+    container.innerHTML = generateRowFormattedContent(st, defaultRow, 'edit');
     
     const clearForm = () => {
       st.columnNames.forEach((name, colIdx) => {
@@ -6234,21 +6213,23 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
       renderTable(st);
     };
     
-    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
-    container.querySelector('.clear-form')?.addEventListener('click', clearForm);
-    
-    container.querySelector('.save-record')?.addEventListener('click', () => {
-      saveRecord();
-      closeRowOperationPanel(st);
-    });
-    
-    container.querySelector('.save-and-new')?.addEventListener('click', () => {
-      saveRecord();
-      clearForm();
-      const idInput = container.querySelector(`[data-col="${st.columnTypes.findIndex(t => t === 'id')}"]`);
-      if (idInput) idInput.textContent = getNextNegativeId(st);
-    });
-  }, title);
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelector('.clear-form')?.addEventListener('click', clearForm);
+        footer.querySelector('.save-record')?.addEventListener('click', () => {
+          saveRecord();
+          closeRowOperationPanel(st);
+        });
+        footer.querySelector('.save-and-new')?.addEventListener('click', () => {
+          saveRecord();
+          clearForm();
+          const idInput = container.querySelector(`[data-col="${st.columnTypes.findIndex(t => t === 'id')}"]`);
+          if (idInput) idInput.textContent = getNextNegativeId(st);
+        });
+      }
+    }, 0);
+  }, title, footerButtons);
 }
 
 function showRowPaperFormDialog(st, rowIdx) {
@@ -6261,6 +6242,7 @@ function showRowPaperFormDialog(st, rowIdx) {
   });
   
   const title = 'Formulário para Impressão';
+  const footerButtons = `<button class="btn btn-primary print-form">Imprimir</button>`;
   
   showContentBasedOnMode(st, (container) => {
     let html = '<div class="paper-form-content" style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white;">';
@@ -6289,45 +6271,38 @@ function showRowPaperFormDialog(st, rowIdx) {
     });
     
     html += '</div>';
-    
-    html += `<div class="row-operation-footer">`;
-    html += `<div class="footer-left">`;
-    html += `<button class="btn btn-primary print-form">Imprimir</button>`;
-    html += `</div>`;
-    html += `<div class="footer-right">`;
-    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
-    html += `</div>`;
-    html += `</div>`;
-    
     container.innerHTML = html;
     
-    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
-    
-    container.querySelector('.print-form')?.addEventListener('click', () => {
-      const printContent = container.querySelector('.paper-form-content');
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <html>
-        <head>
-          <title>Formulário</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
-            .paper-form-field { margin-bottom: 15px; }
-            .paper-form-label { display: block; font-weight: bold; margin-bottom: 5px; }
-            .paper-form-input-placeholder { border-bottom: 1px solid #000; height: 25px; }
-            .paper-form-textarea-placeholder { border: 1px solid #000; height: 80px; }
-            .paper-form-radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
-            .paper-form-radio { display: flex; align-items: center; gap: 5px; }
-            .paper-form-checkbox { display: flex; align-items: center; gap: 5px; }
-          </style>
-        </head>
-        <body>${printContent.innerHTML}</body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    });
-  }, title);
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelector('.print-form')?.addEventListener('click', () => {
+          const printContent = container.querySelector('.paper-form-content');
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <html>
+            <head>
+              <title>Formulário</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
+                .paper-form-field { margin-bottom: 15px; }
+                .paper-form-label { display: block; font-weight: bold; margin-bottom: 5px; }
+                .paper-form-input-placeholder { border-bottom: 1px solid #000; height: 25px; }
+                .paper-form-textarea-placeholder { border: 1px solid #000; height: 80px; }
+                .paper-form-radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
+                .paper-form-radio { display: flex; align-items: center; gap: 5px; }
+                .paper-form-checkbox { display: flex; align-items: center; gap: 5px; }
+              </style>
+            </head>
+            <body>${printContent.innerHTML}</body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.print();
+        });
+      }
+    }, 0);
+  }, title, footerButtons);
 }
 
 function showRowEditDialog(st, rowIdx) {
@@ -6335,61 +6310,54 @@ function showRowEditDialog(st, rowIdx) {
   
   const row = st.relation.items[rowIdx];
   const title = `Editar Registo ${rowIdx + 1}`;
+  const footerButtons = `<button class="btn btn-primary save-record">Gravar</button>`;
   
   showContentBasedOnMode(st, (container) => {
-    let html = generateRowFormattedContent(st, row, 'edit');
-    
-    html += `<div class="row-operation-footer">`;
-    html += `<div class="footer-left">`;
-    html += `<button class="btn btn-primary save-record">Gravar</button>`;
-    html += `</div>`;
-    html += `<div class="footer-right">`;
-    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
-    html += `</div>`;
-    html += `</div>`;
-    
-    container.innerHTML = html;
+    container.innerHTML = generateRowFormattedContent(st, row, 'edit');
     
     const idColIdx = st.columnTypes.findIndex(t => t === 'id');
     const rowId = idColIdx !== -1 ? row[idColIdx] : null;
     
-    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
-    
-    container.querySelector('.save-record')?.addEventListener('click', () => {
-      let targetRowIdx = rowIdx;
-      if (rowId !== null) {
-        targetRowIdx = st.relation.items.findIndex(r => r[idColIdx] === rowId);
-      }
-      
-      if (targetRowIdx === -1) {
-        alert('Registo não encontrado');
-        return;
-      }
-      
-      st.columnNames.forEach((name, colIdx) => {
-        const type = st.columnTypes[colIdx];
-        if (type === 'id') return;
-        
-        const input = container.querySelector(`[data-col="${colIdx}"]`);
-        if (input) {
-          let value;
-          if (type === 'boolean') {
-            value = input.checked;
-          } else if (type === 'int') {
-            value = input.value === '' ? null : parseInt(input.value);
-          } else if (type === 'float') {
-            value = input.value === '' ? null : parseFloat(input.value);
-          } else {
-            value = input.value === '' ? null : input.value;
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelector('.save-record')?.addEventListener('click', () => {
+          let targetRowIdx = rowIdx;
+          if (rowId !== null) {
+            targetRowIdx = st.relation.items.findIndex(r => r[idColIdx] === rowId);
           }
-          st.relation.items[targetRowIdx][colIdx] = value;
-        }
-      });
-      
-      renderTable(st);
-      closeRowOperationPanel(st);
-    });
-  }, title);
+          
+          if (targetRowIdx === -1) {
+            alert('Registo não encontrado');
+            return;
+          }
+          
+          st.columnNames.forEach((name, colIdx) => {
+            const type = st.columnTypes[colIdx];
+            if (type === 'id') return;
+            
+            const input = container.querySelector(`[data-col="${colIdx}"]`);
+            if (input) {
+              let value;
+              if (type === 'boolean') {
+                value = input.checked;
+              } else if (type === 'int') {
+                value = input.value === '' ? null : parseInt(input.value);
+              } else if (type === 'float') {
+                value = input.value === '' ? null : parseFloat(input.value);
+              } else {
+                value = input.value === '' ? null : input.value;
+              }
+              st.relation.items[targetRowIdx][colIdx] = value;
+            }
+          });
+          
+          renderTable(st);
+          closeRowOperationPanel(st);
+        });
+      }
+    }, 0);
+  }, title, footerButtons);
 }
 
 function showNestedRelationDialog(rowIdx, colIdx, st = state) {
@@ -6468,30 +6436,30 @@ function openNestedRelationDialog(relationData) {
 
 // Show content based on single_item_mode setting
 // Returns a cleanup function if content is displayed in detail panel
-function showContentBasedOnMode(st, contentBuilder, title = '') {
+function showContentBasedOnMode(st, contentBuilder, title = '', footerButtonsHtml = '') {
   const singleItemMode = st.rel_options.single_item_mode || 'dialog';
   
   if (singleItemMode === 'dialog') {
     // Show in popup dialog
-    return showContentInPopup(contentBuilder, title);
+    return showContentInPopup(contentBuilder, title, footerButtonsHtml);
   } else {
     // Show in detail panel (right or bottom based on flex class already set)
-    return showContentInDetailPanel(st, contentBuilder, title);
+    return showContentInDetailPanel(st, contentBuilder, title, footerButtonsHtml);
   }
 }
 
 // Show content in the detail panel (for single_item_mode: 'right' or 'bottom')
-function showContentInDetailPanel(st, contentBuilder, title = '') {
+function showContentInDetailPanel(st, contentBuilder, title = '', footerButtonsHtml = '') {
   const detailPanel = getDetailPanel(st);
   if (!detailPanel) {
     // Fallback to popup if no detail panel exists
-    return showContentInPopup(contentBuilder, title);
+    return showContentInPopup(contentBuilder, title, footerButtonsHtml);
   }
   
   // Clear existing content
   detailPanel.innerHTML = '';
   
-  // Create content wrapper with header and close button
+  // Create content wrapper with header, body, and footer
   const wrapper = document.createElement('div');
   wrapper.className = 'detail-panel-content';
   
@@ -6501,6 +6469,10 @@ function showContentInDetailPanel(st, contentBuilder, title = '') {
       <button class="btn-close-detail-panel" title="Fechar">✕</button>
     </div>
     <div class="detail-panel-body"></div>
+    <div class="detail-panel-footer">
+      ${footerButtonsHtml}
+      <button class="btn btn-outline close-panel">Fechar</button>
+    </div>
   `;
   
   detailPanel.appendChild(wrapper);
@@ -6518,12 +6490,13 @@ function showContentInDetailPanel(st, contentBuilder, title = '') {
   };
   
   wrapper.querySelector('.btn-close-detail-panel').addEventListener('click', closeHandler);
+  wrapper.querySelector('.close-panel').addEventListener('click', closeHandler);
   
   return closeHandler;
 }
 
 // Show content in a popup dialog (for single_item_mode: 'dialog')
-function showContentInPopup(contentBuilder, title = '') {
+function showContentInPopup(contentBuilder, title = '', footerButtonsHtml = '') {
   const dialogId = `content-dialog-${Date.now()}`;
   
   // Create overlay backdrop
@@ -6542,6 +6515,7 @@ function showContentInPopup(contentBuilder, title = '') {
     </div>
     <div class="popup-content-body"></div>
     <div class="filter-dialog-footer">
+      ${footerButtonsHtml}
       <button class="btn btn-outline close-popup">Fechar</button>
     </div>
   `;
