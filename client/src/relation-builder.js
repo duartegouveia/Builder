@@ -12254,17 +12254,17 @@ function init() {
   
   const btnSimpleObj = el('.btn-simple-obj');
   btnSimpleObj?.addEventListener('click', () => {
-    textarea.value = '{a:"string",b:True,c:15,d:15.5}';
+    textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5"}';
   });
   
   const btnArrayObj = el('.btn-array-obj');
   btnArrayObj?.addEventListener('click', () => {
-    textarea.value = '{a:"string",b:True,c:15,d:15.5,e:[1,2,3,4,5]}';
+    textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":[1,2,3,4,5]}';
   });
   
   const btnObjectObj = el('.btn-object-obj');
   btnObjectObj?.addEventListener('click', () => {
-    textarea.value = '{a:"string",b:True,c:15,d:15.5,e:{aa:"string",bb:True,cc:15,dd:15.5}}';
+    textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":{"aa":"string","bb":true,"cc":"15","dd":"15.5"}}';
   });
   
   const btnAttributeObj = el('.btn-attribute-obj');
