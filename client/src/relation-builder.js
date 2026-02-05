@@ -6247,6 +6247,12 @@ function showRowPaperFormDialog(st, rowIdx) {
   showContentBasedOnMode(st, (container) => {
     let html = '<div class="paper-form-content" style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white;">';
     
+    // Add relation name as title if it exists
+    const relationName = st.relation.name || '';
+    if (relationName.trim()) {
+      html += `<h1 class="paper-form-title" style="text-align: center; margin-bottom: 20px; font-size: 18pt;">${escapeHtml(relationName)}</h1>`;
+    }
+    
     st.columnNames.forEach((name, colIdx) => {
       const type = st.columnTypes[colIdx];
       
@@ -6285,6 +6291,7 @@ function showRowPaperFormDialog(st, rowIdx) {
               <title>Formulário</title>
               <style>
                 body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
+                .paper-form-title { text-align: center; margin-bottom: 20px; font-size: 18pt; }
                 .paper-form-field { margin-bottom: 15px; }
                 .paper-form-label { display: block; font-weight: bold; margin-bottom: 5px; }
                 .paper-form-input-placeholder { border-bottom: 1px solid #000; height: 25px; }
