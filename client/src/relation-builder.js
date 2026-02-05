@@ -90,7 +90,7 @@ const DEFAULT_REL_OPTIONS = {
   single_item_mode: 'dialog',
   label_field_top_down: true,
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
-  general_always_visible_options: ['New', 'New Fast', 'Paper Form'],
+  general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Output State'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Group Edit', 'Merge', 'Multi Copy', 'Multi Delete']
 };
@@ -128,7 +128,7 @@ const PRODUCTS_JSON = {
     "single_item_mode": "right",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
@@ -178,7 +178,7 @@ const CATEGORIES_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
@@ -237,7 +237,7 @@ const STOCKS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
@@ -350,7 +350,7 @@ const PRICELISTS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
@@ -1953,7 +1953,7 @@ function generateDemoRelation() {
     single_item_mode: 'dialog',
     label_field_top_down: true,
     general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
-    general_always_visible_options: ['New', 'New Fast', 'Paper Form'],
+    general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Output State'],
     general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
     general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Group Edit', 'Merge', 'Multi Copy', 'Multi Delete']
   };
@@ -3901,7 +3901,8 @@ function buildAlwaysVisibleOptionsHtml(options) {
     'New': { value: 'new-row', icon: '➕', label: 'New' },
     'New Fast': { value: 'new-fast-row', icon: '⚡', label: 'New Fast' },
     'Delete': { value: 'delete-row', icon: '🗑️', label: 'Delete' },
-    'Paper Form': { value: 'paper-form-row', icon: '📄', label: 'Paper Form' }
+    'Paper Form': { value: 'paper-form-row', icon: '📄', label: 'Paper Form' },
+    'Output State': { value: 'output-state', icon: '📤', label: 'Output State' }
   };
   
   // Build options in the order defined
@@ -3931,10 +3932,34 @@ function handleAlwaysVisibleAction(st, action) {
     return;
   }
   
+  // Output State action
+  if (action === 'output-state') {
+    outputRelationState(st);
+    return;
+  }
+  
   // Actions that work on highlighted/first row
   if (st.relation.items.length > 0) {
     handleRowOperation(st, rowIdx, action);
   }
+}
+
+// Output relation state as JSON to console and elements with specific classes
+function outputRelationState(st) {
+  const jsonString = JSON.stringify(st.relation, null, 2);
+  
+  // Console log
+  console.log(jsonString);
+  
+  // Fill textareas with class output_textarea_json
+  document.querySelectorAll('textarea.output_textarea_json').forEach(textarea => {
+    textarea.value = jsonString;
+  });
+  
+  // Fill divs with class output_div_json
+  document.querySelectorAll('div.output_div_json').forEach(div => {
+    div.textContent = jsonString;
+  });
 }
 
 // Build multi-select options HTML based on general_multi_options configuration
@@ -4346,9 +4371,13 @@ function renderTable(st = state) {
       `;
     }
     
+    // Check for bin info badge
+    const binConfig = getBinningConfig(st, idx);
+    const binInfoBadge = binConfig ? `<span class="bin-info-badge" data-col="${idx}" title="View bin intervals">ⓘ</span>` : '';
+    
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
-        <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
+        <span class="relation-col-name">${name}${binInfoBadge}${sortIndicator}${filterIcon}</span>
         ${showColumnKind ? `<span class="relation-col-type">${type}</span>` : ''}
         ${colorScaleLegend}
       </div>
@@ -4670,6 +4699,15 @@ function attachTableEventListeners(st = state, container = null) {
       e.stopPropagation(); // Prevent header click/sort
       const colIdx = parseInt(icon.dataset.col);
       openFilterDialogForColumn(colIdx, st);
+    });
+  });
+  
+  // Bin info badge click - shows bin intervals popup
+  tableContainer.querySelectorAll('.bin-info-badge').forEach(badge => {
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent header click/sort
+      const colIdx = parseInt(badge.dataset.col);
+      showBinIntervalsPopup(colIdx, e.clientX, e.clientY, st);
     });
   });
   
@@ -5307,6 +5345,14 @@ function applyBinning(colIdx, numBins, method, st = state) {
   const newColName = originalColName + '_bin';
   const insertIdx = colIdx + 1;
   
+  // Build bin labels for the popup
+  const binLabels = [];
+  for (let i = 0; i < edges.length - 1; i++) {
+    const left = edges[i];
+    const right = edges[i + 1];
+    binLabels.push(`Bin ${i + 1}: [${left.toFixed(2)}, ${right.toFixed(2)})`);
+  }
+  
   // Check if column already exists
   if (st.columnNames.includes(newColName)) {
     // Update existing bin column values instead of creating new one
@@ -5314,6 +5360,14 @@ function applyBinning(colIdx, numBins, method, st = state) {
     st.relation.items.forEach(row => {
       const value = row[colIdx];
       row[existingBinIdx] = getBinNumber(value);
+    });
+    // Store bin config for the existing _bin column
+    setBinningConfig(st, existingBinIdx, {
+      bins: edges.length - 1,
+      method: method,
+      edges: edges,
+      labels: binLabels,
+      sourceColumn: originalColName
     });
     return;
   }
@@ -5384,11 +5438,79 @@ function applyBinning(colIdx, numBins, method, st = state) {
   }
   setSelectedColumns(st, newSelected);
   
+  // Store bin config for the new _bin column
+  setBinningConfig(st, insertIdx, {
+    bins: edges.length - 1,
+    method: method,
+    edges: edges,
+    labels: binLabels,
+    sourceColumn: originalColName
+  });
+  
   // Update JSON textarea
   const jsonTextarea = document.querySelector('.relation-json');
   if (jsonTextarea) {
     jsonTextarea.value = JSON.stringify(st.relation, null, 2);
   }
+}
+
+function showBinIntervalsPopup(colIdx, x, y, st = state) {
+  closeAllMenus();
+  
+  const binConfig = getBinningConfig(st, colIdx);
+  if (!binConfig) return;
+  
+  const popup = document.createElement('div');
+  popup.className = 'bin-intervals-popup';
+  popup.style.left = x + 'px';
+  popup.style.top = y + 'px';
+  
+  const colName = st.columnNames[colIdx];
+  const methodNames = {
+    'equal_width': 'Equal Width',
+    'equal_freq': 'Equal Frequency',
+    'sturges': 'Sturges',
+    'scott': 'Scott'
+  };
+  
+  popup.innerHTML = `
+    <div class="bin-popup-header">
+      <span>${colName}</span>
+      <button class="btn-close-popup">✕</button>
+    </div>
+    <div class="bin-popup-info">
+      <div>Source: <strong>${binConfig.sourceColumn}</strong></div>
+      <div>Method: <strong>${methodNames[binConfig.method] || binConfig.method}</strong></div>
+      <div>Bins: <strong>${binConfig.bins}</strong></div>
+    </div>
+    <div class="bin-popup-intervals">
+      ${binConfig.labels.map(label => `<div class="bin-interval-item">${label}</div>`).join('')}
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  // Adjust position if off-screen
+  const rect = popup.getBoundingClientRect();
+  if (rect.right > window.innerWidth) {
+    popup.style.left = (window.innerWidth - rect.width - 10) + 'px';
+  }
+  if (rect.bottom > window.innerHeight) {
+    popup.style.top = (window.innerHeight - rect.height - 10) + 'px';
+  }
+  
+  // Close button
+  popup.querySelector('.btn-close-popup').addEventListener('click', () => popup.remove());
+  
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function closePopup(e) {
+      if (!popup.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('click', closePopup);
+      }
+    });
+  }, 0);
 }
 
 function showBinningHelpDialog() {
@@ -11106,7 +11228,7 @@ function initRelationInstance(container, relationData, options = {}) {
   if (showJsonEditor) {
     mainPanelHtml += `
       <div class="json-section">
-        <textarea class="relation-json" rows="6" readonly>${JSON.stringify(relationData, null, 2)}</textarea>
+        <textarea class="relation-json output_textarea_json" rows="6" readonly>${JSON.stringify(relationData, null, 2)}</textarea>
       </div>
     `;
   }

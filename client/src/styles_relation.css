@@ -1033,6 +1033,85 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   font-style: italic;
 }
 
+.bin-info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  font-size: 0.75rem;
+  color: var(--primary);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.bin-info-badge:hover {
+  opacity: 1;
+}
+
+.bin-intervals-popup {
+  position: fixed;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  min-width: 200px;
+  max-width: 300px;
+  z-index: 10001;
+}
+
+.bin-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.bin-popup-header .btn-close-popup {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.bin-popup-header .btn-close-popup:hover {
+  background: var(--slate-200);
+}
+
+.bin-popup-info {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.bin-popup-info div {
+  margin-bottom: 2px;
+}
+
+.bin-popup-intervals {
+  padding: var(--space-2) var(--space-3);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.bin-interval-item {
+  padding: 4px 0;
+  font-size: 0.8rem;
+  font-family: monospace;
+  border-bottom: 1px dashed var(--border);
+}
+
+.bin-interval-item:last-child {
+  border-bottom: none;
+}
+
 .binning-help-dialog {
   position: fixed;
   top: 50%;
