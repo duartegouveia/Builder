@@ -73,6 +73,7 @@ const DEFAULT_REL_OPTIONS = {
   show_column_kind: true,
   show_hierarchy: false,
   hierarchy_column: 'parent',
+  hierarchy_root_value: '',
   single_item_mode: 'dialog',
   label_field_top_down: true,
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
@@ -110,6 +111,7 @@ const PRODUCTS_JSON = {
     "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
@@ -159,6 +161,7 @@ const CATEGORIES_JSON = {
     "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
@@ -217,6 +220,7 @@ const STOCKS_JSON = {
     "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
@@ -329,6 +333,7 @@ const PRICELISTS_JSON = {
     "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
@@ -409,6 +414,7 @@ const USERS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -442,6 +448,7 @@ const AUDITLOG_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -469,6 +476,7 @@ const COMPANY_TYPES_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -619,6 +627,7 @@ const DISTRIBUTOR_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -654,6 +663,7 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -681,6 +691,7 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -708,6 +719,7 @@ const STOCK_IMPORTS_STATES_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -739,6 +751,7 @@ const STOCK_IMPORTS_TYPES_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -769,6 +782,7 @@ const STOCK_IMPORTS_DETAILS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -810,6 +824,7 @@ const STOCK_IMPORT_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -843,6 +858,7 @@ const STOCK_WAREHOUSE_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -893,6 +909,7 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -940,6 +957,7 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -989,6 +1007,7 @@ const STOCK_INVENTORY_DETAIL_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1037,6 +1056,7 @@ const STOCK_INVENTORY_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1070,6 +1090,7 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1102,6 +1123,7 @@ const PRODUCT_CATALOG_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1130,6 +1152,7 @@ const PRICELIST_PARTNER_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1161,6 +1184,7 @@ const PRICELIST_PRODUCTS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1193,6 +1217,7 @@ const ALL_PRICELISTS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1224,6 +1249,7 @@ const PRODUCT_BRANDS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "ParentID",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1265,6 +1291,7 @@ const PRODUCT_SPECIES_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1296,6 +1323,7 @@ const PRODUCT_FAMILIES_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "ParentID",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1324,6 +1352,7 @@ const PRODUCT_CATEGORY_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1402,6 +1431,7 @@ const ALL_PRODUCTS_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1441,6 +1471,7 @@ const ALL_COMPANIES_JSON = {
     "show_id": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
@@ -1916,6 +1947,7 @@ function parseRelation(jsonStr) {
       show_column_kind: parsedRelOptions.show_column_kind ?? DEFAULT_REL_OPTIONS.show_column_kind,
       show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
       hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
+      hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
       single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
       label_field_top_down: parsedRelOptions.label_field_top_down ?? DEFAULT_REL_OPTIONS.label_field_top_down,
       general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options],
@@ -10799,6 +10831,7 @@ function initRelationInstance(container, relationData, options = {}) {
     show_column_kind: parsedRelOptions.show_column_kind ?? DEFAULT_REL_OPTIONS.show_column_kind,
     show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
     hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
+    hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
     single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
     label_field_top_down: parsedRelOptions.label_field_top_down ?? DEFAULT_REL_OPTIONS.label_field_top_down,
     general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options],
