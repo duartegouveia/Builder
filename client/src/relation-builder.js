@@ -70,10 +70,15 @@ const DEFAULT_REL_OPTIONS = {
   show_multicheck: false,
   show_natural_order: false,
   show_id: true,
+  show_column_kind: true,
   show_hierarchy: false,
   hierarchy_column: 'parent',
   single_item_mode: 'dialog',
-  general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
+  label_field_top_down: true,
+  general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
+  general_always_visible_options: ['New', 'New Fast', 'Paper Form'],
+  general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
+  general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Group Edit', 'Merge', 'Multi Copy', 'Multi Delete']
 };
 
 // Sample Products JSON for quick loading
@@ -102,10 +107,15 @@ const PRODUCTS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+    "label_field_top_down": true,
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
   "items": [
     ['1','1','PURINA DOG Chow Adulto','Nestle','PURINA','7613036584307',10,'1'],
@@ -146,18 +156,15 @@ const CATEGORIES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "single_item_mode": "dialog",
-    "general_view_options": [
-      "Table",
-      "Cards",
-      "Pivot",
-      "Correlation",
-      "Diagram",
-      "AI",
-      "Saved"
-    ]
+    "label_field_top_down": true,
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
   "items": [
     ['1','1','Dog Food'],
@@ -207,10 +214,15 @@ const STOCKS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+    "label_field_top_down": true,
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
   "items": [
     ["1","30/9/2025","1","Pingo doce","1000","010","AZAMBUJA","2050-275","7613036584307","PURINA DOG Chow Adulto",23,0,"0521","25/10/2026","1"],
@@ -314,10 +326,15 @@ const PRICELISTS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
+    "label_field_top_down": true,
+    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
   "items": [
     ['1','1/1/2024','31/12/2024','2024','1',35.56],
@@ -1798,10 +1815,15 @@ function generateDemoRelation() {
     show_multicheck: true,
     show_natural_order: true,
     show_id: true,
+    show_column_kind: true,
     show_hierarchy: true,
     hierarchy_column: 'parent',
     single_item_mode: 'dialog',
-    general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved']
+    label_field_top_down: true,
+    general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
+    general_always_visible_options: ['New', 'New Fast', 'Paper Form'],
+    general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
+    general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Group Edit', 'Merge', 'Multi Copy', 'Multi Delete']
   };
   
   const countryKeys = Object.keys(options.country);
@@ -3678,11 +3700,11 @@ function renderPagination(st = state) {
     </div>
     <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
       <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
-        <option value="" disabled selected>Selection Actions...</option>
+        <option value="" disabled selected>Checked Actions...</option>
         <option value="invert-page">↔ Invert Page</option>
         <option value="invert-all">↔ Invert All</option>
-        <option value="remove-selected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Selected (${selectedRecords})</option>
-        <option value="remove-unselected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Unselected (${filteredRecords - selectedRecords})</option>
+        <option value="remove-selected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Checked (${selectedRecords})</option>
+        <option value="remove-unselected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Unchecked (${filteredRecords - selectedRecords})</option>
       </select>
     </div>
   `;
@@ -7019,11 +7041,11 @@ function renderCardsView(st = state) {
   
   navHtml += '<div class="cards-actions">';
   navHtml += '<select class="cards-selection-actions">';
-  navHtml += '<option value="" disabled selected>Selection Actions...</option>';
+  navHtml += '<option value="" disabled selected>Checked Actions...</option>';
   navHtml += '<option value="invert-page">↔ Invert Page</option>';
   navHtml += '<option value="invert-all">↔ Invert All</option>';
-  navHtml += '<option value="select-all">✓ Select All</option>';
-  navHtml += '<option value="deselect-all">✗ Deselect All</option>';
+  navHtml += '<option value="select-all">✓ Check All</option>';
+  navHtml += '<option value="deselect-all">✗ Uncheck All</option>';
   navHtml += '</select>';
   navHtml += '</div>';
   
