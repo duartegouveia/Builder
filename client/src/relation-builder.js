@@ -1887,10 +1887,15 @@ function parseRelation(jsonStr) {
       show_multicheck: parsedRelOptions.show_multicheck ?? DEFAULT_REL_OPTIONS.show_multicheck,
       show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
       show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
+      show_column_kind: parsedRelOptions.show_column_kind ?? DEFAULT_REL_OPTIONS.show_column_kind,
       show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
       hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
       single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
-      general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options]
+      label_field_top_down: parsedRelOptions.label_field_top_down ?? DEFAULT_REL_OPTIONS.label_field_top_down,
+      general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options],
+      general_always_visible_options: parsedRelOptions.general_always_visible_options ?? [...DEFAULT_REL_OPTIONS.general_always_visible_options],
+      general_line_options: parsedRelOptions.general_line_options ?? [...DEFAULT_REL_OPTIONS.general_line_options],
+      general_multi_options: parsedRelOptions.general_multi_options ?? [...DEFAULT_REL_OPTIONS.general_multi_options]
     };
     
     // Ensure options exists
