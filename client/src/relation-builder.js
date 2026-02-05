@@ -12274,7 +12274,31 @@ function init() {
   
   const btnRelObj = el('.btn-rel-obj');
   btnRelObj?.addEventListener('click', () => {
-    textarea.value = '{}';
+    textarea.value = JSON.stringify({
+  "pot": "relation",
+  "name": "",
+  "columns": {},
+  "options": {
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_column_kind": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
+    "single_item_mode": "dialog",
+    "label_field_top_down": true,
+    "general_view_options": ["Table","Cards","Pivot","Correlation","Diagram","AI","Saved"],
+    "general_always_visible_options": ["New","New Fast","Paper Form","Output State"],
+    "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
+    "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Group Edit","Merge","Multi Copy","Multi Delete"]
+  },
+  "items": []
+}, null, 2);
   });
   
   const btnObjToRel = el('.btn-obj-to-rel');
