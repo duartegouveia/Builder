@@ -3932,10 +3932,11 @@ function renderTable(st = state) {
     const filterActive = getFilters(st)[idx] ? ' filter-active' : '';
     const colSelected = getSelectedColumns(st).has(idx) ? ' col-selected' : '';
     const filterIcon = getFilters(st)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
+    const showColumnKind = st.rel_options.show_column_kind !== false;
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
         <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
-        <span class="relation-col-type">${type}</span>
+        ${showColumnKind ? `<span class="relation-col-type">${type}</span>` : ''}
       </div>
     `;
     headerRow.appendChild(th);
