@@ -1026,6 +1026,13 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   font-weight: 500;
 }
 
+.binning-note {
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 .binning-help-dialog {
   position: fixed;
   top: 50%;

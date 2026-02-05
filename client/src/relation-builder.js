@@ -3639,16 +3639,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       span.className = 'relation-cell-multiline';
       span.textContent = value || '—';
     } else {
-      // Check for binning on numeric columns
-      const binConfig = getBinningConfig(st, colIdx);
-      if (binConfig && (type === 'int' || type === 'float' || type === 'number') && value !== null && value !== undefined) {
-        const binLabel = getBinLabel(value, binConfig);
-        span.textContent = binLabel || String(value);
-        span.title = `Original: ${value}`;
-        span.classList.add('binned-value');
-      } else {
-        span.textContent = value !== null && value !== undefined ? String(value) : '—';
-      }
+      span.textContent = value !== null && value !== undefined ? String(value) : '—';
     }
     wrapper.appendChild(span);
     return wrapper;
@@ -4938,20 +4929,19 @@ function showColumnMenu(colIdx, x, y, st = state) {
         <div class="accordion-content">
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
             <span class="filter-label">Bins:</span>
-            <input type="number" class="filter-n-input binning-count-input" value="${getBinningConfig(st, colIdx)?.bins || 5}" min="2" max="50" step="1" data-testid="input-binning-count">
+            <input type="number" class="filter-n-input binning-count-input" value="5" min="2" max="50" step="1" data-testid="input-binning-count">
             <select class="filter-position-select binning-method-select" data-testid="select-binning-method">
-              <option value="equal_width" ${getBinningConfig(st, colIdx)?.method === 'equal_width' ? 'selected' : ''}>Equal Width</option>
-              <option value="equal_freq" ${getBinningConfig(st, colIdx)?.method === 'equal_freq' ? 'selected' : ''}>Equal Freq</option>
-              <option value="sturges" ${getBinningConfig(st, colIdx)?.method === 'sturges' ? 'selected' : ''}>Sturges</option>
-              <option value="scott" ${getBinningConfig(st, colIdx)?.method === 'scott' ? 'selected' : ''}>Scott</option>
+              <option value="equal_width">Equal Width</option>
+              <option value="equal_freq">Equal Freq</option>
+              <option value="sturges">Sturges</option>
+              <option value="scott">Scott</option>
             </select>
             <button class="btn-info-small" data-action="binning-help" data-testid="button-binning-help" title="Learn about binning methods">?</button>
           </div>
           <div class="column-menu-item-inline">
-            <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">Apply Binning</button>
-            <button class="btn-clear-small" data-action="clear-binning" data-testid="button-clear-binning">✕ Clear</button>
+            <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">Create _bin Column</button>
           </div>
-          ${getBinningConfig(st, colIdx) ? `<div class="binning-active-indicator">✓ Binning active (${getBinningConfig(st, colIdx).bins} bins)</div>` : ''}
+          <div class="binning-note">Creates a new column with bin numbers (1 to N)</div>
         </div>
       </div>
       ` : ''}
@@ -5074,12 +5064,6 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         renderTable(st);
       }
-      return;
-    }
-    if (action === 'clear-binning') {
-      setBinningConfig(st, colIdx, null);
-      menu.remove();
-      renderTable(st);
       return;
     }
     if (action === 'binning-help') {
@@ -5303,38 +5287,108 @@ function applyBinning(colIdx, numBins, method, st = state) {
     }
   }
   
-  // Build bin labels
-  const binLabels = [];
-  for (let i = 0; i < edges.length - 1; i++) {
-    const left = edges[i];
-    const right = edges[i + 1];
-    const leftStr = left.toFixed(1);
-    const rightStr = right.toFixed(1);
-    binLabels.push(`[${leftStr}, ${rightStr})`);
-  }
-  
-  setBinningConfig(st, colIdx, {
-    bins: edges.length - 1,
-    method: method,
-    edges: edges,
-    labels: binLabels
-  });
-}
-
-function getBinLabel(value, binConfig) {
-  if (!binConfig || !binConfig.edges || value === null || value === undefined) return null;
-  
-  const edges = binConfig.edges;
-  for (let i = 0; i < edges.length - 1; i++) {
-    if (value >= edges[i] && value < edges[i + 1]) {
-      return binConfig.labels[i];
+  // Calculate bin number for each value (1-indexed)
+  function getBinNumber(value) {
+    if (value === null || value === undefined || typeof value !== 'number') return null;
+    for (let i = 0; i < edges.length - 1; i++) {
+      if (value >= edges[i] && value < edges[i + 1]) {
+        return i + 1; // 1-indexed bins
+      }
     }
+    // Handle edge case for max value
+    if (value >= edges[edges.length - 2]) {
+      return edges.length - 1; // Last bin
+    }
+    return null;
   }
-  // Handle edge case for max value
-  if (value === edges[edges.length - 1]) {
-    return binConfig.labels[binConfig.labels.length - 1];
+  
+  // Create new column name
+  const originalColName = st.columnNames[colIdx];
+  const newColName = originalColName + '_bin';
+  const insertIdx = colIdx + 1;
+  
+  // Check if column already exists
+  if (st.columnNames.includes(newColName)) {
+    // Update existing bin column values instead of creating new one
+    const existingBinIdx = st.columnNames.indexOf(newColName);
+    st.relation.items.forEach(row => {
+      const value = row[colIdx];
+      row[existingBinIdx] = getBinNumber(value);
+    });
+    return;
   }
-  return null;
+  
+  // Insert new column into columns object
+  const newColumnsObj = {};
+  let idx = 0;
+  for (const [name, type] of Object.entries(st.relation.columns)) {
+    newColumnsObj[name] = type;
+    if (idx === colIdx) {
+      newColumnsObj[newColName] = 'int';
+    }
+    idx++;
+  }
+  
+  // Insert bin value into each row
+  st.relation.items.forEach(row => {
+    const value = row[colIdx];
+    const binNum = getBinNumber(value);
+    row.splice(insertIdx, 0, binNum);
+  });
+  
+  // Update relation and state
+  st.relation.columns = newColumnsObj;
+  st.columnNames = Object.keys(newColumnsObj);
+  st.columnTypes = Object.values(newColumnsObj);
+  
+  // Shift all index-based state that comes after insertIdx
+  // Sort criteria
+  setSortCriteria(st, getSortCriteria(st).map(c => ({
+    ...c,
+    column: c.column >= insertIdx ? c.column + 1 : c.column
+  })));
+  
+  // Filters
+  const newFilters = {};
+  for (const [i, filter] of Object.entries(getFilters(st))) {
+    const oldIdx = parseInt(i);
+    newFilters[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = filter;
+  }
+  setFilters(st, newFilters);
+  
+  // Formatting
+  const newFormatting = {};
+  for (const [i, fmt] of Object.entries(getFormatting(st))) {
+    const oldIdx = parseInt(i);
+    newFormatting[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = fmt;
+  }
+  setFormatting(st, newFormatting);
+  
+  // Group by columns
+  setGroupByColumns(st, getGroupByColumns(st).map(c => c >= insertIdx ? c + 1 : c));
+  
+  // Group by selected values (shift keys)
+  const oldGroupByVals = getGroupBySelectedValues(st);
+  const newGroupByVals = {};
+  for (const [i, vals] of Object.entries(oldGroupByVals)) {
+    const oldIdx = parseInt(i);
+    newGroupByVals[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = vals;
+  }
+  setGroupBySelectedValues(st, newGroupByVals);
+  
+  // Selected columns
+  const oldSelected = getSelectedColumns(st);
+  const newSelected = new Set();
+  for (const c of oldSelected) {
+    newSelected.add(c >= insertIdx ? c + 1 : c);
+  }
+  setSelectedColumns(st, newSelected);
+  
+  // Update JSON textarea
+  const jsonTextarea = document.querySelector('.relation-json');
+  if (jsonTextarea) {
+    jsonTextarea.value = JSON.stringify(st.relation, null, 2);
+  }
 }
 
 function showBinningHelpDialog() {
