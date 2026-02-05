@@ -1745,6 +1745,58 @@ function shouldShowHierarchy(st) {
   return st.columnNames.includes(hierarchyColumn);
 }
 
+// Navigate up in hierarchy - go to parent level
+function navigateHierarchyUp(st) {
+  const currentVal = getCurrentHierarchyValue(st);
+  const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
+  
+  // If at root, do nothing
+  if (currentVal === '' || currentVal === hierarchyRootVal) return;
+  
+  // Find the current parent item and get its hierarchy column value (grandparent)
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  
+  if (idColIdx < 0 || hierarchyColIdx < 0) return;
+  
+  // Find the item with ID = currentVal
+  let parentItem = null;
+  for (const item of st.relation.items) {
+    const itemId = item[idColIdx];
+    if (itemId !== null && String(itemId) === String(currentVal)) {
+      parentItem = item;
+      break;
+    }
+  }
+  
+  if (parentItem) {
+    // Get the parent's parent (grandparent) value
+    const grandparentVal = parentItem[hierarchyColIdx];
+    const newVal = grandparentVal === null || grandparentVal === undefined ? '' : String(grandparentVal);
+    setCurrentHierarchyValue(st, newVal);
+    setCurrentPage(st, 1);
+    renderTable(st);
+  }
+}
+
+// Navigate down in hierarchy - drill into children of the selected row
+function navigateHierarchyDown(rowIdx, st) {
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  if (idColIdx < 0) return;
+  
+  const item = st.relation.items[rowIdx];
+  if (!item) return;
+  
+  const itemId = item[idColIdx];
+  if (itemId === null || itemId === undefined) return;
+  
+  // Set the current hierarchy value to this item's ID
+  setCurrentHierarchyValue(st, String(itemId));
+  setCurrentPage(st, 1);
+  renderTable(st);
+}
+
 function generateRandomString(length = 8) {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -4764,6 +4816,30 @@ function attachTableEventListeners(st = state, container = null) {
       showNestedRelationDialog(rowIdx, colIdx, st);
     });
   });
+  
+  // Hierarchy Up button - navigate to parent level
+  const btnParentUp = tableContainer.querySelector('.btn-parent-up');
+  if (btnParentUp && !btnParentUp.disabled) {
+    btnParentUp.addEventListener('click', (e) => {
+      navigateHierarchyUp(st);
+    });
+  }
+  
+  // Double-click on row - navigate into children (hierarchy drill-down)
+  if (shouldShowHierarchy(st)) {
+    tableContainer.querySelectorAll('tbody tr').forEach(tr => {
+      tr.addEventListener('dblclick', (e) => {
+        // Skip if clicking on interactive elements
+        if (e.target.matches('input, button, select, textarea, .btn-row-ops')) return;
+        if (e.target.closest('.nested-relation-table-dynamic')) return;
+        
+        const rowIdx = parseInt(tr.dataset.rowIdx);
+        if (isNaN(rowIdx)) return;
+        
+        navigateHierarchyDown(rowIdx, st);
+      });
+    });
+  }
 }
 
 function updateBoolCheckbox(checkbox, value) {
