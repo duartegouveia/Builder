@@ -5982,27 +5982,46 @@ function getNextNegativeId(st) {
 }
 
 function generateRowFormattedContent(st, row, mode = 'view') {
-  let html = '<div class="row-operation-content">';
+  const labelTopDown = st.rel_options.label_field_top_down !== false;
+  const layoutClass = labelTopDown ? 'row-layout-top-down' : 'row-layout-horizontal';
+  let html = `<div class="row-operation-content ${layoutClass}">`;
   
   st.columnNames.forEach((name, colIdx) => {
     const type = st.columnTypes[colIdx];
     const value = row[colIdx];
     
     if (type === 'relation') {
-      html += `<div class="row-field row-field-relation">`;
+      // Relations always use top-down layout
+      html += `<div class="row-field row-field-relation row-field-top-down">`;
       html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
       html += `<div class="row-field-relation-container" data-col="${colIdx}"></div>`;
       html += `</div>`;
     } else {
-      html += `<div class="row-field row-field-${type}">`;
-      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
-      
-      if (mode === 'view' || (mode === 'edit' && type === 'id')) {
-        html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+      if (labelTopDown) {
+        // Top-down layout: label above, value below
+        html += `<div class="row-field row-field-${type} row-field-top-down">`;
+        html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+        
+        if (mode === 'view' || (mode === 'edit' && type === 'id')) {
+          html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+        } else {
+          html += createEditInputHtml(type, value, colIdx, st);
+        }
+        html += `</div>`;
       } else {
-        html += createEditInputHtml(type, value, colIdx, st);
+        // Horizontal layout: label left, value right
+        html += `<div class="row-field row-field-${type} row-field-horizontal">`;
+        html += `<div class="row-field-label-wrapper"><label class="row-field-label">${escapeHtml(name)}</label></div>`;
+        html += `<div class="row-field-value-wrapper">`;
+        
+        if (mode === 'view' || (mode === 'edit' && type === 'id')) {
+          html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+        } else {
+          html += createEditInputHtml(type, value, colIdx, st);
+        }
+        html += `</div>`;
+        html += `</div>`;
       }
-      html += `</div>`;
     }
   });
   

@@ -1842,6 +1842,31 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-bottom: none;
 }
 
+/* Horizontal layout for row fields */
+.row-field-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.row-field-label-wrapper {
+  flex: 0 0 120px;
+  min-width: 120px;
+  padding-top: var(--space-2);
+}
+
+.row-field-value-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Top-down layout (default) */
+.row-field-top-down {
+  display: flex;
+  flex-direction: column;
+}
+
 .row-field-label {
   font-weight: 600;
   font-size: 0.6875rem;
