@@ -1982,8 +1982,30 @@ function applyFilters(st = state) {
   const items = st.relation.items;
   const filteredIndices = [];
   
+  // Get hierarchy filter settings
+  const hierarchyEnabled = st.rel_options.show_hierarchy && shouldShowHierarchy(st);
+  let hierarchyColIdx = -1;
+  if (hierarchyEnabled) {
+    const hierarchyColumn = st.rel_options.hierarchy_column;
+    hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  }
+  const currentHierarchyVal = hierarchyEnabled ? getCurrentHierarchyValue(st) : null;
+  
   for (let i = 0; i < items.length; i++) {
     let passes = true;
+    
+    // Apply hierarchy filter first
+    if (hierarchyEnabled && hierarchyColIdx >= 0) {
+      const itemHierarchyValue = items[i][hierarchyColIdx];
+      // Compare: empty string matches empty/null/undefined
+      const itemVal = itemHierarchyValue === null || itemHierarchyValue === undefined ? '' : String(itemHierarchyValue);
+      const targetVal = currentHierarchyVal === null || currentHierarchyVal === undefined ? '' : String(currentHierarchyVal);
+      if (itemVal !== targetVal) {
+        passes = false;
+      }
+    }
+    
+    if (!passes) continue;
     
     for (const [colIdxStr, filter] of Object.entries(getFilters(st))) {
       const colIdx = parseInt(colIdxStr);
