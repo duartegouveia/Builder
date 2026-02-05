@@ -5900,19 +5900,33 @@ function showRowOperationsMenu(rowIdx, x, y) {
   
   const hasSelection = getSelectedRows(state).size > 0;
   
+  // Define all available line operations with their button HTML
+  const lineOperationsMap = {
+    'View': '<button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>',
+    'Edit': '<button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>',
+    'Copy': '<button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>',
+    'New': '<button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>',
+    'New Fast': '<button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>',
+    'Delete': '<button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>',
+    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>'
+  };
+  
+  // Get configured line options or use defaults
+  const lineOptions = state.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
+  
+  // Build menu buttons in the order defined by general_line_options
+  const lineButtonsHtml = lineOptions
+    .filter(opt => lineOperationsMap[opt])
+    .map(opt => lineOperationsMap[opt])
+    .join('\n    ');
+  
   menu.innerHTML = `
     <div class="column-menu-header">Row ${rowIdx + 1}</div>
-    <button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>
-    <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>
-    <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
-    <button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>
-    <button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>
-    <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>
-    <button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>
+    ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
-        <div class="column-menu-title">Selection (${getSelectedRows(state).size} rows)</div>
-        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ Delete Selected</button>
+        <div class="column-menu-title">Checked (${getSelectedRows(state).size} rows)</div>
+        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ Remove Checked</button>
       </div>
     ` : ''}
   `;
@@ -10800,19 +10814,33 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
   
   const hasSelection = getSelectedRows(st).size > 0;
   
+  // Define all available line operations with their button HTML
+  const lineOperationsMap = {
+    'View': '<button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>',
+    'Edit': '<button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>',
+    'Copy': '<button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>',
+    'New': '<button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>',
+    'New Fast': '<button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>',
+    'Delete': '<button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>',
+    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>'
+  };
+  
+  // Get configured line options or use defaults
+  const lineOptions = st.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
+  
+  // Build menu buttons in the order defined by general_line_options
+  const lineButtonsHtml = lineOptions
+    .filter(opt => lineOperationsMap[opt])
+    .map(opt => lineOperationsMap[opt])
+    .join('\n    ');
+  
   menu.innerHTML = `
     <div class="column-menu-header">Row ${rowIdx + 1}</div>
-    <button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>
-    <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>
-    <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
-    <button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>
-    <button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>
-    <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>
-    <button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>
+    ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
-        <div class="column-menu-title">Selection (${getSelectedRows(st).size} rows)</div>
-        <button class="column-menu-item" data-action="delete-selected">🗑️ Delete Selected</button>
+        <div class="column-menu-title">Checked (${getSelectedRows(st).size} rows)</div>
+        <button class="column-menu-item" data-action="delete-selected">🗑️ Remove Checked</button>
       </div>
     ` : ''}
   `;
