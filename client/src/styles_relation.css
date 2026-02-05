@@ -2268,6 +2268,27 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   z-index: 100;
 }
 
+.always-visible-actions {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.always-visible-actions:hover {
+  border-color: var(--primary);
+}
+
+.always-visible-actions:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
 .view-tab {
   display: flex;
   align-items: center;

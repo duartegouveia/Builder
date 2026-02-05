@@ -3657,6 +3657,52 @@ function matchesFormattingCondition(value, condition, type) {
   return true;
 }
 
+// Build always-visible options HTML based on general_always_visible_options configuration
+function buildAlwaysVisibleOptionsHtml(options) {
+  // Define all available always-visible operations (same icons as line operations)
+  const alwaysVisibleOperationsMap = {
+    'View': { value: 'view-row', icon: '👁', label: 'View' },
+    'Edit': { value: 'edit-row', icon: '✏️', label: 'Edit' },
+    'Copy': { value: 'copy-row', icon: '📋', label: 'Copy' },
+    'New': { value: 'new-row', icon: '➕', label: 'New' },
+    'New Fast': { value: 'new-fast-row', icon: '⚡', label: 'New Fast' },
+    'Delete': { value: 'delete-row', icon: '🗑️', label: 'Delete' },
+    'Paper Form': { value: 'paper-form-row', icon: '📄', label: 'Paper Form' }
+  };
+  
+  // Build options in the order defined
+  const optionsHtml = options
+    .filter(opt => alwaysVisibleOperationsMap[opt])
+    .map(opt => {
+      const op = alwaysVisibleOperationsMap[opt];
+      return `<option value="${op.value}">${op.icon} ${op.label}</option>`;
+    })
+    .join('\n        ');
+  
+  return `<select class="always-visible-actions">
+    <option value="" disabled selected>Actions...</option>
+    ${optionsHtml}
+  </select>`;
+}
+
+// Handle always-visible action (calls same row operations but without a specific row)
+function handleAlwaysVisibleAction(st, action) {
+  // For actions that need a row, use the highlighted row or first row
+  const highlightedRow = getHighlightedRow(st);
+  const rowIdx = highlightedRow !== null ? highlightedRow : 0;
+  
+  // Actions that don't need a specific row
+  if (action === 'new-row' || action === 'new-fast-row') {
+    handleRowOperation(st, -1, action);
+    return;
+  }
+  
+  // Actions that work on highlighted/first row
+  if (st.relation.items.length > 0) {
+    handleRowOperation(st, rowIdx, action);
+  }
+}
+
 // Build multi-select options HTML based on general_multi_options configuration
 function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
   // Define all available multi operations with their option HTML
@@ -6998,25 +7044,48 @@ function renderViewTabs() {
   
   viewTabs.appendChild(tabsLeft);
   
-  // Create right section for help badge (only if table view is available)
+  // Create right section for always-visible options and help badge
   const hasTableView = viewOptions.some(v => v.toLowerCase() === 'table');
+  const tabsRight = document.createElement('div');
+  tabsRight.className = 'view-tabs-right';
+  
+  // Add always-visible options select
+  const alwaysVisibleOptions = state.rel_options.general_always_visible_options || DEFAULT_REL_OPTIONS.general_always_visible_options;
+  if (alwaysVisibleOptions.length > 0) {
+    const selectHtml = buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions);
+    tabsRight.innerHTML = selectHtml;
+    
+    // Add event listener for the select
+    const select = tabsRight.querySelector('.always-visible-actions');
+    if (select) {
+      select.addEventListener('change', (e) => {
+        const action = e.target.value;
+        e.target.value = ''; // Reset to placeholder
+        handleAlwaysVisibleAction(state, action);
+      });
+    }
+  }
+  
+  // Add help badge (only if table view is available)
   if (hasTableView) {
-    const tabsRight = document.createElement('div');
-    tabsRight.className = 'view-tabs-right';
-    // Show badge only if table is the initial view
     const initialView = viewOptions[0]?.toLowerCase() || 'table';
     const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
-    tabsRight.innerHTML = `
-      <span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>
-    `;
-    viewTabs.appendChild(tabsRight);
+    const badgeSpan = document.createElement('span');
+    badgeSpan.className = 'keyboard-help-badge';
+    badgeSpan.title = 'Keyboard Shortcuts';
+    badgeSpan.dataset.testid = 'button-help-keyboard';
+    badgeSpan.style.cssText = badgeDisplay;
+    badgeSpan.textContent = 'ℹ';
+    tabsRight.appendChild(badgeSpan);
     
     // Add hover event to show tooltip with fixed positioning
-    const badge = tabsRight.querySelector('.keyboard-help-badge');
-    if (badge) {
-      badge.addEventListener('mouseenter', showKeyboardHelpTooltip);
-      badge.addEventListener('mouseleave', hideKeyboardHelpTooltip);
-    }
+    badgeSpan.addEventListener('mouseenter', showKeyboardHelpTooltip);
+    badgeSpan.addEventListener('mouseleave', hideKeyboardHelpTooltip);
+  }
+  
+  // Append right section if it has any content
+  if (tabsRight.children.length > 0 || tabsRight.innerHTML.trim()) {
+    viewTabs.appendChild(tabsRight);
   }
   
   // Show view tabs
@@ -10249,6 +10318,12 @@ function initRelationInstance(container, relationData, options = {}) {
   const initialView = viewOptions[0]?.toLowerCase() || 'table';
   const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
   
+  // Build always-visible options select
+  const alwaysVisibleOptions = instanceState.rel_options.general_always_visible_options || DEFAULT_REL_OPTIONS.general_always_visible_options;
+  const alwaysVisibleSelectHtml = alwaysVisibleOptions.length > 0 ? buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions) : '';
+  const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
+  const hasRightContent = alwaysVisibleSelectHtml || badgeHtml;
+  
   mainPanelHtml += `
     <div class="view-tabs" style="margin-bottom: 1rem;">
       <div class="view-tabs-left">
@@ -10258,7 +10333,7 @@ function initRelationInstance(container, relationData, options = {}) {
           return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${view}</button>`;
         }).join('')}
       </div>
-      ${hasTableView ? `<div class="view-tabs-right"><span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span></div>` : ''}
+      ${hasRightContent ? `<div class="view-tabs-right">${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
     </div>
     
     <div class="view-table view-content">
@@ -10477,6 +10552,16 @@ function initInstanceEventListeners(st) {
   if (badge) {
     badge.addEventListener('mouseenter', showKeyboardHelpTooltip);
     badge.addEventListener('mouseleave', hideKeyboardHelpTooltip);
+  }
+  
+  // Always-visible options select event listener
+  const alwaysVisibleSelect = container.querySelector('.always-visible-actions');
+  if (alwaysVisibleSelect) {
+    alwaysVisibleSelect.addEventListener('change', (e) => {
+      const action = e.target.value;
+      e.target.value = ''; // Reset to placeholder
+      handleAlwaysVisibleAction(st, action);
+    });
   }
 }
 
