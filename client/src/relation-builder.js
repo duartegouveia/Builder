@@ -1612,6 +1612,17 @@ function getSortedIndices(st) { return getUiState(st).sortedIndices; }
 function setSortedIndices(st, value) { getUiState(st).sortedIndices = value; }
 function getQuickSearchText(st) { return getUiState(st).quickSearchText || ''; }
 function setQuickSearchText(st, value) { getUiState(st).quickSearchText = value; }
+function getBinning(st) { return getUiState(st).binning || {}; }
+function setBinning(st, value) { getUiState(st).binning = value; }
+function getBinningConfig(st, colIdx) { return getBinning(st)[colIdx]; }
+function setBinningConfig(st, colIdx, config) { 
+  if (!getUiState(st).binning) getUiState(st).binning = {};
+  if (config) {
+    getUiState(st).binning[colIdx] = config;
+  } else {
+    delete getUiState(st).binning[colIdx];
+  }
+}
 function getCurrentView(st) { return getUiState(st).currentView; }
 function setCurrentView(st, value) { getUiState(st).currentView = value; }
 function getPageSize(st) { return getUiState(st).pageSize; }
@@ -3469,7 +3480,16 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       span.className = 'relation-cell-multiline';
       span.textContent = value || '—';
     } else {
-      span.textContent = value !== null && value !== undefined ? String(value) : '—';
+      // Check for binning on numeric columns
+      const binConfig = getBinningConfig(st, colIdx);
+      if (binConfig && (type === 'int' || type === 'float' || type === 'number') && value !== null && value !== undefined) {
+        const binLabel = getBinLabel(value, binConfig);
+        span.textContent = binLabel || String(value);
+        span.title = `Original: ${value}`;
+        span.classList.add('binned-value');
+      } else {
+        span.textContent = value !== null && value !== undefined ? String(value) : '—';
+      }
     }
     wrapper.appendChild(span);
     return wrapper;
@@ -4214,10 +4234,29 @@ function renderTable(st = state) {
     const colSelected = getSelectedColumns(st).has(idx) ? ' col-selected' : '';
     const filterIcon = getFilters(st)[idx] ? `<span class="filter-icon" data-col="${idx}" title="Filter active">⧩</span>` : '';
     const showColumnKind = st.rel_options.show_column_kind !== false;
+    
+    // Check for color scale legend
+    const formatting = getFormatting(st)[idx];
+    let colorScaleLegend = '';
+    if (formatting && formatting._colorScale) {
+      const cs = formatting._colorScale;
+      const gradientColors = cs.colors.join(', ');
+      const minFormatted = typeof cs.min === 'number' ? cs.min.toFixed(1) : cs.min;
+      const maxFormatted = typeof cs.max === 'number' ? cs.max.toFixed(1) : cs.max;
+      colorScaleLegend = `
+        <div class="color-scale-legend">
+          <span class="color-scale-min">${minFormatted}</span>
+          <div class="color-scale-gradient" style="background: linear-gradient(to right, ${gradientColors});"></div>
+          <span class="color-scale-max">${maxFormatted}</span>
+        </div>
+      `;
+    }
+    
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
         <span class="relation-col-name">${name}${sortIndicator}${filterIcon}</span>
         ${showColumnKind ? `<span class="relation-col-type">${type}</span>` : ''}
+        ${colorScaleLegend}
       </div>
     `;
     headerRow.appendChild(th);
@@ -4701,17 +4740,74 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="filter-values">By Values...</button>
           ${type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
             <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
-            <button class="column-menu-item" data-action="filter-top10">Top 10</button>
-            <button class="column-menu-item" data-action="filter-top10p">Top 10%</button>
+            <div class="column-menu-item-inline" data-testid="filter-topn-row">
+              <select class="filter-position-select" data-testid="select-filter-position">
+                <option value="top">Top</option>
+                <option value="middle">Middle</option>
+                <option value="bottom">Bottom</option>
+              </select>
+              <input type="number" class="filter-n-input" value="10" min="1" step="1" data-testid="input-filter-n">
+              <button class="btn-apply-filter" data-action="apply-topn" data-testid="button-apply-topn">Apply</button>
+            </div>
+            <div class="column-menu-item-inline" data-testid="filter-topn-percent-row">
+              <select class="filter-position-select filter-position-pct" data-testid="select-filter-position-pct">
+                <option value="top">Top</option>
+                <option value="middle">Middle</option>
+                <option value="bottom">Bottom</option>
+              </select>
+              <input type="number" class="filter-n-input filter-pct-input" value="10" min="1" max="100" step="1" data-testid="input-filter-pct">
+              <span class="pct-symbol">%</span>
+              <button class="btn-apply-filter" data-action="apply-topn-pct" data-testid="button-apply-topn-pct">Apply</button>
+            </div>
           ` : ''}
           ${type === 'string' || type === 'multilinestring' ? `
             <button class="column-menu-item" data-action="filter-text-criteria">By Criteria...</button>
+          ` : ''}
+          ${type === 'int' || type === 'float' ? `
+            <div class="column-menu-item-inline outliers-row" data-testid="filter-outliers-row">
+              <span class="filter-label">Outliers:</span>
+              <select class="filter-outlier-method" data-testid="select-outlier-method">
+                <option value="iqr">IQR</option>
+                <option value="std">Std Dev</option>
+              </select>
+              <span class="filter-mult-symbol">×</span>
+              <input type="number" class="filter-mult-input" value="1.5" min="0.1" step="0.1" data-testid="input-outlier-mult">
+              <span class="filter-arrow-symbol">→</span>
+              <select class="filter-outlier-mode" data-testid="select-outlier-mode">
+                <option value="keep">Keep outliers</option>
+                <option value="remove">Remove outliers</option>
+              </select>
+              <button class="btn-apply-filter" data-action="apply-outliers" data-testid="button-apply-outliers">Apply</button>
+            </div>
           ` : ''}
           <button class="column-menu-item" data-action="filter-null">Only Null</button>
           <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
           <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
         </div>
       </div>
+      ${type === 'int' || type === 'float' ? `
+      <div class="accordion-section" data-section="binning">
+        <div class="accordion-header">Binning <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-content">
+          <div class="column-menu-item-inline binning-row" data-testid="binning-row">
+            <span class="filter-label">Bins:</span>
+            <input type="number" class="filter-n-input binning-count-input" value="${getBinningConfig(st, colIdx)?.bins || 5}" min="2" max="50" step="1" data-testid="input-binning-count">
+            <select class="filter-position-select binning-method-select" data-testid="select-binning-method">
+              <option value="equal_width" ${getBinningConfig(st, colIdx)?.method === 'equal_width' ? 'selected' : ''}>Equal Width</option>
+              <option value="equal_freq" ${getBinningConfig(st, colIdx)?.method === 'equal_freq' ? 'selected' : ''}>Equal Freq</option>
+              <option value="sturges" ${getBinningConfig(st, colIdx)?.method === 'sturges' ? 'selected' : ''}>Sturges</option>
+              <option value="scott" ${getBinningConfig(st, colIdx)?.method === 'scott' ? 'selected' : ''}>Scott</option>
+            </select>
+            <button class="btn-info-small" data-action="binning-help" data-testid="button-binning-help" title="Learn about binning methods">?</button>
+          </div>
+          <div class="column-menu-item-inline">
+            <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">Apply Binning</button>
+            <button class="btn-clear-small" data-action="clear-binning" data-testid="button-clear-binning">✕ Clear</button>
+          </div>
+          ${getBinningConfig(st, colIdx) ? `<div class="binning-active-indicator">✓ Binning active (${getBinningConfig(st, colIdx).bins} bins)</div>` : ''}
+        </div>
+      </div>
+      ` : ''}
       <div class="accordion-section" data-section="group">
         <div class="accordion-header">Group By <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
@@ -4741,7 +4837,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         <div class="accordion-content">
           <button class="column-menu-item" data-action="format-databar">Color Bar</button>
           <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
-          <button class="column-menu-item ${hasActiveFilter(st) ? '' : 'disabled'}" data-action="format-active-filter" ${hasActiveFilter(st) ? '' : 'disabled'}>Active Filter Color...</button>
+          <button class="column-menu-item" data-action="format-active-filter">Color current results...</button>
           <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
         </div>
       </div>
@@ -4784,6 +4880,66 @@ function showColumnMenu(colIdx, x, y, st = state) {
     const action = e.target.dataset.action;
     if (!action) return;
     
+    // Handle inline filter actions with input values
+    if (action === 'apply-topn') {
+      const row = e.target.closest('.column-menu-item-inline');
+      const position = row.querySelector('.filter-position-select').value;
+      const n = parseInt(row.querySelector('.filter-n-input').value) || 10;
+      if (n > 0) {
+        applyPositionFilter(colIdx, position, n, false, st);
+        menu.remove();
+        setCurrentPage(st, 1);
+        renderTable(st);
+      }
+      return;
+    }
+    if (action === 'apply-topn-pct') {
+      const row = e.target.closest('.column-menu-item-inline');
+      const position = row.querySelector('.filter-position-select').value;
+      const pct = parseInt(row.querySelector('.filter-pct-input').value) || 10;
+      if (pct > 0 && pct <= 100) {
+        applyPositionFilter(colIdx, position, pct, true, st);
+        menu.remove();
+        setCurrentPage(st, 1);
+        renderTable(st);
+      }
+      return;
+    }
+    if (action === 'apply-outliers') {
+      const row = e.target.closest('.column-menu-item-inline');
+      const method = row.querySelector('.filter-outlier-method').value;
+      const multiplier = parseFloat(row.querySelector('.filter-mult-input').value) || 1.5;
+      const mode = row.querySelector('.filter-outlier-mode').value;
+      if (multiplier > 0) {
+        applyOutliersFilter(colIdx, method, multiplier, mode, st);
+        menu.remove();
+        setCurrentPage(st, 1);
+        renderTable(st);
+      }
+      return;
+    }
+    if (action === 'apply-binning') {
+      const section = menu.querySelector('[data-section="binning"]');
+      const bins = parseInt(section.querySelector('.binning-count-input').value) || 5;
+      const method = section.querySelector('.binning-method-select').value;
+      if (bins >= 2) {
+        applyBinning(colIdx, bins, method, st);
+        menu.remove();
+        renderTable(st);
+      }
+      return;
+    }
+    if (action === 'clear-binning') {
+      setBinningConfig(st, colIdx, null);
+      menu.remove();
+      renderTable(st);
+      return;
+    }
+    if (action === 'binning-help') {
+      showBinningHelpDialog();
+      return;
+    }
+    
     handleColumnMenuAction(colIdx, action, st);
     menu.remove();
   });
@@ -4825,18 +4981,12 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'filter-not-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
       break;
-    case 'filter-top10':
-      applyTopFilter(colIdx, 10, false, st);
-      break;
-    case 'filter-top10p':
-      applyTopFilter(colIdx, 10, true, st);
-      break;
     case 'filter-clear':
       delete getFilters(st)[colIdx];
       break;
     case 'format-databar':
-      getFormatting(st)[colIdx] = [{ condition: {}, style: { dataBar: 'var(--primary-200)' } }];
-      break;
+      showDataBarColorDialog(colIdx, st);
+      return;
     case 'format-color-scale':
       applyColorScale(colIdx, st);
       break;
@@ -4891,17 +5041,191 @@ function handleColumnMenuAction(colIdx, action, st = state) {
   renderTable(st);
 }
 
-function applyTopFilter(colIdx, n, isPercent, st = state) {
+function applyPositionFilter(colIdx, position, n, isPercent, st = state) {
   const values = st.relation.items
     .map((row, idx) => ({ value: row[colIdx], idx }))
     .filter(item => item.value !== null && item.value !== undefined)
     .sort((a, b) => b.value - a.value);
   
-  const count = isPercent ? Math.ceil(values.length * n / 100) : Math.min(n, values.length);
-  const topIndices = new Set(values.slice(0, count).map(item => item.idx));
+  const totalCount = values.length;
+  const count = isPercent ? Math.ceil(totalCount * n / 100) : Math.min(n, totalCount);
+  
+  let selectedIndices;
+  
+  if (position === 'top') {
+    // Top N: take first N from sorted (highest values)
+    selectedIndices = values.slice(0, count).map(item => item.idx);
+  } else if (position === 'bottom') {
+    // Bottom N: take last N from sorted (lowest values)
+    selectedIndices = values.slice(-count).map(item => item.idx);
+  } else if (position === 'middle') {
+    // Middle N: take N around the median
+    const middleStart = Math.max(0, Math.floor((totalCount - count) / 2));
+    selectedIndices = values.slice(middleStart, middleStart + count).map(item => item.idx);
+  }
   
   // Use indices-based filter for accuracy with duplicates
-  getFilters(st)[colIdx] = { type: 'indices', indices: topIndices };
+  getFilters(st)[colIdx] = { type: 'indices', indices: new Set(selectedIndices) };
+}
+
+function applyOutliersFilter(colIdx, method, multiplier, mode, st = state) {
+  const values = st.relation.items
+    .map((row, idx) => ({ value: row[colIdx], idx }))
+    .filter(item => item.value !== null && item.value !== undefined && typeof item.value === 'number');
+  
+  if (values.length === 0) return;
+  
+  const numericValues = values.map(v => v.value).sort((a, b) => a - b);
+  
+  let lowerBound, upperBound;
+  
+  if (method === 'iqr') {
+    // IQR method
+    const q1Idx = Math.floor(numericValues.length * 0.25);
+    const q3Idx = Math.floor(numericValues.length * 0.75);
+    const q1 = numericValues[q1Idx];
+    const q3 = numericValues[q3Idx];
+    const iqr = q3 - q1;
+    lowerBound = q1 - multiplier * iqr;
+    upperBound = q3 + multiplier * iqr;
+  } else {
+    // Standard deviation method
+    const mean = numericValues.reduce((a, b) => a + b, 0) / numericValues.length;
+    const variance = numericValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / numericValues.length;
+    const stdDev = Math.sqrt(variance);
+    lowerBound = mean - multiplier * stdDev;
+    upperBound = mean + multiplier * stdDev;
+  }
+  
+  // Filter based on mode
+  let selectedIndices;
+  if (mode === 'keep') {
+    // Keep only outliers (values outside bounds)
+    selectedIndices = values
+      .filter(v => v.value < lowerBound || v.value > upperBound)
+      .map(v => v.idx);
+  } else {
+    // Remove outliers (keep values inside bounds)
+    selectedIndices = values
+      .filter(v => v.value >= lowerBound && v.value <= upperBound)
+      .map(v => v.idx);
+  }
+  
+  getFilters(st)[colIdx] = { type: 'indices', indices: new Set(selectedIndices) };
+}
+
+function applyBinning(colIdx, numBins, method, st = state) {
+  const values = st.relation.items
+    .map(row => row[colIdx])
+    .filter(v => v !== null && v !== undefined && typeof v === 'number');
+  
+  if (values.length === 0) return;
+  
+  const sortedValues = [...values].sort((a, b) => a - b);
+  const min = sortedValues[0];
+  const max = sortedValues[sortedValues.length - 1];
+  const range = max - min;
+  
+  let bins = numBins;
+  
+  // Calculate optimal bins for auto methods
+  if (method === 'sturges') {
+    bins = Math.ceil(Math.log2(values.length) + 1);
+  } else if (method === 'scott') {
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+    const stdDev = Math.sqrt(variance);
+    const binWidth = 3.5 * stdDev / Math.pow(values.length, 1/3);
+    bins = Math.max(2, Math.ceil(range / binWidth));
+  }
+  
+  let edges = [];
+  
+  if (method === 'equal_freq') {
+    // Equal frequency binning
+    const binSize = Math.ceil(sortedValues.length / bins);
+    edges = [min];
+    for (let i = 1; i < bins; i++) {
+      const idx = Math.min(i * binSize, sortedValues.length - 1);
+      edges.push(sortedValues[idx]);
+    }
+    edges.push(max + 0.001); // Ensure max is included
+  } else {
+    // Equal width binning (default for equal_width, sturges, scott)
+    const binWidth = range / bins;
+    for (let i = 0; i <= bins; i++) {
+      edges.push(min + i * binWidth);
+    }
+  }
+  
+  // Build bin labels
+  const binLabels = [];
+  for (let i = 0; i < edges.length - 1; i++) {
+    const left = edges[i];
+    const right = edges[i + 1];
+    const leftStr = left.toFixed(1);
+    const rightStr = right.toFixed(1);
+    binLabels.push(`[${leftStr}, ${rightStr})`);
+  }
+  
+  setBinningConfig(st, colIdx, {
+    bins: edges.length - 1,
+    method: method,
+    edges: edges,
+    labels: binLabels
+  });
+}
+
+function getBinLabel(value, binConfig) {
+  if (!binConfig || !binConfig.edges || value === null || value === undefined) return null;
+  
+  const edges = binConfig.edges;
+  for (let i = 0; i < edges.length - 1; i++) {
+    if (value >= edges[i] && value < edges[i + 1]) {
+      return binConfig.labels[i];
+    }
+  }
+  // Handle edge case for max value
+  if (value === edges[edges.length - 1]) {
+    return binConfig.labels[binConfig.labels.length - 1];
+  }
+  return null;
+}
+
+function showBinningHelpDialog() {
+  const dialog = document.createElement('div');
+  dialog.className = 'binning-help-dialog';
+  dialog.innerHTML = `
+    <h3>Binning Methods</h3>
+    <div class="method-item">
+      <div class="method-name">Equal Width</div>
+      <div class="method-desc">Divides the range into bins of equal width. Best for uniformly distributed data.</div>
+    </div>
+    <div class="method-item">
+      <div class="method-name">Equal Frequency</div>
+      <div class="method-desc">Each bin contains approximately the same number of values. Best for skewed data.</div>
+    </div>
+    <div class="method-item">
+      <div class="method-name">Sturges</div>
+      <div class="method-desc">Calculates optimal bins using k = 1 + log₂(n). Good for normally distributed data.</div>
+    </div>
+    <div class="method-item">
+      <div class="method-name">Scott</div>
+      <div class="method-desc">Uses bin width = 3.5σ / n^(1/3). Optimal for normally distributed data considering variance.</div>
+    </div>
+    <button class="btn-close-dialog">Close</button>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  
+  document.addEventListener('click', function closeDialog(e) {
+    if (!dialog.contains(e.target)) {
+      dialog.remove();
+      document.removeEventListener('click', closeDialog);
+    }
+  }, { capture: true, once: true });
 }
 
 function applyColorScale(colIdx, st = state) {
@@ -4923,6 +5247,9 @@ function applyColorScale(colIdx, st = state) {
       style: { backgroundColor: colors[i] }
     });
   }
+  
+  // Mark as color scale with metadata for legend display
+  rules._colorScale = { min: stats.min, max: stats.max, colors: colors };
   
   getFormatting(st)[colIdx] = rules;
 }
@@ -5852,6 +6179,51 @@ function removeSelectedColumns(st = state) {
   cols.forEach(colIdx => removeColumn(colIdx, st));
 }
 
+function showDataBarColorDialog(colIdx, st = state) {
+  closeAllMenus();
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'color-palette-dialog';
+  
+  let palettesHtml = '';
+  for (const [key, palette] of Object.entries(COLOR_PALETTES)) {
+    palettesHtml += `
+      <div class="palette-section" data-palette="${key}">
+        <div class="palette-name">${palette.name}</div>
+        <div class="palette-colors">
+          ${palette.colors.map(c => {
+            const textColor = getContrastTextColor(c);
+            const showT = textColor === '#ffffff';
+            return `<button class="color-swatch" data-color="${c}" style="background-color: ${c}">${showT ? '<span style="color: white; font-size: 10px; font-weight: bold;">T</span>' : ''}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  dialog.innerHTML = `
+    <div class="color-palette-header">
+      <span>Choose Color for Data Bar</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="color-palettes-container">
+      ${palettesHtml}
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
+  
+  dialog.querySelectorAll('.color-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      getFormatting(st)[colIdx] = [{ condition: {}, style: { dataBar: swatch.dataset.color } }];
+      dialog.remove();
+      renderTable(st);
+    });
+  });
+}
+
 function showActiveFilterColorDialog(colIdx, st = state) {
   closeAllMenus();
   
@@ -5876,7 +6248,7 @@ function showActiveFilterColorDialog(colIdx, st = state) {
   
   dialog.innerHTML = `
     <div class="color-palette-header">
-      <span>Choose Color for Filtered Rows</span>
+      <span>Choose Color for Current Results</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="color-palettes-container">
@@ -5897,8 +6269,6 @@ function showActiveFilterColorDialog(colIdx, st = state) {
 }
 
 function applyActiveFilterColor(colIdx, color, st = state) {
-  if (!hasActiveFilter(st)) return;
-  
   const colName = st.columnNames[colIdx];
   const idColIdx = st.columnNames.indexOf('id');
   
@@ -5916,7 +6286,13 @@ function applyActiveFilterColor(colIdx, color, st = state) {
   
   const coloredItems = st.relation.colored_items[colName];
   
-  getSortedIndices(st).forEach(rowIdx => {
+  // Apply to current results: if filters/search active, use sorted indices; otherwise all items
+  const hasFiltersOrSearch = hasActiveFilter(st) || getQuickSearchText(st).length > 0;
+  const indicesToColor = hasFiltersOrSearch 
+    ? getSortedIndices(st) 
+    : st.relation.items.map((_, idx) => idx);
+  
+  indicesToColor.forEach(rowIdx => {
     const row = st.relation.items[rowIdx];
     const rowId = row[idColIdx];
     

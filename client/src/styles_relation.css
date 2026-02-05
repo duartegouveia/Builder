@@ -346,6 +346,29 @@
   text-transform: uppercase;
 }
 
+.color-scale-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+}
+
+.color-scale-gradient {
+  flex: 1;
+  height: 8px;
+  min-width: 40px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
+
+.color-scale-min,
+.color-scale-max {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
 .filter-icon {
   display: inline-flex;
   align-items: center;
@@ -861,6 +884,193 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 .column-menu-item.disabled:hover,
 .column-menu-item:disabled:hover {
   background: none;
+}
+
+.column-menu-item-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-2) var(--space-3);
+  padding-left: var(--space-4);
+  font-size: 0.8125rem;
+}
+
+.filter-position-select {
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  cursor: pointer;
+  min-width: 70px;
+}
+
+.filter-n-input {
+  width: 50px;
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.filter-n-input::-webkit-inner-spin-button,
+.filter-n-input::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.pct-symbol {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.btn-apply-filter {
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+  background: var(--primary-600);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-apply-filter:hover {
+  background: var(--primary-700);
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.filter-mult-symbol,
+.filter-arrow-symbol {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.filter-outlier-method,
+.filter-outlier-mode {
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  cursor: pointer;
+}
+
+.filter-mult-input {
+  width: 50px;
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.outliers-row {
+  flex-wrap: wrap;
+}
+
+.binning-row {
+  flex-wrap: wrap;
+}
+
+.btn-info-small {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 0.6875rem;
+  background: var(--slate-200);
+  color: var(--slate-600);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.btn-info-small:hover {
+  background: var(--slate-300);
+}
+
+.btn-clear-small {
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+  background: var(--slate-100);
+  color: var(--slate-600);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.btn-clear-small:hover {
+  background: var(--slate-200);
+}
+
+.binning-active-indicator {
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.75rem;
+  color: var(--success-600);
+  font-weight: 500;
+}
+
+.binning-help-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-4);
+  max-width: 500px;
+  z-index: 10001;
+}
+
+.binning-help-dialog h3 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: 1rem;
+}
+
+.binning-help-dialog .method-item {
+  margin-bottom: var(--space-3);
+}
+
+.binning-help-dialog .method-name {
+  font-weight: 600;
+  color: var(--primary-600);
+}
+
+.binning-help-dialog .method-desc {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  margin-top: 2px;
+}
+
+.binning-help-dialog .btn-close-dialog {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--primary-600);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.binned-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--slate-100);
+  padding: 1px 4px;
+  border-radius: var(--radius);
+  cursor: help;
 }
 
 /* Filter Dialog */
