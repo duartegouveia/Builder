@@ -3657,6 +3657,195 @@ function matchesFormattingCondition(value, condition, type) {
   return true;
 }
 
+// Build multi-select options HTML based on general_multi_options configuration
+function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
+  // Define all available multi operations with their option HTML
+  const multiOperationsMap = {
+    'Invert Page': { value: 'invert-page', icon: '↔', label: 'Invert Page' },
+    'Invert All': { value: 'invert-all', icon: '↔', label: 'Invert All' },
+    'Check All': { value: 'select-all', icon: '✓', label: 'Check All' },
+    'Uncheck All': { value: 'deselect-all', icon: '✗', label: 'Uncheck All' },
+    'Remove Checked': { value: 'remove-selected', icon: '✕', label: `Remove Checked (${selectedCount})`, needsSelection: true },
+    'Remove Unchecked': { value: 'remove-unselected', icon: '✕', label: `Remove Unchecked (${filteredCount - selectedCount})`, needsSelection: true },
+    'Multi View': { value: 'multi-view', icon: '👁', label: `Multi View (${selectedCount})`, needsSelection: true },
+    'Multi Edit': { value: 'multi-edit', icon: '✏️', label: `Multi Edit (${selectedCount})`, needsSelection: true },
+    'Group Edit': { value: 'group-edit', icon: '📝', label: `Group Edit (${selectedCount})`, needsSelection: true },
+    'Merge': { value: 'merge', icon: '🔗', label: `Merge (${selectedCount})`, needsSelection: true },
+    'Multi Copy': { value: 'multi-copy', icon: '📋', label: `Multi Copy (${selectedCount})`, needsSelection: true },
+    'Multi Delete': { value: 'multi-delete', icon: '🗑️', label: `Multi Delete (${selectedCount})`, needsSelection: true }
+  };
+  
+  // Get configured multi options or use defaults
+  const multiOptions = st.rel_options.general_multi_options || DEFAULT_REL_OPTIONS.general_multi_options;
+  
+  // Build options in the order defined by general_multi_options
+  return multiOptions
+    .filter(opt => multiOperationsMap[opt])
+    .map(opt => {
+      const op = multiOperationsMap[opt];
+      const disabled = op.needsSelection && selectedCount === 0 ? ' disabled' : '';
+      return `<option value="${op.value}"${disabled}>${op.icon} ${op.label}</option>`;
+    })
+    .join('\n        ');
+}
+
+// Handle multi-select actions (works for both Table and Cards views)
+function handleMultiAction(st, action, options = {}) {
+  const { pageIndices = null, allIndices = null, renderFn = null } = options;
+  
+  // Use provided indices or calculate from state (for table view)
+  const getPageIndices = () => {
+    if (pageIndices) return pageIndices;
+    const pageSize = getPageSize(st) === 'all' ? getSortedIndices(st).length : getPageSize(st);
+    const startIdx = (getCurrentPage(st) - 1) * pageSize;
+    return getSortedIndices(st).slice(startIdx, startIdx + pageSize);
+  };
+  
+  const getAllIndices = () => allIndices || getSortedIndices(st);
+  
+  switch (action) {
+    case 'invert-page':
+      getPageIndices().forEach(idx => {
+        if (getSelectedRows(st).has(idx)) {
+          getSelectedRows(st).delete(idx);
+        } else {
+          getSelectedRows(st).add(idx);
+        }
+      });
+      break;
+    case 'invert-all':
+      getAllIndices().forEach(idx => {
+        if (getSelectedRows(st).has(idx)) {
+          getSelectedRows(st).delete(idx);
+        } else {
+          getSelectedRows(st).add(idx);
+        }
+      });
+      break;
+    case 'select-all':
+      getAllIndices().forEach(idx => getSelectedRows(st).add(idx));
+      break;
+    case 'deselect-all':
+      getSelectedRows(st).clear();
+      break;
+    case 'remove-selected':
+      removeSelectedRows(st);
+      break;
+    case 'remove-unselected':
+      removeUnselectedRows(st);
+      break;
+    case 'multi-view':
+      showMultiViewDialog(st);
+      break;
+    case 'multi-edit':
+      showMultiEditDialog(st);
+      break;
+    case 'group-edit':
+      showGroupEditDialog(st);
+      break;
+    case 'merge':
+      showMergeDialog(st);
+      break;
+    case 'multi-copy':
+      showMultiCopyDialog(st);
+      break;
+    case 'multi-delete':
+      showMultiDeleteDialog(st);
+      break;
+  }
+  
+  // Re-render the view
+  if (renderFn) {
+    renderFn();
+  } else {
+    renderTable(st);
+  }
+}
+
+// Placeholder functions for new multi operations (to be implemented)
+function showMultiViewDialog(st) {
+  const selectedIndices = Array.from(getSelectedRows(st));
+  if (selectedIndices.length === 0) return;
+  
+  const contentBuilder = (container) => {
+    container.innerHTML = `<p>Multi View de ${selectedIndices.length} registos selecionados.</p>
+    <p class="text-muted-foreground">Esta funcionalidade será implementada em breve.</p>`;
+  };
+  showContentBasedOnMode(st, contentBuilder, `👁 Multi View (${selectedIndices.length})`);
+}
+
+function showMultiEditDialog(st) {
+  const selectedIndices = Array.from(getSelectedRows(st));
+  if (selectedIndices.length === 0) return;
+  
+  const contentBuilder = (container) => {
+    container.innerHTML = `<p>Multi Edit de ${selectedIndices.length} registos selecionados.</p>
+    <p class="text-muted-foreground">Esta funcionalidade será implementada em breve.</p>`;
+  };
+  showContentBasedOnMode(st, contentBuilder, `✏️ Multi Edit (${selectedIndices.length})`);
+}
+
+function showGroupEditDialog(st) {
+  const selectedIndices = Array.from(getSelectedRows(st));
+  if (selectedIndices.length === 0) return;
+  
+  const contentBuilder = (container) => {
+    container.innerHTML = `<p>Group Edit de ${selectedIndices.length} registos selecionados.</p>
+    <p class="text-muted-foreground">Esta funcionalidade permite editar o mesmo campo em todos os registos selecionados.</p>`;
+  };
+  showContentBasedOnMode(st, contentBuilder, `📝 Group Edit (${selectedIndices.length})`);
+}
+
+function showMergeDialog(st) {
+  const selectedIndices = Array.from(getSelectedRows(st));
+  if (selectedIndices.length < 2) {
+    alert('Selecione pelo menos 2 registos para fundir.');
+    return;
+  }
+  
+  const contentBuilder = (container) => {
+    container.innerHTML = `<p>Merge de ${selectedIndices.length} registos selecionados.</p>
+    <p class="text-muted-foreground">Esta funcionalidade permite combinar múltiplos registos num só.</p>`;
+  };
+  showContentBasedOnMode(st, contentBuilder, `🔗 Merge (${selectedIndices.length})`);
+}
+
+function showMultiCopyDialog(st) {
+  const selectedIndices = Array.from(getSelectedRows(st));
+  if (selectedIndices.length === 0) return;
+  
+  const contentBuilder = (container) => {
+    container.innerHTML = `<p>Multi Copy de ${selectedIndices.length} registos selecionados.</p>
+    <p class="text-muted-foreground">Esta funcionalidade permite copiar múltiplos registos.</p>`;
+  };
+  showContentBasedOnMode(st, contentBuilder, `📋 Multi Copy (${selectedIndices.length})`);
+}
+
+function showMultiDeleteDialog(st) {
+  const selectedIndices = Array.from(getSelectedRows(st));
+  if (selectedIndices.length === 0) return;
+  
+  const footerHtml = `<button class="btn btn-danger confirm-multi-delete">🗑️ Confirmar Eliminação</button>`;
+  
+  const contentBuilder = (container) => {
+    container.innerHTML = `<p>Tem a certeza que pretende eliminar ${selectedIndices.length} registos selecionados?</p>
+    <p class="text-muted-foreground">Esta ação não pode ser desfeita.</p>`;
+  };
+  
+  const closeHandler = showContentBasedOnMode(st, contentBuilder, `🗑️ Multi Delete (${selectedIndices.length})`, footerHtml);
+  
+  // Add event listener for confirm button
+  setTimeout(() => {
+    const confirmBtn = document.querySelector('.confirm-multi-delete');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => {
+        removeSelectedRows(st);
+        if (closeHandler) closeHandler();
+      });
+    }
+  }, 0);
+}
+
 function renderPagination(st = state) {
   // Get container - from instance container or pagination container
   const paginationContainer = st.container
@@ -3706,10 +3895,7 @@ function renderPagination(st = state) {
     <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
       <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
         <option value="" disabled selected>Checked Actions...</option>
-        <option value="invert-page">↔ Invert Page</option>
-        <option value="invert-all">↔ Invert All</option>
-        <option value="remove-selected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Checked (${selectedRecords})</option>
-        <option value="remove-unselected" ${selectedRecords === 0 ? 'disabled' : ''}>✕ Remove Unchecked (${filteredRecords - selectedRecords})</option>
+        ${buildMultiOptionsHtml(st, selectedRecords, filteredRecords)}
       </select>
     </div>
   `;
@@ -3760,20 +3946,7 @@ function renderPagination(st = state) {
     const action = e.target.value;
     e.target.value = ''; // Reset to placeholder
     
-    switch (action) {
-      case 'invert-page':
-        invertSelection(true, st);
-        break;
-      case 'invert-all':
-        invertSelection(false, st);
-        break;
-      case 'remove-selected':
-        removeSelectedRows(st);
-        break;
-      case 'remove-unselected':
-        removeUnselectedRows(st);
-        break;
-    }
+    handleMultiAction(st, action);
   });
 }
 
@@ -7081,13 +7254,12 @@ function renderCardsView(st = state) {
   navHtml += '</select>';
   navHtml += '</div>';
   
+  const selectedCount = getSelectedRows(st).size;
+  const filteredCount = getSortedIndices(st).length;
   navHtml += '<div class="cards-actions">';
   navHtml += '<select class="cards-selection-actions">';
   navHtml += '<option value="" disabled selected>Checked Actions...</option>';
-  navHtml += '<option value="invert-page">↔ Invert Page</option>';
-  navHtml += '<option value="invert-all">↔ Invert All</option>';
-  navHtml += '<option value="select-all">✓ Check All</option>';
-  navHtml += '<option value="deselect-all">✗ Uncheck All</option>';
+  navHtml += buildMultiOptionsHtml(st, selectedCount, filteredCount);
   navHtml += '</select>';
   navHtml += '</div>';
   
@@ -7160,29 +7332,7 @@ function renderCardsView(st = state) {
     const action = e.target.value;
     e.target.value = '';
     
-    if (action === 'invert-page') {
-      pageIndices.forEach(idx => {
-        if (getSelectedRows(st).has(idx)) {
-          getSelectedRows(st).delete(idx);
-        } else {
-          getSelectedRows(st).add(idx);
-        }
-      });
-    } else if (action === 'invert-all') {
-      indices.forEach(idx => {
-        if (getSelectedRows(st).has(idx)) {
-          getSelectedRows(st).delete(idx);
-        } else {
-          getSelectedRows(st).add(idx);
-        }
-      });
-    } else if (action === 'select-all') {
-      indices.forEach(idx => getSelectedRows(st).add(idx));
-    } else if (action === 'deselect-all') {
-      getSelectedRows(st).clear();
-    }
-    
-    renderCardsView(st);
+    handleMultiAction(st, action, { pageIndices, allIndices: indices, renderFn: () => renderCardsView(st) });
   });
 }
 
