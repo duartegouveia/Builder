@@ -6551,6 +6551,9 @@ function showContentInDetailPanel(st, contentBuilder, title = '', footerButtonsH
 
 // Show content in a popup dialog (for single_item_mode: 'dialog')
 function showContentInPopup(contentBuilder, title = '', footerButtonsHtml = '') {
+  // Close any existing content dialogs before opening a new one
+  document.querySelectorAll('[id^="content-dialog-"]').forEach(el => el.remove());
+  
   const dialogId = `content-dialog-${Date.now()}`;
   
   // Create overlay backdrop
