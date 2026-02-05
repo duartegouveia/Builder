@@ -12399,6 +12399,8 @@ function init() {
     if (previewPanel) {
       const oldUid = previewPanel.dataset.relationUid;
       if (oldUid) {
+        const oldClass = 'relation_' + oldUid;
+        previewPanel.classList.remove(oldClass, 'relation-instance');
         relationInstances.delete(oldUid);
         unregisterRelation(oldUid);
       }
@@ -12407,12 +12409,17 @@ function init() {
       const result = parseRelation(textarea.value);
       if (result.success && result.data.items.length > 0) {
         const relData = JSON.parse(JSON.stringify(result.data));
-        relData.rel_options.single_item_mode = 'bottom';
 
-        const previewState = initRelationInstance(previewPanel, relData, { showJsonEditor: false, isNested: true });
-        previewPanel.dataset.relationUid = previewState.uid;
+        const offscreen = document.createElement('div');
+        const tempState = initRelationInstance(offscreen, relData, { showJsonEditor: false, isNested: true });
+        previewPanel.dataset.relationUid = tempState.uid;
 
-        showRowEditDialog(previewState, 0);
+        previewPanel.classList.add('relation_' + tempState.uid, 'relation-instance');
+        previewPanel.innerHTML = '<div class="relation-detail-panel"></div>';
+        tempState.container = previewPanel;
+        tempState.rel_options.single_item_mode = 'bottom';
+
+        showRowEditDialog(tempState, 0);
       }
     }
   });
