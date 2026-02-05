@@ -12303,7 +12303,128 @@ function init() {
   
   const btnObjToRel = el('.btn-obj-to-rel');
   btnObjToRel?.addEventListener('click', () => {
-    alert('Obj->Rel: functionality to be implemented');
+    const relTemplate = {
+      "pot": "relation",
+      "name": "",
+      "columns": {},
+      "options": {
+        "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+      },
+      "rel_options": {
+        "editable": false,
+        "show_multicheck": true,
+        "show_natural_order": true,
+        "show_id": true,
+        "show_column_kind": true,
+        "show_hierarchy": true,
+        "hierarchy_column": "parent",
+        "hierarchy_root_value": "",
+        "single_item_mode": "dialog",
+        "label_field_top_down": true,
+        "general_view_options": ["Table","Cards","Pivot","Correlation","Diagram","AI","Saved"],
+        "general_always_visible_options": ["New","New Fast","Paper Form","Output State"],
+        "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
+        "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Group Edit","Merge","Multi Copy","Multi Delete"]
+      },
+      "items": []
+    };
+
+    let ta;
+    try {
+      ta = JSON.parse(textarea.value);
+    } catch (e) {
+      alert('Erro: O conteúdo da textarea não é JSON válido.\n' + e.message);
+      return;
+    }
+
+    if (typeof ta !== 'object' || ta === null || Array.isArray(ta)) {
+      alert('Erro: O conteúdo da textarea deve ser um Object (não array nem valor primitivo).');
+      return;
+    }
+
+    function detectKind(value) {
+      if (value === null || value === undefined) return 'text';
+      if (typeof value === 'boolean') return 'boolean';
+      if (typeof value === 'number') return 'float';
+      if (typeof value === 'string') {
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?/.test(value)) return 'datetime';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'date';
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) return 'time';
+        if (value.length > 100) return 'multilinestring';
+        return 'string';
+      }
+      if (Array.isArray(value)) {
+        if (value.length === 0) return 'multi_string';
+        const elementKinds = value.map(v => detectKind(v));
+        const uniqueKinds = [...new Set(elementKinds)];
+        if (uniqueKinds.length === 1) return 'multi_' + uniqueKinds[0];
+        return 'multi_string';
+      }
+      if (typeof value === 'object') return 'relation';
+      return 'string';
+    }
+
+    function objectToRelation(obj) {
+      const rel = JSON.parse(JSON.stringify(relTemplate));
+      const keys = Object.keys(obj);
+      const ta_kind = [];
+      const rowValues = [];
+
+      for (const key of keys) {
+        const value = obj[key];
+        const kind = detectKind(value);
+        ta_kind.push(kind);
+
+        if (kind === 'relation') {
+          const subRel = objectToRelation(value);
+          rowValues.push(JSON.stringify(subRel, null, 2));
+        } else {
+          rowValues.push(value);
+        }
+      }
+
+      keys.forEach((key, i) => {
+        rel.columns[key] = ta_kind[i];
+      });
+
+      rel.items = [rowValues];
+
+      return rel;
+    }
+
+    const resultRel = objectToRelation(ta);
+    textarea.value = JSON.stringify(resultRel, null, 2);
+
+    const previewPanel = document.querySelector('.json-preview-panel');
+    if (previewPanel) {
+      previewPanel.innerHTML = '';
+
+      const result = parseRelation(textarea.value);
+      if (result.success) {
+        const relData = result.data;
+        const tempState = initRelationInstance(document.createElement('div'), JSON.parse(JSON.stringify(relData)), { showJsonEditor: false, isNested: true });
+
+        if (tempState && relData.items.length > 0) {
+          const row = tempState.relation.items[0];
+          previewPanel.innerHTML = `
+            <div class="detail-panel-content">
+              <div class="detail-panel-header">
+                <span class="detail-panel-title">Edit - Registo 1</span>
+              </div>
+              <div class="detail-panel-body"></div>
+            </div>
+          `;
+          const body = previewPanel.querySelector('.detail-panel-body');
+          body.innerHTML = generateRowFormattedContent(tempState, row, 'edit');
+          initRelationFieldsInContainer(body, tempState, row);
+        }
+
+        if (tempState) {
+          relationInstances.delete(tempState.uid);
+          unregisterRelation(tempState.uid);
+        }
+      }
+    }
   });
   
   // Menu item event listeners - close dropdown on click
