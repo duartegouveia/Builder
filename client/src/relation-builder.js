@@ -3264,34 +3264,34 @@ function calculateStatistics(colIdx, st = state) {
 }
 
 // Group By functions
-function applyGroupBy() {
-  if (getGroupByColumns(state).length === 0) {
-    setGroupedData(state, null);
+function applyGroupBy(st = state) {
+  if (getGroupByColumns(st).length === 0) {
+    setGroupedData(st, null);
     return;
   }
   
   const groups = new Map();
   
-  getFilteredIndices(state).forEach(idx => {
-    const row = state.relation.items[idx];
-    const key = getGroupByColumns(state).map(colIdx => JSON.stringify(row[colIdx])).join('|');
+  getFilteredIndices(st).forEach(idx => {
+    const row = st.relation.items[idx];
+    const key = getGroupByColumns(st).map(colIdx => JSON.stringify(row[colIdx])).join('|');
     
     if (!groups.has(key)) {
       groups.set(key, {
-        keyValues: getGroupByColumns(state).map(colIdx => row[colIdx]),
+        keyValues: getGroupByColumns(st).map(colIdx => row[colIdx]),
         indices: []
       });
     }
     groups.get(key).indices.push(idx);
   });
   
-  setGroupedData(state, groups);
+  setGroupedData(st, groups);
 }
 
-function getVisibleColumns() {
-  return state.columnNames
-    .map((name, idx) => ({ name, type: state.columnTypes[idx], idx }))
-    .filter((_, idx) => !getGroupByColumns(state).includes(idx));
+function getVisibleColumns(st = state) {
+  return st.columnNames
+    .map((name, idx) => ({ name, type: st.columnTypes[idx], idx }))
+    .filter((_, idx) => !getGroupByColumns(st).includes(idx));
 }
 
 
@@ -6575,7 +6575,7 @@ function groupColumnsIntoRelation(colIndices, newColName, st = state) {
   renderTable(st);
 }
 
-function showRowOperationsMenu(rowIdx, x, y) {
+function showRowOperationsMenu(rowIdx, x, y, st = state) {
   closeAllMenus();
   
   const menu = document.createElement('div');
@@ -6583,7 +6583,7 @@ function showRowOperationsMenu(rowIdx, x, y) {
   menu.style.left = x + 'px';
   menu.style.top = y + 'px';
   
-  const hasSelection = getSelectedRows(state).size > 0;
+  const hasSelection = getSelectedRows(st).size > 0;
   
   // Define all available line operations with their button HTML
   const lineOperationsMap = {
@@ -6597,7 +6597,7 @@ function showRowOperationsMenu(rowIdx, x, y) {
   };
   
   // Get configured line options or use defaults
-  const lineOptions = state.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
+  const lineOptions = st.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
   
   // Build menu buttons in the order defined by general_line_options
   const lineButtonsHtml = lineOptions
@@ -6610,7 +6610,7 @@ function showRowOperationsMenu(rowIdx, x, y) {
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
-        <div class="column-menu-title">Checked (${getSelectedRows(state).size} rows)</div>
+        <div class="column-menu-title">Checked (${getSelectedRows(st).size} rows)</div>
         <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ Remove Checked</button>
       </div>
     ` : ''}
@@ -6623,7 +6623,7 @@ function showRowOperationsMenu(rowIdx, x, y) {
     if (!actionBtn) return;
     const action = actionBtn.dataset.action;
     
-    handleRowOperation(state, rowIdx, action);
+    handleRowOperation(st, rowIdx, action);
     menu.remove();
   });
   
