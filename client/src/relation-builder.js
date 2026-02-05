@@ -23,6 +23,19 @@ function getContrastTextColor(hexColor) {
   return luminance < 0.5 ? '#ffffff' : '#000000';
 }
 
+function computeQuartile(sortedArr, p) {
+  if (!sortedArr || sortedArr.length === 0) return null;
+  if (sortedArr.length === 1) return sortedArr[0];
+  
+  const pos = (sortedArr.length - 1) * p;
+  const lower = Math.floor(pos);
+  const upper = Math.ceil(pos);
+  const fraction = pos - lower;
+  
+  if (lower === upper) return sortedArr[lower];
+  return sortedArr[lower] + fraction * (sortedArr[upper] - sortedArr[lower]);
+}
+
 // Color palettes for conditional formatting
 const COLOR_PALETTES = {
   pastel: {
@@ -2885,11 +2898,9 @@ function calculateStatistics(colIdx, st = state) {
       stats.variance = variance;
       stats.stdDev = Math.sqrt(variance);
       
-      // Quartiles
-      const q1Idx = Math.floor(nums.length * 0.25);
-      const q3Idx = Math.floor(nums.length * 0.75);
-      stats.q1 = nums[q1Idx];
-      stats.q3 = nums[q3Idx];
+      // Quartiles (using linear interpolation)
+      stats.q1 = computeQuartile(nums, 0.25);
+      stats.q3 = computeQuartile(nums, 0.75);
       stats.iqr = stats.q3 - stats.q1;
       
       // Whiskers and outliers for box plot
@@ -3054,11 +3065,9 @@ function calculateStatistics(colIdx, st = state) {
       stats.lengthStats.variance = lengths.reduce((sum, n) => sum + Math.pow(n - stats.lengthStats.mean, 2), 0) / lengths.length;
       stats.lengthStats.stdDev = Math.sqrt(stats.lengthStats.variance);
       
-      // Quartiles
-      const q1Idx = Math.floor(lengths.length * 0.25);
-      const q3Idx = Math.floor(lengths.length * 0.75);
-      stats.lengthStats.q1 = lengths[q1Idx];
-      stats.lengthStats.q3 = lengths[q3Idx];
+      // Quartiles (using linear interpolation)
+      stats.lengthStats.q1 = computeQuartile(lengths, 0.25);
+      stats.lengthStats.q3 = computeQuartile(lengths, 0.75);
       stats.lengthStats.iqr = stats.lengthStats.q3 - stats.lengthStats.q1;
       
       // Whiskers for box plot
@@ -3287,11 +3296,9 @@ function calculateStatistics(colIdx, st = state) {
         stats.stdDevFormatted = `${stdDevDays.toFixed(2)} days`;
       }
       
-      // Quartiles
-      const q1Idx = Math.floor(nums.length * 0.25);
-      const q3Idx = Math.floor(nums.length * 0.75);
-      const q1Ms = nums[q1Idx];
-      const q3Ms = nums[q3Idx];
+      // Quartiles (using linear interpolation)
+      const q1Ms = computeQuartile(nums, 0.25);
+      const q3Ms = computeQuartile(nums, 0.75);
       stats.q1 = formatValue(q1Ms);
       stats.q3 = formatValue(q3Ms);
       const iqrMs = q3Ms - q1Ms;
@@ -3359,11 +3366,9 @@ function calculateStatistics(colIdx, st = state) {
       stats.variance = rowCounts.reduce((sum, n) => sum + Math.pow(n - stats.mean, 2), 0) / rowCounts.length;
       stats.stdDev = Math.sqrt(stats.variance);
       
-      // Quartiles
-      const q1Idx = Math.floor(rowCounts.length * 0.25);
-      const q3Idx = Math.floor(rowCounts.length * 0.75);
-      stats.q1 = rowCounts[q1Idx];
-      stats.q3 = rowCounts[q3Idx];
+      // Quartiles (using linear interpolation)
+      stats.q1 = computeQuartile(rowCounts, 0.25);
+      stats.q3 = computeQuartile(rowCounts, 0.75);
       stats.iqr = stats.q3 - stats.q1;
       
       // Whiskers for box plot
@@ -5222,11 +5227,9 @@ function applyOutliersFilter(colIdx, method, multiplier, mode, st = state) {
   let lowerBound, upperBound;
   
   if (method === 'iqr') {
-    // IQR method
-    const q1Idx = Math.floor(numericValues.length * 0.25);
-    const q3Idx = Math.floor(numericValues.length * 0.75);
-    const q1 = numericValues[q1Idx];
-    const q3 = numericValues[q3Idx];
+    // IQR method (using linear interpolation)
+    const q1 = computeQuartile(numericValues, 0.25);
+    const q3 = computeQuartile(numericValues, 0.75);
     const iqr = q3 - q1;
     lowerBound = q1 - multiplier * iqr;
     upperBound = q3 + multiplier * iqr;
@@ -7826,6 +7829,7 @@ function renderGroupByPanel(st = state) {
             return `<option value="${val}"${selected}>${escapeHtml(label)} #${itemCount}</option>`;
           }).join('')}
         </select>
+        <button class="btn-remove-group" data-col="${colIdx}" title="Remove this grouping">✕</button>
       </div>
     `;
   });
@@ -7860,6 +7864,24 @@ function renderGroupByPanel(st = state) {
       }
       
       setCurrentPage(st, 1);
+      const currentView = getCurrentView(st);
+      if (currentView === 'cards') {
+        renderCardsView(st);
+      } else if (currentView === 'table') {
+        renderTable(st);
+      }
+    });
+  });
+  
+  groupInfo.querySelectorAll('.btn-remove-group').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const colIdx = parseInt(e.target.dataset.col);
+      const currentGroups = getGroupByColumns(st);
+      const newGroups = currentGroups.filter(idx => idx !== colIdx);
+      setGroupByColumns(st, newGroups);
+      delete getGroupBySelectedValues(st)[colIdx];
+      setCurrentPage(st, 1);
+      renderGroupByPanel(st);
       const currentView = getCurrentView(st);
       if (currentView === 'cards') {
         renderCardsView(st);

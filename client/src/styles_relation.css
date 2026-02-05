@@ -1663,6 +1663,20 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   background: var(--primary-100);
 }
 
+.btn-remove-group {
+  padding: 0 4px;
+  font-size: 0.7rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  line-height: 1;
+}
+
+.btn-remove-group:hover {
+  color: var(--destructive);
+}
+
 /* Column Selection Indicator */
 .col-selected {
   background: var(--primary-100) !important;
