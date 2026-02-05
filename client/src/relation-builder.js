@@ -11941,8 +11941,15 @@ function init() {
   });
   
   const btnSimpleObj = el('.btn-simple-obj');
-  btnSimpleObj?.addEventListener('click', () => {
-    textarea.value = '{a:"string",b:True,c:15,d:15.5}';
+  btnSimpleObj?.addEventListener('click', async () => {
+    try {
+      const response = await fetch('/data/simple_obj.json');
+      const data = await response.json();
+      textarea.value = JSON.stringify(data, null, 2);
+    } catch (error) {
+      console.error('Failed to load simple_obj.json:', error);
+      textarea.value = '{a:"string",b:True,c:15,d:15.5}';
+    }
   });
   
   const btnArrayObj = el('.btn-array-obj');

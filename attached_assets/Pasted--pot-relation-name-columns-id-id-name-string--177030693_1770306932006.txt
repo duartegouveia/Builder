@@ -1,0 +1,7521 @@
+{
+  "pot": "relation",
+  "name": "",
+  "columns": {
+    "id": "id",
+    "name": "string",
+    "country": "select",
+    "active": "boolean",
+    "score": "float",
+    "birth_date": "date",
+    "created_at": "datetime",
+    "start_time": "time",
+    "notes": "multilinestring",
+    "orders": "relation",
+    "tags": "relation"
+  },
+  "options": {
+    "country": {
+      "pt": "🇵🇹 Portugal",
+      "es": "🇪🇸 España",
+      "fr": "🇫🇷 France",
+      "de": "🇩🇪 Deutschland",
+      "it": "🇮🇹 Italia",
+      "uk": "🇬🇧 United Kingdom",
+      "us": "🇺🇸 United States",
+      "br": "🇧🇷 Brasil",
+      "jp": "🇯🇵 Japan",
+      "cn": "🇨🇳 China"
+    },
+    "relation.single_item_mode": {
+      "dialog": "dialog",
+      "right": "right",
+      "bottom": "bottom"
+    }
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_column_kind": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "single_item_mode": "bottom",
+    "label_field_top_down": true,
+    "general_view_options": [
+      "Table",
+      "Cards",
+      "Pivot",
+      "Correlation",
+      "Diagram",
+      "AI",
+      "Saved"
+    ],
+    "general_always_visible_options": [
+      "New",
+      "New Fast",
+      "Paper Form"
+    ],
+    "general_line_options": [
+      "View",
+      "Edit",
+      "Copy",
+      "New",
+      "New Fast",
+      "Delete",
+      "Paper Form"
+    ],
+    "general_multi_options": [
+      "Invert Page",
+      "Invert All",
+      "Remove Checked",
+      "Remove Unchecked",
+      "Multi View",
+      "Multi Edit",
+      "Group Edit",
+      "Merge",
+      "Multi Copy",
+      "Multi Delete"
+    ]
+  },
+  "items": [
+    [
+      "1",
+      "Frank_CUkK",
+      "br",
+      true,
+      -62.728,
+      "2025-02-15",
+      "2025-12-16 06:40:45",
+      "21:10:46",
+      "Line 1: NMydxYazRHOq\nLine 2: FuoCJNKxXjeN\nLine 3: ghvjBShbrGow",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "1",
+            "Henry_uJxT",
+            449,
+            379.756
+          ],
+          [
+            "2",
+            "Bob_vfPk",
+            -86,
+            356.594
+          ],
+          [
+            "3",
+            "Iris_CmZE",
+            424,
+            -214.83
+          ],
+          [
+            "4",
+            "Bob_zsbi",
+            -92,
+            -497.697
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "1",
+            "Frank_bUkd",
+            -24
+          ],
+          [
+            "2",
+            "Eve_JNzC",
+            294
+          ]
+        ]
+      }
+    ],
+    [
+      "2",
+      "Bob_PSSv",
+      "jp",
+      true,
+      -21.019,
+      "2025-09-02",
+      "2025-07-30 06:55:57",
+      "01:48:55",
+      "Line 1: zNyNjnfgPtln\nLine 2: aulzHKVYDSSX\nLine 3: ASQhMFAUUluv",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "5",
+            "Alice_BlGR",
+            -173,
+            -77.081
+          ],
+          [
+            "6",
+            "Jack_NkYT",
+            182,
+            null
+          ],
+          [
+            "7",
+            null,
+            -485,
+            346.49
+          ],
+          [
+            "8",
+            "Henry_SMCW",
+            -20,
+            102.852
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "3",
+            "Grace_xMeS",
+            418
+          ]
+        ]
+      }
+    ],
+    [
+      "3",
+      "Alice_NMzC",
+      "es",
+      true,
+      -116.367,
+      "2025-06-19",
+      "2025-03-21 09:57:27",
+      "04:49:47",
+      "Line 1: JvIipWsYBKOF\nLine 2: VEVsZraVuJRI\nLine 3: rkYKCBDpevLm",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "9",
+            null,
+            -113,
+            489.088
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "4",
+            "Eve_vMqH",
+            -5
+          ],
+          [
+            "5",
+            "Grace_BXdk",
+            488
+          ],
+          [
+            "6",
+            "Frank_fGHI",
+            -39
+          ]
+        ]
+      }
+    ],
+    [
+      "4",
+      "Bob_RpMW",
+      "de",
+      false,
+      179.491,
+      "2025-06-10",
+      "2025-05-26 01:04:04",
+      "04:00:09",
+      "Line 1: bZZoioxXdMmT\nLine 2: yOIWyZIpKHXZ",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "10",
+            "Frank_cVyi",
+            -146,
+            312.446
+          ],
+          [
+            "11",
+            "Diana_YhgT",
+            465,
+            -455.231
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "7",
+            "Jack_bpKU",
+            -98
+          ],
+          [
+            "8",
+            "Frank_TGmB",
+            -161
+          ],
+          [
+            "9",
+            "Bob_ppLd",
+            -358
+          ]
+        ]
+      }
+    ],
+    [
+      "5",
+      "Diana_jPOM",
+      "fr",
+      true,
+      -332.783,
+      "2025-05-12",
+      "2025-06-21 17:20:28",
+      "10:58:29",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "12",
+            null,
+            null,
+            null
+          ],
+          [
+            "13",
+            "Diana_QEsB",
+            -286,
+            62.819
+          ],
+          [
+            "14",
+            "Eve_zMoz",
+            440,
+            -403.327
+          ],
+          [
+            "15",
+            "Bob_HSvG",
+            -451,
+            82.751
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "10",
+            "Jack_gjQr",
+            457
+          ]
+        ]
+      }
+    ],
+    [
+      "6",
+      "Bob_AXxT",
+      "us",
+      false,
+      -385.173,
+      "2025-03-23",
+      "2025-04-12 00:51:58",
+      "07:08:11",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "16",
+            "Bob_NLyH",
+            -209,
+            -223.629
+          ],
+          [
+            "17",
+            "Diana_vaLZ",
+            -293,
+            -410.056
+          ],
+          [
+            "18",
+            "Diana_gQGe",
+            232,
+            272.974
+          ],
+          [
+            "19",
+            "Diana_nojr",
+            369,
+            -62.056
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "11",
+            null,
+            249
+          ],
+          [
+            "12",
+            "Henry_IAbA",
+            498
+          ]
+        ]
+      }
+    ],
+    [
+      "7",
+      "Eve_XlCM",
+      "jp",
+      true,
+      -448.962,
+      "2025-09-06",
+      "2025-05-05 05:54:38",
+      "19:36:30",
+      "Line 1: vresIKxuGfPh",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "20",
+            "Henry_UEIK",
+            80,
+            -92.97
+          ],
+          [
+            "21",
+            "Jack_sImf",
+            -424,
+            -410.39
+          ],
+          [
+            "22",
+            "Henry_AIUO",
+            -23,
+            69.387
+          ],
+          [
+            "23",
+            "Frank_WgWk",
+            -381,
+            null
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "13",
+            null,
+            440
+          ],
+          [
+            "14",
+            "Diana_cRLD",
+            -417
+          ],
+          [
+            "15",
+            "Bob_jQzt",
+            -369
+          ]
+        ]
+      }
+    ],
+    [
+      "8",
+      "Frank_mXRE",
+      null,
+      true,
+      -325.083,
+      "2025-12-27",
+      "2025-08-18 01:20:53",
+      "13:40:20",
+      "Line 1: DIEWQewiAsTE",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "24",
+            "Eve_XChC",
+            121,
+            -491.476
+          ],
+          [
+            "25",
+            "Grace_xsKk",
+            -251,
+            147.81
+          ],
+          [
+            "26",
+            "Frank_Asmj",
+            286,
+            336.897
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "16",
+            "Eve_QsZx",
+            344
+          ],
+          [
+            "17",
+            "Diana_ITWT",
+            76
+          ]
+        ]
+      }
+    ],
+    [
+      "9",
+      "Jack_JFrF",
+      "br",
+      true,
+      -285.791,
+      "2025-06-26",
+      "2025-08-13 08:05:24",
+      "04:03:23",
+      "Line 1: sdYmgCHmqmHD\nLine 2: JbZIlMpWMwsP",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "27",
+            "Eve_KOFb",
+            101,
+            -176.259
+          ],
+          [
+            "28",
+            "Diana_csQB",
+            -206,
+            -398.741
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "18",
+            "Diana_qaxE",
+            415
+          ],
+          [
+            "19",
+            "Frank_hqTd",
+            137
+          ],
+          [
+            "20",
+            "Jack_oyFj",
+            -358
+          ]
+        ]
+      }
+    ],
+    [
+      "10",
+      "Charlie_QSFt",
+      "pt",
+      true,
+      -461.227,
+      "2025-11-05",
+      "2026-01-30 13:59:27",
+      "21:51:34",
+      "Line 1: yqtruwHqaXBF\nLine 2: SZskoycoUCBP",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "29",
+            "Charlie_oCNu",
+            204,
+            -375.413
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "21",
+            "Alice_szTx",
+            425
+          ],
+          [
+            "22",
+            "Alice_hlND",
+            253
+          ],
+          [
+            "23",
+            "Jack_subg",
+            -285
+          ]
+        ]
+      }
+    ],
+    [
+      "11",
+      "Jack_vHOJ",
+      "us",
+      null,
+      -494.476,
+      "2025-09-15",
+      "2025-06-29 13:53:17",
+      null,
+      "Line 1: MHmoUoJQIFwk",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "30",
+            null,
+            null,
+            null
+          ],
+          [
+            "31",
+            "Diana_hATd",
+            -280,
+            407.908
+          ],
+          [
+            "32",
+            "Diana_GaTG",
+            -236,
+            -80.037
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "24",
+            "Eve_lcKX",
+            -275
+          ],
+          [
+            "25",
+            "Jack_vMGp",
+            381
+          ],
+          [
+            "26",
+            "Alice_EUUN",
+            257
+          ]
+        ]
+      }
+    ],
+    [
+      "12",
+      "Charlie_xjNk",
+      "jp",
+      false,
+      426.789,
+      "2025-03-10",
+      "2025-04-04 09:09:40",
+      "16:44:04",
+      "Line 1: bgxaoNbrHvsk",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "33",
+            "Charlie_PuOX",
+            -490,
+            -237.911
+          ],
+          [
+            "34",
+            "Alice_glMe",
+            437,
+            154.95
+          ],
+          [
+            "35",
+            null,
+            127,
+            -377.845
+          ],
+          [
+            "36",
+            "Bob_TBsj",
+            -432,
+            -381.229
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "27",
+            "Grace_rDub",
+            118
+          ],
+          [
+            "28",
+            "Bob_OAmj",
+            -289
+          ]
+        ]
+      }
+    ],
+    [
+      "13",
+      "Henry_ZjAK",
+      "br",
+      false,
+      88.842,
+      "2025-03-19",
+      "2025-11-08 01:47:53",
+      "17:57:48",
+      "Line 1: JdGJlArHmuuv\nLine 2: FSJIjAlJLWwL\nLine 3: SaTaOjKYHpPR",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "37",
+            "Iris_ZEbR",
+            -102,
+            417.89
+          ],
+          [
+            "38",
+            null,
+            448,
+            317.669
+          ],
+          [
+            "39",
+            "Alice_HTIW",
+            null,
+            -435.973
+          ],
+          [
+            "40",
+            "Jack_TYpT",
+            -5,
+            55.661
+          ]
+        ]
+      },
+      null
+    ],
+    [
+      "14",
+      "Alice_unZx",
+      "de",
+      false,
+      -225.099,
+      "2025-02-05",
+      null,
+      "23:49:01",
+      "Line 1: SIXQUXcaQNgE\nLine 2: ScYXESuYziFI",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "41",
+            "Alice_sXKd",
+            -386,
+            null
+          ],
+          [
+            "42",
+            "Frank_MbDi",
+            null,
+            null
+          ],
+          [
+            "43",
+            "Grace_MupX",
+            -36,
+            473.485
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "29",
+            "Henry_zpwq",
+            -284
+          ]
+        ]
+      }
+    ],
+    [
+      "15",
+      "Diana_qTVP",
+      "it",
+      false,
+      -398.661,
+      "2025-06-09",
+      null,
+      "07:45:00",
+      "Line 1: rCWNVpxSwLhl",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "44",
+            "Eve_UnqF",
+            398,
+            462.951
+          ],
+          [
+            "45",
+            "Eve_XabY",
+            437,
+            480.074
+          ],
+          [
+            "46",
+            "Alice_xEkt",
+            null,
+            360.464
+          ],
+          [
+            "47",
+            "Henry_ZBlj",
+            162,
+            null
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "30",
+            "Diana_WOfJ",
+            315
+          ],
+          [
+            "31",
+            "Iris_ywFh",
+            -440
+          ],
+          [
+            "32",
+            "Eve_gbvD",
+            171
+          ]
+        ]
+      }
+    ],
+    [
+      "16",
+      "Alice_mPCr",
+      "br",
+      true,
+      -135.105,
+      "2025-11-12",
+      "2025-08-26 16:29:15",
+      "01:53:12",
+      "Line 1: eHyfJzbFnjEw",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "48",
+            "Charlie_FKnF",
+            -159,
+            232.316
+          ],
+          [
+            "49",
+            "Charlie_Lnib",
+            298,
+            -161.038
+          ]
+        ]
+      },
+      null
+    ],
+    [
+      "17",
+      null,
+      "it",
+      true,
+      191.75,
+      "2025-05-22",
+      "2025-04-26 21:17:20",
+      "09:16:23",
+      "Line 1: UliJkZHljZDb\nLine 2: XNRPpGhCHeMn\nLine 3: bfKvHZOrEGHv",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "50",
+            "Eve_aiWj",
+            -336,
+            -15.521
+          ],
+          [
+            "51",
+            "Diana_PKiI",
+            59,
+            390.323
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "33",
+            "Iris_HyaO",
+            -471
+          ],
+          [
+            "34",
+            "Bob_Jemp",
+            -17
+          ],
+          [
+            "35",
+            "Diana_yeGw",
+            null
+          ],
+          [
+            "36",
+            "Bob_hvXC",
+            -228
+          ]
+        ]
+      }
+    ],
+    [
+      "18",
+      "Jack_kkIp",
+      "us",
+      null,
+      88.839,
+      "2026-01-09",
+      "2025-05-27 09:28:23",
+      "04:27:50",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "52",
+            "Jack_gJlH",
+            -163,
+            200.524
+          ],
+          [
+            "53",
+            "Jack_SUTn",
+            -407,
+            72.484
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "37",
+            "Eve_eGnW",
+            476
+          ],
+          [
+            "38",
+            "Jack_eChk",
+            -215
+          ],
+          [
+            "39",
+            "Charlie_TmYc",
+            null
+          ],
+          [
+            "40",
+            null,
+            156
+          ]
+        ]
+      }
+    ],
+    [
+      "19",
+      "Charlie_letr",
+      "de",
+      true,
+      -356.388,
+      "2025-02-11",
+      "2026-01-13 19:36:57",
+      "03:03:55",
+      "Line 1: RFlDGbMzQBih",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "54",
+            "Eve_CDTZ",
+            494,
+            -9.097
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "41",
+            "Alice_EoLy",
+            266
+          ],
+          [
+            "42",
+            "Eve_ZTUd",
+            157
+          ],
+          [
+            "43",
+            "Grace_uQcs",
+            360
+          ],
+          [
+            "44",
+            "Frank_ttvw",
+            41
+          ]
+        ]
+      }
+    ],
+    [
+      "20",
+      "Eve_iuab",
+      "br",
+      true,
+      -308.86,
+      "2025-12-29",
+      "2025-02-20 00:57:53",
+      "03:11:12",
+      "Line 1: PSWQLfmrZtxW\nLine 2: ifozsLUmOymW\nLine 3: ZcpuYeRCjrQm",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "55",
+            "Jack_Jcxf",
+            -488,
+            17.047
+          ],
+          [
+            "56",
+            "Bob_XSOZ",
+            404,
+            -166.552
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "45",
+            "Eve_pVdT",
+            261
+          ]
+        ]
+      }
+    ],
+    [
+      "21",
+      "Charlie_IOGJ",
+      "es",
+      true,
+      -192.041,
+      "2025-08-27",
+      "2026-01-29 06:27:23",
+      "08:06:49",
+      "Line 1: KHoOZODhQdRt",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "57",
+            null,
+            -416,
+            16.653
+          ],
+          [
+            "58",
+            null,
+            42,
+            null
+          ],
+          [
+            "59",
+            "Henry_Saha",
+            -97,
+            125.177
+          ],
+          [
+            "60",
+            "Charlie_jszW",
+            -229,
+            -175.487
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "46",
+            "Jack_RKvi",
+            455
+          ]
+        ]
+      }
+    ],
+    [
+      "22",
+      "Eve_fmiM",
+      "jp",
+      true,
+      -42.907,
+      "2025-10-03",
+      "2025-04-03 08:14:45",
+      "04:02:29",
+      "Line 1: dCWhGrbtTOto",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "61",
+            "Eve_uFXk",
+            172,
+            -306.519
+          ],
+          [
+            "62",
+            null,
+            -2,
+            -398.452
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "47",
+            "Eve_bJgH",
+            -334
+          ],
+          [
+            "48",
+            null,
+            279
+          ],
+          [
+            "49",
+            "Grace_jZFr",
+            -51
+          ]
+        ]
+      }
+    ],
+    [
+      "23",
+      "Diana_lqzx",
+      "jp",
+      false,
+      100.184,
+      "2025-05-26",
+      "2025-08-21 21:15:21",
+      "10:45:00",
+      "Line 1: dcmzmrcIYhfH\nLine 2: dmZOFhuuXHCt\nLine 3: tbVoDqNWWgUN",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "63",
+            "Diana_reOQ",
+            null,
+            -54.021
+          ],
+          [
+            "64",
+            "Henry_vcnX",
+            281,
+            null
+          ],
+          [
+            "65",
+            "Grace_FPaQ",
+            null,
+            472.401
+          ]
+        ]
+      },
+      null
+    ],
+    [
+      "24",
+      "Diana_hcGZ",
+      "es",
+      true,
+      248.138,
+      "2025-02-26",
+      "2025-02-09 21:50:48",
+      "16:48:19",
+      "Line 1: IWSGGczsNyXH",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "50",
+            "Grace_BLgd",
+            447
+          ]
+        ]
+      }
+    ],
+    [
+      "25",
+      "Bob_PaLq",
+      "es",
+      false,
+      -172.539,
+      "2025-05-22",
+      "2025-07-31 15:16:57",
+      "19:05:19",
+      "Line 1: bpgrHEGicgSM",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "66",
+            "Bob_jEBV",
+            -346,
+            -492.923
+          ],
+          [
+            "67",
+            null,
+            null,
+            -70.78
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "51",
+            null,
+            -306
+          ],
+          [
+            "52",
+            "Eve_OKqY",
+            null
+          ],
+          [
+            "53",
+            "Bob_lDqb",
+            -404
+          ]
+        ]
+      }
+    ],
+    [
+      "26",
+      "Iris_hbqu",
+      "uk",
+      false,
+      199.513,
+      "2025-11-19",
+      "2025-10-02 18:05:29",
+      "22:49:19",
+      "Line 1: QLRtqyeiiVAX\nLine 2: uZcqFfbdUpkU\nLine 3: zZdcrCuIezkh",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "54",
+            "Charlie_GNzp",
+            159
+          ],
+          [
+            "55",
+            "Diana_VUAJ",
+            475
+          ],
+          [
+            "56",
+            null,
+            -5
+          ],
+          [
+            "57",
+            "Frank_Oabo",
+            -432
+          ]
+        ]
+      }
+    ],
+    [
+      "27",
+      "Diana_obum",
+      "es",
+      true,
+      381.724,
+      "2025-10-26",
+      null,
+      "16:04:01",
+      "Line 1: BGNmIEUqoIgN",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "68",
+            "Jack_pIKq",
+            148,
+            -498.854
+          ],
+          [
+            "69",
+            "Diana_DOLK",
+            22,
+            325.759
+          ],
+          [
+            "70",
+            "Charlie_gbXI",
+            -452,
+            385.674
+          ],
+          [
+            "71",
+            null,
+            132,
+            -11.001
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "58",
+            "Jack_yEbK",
+            -181
+          ],
+          [
+            "59",
+            "Diana_ABpj",
+            -388
+          ],
+          [
+            "60",
+            "Jack_RyGU",
+            -128
+          ]
+        ]
+      }
+    ],
+    [
+      "28",
+      "Iris_ujUh",
+      "it",
+      false,
+      -340.273,
+      "2025-09-22",
+      "2025-03-14 10:31:42",
+      "21:15:23",
+      "Line 1: OAQbUsTKbTkz\nLine 2: ijNnVvaPJHzM",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "72",
+            "Frank_NdzM",
+            325,
+            -264.803
+          ],
+          [
+            "73",
+            "Jack_RBNv",
+            87,
+            423.082
+          ],
+          [
+            "74",
+            "Grace_MNAl",
+            351,
+            -498.844
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "61",
+            "Henry_SCZu",
+            192
+          ],
+          [
+            "62",
+            "Henry_TMki",
+            284
+          ],
+          [
+            "63",
+            "Iris_Sfhe",
+            349
+          ],
+          [
+            "64",
+            "Henry_mgfr",
+            253
+          ]
+        ]
+      }
+    ],
+    [
+      "29",
+      null,
+      "cn",
+      null,
+      469.945,
+      "2025-11-28",
+      "2025-02-28 19:36:00",
+      "03:17:50",
+      "Line 1: qXynlxCXtpCS\nLine 2: wasNAnXnqqFz\nLine 3: DsjtRxjzohAw",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "75",
+            "Grace_PeCE",
+            -339,
+            223.721
+          ],
+          [
+            "76",
+            "Frank_wOkb",
+            -130,
+            -197.53
+          ],
+          [
+            "77",
+            "Henry_uYFP",
+            262,
+            453.072
+          ],
+          [
+            "78",
+            "Charlie_UZOV",
+            -69,
+            -403.911
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "65",
+            "Frank_xLHI",
+            219
+          ]
+        ]
+      }
+    ],
+    [
+      "30",
+      "Henry_StDI",
+      "us",
+      false,
+      -459.525,
+      "2025-10-13",
+      "2025-08-30 21:24:13",
+      "04:38:55",
+      "Line 1: qDvBwiRRNexb",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "79",
+            "Iris_uriA",
+            302,
+            26.864
+          ],
+          [
+            "80",
+            "Grace_guXR",
+            -421,
+            246.056
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "66",
+            "Henry_rzAS",
+            402
+          ]
+        ]
+      }
+    ],
+    [
+      "31",
+      "Bob_odkx",
+      "es",
+      null,
+      139.383,
+      "2026-01-06",
+      "2025-08-24 18:54:48",
+      "02:59:19",
+      "Line 1: UoZfmmNjpjyk\nLine 2: AmUNARIKsoZN",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "81",
+            "Alice_vKaN",
+            160,
+            -78.358
+          ],
+          [
+            "82",
+            "Iris_llqZ",
+            -498,
+            317.243
+          ],
+          [
+            "83",
+            "Alice_TvQo",
+            -257,
+            -169.815
+          ],
+          [
+            "84",
+            "Diana_qaid",
+            432,
+            275.08
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "67",
+            "Henry_FNBy",
+            -105
+          ],
+          [
+            "68",
+            "Jack_mCHM",
+            -22
+          ]
+        ]
+      }
+    ],
+    [
+      "32",
+      "Charlie_eYqE",
+      null,
+      true,
+      null,
+      "2025-03-23",
+      "2025-02-23 06:31:52",
+      "00:36:16",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "85",
+            "Grace_YiJe",
+            304,
+            -271.525
+          ],
+          [
+            "86",
+            "Eve_Spdz",
+            209,
+            -90.561
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "69",
+            "Grace_jSsx",
+            97
+          ],
+          [
+            "70",
+            "Alice_Uuvc",
+            372
+          ],
+          [
+            "71",
+            null,
+            -124
+          ]
+        ]
+      }
+    ],
+    [
+      "33",
+      "Grace_QTZe",
+      "br",
+      false,
+      123.669,
+      "2025-12-08",
+      "2025-06-23 14:21:28",
+      "20:19:42",
+      "Line 1: oJZgyaJyIEfA\nLine 2: ZAvIcpgogOwg",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "87",
+            null,
+            -292,
+            -428.272
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "72",
+            "Eve_cCgF",
+            -411
+          ],
+          [
+            "73",
+            null,
+            -168
+          ],
+          [
+            "74",
+            "Iris_PtjQ",
+            -297
+          ],
+          [
+            "75",
+            "Frank_Gisc",
+            -242
+          ]
+        ]
+      }
+    ],
+    [
+      "34",
+      "Jack_dLYH",
+      "fr",
+      true,
+      -478.882,
+      "2025-05-11",
+      "2025-10-15 02:46:17",
+      "18:11:44",
+      "Line 1: ACXmWwwUmcMB\nLine 2: wzOufzgbukxF\nLine 3: iOgpRJJxjzbG",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "88",
+            "Iris_wUFO",
+            143,
+            -242.033
+          ],
+          [
+            "89",
+            "Alice_pbdq",
+            409,
+            135.27
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "76",
+            "Bob_ouuF",
+            236
+          ],
+          [
+            "77",
+            "Grace_rBVA",
+            null
+          ],
+          [
+            "78",
+            "Alice_GZhd",
+            293
+          ]
+        ]
+      }
+    ],
+    [
+      "35",
+      "Alice_hJUN",
+      "fr",
+      true,
+      -389.348,
+      "2026-02-02",
+      "2025-11-11 13:14:00",
+      "15:47:46",
+      "Line 1: XjLQcVCGUCnV",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "90",
+            "Frank_GUDk",
+            391,
+            null
+          ],
+          [
+            "91",
+            "Grace_UaPP",
+            null,
+            231.309
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "79",
+            "Eve_akgf",
+            -479
+          ],
+          [
+            "80",
+            "Diana_CCGd",
+            null
+          ]
+        ]
+      }
+    ],
+    [
+      "36",
+      "Alice_VAgK",
+      "uk",
+      true,
+      28.269,
+      "2026-01-28",
+      "2025-03-10 18:17:34",
+      "20:43:21",
+      "Line 1: pVKpuIEZYxcu",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "92",
+            "Jack_EtTD",
+            -375,
+            -108.789
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "81",
+            "Diana_cblr",
+            -199
+          ]
+        ]
+      }
+    ],
+    [
+      "37",
+      "Bob_WHrC",
+      "de",
+      false,
+      73.79,
+      "2025-07-31",
+      "2025-03-15 02:47:55",
+      "19:38:46",
+      "Line 1: QvakeGDUjRXq\nLine 2: nQdAeWAnywXE\nLine 3: mpGiCqnJwoSy",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "93",
+            "Diana_KWMr",
+            58,
+            -214.592
+          ],
+          [
+            "94",
+            "Alice_oQTl",
+            -12,
+            177.539
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "82",
+            "Jack_GvtN",
+            213
+          ],
+          [
+            "83",
+            "Eve_fqXM",
+            81
+          ],
+          [
+            "84",
+            "Grace_XDvJ",
+            206
+          ]
+        ]
+      }
+    ],
+    [
+      "38",
+      "Henry_FipI",
+      "pt",
+      false,
+      -393.291,
+      "2025-04-18",
+      "2025-10-11 18:27:12",
+      "22:05:25",
+      "Line 1: YSfgOQzcetwQ\nLine 2: HteJrwcVeEcB\nLine 3: jXRdbcUorwob",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "95",
+            "Charlie_MZWE",
+            308,
+            413.348
+          ],
+          [
+            "96",
+            "Grace_NBBT",
+            129,
+            -368.138
+          ],
+          [
+            "97",
+            "Grace_jjuj",
+            null,
+            -225.445
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "85",
+            "Henry_smZt",
+            -364
+          ],
+          [
+            "86",
+            "Iris_zwAl",
+            382
+          ],
+          [
+            "87",
+            "Diana_jpXq",
+            null
+          ]
+        ]
+      }
+    ],
+    [
+      "39",
+      "Bob_ZJPz",
+      null,
+      false,
+      86.682,
+      "2025-02-11",
+      "2025-08-15 04:04:29",
+      "08:35:45",
+      "Line 1: TQXMXfEJmaTF\nLine 2: KcnlziIfsILh\nLine 3: gaTUSsQNGJds",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "98",
+            "Charlie_fQGi",
+            -226,
+            null
+          ],
+          [
+            "99",
+            "Jack_xBeu",
+            423,
+            -127.6
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "88",
+            "Jack_uXZk",
+            429
+          ],
+          [
+            "89",
+            "Diana_OMmo",
+            null
+          ]
+        ]
+      }
+    ],
+    [
+      "40",
+      "Jack_PwHS",
+      "cn",
+      true,
+      208.067,
+      "2025-08-26",
+      "2025-02-06 19:47:16",
+      "22:22:32",
+      "Line 1: RycEYstCSeVO",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "100",
+            "Frank_FXRt",
+            -330,
+            null
+          ],
+          [
+            "101",
+            "Henry_wvTo",
+            -213,
+            -74.816
+          ],
+          [
+            "102",
+            "Diana_wxjH",
+            233,
+            335.441
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "90",
+            "Grace_ebHb",
+            null
+          ],
+          [
+            "91",
+            "Diana_bVaE",
+            151
+          ],
+          [
+            "92",
+            null,
+            222
+          ]
+        ]
+      }
+    ],
+    [
+      "41",
+      "Frank_TFgr",
+      "de",
+      true,
+      -123.155,
+      "2025-05-24",
+      "2025-08-02 16:48:44",
+      null,
+      "Line 1: VlAecIrwOXor",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "103",
+            "Grace_auSK",
+            335,
+            -175.158
+          ],
+          [
+            "104",
+            "Eve_BYiu",
+            228,
+            48.516
+          ],
+          [
+            "105",
+            "Grace_BuGs",
+            -253,
+            266.903
+          ],
+          [
+            "106",
+            "Frank_dsbD",
+            -156,
+            154.606
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "93",
+            "Bob_nixF",
+            -113
+          ],
+          [
+            "94",
+            "Diana_qUdx",
+            24
+          ],
+          [
+            "95",
+            "Alice_uNJz",
+            -491
+          ],
+          [
+            "96",
+            "Jack_zpAj",
+            -361
+          ]
+        ]
+      }
+    ],
+    [
+      "42",
+      "Eve_LKdB",
+      "cn",
+      false,
+      -213.181,
+      "2025-04-08",
+      "2025-07-01 15:26:01",
+      "14:58:11",
+      "Line 1: IbctGkOvMcWr\nLine 2: RWvJnmFZWtUy",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "107",
+            "Grace_VesV",
+            448,
+            231.375
+          ],
+          [
+            "108",
+            "Charlie_nqwm",
+            318,
+            null
+          ],
+          [
+            "109",
+            "Henry_Wuin",
+            172,
+            -278.514
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "97",
+            "Bob_UeSk",
+            435
+          ],
+          [
+            "98",
+            null,
+            null
+          ],
+          [
+            "99",
+            "Grace_Fboe",
+            -467
+          ],
+          [
+            "100",
+            "Frank_eFpY",
+            -22
+          ]
+        ]
+      }
+    ],
+    [
+      "43",
+      "Frank_PYTB",
+      "fr",
+      true,
+      -485.405,
+      "2025-02-22",
+      "2025-10-14 11:45:02",
+      "03:46:34",
+      "Line 1: eSQcPkCDmFFt\nLine 2: lQxVRVRycZCx",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "110",
+            "Diana_lYOa",
+            -309,
+            224.424
+          ],
+          [
+            "111",
+            "Iris_gnkj",
+            207,
+            -331.296
+          ],
+          [
+            "112",
+            "Charlie_edIB",
+            447,
+            -458.93
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "101",
+            "Charlie_SxSU",
+            -422
+          ],
+          [
+            "102",
+            "Eve_alyi",
+            114
+          ],
+          [
+            "103",
+            "Iris_irkk",
+            332
+          ],
+          [
+            "104",
+            "Frank_hDIF",
+            206
+          ]
+        ]
+      }
+    ],
+    [
+      "44",
+      "Alice_aswP",
+      "br",
+      true,
+      315.482,
+      "2025-12-21",
+      "2025-12-17 01:32:05",
+      "22:13:33",
+      "Line 1: LqBvPiCEhYdR\nLine 2: tfkPxqqcrFzC\nLine 3: XKnMXUQbAqHx",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "113",
+            "Jack_rDHi",
+            239,
+            null
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "105",
+            "Diana_AqyM",
+            190
+          ],
+          [
+            "106",
+            "Alice_dlll",
+            187
+          ],
+          [
+            "107",
+            "Bob_Xrcy",
+            57
+          ],
+          [
+            "108",
+            null,
+            -219
+          ]
+        ]
+      }
+    ],
+    [
+      "45",
+      "Iris_evgL",
+      "de",
+      false,
+      254.221,
+      "2026-01-31",
+      "2025-02-21 02:25:34",
+      "19:50:40",
+      "Line 1: wYPnAhDAXWSk\nLine 2: GasVeatnsVJY\nLine 3: GetbWhJsdkFk",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "114",
+            "Bob_hnIS",
+            428,
+            -128.991
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "109",
+            "Bob_Ilgf",
+            -431
+          ],
+          [
+            "110",
+            "Bob_irDm",
+            null
+          ],
+          [
+            "111",
+            "Henry_TDzm",
+            249
+          ],
+          [
+            "112",
+            "Iris_WKEx",
+            null
+          ]
+        ]
+      }
+    ],
+    [
+      "46",
+      null,
+      "cn",
+      true,
+      -2.078,
+      "2025-02-27",
+      "2025-09-07 17:55:44",
+      "03:02:04",
+      "Line 1: ulghXqpzlvOa",
+      null,
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "113",
+            null,
+            -228
+          ],
+          [
+            "114",
+            "Jack_RPWJ",
+            90
+          ]
+        ]
+      }
+    ],
+    [
+      "47",
+      "Alice_QKTL",
+      "fr",
+      true,
+      -401.751,
+      "2025-09-29",
+      "2025-03-02 13:26:19",
+      "14:34:53",
+      "Line 1: fbydOcqMtOMb\nLine 2: LsSbPWdamenl\nLine 3: VQFVhTihWgOM",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "115",
+            "Iris_TvfR",
+            400,
+            437.594
+          ],
+          [
+            "116",
+            "Iris_pqgA",
+            73,
+            457.096
+          ],
+          [
+            "117",
+            "Diana_telG",
+            142,
+            434.862
+          ],
+          [
+            "118",
+            "Eve_JtfX",
+            214,
+            -346.894
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "115",
+            null,
+            141
+          ],
+          [
+            "116",
+            "Bob_HJkk",
+            380
+          ]
+        ]
+      }
+    ],
+    [
+      "48",
+      "Diana_kUmT",
+      "cn",
+      false,
+      260.884,
+      "2025-04-02",
+      "2026-01-04 13:27:28",
+      "08:46:46",
+      "Line 1: GCIMucRIczXJ",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "119",
+            null,
+            414,
+            -202.491
+          ],
+          [
+            "120",
+            "Frank_TTkU",
+            null,
+            -308.687
+          ],
+          [
+            "121",
+            "Alice_lesA",
+            -337,
+            276.084
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "117",
+            "Jack_mfFQ",
+            300
+          ],
+          [
+            "118",
+            "Bob_dMor",
+            -267
+          ]
+        ]
+      }
+    ],
+    [
+      "49",
+      "Jack_zggI",
+      "uk",
+      true,
+      -67.906,
+      "2025-07-24",
+      "2025-04-19 15:49:07",
+      "00:20:07",
+      "Line 1: GaypGqjbhVtr\nLine 2: sTgRBKqSqkpO\nLine 3: hIDFEgnUGpDr",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "122",
+            "Grace_tMlo",
+            -72,
+            -112.948
+          ],
+          [
+            "123",
+            "Eve_CMqY",
+            367,
+            394.549
+          ],
+          [
+            "124",
+            null,
+            174,
+            -200.178
+          ],
+          [
+            "125",
+            "Bob_bJQw",
+            null,
+            -169.291
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "119",
+            "Grace_NqXJ",
+            -106
+          ],
+          [
+            "120",
+            null,
+            null
+          ],
+          [
+            "121",
+            "Frank_tcDa",
+            449
+          ]
+        ]
+      }
+    ],
+    [
+      "50",
+      "Jack_RzoK",
+      "fr",
+      false,
+      -365.539,
+      "2025-07-20",
+      "2025-08-14 13:24:15",
+      null,
+      "Line 1: qAKdXnNRBoYZ",
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "product": "string",
+          "quantity": "int",
+          "price": "float"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "126",
+            "Bob_ySNu",
+            -280,
+            null
+          ],
+          [
+            "127",
+            "Frank_oMWI",
+            -307,
+            -424.607
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "columns": {
+          "id": "id",
+          "tag_name": "string",
+          "priority": "int"
+        },
+        "options": {},
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": true,
+          "show_hierarchy": false,
+          "hierarchy_column": "parent",
+          "hierarchy_root_value": "",
+          "single_item_mode": "dialog",
+          "label_field_top_down": true,
+          "general_view_options": [
+            "Table",
+            "Cards",
+            "Pivot",
+            "Correlation",
+            "Diagram",
+            "AI",
+            "Saved"
+          ],
+          "general_always_visible_options": [
+            "New",
+            "New Fast",
+            "Paper Form"
+          ],
+          "general_line_options": [
+            "View",
+            "Edit",
+            "Copy",
+            "New",
+            "New Fast",
+            "Delete",
+            "Paper Form"
+          ],
+          "general_multi_options": [
+            "Invert Page",
+            "Invert All",
+            "Remove Checked",
+            "Remove Unchecked",
+            "Multi View",
+            "Multi Edit",
+            "Group Edit",
+            "Merge",
+            "Multi Copy",
+            "Multi Delete"
+          ]
+        },
+        "items": [
+          [
+            "122",
+            "Alice_xuXX",
+            288
+          ],
+          [
+            "123",
+            "Diana_AvtZ",
+            -226
+          ],
+          [
+            "124",
+            "Charlie_Isqy",
+            -110
+          ]
+        ]
+      }
+    ]
+  ]
+}
