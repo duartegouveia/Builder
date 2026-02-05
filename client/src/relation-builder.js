@@ -4265,6 +4265,9 @@ function syncFooterColumnWidths(mainTable, footerTable) {
 }
 
 function renderTable(st = state) {
+  // Update group-by panel
+  renderGroupByPanel(st);
+  
   // Get container - from instance container or global DOM
   const container = st.container 
     ? st.container.querySelector('.relation-table-container')
@@ -4314,72 +4317,6 @@ function renderTable(st = state) {
   indexTh.textContent = '#';
   indexTh.className = 'relation-th-index' + (st.rel_options.show_natural_order ? '' : ' hidden');
   headerRow.appendChild(indexTh);
-  
-  // Group info header (if any groups)
-  if (getGroupByColumns(st).length > 0) {
-    const groupInfo = document.createElement('div');
-    groupInfo.className = 'group-by-indicator';
-    
-    let groupHtml = '<span>Grouped by:</span>';
-    getGroupByColumns(st).forEach(colIdx => {
-      const colName = st.columnNames[colIdx];
-      const uniqueValues = getUniqueValuesForColumn(colIdx, st);
-      const currentValue = getGroupBySelectedValues(st)[colIdx];
-      const hasSelection = currentValue !== undefined;
-      
-      const colType = st.columnTypes[colIdx];
-      groupHtml += `
-        <div class="group-by-col" data-col="${colIdx}">
-          <strong>${colName}:</strong>
-          <select class="group-value-select" data-col="${colIdx}">
-            <option value="__all__"${!hasSelection ? ' selected' : ''}>All (${uniqueValues.length})</option>
-            ${uniqueValues.map(v => {
-              const val = v === null ? '__null__' : v;
-              let label;
-              if (v === null) {
-                label = '(null)';
-              } else if (colType === 'select') {
-                const colOptions = st.options[colName];
-                label = (colOptions && colOptions[v] !== undefined) ? colOptions[v] : String(v);
-              } else {
-                label = String(v);
-              }
-              const selected = hasSelection && String(currentValue) === String(v) ? ' selected' : '';
-              return `<option value="${val}"${selected}>${escapeHtml(label)}</option>`;
-            }).join('')}
-          </select>
-        </div>
-      `;
-    });
-    groupHtml += '<button class="btn-clear-groups" data-testid="button-clear-groups">✕ Clear</button>';
-    
-    groupInfo.innerHTML = groupHtml;
-    container.appendChild(groupInfo);
-    
-    groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
-      setGroupByColumns(st, []);
-      setGroupBySelectedValues(st, {});
-      renderTable(st);
-    });
-    
-    groupInfo.querySelectorAll('.group-value-select').forEach(select => {
-      select.addEventListener('change', (e) => {
-        const colIdx = parseInt(e.target.dataset.col);
-        const value = e.target.value;
-        
-        if (value === '__all__') {
-          delete getGroupBySelectedValues(st)[colIdx];
-        } else if (value === '__null__') {
-          getGroupBySelectedValues(st)[colIdx] = null;
-        } else {
-          getGroupBySelectedValues(st)[colIdx] = value;
-        }
-        
-        setCurrentPage(st, 1);
-        renderTable(st);
-      });
-    });
-  }
   
   // Data columns (skip grouped columns)
   st.columnNames.forEach((name, idx) => {
@@ -7835,6 +7772,92 @@ function hideKeyboardHelpTooltip() {
   }
 }
 
+function renderGroupByPanel(st = state) {
+  const panelContainer = st.container 
+    ? st.container.querySelector('.group-by-panel-container') 
+    : el('.group-by-panel-container');
+  
+  if (!panelContainer) return;
+  
+  panelContainer.innerHTML = '';
+  
+  if (getGroupByColumns(st).length === 0) return;
+  
+  const groupInfo = document.createElement('div');
+  groupInfo.className = 'group-by-indicator';
+  
+  let groupHtml = '<span>Grouped by:</span>';
+  getGroupByColumns(st).forEach(colIdx => {
+    const colName = st.columnNames[colIdx];
+    const uniqueValues = getUniqueValuesForColumn(colIdx, st);
+    const currentValue = getGroupBySelectedValues(st)[colIdx];
+    const hasSelection = currentValue !== undefined;
+    
+    const colType = st.columnTypes[colIdx];
+    groupHtml += `
+      <div class="group-by-col" data-col="${colIdx}">
+        <strong>${colName}:</strong>
+        <select class="group-value-select" data-col="${colIdx}">
+          <option value="__all__"${!hasSelection ? ' selected' : ''}>All (${uniqueValues.length})</option>
+          ${uniqueValues.map(v => {
+            const val = v === null ? '__null__' : v;
+            let label;
+            if (v === null) {
+              label = '(null)';
+            } else if (colType === 'select') {
+              const colOptions = st.options[colName];
+              label = (colOptions && colOptions[v] !== undefined) ? colOptions[v] : String(v);
+            } else {
+              label = String(v);
+            }
+            const selected = hasSelection && String(currentValue) === String(v) ? ' selected' : '';
+            return `<option value="${val}"${selected}>${escapeHtml(label)}</option>`;
+          }).join('')}
+        </select>
+      </div>
+    `;
+  });
+  groupHtml += '<button class="btn-clear-groups" data-testid="button-clear-groups">✕ Clear</button>';
+  
+  groupInfo.innerHTML = groupHtml;
+  panelContainer.appendChild(groupInfo);
+  
+  groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
+    setGroupByColumns(st, []);
+    setGroupBySelectedValues(st, {});
+    renderGroupByPanel(st);
+    const currentView = getCurrentView(st);
+    if (currentView === 'cards') {
+      renderCardsView(st);
+    } else if (currentView === 'table') {
+      renderTable(st);
+    }
+  });
+  
+  groupInfo.querySelectorAll('.group-value-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const colIdx = parseInt(e.target.dataset.col);
+      const value = e.target.value;
+      
+      if (value === '__all__') {
+        delete getGroupBySelectedValues(st)[colIdx];
+      } else if (value === '__null__') {
+        getGroupBySelectedValues(st)[colIdx] = null;
+      } else {
+        getGroupBySelectedValues(st)[colIdx] = value;
+      }
+      
+      setCurrentPage(st, 1);
+      const currentView = getCurrentView(st);
+      if (currentView === 'cards') {
+        renderCardsView(st);
+      } else if (currentView === 'table') {
+        renderTable(st);
+      }
+    });
+  });
+}
+
 function switchView(viewName) {
   setCurrentView(state, viewName);
   
@@ -11025,6 +11048,7 @@ function initRelationInstance(container, relationData, options = {}) {
   const hasRightContent = searchHtml || alwaysVisibleSelectHtml || badgeHtml;
   
   mainPanelHtml += `
+    <div class="group-by-panel-container"></div>
     <div class="view-tabs" style="margin-bottom: 1rem;">
       <div class="view-tabs-left">
         ${viewOptions.map((view, idx) => {
