@@ -1,0 +1,79 @@
+Ao carregar no botão "Obj->Rel", faz o seguinte código javascript.
+Começa o conteúdo JSON na textarea e com o seguinte JSON:
+
+{
+  "pot": "relation",
+  "name": "",
+  "columns": {
+  },
+  "options": {
+    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_column_kind": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
+    "single_item_mode": "dialog",
+    "label_field_top_down": true,
+    "general_view_options": [
+      "Table",
+      "Cards",
+      "Pivot",
+      "Correlation",
+      "Diagram",
+      "AI",
+      "Saved"
+    ],
+    "general_always_visible_options": [
+      "New",
+      "New Fast",
+      "Paper Form",
+      "Output State"
+    ],
+    "general_line_options": [
+      "View",
+      "Edit",
+      "Copy",
+      "New",
+      "New Fast",
+      "Delete",
+      "Paper Form"
+    ],
+    "general_multi_options": [
+      "Invert Page",
+      "Invert All",
+      "Remove Checked",
+      "Remove Unchecked",
+      "Multi View",
+      "Multi Edit",
+      "Group Edit",
+      "Merge",
+      "Multi Copy",
+      "Multi Delete"
+    ]
+  },
+  "items": [
+  ]
+}
+
+Faz o parse de ambas as strings. A da textarea coloca na variavel ta. A segunda coloca na variável rel.
+É um requisito que ta é o um object, mas dá mensagem de erro se não for.
+
+Obtem as keys de ta.
+numa nova variavel ta_kind, do tipo array, vamos descobrir o kind de cada um dos atributos e ir acrescentando em ta_kind.
+Para cada key:
+- se o valores de ta[key] for True ou False o kind é "boolean"
+- se o conteúdo de ta[key] for um número, o kind é "float".
+- se o conteúdo de ta[key] for uma string, mas o valor puder ser interpretado como uma date, ou datetime, ou time, então o kind é "date", "datetime" ou "time".
+- se os valores de ta[key] forem do typeof text, se a length da string for >100 o kind é "textarea". Se a length for <=100, o kind é text.
+- se o valor de ta[key] for um Array, é necessário analisar quais são os kinds dos valores dentro do array. Se todos os valores forem consistente do mesmo tipo, então o kind será "multi_"+ o kind dos valores dentro array.
+- se o valor de ta[key] for um Object, então o kind é relation, e chama recursivamente esta função para transformar o objecto em ta[key] numa relation. O valor a cosiderar para este atributo é coverter o objeto rel2 da chamada recursiva em stringatravés de JSON.stringify(rel2,null,2).
+
+Pegando na variavel rel, colocar no atributo "columns", cada key e como valor para essa key o kind que foi sendo colocado em ta_kind.
+
+Depois, em items, colocar um array, em que, seguindo a ordem das keys coloca o respetivo valor, tal como foi obtido de ta, excepto no caso dos Objects, em que se deve colocar a string que resulta da chamada recursiva + stringify.
