@@ -2796,6 +2796,32 @@ function calculateStatistics(colIdx, st = state) {
       // Range
       stats.range = stats.max - stats.min;
     }
+  } else if (type === 'date' || type === 'datetime' || type === 'time') {
+    // Convert date/time values to numeric for statistics
+    let nums;
+    if (type === 'time') {
+      nums = values.map(v => {
+        const [h, m, s] = String(v).split(':').map(Number);
+        return (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+      }).filter(n => !isNaN(n));
+    } else {
+      nums = values.map(v => new Date(v).getTime()).filter(n => !isNaN(n));
+    }
+    
+    if (nums.length > 0) {
+      nums.sort((a, b) => a - b);
+      stats.min = nums[0];
+      stats.max = nums[nums.length - 1];
+      stats.range = stats.max - stats.min;
+      
+      // Median
+      const mid = Math.floor(nums.length / 2);
+      stats.median = nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+      
+      // Mean
+      stats.sum = nums.reduce((a, b) => a + b, 0);
+      stats.mean = stats.sum / nums.length;
+    }
   } else if (type === 'select') {
     // Categorical statistics for select type
     const freq = {};
@@ -3622,10 +3648,17 @@ function applyConditionalFormatting(value, colIdx, cell, rowIdx, st = state) {
         if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
         if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
         
-        if (rule.style.dataBar && (type === 'int' || type === 'float')) {
-          const stats = calculateStatistics(colIdx);
+        if (rule.style.dataBar && (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time')) {
+          const stats = calculateStatistics(colIdx, st);
           if (stats.min !== undefined && stats.max !== undefined && stats.max !== stats.min) {
-            const percent = ((value - stats.min) / (stats.max - stats.min)) * 100;
+            let numValue = value;
+            if (type === 'date' || type === 'datetime') {
+              numValue = new Date(value).getTime();
+            } else if (type === 'time') {
+              const [h, m, s] = String(value).split(':').map(Number);
+              numValue = (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+            }
+            const percent = ((numValue - stats.min) / (stats.max - stats.min)) * 100;
             cell.style.background = `linear-gradient(to right, ${rule.style.dataBar} ${percent}%, transparent ${percent}%)`;
           }
         }
