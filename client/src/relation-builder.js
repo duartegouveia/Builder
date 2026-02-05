@@ -12397,32 +12397,22 @@ function init() {
 
     const previewPanel = document.querySelector('.json-preview-panel');
     if (previewPanel) {
+      const oldUid = previewPanel.dataset.relationUid;
+      if (oldUid) {
+        relationInstances.delete(oldUid);
+        unregisterRelation(oldUid);
+      }
       previewPanel.innerHTML = '';
 
       const result = parseRelation(textarea.value);
-      if (result.success) {
-        const relData = result.data;
-        const tempState = initRelationInstance(document.createElement('div'), JSON.parse(JSON.stringify(relData)), { showJsonEditor: false, isNested: true });
+      if (result.success && result.data.items.length > 0) {
+        const relData = JSON.parse(JSON.stringify(result.data));
+        relData.rel_options.single_item_mode = 'bottom';
 
-        if (tempState && relData.items.length > 0) {
-          const row = tempState.relation.items[0];
-          previewPanel.innerHTML = `
-            <div class="detail-panel-content">
-              <div class="detail-panel-header">
-                <span class="detail-panel-title">Edit - Registo 1</span>
-              </div>
-              <div class="detail-panel-body"></div>
-            </div>
-          `;
-          const body = previewPanel.querySelector('.detail-panel-body');
-          body.innerHTML = generateRowFormattedContent(tempState, row, 'edit');
-          initRelationFieldsInContainer(body, tempState, row);
-        }
+        const previewState = initRelationInstance(previewPanel, relData, { showJsonEditor: false, isNested: true });
+        previewPanel.dataset.relationUid = previewState.uid;
 
-        if (tempState) {
-          relationInstances.delete(tempState.uid);
-          unregisterRelation(tempState.uid);
-        }
+        showRowEditDialog(previewState, 0);
       }
     }
   });
