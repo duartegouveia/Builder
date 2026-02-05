@@ -11915,9 +11915,16 @@ function init() {
   const btnAiAsk = el('.btn-ai-ask');
   const aiQuestion = el('.ai-question');
   
-  btnGenerate?.addEventListener('click', () => {
-    const demo = generateDemoRelation();
-    textarea.value = JSON.stringify(demo, null, 2);
+  btnGenerate?.addEventListener('click', async () => {
+    try {
+      const response = await fetch('/data/demo_data.json');
+      const data = await response.json();
+      textarea.value = JSON.stringify(data, null, 2);
+    } catch (error) {
+      console.error('Failed to load demo_data.json:', error);
+      const demo = generateDemoRelation();
+      textarea.value = JSON.stringify(demo, null, 2);
+    }
   });
   
   const btnLoadProducts = el('.btn-load-products');
