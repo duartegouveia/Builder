@@ -123,8 +123,9 @@
 
 .popup-content-body {
   padding: var(--space-4);
-  overflow: auto;
-  max-height: 60vh;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ===== Main Navigation Menu ===== */
@@ -1528,6 +1529,9 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   box-shadow: var(--shadow-lg);
   z-index: 1000;
   min-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   width: 90vw;
   max-width: 1400px;
   height: 90vh;
@@ -1840,14 +1844,14 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 .row-field-label {
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: 0.6875rem;
   color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .row-field-value {
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
   color: var(--foreground);
   padding: var(--space-2);
   background: var(--slate-50);
@@ -2004,7 +2008,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   padding: var(--space-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
   background: white;
 }
 
