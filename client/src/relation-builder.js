@@ -7794,13 +7794,25 @@ function renderGroupByPanel(st = state) {
     const hasSelection = currentValue !== undefined;
     
     const colType = st.columnTypes[colIdx];
+    const totalItems = st.relation.items ? st.relation.items.length : 0;
+    
+    const getItemCountForValue = (value) => {
+      if (!st.relation.items) return 0;
+      return st.relation.items.filter(item => {
+        const itemValue = item[colIdx];
+        if (value === null) return itemValue === null || itemValue === undefined;
+        return String(itemValue) === String(value);
+      }).length;
+    };
+    
     groupHtml += `
       <div class="group-by-col" data-col="${colIdx}">
         <strong>${colName}:</strong>
         <select class="group-value-select" data-col="${colIdx}">
-          <option value="__all__"${!hasSelection ? ' selected' : ''}>All (${uniqueValues.length})</option>
+          <option value="__all__"${!hasSelection ? ' selected' : ''}>All (${uniqueValues.length}) #${totalItems}</option>
           ${uniqueValues.map(v => {
             const val = v === null ? '__null__' : v;
+            const itemCount = getItemCountForValue(v);
             let label;
             if (v === null) {
               label = '(null)';
@@ -7811,7 +7823,7 @@ function renderGroupByPanel(st = state) {
               label = String(v);
             }
             const selected = hasSelection && String(currentValue) === String(v) ? ' selected' : '';
-            return `<option value="${val}"${selected}>${escapeHtml(label)}</option>`;
+            return `<option value="${val}"${selected}>${escapeHtml(label)} #${itemCount}</option>`;
           }).join('')}
         </select>
       </div>

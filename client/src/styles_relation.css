@@ -1619,7 +1619,8 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   background: var(--primary-50);
   border: 1px solid var(--primary-200);
   border-radius: var(--radius-sm);
-  margin-bottom: var(--space-3);
+  margin-top: 5px;
+  margin-bottom: 5px;
   font-size: 0.8125rem;
 }
 
