@@ -112,7 +112,7 @@ const PRODUCTS_JSON = {
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
-    "single_item_mode": "dialog",
+    "single_item_mode": "right",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
     "general_always_visible_options": ["New", "New Fast", "Paper Form"],
@@ -120,21 +120,21 @@ const PRODUCTS_JSON = {
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
   },
   "items": [
-    ['1','1','PURINA DOG Chow Adulto','Nestle','PURINA','7613036584307',10,'1'],
-    ['2','2','Purina ONE Supreme Adult','Nestle','PURINA','7613036584312',10,'2'],
-    ['3','3','Garden Gourmet à base de proteína vegetal','Nestle','Garden Gourmet','7613036584313',5,'3'],
-    ['4','4','Tablete de Chocolate Nestlé Classic','Nestle','Nestle','7613036584314',5,'4'],
-    ['5','5','Bombons Nestlé Sensations','Nestle','Nestle','7613036584315',0,'4'],
-    ['6','6','Barras de Chocolate Nestlé Crunch','Nestle','Nestle','7613036584316',0,'4'],
-    ['7','7','CINI MINIS Churros','Nestle','Nestle','7613036584317',5,'5'],
-    ['8','8','CHEERIOS Mel 375 g','Nestle','Nestle','7613034626847',10,'5'],
-    ['9','9','NESCAFÉ Classic 200 mg','Nestle','NESCAFÉ','7613035304003',10,'6'],
-    ['10','10','SICAL Torrado','Nestle','SICAL','7613035304008',10,'6'],
-    ['11','11','Bolero Bebida de Cevada','Nestle','Bolero','7613035304013',10,'6'],
-    ['12','12','Natas Longa Vida','Nestle','Longa Vida','7613035304018',10,'7'],
-    ['13','13','Iogurte grego Lindahls rico em proteína','Nestle','Lindahls','7613035304023',10,'7'],
-    ['14','14','Arroz de Marisco Longa Vida','Nestle','Longa Vida','7613035304028',5,'9'],
-    ['15','15','Miúdos Nutrição Infantil NAN','Nestle','NAN','7613035304033',10,'11']
+    ["1", "1", "PURINA DOG Chow Adulto", "Nestle", "PURINA", "7613036584307", 10, "1"],
+    ["2", "2", "Purina ONE Supreme Adult", "Nestle", "PURINA", "7613036584312", 10, "2"],
+    ["3", "3", "Garden Gourmet à base de proteína vegetal", "Nestle", "Garden Gourmet", "7613036584313", 5, "3"],
+    ["4", "4", "Tablete de Chocolate Nestlé Classic", "Nestle", "Nestle", "7613036584314", 5, "4"],
+    ["5", "5", "Bombons Nestlé Sensations", "Nestle", "Nestle", "7613036584315", 0, "4"],
+    ["6", "6", "Barras de Chocolate Nestlé Crunch", "Nestle", "Nestle", "7613036584316", 0, "4"],
+    ["7", "7", "CINI MINIS Churros", "Nestle", "Nestle", "7613036584317", 5, "5"],
+    ["8", "8", "CHEERIOS Mel 375 g", "Nestle", "Nestle", "7613034626847", 10, "5"],
+    ["9", "9", "NESCAFÉ Classic 200 mg", "Nestle", "NESCAFÉ", "7613035304003", 10, "6"],
+    ["10", "10", "SICAL Torrado", "Nestle", "SICAL", "7613035304008", 10, "6"],
+    ["11", "11", "Bolero Bebida de Cevada", "Nestle", "Bolero", "7613035304013", 10, "6"],
+    ["12", "12", "Natas Longa Vida", "Nestle", "Longa Vida", "7613035304018", 10, "7"],
+    ["13", "13", "Iogurte grego Lindahls rico em proteína", "Nestle", "Lindahls", "7613035304023", 10, "7"],
+    ["14", "14", "Arroz de Marisco Longa Vida", "Nestle", "Longa Vida", "7613035304028", 5, "9"],
+    ["15", "15", "Miúdos Nutrição Infantil NAN", "Nestle", "NAN", "7613035304033", 10, "11"]
   ]
 };
 
