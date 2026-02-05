@@ -4961,10 +4961,10 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
         </div>
       </div>
-      ${type === 'int' || type === 'float' ? `
       <div class="accordion-section" data-section="binning">
         <div class="accordion-header">Binning <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
+          ${type === 'int' || type === 'float' ? `
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
             <span class="filter-label">Bins:</span>
             <input type="number" class="filter-n-input binning-count-input" value="5" min="2" max="50" step="1" data-testid="input-binning-count">
@@ -4979,10 +4979,13 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <div class="column-menu-item-inline">
             <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">Create _bin Column</button>
           </div>
+          ` : ''}
+          <div class="column-menu-item-inline">
+            <button class="btn-apply-filter color-binning-btn" data-action="apply-color-binning" data-testid="button-apply-color-binning" data-col="${colIdx}">Create from Colors</button>
+          </div>
           <div class="binning-note">Creates a new column with bin numbers (1 to N)</div>
         </div>
       </div>
-      ` : ''}
       <div class="accordion-section" data-section="group">
         <div class="accordion-header">Group By <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
@@ -5051,6 +5054,19 @@ function showColumnMenu(colIdx, x, y, st = state) {
   // Initial position adjustment
   requestAnimationFrame(() => adjustMenuPosition(menu));
   
+  // Disable color binning button if < 2 unique colors
+  const colorBinBtn = menu.querySelector('.color-binning-btn');
+  if (colorBinBtn) {
+    const uniqueColors = getColumnUniqueColors(colIdx, st);
+    if (uniqueColors.length < 2) {
+      colorBinBtn.disabled = true;
+      colorBinBtn.classList.add('disabled');
+      colorBinBtn.title = 'Requires at least 2 different colors in this column';
+    } else {
+      colorBinBtn.title = `Create bins from ${uniqueColors.length} colors`;
+    }
+  }
+  
   menu.addEventListener('click', (e) => {
     const action = e.target.dataset.action;
     if (!action) return;
@@ -5091,6 +5107,12 @@ function showColumnMenu(colIdx, x, y, st = state) {
         setCurrentPage(st, 1);
         renderTable(st);
       }
+      return;
+    }
+    if (action === 'apply-color-binning') {
+      applyColorBinning(colIdx, st);
+      menu.remove();
+      renderTable(st);
       return;
     }
     if (action === 'apply-binning') {
@@ -5454,6 +5476,159 @@ function applyBinning(colIdx, numBins, method, st = state) {
   }
 }
 
+function getColumnUniqueColors(colIdx, st = state) {
+  const colName = st.columnNames[colIdx];
+  const coloredItems = st.relation.colored_items?.[colName];
+  if (!coloredItems || coloredItems.length === 0) return [];
+  
+  const uniqueColors = new Set(coloredItems.map(item => item.color).filter(c => c));
+  return [...uniqueColors];
+}
+
+function applyColorBinning(colIdx, st = state) {
+  const colName = st.columnNames[colIdx];
+  const coloredItems = st.relation.colored_items?.[colName];
+  if (!coloredItems || coloredItems.length === 0) return;
+  
+  const uniqueColors = getColumnUniqueColors(colIdx, st);
+  if (uniqueColors.length < 2) return;
+  
+  // Create a map from color to bin number (1-indexed)
+  const colorToBin = {};
+  uniqueColors.forEach((color, idx) => {
+    colorToBin[color] = idx + 1;
+  });
+  
+  // Create new column name
+  const newColName = colName + '_bin';
+  const insertIdx = colIdx + 1;
+  
+  // Build bin labels for the popup
+  const binLabels = uniqueColors.map((color, idx) => 
+    `Bin ${idx + 1}: ${color}`
+  );
+  
+  // Check if column already exists
+  if (st.columnNames.includes(newColName)) {
+    // Update existing bin column
+    const existingBinIdx = st.columnNames.indexOf(newColName);
+    const idColIdx = st.columnNames.indexOf('id');
+    if (idColIdx < 0) {
+      alert('No "id" column found. Cannot apply color binning.');
+      return;
+    }
+    
+    st.relation.items.forEach(row => {
+      const rowId = row[idColIdx];
+      const colorItem = coloredItems.find(item => item.id === rowId);
+      row[existingBinIdx] = colorItem ? colorToBin[colorItem.color] : null;
+    });
+    
+    // Store bin config
+    setBinningConfig(st, existingBinIdx, {
+      bins: uniqueColors.length,
+      method: 'colors',
+      edges: [],
+      labels: binLabels,
+      sourceColumn: colName,
+      colorMap: colorToBin
+    });
+    return;
+  }
+  
+  const idColIdx = st.columnNames.indexOf('id');
+  if (idColIdx < 0) {
+    alert('No "id" column found. Cannot apply color binning.');
+    return;
+  }
+  
+  // Insert new column into columns object
+  const newColumnsObj = {};
+  let idx = 0;
+  for (const [name, type] of Object.entries(st.relation.columns)) {
+    newColumnsObj[name] = type;
+    if (idx === colIdx) {
+      newColumnsObj[newColName] = 'int';
+    }
+    idx++;
+  }
+  
+  // Insert bin value into each row based on color
+  st.relation.items.forEach(row => {
+    const rowId = row[idColIdx];
+    const colorItem = coloredItems.find(item => item.id === rowId);
+    const binNum = colorItem ? colorToBin[colorItem.color] : null;
+    row.splice(insertIdx, 0, binNum);
+  });
+  
+  // Update relation and state
+  st.relation.columns = newColumnsObj;
+  st.columnNames = Object.keys(newColumnsObj);
+  st.columnTypes = Object.values(newColumnsObj);
+  
+  // Shift all index-based state that comes after insertIdx
+  setSortCriteria(st, getSortCriteria(st).map(c => ({
+    ...c,
+    column: c.column >= insertIdx ? c.column + 1 : c.column
+  })));
+  
+  const newFilters = {};
+  for (const [i, filter] of Object.entries(getFilters(st))) {
+    const oldIdx = parseInt(i);
+    newFilters[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = filter;
+  }
+  setFilters(st, newFilters);
+  
+  const newFormatting = {};
+  for (const [i, fmt] of Object.entries(getFormatting(st))) {
+    const oldIdx = parseInt(i);
+    newFormatting[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = fmt;
+  }
+  setFormatting(st, newFormatting);
+  
+  setGroupByColumns(st, getGroupByColumns(st).map(c => c >= insertIdx ? c + 1 : c));
+  
+  const oldGroupByVals = getGroupBySelectedValues(st);
+  const newGroupByVals = {};
+  for (const [i, vals] of Object.entries(oldGroupByVals)) {
+    const oldIdx = parseInt(i);
+    newGroupByVals[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = vals;
+  }
+  setGroupBySelectedValues(st, newGroupByVals);
+  
+  const oldSelected = getSelectedColumns(st);
+  const newSelected = new Set();
+  for (const c of oldSelected) {
+    newSelected.add(c >= insertIdx ? c + 1 : c);
+  }
+  setSelectedColumns(st, newSelected);
+  
+  // Shift binning configs
+  const oldBinning = getBinning(st);
+  const newBinning = {};
+  for (const [i, config] of Object.entries(oldBinning)) {
+    const oldIdx = parseInt(i);
+    newBinning[oldIdx >= insertIdx ? oldIdx + 1 : oldIdx] = config;
+  }
+  setBinning(st, newBinning);
+  
+  // Store bin config for the new _bin column
+  setBinningConfig(st, insertIdx, {
+    bins: uniqueColors.length,
+    method: 'colors',
+    edges: [],
+    labels: binLabels,
+    sourceColumn: colName,
+    colorMap: colorToBin
+  });
+  
+  // Update JSON textarea
+  const jsonTextarea = document.querySelector('.relation-json');
+  if (jsonTextarea) {
+    jsonTextarea.value = JSON.stringify(st.relation, null, 2);
+  }
+}
+
 function showBinIntervalsPopup(colIdx, x, y, st = state) {
   closeAllMenus();
   
@@ -5470,8 +5645,22 @@ function showBinIntervalsPopup(colIdx, x, y, st = state) {
     'equal_width': 'Equal Width',
     'equal_freq': 'Equal Frequency',
     'sturges': 'Sturges',
-    'scott': 'Scott'
+    'scott': 'Scott',
+    'colors': 'Cell Colors'
   };
+  
+  // For color binning, show color swatches
+  const labelsHtml = binConfig.labels.map(label => {
+    if (binConfig.method === 'colors' && binConfig.colorMap) {
+      // Extract color from label like "Bin 1: #ff0000"
+      const colorMatch = label.match(/#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}|rgb\([^)]+\)|rgba\([^)]+\)/);
+      const color = colorMatch ? colorMatch[0] : null;
+      if (color) {
+        return `<div class="bin-interval-item"><span class="color-swatch" style="background-color: ${color}; display: inline-block; width: 14px; height: 14px; border-radius: 2px; margin-right: 6px; vertical-align: middle;"></span>${label}</div>`;
+      }
+    }
+    return `<div class="bin-interval-item">${label}</div>`;
+  }).join('');
   
   popup.innerHTML = `
     <div class="bin-popup-header">
@@ -5484,7 +5673,7 @@ function showBinIntervalsPopup(colIdx, x, y, st = state) {
       <div>Bins: <strong>${binConfig.bins}</strong></div>
     </div>
     <div class="bin-popup-intervals">
-      ${binConfig.labels.map(label => `<div class="bin-interval-item">${label}</div>`).join('')}
+      ${labelsHtml}
     </div>
   `;
   
@@ -6485,6 +6674,16 @@ function removeColumn(colIdx, st = state) {
     else if (i > colIdx) newGroupBySelectedValues[i - 1] = val;
   }
   setGroupBySelectedValues(st, newGroupBySelectedValues);
+  
+  // Handle binning config - delete and shift indices
+  const newBinning = {};
+  for (const [idx, config] of Object.entries(getBinning(st))) {
+    const i = parseInt(idx);
+    if (i < colIdx) newBinning[i] = config;
+    else if (i > colIdx) newBinning[i - 1] = config;
+    // Skip i === colIdx to delete it
+  }
+  setBinning(st, newBinning);
   
   getSelectedRows(st).clear();
   setPivotConfig(st, { rowDim: null, colDim: null });
