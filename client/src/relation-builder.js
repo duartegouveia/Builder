@@ -3657,6 +3657,46 @@ function matchesFormattingCondition(value, condition, type) {
   return true;
 }
 
+// Build search input HTML for table/cards views
+function buildSearchInputHtml() {
+  return `<div class="quick-search-wrapper">
+    <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
+    <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
+  </div>`;
+}
+
+// Apply quick search filter to items
+function applyQuickSearch(st, searchText) {
+  const text = (searchText || '').toLowerCase().trim();
+  
+  if (!text) {
+    // Clear search filter - restore to filtered indices without search
+    const baseIndices = getFilteredIndices(st);
+    setSortedIndices(st, [...baseIndices]);
+    return;
+  }
+  
+  // Filter items where at least one visible column contains the search text
+  const items = st.relation.items;
+  const visibleColIndices = st.columnNames.map((_, idx) => idx).filter(idx => {
+    const type = st.columnTypes[idx];
+    // Skip hidden ID columns
+    if (type === 'id' && !st.rel_options.show_id) return false;
+    return true;
+  });
+  
+  const matchingIndices = getFilteredIndices(st).filter(rowIdx => {
+    const row = items[rowIdx];
+    return visibleColIndices.some(colIdx => {
+      const value = row[colIdx];
+      if (value === null || value === undefined) return false;
+      return String(value).toLowerCase().includes(text);
+    });
+  });
+  
+  setSortedIndices(st, matchingIndices);
+}
+
 // Build always-visible options HTML based on general_always_visible_options configuration
 function buildAlwaysVisibleOptionsHtml(options) {
   // Define all available always-visible operations (same icons as line operations)
@@ -7044,23 +7084,70 @@ function renderViewTabs() {
   
   viewTabs.appendChild(tabsLeft);
   
-  // Create right section for always-visible options and help badge
+  // Create right section for search, always-visible options and help badge
   const hasTableView = viewOptions.some(v => v.toLowerCase() === 'table');
+  const hasCardsView = viewOptions.some(v => v.toLowerCase() === 'cards');
+  const showSearchAndActions = hasTableView || hasCardsView;
+  const initialView = viewOptions[0]?.toLowerCase() || 'table';
+  const searchActionsDisplay = (initialView === 'table' || initialView === 'cards') ? '' : 'display: none;';
+  
   const tabsRight = document.createElement('div');
   tabsRight.className = 'view-tabs-right';
   
-  // Add always-visible options select
-  const alwaysVisibleOptions = state.rel_options.general_always_visible_options || DEFAULT_REL_OPTIONS.general_always_visible_options;
-  if (alwaysVisibleOptions.length > 0) {
-    const selectHtml = buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions);
-    tabsRight.innerHTML = selectHtml;
+  // Add search input (only for table/cards views)
+  if (showSearchAndActions) {
+    const searchWrapper = document.createElement('div');
+    searchWrapper.className = 'quick-search-wrapper';
+    searchWrapper.style.cssText = searchActionsDisplay;
+    searchWrapper.innerHTML = `
+      <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
+      <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
+    `;
+    tabsRight.appendChild(searchWrapper);
     
-    // Add event listener for the select
-    const select = tabsRight.querySelector('.always-visible-actions');
+    // Add search event listeners (for main state only - nested instances use initInstanceEventListeners)
+    const searchInput = searchWrapper.querySelector('.quick-search-input');
+    const clearBtn = searchWrapper.querySelector('.quick-search-clear');
+    
+    searchInput.addEventListener('input', (e) => {
+      applyQuickSearch(state, e.target.value);
+      const currentView = getCurrentView(state);
+      if (currentView === 'cards') {
+        renderCardsView(state);
+      } else {
+        renderTable(state);
+      }
+      clearBtn.style.display = e.target.value ? 'block' : 'none';
+    });
+    
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      applyQuickSearch(state, '');
+      const currentView = getCurrentView(state);
+      if (currentView === 'cards') {
+        renderCardsView(state);
+      } else {
+        renderTable(state);
+      }
+    });
+  }
+  
+  // Add always-visible options select (only for table/cards views)
+  const alwaysVisibleOptions = state.rel_options.general_always_visible_options || DEFAULT_REL_OPTIONS.general_always_visible_options;
+  if (showSearchAndActions && alwaysVisibleOptions.length > 0) {
+    const selectWrapper = document.createElement('div');
+    selectWrapper.className = 'always-visible-wrapper';
+    selectWrapper.style.cssText = searchActionsDisplay;
+    selectWrapper.innerHTML = buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions);
+    tabsRight.appendChild(selectWrapper);
+    
+    // Add event listener for the select (for main state only)
+    const select = selectWrapper.querySelector('.always-visible-actions');
     if (select) {
       select.addEventListener('change', (e) => {
         const action = e.target.value;
-        e.target.value = ''; // Reset to placeholder
+        e.target.value = '';
         handleAlwaysVisibleAction(state, action);
       });
     }
@@ -10318,11 +10405,25 @@ function initRelationInstance(container, relationData, options = {}) {
   const initialView = viewOptions[0]?.toLowerCase() || 'table';
   const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
   
-  // Build always-visible options select
+  // Build always-visible options select and search input
   const alwaysVisibleOptions = instanceState.rel_options.general_always_visible_options || DEFAULT_REL_OPTIONS.general_always_visible_options;
-  const alwaysVisibleSelectHtml = alwaysVisibleOptions.length > 0 ? buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions) : '';
+  const hasCardsView = viewOptions.some(v => v.toLowerCase() === 'cards');
+  const showSearchAndActions = hasTableView || hasCardsView;
+  const searchActionsDisplay = (initialView === 'table' || initialView === 'cards') ? '' : 'display: none;';
+  
+  // Build search input HTML
+  const searchHtml = showSearchAndActions ? `<div class="quick-search-wrapper" style="${searchActionsDisplay}">
+    <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
+    <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
+  </div>` : '';
+  
+  // Build actions select HTML
+  const alwaysVisibleSelectHtml = (showSearchAndActions && alwaysVisibleOptions.length > 0) 
+    ? `<div class="always-visible-wrapper" style="${searchActionsDisplay}">${buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions)}</div>` 
+    : '';
+  
   const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
-  const hasRightContent = alwaysVisibleSelectHtml || badgeHtml;
+  const hasRightContent = searchHtml || alwaysVisibleSelectHtml || badgeHtml;
   
   mainPanelHtml += `
     <div class="view-tabs" style="margin-bottom: 1rem;">
@@ -10333,7 +10434,7 @@ function initRelationInstance(container, relationData, options = {}) {
           return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${view}</button>`;
         }).join('')}
       </div>
-      ${hasRightContent ? `<div class="view-tabs-right">${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
+      ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
     </div>
     
     <div class="view-table view-content">
@@ -10563,6 +10664,34 @@ function initInstanceEventListeners(st) {
       handleAlwaysVisibleAction(st, action);
     });
   }
+  
+  // Quick search input event listeners
+  const searchInput = container.querySelector('.quick-search-input');
+  const clearBtn = container.querySelector('.quick-search-clear');
+  if (searchInput && clearBtn) {
+    searchInput.addEventListener('input', (e) => {
+      applyQuickSearch(st, e.target.value);
+      const currentView = getCurrentView(st);
+      if (currentView === 'table') {
+        renderTable(st);
+      } else if (currentView === 'cards') {
+        renderCardsView(st);
+      }
+      clearBtn.style.display = e.target.value ? 'block' : 'none';
+    });
+    
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      applyQuickSearch(st, '');
+      const currentView = getCurrentView(st);
+      if (currentView === 'table') {
+        renderTable(st);
+      } else if (currentView === 'cards') {
+        renderCardsView(st);
+      }
+    });
+  }
 }
 
 // Switch view for a specific instance
@@ -10579,11 +10708,18 @@ function switchViewForInstance(st, view) {
     viewWrapper.style.display = 'block';
   }
   
+  // Show/hide search and actions based on view (only visible for table/cards)
+  const isTableOrCards = view === 'table' || view === 'cards';
+  const searchWrapper = container.querySelector('.quick-search-wrapper');
+  const actionsWrapper = container.querySelector('.always-visible-wrapper');
+  if (searchWrapper) searchWrapper.style.display = isTableOrCards ? '' : 'none';
+  if (actionsWrapper) actionsWrapper.style.display = isTableOrCards ? '' : 'none';
+  
   // Render the view - use parametrized functions
   if (view === 'table') {
     renderTable(st);
   } else if (view === 'cards') {
-    renderCards(st);
+    renderCardsView(st);
   } else if (view === 'pivot') {
     renderPivot(st);
   } else if (view === 'correlation') {

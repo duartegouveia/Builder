@@ -2268,6 +2268,62 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   z-index: 100;
 }
 
+.quick-search-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.quick-search-input {
+  padding: var(--space-1) var(--space-2);
+  padding-right: 24px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  color: var(--foreground);
+  width: 120px;
+  transition: border-color 0.15s ease;
+}
+
+.quick-search-input:hover {
+  border-color: var(--primary);
+}
+
+.quick-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.quick-search-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.quick-search-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  font-size: 0.625rem;
+  cursor: pointer;
+  padding: 2px;
+  display: none;
+  line-height: 1;
+}
+
+.quick-search-clear:hover {
+  color: var(--foreground);
+}
+
+.always-visible-wrapper {
+  display: flex;
+  align-items: center;
+}
+
 .always-visible-actions {
   padding: var(--space-1) var(--space-2);
   font-size: 0.75rem;
