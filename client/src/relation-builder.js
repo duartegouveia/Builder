@@ -5878,7 +5878,9 @@ function showRowOperationsMenu(rowIdx, x, y) {
     <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>
     <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
     <button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>
+    <button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>
     <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>
+    <button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>
     ${hasSelection ? `
       <div class="column-menu-section">
         <div class="column-menu-title">Selection (${getSelectedRows(state).size} rows)</div>
@@ -5917,23 +5919,13 @@ function handleRowOperation(st, rowIdx, action) {
       showRowEditDialog(st, rowIdx);
       break;
     case 'copy-row':
-      const rowCopy = [...st.relation.items[rowIdx]];
-      st.relation.items.push(rowCopy);
-      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-      setSortedIndices(st, [...getFilteredIndices(st)]);
-      renderTable(st);
+      showRowCopyDialog(st, rowIdx);
       break;
     case 'new-row':
-      showRowEditDialog(st, -1);
+      showRowNewDialog(st, -1, 'new');
       break;
     case 'delete-row':
-      if (confirm('Delete this row?')) {
-        st.relation.items.splice(rowIdx, 1);
-        getSelectedRows(st).delete(rowIdx);
-        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-        setSortedIndices(st, [...getFilteredIndices(st)]);
-        renderTable(st);
-      }
+      showRowDeleteDialog(st, rowIdx);
       break;
     case 'delete-selected':
       if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
@@ -5945,6 +5937,103 @@ function handleRowOperation(st, rowIdx, action) {
         renderTable(st);
       }
       break;
+    case 'new-fast-row':
+      showRowNewDialog(st, -1, 'new-fast');
+      break;
+    case 'paper-form-row':
+      showRowPaperFormDialog(st, rowIdx);
+      break;
+  }
+}
+
+function getNextNegativeId(st) {
+  const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+  if (idColIdx === -1) return -1;
+  
+  let minId = 0;
+  st.relation.items.forEach(row => {
+    const id = parseInt(row[idColIdx]);
+    if (!isNaN(id) && id < minId) minId = id;
+  });
+  return minId - 1;
+}
+
+function generateRowFormattedContent(st, row, mode = 'view') {
+  let html = '<div class="row-operation-content">';
+  
+  st.columnNames.forEach((name, colIdx) => {
+    const type = st.columnTypes[colIdx];
+    const value = row[colIdx];
+    
+    if (type === 'relation') {
+      html += `<div class="row-field row-field-relation">`;
+      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      html += `<div class="row-field-relation-container" data-col="${colIdx}"></div>`;
+      html += `</div>`;
+    } else {
+      html += `<div class="row-field row-field-${type}">`;
+      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      
+      if (mode === 'view' || (mode === 'edit' && type === 'id')) {
+        html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+      } else {
+        html += createEditInputHtml(type, value, colIdx, st);
+      }
+      html += `</div>`;
+    }
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function formatValueForViewDisplay(value, type, st, colIdx) {
+  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  
+  if (type === 'boolean') {
+    return value ? '<span class="bool-true">✓ true</span>' : '<span class="bool-false">✗ false</span>';
+  }
+  
+  if (type === 'select' && st.options && st.options[st.columnNames[colIdx]]) {
+    const options = st.options[st.columnNames[colIdx]];
+    const displayValue = options[value] || value;
+    return `<span class="select-value">${escapeHtml(displayValue)}</span>`;
+  }
+  
+  if (type === 'id') {
+    return `<span class="id-value">${escapeHtml(String(value))}</span>`;
+  }
+  
+  if (type === 'int' || type === 'float') {
+    return `<span class="number-value">${value}</span>`;
+  }
+  
+  if (type === 'multilinestring') {
+    return `<span class="multiline-value">${escapeHtml(String(value))}</span>`;
+  }
+  
+  return `<span class="string-value">${escapeHtml(String(value))}</span>`;
+}
+
+function initRelationFieldsInContainer(container, st, row) {
+  const relationContainers = container.querySelectorAll('.row-field-relation-container');
+  relationContainers.forEach(relContainer => {
+    const colIdx = parseInt(relContainer.dataset.col);
+    const relValue = row[colIdx];
+    if (relValue && relValue.columns) {
+      initRelationInstance(relContainer, relValue, { showJsonEditor: false, isNested: true });
+    } else {
+      relContainer.innerHTML = '<span class="null-value">null</span>';
+    }
+  });
+}
+
+function closeRowOperationPanel(st) {
+  const detailPanel = st.container.querySelector('.relation-detail-panel');
+  if (detailPanel) {
+    detailPanel.innerHTML = '';
+    const wrapper = st.container.querySelector('.relation-flex-wrapper');
+    if (wrapper) wrapper.classList.remove('has-detail');
   }
 }
 
@@ -5952,91 +6041,355 @@ function showRowViewDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = `View Row ${rowIdx + 1}`;
+  const title = `Ver Registo ${rowIdx + 1}`;
   
   showContentBasedOnMode(st, (container) => {
-    let html = '<div class="row-view-content">';
+    let html = generateRowFormattedContent(st, row, 'view');
+    
+    html += `<div class="row-operation-footer">`;
+    html += `<div class="footer-left">`;
+    html += `<button class="btn btn-outline btn-action" data-action="edit">✏️ Edit</button>`;
+    html += `<button class="btn btn-outline btn-action" data-action="copy">📋 Copy</button>`;
+    html += `<button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">🗑️ Delete</button>`;
+    html += `</div>`;
+    html += `<div class="footer-right">`;
+    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    container.innerHTML = html;
+    initRelationFieldsInContainer(container, st, row);
+    
+    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
+    
+    container.querySelectorAll('.btn-action').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        if (action === 'edit') showRowEditDialog(st, rowIdx);
+        else if (action === 'copy') showRowCopyDialog(st, rowIdx);
+        else if (action === 'delete') showRowDeleteDialog(st, rowIdx);
+      });
+    });
+  }, title);
+}
+
+function showRowCopyDialog(st, rowIdx) {
+  closeAllMenus();
+  
+  const row = st.relation.items[rowIdx];
+  const title = `Copiar Registo ${rowIdx + 1}`;
+  
+  showContentBasedOnMode(st, (container) => {
+    let html = generateRowFormattedContent(st, row, 'view');
+    
+    html += `<div class="row-operation-footer">`;
+    html += `<div class="footer-left">`;
+    html += `<input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">`;
+    html += `<button class="btn btn-primary generate-copies">Gera Cópias</button>`;
+    html += `</div>`;
+    html += `<div class="footer-right">`;
+    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    container.innerHTML = html;
+    initRelationFieldsInContainer(container, st, row);
+    
+    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
+    
+    container.querySelector('.generate-copies')?.addEventListener('click', () => {
+      const countInput = container.querySelector('.copy-count-input');
+      const count = Math.max(1, parseInt(countInput.value) || 1);
+      const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+      
+      for (let i = 0; i < count; i++) {
+        const newRow = [...row];
+        if (idColIdx !== -1) {
+          newRow[idColIdx] = getNextNegativeId(st);
+          st.relation.items.push(newRow);
+        } else {
+          st.relation.items.push(newRow);
+        }
+      }
+      
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+      closeRowOperationPanel(st);
+    });
+  }, title);
+}
+
+function showRowDeleteDialog(st, rowIdx) {
+  closeAllMenus();
+  
+  const row = st.relation.items[rowIdx];
+  const title = `Eliminar Registo ${rowIdx + 1}`;
+  
+  showContentBasedOnMode(st, (container) => {
+    let html = generateRowFormattedContent(st, row, 'view');
+    
+    html += `<div class="row-operation-footer">`;
+    html += `<div class="footer-left">`;
+    html += `<button class="btn btn-danger delete-record">Elimina Registo</button>`;
+    html += `</div>`;
+    html += `<div class="footer-right">`;
+    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    container.innerHTML = html;
+    initRelationFieldsInContainer(container, st, row);
+    
+    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
+    
+    container.querySelector('.delete-record')?.addEventListener('click', () => {
+      if (confirm('Tem a certeza que pretende eliminar este registo?')) {
+        st.relation.items.splice(rowIdx, 1);
+        getSelectedRows(st).delete(rowIdx);
+        setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+        setSortedIndices(st, [...getFilteredIndices(st)]);
+        renderTable(st);
+        closeRowOperationPanel(st);
+      }
+    });
+  }, title);
+}
+
+function showRowNewDialog(st, rowIdx, mode = 'new') {
+  closeAllMenus();
+  
+  const defaultRow = st.columnTypes.map((type, idx) => {
+    if (type === 'id') return getNextNegativeId(st);
+    if (type === 'boolean') return false;
+    if (type === 'int' || type === 'float') return null;
+    return null;
+  });
+  
+  const title = mode === 'new-fast' ? 'Novo Registo Rápido' : 'Novo Registo';
+  
+  showContentBasedOnMode(st, (container) => {
+    let html = generateRowFormattedContent(st, defaultRow, 'edit');
+    
+    html += `<div class="row-operation-footer">`;
+    html += `<div class="footer-left">`;
+    if (mode === 'new') {
+      html += `<button class="btn btn-outline clear-form">Limpar</button>`;
+    }
+    html += `<button class="btn btn-primary save-record">Gravar</button>`;
+    html += `<button class="btn btn-primary save-and-new">Gravar e Novo</button>`;
+    html += `</div>`;
+    html += `<div class="footer-right">`;
+    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    container.innerHTML = html;
+    
+    const clearForm = () => {
+      st.columnNames.forEach((name, colIdx) => {
+        const type = st.columnTypes[colIdx];
+        const input = container.querySelector(`[data-col="${colIdx}"]`);
+        if (input && type !== 'id') {
+          if (type === 'boolean') {
+            input.checked = false;
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+          } else {
+            input.value = '';
+          }
+        }
+      });
+    };
+    
+    const collectFormData = () => {
+      const newRow = [...defaultRow];
+      st.columnNames.forEach((name, colIdx) => {
+        const type = st.columnTypes[colIdx];
+        if (type === 'id') {
+          newRow[colIdx] = getNextNegativeId(st);
+        } else {
+          const input = container.querySelector(`[data-col="${colIdx}"]`);
+          if (input) {
+            if (type === 'boolean') {
+              newRow[colIdx] = input.checked;
+            } else if (type === 'int') {
+              newRow[colIdx] = input.value === '' ? null : parseInt(input.value);
+            } else if (type === 'float') {
+              newRow[colIdx] = input.value === '' ? null : parseFloat(input.value);
+            } else {
+              newRow[colIdx] = input.value === '' ? null : input.value;
+            }
+          }
+        }
+      });
+      return newRow;
+    };
+    
+    const saveRecord = () => {
+      const newRow = collectFormData();
+      st.relation.items.push(newRow);
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+    };
+    
+    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
+    container.querySelector('.clear-form')?.addEventListener('click', clearForm);
+    
+    container.querySelector('.save-record')?.addEventListener('click', () => {
+      saveRecord();
+      closeRowOperationPanel(st);
+    });
+    
+    container.querySelector('.save-and-new')?.addEventListener('click', () => {
+      saveRecord();
+      clearForm();
+      const idInput = container.querySelector(`[data-col="${st.columnTypes.findIndex(t => t === 'id')}"]`);
+      if (idInput) idInput.textContent = getNextNegativeId(st);
+    });
+  }, title);
+}
+
+function showRowPaperFormDialog(st, rowIdx) {
+  closeAllMenus();
+  
+  const defaultRow = st.columnTypes.map((type, idx) => {
+    if (type === 'id') return '____';
+    if (type === 'boolean') return false;
+    return '';
+  });
+  
+  const title = 'Formulário para Impressão';
+  
+  showContentBasedOnMode(st, (container) => {
+    let html = '<div class="paper-form-content" style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white;">';
     
     st.columnNames.forEach((name, colIdx) => {
       const type = st.columnTypes[colIdx];
-      const value = row[colIdx];
-      html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label><span class="view-value">${formatValueForDisplay(value, type)}</span></div>`;
+      
+      html += `<div class="paper-form-field">`;
+      html += `<label class="paper-form-label">${escapeHtml(name)}</label>`;
+      
+      if (type === 'select' && st.options && st.options[st.columnNames[colIdx]]) {
+        const options = st.options[st.columnNames[colIdx]];
+        html += `<div class="paper-form-radio-group">`;
+        Object.entries(options).forEach(([k, v]) => {
+          html += `<label class="paper-form-radio"><input type="radio" name="field_${colIdx}" disabled> ${escapeHtml(v)}</label>`;
+        });
+        html += `</div>`;
+      } else if (type === 'boolean') {
+        html += `<div class="paper-form-checkbox"><input type="checkbox" disabled> Sim</div>`;
+      } else if (type === 'multilinestring') {
+        html += `<div class="paper-form-textarea-placeholder"></div>`;
+      } else {
+        html += `<div class="paper-form-input-placeholder"></div>`;
+      }
+      html += `</div>`;
     });
     
     html += '</div>';
+    
+    html += `<div class="row-operation-footer">`;
+    html += `<div class="footer-left">`;
+    html += `<button class="btn btn-primary print-form">Imprimir</button>`;
+    html += `</div>`;
+    html += `<div class="footer-right">`;
+    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    
     container.innerHTML = html;
+    
+    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
+    
+    container.querySelector('.print-form')?.addEventListener('click', () => {
+      const printContent = container.querySelector('.paper-form-content');
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>Formulário</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
+            .paper-form-field { margin-bottom: 15px; }
+            .paper-form-label { display: block; font-weight: bold; margin-bottom: 5px; }
+            .paper-form-input-placeholder { border-bottom: 1px solid #000; height: 25px; }
+            .paper-form-textarea-placeholder { border: 1px solid #000; height: 80px; }
+            .paper-form-radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
+            .paper-form-radio { display: flex; align-items: center; gap: 5px; }
+            .paper-form-checkbox { display: flex; align-items: center; gap: 5px; }
+          </style>
+        </head>
+        <body>${printContent.innerHTML}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    });
   }, title);
 }
 
 function showRowEditDialog(st, rowIdx) {
   closeAllMenus();
   
-  const isNew = rowIdx === -1;
-  const row = isNew ? st.columnTypes.map(type => {
-    if (type === 'id') return String(st.relation.items.length + 1);
-    if (type === 'boolean') return false;
-    if (type === 'int' || type === 'float') return 0;
-    return '';
-  }) : st.relation.items[rowIdx];
+  const row = st.relation.items[rowIdx];
+  const title = `Editar Registo ${rowIdx + 1}`;
   
-  const dialog = document.createElement('div');
-  dialog.className = 'filter-dialog';
-  dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; max-height: 80vh; overflow-y: auto;';
-  
-  let html = `<div class="filter-dialog-header"><span>${isNew ? 'New Row' : 'Edit Row ' + (rowIdx + 1)}</span><button class="btn-close-dialog">✕</button></div>`;
-  html += '<div class="filter-dialog-content">';
-  
-  st.columnNames.forEach((name, colIdx) => {
-    const type = st.columnTypes[colIdx];
-    const value = row[colIdx];
-    html += `<div class="filter-row"><label>${escapeHtml(name)} (${type}):</label>`;
-    html += createEditInputHtml(type, value, colIdx, st);
-    html += '</div>';
-  });
-  
-  html += '</div>';
-  html += `<div class="filter-dialog-footer"><button class="btn btn-primary save-row">${isNew ? 'Create' : 'Save'}</button><button class="btn btn-outline close-dialog">Cancel</button></div>`;
-  
-  dialog.innerHTML = html;
-  document.body.appendChild(dialog);
-  
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => dialog.remove());
-  dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.remove());
-  
-  dialog.querySelector('.save-row').addEventListener('click', () => {
-    const targetRow = isNew ? st.columnTypes.map(() => null) : st.relation.items[rowIdx];
+  showContentBasedOnMode(st, (container) => {
+    let html = generateRowFormattedContent(st, row, 'edit');
     
-    st.columnNames.forEach((name, colIdx) => {
-      const type = st.columnTypes[colIdx];
-      const input = dialog.querySelector(`[data-col="${colIdx}"]`);
-      if (input) {
-        let value;
-        if (type === 'boolean') {
-          value = input.checked;
-        } else if (type === 'int') {
-          value = input.value === '' ? null : parseInt(input.value);
-        } else if (type === 'float') {
-          value = input.value === '' ? null : parseFloat(input.value);
-        } else {
-          value = input.value === '' ? null : input.value;
-        }
-        if (isNew) {
-          targetRow[colIdx] = value;
-        } else {
-          st.relation.items[rowIdx][colIdx] = value;
-        }
+    html += `<div class="row-operation-footer">`;
+    html += `<div class="footer-left">`;
+    html += `<button class="btn btn-primary save-record">Gravar</button>`;
+    html += `</div>`;
+    html += `<div class="footer-right">`;
+    html += `<button class="btn btn-outline close-panel">Fechar</button>`;
+    html += `</div>`;
+    html += `</div>`;
+    
+    container.innerHTML = html;
+    
+    const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+    const rowId = idColIdx !== -1 ? row[idColIdx] : null;
+    
+    container.querySelector('.close-panel')?.addEventListener('click', () => closeRowOperationPanel(st));
+    
+    container.querySelector('.save-record')?.addEventListener('click', () => {
+      let targetRowIdx = rowIdx;
+      if (rowId !== null) {
+        targetRowIdx = st.relation.items.findIndex(r => r[idColIdx] === rowId);
       }
+      
+      if (targetRowIdx === -1) {
+        alert('Registo não encontrado');
+        return;
+      }
+      
+      st.columnNames.forEach((name, colIdx) => {
+        const type = st.columnTypes[colIdx];
+        if (type === 'id') return;
+        
+        const input = container.querySelector(`[data-col="${colIdx}"]`);
+        if (input) {
+          let value;
+          if (type === 'boolean') {
+            value = input.checked;
+          } else if (type === 'int') {
+            value = input.value === '' ? null : parseInt(input.value);
+          } else if (type === 'float') {
+            value = input.value === '' ? null : parseFloat(input.value);
+          } else {
+            value = input.value === '' ? null : input.value;
+          }
+          st.relation.items[targetRowIdx][colIdx] = value;
+        }
+      });
+      
+      renderTable(st);
+      closeRowOperationPanel(st);
     });
-    
-    if (isNew) {
-      st.relation.items.push(targetRow);
-      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-      setSortedIndices(st, [...getFilteredIndices(st)]);
-    }
-    
-    renderTable(st);
-    dialog.remove();
-  });
+  }, title);
 }
 
 function showNestedRelationDialog(rowIdx, colIdx, st = state) {
@@ -10413,11 +10766,13 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
   
   menu.innerHTML = `
     <div class="column-menu-header">Row ${rowIdx + 1}</div>
-    <button class="column-menu-item" data-action="view-row">👁 View</button>
-    <button class="column-menu-item" data-action="edit-row">✏️ Edit</button>
-    <button class="column-menu-item" data-action="copy-row">📋 Copy</button>
-    <button class="column-menu-item" data-action="new-row">➕ New</button>
-    <button class="column-menu-item" data-action="delete-row">🗑️ Delete</button>
+    <button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>
+    <button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>
+    <button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>
+    <button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>
+    <button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>
+    <button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>
+    <button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>
     ${hasSelection ? `
       <div class="column-menu-section">
         <div class="column-menu-title">Selection (${getSelectedRows(st).size} rows)</div>
@@ -10549,6 +10904,36 @@ function init() {
   const btnLoadPriceLists = el('.btn-load-pricelists');
   btnLoadPriceLists?.addEventListener('click', () => {
     textarea.value = JSON.stringify(PRICELISTS_JSON, null, 2);
+  });
+  
+  const btnSimpleObj = el('.btn-simple-obj');
+  btnSimpleObj?.addEventListener('click', () => {
+    textarea.value = '{a:"string",b:True,c:15,d:15.5}';
+  });
+  
+  const btnArrayObj = el('.btn-array-obj');
+  btnArrayObj?.addEventListener('click', () => {
+    textarea.value = '{a:"string",b:True,c:15,d:15.5,e:[1,2,3,4,5]}';
+  });
+  
+  const btnObjectObj = el('.btn-object-obj');
+  btnObjectObj?.addEventListener('click', () => {
+    textarea.value = '{a:"string",b:True,c:15,d:15.5,e:{aa:"string",bb:True,cc:15,dd:15.5}}';
+  });
+  
+  const btnAttributeObj = el('.btn-attribute-obj');
+  btnAttributeObj?.addEventListener('click', () => {
+    textarea.value = '{}';
+  });
+  
+  const btnRelObj = el('.btn-rel-obj');
+  btnRelObj?.addEventListener('click', () => {
+    textarea.value = '{}';
+  });
+  
+  const btnObjToRel = el('.btn-obj-to-rel');
+  btnObjToRel?.addEventListener('click', () => {
+    alert('Obj->Rel: functionality to be implemented');
   });
   
   // Menu item event listeners - close dropdown on click

@@ -1796,6 +1796,231 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   width: auto;
 }
 
+/* Row Operation Content - View, Edit, Copy, Delete, New, Paper Form */
+.row-operation-content {
+  padding: var(--space-4);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.row-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.row-field:last-child {
+  border-bottom: none;
+}
+
+.row-field-label {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.row-field-value {
+  font-size: 0.9375rem;
+  color: var(--foreground);
+  padding: var(--space-2);
+  background: var(--slate-50);
+  border-radius: var(--radius-sm);
+  min-height: 1.5em;
+}
+
+.row-field-value-id {
+  font-family: var(--font-mono);
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
+.row-field-value-int,
+.row-field-value-float {
+  font-family: var(--font-mono);
+  color: var(--blue-600);
+}
+
+.row-field-value-boolean {
+  display: inline-block;
+}
+
+.bool-true {
+  color: var(--green-600);
+  font-weight: 500;
+}
+
+.bool-false {
+  color: var(--red-500);
+  font-weight: 500;
+}
+
+.id-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.number-value {
+  font-family: var(--font-mono);
+}
+
+.select-value {
+  color: var(--purple-600);
+}
+
+.multiline-value {
+  white-space: pre-wrap;
+  font-size: 0.875rem;
+}
+
+.null-value {
+  color: var(--muted-foreground);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.row-field-relation {
+  flex-direction: column;
+}
+
+.row-field-relation-container {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Row Operation Footer */
+.row-operation-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+  background: var(--slate-50);
+  position: sticky;
+  bottom: 0;
+}
+
+.footer-left {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.footer-right {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-danger {
+  background: var(--red-500);
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: var(--red-600);
+}
+
+.btn-danger-outline {
+  color: var(--red-500);
+  border-color: var(--red-300);
+}
+
+.btn-danger-outline:hover {
+  background: var(--red-50);
+  color: var(--red-600);
+}
+
+.copy-count-input {
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Paper Form Styles */
+.paper-form-content {
+  background: white;
+  font-family: Arial, sans-serif;
+}
+
+.paper-form-field {
+  margin-bottom: 15px;
+  page-break-inside: avoid;
+}
+
+.paper-form-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.paper-form-input-placeholder {
+  border-bottom: 1px solid #000;
+  height: 25px;
+  min-width: 200px;
+}
+
+.paper-form-textarea-placeholder {
+  border: 1px solid #000;
+  height: 80px;
+  min-width: 100%;
+}
+
+.paper-form-radio-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.paper-form-radio {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.paper-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Row operation inputs - same styling as table */
+.row-operation-content .relation-input,
+.row-operation-content .relation-select,
+.row-operation-content .relation-textarea {
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  background: white;
+}
+
+.row-operation-content .relation-input:focus,
+.row-operation-content .relation-select:focus,
+.row-operation-content .relation-textarea:focus {
+  outline: none;
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+.row-operation-content input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
 /* Column menu active state */
 .column-menu-item.active {
   background: var(--primary-50);
