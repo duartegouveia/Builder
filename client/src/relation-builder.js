@@ -3698,7 +3698,16 @@ function filterByQuickSearch(st, indices) {
     return visibleColIndices.some(colIdx => {
       const value = row[colIdx];
       if (value === null || value === undefined) return false;
-      return String(value).toLowerCase().includes(text);
+      
+      // For select columns, search in the display label instead of the key
+      const type = st.columnTypes[colIdx];
+      let searchValue = value;
+      if (type === 'select' && st.options && st.options[st.columnNames[colIdx]]) {
+        const options = st.options[st.columnNames[colIdx]];
+        searchValue = options[value] || value;
+      }
+      
+      return String(searchValue).toLowerCase().includes(text);
     });
   });
   
