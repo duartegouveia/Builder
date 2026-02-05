@@ -4371,12 +4371,31 @@ function renderTable(st = state) {
     headerRow.appendChild(th);
   });
   
-  // Parent row (above header, no click handlers)
+  // Parent row (above header, no click handlers) - for hierarchy navigation
   const parentRow = document.createElement('tr');
   parentRow.className = 'relation-parent-row' + (shouldShowHierarchy(st) ? '' : ' hidden');
   
-  // Parent row cells with first item data (temporary example)
-  const firstItem = st.relation.items.length > 0 ? st.relation.items[0] : null;
+  // Find the parent record based on currentHierarchyValue
+  const currentHierarchyVal = getCurrentHierarchyValue(st);
+  const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  let parentItem = null;
+  let parentItemIdx = -1;
+  
+  // Only look for parent if currentHierarchyValue is not empty
+  if (currentHierarchyVal !== '' && idColIdx >= 0) {
+    for (let i = 0; i < st.relation.items.length; i++) {
+      const itemId = st.relation.items[i][idColIdx];
+      if (itemId !== null && itemId !== undefined && String(itemId) === String(currentHierarchyVal)) {
+        parentItem = st.relation.items[i];
+        parentItemIdx = i;
+        break;
+      }
+    }
+  }
+  
+  // Determine if up button should be disabled
+  const upButtonDisabled = currentHierarchyVal === '' || currentHierarchyVal === hierarchyRootVal;
   
   // Select column - empty
   const parentSelectTh = document.createElement('th');
@@ -4387,10 +4406,11 @@ function renderTable(st = state) {
   const parentOpsTh = document.createElement('th');
   parentOpsTh.className = 'relation-th-parent';
   const btnParentUp = document.createElement('button');
-  btnParentUp.className = 'btn-parent-up';
-  btnParentUp.title = 'Move to the upper level';
+  btnParentUp.className = 'btn-parent-up' + (upButtonDisabled ? ' disabled' : '');
+  btnParentUp.title = upButtonDisabled ? 'Already at root level' : 'Move to the upper level';
   btnParentUp.textContent = '↑';
   btnParentUp.dataset.testid = 'button-parent-up';
+  btnParentUp.disabled = upButtonDisabled;
   parentOpsTh.appendChild(btnParentUp);
   parentRow.appendChild(parentOpsTh);
   
@@ -4399,15 +4419,15 @@ function renderTable(st = state) {
   parentIndexTh.className = 'relation-th-parent' + (st.rel_options.show_natural_order ? '' : ' hidden');
   parentRow.appendChild(parentIndexTh);
   
-  // Data columns
+  // Data columns - show parent item data or empty
   st.columnNames.forEach((name, idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
     const th = document.createElement('th');
     const type = st.columnTypes[idx];
     const isHiddenId = type === 'id' && !st.rel_options.show_id;
     th.className = 'relation-th-parent' + (isHiddenId ? ' hidden' : '');
-    if (firstItem) {
-      const value = firstItem[idx];
+    if (parentItem) {
+      const value = parentItem[idx];
       
       if (type === 'relation') {
         const btn = document.createElement('button');
@@ -4415,7 +4435,7 @@ function renderTable(st = state) {
         const count = value?.items?.length || 0;
         btn.innerHTML = `📋 ${count}`;
         btn.title = `View nested relation (${count} rows)`;
-        btn.dataset.row = '0';
+        btn.dataset.row = parentItemIdx;
         btn.dataset.col = idx;
         btn.dataset.testid = `button-parent-relation-${idx}`;
         th.appendChild(btn);
