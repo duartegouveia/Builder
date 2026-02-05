@@ -1500,7 +1500,8 @@ const DEFAULT_UI_STATE = {
   diagramNodes: [],
   filteredIndices: [],
   sortedIndices: [],
-  quickSearchText: ''      // Quick search filter text
+  quickSearchText: '',     // Quick search filter text
+  currentHierarchyValue: null  // Current hierarchy level (null = use hierarchy_root_value from rel_options)
 };
 
 // Initialize uiState on a relation (ensures defaults exist)
@@ -1680,6 +1681,15 @@ function getCardsCurrentPage(st) { return getUiState(st).cardsCurrentPage; }
 function setCardsCurrentPage(st, value) { getUiState(st).cardsCurrentPage = value; }
 function getHighlightedRow(st) { return getUiState(st).highlightedRow; }
 function setHighlightedRow(st, value) { getUiState(st).highlightedRow = value; }
+function getCurrentHierarchyValue(st) { 
+  const val = getUiState(st).currentHierarchyValue;
+  // If null, use the hierarchy_root_value from rel_options
+  if (val === null) {
+    return st.rel_options.hierarchy_root_value ?? '';
+  }
+  return val;
+}
+function setCurrentHierarchyValue(st, value) { getUiState(st).currentHierarchyValue = value; }
 
 // Global state for main relation (backwards compatibility)
 let state = createRelationState();
