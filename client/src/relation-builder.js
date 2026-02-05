@@ -1456,7 +1456,8 @@ const DEFAULT_UI_STATE = {
   pivotConfig: { rowColumn: null, colColumn: null, values: [] },
   diagramNodes: [],
   filteredIndices: [],
-  sortedIndices: []
+  sortedIndices: [],
+  quickSearchText: ''      // Quick search filter text
 };
 
 // Initialize uiState on a relation (ensures defaults exist)
@@ -1609,6 +1610,8 @@ function getFilteredIndices(st) { return getUiState(st).filteredIndices; }
 function setFilteredIndices(st, value) { getUiState(st).filteredIndices = value; }
 function getSortedIndices(st) { return getUiState(st).sortedIndices; }
 function setSortedIndices(st, value) { getUiState(st).sortedIndices = value; }
+function getQuickSearchText(st) { return getUiState(st).quickSearchText || ''; }
+function setQuickSearchText(st, value) { getUiState(st).quickSearchText = value; }
 function getCurrentView(st) { return getUiState(st).currentView; }
 function setCurrentView(st, value) { getUiState(st).currentView = value; }
 function getPageSize(st) { return getUiState(st).pageSize; }
@@ -2082,7 +2085,11 @@ function parseTimeToMs(timeStr) {
 
 // Sorting functions
 function applySorting(st = state) {
-  const sortedIndices = [...getFilteredIndices(st)];
+  // Start with filtered indices
+  let sortedIndices = [...getFilteredIndices(st)];
+  
+  // Apply quick search filter on top of column filters
+  sortedIndices = filterByQuickSearch(st, sortedIndices);
   
   if (getSortCriteria(st).length === 0) {
     setSortedIndices(st, sortedIndices);
@@ -3665,18 +3672,19 @@ function buildSearchInputHtml() {
   </div>`;
 }
 
-// Apply quick search filter to items
+// Apply quick search filter to items - stores text in state for applySorting to use
 function applyQuickSearch(st, searchText) {
-  const text = (searchText || '').toLowerCase().trim();
+  setQuickSearchText(st, (searchText || '').trim());
+}
+
+// Filter indices by quick search text (called by applySorting)
+function filterByQuickSearch(st, indices) {
+  const text = getQuickSearchText(st).toLowerCase();
   
   if (!text) {
-    // Clear search filter - restore to filtered indices without search
-    const baseIndices = getFilteredIndices(st);
-    setSortedIndices(st, [...baseIndices]);
-    return;
+    return indices;
   }
   
-  // Filter items where at least one visible column contains the search text
   const items = st.relation.items;
   const visibleColIndices = st.columnNames.map((_, idx) => idx).filter(idx => {
     const type = st.columnTypes[idx];
@@ -3685,7 +3693,7 @@ function applyQuickSearch(st, searchText) {
     return true;
   });
   
-  const matchingIndices = getFilteredIndices(st).filter(rowIdx => {
+  const matchingIndices = indices.filter(rowIdx => {
     const row = items[rowIdx];
     return visibleColIndices.some(colIdx => {
       const value = row[colIdx];
@@ -3694,7 +3702,7 @@ function applyQuickSearch(st, searchText) {
     });
   });
   
-  setSortedIndices(st, matchingIndices);
+  return matchingIndices;
 }
 
 // Build always-visible options HTML based on general_always_visible_options configuration
