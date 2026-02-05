@@ -1227,7 +1227,19 @@ const PRODUCT_BRANDS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"]
   },
-  "items": [["", "", "", "", "", ""]]
+  "items": [
+    ["1", "", "", "", "", "A"],
+    ["2", "", "", "", "", "B"],
+    ["3", "", "", "", "", "C"],
+    ["4", "", "", "1", "", "AA"],
+    ["5", "", "", "1", "", "AB"],
+    ["6", "", "", "1", "", "AC"],
+    ["7", "", "", "2", "", "BA"],
+    ["8", "", "", "2", "", "BB"],
+    ["9", "", "", "3", "", "CA"],
+    ["10", "", "", "4", "", "AAA"],
+    ["11", "", "", "4", "", "AAB"]
+  ]
 };
 
 const PRODUCT_SPECIES_JSON = {
