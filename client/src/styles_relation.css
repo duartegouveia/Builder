@@ -1321,7 +1321,8 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-top: 1px solid var(--border);
 }
 
-.filter-dialog-footer .close-popup {
+.filter-dialog-footer .close-popup,
+.filter-dialog-footer .close-selection {
   margin-left: auto;
 }
 
