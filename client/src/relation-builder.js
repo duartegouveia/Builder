@@ -3893,19 +3893,19 @@ function handleAlwaysVisibleAction(st, action) {
 
   // Select One
   if (action === 'select-one') {
-    showToast('Select One: funcionalidade em desenvolvimento.', 'info');
+    openSelectOneDialog(st);
     return;
   }
 
   // Select Many
   if (action === 'select-many') {
-    showToast('Select Many: funcionalidade em desenvolvimento.', 'info');
+    openSelectManyDialog(st);
     return;
   }
 
   // Choose Many
   if (action === 'choose-many') {
-    showToast('Choose Many: funcionalidade em desenvolvimento.', 'info');
+    openChooseManyDialog(st);
     return;
   }
 
@@ -3942,19 +3942,279 @@ function handleAlwaysVisibleAction(st, action) {
 // Output relation state as JSON to console and elements with specific classes
 function outputRelationState(st) {
   const jsonString = JSON.stringify(st.relation, null, 2);
-  
-  // Console log
+  outputToConsoleAndElements(jsonString);
+}
+
+function outputToConsoleAndElements(value) {
+  const jsonString = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   console.log(jsonString);
-  
-  // Fill textareas with class output_textarea_json
   document.querySelectorAll('textarea.output_textarea_json').forEach(textarea => {
     textarea.value = jsonString;
   });
-  
-  // Fill divs with class output_div_json
   document.querySelectorAll('div.output_div_json').forEach(div => {
     div.textContent = jsonString;
   });
+}
+
+function cloneRelationForSelection(st, clearItems = false) {
+  const copy = JSON.parse(JSON.stringify(st.relation));
+  copy.rel_options = { ...DEFAULT_REL_OPTIONS };
+  delete copy.rel_options.uiState;
+  if (clearItems) copy.items = [];
+  return copy;
+}
+
+function getIdColumnIndex(instanceSt) {
+  let idx = instanceSt.columnNames.indexOf('id');
+  if (idx < 0) idx = instanceSt.columnNames.indexOf('ID');
+  if (idx < 0) idx = instanceSt.columnTypes.indexOf('id');
+  return idx;
+}
+
+function getRowId(instanceSt, rowIdx) {
+  const idCol = getIdColumnIndex(instanceSt);
+  if (idCol < 0 || !instanceSt.relation.items[rowIdx]) return null;
+  return instanceSt.relation.items[rowIdx][idCol];
+}
+
+function openSelectOneDialog(st) {
+  const relCopy = cloneRelationForSelection(st);
+  const dialogId = `select-one-${Date.now()}`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
+
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog selection-dialog';
+  dialog.id = dialogId;
+
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Select One (${relCopy.items.length} registos)</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="popup-content-body">
+      <div class="selection-relation-container" id="${dialogId}-builder"></div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline close-selection">Fechar</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(dialog);
+
+  const builderContainer = document.getElementById(`${dialogId}-builder`);
+  const instanceSt = initRelationInstance(builderContainer, relCopy, { showJsonEditor: false, isNested: true });
+
+  const cleanup = () => {
+    if (instanceSt) {
+      relationInstances.delete(instanceSt.uid);
+      unregisterRelation(instanceSt.uid);
+    }
+    overlay.remove();
+    dialog.remove();
+  };
+
+  const outputAndClose = (id) => {
+    if (id !== null && id !== undefined) {
+      outputToConsoleAndElements(JSON.stringify(id));
+    } else {
+      outputToConsoleAndElements('');
+    }
+    cleanup();
+  };
+
+  builderContainer.addEventListener('dblclick', (e) => {
+    const tr = e.target.closest('tbody tr[data-row-idx]');
+    if (!tr) return;
+    const rowIdx = parseInt(tr.dataset.rowIdx);
+    if (isNaN(rowIdx)) return;
+    const id = getRowId(instanceSt, rowIdx);
+    outputAndClose(id);
+  });
+
+  const closeHandler = () => {
+    const highlighted = getHighlightedRow(instanceSt);
+    if (highlighted !== null && highlighted !== undefined) {
+      const id = getRowId(instanceSt, highlighted);
+      outputAndClose(id);
+    } else {
+      outputAndClose(null);
+    }
+  };
+
+  overlay.addEventListener('click', closeHandler);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', closeHandler);
+  dialog.querySelector('.close-selection').addEventListener('click', closeHandler);
+}
+
+function openSelectManyDialog(st) {
+  const relCopy = cloneRelationForSelection(st);
+  relCopy.rel_options.show_multicheck = true;
+  const dialogId = `select-many-${Date.now()}`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
+
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog selection-dialog';
+  dialog.id = dialogId;
+
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Select Many (${relCopy.items.length} registos)</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="popup-content-body">
+      <div class="selection-relation-container" id="${dialogId}-builder"></div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline close-selection">Fechar</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(dialog);
+
+  const builderContainer = document.getElementById(`${dialogId}-builder`);
+  const instanceSt = initRelationInstance(builderContainer, relCopy, { showJsonEditor: false, isNested: true });
+
+  const cleanup = () => {
+    if (instanceSt) {
+      relationInstances.delete(instanceSt.uid);
+      unregisterRelation(instanceSt.uid);
+    }
+    overlay.remove();
+    dialog.remove();
+  };
+
+  const outputAndClose = () => {
+    const selected = getSelectedRows(instanceSt);
+    const ids = [];
+    if (selected && selected.size > 0) {
+      selected.forEach(rowIdx => {
+        const id = getRowId(instanceSt, rowIdx);
+        if (id !== null && id !== undefined) ids.push(id);
+      });
+    }
+    outputToConsoleAndElements(JSON.stringify(ids));
+    cleanup();
+  };
+
+  overlay.addEventListener('click', outputAndClose);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', outputAndClose);
+  dialog.querySelector('.close-selection').addEventListener('click', outputAndClose);
+}
+
+function openChooseManyDialog(st) {
+  const relSource = cloneRelationForSelection(st);
+  const relTarget = cloneRelationForSelection(st, true);
+  const dialogId = `choose-many-${Date.now()}`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
+
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog selection-dialog choose-many-dialog';
+  dialog.id = dialogId;
+
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Choose Many</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="popup-content-body choose-many-body">
+      <div class="choose-many-section">
+        <div class="choose-many-label">Disponíveis (${relSource.items.length})</div>
+        <div class="selection-relation-container choose-source-container" id="${dialogId}-source"></div>
+      </div>
+      <div class="choose-many-section">
+        <div class="choose-many-label">Seleccionados (0)</div>
+        <div class="selection-relation-container choose-target-container" id="${dialogId}-target"></div>
+      </div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-outline close-selection">Fechar</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(dialog);
+
+  const sourceContainer = document.getElementById(`${dialogId}-source`);
+  const targetContainer = document.getElementById(`${dialogId}-target`);
+
+  const sourceSt = initRelationInstance(sourceContainer, relSource, { showJsonEditor: false, isNested: true });
+  const targetSt = initRelationInstance(targetContainer, relTarget, { showJsonEditor: false, isNested: true });
+
+  const updateLabels = () => {
+    const sections = dialog.querySelectorAll('.choose-many-label');
+    if (sections[0]) sections[0].textContent = `Disponíveis (${sourceSt.relation.items.length})`;
+    if (sections[1]) sections[1].textContent = `Seleccionados (${targetSt.relation.items.length})`;
+  };
+
+  const cleanup = () => {
+    [sourceSt, targetSt].forEach(ist => {
+      if (ist) {
+        relationInstances.delete(ist.uid);
+        unregisterRelation(ist.uid);
+      }
+    });
+    overlay.remove();
+    dialog.remove();
+  };
+
+  sourceContainer.addEventListener('dblclick', (e) => {
+    const tr = e.target.closest('tbody tr[data-row-idx]');
+    if (!tr) return;
+    const rowIdx = parseInt(tr.dataset.rowIdx);
+    if (isNaN(rowIdx) || rowIdx >= sourceSt.relation.items.length) return;
+    const item = JSON.parse(JSON.stringify(sourceSt.relation.items[rowIdx]));
+    targetSt.relation.items.push(item);
+    const targetCount = targetSt.relation.items.length;
+    setFilteredIndices(targetSt, [...Array(targetCount).keys()]);
+    setSortedIndices(targetSt, [...Array(targetCount).keys()]);
+    applyFilters(targetSt);
+    applySorting(targetSt);
+    renderTable(targetSt);
+    updateLabels();
+  });
+
+  targetContainer.addEventListener('dblclick', (e) => {
+    const tr = e.target.closest('tbody tr[data-row-idx]');
+    if (!tr) return;
+    const rowIdx = parseInt(tr.dataset.rowIdx);
+    if (isNaN(rowIdx) || rowIdx >= targetSt.relation.items.length) return;
+    targetSt.relation.items.splice(rowIdx, 1);
+    const targetCount = targetSt.relation.items.length;
+    setFilteredIndices(targetSt, [...Array(targetCount).keys()]);
+    setSortedIndices(targetSt, [...Array(targetCount).keys()]);
+    setSelectedRows(targetSt, new Set());
+    applyFilters(targetSt);
+    applySorting(targetSt);
+    renderTable(targetSt);
+    updateLabels();
+  });
+
+  const outputAndClose = () => {
+    const ids = [];
+    const idCol = getIdColumnIndex(targetSt);
+    if (idCol >= 0) {
+      targetSt.relation.items.forEach(item => {
+        if (item[idCol] !== null && item[idCol] !== undefined) ids.push(item[idCol]);
+      });
+    }
+    outputToConsoleAndElements(JSON.stringify(ids));
+    cleanup();
+  };
+
+  overlay.addEventListener('click', outputAndClose);
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', outputAndClose);
+  dialog.querySelector('.close-selection').addEventListener('click', outputAndClose);
 }
 
 function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {

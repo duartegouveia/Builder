@@ -4474,6 +4474,52 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-color: var(--destructive, #ef4444);
 }
 
+/* Selection Dialogs */
+.selection-dialog {
+  max-width: 90vw;
+  width: 900px;
+}
+
+.selection-dialog .popup-content-body {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.choose-many-dialog {
+  width: 950px;
+}
+
+.choose-many-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.choose-many-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.choose-many-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: var(--space-1) var(--space-2);
+  background: var(--muted, #f4f4f5);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  color: var(--foreground);
+}
+
+.choose-many-section .selection-relation-container {
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: auto;
+  max-height: 35vh;
+}
+
 @media (max-width: 768px) {
   .multi-panels-2,
   .multi-panels-3,
@@ -4488,5 +4534,13 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
   .saved-name-input {
     min-width: auto;
+  }
+
+  .selection-dialog {
+    width: 95vw;
+  }
+
+  .choose-many-section .selection-relation-container {
+    max-height: 30vh;
   }
 }
