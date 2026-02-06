@@ -70,10 +70,10 @@
       "Remove Unchecked",
       "Multi View",
       "Multi Edit",
-      "Group Edit",
-      "Merge",
       "Multi Copy",
-      "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
     ]
   },
   "items": [
@@ -138,10 +138,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -209,10 +209,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -295,10 +295,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -378,10 +378,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -454,10 +454,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -537,10 +537,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -628,10 +628,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -705,10 +705,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -791,10 +791,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -874,10 +874,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -960,10 +960,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1043,10 +1043,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1134,10 +1134,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1205,10 +1205,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1291,10 +1291,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1356,10 +1356,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1447,10 +1447,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1524,10 +1524,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1600,10 +1600,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1677,10 +1677,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1768,10 +1768,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1833,10 +1833,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1909,10 +1909,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -1980,10 +1980,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2061,10 +2061,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2144,10 +2144,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2235,10 +2235,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2318,10 +2318,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2409,10 +2409,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2474,10 +2474,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2560,10 +2560,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2631,10 +2631,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2707,10 +2707,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2772,10 +2772,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2858,10 +2858,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -2935,10 +2935,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3026,10 +3026,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3112,10 +3112,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3177,10 +3177,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3258,10 +3258,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3336,10 +3336,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3407,10 +3407,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3483,10 +3483,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3566,10 +3566,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3647,10 +3647,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3730,10 +3730,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3811,10 +3811,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3888,10 +3888,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -3969,10 +3969,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4053,10 +4053,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4124,10 +4124,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4215,10 +4215,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4280,10 +4280,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4361,10 +4361,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4438,10 +4438,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4524,10 +4524,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4589,10 +4589,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4675,10 +4675,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4758,10 +4758,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4849,10 +4849,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4914,10 +4914,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -4995,10 +4995,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5060,10 +5060,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5151,10 +5151,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5216,10 +5216,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5302,10 +5302,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5379,10 +5379,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5470,10 +5470,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5547,10 +5547,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5633,10 +5633,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5704,10 +5704,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5795,10 +5795,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5891,10 +5891,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -5974,10 +5974,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6065,10 +6065,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6136,10 +6136,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6227,10 +6227,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6298,10 +6298,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6379,10 +6379,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6456,10 +6456,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6542,10 +6542,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6625,10 +6625,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6706,10 +6706,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6789,10 +6789,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6880,10 +6880,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -6963,10 +6963,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7049,10 +7049,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7132,10 +7132,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7223,10 +7223,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7288,10 +7288,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7364,10 +7364,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7435,10 +7435,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7516,10 +7516,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7599,10 +7599,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7680,10 +7680,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [
@@ -7751,10 +7751,10 @@
             "Remove Unchecked",
             "Multi View",
             "Multi Edit",
-            "Group Edit",
-            "Merge",
             "Multi Copy",
-            "Multi Delete"
+            "Multi Delete",
+            "Group Edit",
+            "Merge"
           ]
         },
         "items": [

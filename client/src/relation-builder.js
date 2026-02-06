@@ -92,7 +92,7 @@ const DEFAULT_REL_OPTIONS = {
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
   general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Output State'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
-  general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Group Edit', 'Merge', 'Multi Copy', 'Multi Delete']
+  general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
 };
 
 // Sample Products JSON for quick loading
@@ -126,7 +126,7 @@ const PRODUCTS_JSON = {
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
     "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ["1", "1", "PURINA DOG Chow Adulto", "Nestle", "PURINA", "7613036584307", 10, "1"],
@@ -172,7 +172,7 @@ const CATEGORIES_JSON = {
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
     "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ['1','1','Dog Food'],
@@ -227,7 +227,7 @@ const STOCKS_JSON = {
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
     "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ["1","30/9/2025","1","Pingo doce","1000","010","AZAMBUJA","2050-275","7613036584307","PURINA DOG Chow Adulto",23,0,"0521","25/10/2026","1"],
@@ -336,7 +336,7 @@ const PRICELISTS_JSON = {
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
     "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Group Edit", "Merge", "Multi Copy", "Multi Delete"]
+    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ['1','1/1/2024','31/12/2024','2024','1',35.56],
@@ -1827,7 +1827,7 @@ function generateDemoRelation() {
     general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
     general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Output State'],
     general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
-    general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Group Edit', 'Merge', 'Multi Copy', 'Multi Delete']
+    general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
   };
   
   const countryKeys = Object.keys(options.country);
@@ -12819,7 +12819,7 @@ function init() {
     "general_view_options": ["Table","Cards","Pivot","Correlation","Diagram","AI","Saved"],
     "general_always_visible_options": ["New","New Fast","Paper Form","Output State"],
     "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
-    "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Group Edit","Merge","Multi Copy","Multi Delete"]
+    "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Multi Copy","Multi Delete","Group Edit","Merge"]
   },
   "items": []
 }, null, 2);
@@ -12848,7 +12848,7 @@ function init() {
         "general_view_options": ["Table","Cards","Pivot","Correlation","Diagram","AI","Saved"],
         "general_always_visible_options": ["New","New Fast","Paper Form","Output State"],
         "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
-        "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Group Edit","Merge","Multi Copy","Multi Delete"]
+        "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Multi Copy","Multi Delete","Group Edit","Merge"]
       },
       "items": []
     };
