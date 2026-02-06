@@ -4778,6 +4778,10 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   padding: 12px 18px;
   border-top: 1px solid var(--border-color, #333);
 }
+.export-dialog-footer .btn {
+  padding-left: 10px;
+  padding-right: 10px;
+}
 
 /* Import Dialog */
 .import-dialog {
@@ -4945,4 +4949,8 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   gap: 8px;
   padding: 12px 18px;
   border-top: 1px solid var(--border-color, #333);
+}
+.import-dialog-footer .btn {
+  padding-left: 10px;
+  padding-right: 10px;
 }
