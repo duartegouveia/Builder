@@ -28,7 +28,11 @@
       "jp": "🇯🇵 Japan",
       "cn": "🇨🇳 China"
     },
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
+    ]
   },
   "rel_options": {
     "editable": false,
@@ -40,6 +44,7 @@
     "hierarchy_column": "parent",
     "single_item_mode": "bottom",
     "label_field_top_down": true,
+    "OnDoubleClickAction": "",
     "general_view_options": [
       "Table",
       "Cards",
@@ -47,20 +52,22 @@
       "Correlation",
       "Diagram",
       "AI",
-      "Saved"
+      "Saved",
+      "Structure"
     ],
     "general_always_visible_options": [
       "New",
       "New Fast",
+      "Advanced Search",
       "Paper Form",
       "Print",
-            "Select One",
-            "Select Many",
-            "Choose Many",
-            "Import from File",
-            "Export to file",
-            "Integrity Check",
-            "Output State"
+      "Select One",
+      "Select Many",
+      "Choose Many",
+      "Import from File",
+      "Export to file",
+      "Integrity Check",
+      "Output State"
     ],
     "general_line_options": [
       "View",
@@ -70,7 +77,7 @@
       "New Fast",
       "Delete",
       "Paper Form",
-            "Print"
+      "Print"
     ],
     "general_multi_options": [
       "Invert Page",
@@ -80,9 +87,9 @@
       "Multi View",
       "Multi Edit",
       "Multi Copy",
-            "Multi Delete",
-            "Group Edit",
-            "Merge"
+      "Multi Delete",
+      "Group Edit",
+      "Merge"
     ]
   },
   "items": [
@@ -117,6 +124,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -124,11 +132,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -197,6 +207,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -204,11 +215,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -292,6 +305,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -299,11 +313,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -384,6 +400,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -391,11 +408,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -469,6 +488,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -476,11 +496,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -561,6 +583,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -568,11 +591,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -661,6 +686,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -668,11 +694,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -747,6 +775,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -754,11 +783,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -842,6 +873,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -849,11 +881,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -934,6 +968,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -941,11 +976,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1029,6 +1066,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1036,11 +1074,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1121,6 +1161,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1128,11 +1169,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1221,6 +1264,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1228,11 +1272,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1301,6 +1347,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1308,11 +1355,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1396,6 +1445,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1403,11 +1453,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1470,6 +1522,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1477,11 +1530,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1570,6 +1625,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1577,11 +1633,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1656,6 +1714,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1663,11 +1722,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1741,6 +1802,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1748,11 +1810,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1827,6 +1891,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1834,11 +1899,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -1927,6 +1994,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -1934,11 +2002,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2001,6 +2071,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2008,11 +2079,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2086,6 +2159,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2093,11 +2167,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2166,6 +2242,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2173,11 +2250,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2256,6 +2335,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2263,11 +2343,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2348,6 +2430,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2355,11 +2438,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2448,6 +2533,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2455,11 +2541,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2540,6 +2628,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2547,11 +2636,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2640,6 +2731,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2647,11 +2739,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2714,6 +2808,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2721,11 +2816,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2809,6 +2906,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2816,11 +2914,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2889,6 +2989,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2896,11 +2997,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -2974,6 +3077,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -2981,11 +3085,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3048,6 +3154,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3055,11 +3162,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3143,6 +3252,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3150,11 +3260,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3229,6 +3341,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3236,11 +3349,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3329,6 +3444,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3336,11 +3452,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3424,6 +3542,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3431,11 +3550,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3498,6 +3619,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3505,11 +3627,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3588,6 +3712,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3595,11 +3720,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3675,6 +3802,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3682,11 +3810,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3755,6 +3885,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3762,11 +3893,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3840,6 +3973,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3847,11 +3981,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -3932,6 +4068,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -3939,11 +4076,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4022,6 +4161,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4029,11 +4169,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4114,6 +4256,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4121,11 +4264,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4204,6 +4349,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4211,11 +4357,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4290,6 +4438,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4297,11 +4446,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4380,6 +4531,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4387,11 +4539,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4473,6 +4627,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4480,11 +4635,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4553,6 +4710,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4560,11 +4718,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4653,6 +4813,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4660,11 +4821,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4727,6 +4890,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4734,11 +4898,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4817,6 +4983,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4824,11 +4991,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4903,6 +5072,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -4910,11 +5080,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -4998,6 +5170,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5005,11 +5178,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5072,6 +5247,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5079,11 +5255,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5167,6 +5345,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5174,11 +5353,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5259,6 +5440,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5266,11 +5448,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5359,6 +5543,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5366,11 +5551,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5433,6 +5620,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5440,11 +5628,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5523,6 +5713,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5530,11 +5721,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5597,6 +5790,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5604,11 +5798,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5697,6 +5893,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5704,11 +5901,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5771,6 +5970,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5778,11 +5978,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5866,6 +6068,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5873,11 +6076,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -5952,6 +6157,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -5959,11 +6165,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6052,6 +6260,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6059,11 +6268,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6138,6 +6349,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6145,11 +6357,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6233,6 +6447,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6240,11 +6455,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6313,6 +6530,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6320,11 +6538,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6413,6 +6633,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6420,11 +6641,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6518,6 +6741,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6525,11 +6749,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6610,6 +6836,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6617,11 +6844,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6710,6 +6939,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6717,11 +6947,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6790,6 +7022,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6797,11 +7030,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6890,6 +7125,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6897,11 +7133,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -6970,6 +7208,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -6977,11 +7216,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7060,6 +7301,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7067,11 +7309,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7146,6 +7390,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7153,11 +7398,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7241,6 +7488,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7248,11 +7496,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7333,6 +7583,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7340,11 +7591,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7423,6 +7676,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7430,11 +7684,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7515,6 +7771,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7522,11 +7779,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7615,6 +7874,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7622,11 +7882,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7707,6 +7969,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7714,11 +7977,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7802,6 +8067,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7809,11 +8075,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7894,6 +8162,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -7901,11 +8170,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -7994,6 +8265,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8001,11 +8273,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8068,6 +8342,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8075,11 +8350,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8153,6 +8430,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8160,11 +8438,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8233,6 +8513,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8240,11 +8521,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8323,6 +8606,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8330,11 +8614,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8415,6 +8701,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8422,11 +8709,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8505,6 +8794,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8512,11 +8802,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
@@ -8585,6 +8877,7 @@
           "hierarchy_root_value": "",
           "single_item_mode": "dialog",
           "label_field_top_down": true,
+          "OnDoubleClickAction": "",
           "general_view_options": [
             "Table",
             "Cards",
@@ -8592,11 +8885,13 @@
             "Correlation",
             "Diagram",
             "AI",
-            "Saved"
+            "Saved",
+            "Structure"
           ],
           "general_always_visible_options": [
             "New",
             "New Fast",
+            "Advanced Search",
             "Paper Form",
             "Print",
             "Select One",
