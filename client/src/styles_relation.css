@@ -4954,3 +4954,11 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   padding-left: 10px;
   padding-right: 10px;
 }
+
+.selection-search-bar {
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+.selection-search-bar .quick-search-wrapper {
+  width: 100%;
+}

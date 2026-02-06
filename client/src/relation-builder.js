@@ -5060,6 +5060,34 @@ function getRowId(instanceSt, rowIdx) {
   return instanceSt.relation.items[rowIdx][idCol];
 }
 
+function setupSelectionSearch(dialog, instanceSt) {
+  const searchInput = dialog.querySelector('.selection-search-input');
+  const clearBtn = dialog.querySelector('.selection-search-clear');
+  if (!searchInput || !clearBtn) return;
+  searchInput.addEventListener('input', (e) => {
+    applyQuickSearch(instanceSt, e.target.value);
+    applySorting(instanceSt);
+    renderTable(instanceSt);
+    clearBtn.style.display = e.target.value ? 'block' : 'none';
+  });
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    applyQuickSearch(instanceSt, '');
+    applySorting(instanceSt);
+    renderTable(instanceSt);
+  });
+}
+
+function selectionSearchHtml() {
+  return `<div class="selection-search-bar">
+    <div class="quick-search-wrapper">
+      <input type="text" class="selection-search-input quick-search-input" placeholder="Search..." data-testid="input-selection-search">
+      <button class="selection-search-clear quick-search-clear" title="Clear search" data-testid="button-clear-selection-search">✕</button>
+    </div>
+  </div>`;
+}
+
 function openSelectOneDialog(st) {
   const relCopy = cloneRelationForSelection(st);
   const dialogId = `select-one-${Date.now()}`;
@@ -5077,6 +5105,7 @@ function openSelectOneDialog(st) {
       <span>Select One (${relCopy.items.length} registos)</span>
       <button class="btn-close-dialog">✕</button>
     </div>
+    ${selectionSearchHtml()}
     <div class="popup-content-body">
       <div class="selection-relation-container" id="${dialogId}-builder"></div>
     </div>
@@ -5090,6 +5119,7 @@ function openSelectOneDialog(st) {
 
   const builderContainer = document.getElementById(`${dialogId}-builder`);
   const instanceSt = initRelationInstance(builderContainer, relCopy, { showJsonEditor: false, isNested: true });
+  setupSelectionSearch(dialog, instanceSt);
 
   const cleanup = () => {
     if (instanceSt) {
@@ -5150,6 +5180,7 @@ function openSelectManyDialog(st) {
       <span>Select Many (${relCopy.items.length} registos)</span>
       <button class="btn-close-dialog">✕</button>
     </div>
+    ${selectionSearchHtml()}
     <div class="popup-content-body">
       <div class="selection-relation-container" id="${dialogId}-builder"></div>
     </div>
@@ -5163,6 +5194,7 @@ function openSelectManyDialog(st) {
 
   const builderContainer = document.getElementById(`${dialogId}-builder`);
   const instanceSt = initRelationInstance(builderContainer, relCopy, { showJsonEditor: false, isNested: true });
+  setupSelectionSearch(dialog, instanceSt);
 
   const cleanup = () => {
     if (instanceSt) {
@@ -5212,6 +5244,7 @@ function openChooseManyDialog(st) {
     <div class="popup-content-body choose-many-body">
       <div class="choose-many-section">
         <div class="choose-many-label">Disponíveis (${relSource.items.length})</div>
+        ${selectionSearchHtml()}
         <div class="selection-relation-container choose-source-container" id="${dialogId}-source"></div>
       </div>
       <div class="choose-many-section">
@@ -5232,6 +5265,8 @@ function openChooseManyDialog(st) {
 
   const sourceSt = initRelationInstance(sourceContainer, relSource, { showJsonEditor: false, isNested: true });
   const targetSt = initRelationInstance(targetContainer, relTarget, { showJsonEditor: false, isNested: true });
+  const sourceSection = dialog.querySelector('.choose-many-section');
+  setupSelectionSearch(sourceSection, sourceSt);
 
   const updateLabels = () => {
     const sections = dialog.querySelectorAll('.choose-many-label');
