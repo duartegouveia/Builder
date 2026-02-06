@@ -84,6 +84,7 @@ const DEFAULT_REL_OPTIONS = {
   show_natural_order: false,
   show_id: true,
   show_column_kind: true,
+  show_stats: true,
   show_hierarchy: false,
   hierarchy_column: 'parent',
   hierarchy_root_value: '',
@@ -120,6 +121,7 @@ const PRODUCTS_JSON = {
     "show_natural_order": true,
     "show_id": true,
     "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -168,6 +170,7 @@ const CATEGORIES_JSON = {
     "show_natural_order": true,
     "show_id": true,
     "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -225,6 +228,7 @@ const STOCKS_JSON = {
     "show_natural_order": true,
     "show_id": true,
     "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -336,6 +340,7 @@ const PRICELISTS_JSON = {
     "show_natural_order": true,
     "show_id": true,
     "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1930,6 +1935,7 @@ function parseRelation(jsonStr) {
       show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
       show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
       show_column_kind: parsedRelOptions.show_column_kind ?? DEFAULT_REL_OPTIONS.show_column_kind,
+      show_stats: parsedRelOptions.show_stats ?? DEFAULT_REL_OPTIONS.show_stats,
       show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
       hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
       hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
@@ -3962,6 +3968,7 @@ const SELECTION_REL_OPTIONS = {
   show_natural_order: false,
   show_id: true,
   show_column_kind: false,
+  show_stats: false,
   show_hierarchy: true,
   hierarchy_column: 'parent',
   single_item_mode: 'bottom',
@@ -5323,10 +5330,12 @@ function renderTable(st = state) {
   });
   
   // Footer table (separate, outside scroll area)
+  let footerTable = null;
+  if (st.rel_options.show_stats) {
   const footerWrapper = document.createElement('div');
   footerWrapper.className = 'relation-footer-wrapper';
   
-  const footerTable = document.createElement('table');
+  footerTable = document.createElement('table');
   footerTable.className = 'relation-table relation-footer-table';
   
   const tfoot = document.createElement('tfoot');
@@ -5355,9 +5364,10 @@ function renderTable(st = state) {
   footerTable.appendChild(tfoot);
   footerWrapper.appendChild(footerTable);
   container.appendChild(footerWrapper);
+  }
   
   // Sync column widths between main table and footer
-  syncFooterColumnWidths(table, footerTable);
+  if (footerTable) syncFooterColumnWidths(table, footerTable);
   
   // Pagination
   const paginationDiv = document.createElement('div');
@@ -13440,6 +13450,7 @@ function init() {
     "show_natural_order": true,
     "show_id": true,
     "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -13471,6 +13482,7 @@ function init() {
         "show_natural_order": true,
         "show_id": true,
         "show_column_kind": true,
+        "show_stats": true,
         "show_hierarchy": true,
         "hierarchy_column": "parent",
         "hierarchy_root_value": "",
