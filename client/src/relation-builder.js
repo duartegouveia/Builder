@@ -3376,6 +3376,34 @@ function formatCellValue(value, type, colName) {
   return String(value);
 }
 
+function showConfirmDialog(message, onConfirm, options = {}) {
+  const { confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'danger' } = options;
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  const dialog = document.createElement('div');
+  dialog.className = 'confirm-dialog';
+  const msg = document.createElement('p');
+  msg.className = 'confirm-dialog-message';
+  msg.textContent = message;
+  dialog.appendChild(msg);
+  const btnRow = document.createElement('div');
+  btnRow.className = 'confirm-dialog-buttons';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-outline';
+  cancelBtn.textContent = cancelText;
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = `btn btn-${type}`;
+  confirmBtn.textContent = confirmText;
+  confirmBtn.addEventListener('click', () => { overlay.remove(); onConfirm(); });
+  btnRow.appendChild(cancelBtn);
+  btnRow.appendChild(confirmBtn);
+  dialog.appendChild(btnRow);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  confirmBtn.focus();
+}
+
 function showToast(message, type = 'info', duration = 3000) {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -4964,9 +4992,11 @@ function showMultiDeleteDialog(st) {
       if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'view');
     });
     wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
-      removeSelectedRows(st);
-      showToast(`${checkedIndices.length} registos eliminados.`, 'success');
-      if (closeHandler) closeHandler();
+      showConfirmDialog(`Tem a certeza que pretende eliminar ${checkedIndices.length} registos?`, () => {
+        removeSelectedRows(st);
+        showToast(`${checkedIndices.length} registos eliminados.`, 'success');
+        if (closeHandler) closeHandler();
+      }, { confirmText: 'Eliminar Todos' });
     });
   }, 0);
 }
@@ -8186,14 +8216,14 @@ function showRowCopyDialog(st, rowIdx) {
 function showRowDeleteDialog(st, rowIdx) {
   closeAllMenus();
   
-  if (confirm(`Tem a certeza que pretende eliminar o registo ${rowIdx + 1}?`)) {
+  showConfirmDialog(`Tem a certeza que pretende eliminar o registo ${rowIdx + 1}?`, () => {
     st.relation.items.splice(rowIdx, 1);
     getSelectedRows(st).delete(rowIdx);
     setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
     setSortedIndices(st, [...getFilteredIndices(st)]);
     renderTable(st);
     outputRelationState(st);
-  }
+  }, { confirmText: 'Eliminar' });
 }
 
 function showRowNewDialog(st, rowIdx, mode = 'new') {
