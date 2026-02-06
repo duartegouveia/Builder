@@ -7324,10 +7324,12 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
         footer.querySelector('.clear-form')?.addEventListener('click', clearForm);
         footer.querySelector('.save-record')?.addEventListener('click', () => {
           saveRecord();
+          outputRelationState(st);
           closeRowOperationPanel(st);
         });
         footer.querySelector('.save-and-new')?.addEventListener('click', () => {
           saveRecord();
+          outputRelationState(st);
           clearForm();
           const idInput = container.querySelector(`[data-col="${st.columnTypes.findIndex(t => t === 'id')}"]`);
           if (idInput) idInput.textContent = getNextNegativeId(st);
@@ -7465,6 +7467,7 @@ function showRowEditDialog(st, rowIdx) {
           });
           
           renderTable(st);
+          outputRelationState(st);
           closeRowOperationPanel(st);
         });
       }
@@ -12345,12 +12348,18 @@ function init() {
     function detectKind(value) {
       if (value === null || value === undefined) return 'text';
       if (typeof value === 'boolean') return 'boolean';
-      if (typeof value === 'number') return 'float';
+      if (typeof value === 'number') {
+        return Number.isInteger(value) ? 'int' : 'float';
+      }
       if (typeof value === 'string') {
         if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?/.test(value)) return 'datetime';
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'date';
         if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) return 'time';
         if (value.length > 100) return 'multilinestring';
+        const trimmed = value.trim();
+        if (trimmed !== '' && !isNaN(trimmed) && isFinite(trimmed)) {
+          return trimmed.includes('.') ? 'float' : 'int';
+        }
         return 'string';
       }
       if (Array.isArray(value)) {
@@ -12378,6 +12387,8 @@ function init() {
         if (kind === 'relation') {
           const subRel = objectToRelation(value);
           rowValues.push(JSON.stringify(subRel, null, 2));
+        } else if (typeof value === 'string' && (kind === 'int' || kind === 'float')) {
+          rowValues.push(kind === 'int' ? parseInt(value) : parseFloat(value));
         } else {
           rowValues.push(value);
         }

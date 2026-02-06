@@ -1808,7 +1808,30 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   z-index: 1000;
-  padding: var(--space-1);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.row-ops-menu .column-menu-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  box-shadow: var(--shadow-xs);
+  transition: all var(--transition-normal);
+}
+
+.row-ops-menu .column-menu-item:hover {
+  background: var(--slate-50);
+  border-color: var(--slate-300);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Nested Relation Cell Button */
