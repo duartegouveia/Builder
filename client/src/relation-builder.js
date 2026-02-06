@@ -5158,7 +5158,7 @@ function openSelectOneDialog(st) {
     }
   };
 
-  overlay.addEventListener('click', closeHandler);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeHandler(); });
   dialog.querySelector('.btn-close-dialog').addEventListener('click', closeHandler);
   dialog.querySelector('.close-selection').addEventListener('click', closeHandler);
 }
@@ -5218,7 +5218,7 @@ function openSelectManyDialog(st) {
     cleanup();
   };
 
-  overlay.addEventListener('click', outputAndClose);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) outputAndClose(); });
   dialog.querySelector('.btn-close-dialog').addEventListener('click', outputAndClose);
   dialog.querySelector('.close-selection').addEventListener('click', outputAndClose);
 }
@@ -5335,7 +5335,7 @@ function openChooseManyDialog(st) {
     cleanup();
   };
 
-  overlay.addEventListener('click', outputAndClose);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) outputAndClose(); });
   dialog.querySelector('.btn-close-dialog').addEventListener('click', outputAndClose);
   dialog.querySelector('.close-selection').addEventListener('click', outputAndClose);
 }
@@ -8540,7 +8540,7 @@ function showStatisticsPanel(colIdx) {
 }
 
 function closeAllMenus() {
-  document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog, .group-cols-dialog, .color-palette-dialog').forEach(el => el.remove());
+  document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog:not(.selection-dialog), .group-cols-dialog, .color-palette-dialog').forEach(el => el.remove());
 }
 
 function hasActiveFilter(st = state) {
