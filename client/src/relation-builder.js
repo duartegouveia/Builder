@@ -7134,11 +7134,15 @@ function initRelationFieldsInContainer(container, st, row) {
 }
 
 function closeRowOperationPanel(st) {
+  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
   const detailPanel = st.container.querySelector('.relation-detail-panel');
   if (detailPanel) {
     detailPanel.innerHTML = '';
     const wrapper = st.container.querySelector('.relation-flex-wrapper');
     if (wrapper) wrapper.classList.remove('has-detail');
+  }
+  if (singleItemMode === 'bottom') {
+    st.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
@@ -7650,11 +7654,14 @@ function showContentInPopup(contentBuilder, title = '', footerButtonsHtml = '') 
 
 // Clear the detail panel content and update layout state
 function clearDetailPanel(st) {
+  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
   const detailPanel = getDetailPanel(st);
   if (detailPanel) {
     detailPanel.innerHTML = '';
-    // Update layout state to remove .has-detail class
     updateDetailPanelState(st);
+  }
+  if (singleItemMode === 'bottom') {
+    st.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
