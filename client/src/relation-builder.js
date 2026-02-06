@@ -7221,31 +7221,14 @@ function showRowCopyDialog(st, rowIdx) {
 function showRowDeleteDialog(st, rowIdx) {
   closeAllMenus();
   
-  const row = st.relation.items[rowIdx];
-  const title = `Eliminar Registo ${rowIdx + 1}`;
-  
-  const footerButtons = `<button class="btn btn-danger delete-record">Elimina Registo</button>`;
-  
-  showContentBasedOnMode(st, (container) => {
-    container.innerHTML = generateRowFormattedContent(st, row, 'view');
-    initRelationFieldsInContainer(container, st, row);
-    
-    setTimeout(() => {
-      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
-      if (footer) {
-        footer.querySelector('.delete-record')?.addEventListener('click', () => {
-          if (confirm('Tem a certeza que pretende eliminar este registo?')) {
-            st.relation.items.splice(rowIdx, 1);
-            getSelectedRows(st).delete(rowIdx);
-            setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
-            setSortedIndices(st, [...getFilteredIndices(st)]);
-            renderTable(st);
-            closeRowOperationPanel(st);
-          }
-        });
-      }
-    }, 0);
-  }, title, footerButtons);
+  if (confirm(`Tem a certeza que pretende eliminar o registo ${rowIdx + 1}?`)) {
+    st.relation.items.splice(rowIdx, 1);
+    getSelectedRows(st).delete(rowIdx);
+    setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+    setSortedIndices(st, [...getFilteredIndices(st)]);
+    renderTable(st);
+    outputRelationState(st);
+  }
 }
 
 function showRowNewDialog(st, rowIdx, mode = 'new') {
