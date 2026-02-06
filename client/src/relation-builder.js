@@ -4944,7 +4944,7 @@ function renderPagination(st = state) {
         ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
         <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedRecords} checked</span>
       </div>
-      <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
+      <div class="pagination-actions${showMulticheck && (st.rel_options.general_multi_options || []).length > 0 ? '' : ' hidden'}">
         <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
           <option value="" disabled selected>Checked Actions...</option>
           ${buildMultiOptionsHtml(st, selectedRecords, filteredRecords)}
@@ -5263,7 +5263,10 @@ function renderTable(st = state) {
     // Operations button (position 2)
     const opsTd = document.createElement('td');
     opsTd.className = 'relation-td-ops';
-    opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
+    const lineOpts = st.rel_options.general_line_options || [];
+    if (lineOpts.length > 0) {
+      opsTd.innerHTML = `<button class="btn-row-ops" data-row="${rowIdx}" title="Row operations">⋮</button>`;
+    }
     tr.appendChild(opsTd);
     
     // Index
@@ -9252,7 +9255,8 @@ function renderCardsView(st = state) {
   }
   navHtml += '<span class="cards-info-selected' + (showMulticheck ? '' : ' hidden') + '">' + selectedRecords + ' checked</span>';
   navHtml += '</div>';
-  navHtml += '<div class="cards-actions' + (showMulticheck ? '' : ' hidden') + '">';
+  const hasMultiOpts = (st.rel_options.general_multi_options || []).length > 0;
+  navHtml += '<div class="cards-actions' + (showMulticheck && hasMultiOpts ? '' : ' hidden') + '">';
   navHtml += '<select class="cards-selection-actions">';
   navHtml += '<option value="" disabled selected>Checked Actions...</option>';
   navHtml += buildMultiOptionsHtml(st, selectedCount, filteredCount);
@@ -12283,16 +12287,18 @@ function initRelationInstance(container, relationData, options = {}) {
   const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
   const hasRightContent = searchHtml || alwaysVisibleSelectHtml || badgeHtml;
   
+  const hasViewTabs = viewOptions.length > 0;
+  const viewTabsStyle = hasViewTabs || hasRightContent ? 'margin-bottom: 1rem;' : 'display: none;';
   mainPanelHtml += `
     <div class="group-by-panel-container"></div>
-    <div class="view-tabs" style="margin-bottom: 1rem;">
-      <div class="view-tabs-left">
+    <div class="view-tabs" style="${viewTabsStyle}">
+      ${hasViewTabs ? `<div class="view-tabs-left">
         ${viewOptions.map((view, idx) => {
           const viewKey = view.toLowerCase();
           const icon = VIEW_TAB_ICONS[viewKey] || '';
           return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${view}</button>`;
         }).join('')}
-      </div>
+      </div>` : ''}
       ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
     </div>
     
