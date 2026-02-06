@@ -12171,7 +12171,25 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-saved view-content" style="display: none;">
       <div class="saved-panel">
-        <p class="text-muted-foreground text-center py-8">Saved views will appear here</p>
+        <div class="saved-form">
+          <div class="saved-form-row">
+            <input type="text" class="saved-name-input" placeholder="Nome da vista..." maxlength="80" />
+            <select class="saved-type-select">
+              <option value="format">Formato</option>
+              <option value="records">Registos</option>
+              <option value="both">Ambos</option>
+            </select>
+            <select class="saved-scope-select">
+              <option value="you">Para Ti</option>
+              <option value="everyone">Para Todos</option>
+            </select>
+            <button class="btn-save-view" title="Guardar vista">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+              Guardar
+            </button>
+          </div>
+        </div>
+        <div class="saved-views-list"></div>
       </div>
     </div>
     
@@ -12439,11 +12457,169 @@ function initAIView(st = state) {
 }
 
 function initSavedView(st = state) {
+  const panel = st.container ? st.container.querySelector('.saved-panel') : el('.saved-panel');
+  if (!panel) return;
+
+  if (!st.relation.saved) st.relation.saved = [];
+
+  const nameInput = panel.querySelector('.saved-name-input');
+  const typeSelect = panel.querySelector('.saved-type-select');
+  const scopeSelect = panel.querySelector('.saved-scope-select');
+  const saveBtn = panel.querySelector('.btn-save-view');
+
+  if (saveBtn) {
+    const newBtn = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+    newBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.classList.add('input-error');
+        setTimeout(() => nameInput.classList.remove('input-error'), 1500);
+        return;
+      }
+      const exists = st.relation.saved.find(s => s.name === name);
+      if (exists) {
+        if (!confirm(`A vista "${name}" já existe. Substituir?`)) return;
+        st.relation.saved = st.relation.saved.filter(s => s.name !== name);
+      }
+      const type = typeSelect.value;
+      const scope = scopeSelect.value;
+      const snapshot = createSavedSnapshot(st, type);
+      st.relation.saved.push({
+        name,
+        datetime: new Date().toISOString(),
+        type,
+        scope,
+        data: JSON.stringify(snapshot)
+      });
+      nameInput.value = '';
+      renderSavedViewsList(st);
+    });
+  }
+
+  renderSavedViewsList(st);
+}
+
+function createSavedSnapshot(st, type) {
+  const snapshot = {};
+  if (type === 'format' || type === 'both') {
+    snapshot.uiState = serializeUiState(getUiState(st));
+    snapshot.columns = JSON.parse(JSON.stringify(st.relation.columns));
+  }
+  if (type === 'records' || type === 'both') {
+    snapshot.items = JSON.parse(JSON.stringify(st.relation.items));
+  }
+  return snapshot;
+}
+
+function restoreSavedSnapshot(st, savedEntry) {
+  const snapshot = JSON.parse(savedEntry.data);
+  const type = savedEntry.type;
+
+  if (type === 'format' || type === 'both') {
+    if (snapshot.uiState) {
+      st.rel_options.uiState = deserializeUiState(snapshot.uiState);
+    }
+    if (snapshot.columns) {
+      st.relation.columns = JSON.parse(JSON.stringify(snapshot.columns));
+      st.columnNames = Object.keys(st.relation.columns);
+      st.columnTypes = Object.values(st.relation.columns);
+    }
+  }
+  if (type === 'records' || type === 'both') {
+    if (snapshot.items) {
+      st.relation.items = JSON.parse(JSON.stringify(snapshot.items));
+    }
+  }
+
+  const itemCount = (st.relation.items || []).length;
+  applyFilters(st);
+  applySorting(st);
+  setCurrentView(st, 'table');
+  switchViewForInstance(st, 'table');
+}
+
+function deleteSavedView(st, name) {
+  st.relation.saved = st.relation.saved.filter(s => s.name !== name);
+  renderSavedViewsList(st);
+}
+
+function renderSavedViewsList(st) {
   const container = st.container ? st.container.querySelector('.saved-views-list') : el('.saved-views-list');
   if (!container) return;
-  
-  // Saved view placeholder - will show saved view configs when implemented
-  container.innerHTML = '<p class="text-muted-foreground">No saved views yet. Save a view configuration to access it here.</p>';
+
+  const saved = st.relation.saved || [];
+  if (saved.length === 0) {
+    container.innerHTML = '<p class="saved-empty-msg">Sem vistas guardadas. Guarda uma configuração para a aceder aqui.</p>';
+    return;
+  }
+
+  const typeLabels = { format: 'Formato', records: 'Registos', both: 'Ambos' };
+  const scopeLabels = { you: 'Para Ti', everyone: 'Para Todos' };
+  const typeIcons = {
+    format: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>',
+    records: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>',
+    both: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>'
+  };
+
+  let html = '<div class="saved-items">';
+  saved.forEach((entry, idx) => {
+    const d = new Date(entry.datetime);
+    const dateStr = d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    html += `
+      <div class="saved-item" data-saved-idx="${idx}" title="Duplo-clique para restaurar">
+        <div class="saved-item-info">
+          <span class="saved-item-name">${entry.name}</span>
+          <span class="saved-item-meta">
+            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}
+            &middot; ${scopeLabels[entry.scope] || entry.scope}
+            &middot; ${dateStr} ${timeStr}
+          </span>
+        </div>
+        <div class="saved-item-actions">
+          <button class="btn-restore-saved" data-saved-idx="${idx}" title="Restaurar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
+          <button class="btn-delete-saved" data-saved-idx="${idx}" title="Eliminar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('.saved-item').forEach(item => {
+    item.addEventListener('dblclick', () => {
+      const idx = parseInt(item.dataset.savedIdx);
+      if (idx >= 0 && idx < saved.length) {
+        restoreSavedSnapshot(st, saved[idx]);
+      }
+    });
+  });
+
+  container.querySelectorAll('.btn-restore-saved').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.savedIdx);
+      if (idx >= 0 && idx < saved.length) {
+        restoreSavedSnapshot(st, saved[idx]);
+      }
+    });
+  });
+
+  container.querySelectorAll('.btn-delete-saved').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.savedIdx);
+      if (idx >= 0 && idx < saved.length) {
+        if (confirm(`Eliminar vista "${saved[idx].name}"?`)) {
+          deleteSavedView(st, saved[idx].name);
+        }
+      }
+    });
+  });
 }
 
 async function askAIWithState(question, st = state) {
