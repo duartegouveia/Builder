@@ -92,8 +92,8 @@ const DEFAULT_REL_OPTIONS = {
   label_field_top_down: true,
   OnDoubleClickAction: '',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
-  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Print', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
-  general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form', 'Print'],
+  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
+  general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
 };
 
@@ -129,8 +129,8 @@ const PRODUCTS_JSON = {
     "label_field_top_down": true,
     "OnDoubleClickAction": "",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
+    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -178,8 +178,8 @@ const CATEGORIES_JSON = {
     "label_field_top_down": true,
     "OnDoubleClickAction": "",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
+    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -236,8 +236,8 @@ const STOCKS_JSON = {
     "label_field_top_down": true,
     "OnDoubleClickAction": "",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
+    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -348,8 +348,8 @@ const PRICELISTS_JSON = {
     "label_field_top_down": true,
     "OnDoubleClickAction": "",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
+    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -1867,8 +1867,8 @@ function generateDemoRelation() {
     label_field_top_down: true,
     OnDoubleClickAction: '',
     general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
-    general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Print', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
-    general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form', 'Print'],
+    general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
+    general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
     general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
   };
   
@@ -3376,6 +3376,1038 @@ function formatCellValue(value, type, colName) {
   return String(value);
 }
 
+// ─── Integrity Check ───────────────────────────────────────────────────
+const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'multilinestring', 'relation', 'date', 'datetime', 'time', 'select']);
+const KNOWN_REL_OPTIONS_KEYS = new Set(Object.keys(DEFAULT_REL_OPTIONS));
+const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved']);
+
+function checkRelationIntegrity(relation, path = 'root') {
+  const issues = [];
+  const warnings = [];
+  const info = [];
+
+  if (!relation || typeof relation !== 'object') {
+    issues.push({ path, severity: 'error', msg: 'Relation is not a valid object.' });
+    return { issues, warnings, info };
+  }
+
+  if (relation.pot !== 'relation') {
+    issues.push({ path, severity: 'error', msg: `"pot" deve ser "relation", encontrado: "${relation.pot}".` });
+  }
+
+  Object.keys(relation).forEach(key => {
+    if (!KNOWN_RELATION_KEYS.has(key)) {
+      warnings.push({ path, severity: 'warning', msg: `Atributo desconhecido na relation: "${key}".` });
+    }
+  });
+
+  if (typeof relation.columns !== 'object' || relation.columns === null || Array.isArray(relation.columns)) {
+    issues.push({ path, severity: 'error', msg: '"columns" deve ser um objecto.' });
+    return { issues, warnings, info };
+  }
+
+  const columnNames = Object.keys(relation.columns);
+  const columnKinds = Object.values(relation.columns);
+  const numCols = columnNames.length;
+
+  if (numCols === 0) {
+    warnings.push({ path, severity: 'warning', msg: 'Relation não tem colunas definidas.' });
+  }
+
+  let hasId = false;
+  columnKinds.forEach((kind, idx) => {
+    if (typeof kind !== 'string') {
+      issues.push({ path, severity: 'error', msg: `Coluna "${columnNames[idx]}": kind deve ser uma string, encontrado ${typeof kind}.` });
+    } else if (!KNOWN_COLUMN_KINDS.has(kind)) {
+      warnings.push({ path, severity: 'warning', msg: `Coluna "${columnNames[idx]}": kind desconhecido "${kind}".` });
+    }
+    if (kind === 'id') hasId = true;
+  });
+
+  if (!hasId) {
+    warnings.push({ path, severity: 'warning', msg: 'Nenhuma coluna do tipo "id" encontrada.' });
+  }
+
+  if (!Array.isArray(relation.items)) {
+    issues.push({ path, severity: 'error', msg: '"items" deve ser um array.' });
+  } else {
+    info.push({ path, severity: 'info', msg: `${relation.items.length} registos, ${numCols} colunas.` });
+
+    const idColIdx = columnNames.indexOf(columnNames.find((_, i) => columnKinds[i] === 'id'));
+    const seenIds = new Set();
+
+    relation.items.forEach((row, rowIdx) => {
+      if (!Array.isArray(row)) {
+        issues.push({ path, severity: 'error', msg: `Registo #${rowIdx + 1}: deve ser um array, encontrado ${typeof row}.` });
+        return;
+      }
+
+      if (row.length !== numCols) {
+        issues.push({ path, severity: 'error', msg: `Registo #${rowIdx + 1}: tem ${row.length} valores, esperados ${numCols}.` });
+      }
+
+      row.forEach((cellValue, colIdx) => {
+        if (colIdx >= numCols) return;
+        const kind = columnKinds[colIdx];
+        const colName = columnNames[colIdx];
+        const cellPath = `${path} → registo #${rowIdx + 1} → "${colName}"`;
+
+        if (cellValue === null || cellValue === undefined || cellValue === '') return;
+
+        if (kind === 'int') {
+          const parsed = Number(cellValue);
+          if (isNaN(parsed) || (typeof cellValue === 'string' && cellValue.trim() === '')) {
+            warnings.push({ path: cellPath, severity: 'warning', msg: `Valor "${cellValue}" não é um inteiro válido.` });
+          } else if (!Number.isInteger(parsed) && typeof cellValue !== 'string') {
+            warnings.push({ path: cellPath, severity: 'warning', msg: `Valor ${cellValue} é decimal, esperado inteiro.` });
+          }
+        } else if (kind === 'float') {
+          const parsed = Number(cellValue);
+          if (isNaN(parsed) || (typeof cellValue === 'string' && cellValue.trim() === '')) {
+            warnings.push({ path: cellPath, severity: 'warning', msg: `Valor "${cellValue}" não é um número válido.` });
+          }
+        } else if (kind === 'boolean') {
+          const valid = [true, false, 'true', 'false', '0', '1', 0, 1];
+          if (!valid.includes(cellValue)) {
+            warnings.push({ path: cellPath, severity: 'warning', msg: `Valor "${cellValue}" não é booleano válido.` });
+          }
+        } else if (kind === 'relation') {
+          if (typeof cellValue === 'object' && cellValue !== null && cellValue.pot === 'relation') {
+            const nested = checkRelationIntegrity(cellValue, `${path} → "${colName}" (registo #${rowIdx + 1})`);
+            issues.push(...nested.issues);
+            warnings.push(...nested.warnings);
+            info.push(...nested.info);
+          } else if (typeof cellValue === 'string') {
+            try {
+              const parsed = JSON.parse(cellValue);
+              if (parsed && parsed.pot === 'relation') {
+                const nested = checkRelationIntegrity(parsed, `${path} → "${colName}" (registo #${rowIdx + 1})`);
+                issues.push(...nested.issues);
+                warnings.push(...nested.warnings);
+                info.push(...nested.info);
+              }
+            } catch (_) { /* not a JSON relation, that's fine */ }
+          }
+        } else if (kind === 'id') {
+          if (seenIds.has(String(cellValue))) {
+            issues.push({ path: cellPath, severity: 'error', msg: `ID duplicado: "${cellValue}".` });
+          }
+          seenIds.add(String(cellValue));
+        }
+      });
+    });
+  }
+
+  if (relation.rel_options && typeof relation.rel_options === 'object') {
+    Object.keys(relation.rel_options).forEach(key => {
+      if (!KNOWN_REL_OPTIONS_KEYS.has(key)) {
+        warnings.push({ path, severity: 'warning', msg: `rel_options: propriedade desconhecida "${key}".` });
+      }
+    });
+
+    const ro = relation.rel_options;
+    if (ro.editable !== undefined && typeof ro.editable !== 'boolean') {
+      warnings.push({ path, severity: 'warning', msg: `rel_options.editable deve ser boolean, encontrado ${typeof ro.editable}.` });
+    }
+    if (ro.show_multicheck !== undefined && typeof ro.show_multicheck !== 'boolean') {
+      warnings.push({ path, severity: 'warning', msg: `rel_options.show_multicheck deve ser boolean, encontrado ${typeof ro.show_multicheck}.` });
+    }
+    ['general_view_options', 'general_always_visible_options', 'general_line_options', 'general_multi_options'].forEach(arrKey => {
+      if (ro[arrKey] !== undefined && !Array.isArray(ro[arrKey])) {
+        issues.push({ path, severity: 'error', msg: `rel_options.${arrKey} deve ser um array.` });
+      }
+    });
+  }
+
+  if (relation.options && typeof relation.options !== 'object') {
+    warnings.push({ path, severity: 'warning', msg: '"options" deve ser um objecto.' });
+  }
+
+  return { issues, warnings, info };
+}
+
+function performIntegrityCheck(st) {
+  const result = checkRelationIntegrity(st.relation);
+  const allEntries = [
+    ...result.issues,
+    ...result.warnings,
+    ...result.info
+  ];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.style.zIndex = '100001';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'integrity-check-dialog';
+
+  const header = document.createElement('div');
+  header.className = 'integrity-check-header';
+  const title = document.createElement('h3');
+  title.textContent = 'Integrity Check';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn btn-outline integrity-check-close';
+  closeBtn.textContent = '✕';
+  closeBtn.addEventListener('click', () => overlay.remove());
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+  dialog.appendChild(header);
+
+  const summary = document.createElement('div');
+  summary.className = 'integrity-check-summary';
+  const errCount = result.issues.length;
+  const warnCount = result.warnings.length;
+  const infoCount = result.info.length;
+
+  if (errCount === 0 && warnCount === 0) {
+    summary.innerHTML = '<span class="integrity-ok">✔ Estrutura consistente. Sem erros encontrados.</span>';
+  } else {
+    summary.innerHTML = `<span class="integrity-errors">${errCount} erro${errCount !== 1 ? 's' : ''}</span> · <span class="integrity-warnings">${warnCount} aviso${warnCount !== 1 ? 's' : ''}</span> · <span class="integrity-info">${infoCount} info</span>`;
+  }
+  dialog.appendChild(summary);
+
+  const body = document.createElement('div');
+  body.className = 'integrity-check-body';
+
+  if (allEntries.length === 0) {
+    const emptyMsg = document.createElement('p');
+    emptyMsg.textContent = 'Nenhuma verificação a reportar.';
+    body.appendChild(emptyMsg);
+  } else {
+    allEntries.forEach(entry => {
+      const row = document.createElement('div');
+      row.className = `integrity-entry integrity-${entry.severity}`;
+      const icon = entry.severity === 'error' ? '❌' : entry.severity === 'warning' ? '⚠️' : 'ℹ️';
+      const pathSpan = entry.path !== 'root' ? `<span class="integrity-path">${entry.path}</span> ` : '';
+      row.innerHTML = `<span class="integrity-icon">${icon}</span>${pathSpan}<span class="integrity-msg">${entry.msg}</span>`;
+      body.appendChild(row);
+    });
+  }
+
+  dialog.appendChild(body);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+// ─── Export to File ─────────────────────────────────────────────────────
+function getExportItems(st, scope) {
+  const columnNames = Object.keys(st.relation.columns);
+  const columnKinds = Object.values(st.relation.columns);
+  let items = [];
+  if (scope === 'all') {
+    items = st.relation.items;
+  } else if (scope === 'checked') {
+    const checked = [...getSelectedRows(st)].sort((a, b) => a - b);
+    items = checked.map(i => st.relation.items[i]);
+  } else if (scope === 'selected') {
+    const idx = getHighlightedRow(st);
+    if (idx >= 0 && idx < st.relation.items.length) items = [st.relation.items[idx]];
+  }
+  return { items, columnNames, columnKinds };
+}
+
+function exportToCSV(items, columnNames) {
+  const escape = v => {
+    const s = v == null ? '' : String(v);
+    if (s.includes('"') || s.includes(',') || s.includes('\n') || s.includes(';')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+  const header = columnNames.map(escape).join(';');
+  const rows = items.map(row => row.map((cell, i) => {
+    if (cell && typeof cell === 'object' && cell.pot === 'relation') return escape('[Relation]');
+    return escape(cell);
+  }).join(';'));
+  return header + '\n' + rows.join('\n');
+}
+
+function exportToExcelXML(items, columnNames, columnKinds, relationName) {
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<?mso-application progid="Excel.Sheet"?>\n';
+  xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
+  xml += '  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n';
+  xml += `  <Worksheet ss:Name="${relationName || 'Data'}">\n    <Table>\n`;
+  xml += '      <Row>\n';
+  columnNames.forEach(col => {
+    xml += `        <Cell><Data ss:Type="String">${escapeXML(col)}</Data></Cell>\n`;
+  });
+  xml += '      </Row>\n';
+  items.forEach(row => {
+    xml += '      <Row>\n';
+    row.forEach((cell, i) => {
+      let type = 'String';
+      let val = cell == null ? '' : cell;
+      if (cell && typeof cell === 'object' && cell.pot === 'relation') {
+        val = '[Relation]';
+      } else if (columnKinds[i] === 'int' || columnKinds[i] === 'float') {
+        type = 'Number';
+        val = cell == null ? '' : cell;
+      }
+      xml += `        <Cell><Data ss:Type="${type}">${escapeXML(String(val))}</Data></Cell>\n`;
+    });
+    xml += '      </Row>\n';
+  });
+  xml += '    </Table>\n  </Worksheet>\n</Workbook>';
+  return xml;
+}
+
+function exportToXML(items, columnNames, relationName) {
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += `<${relationName || 'relation'}>\n`;
+  items.forEach((row, idx) => {
+    xml += '  <record>\n';
+    row.forEach((cell, i) => {
+      let val = cell;
+      if (cell && typeof cell === 'object' && cell.pot === 'relation') val = '[Relation]';
+      xml += `    <${columnNames[i]}>${escapeXML(String(val == null ? '' : val))}</${columnNames[i]}>\n`;
+    });
+    xml += '  </record>\n';
+  });
+  xml += `</${relationName || 'relation'}>`;
+  return xml;
+}
+
+function escapeXML(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function exportToHTML(items, columnNames, columnKinds, relationName, forPdf) {
+  const title = relationName || 'Exportação';
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+h1 { font-size: 18px; margin-bottom: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 12px; }
+th { background: #4a5568; color: #fff; padding: 8px 10px; text-align: left; border: 1px solid #2d3748; }
+td { padding: 6px 10px; border: 1px solid #ccc; }
+tr:nth-child(even) { background: #f7fafc; }
+.footer { margin-top: 16px; font-size: 11px; color: #888; }
+${forPdf ? '@media print { body { margin: 0; } }' : ''}
+</style></head><body>
+<h1>${title}</h1>
+<table><thead><tr>`;
+  columnNames.forEach(col => { html += `<th>${col}</th>`; });
+  html += '</tr></thead><tbody>';
+  items.forEach(row => {
+    html += '<tr>';
+    row.forEach((cell, i) => {
+      let val = cell;
+      if (cell && typeof cell === 'object' && cell.pot === 'relation') val = '[Relation]';
+      html += `<td>${val == null ? '' : val}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += `</tbody></table>
+<div class="footer">${items.length} registos exportados · ${new Date().toLocaleString('pt-PT')}</div>
+</body></html>`;
+  return html;
+}
+
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function openInNewTab(content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+}
+
+function showExportDialog(st) {
+  const hasChecked = getSelectedRows(st).size > 0;
+  const hasHighlighted = getHighlightedRow(st) >= 0;
+  const totalItems = st.relation.items.length;
+  const relationName = st.relation.name || 'relation';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.style.zIndex = '100001';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'export-dialog';
+
+  dialog.innerHTML = `
+    <div class="export-dialog-header">
+      <h3>Export to File</h3>
+      <button class="btn btn-outline export-close">✕</button>
+    </div>
+    <div class="export-dialog-body">
+      <div class="export-section">
+        <label class="export-label">Âmbito</label>
+        <div class="export-radios">
+          <label><input type="radio" name="export-scope" value="all" checked> Todos (${totalItems})</label>
+          ${hasChecked ? `<label><input type="radio" name="export-scope" value="checked"> Checked (${getSelectedRows(st).size})</label>` : ''}
+          ${hasHighlighted ? `<label><input type="radio" name="export-scope" value="selected"> Linha selecionada</label>` : ''}
+        </div>
+      </div>
+      <div class="export-section">
+        <label class="export-label">Formato</label>
+        <div class="export-radios">
+          <label><input type="radio" name="export-format" value="csv" checked> CSV</label>
+          <label><input type="radio" name="export-format" value="excel"> Excel</label>
+          <label><input type="radio" name="export-format" value="xml"> XML</label>
+          <label><input type="radio" name="export-format" value="word"> Word / HTML</label>
+          <label><input type="radio" name="export-format" value="pdf"> PDF</label>
+        </div>
+      </div>
+      <div class="export-section export-template-section" style="display:none">
+        <label class="export-label">Template</label>
+        <select class="export-template-select">
+          <option value="">Genérico (default)</option>
+        </select>
+      </div>
+      <div class="export-section">
+        <label class="export-label">Ação</label>
+        <div class="export-radios">
+          <label><input type="radio" name="export-action" value="download" checked> Download</label>
+          <label><input type="radio" name="export-action" value="newtab"> Abrir em nova tab</label>
+        </div>
+      </div>
+    </div>
+    <div class="export-dialog-footer">
+      <button class="btn btn-outline export-cancel">Cancelar</button>
+      <button class="btn btn-primary export-confirm">Exportar</button>
+    </div>
+  `;
+
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  const closeDialog = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeDialog(); });
+  dialog.querySelector('.export-close').addEventListener('click', closeDialog);
+  dialog.querySelector('.export-cancel').addEventListener('click', closeDialog);
+
+  const formatRadios = dialog.querySelectorAll('input[name="export-format"]');
+  const templateSection = dialog.querySelector('.export-template-section');
+  const templateSelect = dialog.querySelector('.export-template-select');
+
+  const loadTemplates = async (format) => {
+    templateSelect.innerHTML = '<option value="">Genérico (default)</option>';
+    try {
+      const resp = await fetch(`/api/export/templates?name=${encodeURIComponent(relationName)}&format=${encodeURIComponent(format)}`);
+      const data = await resp.json();
+      if (data.templates && data.templates.length > 0) {
+        data.templates.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.path;
+          opt.textContent = `${t.name} (${t.source})`;
+          templateSelect.appendChild(opt);
+        });
+        templateSection.style.display = '';
+      } else {
+        templateSection.style.display = 'none';
+      }
+    } catch (_) {
+      templateSection.style.display = 'none';
+    }
+  };
+
+  formatRadios.forEach(r => r.addEventListener('change', () => loadTemplates(r.value)));
+  loadTemplates('csv');
+
+  dialog.querySelector('.export-confirm').addEventListener('click', async () => {
+    const scope = dialog.querySelector('input[name="export-scope"]:checked').value;
+    const format = dialog.querySelector('input[name="export-format"]:checked').value;
+    const actionType = dialog.querySelector('input[name="export-action"]:checked').value;
+    const templatePath = templateSelect.value;
+
+    const { items, columnNames, columnKinds } = getExportItems(st, scope);
+
+    if (items.length === 0) {
+      showToast('Não há registos para exportar.', 'warning');
+      return;
+    }
+
+    let content, filename, mimeType;
+
+    if (templatePath) {
+      try {
+        const resp = await fetch(`/api/export/template/${templatePath}`);
+        const tmplData = await resp.json();
+        content = interpolateTemplate(tmplData.content, items, columnNames, columnKinds, relationName);
+        const ext = format === 'excel' ? 'xls' : format === 'word' ? 'html' : format;
+        filename = `${relationName}.${ext}`;
+        mimeType = getMimeType(format);
+      } catch (_) {
+        showToast('Erro ao carregar template.', 'error');
+        return;
+      }
+    } else {
+      if (format === 'csv') {
+        content = exportToCSV(items, columnNames);
+        filename = `${relationName}.csv`;
+        mimeType = 'text/csv;charset=utf-8';
+      } else if (format === 'excel') {
+        content = exportToExcelXML(items, columnNames, columnKinds, relationName);
+        filename = `${relationName}.xls`;
+        mimeType = 'application/vnd.ms-excel';
+      } else if (format === 'xml') {
+        content = exportToXML(items, columnNames, relationName);
+        filename = `${relationName}.xml`;
+        mimeType = 'application/xml';
+      } else if (format === 'word') {
+        content = exportToHTML(items, columnNames, columnKinds, relationName, false);
+        filename = `${relationName}.html`;
+        mimeType = 'text/html;charset=utf-8';
+      } else if (format === 'pdf') {
+        content = exportToHTML(items, columnNames, columnKinds, relationName, true);
+        filename = `${relationName}.html`;
+        mimeType = 'text/html;charset=utf-8';
+      }
+    }
+
+    if (actionType === 'download') {
+      downloadFile(content, filename, mimeType);
+    } else {
+      openInNewTab(content, mimeType);
+    }
+
+    showToast(`Exportados ${items.length} registos em formato ${format.toUpperCase()}.`, 'success');
+    closeDialog();
+  });
+}
+
+function getMimeType(format) {
+  const map = { csv: 'text/csv;charset=utf-8', excel: 'application/vnd.ms-excel', xml: 'application/xml', word: 'text/html;charset=utf-8', pdf: 'text/html;charset=utf-8' };
+  return map[format] || 'text/plain';
+}
+
+function interpolateTemplate(template, items, columnNames, columnKinds, relationName) {
+  let result = template;
+  result = result.replace(/\{\{relation_name\}\}/g, relationName || 'Relation');
+  result = result.replace(/\{\{date\}\}/g, new Date().toLocaleString('pt-PT'));
+  result = result.replace(/\{\{count\}\}/g, String(items.length));
+  result = result.replace(/\{\{columns_json\}\}/g, JSON.stringify(columnNames));
+
+  const headerMatch = result.match(/\{\{#header\}\}([\s\S]*?)\{\{\/header\}\}/);
+  if (headerMatch) {
+    const headerTpl = headerMatch[1];
+    const headers = columnNames.map(col => headerTpl.replace(/\{\{column_name\}\}/g, col)).join('');
+    result = result.replace(/\{\{#header\}\}[\s\S]*?\{\{\/header\}\}/, headers);
+  }
+
+  const rowMatch = result.match(/\{\{#rows\}\}([\s\S]*?)\{\{\/rows\}\}/);
+  if (rowMatch) {
+    const rowTpl = rowMatch[1];
+    const cellMatch = rowTpl.match(/\{\{#cells\}\}([\s\S]*?)\{\{\/cells\}\}/);
+    let rows = '';
+    items.forEach((row, rowIdx) => {
+      let rowStr = rowTpl.replace(/\{\{row_index\}\}/g, String(rowIdx + 1));
+      if (cellMatch) {
+        const cellTpl = cellMatch[1];
+        const cells = row.map((cell, ci) => {
+          let val = cell;
+          if (cell && typeof cell === 'object' && cell.pot === 'relation') val = '[Relation]';
+          return cellTpl.replace(/\{\{value\}\}/g, val == null ? '' : String(val))
+            .replace(/\{\{column_name\}\}/g, columnNames[ci] || '')
+            .replace(/\{\{column_kind\}\}/g, columnKinds[ci] || '');
+        }).join('');
+        rowStr = rowStr.replace(/\{\{#cells\}\}[\s\S]*?\{\{\/cells\}\}/, cells);
+      }
+      columnNames.forEach((col, ci) => {
+        let val = row[ci];
+        if (val && typeof val === 'object' && val.pot === 'relation') val = '[Relation]';
+        rowStr = rowStr.replace(new RegExp(`\\{\\{${col}\\}\\}`, 'g'), val == null ? '' : String(val));
+      });
+      rows += rowStr;
+    });
+    result = result.replace(/\{\{#rows\}\}[\s\S]*?\{\{\/rows\}\}/, rows);
+  }
+
+  return result;
+}
+
+// ─── Import from File ───────────────────────────────────────────────────
+function showImportDialog(st) {
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.style.zIndex = '100001';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'import-dialog';
+
+  dialog.innerHTML = `
+    <div class="import-dialog-header">
+      <h3>Import from File</h3>
+      <button class="btn btn-outline import-close">✕</button>
+    </div>
+    <div class="import-dialog-body">
+      <div class="import-step import-step-upload">
+        <label class="import-label">Selecionar ficheiro</label>
+        <div class="import-dropzone" data-testid="import-dropzone">
+          <span class="import-dropzone-text">Arraste um ficheiro para aqui ou clique para selecionar</span>
+          <input type="file" class="import-file-input" accept=".csv,.tsv,.txt,.xls,.xml,.html,.htm,.json" style="display:none">
+        </div>
+        <div class="import-file-info" style="display:none"></div>
+      </div>
+      <div class="import-step import-step-tables" style="display:none">
+        <label class="import-label">Tabelas encontradas</label>
+        <select class="import-table-select"></select>
+      </div>
+      <div class="import-step import-step-preview" style="display:none">
+        <label class="import-label">Pré-visualização dos dados importados</label>
+        <div class="import-preview-table-wrap"></div>
+      </div>
+      <div class="import-step import-step-mapping" style="display:none">
+        <label class="import-label">Mapeamento de colunas</label>
+        <div class="import-mapping-body"></div>
+      </div>
+      <div class="import-step import-step-text" style="display:none">
+        <label class="import-label">Editar dados (texto)</label>
+        <textarea class="import-text-area" rows="10" spellcheck="false"></textarea>
+      </div>
+    </div>
+    <div class="import-dialog-footer">
+      <button class="btn btn-outline import-cancel">Cancelar</button>
+      <button class="btn btn-outline import-edit-text" style="display:none">Editar Texto</button>
+      <button class="btn btn-primary import-confirm" style="display:none">Importar</button>
+    </div>
+  `;
+
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  const closeDialog = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeDialog(); });
+  dialog.querySelector('.import-close').addEventListener('click', closeDialog);
+  dialog.querySelector('.import-cancel').addEventListener('click', closeDialog);
+
+  const dropzone = dialog.querySelector('.import-dropzone');
+  const fileInput = dialog.querySelector('.import-file-input');
+  const fileInfo = dialog.querySelector('.import-file-info');
+  const stepTables = dialog.querySelector('.import-step-tables');
+  const tableSelect = dialog.querySelector('.import-table-select');
+  const stepPreview = dialog.querySelector('.import-step-preview');
+  const previewWrap = dialog.querySelector('.import-preview-table-wrap');
+  const stepMapping = dialog.querySelector('.import-step-mapping');
+  const mappingBody = dialog.querySelector('.import-mapping-body');
+  const stepText = dialog.querySelector('.import-step-text');
+  const textArea = dialog.querySelector('.import-text-area');
+  const editTextBtn = dialog.querySelector('.import-edit-text');
+  const confirmBtn = dialog.querySelector('.import-confirm');
+
+  let parsedTables = [];
+  let currentTable = null;
+  let columnMapping = [];
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files.length > 0) processFile(fileInput.files[0]); });
+
+  async function processFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    fileInfo.style.display = '';
+    fileInfo.textContent = `Ficheiro: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    dropzone.style.display = 'none';
+
+    try {
+      const text = await file.text();
+      parsedTables = [];
+
+      if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
+        parsedTables = [parseCSV(text, ext === 'tsv' ? '\t' : null)];
+      } else if (ext === 'json') {
+        parsedTables = parseJSONFile(text);
+      } else if (ext === 'xml') {
+        parsedTables = parseXMLFile(text);
+      } else if (ext === 'html' || ext === 'htm') {
+        parsedTables = parseHTMLFile(text);
+      } else if (ext === 'xlsx') {
+        showToast('Formato .xlsx (Excel binário) não é suportado. Guarde como .xls (XML) ou .csv.', 'error');
+        return;
+      } else if (ext === 'xls') {
+        parsedTables = parseExcelXML(text);
+      } else {
+        showToast(`Formato .${ext} não suportado.`, 'error');
+        return;
+      }
+
+      if (parsedTables.length === 0) {
+        showToast('Nenhuma tabela encontrada no ficheiro.', 'warning');
+        return;
+      }
+
+      if (parsedTables.length > 1) {
+        stepTables.style.display = '';
+        tableSelect.innerHTML = '';
+        parsedTables.forEach((t, i) => {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = t.name || `Tabela ${i + 1} (${t.rows.length} registos)`;
+          tableSelect.appendChild(opt);
+        });
+        tableSelect.addEventListener('change', () => selectTable(parseInt(tableSelect.value)));
+      }
+
+      selectTable(0);
+    } catch (err) {
+      showToast('Erro ao processar ficheiro: ' + err.message, 'error');
+    }
+  }
+
+  function selectTable(idx) {
+    currentTable = parsedTables[idx];
+    if (!currentTable) return;
+
+    showPreview(currentTable);
+    buildMapping(currentTable);
+    editTextBtn.style.display = '';
+    confirmBtn.style.display = '';
+  }
+
+  function showPreview(table) {
+    stepPreview.style.display = '';
+    let html = '<table class="import-preview-table"><thead><tr>';
+    table.headers.forEach(h => { html += `<th>${h}</th>`; });
+    html += '</tr></thead><tbody>';
+    const previewRows = table.rows.slice(0, 10);
+    previewRows.forEach(row => {
+      html += '<tr>';
+      row.forEach(cell => { html += `<td>${cell == null ? '' : cell}</td>`; });
+      html += '</tr>';
+    });
+    if (table.rows.length > 10) {
+      html += `<tr><td colspan="${table.headers.length}" style="text-align:center;font-style:italic">... e mais ${table.rows.length - 10} registos</td></tr>`;
+    }
+    html += '</tbody></table>';
+    previewWrap.innerHTML = html;
+  }
+
+  function buildMapping(table) {
+    stepMapping.style.display = '';
+    const destCols = Object.keys(st.relation.columns);
+    const destKinds = Object.values(st.relation.columns);
+    columnMapping = [];
+
+    mappingBody.innerHTML = '';
+    table.headers.forEach((srcCol, srcIdx) => {
+      const bestMatch = findBestColumnMatch(srcCol, destCols);
+      const mapRow = document.createElement('div');
+      mapRow.className = 'import-mapping-row';
+
+      const srcLabel = document.createElement('span');
+      srcLabel.className = 'import-mapping-src';
+      srcLabel.textContent = srcCol;
+
+      const arrow = document.createElement('span');
+      arrow.className = 'import-mapping-arrow';
+      arrow.textContent = '→';
+
+      const destSelect = document.createElement('select');
+      destSelect.className = 'import-mapping-dest';
+      destSelect.innerHTML = '<option value="">(ignorar)</option>';
+      destCols.forEach((dc, di) => {
+        const opt = document.createElement('option');
+        opt.value = dc;
+        opt.textContent = `${dc} (${destKinds[di]})`;
+        if (dc === bestMatch) opt.selected = true;
+        destSelect.appendChild(opt);
+      });
+
+      const convertLabel = document.createElement('span');
+      convertLabel.className = 'import-mapping-convert';
+      if (bestMatch) {
+        const destKind = destKinds[destCols.indexOf(bestMatch)];
+        convertLabel.textContent = `→ ${destKind}`;
+      }
+
+      destSelect.addEventListener('change', () => {
+        const selectedDest = destSelect.value;
+        if (selectedDest) {
+          const destKind = destKinds[destCols.indexOf(selectedDest)];
+          convertLabel.textContent = `→ ${destKind}`;
+        } else {
+          convertLabel.textContent = '';
+        }
+      });
+
+      mapRow.appendChild(srcLabel);
+      mapRow.appendChild(arrow);
+      mapRow.appendChild(destSelect);
+      mapRow.appendChild(convertLabel);
+      mappingBody.appendChild(mapRow);
+
+      columnMapping.push({ srcIdx, srcCol, destSelect });
+    });
+  }
+
+  function findBestColumnMatch(srcCol, destCols) {
+    const srcLower = srcCol.toLowerCase().replace(/[_\-\s]/g, '');
+    let bestMatch = null;
+    let bestScore = 0;
+    destCols.forEach(dc => {
+      const dcLower = dc.toLowerCase().replace(/[_\-\s]/g, '');
+      if (srcLower === dcLower) { bestMatch = dc; bestScore = 100; return; }
+      if (dcLower.includes(srcLower) || srcLower.includes(dcLower)) {
+        const score = 50 + (Math.min(srcLower.length, dcLower.length) / Math.max(srcLower.length, dcLower.length)) * 30;
+        if (score > bestScore) { bestMatch = dc; bestScore = score; }
+      }
+    });
+    return bestScore >= 40 ? bestMatch : null;
+  }
+
+  editTextBtn.addEventListener('click', () => {
+    if (stepText.style.display === 'none') {
+      stepText.style.display = '';
+      if (currentTable) {
+        const lines = [currentTable.headers.join('\t')];
+        currentTable.rows.forEach(row => lines.push(row.map(c => c == null ? '' : c).join('\t')));
+        textArea.value = lines.join('\n');
+      }
+      editTextBtn.textContent = 'Atualizar da Edição';
+    } else {
+      const lines = textArea.value.split('\n').filter(l => l.trim());
+      if (lines.length > 0) {
+        const headers = lines[0].split('\t');
+        const rows = lines.slice(1).map(l => l.split('\t'));
+        currentTable = { name: currentTable?.name || 'Editado', headers, rows };
+        showPreview(currentTable);
+        buildMapping(currentTable);
+      }
+      stepText.style.display = 'none';
+      editTextBtn.textContent = 'Editar Texto';
+    }
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    if (!currentTable) return;
+
+    const destCols = Object.keys(st.relation.columns);
+    const destKinds = Object.values(st.relation.columns);
+    let newItemsCount = 0;
+
+    const maxId = st.relation.items.reduce((max, row) => {
+      const idColIdx = destCols.findIndex((_, i) => destKinds[i] === 'id');
+      if (idColIdx >= 0) {
+        const val = parseInt(row[idColIdx]);
+        return isNaN(val) ? max : Math.max(max, val);
+      }
+      return max;
+    }, 0);
+    let nextId = maxId + 1;
+
+    currentTable.rows.forEach(srcRow => {
+      const newRow = new Array(destCols.length).fill('');
+      const idColIdx = destCols.findIndex((_, i) => destKinds[i] === 'id');
+      if (idColIdx >= 0) newRow[idColIdx] = String(nextId++);
+
+      columnMapping.forEach(({ srcIdx, destSelect }) => {
+        const destCol = destSelect.value;
+        if (!destCol) return;
+        const destIdx = destCols.indexOf(destCol);
+        if (destIdx < 0 || destKinds[destIdx] === 'id') return;
+
+        let val = srcIdx < srcRow.length ? srcRow[srcIdx] : '';
+        val = convertValue(val, destKinds[destIdx]);
+        newRow[destIdx] = val;
+      });
+
+      st.relation.items.push(newRow);
+      newItemsCount++;
+    });
+
+    showToast(`Importados ${newItemsCount} registos.`, 'success');
+    renderTable(st);
+    closeDialog();
+  });
+}
+
+function convertValue(val, targetKind) {
+  if (val == null || val === '') return '';
+  const str = String(val).trim();
+  if (targetKind === 'int') {
+    const n = parseInt(str.replace(/[^\d\-]/g, ''));
+    return isNaN(n) ? str : n;
+  }
+  if (targetKind === 'float') {
+    const cleaned = str.replace(/,/g, '.');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? str : n;
+  }
+  if (targetKind === 'boolean') {
+    const lower = str.toLowerCase();
+    if (['true', '1', 'sim', 'yes', 'v'].includes(lower)) return true;
+    if (['false', '0', 'não', 'nao', 'no', 'f'].includes(lower)) return false;
+    return str;
+  }
+  return str;
+}
+
+function parseCSV(text, forceSep) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length === 0) return [];
+
+  const sep = forceSep || detectCSVSeparator(lines[0]);
+  const headers = parseCSVLine(lines[0], sep);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const parsed = parseCSVLine(lines[i], sep);
+    if (parsed.length > 0) rows.push(parsed);
+  }
+  return [{ name: 'CSV', headers, rows }];
+}
+
+function detectCSVSeparator(line) {
+  const counts = { ';': 0, ',': 0, '\t': 0, '|': 0 };
+  for (const ch of line) { if (counts[ch] !== undefined) counts[ch]++; }
+  let best = ',', bestCount = 0;
+  for (const [sep, count] of Object.entries(counts)) {
+    if (count > bestCount) { best = sep; bestCount = count; }
+  }
+  return best;
+}
+
+function parseCSVLine(line, sep) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') { current += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === sep) { result.push(current); current = ''; }
+      else current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function parseJSONFile(text) {
+  try {
+    const data = JSON.parse(text);
+    if (data.pot === 'relation' && data.columns && data.items) {
+      const headers = Object.keys(data.columns);
+      const rows = data.items.map(item => {
+        return headers.map((_, ci) => {
+          const val = item[ci];
+          if (val && typeof val === 'object') return JSON.stringify(val);
+          return val == null ? '' : val;
+        });
+      });
+      return [{ name: data.name || 'Relation', headers, rows }];
+    }
+    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+      const headers = [...new Set(data.flatMap(Object.keys))];
+      const rows = data.map(obj => headers.map(h => {
+        const v = obj[h];
+        if (v && typeof v === 'object') return JSON.stringify(v);
+        return v == null ? '' : v;
+      }));
+      return [{ name: 'JSON Array', headers, rows }];
+    }
+  } catch (_) {}
+  return [];
+}
+
+function parseXMLFile(text) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'application/xml');
+    const records = doc.querySelectorAll('record');
+    if (records.length === 0) {
+      const root = doc.documentElement;
+      const children = [...root.children];
+      if (children.length > 0) {
+        const headers = [...new Set(children.flatMap(c => [...c.children].map(e => e.tagName)))];
+        const rows = children.map(c => headers.map(h => {
+          const el = c.querySelector(h);
+          return el ? el.textContent : '';
+        }));
+        return [{ name: root.tagName, headers, rows }];
+      }
+    } else {
+      const headers = [...new Set([...records].flatMap(r => [...r.children].map(e => e.tagName)))];
+      const rows = [...records].map(r => headers.map(h => {
+        const el = r.querySelector(h);
+        return el ? el.textContent : '';
+      }));
+      return [{ name: 'XML', headers, rows }];
+    }
+  } catch (_) {}
+  return [];
+}
+
+function parseHTMLFile(text) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const tables = doc.querySelectorAll('table');
+    const results = [];
+    tables.forEach((table, tIdx) => {
+      const headerRow = table.querySelector('thead tr') || table.querySelector('tr');
+      if (!headerRow) return;
+      const headers = [...headerRow.querySelectorAll('th, td')].map(c => c.textContent.trim());
+      const bodyRows = table.querySelectorAll('tbody tr');
+      const rowEls = bodyRows.length > 0 ? bodyRows : table.querySelectorAll('tr');
+      const rows = [];
+      rowEls.forEach((tr, rIdx) => {
+        if (rIdx === 0 && !table.querySelector('thead')) return;
+        const cells = [...tr.querySelectorAll('td, th')].map(c => c.textContent.trim());
+        if (cells.length > 0) rows.push(cells);
+      });
+      results.push({ name: `Tabela ${tIdx + 1}`, headers, rows });
+    });
+    return results;
+  } catch (_) {}
+  return [];
+}
+
+function parseExcelXML(text) {
+  try {
+    if (text.includes('urn:schemas-microsoft-com:office:spreadsheet')) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'application/xml');
+      const worksheets = doc.querySelectorAll('Worksheet');
+      const results = [];
+      worksheets.forEach(ws => {
+        const name = ws.getAttribute('ss:Name') || ws.getAttribute('Name') || 'Sheet';
+        const tableEl = ws.querySelector('Table');
+        if (!tableEl) return;
+        const rowEls = tableEl.querySelectorAll('Row');
+        if (rowEls.length === 0) return;
+        const headers = [...rowEls[0].querySelectorAll('Cell Data, Cell > Data')].map(d => d.textContent);
+        const rows = [];
+        for (let i = 1; i < rowEls.length; i++) {
+          const cells = [...rowEls[i].querySelectorAll('Cell Data, Cell > Data')].map(d => d.textContent);
+          rows.push(cells);
+        }
+        results.push({ name, headers, rows });
+      });
+      return results;
+    }
+    return parseHTMLFile(text);
+  } catch (_) {}
+  return [];
+}
+
 function showConfirmDialog(message, onConfirm, options = {}) {
   const { confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'danger' } = options;
   const overlay = document.createElement('div');
@@ -3945,13 +4977,13 @@ function handleAlwaysVisibleAction(st, action) {
 
   // Import from File
   if (action === 'import-file') {
-    showToast('Import from File: funcionalidade em desenvolvimento.', 'info');
+    showImportDialog(st);
     return;
   }
 
   // Export to file
   if (action === 'export-file') {
-    showToast('Export to file: funcionalidade em desenvolvimento.', 'info');
+    showExportDialog(st);
     return;
   }
 
@@ -3963,7 +4995,7 @@ function handleAlwaysVisibleAction(st, action) {
 
   // Integrity Check
   if (action === 'integrity-check') {
-    showToast('Integrity Check: funcionalidade em desenvolvimento.', 'info');
+    performIntegrityCheck(st);
     return;
   }
 
@@ -13534,8 +14566,8 @@ function init() {
     "label_field_top_down": true,
     "OnDoubleClickAction": "",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form","Print","Select One","Select Many","Choose Many","Import from File","Export to file","Integrity Check","Output State"],
-    "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form","Print"],
+    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form","Select One","Select Many","Choose Many","Import from File","Export to file","Integrity Check","Output State"],
+    "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
     "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Multi Copy","Multi Delete","Group Edit","Merge"]
   },
   "items": []

@@ -1,5 +1,7 @@
 import { storage } from "./storage.js";
 import OpenAI from "openai";
+import fs from "fs";
+import path from "path";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -7,6 +9,55 @@ const openai = new OpenAI({
 });
 
 export async function registerRoutes(httpServer, app) {
+
+  app.get("/api/export/templates", (req, res) => {
+    try {
+      const { name, format } = req.query;
+      const templates = [];
+      const exportBase = path.join(process.cwd(), "client", "public", "export");
+      
+      if (name && format) {
+        const specificDir = path.join(exportBase, name, format);
+        if (fs.existsSync(specificDir)) {
+          const files = fs.readdirSync(specificDir).filter(f => !f.startsWith('.'));
+          files.forEach(f => templates.push({ name: f, path: `${name}/${format}/${f}`, source: 'specific' }));
+        }
+      }
+      
+      if (format) {
+        const genericDir = path.join(exportBase, "generic", format);
+        if (fs.existsSync(genericDir)) {
+          const files = fs.readdirSync(genericDir).filter(f => !f.startsWith('.'));
+          files.forEach(f => templates.push({ name: f, path: `generic/${format}/${f}`, source: 'generic' }));
+        }
+      }
+      
+      res.json({ templates });
+    } catch (error) {
+      res.json({ templates: [] });
+    }
+  });
+
+  app.get("/api/export/template/:templatePath(*)", (req, res) => {
+    try {
+      const templatePath = req.params.templatePath;
+      if (templatePath.includes('..') || path.isAbsolute(templatePath)) {
+        return res.status(400).json({ error: "Invalid template path" });
+      }
+      const exportBase = path.resolve(process.cwd(), "client", "public", "export");
+      const filePath = path.resolve(exportBase, templatePath);
+      if (!filePath.startsWith(exportBase)) {
+        return res.status(400).json({ error: "Invalid template path" });
+      }
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      const content = fs.readFileSync(filePath, "utf8");
+      res.json({ content });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to read template" });
+    }
+  });
   
   // AI Analysis endpoint for Relation Builder
   app.post("/api/ai/analyze", async (req, res) => {
