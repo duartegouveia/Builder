@@ -3956,10 +3956,26 @@ function outputToConsoleAndElements(value) {
   });
 }
 
-function cloneRelationForSelection(st, clearItems = false) {
+const SELECTION_REL_OPTIONS = {
+  editable: false,
+  show_multicheck: false,
+  show_natural_order: false,
+  show_id: true,
+  show_column_kind: false,
+  show_hierarchy: true,
+  hierarchy_column: 'parent',
+  single_item_mode: 'bottom',
+  label_field_top_down: true,
+  OnDoubleClickAction: '',
+  general_view_options: [],
+  general_always_visible_options: [],
+  general_line_options: [],
+  general_multi_options: []
+};
+
+function cloneRelationForSelection(st, clearItems = false, overrideOptions = {}) {
   const copy = JSON.parse(JSON.stringify(st.relation));
-  copy.rel_options = { ...DEFAULT_REL_OPTIONS };
-  delete copy.rel_options.uiState;
+  copy.rel_options = { ...SELECTION_REL_OPTIONS, ...overrideOptions };
   if (clearItems) copy.items = [];
   return copy;
 }
@@ -4051,8 +4067,7 @@ function openSelectOneDialog(st) {
 }
 
 function openSelectManyDialog(st) {
-  const relCopy = cloneRelationForSelection(st);
-  relCopy.rel_options.show_multicheck = true;
+  const relCopy = cloneRelationForSelection(st, false, { show_multicheck: true });
   const dialogId = `select-many-${Date.now()}`;
 
   const overlay = document.createElement('div');
