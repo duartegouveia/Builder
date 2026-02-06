@@ -4407,6 +4407,9 @@ function renderMultiPanelContent(container, st, checkedIndices, panelPositions, 
     panelDiv.innerHTML = navHtml + '<div class="multi-panel-body">' + contentHtml + '</div>';
     panelsDiv.appendChild(panelDiv);
     initRelationFieldsInContainer(panelDiv, st, row);
+    if (isMerge && p === 0) {
+      injectMergeRadiosIntoEditPanel(panelDiv, st, rowIdx);
+    }
   }
   requestAnimationFrame(() => alignMultiPanelFieldHeights(container));
   setupMultiPanelNavEvents(container, st, checkedIndices, panelPositions, numPanels, mode, options);
@@ -4797,12 +4800,37 @@ function showMergeDialog(st) {
   }, 0);
 }
 
+function injectMergeRadiosIntoEditPanel(panelDiv, st, rowIdx) {
+  const fields = panelDiv.querySelectorAll('.row-field');
+  fields.forEach(field => {
+    const input = field.querySelector('[data-col]');
+    if (!input) return;
+    const colIdx = parseInt(input.dataset.col);
+    const type = st.columnTypes[colIdx];
+    if (type === 'id' || type === 'relation') return;
+    field.classList.add('merge-field-row');
+    const radioWrapper = document.createElement('div');
+    radioWrapper.className = 'merge-radio-wrapper';
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.className = 'merge-field-radio';
+    radio.name = `merge-field-${colIdx}`;
+    radio.dataset.col = colIdx;
+    radio.dataset.panel = '0';
+    radio.dataset.rowIdx = rowIdx;
+    radio.checked = true;
+    radioWrapper.appendChild(radio);
+    field.insertBefore(radioWrapper, field.firstChild);
+  });
+}
+
 function generateMergePanelContent(st, row, rowIdx, mergeState, panelIdx) {
   const labelTopDown = st.rel_options.label_field_top_down !== false;
   const layoutClass = labelTopDown ? 'row-layout-top-down' : 'row-layout-horizontal';
   let html = `<div class="row-operation-content ${layoutClass}">`;
   st.columnNames.forEach((name, colIdx) => {
     const type = st.columnTypes[colIdx];
+    if (type === 'id') return;
     const value = row[colIdx];
     html += `<div class="row-field row-field-${type} row-field-top-down merge-field-row">`;
     if (type === 'relation') {
