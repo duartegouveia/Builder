@@ -4174,6 +4174,12 @@ function openChooseManyDialog(st) {
     const rowIdx = parseInt(tr.dataset.rowIdx);
     if (isNaN(rowIdx) || rowIdx >= sourceSt.relation.items.length) return;
     const item = JSON.parse(JSON.stringify(sourceSt.relation.items[rowIdx]));
+    const idCol = getIdColumnIndex(sourceSt);
+    if (idCol >= 0) {
+      const itemId = item[idCol];
+      const alreadyExists = targetSt.relation.items.some(r => r[idCol] === itemId);
+      if (alreadyExists) return;
+    }
     targetSt.relation.items.push(item);
     const targetCount = targetSt.relation.items.length;
     setFilteredIndices(targetSt, [...Array(targetCount).keys()]);
