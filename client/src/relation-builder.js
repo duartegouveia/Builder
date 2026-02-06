@@ -4414,6 +4414,24 @@ function renderMultiPanelContent(container, st, checkedIndices, panelPositions, 
   requestAnimationFrame(() => alignMultiPanelFieldHeights(container));
   setupMultiPanelNavEvents(container, st, checkedIndices, panelPositions, numPanels, mode, options);
   if (isMerge) setupMergeRadioEvents(container, st, checkedIndices, panelPositions);
+  setupMultiPanelSyncScroll(container);
+}
+
+function setupMultiPanelSyncScroll(container) {
+  const bodies = container.querySelectorAll('.multi-panel-body');
+  if (bodies.length < 2) return;
+  let syncing = false;
+  bodies.forEach(body => {
+    body.addEventListener('scroll', () => {
+      if (syncing) return;
+      syncing = true;
+      const top = body.scrollTop;
+      bodies.forEach(other => {
+        if (other !== body) other.scrollTop = top;
+      });
+      syncing = false;
+    });
+  });
 }
 
 function setupMergeRadioEvents(container, st, checkedIndices, panelPositions) {
