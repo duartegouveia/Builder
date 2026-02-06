@@ -1,0 +1,15 @@
+Na action "Export to File" faz aparecer uma dialog, que permite escolher se é para exportar todos (caso existam), os checked (caso existam), ou a linha seleccionada (caso exista).
+Permite também escolher o formato em que se pretende exportar: CSV, Excel, XML, Word, Pdf.
+Depois de escolher o formato, deve tentar verificar no servidor, dentro da pasta "export", "name" e "formato", os modelos que existem em cada formato, para cada relation com determinado nome.
+Existe sempre um ficheiro genérico (que é o default) por cada formato, mesmo que não exista ou não se consiga aceder à pasta do servidor.
+Feitas as escolhas, serão interpolados os dados correspondentes dos items, com a template escolhida e produzido o documento no formato escolhido que pode ser aberto numa nova tab, ou feito o download.
+
+Na action "Import from File", começamos por fazer upload do ficheiro. Depois deteta qual é o formato do ficheiro escolhido: CSV, Excel, XML, Word, Pdf. O objetivo é criar uma relation a partir dos dados apresentados no ficheiro fazendo uma interpretação inteligente dependente do formato. A ideia é descobrir uma estrutura que corresponde a uma tabela, com colunas nomeadas e um ou mais registos que mapeiam cada coluna.
+Em alguns casos, como por exemplo no excel ou no word, podem existir mais do que uma relation possível, por exemplo de várias tabsheets ou várias tabelas. Nesse caso mostrar uma select para escolher qual das tabelas queremos utilizar, ou multiplas, para completar dados com base em chave.
+Construída(s) a(s) relation(s) dos dados importados, o passo seguinte é apresentar um mapeamento inteligente entre as colunas da(s) relation(s) importada(s) e as colunas da relation onde foi pedida a importação. Pode ser necessário introduzir adaptadores de formato, por vezes separando campos, por exemplo dia, mes, ano, por vezes tendo de converter entre string, textarea, int, float, boolean.
+Pode ser necessário fazer mapeamentos manuais entre colunas (da importada e da relation de destino), deduzindo as conversões. Ou também apagar as conversões sugeridas pelo sistema. O primeiro critério para mapear colunas é o nome da coluna. Pode ser pedida ajuda à AI para fazer a conversão nos tipos de dados corretos.
+No limite, deve permitir editar os cados em texto, inclusive permitir copy&paste para ferramentas externas. 
+
+Na action "Integrity Check", faz-se uma verificação se a estrutura da relation tem dados consistentes, se os atributos presentes são conhecidos e os valores válidos, se os valores indicados nas posições dos items é consistente com o kind das colunas. Fazer também a verificação para valores de células do tipo relation.
+
+Eliminar as opções "Print" de line actions, always visible e checked actions.
