@@ -90,14 +90,15 @@ const DEFAULT_REL_OPTIONS = {
   single_item_mode: 'dialog',
   label_field_top_down: true,
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
-  general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Output State'],
-  general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
+  general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Print', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
+  general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form', 'Print'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
 };
 
 // Sample Products JSON for quick loading
 const PRODUCTS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "",
   "columns": {
     "id": "id",
@@ -124,8 +125,8 @@ const PRODUCTS_JSON = {
     "single_item_mode": "right",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -149,6 +150,7 @@ const PRODUCTS_JSON = {
 
 const CATEGORIES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "",
   "columns": {
     "id": "id",
@@ -170,8 +172,8 @@ const CATEGORIES_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -192,6 +194,7 @@ const CATEGORIES_JSON = {
 
 const STOCKS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "",
   "columns": {
     "id": "id",
@@ -225,8 +228,8 @@ const STOCKS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -310,6 +313,7 @@ const STOCKS_JSON = {
 
 const PRICELISTS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "",
   "columns": {
     "id": "id",
@@ -334,8 +338,8 @@ const PRICELISTS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved"],
-    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
+    "general_always_visible_options": ["New", "New Fast", "Paper Form", "Print", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
+    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form", "Print"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
@@ -374,6 +378,7 @@ const PRICELISTS_JSON = {
 
 const USERS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "admin_user",
   "columns": {
     "ID": "id",
@@ -416,6 +421,7 @@ const USERS_JSON = {
 
 const AUDITLOG_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "admin_auditlog",
   "columns": {
     "ID": "id",
@@ -446,6 +452,7 @@ const AUDITLOG_JSON = {
 
 const COMPANY_TYPES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company_type",
   "columns": {
     "ID": "id",
@@ -470,6 +477,7 @@ const COMPANY_TYPES_JSON = {
 
 const ALL_STOCKS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock",
   "columns": {
     "id": "id",
@@ -577,6 +585,7 @@ const ALL_STOCKS_JSON = {
 
 const DISTRIBUTOR_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "distributor",
   "columns": {
     "ID": "id",
@@ -613,6 +622,7 @@ const DISTRIBUTOR_JSON = {
 
 const ADMIN_DATA_MANAGEMENT_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "admin_data_management",
   "columns": {
     "ID": "id",
@@ -645,6 +655,7 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
 
 const STOCK_IMPORTS_STATES_DETAILS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_imports_states_details",
   "columns": {
     "ID": "id",
@@ -669,6 +680,7 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
 
 const STOCK_IMPORTS_STATES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_imports_states",
   "columns": {
     "ID": "id",
@@ -693,6 +705,7 @@ const STOCK_IMPORTS_STATES_JSON = {
 
 const STOCK_IMPORTS_TYPES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_imports_types",
   "columns": {
     "ID": "id",
@@ -721,6 +734,7 @@ const STOCK_IMPORTS_TYPES_JSON = {
 
 const STOCK_IMPORTS_DETAILS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_imports_details",
   "columns": {
     "ID": "id",
@@ -748,6 +762,7 @@ const STOCK_IMPORTS_DETAILS_JSON = {
 
 const STOCK_IMPORT_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_import",
   "columns": {
     "ID": "id",
@@ -786,6 +801,7 @@ const STOCK_IMPORT_JSON = {
 
 const STOCK_WAREHOUSE_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_warehouse",
   "columns": {
     "ID": "id",
@@ -816,6 +832,7 @@ const STOCK_WAREHOUSE_JSON = {
 
 const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_historic_inventory_detail",
   "columns": {
     "ID": "id",
@@ -863,6 +880,7 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
 
 const STOCK_HISTORIC_INVENTORY_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_historic_inventory",
   "columns": {
     "ID": "id",
@@ -907,6 +925,7 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
 
 const STOCK_INVENTORY_DETAIL_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_inventory_detail",
   "columns": {
     "ID": "id",
@@ -953,6 +972,7 @@ const STOCK_INVENTORY_DETAIL_JSON = {
 
 const STOCK_INVENTORY_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "stock_inventory",
   "columns": {
     "ID": "id",
@@ -998,6 +1018,7 @@ const STOCK_INVENTORY_JSON = {
 
 const CATALOG_PRODUCT_CONVERSIONS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company_product_catalog_conversion",
   "columns": {
     "ID": "id",
@@ -1028,6 +1049,7 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
 
 const PRODUCT_CATALOG_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company_product_catalog",
   "columns": {
     "ID": "id",
@@ -1057,6 +1079,7 @@ const PRODUCT_CATALOG_JSON = {
 
 const PRICELIST_PARTNER_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "pricelist_partner",
   "columns": {
     "ID": "id",
@@ -1082,6 +1105,7 @@ const PRICELIST_PARTNER_JSON = {
 
 const PRICELIST_PRODUCTS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "pricelist_product",
   "columns": {
     "ID": "id",
@@ -1110,6 +1134,7 @@ const PRICELIST_PRODUCTS_JSON = {
 
 const ALL_PRICELISTS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "pricelist",
   "columns": {
     "ID": "id",
@@ -1139,6 +1164,7 @@ const ALL_PRICELISTS_JSON = {
 
 const PRODUCT_BRANDS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company_product_brand",
   "columns": {
     "ID": "id",
@@ -1179,6 +1205,7 @@ const PRODUCT_BRANDS_JSON = {
 
 const PRODUCT_SPECIES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company_product_specie",
   "columns": {
     "ID": "id",
@@ -1205,6 +1232,7 @@ const PRODUCT_SPECIES_JSON = {
 
 const PRODUCT_FAMILIES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company_product_family",
   "columns": {
     "ID": "id",
@@ -1233,6 +1261,7 @@ const PRODUCT_FAMILIES_JSON = {
 
 const PRODUCT_CATEGORY_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "product_category",
   "columns": {
     "id": "id",
@@ -1271,6 +1300,7 @@ const PRODUCT_CATEGORY_JSON = {
 
 const ALL_PRODUCTS_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "product",
   "columns": {
     "ID": "id",
@@ -1333,6 +1363,7 @@ const ALL_PRODUCTS_JSON = {
 
 const ALL_COMPANIES_JSON = {
   "pot": "relation",
+  "guid": "",
   "name": "company",
   "columns": {
     "ID": "id",
@@ -1825,8 +1856,8 @@ function generateDemoRelation() {
     single_item_mode: 'dialog',
     label_field_top_down: true,
     general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved'],
-    general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Output State'],
-    general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
+    general_always_visible_options: ['New', 'New Fast', 'Paper Form', 'Print', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
+    general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form', 'Print'],
     general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
   };
   
@@ -1863,6 +1894,7 @@ function generateDemoRelation() {
   
   return {
     pot: 'relation',
+    guid: '',
     name: '',
     columns: columns,
     options: options,
@@ -3798,7 +3830,14 @@ function buildAlwaysVisibleOptionsHtml(options) {
     'New Fast': { value: 'new-fast-row', icon: '⚡', label: 'New Fast' },
     'Delete': { value: 'delete-row', icon: '🗑️', label: 'Delete' },
     'Paper Form': { value: 'paper-form-row', icon: '📄', label: 'Paper Form' },
-    'Output State': { value: 'output-state', icon: '📤', label: 'Output State' }
+    'Print': { value: 'print-row', icon: '🖨️', label: 'Print' },
+    'Select One': { value: 'select-one', icon: '☝', label: 'Select One' },
+    'Select Many': { value: 'select-many', icon: '☑', label: 'Select Many' },
+    'Choose Many': { value: 'choose-many', icon: '🔘', label: 'Choose Many' },
+    'Import from File': { value: 'import-file', icon: '📥', label: 'Import from File' },
+    'Export to file': { value: 'export-file', icon: '📤', label: 'Export to file' },
+    'Integrity Check': { value: 'integrity-check', icon: '🔍', label: 'Integrity Check' },
+    'Output State': { value: 'output-state', icon: '📋', label: 'Output State' }
   };
   
   // Build options in the order defined
@@ -3833,7 +3872,53 @@ function handleAlwaysVisibleAction(st, action) {
     outputRelationState(st);
     return;
   }
-  
+
+  // Print action (always-visible level)
+  if (action === 'print-row') {
+    if (st.relation.items.length > 0) {
+      handleRowOperation(st, rowIdx, action);
+    } else {
+      showToast('Nenhum registo para imprimir.', 'warning');
+    }
+    return;
+  }
+
+  // Select One
+  if (action === 'select-one') {
+    showToast('Select One: funcionalidade em desenvolvimento.', 'info');
+    return;
+  }
+
+  // Select Many
+  if (action === 'select-many') {
+    showToast('Select Many: funcionalidade em desenvolvimento.', 'info');
+    return;
+  }
+
+  // Choose Many
+  if (action === 'choose-many') {
+    showToast('Choose Many: funcionalidade em desenvolvimento.', 'info');
+    return;
+  }
+
+  // Import from File
+  if (action === 'import-file') {
+    showToast('Import from File: funcionalidade em desenvolvimento.', 'info');
+    return;
+  }
+
+  // Export to file
+  if (action === 'export-file') {
+    showToast('Export to file: funcionalidade em desenvolvimento.', 'info');
+    return;
+  }
+
+  // Integrity Check
+  if (action === 'integrity-check') {
+    showToast('Integrity Check: funcionalidade em desenvolvimento.', 'info');
+    return;
+  }
+
   // Actions that work on highlighted/first row
   if (st.relation.items.length > 0) {
     handleRowOperation(st, rowIdx, action);
@@ -7470,7 +7555,8 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
     'New': '<button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>',
     'New Fast': '<button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>',
     'Delete': '<button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>',
-    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>'
+    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>',
+    'Print': '<button class="column-menu-item" data-action="print-row" data-testid="button-row-print">🖨️ Print</button>'
   };
   
   // Get configured line options or use defaults
@@ -7546,6 +7632,9 @@ function handleRowOperation(st, rowIdx, action) {
       break;
     case 'paper-form-row':
       showRowPaperFormDialog(st, rowIdx);
+      break;
+    case 'print-row':
+      showRowPrintDialog(st, rowIdx);
       break;
   }
 }
@@ -7914,6 +8003,49 @@ function showRowPaperFormDialog(st, rowIdx) {
               </style>
             </head>
             <body>${printContent.innerHTML}</body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.print();
+        });
+      }
+    }, 0);
+  }, title, footerButtons);
+}
+
+function showRowPrintDialog(st, rowIdx) {
+  closeAllMenus();
+  const row = st.relation.items[rowIdx];
+  const title = `🖨️ Imprimir Registo ${rowIdx + 1}`;
+  const footerButtons = `<button class="btn btn-primary print-record">Imprimir</button>`;
+
+  showContentBasedOnMode(st, (container) => {
+    container.innerHTML = generateRowFormattedContent(st, row, 'view');
+
+    setTimeout(() => {
+      const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
+      if (footer) {
+        footer.querySelector('.print-record')?.addEventListener('click', () => {
+          const printContent = container.querySelector('.row-operation-content');
+          if (!printContent) return;
+          const relationName = st.relation.name || '';
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <html>
+            <head>
+              <title>${escapeHtml(relationName || 'Registo')}</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
+                h1 { text-align: center; margin-bottom: 20px; font-size: 18pt; }
+                .row-field { margin-bottom: 10px; }
+                .row-field-label { font-weight: bold; margin-right: 8px; }
+                .row-field-value { display: inline; }
+              </style>
+            </head>
+            <body>
+              ${relationName ? `<h1>${escapeHtml(relationName)} - Registo ${rowIdx + 1}</h1>` : `<h1>Registo ${rowIdx + 1}</h1>`}
+              ${printContent.innerHTML}
+            </body>
             </html>
           `);
           printWindow.document.close();
@@ -12621,7 +12753,8 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
     'New': '<button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>',
     'New Fast': '<button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>',
     'Delete': '<button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>',
-    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>'
+    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>',
+    'Print': '<button class="column-menu-item" data-action="print-row" data-testid="button-row-print">🖨️ Print</button>'
   };
   
   // Get configured line options or use defaults
@@ -12800,6 +12933,7 @@ function init() {
   btnRelObj?.addEventListener('click', () => {
     textarea.value = JSON.stringify({
   "pot": "relation",
+  "guid": "",
   "name": "",
   "columns": {},
   "options": {
@@ -12817,8 +12951,8 @@ function init() {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "general_view_options": ["Table","Cards","Pivot","Correlation","Diagram","AI","Saved"],
-    "general_always_visible_options": ["New","New Fast","Paper Form","Output State"],
-    "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
+    "general_always_visible_options": ["New","New Fast","Paper Form","Print","Select One","Select Many","Choose Many","Import from File","Export to file","Integrity Check","Output State"],
+    "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form","Print"],
     "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Multi Copy","Multi Delete","Group Edit","Merge"]
   },
   "items": []
@@ -12829,6 +12963,7 @@ function init() {
   btnObjToRel?.addEventListener('click', () => {
     const relTemplate = {
       "pot": "relation",
+      "guid": "",
       "name": "",
       "columns": {},
       "options": {
