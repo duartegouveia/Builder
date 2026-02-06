@@ -581,6 +581,7 @@
 
 .relation-table-readonly td {
   background: var(--slate-50);
+  user-select: none;
 }
 
 /* Relation Table Advanced Features */
