@@ -3331,12 +3331,36 @@ function formatCellValue(value, type, colName) {
   return String(value);
 }
 
-function showToast(message) {
+function showToast(message, type = 'info', duration = 3000) {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2000);
+  toast.className = `toast toast-${type}`;
+
+  const msgSpan = document.createElement('span');
+  msgSpan.textContent = message;
+  toast.appendChild(msgSpan);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'toast-close';
+  closeBtn.textContent = '\u2715';
+  closeBtn.addEventListener('click', () => removeToast(toast));
+  toast.appendChild(closeBtn);
+
+  container.appendChild(toast);
+
+  const timer = setTimeout(() => removeToast(toast), duration);
+
+  function removeToast(el) {
+    clearTimeout(timer);
+    el.classList.add('toast-fade-out');
+    el.addEventListener('animationend', () => el.remove());
+  }
 }
 
 function updateTextarea(st = state) {
@@ -3834,7 +3858,6 @@ function outputRelationState(st) {
   });
 }
 
-// Build multi-select options HTML based on general_multi_options configuration
 function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
   // Define all available multi operations with their option HTML
   const multiOperationsMap = {
@@ -3939,87 +3962,579 @@ function handleMultiAction(st, action, options = {}) {
   }
 }
 
-// Placeholder functions for new multi operations (to be implemented)
+function buildMultiPanelNavigationHtml(panelIdx, currentRecordPos, totalChecked) {
+  return `<div class="multi-panel-nav" data-panel="${panelIdx}">
+    <button class="btn-page mp-first" data-panel="${panelIdx}" ${currentRecordPos <= 0 ? 'disabled' : ''}>⟨⟨</button>
+    <button class="btn-page mp-prev" data-panel="${panelIdx}" ${currentRecordPos <= 0 ? 'disabled' : ''}>⟨</button>
+    <span class="mp-indicator">
+      <input type="number" class="mp-input" data-panel="${panelIdx}" value="${currentRecordPos + 1}" min="1" max="${totalChecked}" style="width:50px;text-align:center;">
+      <span>of ${totalChecked}</span>
+    </span>
+    <button class="btn-page mp-next" data-panel="${panelIdx}" ${currentRecordPos >= totalChecked - 1 ? 'disabled' : ''}>⟩</button>
+    <button class="btn-page mp-last" data-panel="${panelIdx}" ${currentRecordPos >= totalChecked - 1 ? 'disabled' : ''}>⟩⟩</button>
+  </div>`;
+}
+
+function alignMultiPanelFieldHeights(container) {
+  const panels = container.querySelectorAll('.multi-panel');
+  if (panels.length < 2) return;
+  const fieldsByIndex = {};
+  panels.forEach(panel => {
+    panel.querySelectorAll('.row-field').forEach((field, idx) => {
+      if (!fieldsByIndex[idx]) fieldsByIndex[idx] = [];
+      field.style.minHeight = '';
+      fieldsByIndex[idx].push(field);
+    });
+  });
+  Object.values(fieldsByIndex).forEach(fields => {
+    let maxH = 0;
+    fields.forEach(f => { maxH = Math.max(maxH, f.offsetHeight); });
+    fields.forEach(f => { f.style.minHeight = maxH + 'px'; });
+  });
+}
+
+function renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, mode, options = {}) {
+  const { isEdit = false, isMerge = false, mergeState = null } = options;
+  const panelsDiv = container.querySelector('.multi-panels-grid');
+  if (!panelsDiv) return;
+  panelsDiv.innerHTML = '';
+  panelsDiv.className = 'multi-panels-grid multi-panels-' + numPanels;
+  for (let p = 0; p < numPanels; p++) {
+    const pos = panelPositions[p];
+    const rowIdx = checkedIndices[pos];
+    const row = st.relation.items[rowIdx];
+    const panelDiv = document.createElement('div');
+    panelDiv.className = 'multi-panel';
+    panelDiv.dataset.panel = p;
+    let panelMode = mode;
+    if (isMerge) {
+      panelMode = p === 0 ? 'edit' : 'view';
+    }
+    const navHtml = buildMultiPanelNavigationHtml(p, pos, checkedIndices.length);
+    let contentHtml = '';
+    if (isMerge && p > 0) {
+      contentHtml = generateMergePanelContent(st, row, rowIdx, mergeState, p);
+    } else {
+      contentHtml = generateRowFormattedContent(st, row, panelMode);
+    }
+    panelDiv.innerHTML = navHtml + '<div class="multi-panel-body">' + contentHtml + '</div>';
+    panelsDiv.appendChild(panelDiv);
+    initRelationFieldsInContainer(panelDiv, st, row);
+  }
+  requestAnimationFrame(() => alignMultiPanelFieldHeights(container));
+  setupMultiPanelNavEvents(container, st, checkedIndices, panelPositions, numPanels, mode, options);
+  if (isMerge) setupMergeRadioEvents(container, st, checkedIndices, panelPositions);
+}
+
+function setupMergeRadioEvents(container, st, checkedIndices, panelPositions) {
+  container.querySelectorAll('.merge-field-radio').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const colIdx = parseInt(radio.dataset.col);
+      const srcRowIdx = parseInt(radio.dataset.rowIdx);
+      const type = st.columnTypes[colIdx];
+      const srcValue = st.relation.items[srcRowIdx][colIdx];
+      const editPanel = container.querySelector('.multi-panel[data-panel="0"]');
+      if (!editPanel) return;
+      const input = editPanel.querySelector(`[data-col="${colIdx}"]`);
+      if (!input) return;
+      if (type === 'boolean') { input.checked = !!srcValue; }
+      else if (type === 'int' || type === 'float') { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
+      else if (input.tagName === 'SELECT') { input.value = srcValue !== null ? srcValue : ''; }
+      else { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
+    });
+  });
+}
+
+function setupMultiPanelNavEvents(container, st, checkedIndices, panelPositions, numPanels, mode, options) {
+  const { isEdit = false, isMerge = false } = options;
+  container.querySelectorAll('.multi-panel-nav').forEach(nav => {
+    const p = parseInt(nav.dataset.panel);
+    nav.querySelector('.mp-first')?.addEventListener('click', () => {
+      panelPositions[p] = 0;
+      if (isEdit) panelPositions[p] = findNextAvailablePos(panelPositions, p, 0, checkedIndices.length, 1);
+      renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, mode, options);
+    });
+    nav.querySelector('.mp-prev')?.addEventListener('click', () => {
+      let newPos = panelPositions[p] - 1;
+      if (isEdit) newPos = findNextAvailablePos(panelPositions, p, newPos, checkedIndices.length, -1);
+      if (newPos >= 0) { panelPositions[p] = newPos; renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, mode, options); }
+    });
+    nav.querySelector('.mp-next')?.addEventListener('click', () => {
+      let newPos = panelPositions[p] + 1;
+      if (isEdit) newPos = findNextAvailablePos(panelPositions, p, newPos, checkedIndices.length, 1);
+      if (newPos < checkedIndices.length) { panelPositions[p] = newPos; renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, mode, options); }
+    });
+    nav.querySelector('.mp-last')?.addEventListener('click', () => {
+      panelPositions[p] = checkedIndices.length - 1;
+      if (isEdit) panelPositions[p] = findNextAvailablePos(panelPositions, p, checkedIndices.length - 1, checkedIndices.length, -1);
+      renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, mode, options);
+    });
+    nav.querySelector('.mp-input')?.addEventListener('change', (e) => {
+      let val = parseInt(e.target.value) - 1;
+      if (isNaN(val) || val < 0) val = 0;
+      if (val >= checkedIndices.length) val = checkedIndices.length - 1;
+      if (isEdit) val = findNextAvailablePos(panelPositions, p, val, checkedIndices.length, 1);
+      panelPositions[p] = val;
+      renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, mode, options);
+    });
+  });
+}
+
+function findNextAvailablePos(panelPositions, currentPanel, startPos, total, direction) {
+  let pos = startPos;
+  while (pos >= 0 && pos < total) {
+    const used = panelPositions.some((pp, idx) => idx !== currentPanel && pp === pos);
+    if (!used) return pos;
+    pos += direction;
+  }
+  pos = startPos - direction;
+  while (pos >= 0 && pos < total) {
+    const used = panelPositions.some((pp, idx) => idx !== currentPanel && pp === pos);
+    if (!used) return pos;
+    pos -= direction;
+  }
+  return panelPositions[currentPanel];
+}
+
+function getInitialPanelPositions(numPanels, totalChecked) {
+  const positions = [];
+  for (let i = 0; i < numPanels; i++) {
+    positions.push(Math.min(i, totalChecked - 1));
+  }
+  return positions;
+}
+
 function showMultiViewDialog(st) {
-  const selectedIndices = Array.from(getSelectedRows(st));
-  if (selectedIndices.length === 0) return;
-  
-  const contentBuilder = (container) => {
-    container.innerHTML = `<p>Multi View de ${selectedIndices.length} registos selecionados.</p>
-    <p class="text-muted-foreground">Esta funcionalidade será implementada em breve.</p>`;
-  };
-  showContentBasedOnMode(st, contentBuilder, `👁 Multi View (${selectedIndices.length})`);
+  const checkedIndices = Array.from(getSelectedRows(st));
+  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  let numPanels = Math.min(2, checkedIndices.length);
+  let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+
+  const footerHtml = `
+    <select class="mp-panel-count">
+      <option value="1">1 panel</option>
+      <option value="2" selected>2 panels</option>
+      <option value="3" ${checkedIndices.length < 3 ? 'disabled' : ''}>3 panels</option>
+      <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
+    </select>
+  `;
+
+  let bodyRef = null;
+  const closeHandler = showContentBasedOnMode(st, (container) => {
+    bodyRef = container;
+    container.innerHTML = '<div class="multi-panels-grid"></div>';
+    renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view');
+  }, `👁 Multi View (${checkedIndices.length})`, footerHtml);
+
+  setTimeout(() => {
+    const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
+    const panelCountSel = wrapper?.querySelector('.mp-panel-count');
+    if (panelCountSel) {
+      panelCountSel.addEventListener('change', (e) => {
+        numPanels = parseInt(e.target.value);
+        panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+        if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'view');
+      });
+    }
+  }, 0);
 }
 
 function showMultiEditDialog(st) {
-  const selectedIndices = Array.from(getSelectedRows(st));
-  if (selectedIndices.length === 0) return;
-  
-  const contentBuilder = (container) => {
-    container.innerHTML = `<p>Multi Edit de ${selectedIndices.length} registos selecionados.</p>
-    <p class="text-muted-foreground">Esta funcionalidade será implementada em breve.</p>`;
-  };
-  showContentBasedOnMode(st, contentBuilder, `✏️ Multi Edit (${selectedIndices.length})`);
+  const checkedIndices = Array.from(getSelectedRows(st));
+  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  let numPanels = Math.min(2, checkedIndices.length);
+  let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+
+  const footerHtml = `
+    <select class="mp-panel-count">
+      <option value="1">1 panel</option>
+      <option value="2" selected>2 panels</option>
+      <option value="3" ${checkedIndices.length < 3 ? 'disabled' : ''}>3 panels</option>
+      <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
+    </select>
+    <button class="btn btn-primary mp-save-all">Gravar</button>
+  `;
+
+  let bodyRef = null;
+  const closeHandler = showContentBasedOnMode(st, (container) => {
+    bodyRef = container;
+    container.innerHTML = '<div class="multi-panels-grid"></div>';
+    renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'edit', { isEdit: true });
+  }, `✏️ Multi Edit (${checkedIndices.length})`, footerHtml);
+
+  setTimeout(() => {
+    const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
+    if (!wrapper) return;
+    wrapper.querySelector('.mp-panel-count')?.addEventListener('change', (e) => {
+      numPanels = parseInt(e.target.value);
+      panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+      if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'edit', { isEdit: true });
+    });
+    wrapper.querySelector('.mp-save-all')?.addEventListener('click', () => {
+      const panels = wrapper.querySelectorAll('.multi-panel');
+      let saved = 0;
+      panels.forEach((panel, p) => {
+        const pos = panelPositions[p];
+        const rowIdx = checkedIndices[pos];
+        st.columnNames.forEach((name, colIdx) => {
+          const type = st.columnTypes[colIdx];
+          if (type === 'id' || type === 'relation') return;
+          const input = panel.querySelector(`[data-col="${colIdx}"]`);
+          if (input) {
+            let value;
+            if (type === 'boolean') { value = input.checked; }
+            else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
+            else if (type === 'float') { value = input.value === '' ? null : parseFloat(input.value); }
+            else { value = input.value === '' ? null : input.value; }
+            st.relation.items[rowIdx][colIdx] = value;
+          }
+        });
+        saved++;
+      });
+      renderTable(st);
+      outputRelationState(st);
+      showToast(`${saved} registos gravados.`, 'success');
+      if (closeHandler) closeHandler();
+    });
+  }, 0);
 }
 
 function showGroupEditDialog(st) {
-  const selectedIndices = Array.from(getSelectedRows(st));
-  if (selectedIndices.length === 0) return;
-  
-  const contentBuilder = (container) => {
-    container.innerHTML = `<p>Group Edit de ${selectedIndices.length} registos selecionados.</p>
-    <p class="text-muted-foreground">Esta funcionalidade permite editar o mesmo campo em todos os registos selecionados.</p>`;
-  };
-  showContentBasedOnMode(st, contentBuilder, `📝 Group Edit (${selectedIndices.length})`);
+  const checkedIndices = Array.from(getSelectedRows(st));
+  if (checkedIndices.length === 0) return;
+
+  const footerHtml = `
+    <button class="btn btn-primary ge-save-all">Gravar para Todos</button>
+    <span class="info-badge ge-info-badge" title="Info">ℹ</span>
+    <div class="info-popup ge-info-popup hidden">
+      <p><strong>Group Edit</strong></p>
+      <p>Esta operação permite definir valores para um ou mais campos em todos os registos checked.</p>
+      <p>Assinale a checkbox de cada campo que pretende alterar, defina o valor, e clique "Gravar para Todos".</p>
+    </div>
+  `;
+
+  let bodyRef = null;
+  const closeHandler = showContentBasedOnMode(st, (container) => {
+    bodyRef = container;
+    const labelTopDown = st.rel_options.label_field_top_down !== false;
+    const layoutClass = labelTopDown ? 'row-layout-top-down' : 'row-layout-horizontal';
+    let html = `<div class="group-edit-content ${layoutClass}">`;
+    st.columnNames.forEach((name, colIdx) => {
+      const type = st.columnTypes[colIdx];
+      const isEditable = type !== 'id' && type !== 'relation';
+      const histogram = buildFieldHistogram(st, checkedIndices, colIdx);
+      html += `<div class="ge-field" data-col="${colIdx}">`;
+      html += `<div class="ge-field-header">`;
+      if (isEditable) {
+        html += `<input type="checkbox" class="ge-field-check" data-col="${colIdx}">`;
+      }
+      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      html += `</div>`;
+      html += `<div class="ge-field-edit hidden" data-col="${colIdx}">`;
+      if (isEditable) {
+        html += createEditInputHtml(type, null, colIdx, st);
+      }
+      html += `</div>`;
+      html += `<div class="ge-field-histogram" data-col="${colIdx}">${histogram}</div>`;
+      html += `</div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.ge-field-check').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const col = cb.dataset.col;
+        const editDiv = container.querySelector(`.ge-field-edit[data-col="${col}"]`);
+        const histDiv = container.querySelector(`.ge-field-histogram[data-col="${col}"]`);
+        if (cb.checked) {
+          editDiv?.classList.remove('hidden');
+          histDiv?.classList.add('hidden');
+        } else {
+          editDiv?.classList.add('hidden');
+          histDiv?.classList.remove('hidden');
+        }
+      });
+    });
+  }, `📝 Group Edit (${checkedIndices.length})`, footerHtml);
+
+  setTimeout(() => {
+    const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
+    if (!wrapper) return;
+    const infoBadge = wrapper.querySelector('.ge-info-badge');
+    const infoPopup = wrapper.querySelector('.ge-info-popup');
+    if (infoBadge && infoPopup) {
+      infoBadge.addEventListener('click', () => infoPopup.classList.toggle('hidden'));
+    }
+    wrapper.querySelector('.ge-save-all')?.addEventListener('click', () => {
+      const body = wrapper.querySelector('.detail-panel-body, .popup-content-body');
+      if (!body) return;
+      const checkedFields = body.querySelectorAll('.ge-field-check:checked');
+      if (checkedFields.length === 0) { showToast('Nenhum campo selecionado.', 'warning'); return; }
+      let updated = 0;
+      checkedFields.forEach(cb => {
+        const colIdx = parseInt(cb.dataset.col);
+        const type = st.columnTypes[colIdx];
+        const input = body.querySelector(`.ge-field-edit[data-col="${colIdx}"] [data-col="${colIdx}"]`);
+        if (!input) return;
+        let value;
+        if (type === 'boolean') { value = input.checked; }
+        else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
+        else if (type === 'float') { value = input.value === '' ? null : parseFloat(input.value); }
+        else { value = input.value === '' ? null : input.value; }
+        checkedIndices.forEach(rowIdx => {
+          st.relation.items[rowIdx][colIdx] = value;
+          updated++;
+        });
+      });
+      renderTable(st);
+      outputRelationState(st);
+      showToast(`${checkedFields.length} campo(s) atualizados em ${checkedIndices.length} registos.`, 'success');
+      if (closeHandler) closeHandler();
+    });
+  }, 0);
+}
+
+function buildFieldHistogram(st, checkedIndices, colIdx) {
+  const counts = {};
+  checkedIndices.forEach(idx => {
+    const val = st.relation.items[idx][colIdx];
+    const key = val === null || val === undefined ? '(null)' : String(val);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  return '<div class="ge-histogram">' + entries.map(([val, count]) =>
+    `<div class="ge-histogram-row"><span class="ge-histogram-val">${escapeHtml(val)}</span> <span class="ge-histogram-count">#${count}</span></div>`
+  ).join('') + '</div>';
 }
 
 function showMergeDialog(st) {
-  const selectedIndices = Array.from(getSelectedRows(st));
-  if (selectedIndices.length < 2) {
-    alert('Selecione pelo menos 2 registos para fundir.');
-    return;
-  }
-  
-  const contentBuilder = (container) => {
-    container.innerHTML = `<p>Merge de ${selectedIndices.length} registos selecionados.</p>
-    <p class="text-muted-foreground">Esta funcionalidade permite combinar múltiplos registos num só.</p>`;
-  };
-  showContentBasedOnMode(st, contentBuilder, `🔗 Merge (${selectedIndices.length})`);
+  const checkedIndices = Array.from(getSelectedRows(st));
+  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos para fundir.', 'warning'); return; }
+  let numPanels = Math.min(2, checkedIndices.length);
+  let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+  const mergeState = { radioSelections: {} };
+
+  const panelCountOptions = [2, 3, 4].map(n =>
+    `<option value="${n}" ${n === numPanels ? 'selected' : ''} ${checkedIndices.length < n ? 'disabled' : ''}>${n} panels</option>`
+  ).join('');
+
+  const footerHtml = `
+    <select class="mp-panel-count">${panelCountOptions}</select>
+    <button class="btn btn-primary merge-execute">Juntar Todos num Só</button>
+    <span class="info-badge merge-info-badge" title="Info">ℹ</span>
+    <div class="info-popup merge-info-popup hidden">
+      <p><strong>Merge</strong></p>
+      <p>O primeiro painel (Edit) é o registo que vai receber o resultado do merge.</p>
+      <p>Nos painéis seguintes (View), clique no radiobutton de cada campo para adotar o valor desse registo.</p>
+      <p>Para campos do tipo relation, use as checkboxes para escolher quais sub-registos copiar.</p>
+      <p>Ao clicar "Juntar Todos num Só", os valores escolhidos são aplicados ao registo do painel 1 e os restantes são eliminados.</p>
+    </div>
+  `;
+
+  let bodyRef = null;
+  const closeHandler = showContentBasedOnMode(st, (container) => {
+    bodyRef = container;
+    container.innerHTML = '<div class="multi-panels-grid"></div>';
+    renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view', { isMerge: true, mergeState });
+  }, `🔗 Merge (${checkedIndices.length})`, footerHtml);
+
+  setTimeout(() => {
+    const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
+    if (!wrapper) return;
+    const infoBadge = wrapper.querySelector('.merge-info-badge');
+    const infoPopup = wrapper.querySelector('.merge-info-popup');
+    if (infoBadge && infoPopup) {
+      infoBadge.addEventListener('click', () => infoPopup.classList.toggle('hidden'));
+    }
+    wrapper.querySelector('.mp-panel-count')?.addEventListener('change', (e) => {
+      numPanels = parseInt(e.target.value);
+      panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+      if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'view', { isMerge: true, mergeState });
+    });
+    wrapper.querySelector('.merge-execute')?.addEventListener('click', () => {
+      if (!bodyRef) return;
+      const editPanel = bodyRef.querySelector('.multi-panel[data-panel="0"]');
+      if (!editPanel) return;
+      const targetRowIdx = checkedIndices[panelPositions[0]];
+      st.columnNames.forEach((name, colIdx) => {
+        const type = st.columnTypes[colIdx];
+        if (type === 'id') return;
+        if (type === 'relation') {
+          const mergeRelItems = [];
+          const existingRel = st.relation.items[targetRowIdx][colIdx];
+          if (existingRel && existingRel.items) mergeRelItems.push(...existingRel.items);
+          bodyRef.querySelectorAll(`.merge-rel-check[data-col="${colIdx}"]:checked`).forEach(cb => {
+            const srcPanel = parseInt(cb.dataset.srcPanel);
+            const itemIdx = parseInt(cb.dataset.itemIdx);
+            const srcRowIdx = checkedIndices[panelPositions[srcPanel]];
+            const srcRel = st.relation.items[srcRowIdx][colIdx];
+            if (srcRel && srcRel.items && srcRel.items[itemIdx]) {
+              const item = [...srcRel.items[itemIdx]];
+              const idColIdx = srcRel.columns ? srcRel.columns.findIndex(c => c[1] === 'id') : -1;
+              if (idColIdx >= 0 && item[idColIdx] < 0) {
+                const existingIds = mergeRelItems.map(r => r[idColIdx]).filter(id => typeof id === 'number');
+                const duplicate = existingIds.includes(item[idColIdx]);
+                if (duplicate) {
+                  let minId = Math.min(0, ...existingIds);
+                  item[idColIdx] = minId - 1;
+                }
+              }
+              mergeRelItems.push(item);
+            }
+          });
+          if (existingRel) {
+            st.relation.items[targetRowIdx][colIdx] = { ...existingRel, items: mergeRelItems };
+          }
+        } else {
+          const input = editPanel.querySelector(`[data-col="${colIdx}"]`);
+          if (input) {
+            let value;
+            if (type === 'boolean') { value = input.checked; }
+            else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
+            else if (type === 'float') { value = input.value === '' ? null : parseFloat(input.value); }
+            else { value = input.value === '' ? null : input.value; }
+            st.relation.items[targetRowIdx][colIdx] = value;
+          }
+        }
+      });
+      const indicesToRemove = checkedIndices.filter(idx => idx !== targetRowIdx).sort((a, b) => b - a);
+      indicesToRemove.forEach(idx => st.relation.items.splice(idx, 1));
+      getSelectedRows(st).clear();
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+      outputRelationState(st);
+      showToast(`Registos fundidos com sucesso.`, 'success');
+      if (closeHandler) closeHandler();
+    });
+  }, 0);
+}
+
+function generateMergePanelContent(st, row, rowIdx, mergeState, panelIdx) {
+  const labelTopDown = st.rel_options.label_field_top_down !== false;
+  const layoutClass = labelTopDown ? 'row-layout-top-down' : 'row-layout-horizontal';
+  let html = `<div class="row-operation-content ${layoutClass}">`;
+  st.columnNames.forEach((name, colIdx) => {
+    const type = st.columnTypes[colIdx];
+    const value = row[colIdx];
+    html += `<div class="row-field row-field-${type} row-field-top-down merge-field-row">`;
+    if (type === 'relation') {
+      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      if (value && value.items && value.items.length > 0) {
+        html += '<div class="merge-rel-items">';
+        value.items.forEach((item, itemIdx) => {
+          const itemSummary = item.map((v, i) => v !== null && v !== undefined ? String(v) : '').filter(s => s).slice(0, 3).join(', ');
+          html += `<label class="merge-rel-item"><input type="checkbox" class="merge-rel-check" data-col="${colIdx}" data-src-panel="${panelIdx}" data-item-idx="${itemIdx}"> ${escapeHtml(itemSummary || '(item)')}</label>`;
+        });
+        html += '</div>';
+      } else {
+        html += '<span class="null-value">null</span>';
+      }
+    } else {
+      html += `<div class="merge-radio-wrapper">`;
+      html += `<input type="radio" class="merge-field-radio" name="merge-field-${colIdx}" data-col="${colIdx}" data-panel="${panelIdx}" data-row-idx="${rowIdx}">`;
+      html += `</div>`;
+      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+    }
+    html += `</div>`;
+  });
+  html += '</div>';
+  return html;
 }
 
 function showMultiCopyDialog(st) {
-  const selectedIndices = Array.from(getSelectedRows(st));
-  if (selectedIndices.length === 0) return;
-  
-  const contentBuilder = (container) => {
-    container.innerHTML = `<p>Multi Copy de ${selectedIndices.length} registos selecionados.</p>
-    <p class="text-muted-foreground">Esta funcionalidade permite copiar múltiplos registos.</p>`;
-  };
-  showContentBasedOnMode(st, contentBuilder, `📋 Multi Copy (${selectedIndices.length})`);
+  const checkedIndices = Array.from(getSelectedRows(st));
+  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  let numPanels = Math.min(2, checkedIndices.length);
+  let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+
+  const footerHtml = `
+    <select class="mp-panel-count">
+      <option value="1">1 panel</option>
+      <option value="2" selected>2 panels</option>
+      <option value="3" ${checkedIndices.length < 3 ? 'disabled' : ''}>3 panels</option>
+      <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
+    </select>
+    <input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">
+    <button class="btn btn-primary mp-generate-copies">Gerar Cópias</button>
+  `;
+
+  let bodyRef = null;
+  const closeHandler = showContentBasedOnMode(st, (container) => {
+    bodyRef = container;
+    container.innerHTML = '<div class="multi-panels-grid"></div>';
+    renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view');
+  }, `📋 Multi Copy (${checkedIndices.length})`, footerHtml);
+
+  setTimeout(() => {
+    const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
+    if (!wrapper) return;
+    wrapper.querySelector('.mp-panel-count')?.addEventListener('change', (e) => {
+      numPanels = parseInt(e.target.value);
+      panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+      if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'view');
+    });
+    wrapper.querySelector('.mp-generate-copies')?.addEventListener('click', () => {
+      const countInput = wrapper.querySelector('.copy-count-input');
+      const count = Math.max(1, parseInt(countInput?.value) || 1);
+      const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+      let totalCopied = 0;
+      checkedIndices.forEach(rowIdx => {
+        const row = st.relation.items[rowIdx];
+        for (let i = 0; i < count; i++) {
+          const newRow = [...row];
+          if (idColIdx !== -1) newRow[idColIdx] = getNextNegativeId(st);
+          st.relation.items.push(newRow);
+          totalCopied++;
+        }
+      });
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      renderTable(st);
+      outputRelationState(st);
+      showToast(`${totalCopied} cópias geradas.`, 'success');
+      if (closeHandler) closeHandler();
+    });
+  }, 0);
 }
 
 function showMultiDeleteDialog(st) {
-  const selectedIndices = Array.from(getSelectedRows(st));
-  if (selectedIndices.length === 0) return;
-  
-  const footerHtml = `<button class="btn btn-danger confirm-multi-delete">🗑️ Confirmar Eliminação</button>`;
-  
-  const contentBuilder = (container) => {
-    container.innerHTML = `<p>Tem a certeza que pretende eliminar ${selectedIndices.length} registos selecionados?</p>
-    <p class="text-muted-foreground">Esta ação não pode ser desfeita.</p>`;
-  };
-  
-  const closeHandler = showContentBasedOnMode(st, contentBuilder, `🗑️ Multi Delete (${selectedIndices.length})`, footerHtml);
-  
-  // Add event listener for confirm button
+  const checkedIndices = Array.from(getSelectedRows(st));
+  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  let numPanels = Math.min(2, checkedIndices.length);
+  let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+
+  const footerHtml = `
+    <select class="mp-panel-count">
+      <option value="1">1 panel</option>
+      <option value="2" selected>2 panels</option>
+      <option value="3" ${checkedIndices.length < 3 ? 'disabled' : ''}>3 panels</option>
+      <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
+    </select>
+    <button class="btn btn-danger mp-delete-all">Apagar Todos</button>
+  `;
+
+  let bodyRef = null;
+  const closeHandler = showContentBasedOnMode(st, (container) => {
+    bodyRef = container;
+    container.innerHTML = '<div class="multi-panels-grid"></div>';
+    renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view');
+  }, `🗑️ Multi Delete (${checkedIndices.length})`, footerHtml);
+
   setTimeout(() => {
-    const confirmBtn = document.querySelector('.confirm-multi-delete');
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', () => {
-        removeSelectedRows(st);
-        if (closeHandler) closeHandler();
-      });
-    }
+    const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
+    if (!wrapper) return;
+    wrapper.querySelector('.mp-panel-count')?.addEventListener('change', (e) => {
+      numPanels = parseInt(e.target.value);
+      panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
+      if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'view');
+    });
+    wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
+      removeSelectedRows(st);
+      showToast(`${checkedIndices.length} registos eliminados.`, 'success');
+      if (closeHandler) closeHandler();
+    });
   }, 0);
 }
 
