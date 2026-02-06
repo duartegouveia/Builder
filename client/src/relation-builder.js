@@ -7582,6 +7582,14 @@ function showContentInDetailPanel(st, contentBuilder, title = '', footerButtonsH
   // Toggle .has-detail class on wrapper for proper layout
   updateDetailPanelState(st);
   
+  // Scroll detail panel into view when mode is 'bottom'
+  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  if (singleItemMode === 'bottom') {
+    setTimeout(() => {
+      detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+  
   // Set up close handler
   const closeHandler = () => {
     clearDetailPanel(st);
