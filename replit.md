@@ -54,7 +54,7 @@ The Relation Builder offers an advanced data table interface with the following 
     - **Correlation View**: Analyzes column correlations (Pearson, Cramér's V).
     - **Diagram View**: Force-directed clustering visualization.
     - **AI View**: Dedicated panel for the AI assistant.
-    - **Saved View**: Saved views panel.
+    - **Saved View**: Persists and restores relation snapshots. Supports three save types: Format (uiState + column structure for binning), Records (items only), Both (complete snapshot). Includes scope (For You / For Everyone), duplicate name validation, restore via double-click or button, and delete with confirmation. Saved views are stored in `st.relation.saved` array on the relation data object.
     - **Structure View**: Structure panel (empty, for future development).
 
 ### Virtual Keyboard Features
