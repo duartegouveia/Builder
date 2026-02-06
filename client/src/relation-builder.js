@@ -3512,10 +3512,10 @@ function invertSelection(pageOnly = false, st = state) {
   renderTable(st);
 }
 
-function removeSelectedRows(st = state) {
+function removeSelectedRows(st = state, skipConfirm = false) {
   if (getSelectedRows(st).size === 0) return;
   
-  if (!confirm(`Remove ${getSelectedRows(st).size} selected rows from the data?`)) return;
+  if (!skipConfirm && !confirm(`Remove ${getSelectedRows(st).size} selected rows from the data?`)) return;
   
   // Get sorted indices to remove (descending to preserve indices)
   const indicesToRemove = [...getSelectedRows(st)].sort((a, b) => b - a);
@@ -4993,7 +4993,7 @@ function showMultiDeleteDialog(st) {
     });
     wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
       showConfirmDialog(`Tem a certeza que pretende eliminar ${checkedIndices.length} registos?`, () => {
-        removeSelectedRows(st);
+        removeSelectedRows(st, true);
         showToast(`${checkedIndices.length} registos eliminados.`, 'success');
         if (closeHandler) closeHandler();
       }, { confirmText: 'Eliminar Todos' });
