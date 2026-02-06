@@ -4043,37 +4043,40 @@ function renderPagination(st = state) {
   
   const showMulticheck = st.rel_options.show_multicheck;
   paginationContainer.innerHTML = `
-    <div class="pagination-info">
-      <span class="pagination-total">${totalRecords} total</span>
-      ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
-      <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedRecords} selected</span>
+    <div class="pagination-left">
+      <div class="pagination-info">
+        <span class="pagination-total">${totalRecords} total</span>
+        ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
+        <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedRecords} checked</span>
+      </div>
+      <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
+        <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
+          <option value="" disabled selected>Checked Actions...</option>
+          ${buildMultiOptionsHtml(st, selectedRecords, filteredRecords)}
+        </select>
+      </div>
     </div>
-    <div class="pagination-size">
-      <label>Per page:</label>
-      <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
-        <option value="5" ${getPageSize(st) === 5 ? 'selected' : ''}>5</option>
-        <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10</option>
-        <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20</option>
-        <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50</option>
-        <option value="100" ${getPageSize(st) === 100 ? 'selected' : ''}>100</option>
-        <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''}>All</option>
-      </select>
-    </div>
-    <div class="pagination-nav">
-      <button class="btn-page btn-first" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>
-      <button class="btn-page btn-prev" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨</button>
-      <span class="page-indicator">
-        <input type="number" class="page-input" value="${currentPage}" min="${hasResults ? 1 : 0}" max="${totalPages}" ${!hasResults ? 'disabled' : ''} />
-        <span>of ${totalPages}</span>
-      </span>
-      <button class="btn-page btn-next" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
-      <button class="btn-page btn-last" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
-    </div>
-    <div class="pagination-actions${showMulticheck ? '' : ' hidden'}">
-      <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
-        <option value="" disabled selected>Checked Actions...</option>
-        ${buildMultiOptionsHtml(st, selectedRecords, filteredRecords)}
-      </select>
+    <div class="pagination-right">
+      <div class="pagination-size">
+        <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
+          <option value="5" ${getPageSize(st) === 5 ? 'selected' : ''}>5 per page</option>
+          <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10 per page</option>
+          <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20 per page</option>
+          <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50 per page</option>
+          <option value="100" ${getPageSize(st) === 100 ? 'selected' : ''}>100 per page</option>
+          <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''}>All</option>
+        </select>
+      </div>
+      <div class="pagination-nav">
+        <button class="btn-page btn-first" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>
+        <button class="btn-page btn-prev" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨</button>
+        <span class="page-indicator">
+          <input type="number" class="page-input" value="${currentPage}" min="${hasResults ? 1 : 0}" max="${totalPages}" ${!hasResults ? 'disabled' : ''} />
+          <span>of ${totalPages}</span>
+        </span>
+        <button class="btn-page btn-next" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
+        <button class="btn-page btn-last" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
+      </div>
     </div>
   `;
   
@@ -8292,34 +8295,39 @@ function renderCardsView(st = state) {
   const selectedRecords = getSelectedRows(st).size;
   const hasFilter = filteredRecords !== totalRecords;
   
-  let navHtml = '<div class="cards-info">';
+  const selectedCount = getSelectedRows(st).size;
+  const filteredCount = getSortedIndices(st).length;
+  const showMulticheck = st.rel_options.show_multicheck;
+
+  let navHtml = '<div class="cards-left">';
+  navHtml += '<div class="cards-info">';
   navHtml += '<span class="cards-info-total">' + totalRecords + ' total</span>';
   if (hasFilter) {
     navHtml += '<span class="cards-info-filtered">' + filteredRecords + ' filtered</span>';
   }
-  navHtml += '<span class="cards-info-selected">' + selectedRecords + ' selected</span>';
+  navHtml += '<span class="cards-info-selected' + (showMulticheck ? '' : ' hidden') + '">' + selectedRecords + ' checked</span>';
   navHtml += '</div>';
-  
+  navHtml += '<div class="cards-actions' + (showMulticheck ? '' : ' hidden') + '">';
+  navHtml += '<select class="cards-selection-actions">';
+  navHtml += '<option value="" disabled selected>Checked Actions...</option>';
+  navHtml += buildMultiOptionsHtml(st, selectedCount, filteredCount);
+  navHtml += '</select>';
+  navHtml += '</div>';
+  navHtml += '</div>';
+
+  navHtml += '<div class="cards-right">';
+  navHtml += '<select class="cards-page-size">';
+  pageSizeOptions.forEach(size => {
+    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(st) === size ? 'selected' : '') + '>' + size + ' per card</option>';
+  });
+  navHtml += '</select>';
   navHtml += '<div class="cards-pagination">';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (getCardsCurrentPage(st) <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (getCardsCurrentPage(st) <= 1 ? 'disabled' : '') + '>⟨</button>';
   navHtml += '<span>Page ' + getCardsCurrentPage(st) + ' of ' + totalPages + '</span>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (getCardsCurrentPage(st) >= totalPages ? 'disabled' : '') + '>⟩</button>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (getCardsCurrentPage(st) >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
-  navHtml += '<select class="cards-page-size">';
-  pageSizeOptions.forEach(size => {
-    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(st) === size ? 'selected' : '') + '>' + size + ' cards</option>';
-  });
-  navHtml += '</select>';
   navHtml += '</div>';
-  
-  const selectedCount = getSelectedRows(st).size;
-  const filteredCount = getSortedIndices(st).length;
-  navHtml += '<div class="cards-actions">';
-  navHtml += '<select class="cards-selection-actions">';
-  navHtml += '<option value="" disabled selected>Checked Actions...</option>';
-  navHtml += buildMultiOptionsHtml(st, selectedCount, filteredCount);
-  navHtml += '</select>';
   navHtml += '</div>';
   
   cardsNavigation.innerHTML = navHtml;
@@ -11835,7 +11843,7 @@ function renderPaginationWithState(st, paginationDiv) {
   
   paginationDiv.innerHTML = `
     <span class="pagination-info">${totalItems} rows</span>
-    <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedCount} selected</span>
+    <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedCount} checked</span>
     <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
       <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
       <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>

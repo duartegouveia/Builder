@@ -713,6 +713,19 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   flex-wrap: wrap;
 }
 
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pagination-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
 .pagination-info {
   display: flex;
   gap: var(--space-3);
@@ -735,7 +748,6 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 .pagination-size {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
 }
 
 .pagination-size select {
@@ -2736,7 +2748,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-3);
   background: var(--slate-50);
@@ -2745,6 +2757,19 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-radius: 0 0 var(--radius-md) var(--radius-md);
   font-size: 0.8125rem;
   flex-wrap: wrap;
+}
+
+.cards-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cards-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
 }
 
 .data-card {
@@ -2900,7 +2925,6 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-radius: var(--radius-sm);
   background: var(--white);
   font-size: 0.8125rem;
-  margin-left: var(--space-2);
 }
 
 .cards-actions {
