@@ -10,6 +10,39 @@ const openai = new OpenAI({
 
 export async function registerRoutes(httpServer, app) {
 
+  app.get("/api/docs", (req, res) => {
+    const docsDir = path.join(process.cwd(), "docs");
+    if (!fs.existsSync(docsDir)) {
+      return res.status(404).json({ error: "Docs folder not found" });
+    }
+    const files = fs.readdirSync(docsDir).filter(f => f.endsWith('.docx'));
+    res.json(files);
+  });
+
+  app.get("/api/docs/download/:filename", (req, res) => {
+    const filename = req.params.filename;
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return res.status(400).json({ error: "Invalid filename" });
+    }
+    const filePath = path.join(process.cwd(), "docs", filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.sendFile(filePath);
+  });
+
+  app.get("/api/docs/page", (req, res) => {
+    const docsDir = path.join(process.cwd(), "docs");
+    const files = fs.existsSync(docsDir) ? fs.readdirSync(docsDir).filter(f => f.endsWith('.docx')) : [];
+    const fileLinks = files.map(f => {
+      const label = f.replace('.docx', '').replace(/_/g, ' ');
+      return `<li style="margin:12px 0"><a href="/api/docs/download/${encodeURIComponent(f)}" style="color:#2E75B6;font-size:18px;text-decoration:none;border-bottom:1px solid #2E75B6">${label}</a> <span style="color:#888;font-size:14px">(.docx)</span></li>`;
+    }).join('');
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Documentação</title></head><body style="font-family:Calibri,sans-serif;max-width:600px;margin:60px auto;padding:20px"><h1 style="color:#1F4E79">Documentação do Relation Builder</h1><p style="color:#555">Clique para descarregar:</p><ul style="list-style:none;padding:0">${fileLinks}</ul><p style="margin-top:40px;color:#aaa;font-size:13px">Abra os ficheiros .docx no Word, LibreOffice ou Google Docs.</p></body></html>`);
+  });
+
   app.get("/api/export/templates", (req, res) => {
     try {
       const { name, format } = req.query;
