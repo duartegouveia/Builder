@@ -92,10 +92,15 @@ const DEFAULT_REL_OPTIONS = {
   label_field_top_down: true,
   OnDoubleClickAction: '',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
-  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
+  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
 };
+
+function logOperation(st, op) {
+  if (!st.relation.log) st.relation.log = [];
+  st.relation.log.push({ pot: 'relation_op', timestamp: new Date().toISOString(), ...op });
+}
 
 // Sample Products JSON for quick loading
 const PRODUCTS_JSON = {
@@ -420,6 +425,8 @@ const USERS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -451,6 +458,8 @@ const AUDITLOG_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -476,6 +485,8 @@ const COMPANY_TYPES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -511,6 +522,7 @@ const ALL_STOCKS_JSON = {
   },
   "rel_options": {
     "editable": false,
+    "show_stats": true,
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
   },
@@ -621,6 +633,8 @@ const DISTRIBUTOR_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -654,6 +668,8 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -679,6 +695,8 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -704,6 +722,8 @@ const STOCK_IMPORTS_STATES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -733,6 +753,8 @@ const STOCK_IMPORTS_TYPES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -761,6 +783,8 @@ const STOCK_IMPORTS_DETAILS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -800,6 +824,8 @@ const STOCK_IMPORT_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -831,6 +857,8 @@ const STOCK_WAREHOUSE_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -879,6 +907,8 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -924,6 +954,8 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -971,6 +1003,8 @@ const STOCK_INVENTORY_DETAIL_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1017,6 +1051,8 @@ const STOCK_INVENTORY_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1048,6 +1084,8 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1078,6 +1116,8 @@ const PRODUCT_CATALOG_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1104,6 +1144,8 @@ const PRICELIST_PARTNER_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1133,6 +1175,8 @@ const PRICELIST_PRODUCTS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1163,6 +1207,8 @@ const ALL_PRICELISTS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1192,6 +1238,8 @@ const PRODUCT_BRANDS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "ParentID",
     "hierarchy_root_value": "",
@@ -1231,6 +1279,8 @@ const PRODUCT_SPECIES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1260,6 +1310,8 @@ const PRODUCT_FAMILIES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "ParentID",
     "hierarchy_root_value": "",
@@ -1286,6 +1338,8 @@ const PRODUCT_CATEGORY_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1362,6 +1416,8 @@ const ALL_PRODUCTS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1399,6 +1455,8 @@ const ALL_COMPANIES_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
@@ -1431,7 +1489,8 @@ const DEFAULT_UI_STATE = {
   filteredIndices: [],
   sortedIndices: [],
   quickSearchText: '',     // Quick search filter text
-  currentHierarchyValue: null  // Current hierarchy level (null = use hierarchy_root_value from rel_options)
+  currentHierarchyValue: null,  // Current hierarchy level (null = use hierarchy_root_value from rel_options)
+  columns_visible: null
 };
 
 // Initialize uiState on a relation (ensures defaults exist)
@@ -1586,6 +1645,35 @@ function getSortedIndices(st) { return getUiState(st).sortedIndices; }
 function setSortedIndices(st, value) { getUiState(st).sortedIndices = value; }
 function getQuickSearchText(st) { return getUiState(st).quickSearchText || ''; }
 function setQuickSearchText(st, value) { getUiState(st).quickSearchText = value; }
+function getColumnsVisible(st) { return getUiState(st).columns_visible; }
+function setColumnsVisible(st, value) { getUiState(st).columns_visible = value; }
+
+function getVisibleColumnIndices(st) {
+  const cv = getColumnsVisible(st);
+  if (!cv || Object.keys(cv).length === 0) {
+    return st.columnNames.map((_, idx) => idx);
+  }
+  const indices = [];
+  for (const colName of Object.keys(cv)) {
+    const idx = st.columnNames.indexOf(colName);
+    if (idx !== -1) indices.push(idx);
+  }
+  return indices;
+}
+
+function getColumnWidth(st, colIdx) {
+  const cv = getColumnsVisible(st);
+  if (!cv) return 0;
+  const name = st.columnNames[colIdx];
+  return cv[name] || 0;
+}
+
+function isColumnVisible(st, colIdx) {
+  const cv = getColumnsVisible(st);
+  if (!cv || Object.keys(cv).length === 0) return true;
+  return st.columnNames[colIdx] in cv;
+}
+
 function getBinning(st) { return getUiState(st).binning || {}; }
 function setBinning(st, value) { getUiState(st).binning = value; }
 function getBinningConfig(st, colIdx) { return getBinning(st)[colIdx]; }
@@ -1952,6 +2040,7 @@ function parseRelation(jsonStr) {
     if (!data.options) {
       data.options = {};
     }
+    if (!data.log) data.log = [];
     
     return { success: true, data };
   } catch (e) {
@@ -4226,6 +4315,7 @@ function showImportDialog(st) {
       newItemsCount++;
     });
 
+    logOperation(st, { op: 'import', count: newItemsCount });
     showToast(`Importados ${newItemsCount} registos.`, 'success');
     renderTable(st);
     closeDialog();
@@ -4552,11 +4642,13 @@ function removeSelectedRows(st = state, skipConfirm = false) {
   // Get sorted indices to remove (descending to preserve indices)
   const indicesToRemove = [...getSelectedRows(st)].sort((a, b) => b - a);
   
+  const removedCount = indicesToRemove.length;
   indicesToRemove.forEach(idx => {
     st.relation.items.splice(idx, 1);
   });
   
   getSelectedRows(st).clear();
+  logOperation(st, { op: 'remove_selected', count: removedCount });
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
@@ -4573,6 +4665,7 @@ function removeUnselectedRows(st = state) {
   st.relation.items = selectedIndices.map(idx => st.relation.items[idx]);
   
   getSelectedRows(st).clear();
+  logOperation(st, { op: 'remove_unselected', removed: unselectedCount });
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
@@ -4910,6 +5003,7 @@ function buildAlwaysVisibleOptionsHtml(options) {
     'Import from File': { value: 'import-file', icon: '📥', label: 'Import from File' },
     'Export to file': { value: 'export-file', icon: '📤', label: 'Export to file' },
     'Advanced Search': { value: 'advanced-search', icon: '🔎', label: 'Advanced Search' },
+    'Remove Duplicates': { value: 'remove-duplicates', icon: '🔄', label: 'Remove Duplicates' },
     'Integrity Check': { value: 'integrity-check', icon: '🔍', label: 'Integrity Check' },
     'Output State': { value: 'output-state', icon: '📋', label: 'Output State' }
   };
@@ -4993,6 +5087,33 @@ function handleAlwaysVisibleAction(st, action) {
     return;
   }
 
+  // Remove Duplicates
+  if (action === 'remove-duplicates') {
+    const visibleColIndices = st.columnNames.map((_, idx) => idx).filter(idx => {
+      const type = st.columnTypes[idx];
+      if (type === 'id' && !st.rel_options.show_id) return false;
+      if (type === 'relation') return false;
+      return true;
+    });
+    const seen = new Set();
+    const uniqueItems = [];
+    st.relation.items.forEach(row => {
+      const key = visibleColIndices.map(i => JSON.stringify(row[i])).join('|');
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueItems.push(row);
+      }
+    });
+    const removedCount = st.relation.items.length - uniqueItems.length;
+    st.relation.items = uniqueItems;
+    setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+    setSortedIndices(st, [...getFilteredIndices(st)]);
+    logOperation(st, { op: 'remove_duplicates', removed: removedCount });
+    renderTable(st);
+    showToast(`Removed ${removedCount} duplicate row(s). ${uniqueItems.length} unique rows remain.`, removedCount > 0 ? 'success' : 'info');
+    return;
+  }
+
   // Integrity Check
   if (action === 'integrity-check') {
     performIntegrityCheck(st);
@@ -5007,7 +5128,22 @@ function handleAlwaysVisibleAction(st, action) {
 
 // Output relation state as JSON to console and elements with specific classes
 function outputRelationState(st) {
-  const jsonString = JSON.stringify(st.relation, null, 2);
+  const output = JSON.parse(JSON.stringify(st.relation));
+  if (output.rel_options) {
+    const filtered = {};
+    for (const [key, value] of Object.entries(output.rel_options)) {
+      if (key === 'uiState') continue;
+      if (JSON.stringify(value) !== JSON.stringify(DEFAULT_REL_OPTIONS[key])) {
+        filtered[key] = value;
+      }
+    }
+    if (Object.keys(filtered).length > 0) {
+      output.rel_options = filtered;
+    } else {
+      delete output.rel_options;
+    }
+  }
+  const jsonString = JSON.stringify(output, null, 2);
   outputToConsoleAndElements(jsonString);
 }
 
@@ -5905,6 +6041,7 @@ function showMergeDialog(st) {
       getSelectedRows(st).clear();
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
+      logOperation(st, { op: 'merge', merged_count: indicesToRemove.length });
       renderTable(st);
       outputRelationState(st);
       showToast(`Registos fundidos com sucesso.`, 'success');
@@ -6019,6 +6156,7 @@ function showMultiCopyDialog(st) {
       });
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
+      logOperation(st, { op: 'multi_copy', count: totalCopied });
       renderTable(st);
       outputRelationState(st);
       showToast(`${totalCopied} cópias geradas.`, 'success');
@@ -6061,6 +6199,7 @@ function showMultiDeleteDialog(st) {
     wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
       showConfirmDialog(`Tem a certeza que pretende eliminar ${checkedIndices.length} registos?`, () => {
         removeSelectedRows(st, true);
+        logOperation(st, { op: 'multi_delete', count: checkedIndices.length });
         showToast(`${checkedIndices.length} registos eliminados.`, 'success');
         if (closeHandler) closeHandler();
       }, { confirmText: 'Eliminar Todos' });
@@ -6259,14 +6398,21 @@ function renderTable(st = state) {
   indexTh.className = 'relation-th-index' + (st.rel_options.show_natural_order ? '' : ' hidden');
   headerRow.appendChild(indexTh);
   
-  // Data columns (skip grouped columns)
-  st.columnNames.forEach((name, idx) => {
+  // Data columns (use columns_visible order, skip grouped columns)
+  const visibleColIndices = getVisibleColumnIndices(st);
+  visibleColIndices.forEach((idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
-    
+    const name = st.columnNames[idx];
     const th = document.createElement('th');
     const type = st.columnTypes[idx];
     const isHiddenId = type === 'id' && !st.rel_options.show_id;
     th.className = 'relation-th-sortable' + (isHiddenId ? ' hidden' : '');
+    const colWidth = getColumnWidth(st, idx);
+    if (colWidth > 0) {
+      th.style.width = colWidth + 'px';
+      th.style.minWidth = colWidth + 'px';
+      th.style.maxWidth = colWidth + 'px';
+    }
     th.dataset.col = idx;
     const sortIndicator = getSortIndicator(idx, st);
     const filterActive = getFilters(st)[idx] ? ' filter-active' : '';
@@ -6302,6 +6448,11 @@ function renderTable(st = state) {
         ${colorScaleLegend}
       </div>
     `;
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'col-resize-handle';
+    resizeHandle.dataset.col = idx;
+    th.appendChild(resizeHandle);
+    th.style.position = 'relative';
     headerRow.appendChild(th);
   });
   
@@ -6353,8 +6504,8 @@ function renderTable(st = state) {
   parentIndexTh.className = 'relation-th-parent' + (st.rel_options.show_natural_order ? '' : ' hidden');
   parentRow.appendChild(parentIndexTh);
   
-  // Data columns - show parent item data or empty
-  st.columnNames.forEach((name, idx) => {
+  // Data columns - show parent item data or empty (use columns_visible order)
+  visibleColIndices.forEach((idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
     const th = document.createElement('th');
     const type = st.columnTypes[idx];
@@ -6425,14 +6576,22 @@ function renderTable(st = state) {
     indexTd.className = 'relation-td-index' + (st.rel_options.show_natural_order ? '' : ' hidden');
     tr.appendChild(indexTd);
     
-    // Data cells (skip grouped columns)
-    row.forEach((value, colIdx) => {
+    // Data cells (use columns_visible order, skip grouped columns)
+    visibleColIndices.forEach((colIdx) => {
       if (getGroupByColumns(st).includes(colIdx)) return;
-      
+      const value = row[colIdx];
       const td = document.createElement('td');
       const type = st.columnTypes[colIdx];
       const isHiddenId = type === 'id' && !st.rel_options.show_id;
       if (isHiddenId) td.classList.add('hidden');
+      const colWidth = getColumnWidth(st, colIdx);
+      if (colWidth > 0) {
+        td.style.width = colWidth + 'px';
+        td.style.minWidth = colWidth + 'px';
+        td.style.maxWidth = colWidth + 'px';
+        td.style.overflow = 'hidden';
+        td.style.textOverflow = 'ellipsis';
+      }
       td.appendChild(createInputForType(type, value, rowIdx, colIdx, st.rel_options.editable, st));
       applyConditionalFormatting(value, colIdx, td, rowIdx, st);
       tr.appendChild(td);
@@ -6492,7 +6651,7 @@ function renderTable(st = state) {
   if (!st.rel_options.show_natural_order) footerIndexTd.classList.add('hidden');
   footerRow.appendChild(footerIndexTd); // Index column
   
-  st.columnNames.forEach((_, colIdx) => {
+  visibleColIndices.forEach((colIdx) => {
     if (getGroupByColumns(st).includes(colIdx)) return;
     
     const td = document.createElement('td');
@@ -6722,6 +6881,99 @@ function attachTableEventListeners(st = state, container = null) {
     });
   }
   
+  // Column resize handles
+  tableContainer.querySelectorAll('.col-resize-handle').forEach(handle => {
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const colIdx = parseInt(handle.dataset.col);
+      const th = handle.closest('th');
+      const startX = e.clientX;
+      const startWidth = th.offsetWidth;
+      handle.classList.add('resizing');
+      
+      const onMouseMove = (moveE) => {
+        const newWidth = Math.max(30, startWidth + (moveE.clientX - startX));
+        th.style.width = newWidth + 'px';
+        th.style.minWidth = newWidth + 'px';
+        th.style.maxWidth = newWidth + 'px';
+      };
+      
+      const onMouseUp = (upE) => {
+        handle.classList.remove('resizing');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        const finalWidth = th.offsetWidth;
+        const cv = getColumnsVisible(st) || {};
+        const newCV = Object.keys(cv).length > 0 ? { ...cv } : {};
+        if (Object.keys(newCV).length === 0) {
+          st.columnNames.forEach((n) => { newCV[n] = 0; });
+        }
+        newCV[st.columnNames[colIdx]] = finalWidth;
+        setColumnsVisible(st, newCV);
+        logOperation(st, { op: 'resize_column', column: st.columnNames[colIdx], width: finalWidth });
+      };
+      
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  });
+
+  // Column drag & drop reorder
+  const headerThs = tableContainer.querySelectorAll('th.relation-th-sortable');
+  headerThs.forEach(th => {
+    th.setAttribute('draggable', 'true');
+    th.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', th.dataset.col);
+      e.dataTransfer.effectAllowed = 'move';
+      th.classList.add('th-dragging');
+    });
+    th.addEventListener('dragend', () => {
+      th.classList.remove('th-dragging');
+      headerThs.forEach(t => t.classList.remove('th-drag-over'));
+    });
+    th.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      th.classList.add('th-drag-over');
+    });
+    th.addEventListener('dragleave', () => {
+      th.classList.remove('th-drag-over');
+    });
+    th.addEventListener('drop', (e) => {
+      e.preventDefault();
+      headerThs.forEach(t => t.classList.remove('th-drag-over'));
+      const fromColIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      const toColIdx = parseInt(th.dataset.col);
+      if (fromColIdx === toColIdx) return;
+      
+      const cv = getColumnsVisible(st) || {};
+      let orderedNames;
+      if (Object.keys(cv).length > 0) {
+        orderedNames = Object.keys(cv);
+      } else {
+        orderedNames = [...st.columnNames];
+      }
+      
+      const fromName = st.columnNames[fromColIdx];
+      const toName = st.columnNames[toColIdx];
+      const fromPos = orderedNames.indexOf(fromName);
+      const toPos = orderedNames.indexOf(toName);
+      
+      if (fromPos === -1 || toPos === -1) return;
+      
+      orderedNames.splice(fromPos, 1);
+      orderedNames.splice(toPos, 0, fromName);
+      
+      const newCV = {};
+      orderedNames.forEach(name => {
+        newCV[name] = cv[name] || 0;
+      });
+      setColumnsVisible(st, newCV);
+      logOperation(st, { op: 'reorder_column', column: fromName, after: toName });
+      renderTable(st);
+    });
+  });
+
   // Double-click on row - navigate into children (hierarchy drill-down)
   if (shouldShowHierarchy(st)) {
     tableContainer.querySelectorAll('tbody tr').forEach(tr => {
@@ -6811,6 +7063,15 @@ function adjustMenuPosition(menu) {
   }
 }
 
+function countSyllables(word) {
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (word.length <= 2) return 1;
+  word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+  word = word.replace(/^y/, '');
+  const matches = word.match(/[aeiouy]{1,2}/g);
+  return matches ? matches.length : 1;
+}
+
 function showColumnMenu(colIdx, x, y, st = state) {
   closeAllMenus();
   
@@ -6876,8 +7137,8 @@ function showColumnMenu(colIdx, x, y, st = state) {
               <input type="number" class="filter-mult-input" value="1.5" min="0.1" step="0.1" data-testid="input-outlier-mult">
               <span class="filter-arrow-symbol">→</span>
               <select class="filter-outlier-mode" data-testid="select-outlier-mode">
-                <option value="keep">Keep outliers</option>
-                <option value="remove">Remove outliers</option>
+                <option value="keep">Choose Outliers</option>
+                <option value="remove">Choose Not Outliers</option>
               </select>
               <button class="btn-apply-filter" data-action="apply-outliers" data-testid="button-apply-outliers">Apply</button>
             </div>
@@ -6888,7 +7149,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         </div>
       </div>
       <div class="accordion-section" data-section="binning">
-        <div class="accordion-header">Binning <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">Binning / Bucketing <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           ${type === 'int' || type === 'float' ? `
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
@@ -6906,6 +7167,11 @@ function showColumnMenu(colIdx, x, y, st = state) {
             <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">Create _bin Column</button>
           </div>
           ` : ''}
+          <div class="column-menu-separator"></div>
+          <button class="column-menu-item" data-action="row-number">Row Number</button>
+          <button class="column-menu-item" data-action="rank">Rank</button>
+          <button class="column-menu-item" data-action="dense-rank">Dense Rank</button>
+          <div class="column-menu-separator"></div>
           <div class="column-menu-item-inline">
             <button class="btn-apply-filter color-binning-btn" data-action="apply-color-binning" data-testid="button-apply-color-binning" data-col="${colIdx}">Create from Colors</button>
           </div>
@@ -6923,17 +7189,66 @@ function showColumnMenu(colIdx, x, y, st = state) {
       <div class="accordion-section" data-section="relation">
         <div class="accordion-header">Relation <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="expand-relation">⊗ Cartesian Product</button>
+          <button class="column-menu-item" data-action="expand-relation-this">⊗ Cartesian Product (THIS)</button>
+          <button class="column-menu-item" data-action="expand-relation">⊗ Cartesian Product (ALL)</button>
         </div>
       </div>
       ` : ''}
-      <div class="accordion-section" data-section="selection">
-        <div class="accordion-header">Column Selection <span class="accordion-arrow">▶</span></div>
+      <div class="accordion-section" data-section="column">
+        <div class="accordion-header">Column <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
+          <button class="column-menu-item" data-action="show-hide-columns">⚙ Show/Hide Columns...</button>
+          <button class="column-menu-item" data-action="hide-column">👁‍🗨 Hide Column</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="hide-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>👁‍🗨 Hide Selected Columns (${getSelectedColumns(st).size})</button>
+          <div class="column-menu-separator"></div>
           <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
           <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
           <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
           <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Clear Selection</button>
+          ${(type === 'date' || type === 'datetime') ? `
+          <div class="column-menu-separator"></div>
+          <div class="column-menu-sublabel">Derived Columns (Date)</div>
+          <button class="column-menu-item" data-action="derive-year">Extract Year → ${name}_year</button>
+          <button class="column-menu-item" data-action="derive-month">Extract Month (1-12) → ${name}_month</button>
+          <button class="column-menu-item" data-action="derive-day">Extract Day → ${name}_day</button>
+          <button class="column-menu-item" data-action="derive-dayofweek">Extract Day of Week (1-7) → ${name}_dayofweek</button>
+          <button class="column-menu-item" data-action="derive-weekofyear">Extract Week of Year → ${name}_weekofyear</button>
+          <button class="column-menu-item" data-action="derive-quarter">Extract Quarter (1-4) → ${name}_quarter</button>
+          <button class="column-menu-item" data-action="derive-semester">Extract Semester (1-2) → ${name}_semester</button>
+          ` : ''}
+          ${(type === 'time' || type === 'datetime') ? `
+          <div class="column-menu-separator"></div>
+          <div class="column-menu-sublabel">Derived Columns (Time)</div>
+          <button class="column-menu-item" data-action="derive-hour">Extract Hour → ${name}_hour</button>
+          <button class="column-menu-item" data-action="derive-minute">Extract Minute → ${name}_minute</button>
+          <button class="column-menu-item" data-action="derive-second">Extract Second → ${name}_second</button>
+          <button class="column-menu-item" data-action="derive-ampm">Extract AM/PM → ${name}_ampm</button>
+          <button class="column-menu-item" data-action="derive-hour12">Extract Hour (12h) → ${name}_hour12</button>
+          ` : ''}
+          ${type === 'float' ? `
+          <div class="column-menu-separator"></div>
+          <div class="column-menu-sublabel">Derived Columns (Float)</div>
+          <div class="column-menu-item-inline">
+            <span class="filter-label">Round to</span>
+            <input type="number" class="filter-n-input derive-round-n" value="2" min="0" max="10" step="1">
+            <span class="filter-label">decimals</span>
+            <button class="btn-apply-filter" data-action="derive-round">Create</button>
+          </div>
+          ` : ''}
+          ${(type === 'string' || type === 'textarea' || type === 'multilinestring') ? `
+          <div class="column-menu-separator"></div>
+          <div class="column-menu-sublabel">Derived Columns (Text)</div>
+          <button class="column-menu-item" data-action="derive-length">Length (chars) → ${name}_length</button>
+          <button class="column-menu-item" data-action="derive-bytes">Length (bytes) → ${name}_bytes</button>
+          <button class="column-menu-item" data-action="derive-flesch-ease">Flesch Reading Ease (0-100) → ${name}_flesch_ease <span class="info-badge" data-tooltip="Flesch Reading Ease scores text readability on a 0-100 scale. Higher scores indicate easier reading: 90-100 = 5th grader, 60-70 = 8th-9th grader, 30-50 = college level, 0-30 = professional/academic. Based on average sentence length and syllable count." title="Flesch Reading Ease scores text readability on a 0-100 scale. Higher scores indicate easier reading: 90-100 = 5th grader, 60-70 = 8th-9th grader, 30-50 = college level, 0-30 = professional/academic.">ⓘ</span></button>
+          <button class="column-menu-item" data-action="derive-flesch-kincaid">Flesch-Kincaid Grade Level → ${name}_flesch_kincaid <span class="info-badge" data-tooltip="Flesch-Kincaid Grade Level indicates the U.S. school grade needed to understand the text. A score of 8.0 means an 8th grader can understand it. Lower scores mean easier text. Based on average sentence length and syllable count." title="Flesch-Kincaid Grade Level indicates the U.S. school grade needed to understand the text. A score of 8.0 means an 8th grader can understand it. Lower scores mean easier text.">ⓘ</span></button>
+          ${type === 'textarea' || type === 'multilinestring' ? `
+          <button class="column-menu-item" data-action="derive-sentences">Sentence Count → ${name}_sentences</button>
+          ` : ''}
+          ` : ''}
+          <div class="column-menu-separator"></div>
+          <button class="column-menu-item" data-action="remove-column">Remove Column</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(st).size})</button>
         </div>
       </div>
       <div class="accordion-section" data-section="formatting">
@@ -6943,13 +7258,6 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
           <button class="column-menu-item" data-action="format-active-filter">Color current results...</button>
           <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
-        </div>
-      </div>
-      <div class="accordion-section" data-section="remove">
-        <div class="accordion-header">Remove <span class="accordion-arrow">▶</span></div>
-        <div class="accordion-content">
-          <button class="column-menu-item" data-action="remove-column">Remove Column</button>
-          <button class="column-menu-item ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(st).size})</button>
         </div>
       </div>
     </div>
@@ -7072,16 +7380,160 @@ function showColumnMenu(colIdx, x, y, st = state) {
   }, { once: false });
 }
 
+function showColumnsVisibilityDialog(st) {
+  closeAllMenus();
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.style.zIndex = '100001';
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'confirm-dialog';
+  dialog.style.maxWidth = '500px';
+  dialog.style.maxHeight = '80vh';
+  
+  const currentCV = getColumnsVisible(st);
+  const allCols = st.columnNames.map((name, idx) => ({
+    name,
+    type: st.columnTypes[idx],
+    idx,
+    visible: isColumnVisible(st, idx),
+    width: getColumnWidth(st, idx)
+  }));
+  
+  const orderedCols = [];
+  if (currentCV && Object.keys(currentCV).length > 0) {
+    for (const colName of Object.keys(currentCV)) {
+      const col = allCols.find(c => c.name === colName);
+      if (col) orderedCols.push(col);
+    }
+    allCols.forEach(col => {
+      if (!orderedCols.includes(col)) orderedCols.push(col);
+    });
+  } else {
+    orderedCols.push(...allCols);
+  }
+  
+  let listHtml = '';
+  orderedCols.forEach((col, displayIdx) => {
+    listHtml += `
+      <div class="cv-row" draggable="true" data-col-name="${col.name}" data-col-idx="${col.idx}">
+        <span class="cv-drag-handle">☰</span>
+        <label class="cv-checkbox-label">
+          <input type="checkbox" class="cv-checkbox" ${col.visible ? 'checked' : ''} data-col-name="${col.name}">
+          <span>${col.name} <small>(${col.type})</small></span>
+        </label>
+        <input type="number" class="cv-width-input" value="${col.width}" min="0" max="1000" step="10" data-col-name="${col.name}" title="Width in px (0 = auto)">
+      </div>`;
+  });
+  
+  dialog.innerHTML = `
+    <div class="confirm-dialog-content">
+      <h3>Show/Hide Columns</h3>
+      <div class="cv-actions-bar">
+        <button class="btn btn-sm cv-select-all">Select All</button>
+        <button class="btn btn-sm cv-deselect-all">Deselect All</button>
+      </div>
+      <div class="cv-columns-list">${listHtml}</div>
+    </div>
+    <div class="confirm-dialog-buttons">
+      <button class="btn btn-outline cv-cancel">Cancel</button>
+      <button class="btn btn-primary cv-apply">Apply</button>
+    </div>
+  `;
+  
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  
+  const list = dialog.querySelector('.cv-columns-list');
+  let draggedRow = null;
+  
+  list.querySelectorAll('.cv-row').forEach(row => {
+    row.addEventListener('dragstart', (e) => {
+      draggedRow = row;
+      row.classList.add('cv-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('cv-dragging');
+      draggedRow = null;
+      list.querySelectorAll('.cv-row').forEach(r => r.classList.remove('cv-drag-over'));
+    });
+    row.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (draggedRow && draggedRow !== row) {
+        row.classList.add('cv-drag-over');
+      }
+    });
+    row.addEventListener('dragleave', () => {
+      row.classList.remove('cv-drag-over');
+    });
+    row.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (draggedRow && draggedRow !== row) {
+        const allRows = [...list.querySelectorAll('.cv-row')];
+        const dragIdx = allRows.indexOf(draggedRow);
+        const dropIdx = allRows.indexOf(row);
+        if (dragIdx < dropIdx) {
+          row.after(draggedRow);
+        } else {
+          row.before(draggedRow);
+        }
+      }
+      list.querySelectorAll('.cv-row').forEach(r => r.classList.remove('cv-drag-over'));
+    });
+  });
+  
+  dialog.querySelector('.cv-select-all').addEventListener('click', () => {
+    dialog.querySelectorAll('.cv-checkbox').forEach(cb => cb.checked = true);
+  });
+  dialog.querySelector('.cv-deselect-all').addEventListener('click', () => {
+    dialog.querySelectorAll('.cv-checkbox').forEach(cb => cb.checked = false);
+  });
+  
+  dialog.querySelector('.cv-cancel').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  
+  dialog.querySelector('.cv-apply').addEventListener('click', () => {
+    const rows = dialog.querySelectorAll('.cv-row');
+    const newCV = {};
+    let anyChecked = false;
+    rows.forEach(row => {
+      const colName = row.dataset.colName;
+      const checkbox = row.querySelector('.cv-checkbox');
+      const widthInput = row.querySelector('.cv-width-input');
+      if (checkbox.checked) {
+        anyChecked = true;
+        newCV[colName] = parseInt(widthInput.value) || 0;
+      }
+    });
+    if (!anyChecked) {
+      setColumnsVisible(st, null);
+    } else if (Object.keys(newCV).length === st.columnNames.length) {
+      const allDefault = st.columnNames.every((name, i) => Object.keys(newCV)[i] === name) &&
+                          Object.values(newCV).every(w => w === 0);
+      setColumnsVisible(st, allDefault ? null : newCV);
+    } else {
+      setColumnsVisible(st, newCV);
+    }
+    logOperation(st, { op: 'columns_visible', columns_visible: getColumnsVisible(st) });
+    overlay.remove();
+    renderTable(st);
+  });
+}
+
 function handleColumnMenuAction(colIdx, action, st = state) {
   switch (action) {
     case 'sort-asc':
       setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
+      logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'asc' });
       break;
     case 'sort-desc':
       setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
+      logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'desc' });
       break;
     case 'sort-clear':
       setSortCriteria(st, getSortCriteria(st).filter(c => c.column !== colIdx));
+      logOperation(st, { op: 'sort_clear', column: st.columnNames[colIdx] });
       break;
     case 'filter-values':
       showFilterValuesDialog(colIdx, st);
@@ -7094,18 +7546,22 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       return;
     case 'filter-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
+      logOperation(st, { op: 'filter_null', column: st.columnNames[colIdx] });
       break;
     case 'filter-not-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
+      logOperation(st, { op: 'filter_not_null', column: st.columnNames[colIdx] });
       break;
     case 'filter-clear':
       delete getFilters(st)[colIdx];
+      logOperation(st, { op: 'filter_clear', column: st.columnNames[colIdx] });
       break;
     case 'format-databar':
       showDataBarColorDialog(colIdx, st);
       return;
     case 'format-color-scale':
       applyColorScale(colIdx, st);
+      logOperation(st, { op: 'format_color_scale', column: st.columnNames[colIdx] });
       break;
     case 'format-clear':
       delete getFormatting(st)[colIdx];
@@ -7114,17 +7570,363 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         const colName = st.columnNames[colIdx];
         delete st.relation.colored_items[colName];
       }
+      logOperation(st, { op: 'format_clear', column: st.columnNames[colIdx] });
       break;
     case 'toggle-group':
       toggleGroupBy(colIdx, st);
+      logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx] });
       return;
     case 'clear-groups':
       setGroupByColumns(st, []);
       setGroupBySelectedValues(st, {});
+      logOperation(st, { op: 'clear_groups' });
       break;
     case 'expand-relation':
       expandRelationColumn(colIdx, st);
+      logOperation(st, { op: 'expand_relation', column: st.columnNames[colIdx] });
       return;
+    case 'expand-relation-this':
+      expandRelationColumnThis(colIdx, st);
+      logOperation(st, { op: 'expand_relation_this', column: st.columnNames[colIdx] });
+      return;
+    case 'row-number': {
+      let newColName = 'row_number';
+      let counter = 2;
+      while (st.columnNames.includes(newColName)) {
+        newColName = 'row_number_' + counter++;
+      }
+      st.relation.columns[newColName] = 'int';
+      st.columnNames.push(newColName);
+      st.columnTypes.push('int');
+      const sortedIndices = getSortedIndices(st);
+      st.relation.items.forEach(row => row.push(null));
+      sortedIndices.forEach((itemIdx, sortPos) => {
+        st.relation.items[itemIdx][st.columnNames.length - 1] = sortPos + 1;
+      });
+      setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
+      setSortedIndices(st, [...getFilteredIndices(st)]);
+      logOperation(st, { op: 'row_number', column_created: newColName });
+      closeAllMenus();
+      renderTable(st);
+      break;
+    }
+    case 'rank': {
+      const name = st.columnNames[colIdx];
+      const rankColName = name + '_rank';
+      let rankColIdx = st.columnNames.indexOf(rankColName);
+      if (rankColIdx === -1) {
+        st.relation.columns[rankColName] = 'int';
+        st.columnNames.push(rankColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        rankColIdx = st.columnNames.length - 1;
+      }
+      const itemsWithIdx = st.relation.items.map((row, idx) => ({ idx, val: row[colIdx] }));
+      itemsWithIdx.sort((a, b) => {
+        if (a.val === null && b.val === null) return 0;
+        if (a.val === null) return 1;
+        if (b.val === null) return -1;
+        if (typeof a.val === 'string') return a.val.localeCompare(b.val);
+        return a.val - b.val;
+      });
+      let currentRank = 1;
+      for (let i = 0; i < itemsWithIdx.length; i++) {
+        if (i > 0 && itemsWithIdx[i].val !== itemsWithIdx[i - 1].val) {
+          currentRank = i + 1;
+        }
+        st.relation.items[itemsWithIdx[i].idx][rankColIdx] = itemsWithIdx[i].val === null ? null : currentRank;
+      }
+      logOperation(st, { op: 'rank', column: name, column_created: rankColName });
+      closeAllMenus();
+      renderTable(st);
+      break;
+    }
+    case 'dense-rank': {
+      const name = st.columnNames[colIdx];
+      const denseColName = name + '_dense_rank';
+      let denseColIdx = st.columnNames.indexOf(denseColName);
+      if (denseColIdx === -1) {
+        st.relation.columns[denseColName] = 'int';
+        st.columnNames.push(denseColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        denseColIdx = st.columnNames.length - 1;
+      }
+      const denseItems = st.relation.items.map((row, idx) => ({ idx, val: row[colIdx] }));
+      denseItems.sort((a, b) => {
+        if (a.val === null && b.val === null) return 0;
+        if (a.val === null) return 1;
+        if (b.val === null) return -1;
+        if (typeof a.val === 'string') return a.val.localeCompare(b.val);
+        return a.val - b.val;
+      });
+      let denseRank = 1;
+      for (let i = 0; i < denseItems.length; i++) {
+        if (i > 0 && denseItems[i].val !== denseItems[i - 1].val) {
+          denseRank++;
+        }
+        st.relation.items[denseItems[i].idx][denseColIdx] = denseItems[i].val === null ? null : denseRank;
+      }
+      logOperation(st, { op: 'dense_rank', column: name, column_created: denseColName });
+      closeAllMenus();
+      renderTable(st);
+      break;
+    }
+    // === Derived Columns: Date ===
+    case 'derive-year':
+    case 'derive-month':
+    case 'derive-day':
+    case 'derive-dayofweek':
+    case 'derive-weekofyear':
+    case 'derive-quarter':
+    case 'derive-semester': {
+      const deriveName = action.replace('derive-', '');
+      const deriveColName = st.columnNames[colIdx] + '_' + deriveName;
+      let deriveColIdx = st.columnNames.indexOf(deriveColName);
+      const isNew = deriveColIdx === -1;
+      if (isNew) {
+        st.relation.columns[deriveColName] = 'int';
+        st.columnNames.push(deriveColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        deriveColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined || val === '') {
+          row[deriveColIdx] = null;
+          return;
+        }
+        const d = new Date(val);
+        if (isNaN(d.getTime())) { row[deriveColIdx] = null; return; }
+        switch (deriveName) {
+          case 'year': row[deriveColIdx] = d.getFullYear(); break;
+          case 'month': row[deriveColIdx] = d.getMonth() + 1; break;
+          case 'day': row[deriveColIdx] = d.getDate(); break;
+          case 'dayofweek': row[deriveColIdx] = d.getDay() + 1; break; // Sunday=1
+          case 'weekofyear': {
+            const oneJan = new Date(d.getFullYear(), 0, 1);
+            const days = Math.floor((d - oneJan) / 86400000);
+            row[deriveColIdx] = Math.ceil((days + oneJan.getDay() + 1) / 7);
+            break;
+          }
+          case 'quarter': row[deriveColIdx] = Math.ceil((d.getMonth() + 1) / 3); break;
+          case 'semester': row[deriveColIdx] = d.getMonth() < 6 ? 1 : 2; break;
+        }
+      });
+      logOperation(st, { op: 'derive', type: deriveName, source_column: st.columnNames[colIdx], column_created: deriveColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    // === Derived Columns: Time ===
+    case 'derive-hour':
+    case 'derive-minute':
+    case 'derive-second':
+    case 'derive-hour12': {
+      const tDeriveName = action.replace('derive-', '');
+      const tColName = st.columnNames[colIdx] + '_' + tDeriveName;
+      let tColIdx = st.columnNames.indexOf(tColName);
+      if (tColIdx === -1) {
+        st.relation.columns[tColName] = 'int';
+        st.columnNames.push(tColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        tColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined || val === '') { row[tColIdx] = null; return; }
+        let hours, minutes, seconds;
+        if (typeof val === 'string' && val.includes(':')) {
+          const parts = val.split(':');
+          hours = parseInt(parts[0]) || 0;
+          minutes = parseInt(parts[1]) || 0;
+          seconds = parseInt(parts[2]) || 0;
+        } else {
+          const d = new Date(val);
+          if (isNaN(d.getTime())) { row[tColIdx] = null; return; }
+          hours = d.getHours();
+          minutes = d.getMinutes();
+          seconds = d.getSeconds();
+        }
+        switch (tDeriveName) {
+          case 'hour': row[tColIdx] = hours; break;
+          case 'minute': row[tColIdx] = minutes; break;
+          case 'second': row[tColIdx] = seconds; break;
+          case 'hour12': row[tColIdx] = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours); break;
+        }
+      });
+      logOperation(st, { op: 'derive', type: tDeriveName, source_column: st.columnNames[colIdx], column_created: tColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    case 'derive-ampm': {
+      const ampmColName = st.columnNames[colIdx] + '_ampm';
+      let ampmColIdx = st.columnNames.indexOf(ampmColName);
+      if (ampmColIdx === -1) {
+        st.relation.columns[ampmColName] = 'string';
+        st.columnNames.push(ampmColName);
+        st.columnTypes.push('string');
+        st.relation.items.forEach(row => row.push(null));
+        ampmColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined || val === '') { row[ampmColIdx] = null; return; }
+        let hours;
+        if (typeof val === 'string' && val.includes(':')) {
+          hours = parseInt(val.split(':')[0]) || 0;
+        } else {
+          const d = new Date(val);
+          if (isNaN(d.getTime())) { row[ampmColIdx] = null; return; }
+          hours = d.getHours();
+        }
+        row[ampmColIdx] = hours < 12 ? 'am' : 'pm';
+      });
+      logOperation(st, { op: 'derive', type: 'ampm', source_column: st.columnNames[colIdx], column_created: ampmColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    // === Derived Columns: Float rounding ===
+    case 'derive-round': {
+      const menu = document.querySelector('.column-menu');
+      const nInput = menu?.querySelector('.derive-round-n');
+      const n = nInput ? parseInt(nInput.value) : 2;
+      const roundColName = st.columnNames[colIdx] + '_round' + n;
+      let roundColIdx = st.columnNames.indexOf(roundColName);
+      if (roundColIdx === -1) {
+        st.relation.columns[roundColName] = 'float';
+        st.columnNames.push(roundColName);
+        st.columnTypes.push('float');
+        st.relation.items.forEach(row => row.push(null));
+        roundColIdx = st.columnNames.length - 1;
+      }
+      const factor = Math.pow(10, n);
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined) { row[roundColIdx] = null; return; }
+        const num = parseFloat(val);
+        row[roundColIdx] = isNaN(num) ? null : Math.round(num * factor) / factor;
+      });
+      logOperation(st, { op: 'derive', type: 'round', source_column: st.columnNames[colIdx], column_created: roundColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    // === Derived Columns: String metrics ===
+    case 'derive-length': {
+      const lenColName = st.columnNames[colIdx] + '_length';
+      let lenColIdx = st.columnNames.indexOf(lenColName);
+      if (lenColIdx === -1) {
+        st.relation.columns[lenColName] = 'int';
+        st.columnNames.push(lenColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        lenColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        row[lenColIdx] = val === null || val === undefined ? null : [...String(val)].length;
+      });
+      logOperation(st, { op: 'derive', type: 'length', source_column: st.columnNames[colIdx], column_created: lenColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    case 'derive-bytes': {
+      const bytesColName = st.columnNames[colIdx] + '_bytes';
+      let bytesColIdx = st.columnNames.indexOf(bytesColName);
+      if (bytesColIdx === -1) {
+        st.relation.columns[bytesColName] = 'int';
+        st.columnNames.push(bytesColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        bytesColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        row[bytesColIdx] = val === null || val === undefined ? null : new TextEncoder().encode(String(val)).length;
+      });
+      logOperation(st, { op: 'derive', type: 'bytes', source_column: st.columnNames[colIdx], column_created: bytesColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    case 'derive-flesch-ease': {
+      const feColName = st.columnNames[colIdx] + '_flesch_ease';
+      let feColIdx = st.columnNames.indexOf(feColName);
+      if (feColIdx === -1) {
+        st.relation.columns[feColName] = 'float';
+        st.columnNames.push(feColName);
+        st.columnTypes.push('float');
+        st.relation.items.forEach(row => row.push(null));
+        feColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined || String(val).trim() === '') { row[feColIdx] = null; return; }
+        const text = String(val);
+        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+        const words = text.split(/\s+/).filter(w => w.length > 0);
+        const totalWords = words.length || 1;
+        const totalSyllables = words.reduce((sum, w) => sum + countSyllables(w), 0);
+        const score = 206.835 - 1.015 * (totalWords / sentences) - 84.6 * (totalSyllables / totalWords);
+        row[feColIdx] = Math.round(score * 100) / 100;
+      });
+      logOperation(st, { op: 'derive', type: 'flesch_ease', source_column: st.columnNames[colIdx], column_created: feColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    case 'derive-flesch-kincaid': {
+      const fkColName = st.columnNames[colIdx] + '_flesch_kincaid';
+      let fkColIdx = st.columnNames.indexOf(fkColName);
+      if (fkColIdx === -1) {
+        st.relation.columns[fkColName] = 'float';
+        st.columnNames.push(fkColName);
+        st.columnTypes.push('float');
+        st.relation.items.forEach(row => row.push(null));
+        fkColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined || String(val).trim() === '') { row[fkColIdx] = null; return; }
+        const text = String(val);
+        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+        const words = text.split(/\s+/).filter(w => w.length > 0);
+        const totalWords = words.length || 1;
+        const totalSyllables = words.reduce((sum, w) => sum + countSyllables(w), 0);
+        const score = 0.39 * (totalWords / sentences) + 11.8 * (totalSyllables / totalWords) - 15.59;
+        row[fkColIdx] = Math.round(score * 100) / 100;
+      });
+      logOperation(st, { op: 'derive', type: 'flesch_kincaid', source_column: st.columnNames[colIdx], column_created: fkColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    case 'derive-sentences': {
+      const sentColName = st.columnNames[colIdx] + '_sentences';
+      let sentColIdx = st.columnNames.indexOf(sentColName);
+      if (sentColIdx === -1) {
+        st.relation.columns[sentColName] = 'int';
+        st.columnNames.push(sentColName);
+        st.columnTypes.push('int');
+        st.relation.items.forEach(row => row.push(null));
+        sentColIdx = st.columnNames.length - 1;
+      }
+      st.relation.items.forEach(row => {
+        const val = row[colIdx];
+        if (val === null || val === undefined || String(val).trim() === '') { row[sentColIdx] = null; return; }
+        row[sentColIdx] = String(val).split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+      });
+      logOperation(st, { op: 'derive', type: 'sentences', source_column: st.columnNames[colIdx], column_created: sentColName });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
     case 'toggle-select-col':
       if (getSelectedColumns(st).has(colIdx)) {
         getSelectedColumns(st).delete(colIdx);
@@ -7143,13 +7945,53 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'clear-col-selection':
       getSelectedColumns(st).clear();
       break;
+    case 'show-hide-columns':
+      showColumnsVisibilityDialog(st);
+      return;
+    case 'hide-column': {
+      const cv = getColumnsVisible(st) || {};
+      const newCV = {};
+      if (Object.keys(cv).length === 0) {
+        st.columnNames.forEach((n, i) => { if (i !== colIdx) newCV[n] = 0; });
+      } else {
+        for (const [n, w] of Object.entries(cv)) {
+          if (n !== st.columnNames[colIdx]) newCV[n] = w;
+        }
+      }
+      setColumnsVisible(st, Object.keys(newCV).length > 0 ? newCV : null);
+      logOperation(st, { op: 'hide_column', column: st.columnNames[colIdx] });
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
+    case 'hide-selected-cols': {
+      const cv = getColumnsVisible(st) || {};
+      const selectedCols = getSelectedColumns(st);
+      const selectedNames = new Set([...selectedCols].map(i => st.columnNames[i]));
+      const newCV = {};
+      if (Object.keys(cv).length === 0) {
+        st.columnNames.forEach((n, i) => { if (!selectedNames.has(n)) newCV[n] = 0; });
+      } else {
+        for (const [n, w] of Object.entries(cv)) {
+          if (!selectedNames.has(n)) newCV[n] = w;
+        }
+      }
+      setColumnsVisible(st, Object.keys(newCV).length > 0 ? newCV : null);
+      logOperation(st, { op: 'hide_selected_columns', columns: [...selectedNames] });
+      getSelectedColumns(st).clear();
+      closeAllMenus();
+      renderTable(st);
+      return;
+    }
     case 'format-active-filter':
       showActiveFilterColorDialog(colIdx, st);
       return;
     case 'remove-column':
+      logOperation(st, { op: 'remove_column', column: st.columnNames[colIdx] });
       removeColumn(colIdx, st);
       break;
     case 'remove-selected-cols':
+      logOperation(st, { op: 'remove_selected_columns' });
       removeSelectedColumns(st);
       break;
   }
@@ -8664,6 +9506,7 @@ function showDataBarColorDialog(colIdx, st = state) {
   dialog.querySelectorAll('.color-swatch').forEach(swatch => {
     swatch.addEventListener('click', () => {
       getFormatting(st)[colIdx] = [{ condition: {}, style: { dataBar: swatch.dataset.color } }];
+      logOperation(st, { op: 'format_databar', column: st.columnNames[colIdx], color: swatch.dataset.color });
       dialog.remove();
       renderTable(st);
     });
@@ -8896,6 +9739,75 @@ function expandRelationColumn(colIdx, st = state) {
   renderTable(st);
 }
 
+function expandRelationColumnThis(colIdx, st = state) {
+  if (st.columnTypes[colIdx] !== 'relation') return;
+
+  const nestedColumns = {};
+  st.relation.items.forEach(row => {
+    const nestedRelation = row[colIdx];
+    if (nestedRelation && nestedRelation.columns) {
+      Object.assign(nestedColumns, nestedRelation.columns);
+    }
+  });
+
+  const newColumnsObj = {};
+  st.columnNames.forEach((name, idx) => {
+    if (idx !== colIdx) {
+      newColumnsObj[name] = st.columnTypes[idx];
+    }
+  });
+  Object.assign(newColumnsObj, nestedColumns);
+
+  const nestedColNames = Object.keys(nestedColumns);
+  const otherColIndices = st.columnNames.map((_, idx) => idx).filter(idx => idx !== colIdx);
+
+  let newItems = [];
+
+  st.relation.items.forEach(row => {
+    const baseValues = otherColIndices.map(idx => row[idx]);
+    const nestedRelation = row[colIdx];
+
+    if (!nestedRelation || !nestedRelation.items || nestedRelation.items.length === 0) {
+      const newRow = [...baseValues];
+      nestedColNames.forEach(() => newRow.push(null));
+      newItems.push(newRow);
+      return;
+    }
+
+    const nestedRelColNames = Object.keys(nestedRelation.columns || {});
+
+    nestedRelation.items.forEach(subRow => {
+      const newRow = [...baseValues];
+      nestedColNames.forEach(ncName => {
+        const subIdx = nestedRelColNames.indexOf(ncName);
+        newRow.push(subIdx >= 0 && subIdx < subRow.length ? subRow[subIdx] : null);
+      });
+      newItems.push(newRow);
+    });
+  });
+
+  st.relation = {
+    pot: 'relation',
+    columns: newColumnsObj,
+    items: newItems
+  };
+
+  st.columnNames = Object.keys(newColumnsObj);
+  st.columnTypes = Object.values(newColumnsObj);
+  setFilteredIndices(st, [...Array(newItems.length).keys()]);
+  setSortedIndices(st, [...getFilteredIndices(st)]);
+  setSelectedRows(st, new Set());
+  setSortCriteria(st, []);
+  setFilters(st, {});
+  setFormatting(st, {});
+  setGroupByColumns(st, []);
+  setGroupBySelectedValues(st, {});
+  setCurrentPage(st, 1);
+
+  el('.relation-json').value = JSON.stringify(st.relation, null, 2);
+  renderTable(st);
+}
+
 function showGroupColumnsDialog(st = state) {
   closeAllMenus();
   
@@ -9070,11 +9982,13 @@ function handleRowOperation(st, rowIdx, action) {
       break;
     case 'delete-selected':
       if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
+        const deleteCount = getSelectedRows(st).size;
         const indices = [...getSelectedRows(st)].sort((a, b) => b - a);
         indices.forEach(i => st.relation.items.splice(i, 1));
         getSelectedRows(st).clear();
         setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
         setSortedIndices(st, [...getFilteredIndices(st)]);
+        logOperation(st, { op: 'delete_selected', count: deleteCount });
         renderTable(st);
       }
       break;
@@ -9272,6 +10186,7 @@ function showRowCopyDialog(st, rowIdx) {
           
           setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
           setSortedIndices(st, [...getFilteredIndices(st)]);
+          logOperation(st, { op: 'copy_row', source_row: rowIdx, copies: count });
           renderTable(st);
           closeRowOperationPanel(st);
         });
@@ -9288,6 +10203,7 @@ function showRowDeleteDialog(st, rowIdx) {
     getSelectedRows(st).delete(rowIdx);
     setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
     setSortedIndices(st, [...getFilteredIndices(st)]);
+    logOperation(st, { op: 'delete_row', row_index: rowIdx });
     renderTable(st);
     outputRelationState(st);
   }, { confirmText: 'Eliminar' });
@@ -9360,6 +10276,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
       st.relation.items.push(newRow);
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
+      logOperation(st, { op: 'add_row', row_index: st.relation.items.length - 1 });
       renderTable(st);
     };
     
@@ -9376,8 +10293,12 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
           saveRecord();
           outputRelationState(st);
           clearForm();
-          const idInput = container.querySelector(`[data-col="${st.columnTypes.findIndex(t => t === 'id')}"]`);
-          if (idInput) idInput.textContent = getNextNegativeId(st);
+          const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+          if (idColIdx !== -1) {
+            const newId = getNextNegativeId(st);
+            const idSpan = container.querySelector('.row-field-value-id');
+            if (idSpan) idSpan.textContent = newId;
+          }
         });
       }
     }, 0);
@@ -13364,6 +14285,7 @@ function initRelationInstance(container, relationData, options = {}) {
   instanceState.columnNames = Object.keys(relationData.columns || {});
   instanceState.columnTypes = Object.values(relationData.columns || {});
   instanceState.options = relationData.options || {};
+  if (!relationData.log) relationData.log = [];
   
   const parsedRelOptions = relationData.rel_options || {};
   instanceState.rel_options = {
@@ -13618,6 +14540,7 @@ function initRelationInstance(container, relationData, options = {}) {
               <option value="format">Formato</option>
               <option value="records">Registos</option>
               <option value="both">Ambos</option>
+              <option value="log">Log de Operações</option>
             </select>
             <select class="saved-scope-select">
               <option value="you">Para Ti</option>
@@ -13949,6 +14872,9 @@ function createSavedSnapshot(st, type) {
   if (type === 'records' || type === 'both') {
     snapshot.items = JSON.parse(JSON.stringify(st.relation.items));
   }
+  if (type === 'log') {
+    snapshot.log = JSON.parse(JSON.stringify(st.relation.log || []));
+  }
   return snapshot;
 }
 
@@ -13969,6 +14895,12 @@ function restoreSavedSnapshot(st, savedEntry) {
   if (type === 'records' || type === 'both') {
     if (snapshot.items) {
       st.relation.items = JSON.parse(JSON.stringify(snapshot.items));
+    }
+  }
+  if (type === 'log') {
+    if (snapshot.log) {
+      st.relation.log = JSON.parse(JSON.stringify(snapshot.log));
+      showToast(`Log restaurado: ${snapshot.log.length} operações`, 'info');
     }
   }
 
@@ -13994,12 +14926,13 @@ function renderSavedViewsList(st) {
     return;
   }
 
-  const typeLabels = { format: 'Formato', records: 'Registos', both: 'Ambos' };
+  const typeLabels = { format: 'Formato', records: 'Registos', both: 'Ambos', log: 'Log' };
   const scopeLabels = { you: 'Para Ti', everyone: 'Para Todos' };
   const typeIcons = {
     format: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>',
     records: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>',
-    both: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>'
+    both: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+    log: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>'
   };
 
   let html = '<div class="saved-items">';
@@ -14012,7 +14945,7 @@ function renderSavedViewsList(st) {
         <div class="saved-item-info">
           <span class="saved-item-name">${entry.name}</span>
           <span class="saved-item-meta">
-            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}
+            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}${entry.type === 'log' ? ` (${(JSON.parse(entry.data).log || []).length} ops)` : ''}
             &middot; ${scopeLabels[entry.scope] || entry.scope}
             &middot; ${dateStr} ${timeStr}
           </span>
@@ -14469,6 +15402,14 @@ function createEditInputHtml(type, value, colIdx, st) {
     html += '</select>';
     return html;
   } else if (type === 'multilinestring') {
+    return `<textarea class="relation-textarea" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
+  } else if (type === 'date') {
+    return `<input type="date" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+  } else if (type === 'datetime') {
+    return `<input type="datetime-local" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+  } else if (type === 'time') {
+    return `<input type="time" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+  } else if (type === 'textarea') {
     return `<textarea class="relation-textarea" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
   } else if (type === 'relation') {
     return `<span class="view-value">📋 ${value?.items?.length || 0} rows (not editable here)</span>`;

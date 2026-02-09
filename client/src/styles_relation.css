@@ -923,6 +923,37 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   background: none;
 }
 
+.column-menu-separator {
+  height: 1px;
+  background: var(--border-color, #333);
+  margin: 4px 8px;
+}
+
+.column-menu-sublabel {
+  padding: 4px 12px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #a6adc8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--blue-400, #60a5fa);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: help;
+  margin-left: 4px;
+  position: relative;
+}
+
 .column-menu-item-inline {
   display: flex;
   align-items: center;
@@ -4700,14 +4731,14 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 /* Export Dialog */
 .export-dialog {
-  background: var(--card-bg, #1e1e2e);
-  border: 1px solid var(--border-color, #333);
-  border-radius: 10px;
+  background: var(--white, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
   width: 90%;
   max-width: 500px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .export-dialog-header {
@@ -4785,15 +4816,15 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 /* Import Dialog */
 .import-dialog {
-  background: var(--card-bg, #1e1e2e);
-  border: 1px solid var(--border-color, #333);
-  border-radius: 10px;
+  background: var(--white, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
   width: 92%;
   max-width: 750px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .import-dialog-header {
@@ -4961,4 +4992,84 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .selection-search-bar .quick-search-wrapper {
   width: 100%;
+}
+
+/* Column Resize Handle */
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 11;
+}
+.col-resize-handle:hover,
+.col-resize-handle.resizing {
+  background: var(--blue-400, #60a5fa);
+}
+
+/* Column Drag & Drop */
+.th-dragging {
+  opacity: 0.5;
+}
+.th-drag-over {
+  border-left: 3px solid var(--blue-400, #60a5fa) !important;
+}
+
+/* Show/Hide Columns Dialog */
+.cv-columns-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  margin: 8px 0;
+}
+.cv-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-light, #f1f5f9);
+  cursor: grab;
+}
+.cv-row:last-child {
+  border-bottom: none;
+}
+.cv-drag-handle {
+  color: var(--text-secondary, #94a3b8);
+  cursor: grab;
+  font-size: 14px;
+}
+.cv-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  font-size: 13px;
+  cursor: pointer;
+}
+.cv-checkbox-label small {
+  color: var(--text-secondary, #94a3b8);
+}
+.cv-width-input {
+  width: 60px;
+  padding: 2px 6px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: right;
+}
+.cv-dragging {
+  opacity: 0.5;
+  background: var(--blue-50, #eff6ff);
+}
+.cv-drag-over {
+  border-top: 2px solid var(--blue-400, #60a5fa);
+}
+.cv-actions-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
 }
