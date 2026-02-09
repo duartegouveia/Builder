@@ -6,7 +6,7 @@ This multi-tool web application provides scientific computing and input utilitie
 
 Key capabilities include:
 - **Virtual Keyboard**: A comprehensive Unicode character browser with hierarchical navigation, transliteration, multiple layouts, and advanced input features.
-- **Relation Builder**: An advanced data table interface for creating and managing relational data with diverse views (Table, Cards, Pivot, Correlation, Diagram, AI).
+- **Relation Builder**: An advanced data table interface for creating and managing relational data with diverse views (Table, Cards, Pivot, Correlation, Clustering, AI).
 - **Error Propagator**: A scientific calculator for error propagation using partial derivatives and uncertainty analysis.
 - **Logic Builder**: A visual tool for constructing complex logical expressions.
 
@@ -52,7 +52,7 @@ The Relation Builder offers an advanced data table interface with the following 
     - **Cards View**: Grid-based display for individual rows.
     - **Pivot Table View**: Cross-tabulation with aggregation options.
     - **Correlation View**: Analyzes column correlations (Pearson, Cramér's V).
-    - **Diagram View**: Force-directed clustering visualization.
+    - **Clustering View** (internal key: `diagram`): t-SNE dimensionality reduction with k-means clustering visualization. Includes "Run t-SNE" button with configurable clusters, perplexity, and iterations. "Clusters as Column" button (enabled after clustering) exports three columns: `clusters` (int, cluster assignment), `clustering_x` (float, t-SNE x coordinate), `clustering_y` (float, t-SNE y coordinate). Coordinates are raw t-SNE output values rounded to 3 decimal places. Display name mapped via `VIEW_DISPLAY_NAMES` object while internal key remains `diagram` for CSS/logic compatibility. Works in both main and nested relation instances.
     - **AI View**: Dedicated panel for the AI assistant.
     - **Saved View**: Persists and restores relation snapshots. Supports four save types: Format (uiState + column structure for binning), Records (items only), Both (complete snapshot), Log (operation log sequence). Includes scope (For You / For Everyone), duplicate name validation, restore via double-click or button, and delete with confirmation. Saved views are stored in `st.relation.saved` array on the relation data object.
     - **Structure View**: Structure panel (empty, for future development).

@@ -14042,6 +14042,8 @@ function runClustering(st = state) {
       idx: getSortedIndices(st)[i],
       x: padding + ((p[0] - minX) / rangeX) * (width - 2 * padding),
       y: padding + ((p[1] - minY) / rangeY) * (height - 2 * padding),
+      tsneX: p[0],
+      tsneY: p[1],
       rawData: data[i],
       radius: ballRadius
     }));
@@ -14081,31 +14083,48 @@ function addClustersAsColumn(st = state) {
   const nodes = getDiagramNodes(st);
   if (!nodes || nodes.length === 0) return;
   
-  const colName = 'clusters';
-  let colIdx = st.columnNames.indexOf(colName);
-  const isNew = colIdx === -1;
+  const colDefs = [
+    { name: 'clusters', type: 'int' },
+    { name: 'clustering_x', type: 'float' },
+    { name: 'clustering_y', type: 'float' }
+  ];
+  const cv = getColumnsVisible(st);
+  const hasCv = cv && Object.keys(cv).length > 0;
+  const colIndices = [];
+  let anyNew = false;
   
-  if (isNew) {
-    st.relation.columns[colName] = 'int';
-    st.columnNames.push(colName);
-    st.columnTypes.push('int');
-    st.relation.items.forEach(row => row.push(null));
-    colIdx = st.columnNames.length - 1;
-    const cv = getColumnsVisible(st);
-    if (cv && Object.keys(cv).length > 0) {
-      cv[colName] = 0;
-      setColumnsVisible(st, cv);
+  colDefs.forEach(def => {
+    let idx = st.columnNames.indexOf(def.name);
+    const isNew = idx === -1;
+    if (isNew) {
+      anyNew = true;
+      st.relation.columns[def.name] = def.type;
+      st.columnNames.push(def.name);
+      st.columnTypes.push(def.type);
+      st.relation.items.forEach(row => row.push(null));
+      idx = st.columnNames.length - 1;
+      if (hasCv) {
+        cv[def.name] = 0;
+      }
     }
+    colIndices.push(idx);
+  });
+  
+  if (anyNew && hasCv) {
+    setColumnsVisible(st, cv);
   }
   
   nodes.forEach(node => {
     if (node.idx != null && node.idx < st.relation.items.length) {
-      st.relation.items[node.idx][colIdx] = node.cluster;
+      const row = st.relation.items[node.idx];
+      row[colIndices[0]] = node.cluster;
+      row[colIndices[1]] = Math.round((node.tsneX ?? node.x) * 1000) / 1000;
+      row[colIndices[2]] = Math.round((node.tsneY ?? node.y) * 1000) / 1000;
     }
   });
   
-  logOperation(st, { op: 'clusters_as_column', column: colName, num_clusters: new Set(nodes.map(n => n.cluster)).size });
-  showToast('Column "clusters" ' + (isNew ? 'added' : 'updated'));
+  logOperation(st, { op: 'clusters_as_column', columns: colDefs.map(d => d.name), num_clusters: new Set(nodes.map(n => n.cluster)).size });
+  showToast('Columns "clusters", "clustering_x", "clustering_y" ' + (anyNew ? 'added' : 'updated'));
 }
 
 // K-means clustering algorithm
