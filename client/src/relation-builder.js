@@ -2296,8 +2296,9 @@ function applySorting(st = state) {
 }
 
 function compareValues(a, b, type, options) {
-  if (a === null || a === undefined) return b === null || b === undefined ? 0 : 1;
-  if (b === null || b === undefined) return -1;
+  const nullsFirst = options && options.nullsFirst;
+  if (a === null || a === undefined) return b === null || b === undefined ? 0 : (nullsFirst ? -1 : 1);
+  if (b === null || b === undefined) return nullsFirst ? 1 : -1;
   
   if (type === 'int' || type === 'float') {
     return a - b;
@@ -2373,6 +2374,7 @@ function showSortPanelDialog(st) {
             <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-accent" data-sort-idx="${idx}" ${opts.accentInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-accent-${idx}"> Accent Insensitive</label>
             <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-punct" data-sort-idx="${idx}" ${opts.punctuationInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-punct-${idx}"> Punctuation Insensitive</label>
             <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-num" data-sort-idx="${idx}" ${opts.parseNumbers !== false ? 'checked' : ''} data-testid="sort-opt-num-${idx}"> Parse Numbers</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-nulls-first" data-sort-idx="${idx}" ${opts.nullsFirst ? 'checked' : ''} data-testid="sort-opt-nulls-first-${idx}"> Nulls First</label>
           </div>
         </div>`;
     }).join('');
@@ -2423,6 +2425,13 @@ function showSortPanelDialog(st) {
         const idx = parseInt(e.target.dataset.sortIdx);
         if (!criteria[idx].options) criteria[idx].options = {};
         criteria[idx].options.parseNumbers = e.target.checked;
+      });
+    });
+    listEl.querySelectorAll('.sort-opt-nulls-first').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        if (!criteria[idx].options) criteria[idx].options = {};
+        criteria[idx].options.nullsFirst = e.target.checked;
       });
     });
 

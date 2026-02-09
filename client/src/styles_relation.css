@@ -3293,6 +3293,8 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 .correlation-section .correlation-section-header {
   flex-shrink: 0;
+  margin-top: 20px;
+  align-self: center;
 }
 
 .correlation-section .correlation-config-row {
