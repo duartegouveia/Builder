@@ -1648,6 +1648,29 @@ function setQuickSearchText(st, value) { getUiState(st).quickSearchText = value;
 function getColumnsVisible(st) { return getUiState(st).columns_visible; }
 function setColumnsVisible(st, value) { getUiState(st).columns_visible = value; }
 
+function insertColumnAfterInVisible(st, sourceColName, newColName) {
+  let cv = getColumnsVisible(st);
+  if (!cv) {
+    cv = {};
+    st.columnNames.forEach(name => { cv[name] = 0; });
+  }
+  if (!(newColName in cv)) {
+    cv[newColName] = 0;
+  }
+  const entries = Object.entries(cv);
+  const newEntries = entries.filter(([k]) => k !== newColName);
+  const sourceIdx = newEntries.findIndex(([k]) => k === sourceColName);
+  if (sourceIdx !== -1) {
+    newEntries.splice(sourceIdx + 1, 0, [newColName, 0]);
+  } else {
+    newEntries.push([newColName, 0]);
+  }
+  const reordered = {};
+  newEntries.forEach(([k, v]) => { reordered[k] = v; });
+  setColumnsVisible(st, reordered);
+  logOperation(st, { op: 'columns_visible_reorder', source_column: sourceColName, new_column: newColName });
+}
+
 function getVisibleColumnIndices(st) {
   const cv = getColumnsVisible(st);
   if (!cv || Object.keys(cv).length === 0) {
@@ -7821,6 +7844,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       });
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
+      insertColumnAfterInVisible(st, st.columnNames[colIdx], newColName);
       logOperation(st, { op: 'row_number', column_created: newColName });
       closeAllMenus();
       renderTable(st);
@@ -7830,7 +7854,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       const name = st.columnNames[colIdx];
       const rankColName = name + '_rank';
       let rankColIdx = st.columnNames.indexOf(rankColName);
-      if (rankColIdx === -1) {
+      const rankIsNew = rankColIdx === -1;
+      if (rankIsNew) {
         st.relation.columns[rankColName] = 'int';
         st.columnNames.push(rankColName);
         st.columnTypes.push('int');
@@ -7852,6 +7877,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         }
         st.relation.items[itemsWithIdx[i].idx][rankColIdx] = itemsWithIdx[i].val === null ? null : currentRank;
       }
+      if (rankIsNew) insertColumnAfterInVisible(st, name, rankColName);
       logOperation(st, { op: 'rank', column: name, column_created: rankColName });
       closeAllMenus();
       renderTable(st);
@@ -7861,7 +7887,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       const name = st.columnNames[colIdx];
       const denseColName = name + '_dense_rank';
       let denseColIdx = st.columnNames.indexOf(denseColName);
-      if (denseColIdx === -1) {
+      const denseIsNew = denseColIdx === -1;
+      if (denseIsNew) {
         st.relation.columns[denseColName] = 'int';
         st.columnNames.push(denseColName);
         st.columnTypes.push('int');
@@ -7883,6 +7910,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         }
         st.relation.items[denseItems[i].idx][denseColIdx] = denseItems[i].val === null ? null : denseRank;
       }
+      if (denseIsNew) insertColumnAfterInVisible(st, name, denseColName);
       logOperation(st, { op: 'dense_rank', column: name, column_created: denseColName });
       closeAllMenus();
       renderTable(st);
@@ -7930,6 +7958,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
           case 'semester': row[deriveColIdx] = d.getMonth() < 6 ? 1 : 2; break;
         }
       });
+      if (isNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], deriveColName);
       logOperation(st, { op: 'derive', type: deriveName, source_column: st.columnNames[colIdx], column_created: deriveColName });
       closeAllMenus();
       renderTable(st);
@@ -7943,7 +7972,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       const tDeriveName = action.replace('derive-', '');
       const tColName = st.columnNames[colIdx] + '_' + tDeriveName;
       let tColIdx = st.columnNames.indexOf(tColName);
-      if (tColIdx === -1) {
+      const tIsNew = tColIdx === -1;
+      if (tIsNew) {
         st.relation.columns[tColName] = 'int';
         st.columnNames.push(tColName);
         st.columnTypes.push('int');
@@ -7973,6 +8003,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
           case 'hour12': row[tColIdx] = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours); break;
         }
       });
+      if (tIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], tColName);
       logOperation(st, { op: 'derive', type: tDeriveName, source_column: st.columnNames[colIdx], column_created: tColName });
       closeAllMenus();
       renderTable(st);
@@ -7981,7 +8012,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'derive-ampm': {
       const ampmColName = st.columnNames[colIdx] + '_ampm';
       let ampmColIdx = st.columnNames.indexOf(ampmColName);
-      if (ampmColIdx === -1) {
+      const ampmIsNew = ampmColIdx === -1;
+      if (ampmIsNew) {
         st.relation.columns[ampmColName] = 'string';
         st.columnNames.push(ampmColName);
         st.columnTypes.push('string');
@@ -8001,6 +8033,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         }
         row[ampmColIdx] = hours < 12 ? 'am' : 'pm';
       });
+      if (ampmIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], ampmColName);
       logOperation(st, { op: 'derive', type: 'ampm', source_column: st.columnNames[colIdx], column_created: ampmColName });
       closeAllMenus();
       renderTable(st);
@@ -8013,7 +8046,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       const n = nInput ? parseInt(nInput.value) : 2;
       const roundColName = st.columnNames[colIdx] + '_round' + n;
       let roundColIdx = st.columnNames.indexOf(roundColName);
-      if (roundColIdx === -1) {
+      const roundIsNew = roundColIdx === -1;
+      if (roundIsNew) {
         st.relation.columns[roundColName] = 'float';
         st.columnNames.push(roundColName);
         st.columnTypes.push('float');
@@ -8027,6 +8061,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         const num = parseFloat(val);
         row[roundColIdx] = isNaN(num) ? null : Math.round(num * factor) / factor;
       });
+      if (roundIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], roundColName);
       logOperation(st, { op: 'derive', type: 'round', source_column: st.columnNames[colIdx], column_created: roundColName });
       closeAllMenus();
       renderTable(st);
@@ -8036,7 +8071,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'derive-length': {
       const lenColName = st.columnNames[colIdx] + '_length';
       let lenColIdx = st.columnNames.indexOf(lenColName);
-      if (lenColIdx === -1) {
+      const lenIsNew = lenColIdx === -1;
+      if (lenIsNew) {
         st.relation.columns[lenColName] = 'int';
         st.columnNames.push(lenColName);
         st.columnTypes.push('int');
@@ -8047,6 +8083,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         const val = row[colIdx];
         row[lenColIdx] = val === null || val === undefined ? null : [...String(val)].length;
       });
+      if (lenIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], lenColName);
       logOperation(st, { op: 'derive', type: 'length', source_column: st.columnNames[colIdx], column_created: lenColName });
       closeAllMenus();
       renderTable(st);
@@ -8055,7 +8092,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'derive-bytes': {
       const bytesColName = st.columnNames[colIdx] + '_bytes';
       let bytesColIdx = st.columnNames.indexOf(bytesColName);
-      if (bytesColIdx === -1) {
+      const bytesIsNew = bytesColIdx === -1;
+      if (bytesIsNew) {
         st.relation.columns[bytesColName] = 'int';
         st.columnNames.push(bytesColName);
         st.columnTypes.push('int');
@@ -8066,6 +8104,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         const val = row[colIdx];
         row[bytesColIdx] = val === null || val === undefined ? null : new TextEncoder().encode(String(val)).length;
       });
+      if (bytesIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], bytesColName);
       logOperation(st, { op: 'derive', type: 'bytes', source_column: st.columnNames[colIdx], column_created: bytesColName });
       closeAllMenus();
       renderTable(st);
@@ -8074,7 +8113,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'derive-flesch-ease': {
       const feColName = st.columnNames[colIdx] + '_flesch_ease';
       let feColIdx = st.columnNames.indexOf(feColName);
-      if (feColIdx === -1) {
+      const feIsNew = feColIdx === -1;
+      if (feIsNew) {
         st.relation.columns[feColName] = 'float';
         st.columnNames.push(feColName);
         st.columnTypes.push('float');
@@ -8092,6 +8132,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         const score = 206.835 - 1.015 * (totalWords / sentences) - 84.6 * (totalSyllables / totalWords);
         row[feColIdx] = Math.round(score * 100) / 100;
       });
+      if (feIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], feColName);
       logOperation(st, { op: 'derive', type: 'flesch_ease', source_column: st.columnNames[colIdx], column_created: feColName });
       closeAllMenus();
       renderTable(st);
@@ -8100,7 +8141,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'derive-flesch-kincaid': {
       const fkColName = st.columnNames[colIdx] + '_flesch_kincaid';
       let fkColIdx = st.columnNames.indexOf(fkColName);
-      if (fkColIdx === -1) {
+      const fkIsNew = fkColIdx === -1;
+      if (fkIsNew) {
         st.relation.columns[fkColName] = 'float';
         st.columnNames.push(fkColName);
         st.columnTypes.push('float');
@@ -8118,6 +8160,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         const score = 0.39 * (totalWords / sentences) + 11.8 * (totalSyllables / totalWords) - 15.59;
         row[fkColIdx] = Math.round(score * 100) / 100;
       });
+      if (fkIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], fkColName);
       logOperation(st, { op: 'derive', type: 'flesch_kincaid', source_column: st.columnNames[colIdx], column_created: fkColName });
       closeAllMenus();
       renderTable(st);
@@ -8126,7 +8169,8 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'derive-sentences': {
       const sentColName = st.columnNames[colIdx] + '_sentences';
       let sentColIdx = st.columnNames.indexOf(sentColName);
-      if (sentColIdx === -1) {
+      const sentIsNew = sentColIdx === -1;
+      if (sentIsNew) {
         st.relation.columns[sentColName] = 'int';
         st.columnNames.push(sentColName);
         st.columnTypes.push('int');
@@ -8138,6 +8182,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         if (val === null || val === undefined || String(val).trim() === '') { row[sentColIdx] = null; return; }
         row[sentColIdx] = String(val).split(/[.!?]+/).filter(s => s.trim().length > 0).length;
       });
+      if (sentIsNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], sentColName);
       logOperation(st, { op: 'derive', type: 'sentences', source_column: st.columnNames[colIdx], column_created: sentColName });
       closeAllMenus();
       renderTable(st);
@@ -8453,6 +8498,8 @@ function applyBinning(colIdx, numBins, method, st = state) {
     sourceColumn: originalColName
   });
   
+  insertColumnAfterInVisible(st, originalColName, newColName);
+  
   // Update JSON textarea
   const jsonTextarea = document.querySelector('.relation-json');
   if (jsonTextarea) {
@@ -8605,6 +8652,8 @@ function applyColorBinning(colIdx, st = state) {
     sourceColumn: colName,
     colorMap: colorToBin
   });
+  
+  insertColumnAfterInVisible(st, colName, newColName);
   
   // Update JSON textarea
   const jsonTextarea = document.querySelector('.relation-json');
@@ -14755,8 +14804,8 @@ function initRelationInstance(container, relationData, options = {}) {
             <select class="saved-type-select">
               <option value="format">Formato</option>
               <option value="records">Registos</option>
-              <option value="both">Ambos</option>
               <option value="log">Log de Operações</option>
+              <option value="both">Todos</option>
             </select>
             <select class="saved-scope-select">
               <option value="you">Para Ti</option>
@@ -15123,8 +15172,19 @@ function restoreSavedSnapshot(st, savedEntry) {
   const itemCount = (st.relation.items || []).length;
   applyFilters(st);
   applySorting(st);
-  setCurrentView(st, 'table');
-  switchViewForInstance(st, 'table');
+  const viewOpts = st.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
+  const hasTable = viewOpts.some(v => v.toLowerCase() === 'table');
+  const hasCards = viewOpts.some(v => v.toLowerCase() === 'cards');
+  const targetView = hasTable ? 'table' : hasCards ? 'cards' : (viewOpts[0]?.toLowerCase() || 'table');
+  if (st.container) {
+    setCurrentView(st, targetView);
+    switchViewForInstance(st, targetView);
+    st.container.querySelectorAll('.view-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.view === targetView);
+    });
+  } else {
+    switchView(targetView);
+  }
 }
 
 function deleteSavedView(st, name) {
@@ -15142,7 +15202,7 @@ function renderSavedViewsList(st) {
     return;
   }
 
-  const typeLabels = { format: 'Formato', records: 'Registos', both: 'Ambos', log: 'Log' };
+  const typeLabels = { format: 'Formato', records: 'Registos', both: 'Todos', log: 'Log' };
   const scopeLabels = { you: 'Para Ti', everyone: 'Para Todos' };
   const typeIcons = {
     format: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>',
