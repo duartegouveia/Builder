@@ -8785,8 +8785,9 @@ function applyColorScale(colIdx, st = state) {
   for (let i = 0; i < steps; i++) {
     const minVal = stats.min + (range / steps) * i;
     const maxVal = stats.min + (range / steps) * (i + 1);
+    const upperCondition = (i === steps - 1) ? { lte: maxVal } : { lt: maxVal };
     rules.push({
-      condition: { gte: minVal, lt: maxVal },
+      condition: { gte: minVal, ...upperCondition },
       style: { backgroundColor: colors[i] }
     });
   }
