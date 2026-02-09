@@ -14945,7 +14945,7 @@ function renderSavedViewsList(st) {
         <div class="saved-item-info">
           <span class="saved-item-name">${entry.name}</span>
           <span class="saved-item-meta">
-            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}${entry.type === 'log' ? ` (${(JSON.parse(entry.data).log || []).length} ops)` : ''}
+            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}${entry.type === 'log' ? (() => { try { return ` (${(JSON.parse(entry.data).log || []).length} ops)`; } catch(e) { return ''; } })() : ''}
             &middot; ${scopeLabels[entry.scope] || entry.scope}
             &middot; ${dateStr} ${timeStr}
           </span>

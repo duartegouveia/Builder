@@ -87,7 +87,7 @@ function generateRequirementsDoc() {
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 400 },
-      children: [new TextRun({ text: `Versão 1.0 — ${new Date().toLocaleDateString('pt-PT')}`, font: FONT, size: 22, color: '999999' })],
+      children: [new TextRun({ text: `Versão 1.1 — ${new Date().toLocaleDateString('pt-PT')}`, font: FONT, size: 22, color: '999999' })],
     }),
     emptyLine(),
   );
@@ -124,12 +124,18 @@ function generateRequirementsDoc() {
   sections.push(para('28. Opções Configuráveis (rel_options)'));
   sections.push(para('29. Atalhos de Teclado'));
   sections.push(para('30. Responsividade e Interface'));
+  sections.push(para('31. Colunas Derivadas'));
+  sections.push(para('32. Log de Operações'));
+  sections.push(para('33. Visibilidade de Colunas (columns_visible)'));
+  sections.push(para('34. Produto Cartesiano'));
+  sections.push(para('35. Remoção de Duplicados'));
 
   // 1. Introduction
   sections.push(heading1('1. Introdução'));
   sections.push(para('O Relation Builder é uma ferramenta avançada de gestão de dados relacionais construída como aplicação web com HTML, JavaScript vanilla e CSS standard. O seu objetivo principal é permitir a criação, manipulação, análise e visualização de dados tabulares com funcionalidades comparáveis a folhas de cálculo profissionais, mas integradas numa interface web leve e sem dependências de frameworks.'));
   sections.push(boldPara('Público-alvo: ', 'Utilizadores que necessitam de controlo preciso sobre relações de dados, desde analistas de dados até gestores de informação.'));
   sections.push(boldPara('Filosofia: ', 'Todas as instâncias de relação utilizam código parametrizado idêntico via initRelationInstance(), garantindo consistência e manutenibilidade.'));
+  sections.push(para('A versão 1.1 introduz funcionalidades significativas: colunas derivadas para extração automática de componentes de datas, horas e métricas de texto; um sistema de log de operações para rastreabilidade e replay futuro; controlo granular de visibilidade e ordenação de colunas via columns_visible; produto cartesiano para expansão de relações aninhadas; remoção de duplicados; e operações de Row Number, Rank e Dense Rank para classificação de registos.'));
 
   // 2. Data Structure
   sections.push(heading1('2. Estrutura de Dados e Modelo Relacional'));
@@ -263,7 +269,7 @@ function generateRequirementsDoc() {
   sections.push(heading1('10. Vistas Guardadas'));
   sections.push(heading2('10.1 Funcionalidades'));
   sections.push(bullet('Gravação de snapshots da relação com nome personalizável.'));
-  sections.push(bullet('Três tipos de gravação: Formato (uiState + colunas), Registos (items), Ambos.'));
+  sections.push(bullet('Quatro tipos de gravação: Formato (uiState + colunas), Registos (items), Ambos, Log de Operações (sequência de operações para replay).'));
   sections.push(bullet('Âmbito: Para Ti ou Para Todos.'));
   sections.push(bullet('Validação de nomes duplicados com confirmação de substituição.'));
   sections.push(bullet('Restauro via duplo-clique ou botão dedicado.'));
@@ -280,7 +286,7 @@ function generateRequirementsDoc() {
   sections.push(boldPara('Filtro por Comparação: ', 'Operadores de comparação (=, !=, >, <, >=, <=, entre, contém, começa com, termina com, regex) com suporte para tipos numéricos, texto e datas.'));
   sections.push(boldPara('Filtro por Texto: ', 'Critérios textuais avançados incluindo contém, não contém, começa com, termina com, expressão regular, maiúsculas/minúsculas.'));
   sections.push(boldPara('Filtro por Posição: ', 'Top N, Bottom N, Middle N registos baseado em valores numéricos.'));
-  sections.push(boldPara('Filtro por Outliers: ', 'Detecção e filtragem de outliers usando método IQR ou Z-score.'));
+  sections.push(boldPara('Filtro por Outliers: ', 'Detecção e filtragem de outliers usando método IQR ou Z-score. Opções renomeadas na v1.1: "Choose Outliers" (anteriormente "Keep Outliers") e "Choose Not Outliers" (anteriormente "Remove Outliers") para maior clareza semântica.'));
   sections.push(boldPara('Filtro por Nulos: ', 'Mostrar apenas valores nulos ou não-nulos.'));
   sections.push(heading2('11.2 Funcionalidades Transversais'));
   sections.push(bullet('Indicadores visuais de colunas filtradas nos cabeçalhos.'));
@@ -338,16 +344,22 @@ function generateRequirementsDoc() {
   sections.push(heading2('15.2 Justificação'));
   sections.push(para('A formatação condicional transforma dados numéricos em informação visual imediata. As 8 paletas suportam diferentes necessidades de contraste e acessibilidade. Barras de dados e ícones complementam a escala de cores para diferentes tipos de visualização.'));
 
-  // 16. Binning
-  sections.push(heading1('16. Binning (Discretização)'));
-  sections.push(heading2('16.1 Funcionalidades'));
+  // 16. Binning / Bucketing
+  sections.push(heading1('16. Binning / Bucketing (Discretização)'));
+  sections.push(heading2('16.1 Funcionalidades de Binning'));
   sections.push(bullet('Discretização de colunas numéricas em intervalos.'));
   sections.push(bullet('Número de bins configurável.'));
   sections.push(bullet('Apresentação como intervalos (ex: "10-20") nos valores da tabela.'));
   sections.push(bullet('Interação com filtros por valores (filtragem por bin).'));
   sections.push(bullet('Reversão do binning para valores originais.'));
-  sections.push(heading2('16.2 Justificação'));
-  sections.push(para('O binning simplifica a análise de dados contínuos, permitindo agrupamento e filtragem por intervalos. É especialmente útil em combinação com tabelas pivot e agrupamento.'));
+  sections.push(bullet('Menu renomeado na v1.1: "Binning / Bucketing" para maior clareza terminológica.'));
+  sections.push(heading2('16.2 Row Number / Rank / Dense Rank (v1.1)'));
+  sections.push(para('A secção Binning / Bucketing inclui agora três operações de classificação de registos:'));
+  sections.push(boldPara('Row Number: ', 'Adiciona uma nova coluna inteira com numeração sequencial (1, 2, 3, ...) baseada na ordem de ordenação atual. Cada linha recebe um número único.'));
+  sections.push(boldPara('Rank: ', 'Adiciona uma nova coluna inteira que classifica as linhas pelo valor da coluna de contexto. Empates recebem o mesmo rank, com gaps subsequentes (ex: 1, 2, 2, 4).'));
+  sections.push(boldPara('Dense Rank: ', 'Similar ao Rank mas sem gaps entre classificações. Empates recebem o mesmo rank e o próximo rank distinto é consecutivo (ex: 1, 2, 2, 3).'));
+  sections.push(heading2('16.3 Justificação'));
+  sections.push(para('O binning simplifica a análise de dados contínuos, permitindo agrupamento e filtragem por intervalos. As operações de Row Number, Rank e Dense Rank permitem classificação e numeração de registos sem necessidade de cálculos manuais, seguindo padrões SQL standard que os utilizadores analíticos conhecem.'));
 
   // 17. Row Operations
   sections.push(heading1('17. Operações sobre Linhas'));
@@ -496,6 +508,7 @@ function generateRequirementsDoc() {
   sections.push(boldPara('show_stats: ', 'Mostra/oculta linha de estatísticas no rodapé.'));
   sections.push(boldPara('show_hierarchy: ', 'Ativa/desativa navegação hierárquica.'));
   sections.push(boldPara('hierarchy_column: ', 'Coluna usada para relações pai-filho na hierarquia.'));
+  sections.push(boldPara('hierarchy_root_value: ', 'Valor que identifica os nós raiz na navegação hierárquica (valor do campo pai para elementos de topo).'));
   sections.push(boldPara('single_item_mode: ', 'Modo de apresentação de detalhe (dialog, right, bottom).'));
   sections.push(boldPara('label_field_top_down: ', 'Campo usado como label em breadcrumbs e títulos.'));
   sections.push(boldPara('OnDoubleClickAction: ', 'Ação ao duplo-clicar numa linha (view, edit).'));
@@ -528,6 +541,88 @@ function generateRequirementsDoc() {
   sections.push(heading2('30.2 Justificação'));
   sections.push(para('Uma interface responsiva e informativa melhora a experiência do utilizador em diferentes dispositivos. O feedback visual constante garante que o utilizador compreende o estado atual dos dados e das operações aplicadas.'));
 
+  // 31. Derived Columns
+  sections.push(heading1('31. Colunas Derivadas'));
+  sections.push(heading2('31.1 Descrição'));
+  sections.push(para('O sistema de colunas derivadas (v1.1) permite extrair automaticamente componentes de valores existentes, criando novas colunas com dados calculados. As extrações são organizadas por tipo de dados de origem.'));
+  sections.push(heading2('31.2 Extrações de Data'));
+  sections.push(bullet('Year: Extrai o ano (ex: 2025).'));
+  sections.push(bullet('Month: Extrai o mês (1-12).'));
+  sections.push(bullet('Day: Extrai o dia do mês (1-31).'));
+  sections.push(bullet('Weekday: Extrai o dia da semana (0=Domingo, 6=Sábado).'));
+  sections.push(bullet('Quarter: Extrai o trimestre (1-4).'));
+  sections.push(bullet('Semester: Extrai o semestre (1-2).'));
+  sections.push(bullet('Day of Year: Extrai o dia do ano (1-366).'));
+  sections.push(bullet('Week of Year: Extrai a semana do ano (1-53).'));
+  sections.push(bullet('ISO Week: Extrai a semana ISO do ano.'));
+  sections.push(heading2('31.3 Extrações de Hora'));
+  sections.push(bullet('Hour: Extrai a hora (0-23).'));
+  sections.push(bullet('Minute: Extrai o minuto (0-59).'));
+  sections.push(bullet('Second: Extrai o segundo (0-59).'));
+  sections.push(bullet('AM/PM: Extrai indicador AM ou PM.'));
+  sections.push(bullet('Hour12: Extrai a hora em formato 12h (1-12).'));
+  sections.push(heading2('31.4 Arredondamento de Float'));
+  sections.push(bullet('Round: Arredonda valores float para um número especificado de casas decimais.'));
+  sections.push(heading2('31.5 Métricas de String'));
+  sections.push(bullet('Length: Número de caracteres do texto.'));
+  sections.push(bullet('Bytes: Tamanho em bytes (codificação UTF-8).'));
+  sections.push(bullet('Flesch Reading Ease: Índice de legibilidade Flesch (0-100, quanto maior mais fácil de ler).'));
+  sections.push(bullet('Flesch-Kincaid Grade Level: Nível escolar estimado para compreensão do texto.'));
+  sections.push(bullet('Sentence Count: Número de frases no texto.'));
+  sections.push(heading2('31.6 Justificação'));
+  sections.push(para('As colunas derivadas eliminam a necessidade de cálculos manuais ou fórmulas para extrações comuns. A organização por tipo de dados (data, hora, float, string) facilita a descoberta de funcionalidades. As métricas de legibilidade (Flesch) são um diferenciador para análise de conteúdo textual.'));
+
+  // 32. Operation Log
+  sections.push(heading1('32. Log de Operações'));
+  sections.push(heading2('32.1 Descrição'));
+  sections.push(para('Todas as operações mutantes sobre a relação são registadas no array relation.log[] como objetos declarativos com a estrutura {pot: "relation_op", timestamp, op, ...params}. Este sistema permite rastreabilidade completa e prepara o caminho para funcionalidades futuras de replay e undo.'));
+  sections.push(heading2('32.2 Funcionalidades'));
+  sections.push(bullet('Registo automático de mais de 40 tipos de operações.'));
+  sections.push(bullet('Cada entrada inclui timestamp ISO para auditoria temporal.'));
+  sections.push(bullet('Parâmetros completos da operação são preservados para replay futuro.'));
+  sections.push(bullet('O log é serializado como parte da relação e pode ser guardado/restaurado via Vistas Guardadas (tipo "Log de Operações").'));
+  sections.push(bullet('Operações registadas incluem: adição/remoção de linhas, edição de células, ordenação, filtragem, binning, merge, group edit, formatação condicional, entre outras.'));
+  sections.push(heading2('32.3 Justificação'));
+  sections.push(para('O log de operações é fundamental para auditoria e rastreabilidade. A estrutura declarativa dos registos permite que no futuro se implementem funcionalidades de undo/redo e replay de sequências de operações, transformando o Relation Builder numa ferramenta com histórico completo de transformações.'));
+
+  // 33. Columns Visible
+  sections.push(heading1('33. Visibilidade de Colunas (columns_visible)'));
+  sections.push(heading2('33.1 Descrição'));
+  sections.push(para('O objeto columns_visible no uiState controla a visibilidade, largura e ordem de apresentação das colunas na tabela. Este sistema substitui a abordagem anterior de mostrar todas as colunas por defeito.'));
+  sections.push(heading2('33.2 Funcionalidades'));
+  sections.push(bullet('Visibilidade: uma chave presente no objeto significa coluna visível; chave ausente significa coluna oculta.'));
+  sections.push(bullet('Largura: o valor de cada chave representa a largura em pixels (0 = largura automática).'));
+  sections.push(bullet('Ordem: a ordem das chaves no objeto determina a ordem de apresentação das colunas.'));
+  sections.push(bullet('Diálogo Show/Hide Columns com checkboxes para cada coluna, inputs de largura e drag & drop para reordenação.'));
+  sections.push(bullet('Ações "Hide Column" e "Hide Selected Columns" no submenu Column do menu de contexto.'));
+  sections.push(bullet('Redimensionamento de colunas via bordas arrastáveis nos cabeçalhos da tabela.'));
+  sections.push(bullet('Reordenação de colunas via drag & drop diretamente nos cabeçalhos da tabela.'));
+  sections.push(bullet('O submenu Column reorganiza as operações anteriormente em "Column Selection", incluindo as ações de remover colunas.'));
+  sections.push(heading2('33.3 Justificação'));
+  sections.push(para('O controlo granular de visibilidade de colunas é essencial para relações com muitas colunas. A combinação de diálogo dedicado, ações no menu de contexto e interação direta nos cabeçalhos (resize e reorder) oferece múltiplos caminhos de interação para diferentes preferências de utilizador. A persistência via uiState garante que as configurações são mantidas entre sessões.'));
+
+  // 34. Cartesian Product
+  sections.push(heading1('34. Produto Cartesiano'));
+  sections.push(heading2('34.1 Descrição'));
+  sections.push(para('O produto cartesiano permite expandir relações aninhadas, fazendo cross-join dos registos da sub-relação com os registos da relação principal.'));
+  sections.push(heading2('34.2 Variantes'));
+  sections.push(boldPara('Cartesian Product (THIS): ', 'Realiza cross-join entre a coluna de relação aninhada selecionada e a relação atual. Cada linha da relação principal é multiplicada pelo número de linhas da sub-relação correspondente, com as colunas da sub-relação adicionadas como novas colunas.'));
+  sections.push(boldPara('Cartesian Product (ALL): ', 'Realiza cross-join de TODAS as colunas do tipo relation na relação atual, expandindo todas as sub-relações simultaneamente.'));
+  sections.push(heading2('34.3 Justificação'));
+  sections.push(para('O produto cartesiano é uma operação fundamental em álgebra relacional. Permite "achatamento" (flattening) de estruturas aninhadas para análise tabular, facilitando operações como filtragem, ordenação e pivot sobre dados que estavam em sub-relações.'));
+
+  // 35. Remove Duplicates
+  sections.push(heading1('35. Remoção de Duplicados'));
+  sections.push(heading2('35.1 Descrição'));
+  sections.push(para('A operação de remoção de duplicados identifica e remove linhas exatamente iguais da relação, mantendo apenas uma instância de cada combinação única de valores.'));
+  sections.push(heading2('35.2 Funcionalidades'));
+  sections.push(bullet('Comparação exata de todos os campos (exceto ID) para identificar duplicados.'));
+  sections.push(bullet('Preservação da primeira ocorrência de cada grupo de duplicados.'));
+  sections.push(bullet('Feedback ao utilizador com contagem de linhas removidas.'));
+  sections.push(bullet('Operação registada no log de operações.'));
+  sections.push(heading2('35.3 Justificação'));
+  sections.push(para('Dados duplicados são um problema frequente em conjuntos de dados importados ou resultantes de operações como produto cartesiano. A remoção automática de duplicados complementa o merge manual para casos mais simples onde os registos são exatamente iguais.'));
+
   return new Document({
     sections: [{ children: sections }],
   });
@@ -554,7 +649,7 @@ function generateTestsDoc() {
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 400 },
-      children: [new TextRun({ text: `Versão 1.0 — ${new Date().toLocaleDateString('pt-PT')}`, font: FONT, size: 22, color: '999999' })],
+      children: [new TextRun({ text: `Versão 1.1 — ${new Date().toLocaleDateString('pt-PT')}`, font: FONT, size: 22, color: '999999' })],
     }),
     emptyLine(),
   );
@@ -961,6 +1056,115 @@ function generateTestsDoc() {
     'Tooltip de atalhos de teclado aparece e desaparece corretamente.'
   ));
 
+  // Section 28: v1.1 Features
+  sections.push(heading1('28. Funcionalidades v1.1'));
+
+  sections.push(heading2('28.1 Row Number / Rank / Dense Rank'));
+  sections.push(...testCase('063', 'Row Number',
+    'Vista de tabela com dados e ordenação aplicada.',
+    ['Clicar direito no cabeçalho de uma coluna numérica.', 'Selecionar "Binning / Bucketing" → "Row Number".', 'Verificar que uma nova coluna inteira é adicionada com numeração sequencial (1, 2, 3, ...).', 'Verificar que a numeração respeita a ordem de ordenação atual.'],
+    'Nova coluna com numeração sequencial adicionada conforme a ordem de ordenação.'
+  ));
+  sections.push(...testCase('064', 'Rank',
+    'Vista de tabela com coluna numérica contendo valores repetidos.',
+    ['Clicar direito no cabeçalho da coluna numérica.', 'Selecionar "Binning / Bucketing" → "Rank".', 'Verificar que uma nova coluna inteira é adicionada com classificação.', 'Verificar que valores iguais recebem o mesmo rank.', 'Verificar que existem gaps após empates (ex: 1, 2, 2, 4).'],
+    'Classificação Rank aplicada com empates e gaps corretos.'
+  ));
+  sections.push(...testCase('065', 'Dense Rank',
+    'Vista de tabela com coluna numérica contendo valores repetidos.',
+    ['Clicar direito no cabeçalho da coluna numérica.', 'Selecionar "Binning / Bucketing" → "Dense Rank".', 'Verificar que uma nova coluna inteira é adicionada com classificação densa.', 'Verificar que valores iguais recebem o mesmo rank.', 'Verificar que NÃO existem gaps (ex: 1, 2, 2, 3).'],
+    'Classificação Dense Rank aplicada sem gaps entre ranks.'
+  ));
+
+  sections.push(heading2('28.2 Produto Cartesiano'));
+  sections.push(...testCase('066', 'Cartesian Product (THIS)',
+    'Relação com pelo menos uma coluna do tipo "relation" com sub-registos.',
+    ['Clicar direito no cabeçalho da coluna de relação.', 'Selecionar "Cartesian Product (THIS)".', 'Verificar que cada linha é multiplicada pelo número de sub-registos da sua sub-relação.', 'Verificar que as colunas da sub-relação aparecem como novas colunas na tabela principal.', 'Verificar que o número total de linhas aumentou conforme esperado.'],
+    'Cross-join realizado com expansão correta de linhas e adição de colunas da sub-relação.'
+  ));
+  sections.push(...testCase('067', 'Cartesian Product (ALL)',
+    'Relação com múltiplas colunas do tipo "relation".',
+    ['Aceder à operação "Cartesian Product (ALL)" via menu.', 'Verificar que TODAS as colunas de relação são expandidas simultaneamente.', 'Verificar que o resultado contém as colunas de todas as sub-relações.'],
+    'Todas as sub-relações expandidas num único passo com resultado correto.'
+  ));
+
+  sections.push(heading2('28.3 Remoção de Duplicados'));
+  sections.push(...testCase('068', 'Remove Duplicates',
+    'Relação com linhas duplicadas (valores idênticos exceto ID).',
+    ['Aceder à operação "Remove Duplicates" via menu de ações.', 'Verificar que as linhas duplicadas são removidas.', 'Verificar que apenas uma instância de cada combinação de valores é mantida.', 'Verificar mensagem de feedback com contagem de linhas removidas.'],
+    'Duplicados removidos com preservação da primeira ocorrência e feedback ao utilizador.'
+  ));
+
+  sections.push(heading2('28.4 Colunas Derivadas'));
+  sections.push(...testCase('069', 'Colunas Derivadas - Extrações de Data',
+    'Relação com coluna do tipo date ou datetime com valores preenchidos.',
+    ['Clicar direito no cabeçalho da coluna de data.', 'Selecionar "Derived Columns" no menu.', 'Selecionar extração "Year".', 'Verificar que nova coluna inteira é criada com o ano extraído.', 'Repetir para Month, Day, Weekday, Quarter, Semester, Day of Year, Week of Year e ISO Week.', 'Verificar que todos os valores extraídos estão corretos.'],
+    'Novas colunas criadas com valores de data extraídos corretamente para cada componente.'
+  ));
+  sections.push(...testCase('070', 'Colunas Derivadas - Extrações de Hora',
+    'Relação com coluna do tipo time ou datetime com valores de hora.',
+    ['Clicar direito no cabeçalho da coluna de hora.', 'Selecionar "Derived Columns" → "Hour".', 'Verificar que nova coluna inteira é criada com a hora extraída.', 'Repetir para Minute, Second, AM/PM e Hour12.', 'Verificar que AM/PM retorna string "AM" ou "PM" e Hour12 retorna valor 1-12.'],
+    'Componentes de hora extraídos corretamente incluindo formato 12h e AM/PM.'
+  ));
+  sections.push(...testCase('071', 'Colunas Derivadas - Arredondamento Float',
+    'Relação com coluna do tipo float com valores decimais.',
+    ['Clicar direito no cabeçalho da coluna float.', 'Selecionar "Derived Columns" → "Round".', 'Especificar número de casas decimais (ex: 2).', 'Verificar que nova coluna é criada com valores arredondados.'],
+    'Valores float arredondados ao número de casas decimais especificado.'
+  ));
+  sections.push(...testCase('072', 'Colunas Derivadas - Métricas de String',
+    'Relação com coluna do tipo string ou textarea com texto.',
+    ['Clicar direito no cabeçalho da coluna de texto.', 'Selecionar "Derived Columns" → "Length".', 'Verificar que nova coluna inteira mostra o comprimento do texto.', 'Repetir para Bytes, Flesch Reading Ease, Flesch-Kincaid Grade Level e Sentence Count.', 'Verificar que Flesch Reading Ease retorna valor numérico entre 0-100.', 'Verificar que Sentence Count retorna contagem correta de frases.'],
+    'Métricas de string calculadas corretamente para cada tipo de métrica.'
+  ));
+
+  sections.push(heading2('28.5 Log de Operações'));
+  sections.push(...testCase('073', 'Registo de Operações no Log',
+    'Relação carregada com dados.',
+    ['Executar uma operação mutante (ex: adicionar linha).', 'Verificar no JSON da relação que relation.log contém uma entrada.', 'Verificar que a entrada tem formato {pot: "relation_op", timestamp, op, ...params}.', 'Executar mais operações (editar célula, eliminar linha, aplicar binning).', 'Verificar que cada operação adiciona nova entrada ao log com timestamp e parâmetros corretos.'],
+    'Todas as operações mutantes são registadas no log com estrutura declarativa correta.'
+  ));
+
+  sections.push(heading2('28.6 Visibilidade de Colunas'));
+  sections.push(...testCase('074', 'Diálogo Show/Hide Columns',
+    'Vista de tabela com múltiplas colunas.',
+    ['Aceder ao diálogo "Show/Hide Columns" via menu de coluna.', 'Verificar que todas as colunas são listadas com checkboxes.', 'Desmarcar uma coluna.', 'Verificar que o input de largura está disponível para cada coluna.', 'Alterar a largura de uma coluna no input.', 'Usar drag & drop para reordenar colunas no diálogo.', 'Confirmar alterações.', 'Verificar que a tabela reflete as alterações (coluna oculta, largura alterada, nova ordem).'],
+    'Diálogo permite controlar visibilidade, largura e ordem, com reflexo imediato na tabela.'
+  ));
+  sections.push(...testCase('075', 'Hide Column via Menu',
+    'Vista de tabela com múltiplas colunas visíveis.',
+    ['Clicar direito no cabeçalho de uma coluna.', 'Selecionar "Column" → "Hide Column".', 'Verificar que a coluna desaparece da tabela.', 'Verificar que a coluna pode ser restaurada via diálogo Show/Hide Columns.'],
+    'Coluna ocultada via menu e restaurável via diálogo.'
+  ));
+  sections.push(...testCase('076', 'Redimensionamento de Coluna via Drag',
+    'Vista de tabela com colunas visíveis.',
+    ['Posicionar o cursor na borda direita de um cabeçalho de coluna.', 'Verificar que o cursor muda para indicador de resize.', 'Arrastar a borda para redimensionar a coluna.', 'Verificar que a largura da coluna é atualizada em tempo real.', 'Verificar que o valor de largura é persistido no columns_visible do uiState.'],
+    'Coluna redimensionada via drag com persistência no estado.'
+  ));
+  sections.push(...testCase('077', 'Reordenação de Colunas via Drag & Drop',
+    'Vista de tabela com múltiplas colunas.',
+    ['Clicar e arrastar um cabeçalho de coluna para outra posição.', 'Verificar feedback visual durante o drag (indicador de posição).', 'Largar a coluna na nova posição.', 'Verificar que a ordem das colunas é atualizada na tabela.', 'Verificar que a nova ordem é persistida no columns_visible do uiState.'],
+    'Colunas reordenadas via drag & drop com persistência no estado.'
+  ));
+
+  sections.push(heading2('28.7 Vistas Guardadas com Log'));
+  sections.push(...testCase('078', 'Guardar e Restaurar Vista de Log',
+    'Relação com operações executadas (log não vazio).',
+    ['Abrir separador "Saved".', 'Selecionar tipo "Log de Operações".', 'Escrever nome e guardar.', 'Verificar que a vista aparece na lista com tipo "Log".', 'Limpar os dados da relação.', 'Restaurar a vista de log guardada.', 'Verificar que a sequência de operações é restaurada no relation.log.'],
+    'Vista de Log guardada e restaurada com sequência de operações preservada.'
+  ));
+
+  sections.push(heading2('28.8 Renomeações de Menu'));
+  sections.push(...testCase('079', 'Menu Binning / Bucketing Renomeado',
+    'Vista de tabela com coluna numérica.',
+    ['Clicar direito no cabeçalho de uma coluna numérica.', 'Verificar que o item de menu mostra "Binning / Bucketing" (não apenas "Binning").', 'Verificar que o submenu contém as opções: Binning, Row Number, Rank, Dense Rank.'],
+    'Menu renomeado para "Binning / Bucketing" com novas opções visíveis.'
+  ));
+  sections.push(...testCase('080', 'Opções de Filtro de Outliers Renomeadas',
+    'Vista de tabela com coluna numérica.',
+    ['Abrir filtro para uma coluna numérica.', 'Selecionar aba "Outliers".', 'Verificar que as opções mostram "Choose Outliers" (não "Keep Outliers").', 'Verificar que a opção alternativa mostra "Choose Not Outliers" (não "Remove Outliers").'],
+    'Opções de filtro de outliers com nomes atualizados v1.1.'
+  ));
+
   return new Document({
     sections: [{ children: sections }],
   });
@@ -992,7 +1196,7 @@ function generateReflectionDoc() {
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 400 },
-      children: [new TextRun({ text: `Versão 1.0 — ${new Date().toLocaleDateString('pt-PT')}`, font: FONT, size: 22, color: '999999' })],
+      children: [new TextRun({ text: `Versão 1.1 — ${new Date().toLocaleDateString('pt-PT')}`, font: FONT, size: 22, color: '999999' })],
     }),
     emptyLine(),
   );
@@ -1263,6 +1467,35 @@ function generateReflectionDoc() {
     'Painel destacável (pop-out para janela separada). Modo split-screen (tabela + detalhe fixo). Modo full-screen para detalhe. Transição animada entre modos.'
   ));
 
+  // 12. Evolution to v1.1
+  sections.push(heading1('12. Evolução para Versão 1.1'));
+  sections.push(para('A versão 1.1 do Relation Builder representa uma evolução significativa que adiciona capacidades sem comprometer a arquitetura existente. Esta secção analisa as principais adições e as suas implicações arquiteturais.'));
+
+  sections.push(heading2('12.1 Sistema columns_visible como Evolução do Modelo de Apresentação'));
+  sections.push(boldPara('Necessidade: ', 'Na v1.0, todas as colunas eram sempre visíveis e a largura era determinada automaticamente pelo browser. Em relações com muitas colunas, a tabela tornava-se ilegível. O columns_visible resolve isto com controlo granular.'));
+  sections.push(boldPara('Impacto Arquitetural: ', 'O columns_visible é um objeto no uiState que codifica três dimensões num único artefacto: presença da chave = visibilidade, valor = largura, ordem das chaves = ordem de apresentação. Esta codificação é elegante mas requer que a ordem de propriedades do objeto JavaScript seja preservada, o que é garantido nas especificações modernas de JS.'));
+  sections.push(boldPara('Usabilidade: ', 'A oferta de múltiplos caminhos de interação (diálogo, menu, drag resize, drag reorder) segue o princípio de acomodar diferentes estilos de trabalho. A reorganização do menu de coluna (Column Selection → submenu Column) agrupa logicamente as operações relacionadas.'));
+  sections.push(boldPara('Evolução Futura: ', 'Perfis de visibilidade por tipo de tarefa. Herança de configuração de colunas entre vistas. Responsividade automática que oculta colunas conforme o tamanho do ecrã.'));
+
+  sections.push(heading2('12.2 Log de Operações como Base para Replay/Undo'));
+  sections.push(boldPara('Necessidade: ', 'A rastreabilidade de operações é fundamental para auditoria e reversibilidade. O log de operações regista mais de 40 tipos de operações mutantes com estrutura declarativa {pot: "relation_op", timestamp, op, ...params}.'));
+  sections.push(boldPara('Impacto Arquitetural: ', 'O log transforma o Relation Builder de uma ferramenta de manipulação direta para uma que mantém histórico completo de transformações. A estrutura declarativa dos registos é fundamental: cada entrada contém toda a informação necessária para reproduzir a operação, permitindo futuramente replay de sequências e undo/redo. A integração com Vistas Guardadas (novo tipo "Log de Operações") permite persistir e partilhar pipelines de transformação.'));
+  sections.push(boldPara('Custo/Benefício: ', 'O custo de instrumentar 40+ operações é moderado mas o benefício é muito alto: auditoria completa, replay, e fundação para funcionalidades avançadas de versionamento de dados.'));
+  sections.push(boldPara('Evolução Futura: ', 'Undo/redo baseado no log. Replay de sequências de operações sobre novos dados. Partilha de pipelines de transformação entre utilizadores. Visualização temporal do log.'));
+
+  sections.push(heading2('12.3 Colunas Derivadas como Extensão do Pipeline de Transformação'));
+  sections.push(boldPara('Necessidade: ', 'Utilizadores frequentemente necessitam de componentes extraídos de dados existentes (ano de uma data, comprimento de um texto). Antes da v1.1, estas transformações requeriam ferramentas externas.'));
+  sections.push(boldPara('Impacto Arquitetural: ', 'O sistema de colunas derivadas é organizado por tipo de dados de origem (date, time, float, string), o que facilita a descoberta e a extensibilidade. A inclusão de métricas de legibilidade (Flesch Reading Ease, Flesch-Kincaid Grade Level) diferencia o Relation Builder de ferramentas concorrentes na análise de conteúdo textual. A extração cria colunas genuínas na relação, que podem depois ser usadas em filtros, pivot, correlação e outras funcionalidades existentes.'));
+  sections.push(boldPara('Custo/Benefício: ', 'Custo moderado de implementação (extrações simples + algoritmos de legibilidade). Benefício alto pois elimina a necessidade de ferramentas externas para transformações comuns.'));
+  sections.push(boldPara('Evolução Futura: ', 'Fórmulas customizáveis pelo utilizador. Colunas derivadas por expressão regular. Transformações em cadeia (pipeline visual). Colunas calculadas que se atualizam automaticamente.'));
+
+  sections.push(heading2('12.4 Padrão de Evolução Progressiva'));
+  sections.push(para('A v1.1 demonstra um padrão de evolução progressiva: todas as funcionalidades novas foram adicionadas sem quebrar funcionalidades existentes. Os menus foram reorganizados (Column Selection → Column) mas as operações mantiveram o seu comportamento. As renomeações (Binning → Binning / Bucketing, Keep Outliers → Choose Outliers) melhoram a clareza sem alterar a semântica.'));
+  sections.push(para('O produto cartesiano e a remoção de duplicados complementam o ecossistema existente de operações sobre relações, e as operações Row Number/Rank/Dense Rank estendem a secção de binning com funcionalidades de classificação que seguem padrões SQL bem conhecidos.'));
+  sections.push(para('A adopção de operações baseadas em índice de posição (em vez de depender de coluna id) torna o sistema mais robusto e flexível, permitindo operações sobre relações sem coluna id.'));
+  sections.push(para('Este padrão de evolução sem ruptura é essencial para a manutenibilidade a longo prazo e a confiança dos utilizadores na estabilidade da ferramenta.'));
+  sections.push(emptyLine());
+
   // Conclusion
   sections.push(heading1('Conclusão'));
   sections.push(para('O Relation Builder demonstra um equilíbrio cuidadoso entre funcionalidade avançada e complexidade gerível. As decisões de design seguem princípios sólidos:'));
@@ -1271,7 +1504,7 @@ function generateReflectionDoc() {
   sections.push(bullet('Autonomia: Sem dependências de frameworks, mantendo controlo total.'));
   sections.push(bullet('Extensibilidade: A arquitetura permite evolução sem reescrita.'));
   sections.push(emptyLine());
-  sections.push(para('As áreas com maior potencial de evolução são: (1) persistência de dados via base de dados, (2) colaboração multi-utilizador, (3) visualizações gráficas avançadas, e (4) automação via scripting/macros. Estas evoluções devem ser priorizadas conforme feedback real de utilizadores.'));
+  sections.push(para('As áreas com maior potencial de evolução são: (1) persistência de dados via base de dados, (2) colaboração multi-utilizador, (3) visualizações gráficas avançadas, (4) automação via scripting/macros, e (5) replay e undo baseado no log de operações introduzido na v1.1. Estas evoluções devem ser priorizadas conforme feedback real de utilizadores.'));
 
   return new Document({
     sections: [{ children: sections }],
