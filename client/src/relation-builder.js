@@ -14084,9 +14084,9 @@ function addClustersAsColumn(st = state) {
   if (!nodes || nodes.length === 0) return;
   
   const colDefs = [
-    { name: 'clusters', type: 'int' },
-    { name: 'clustering_x', type: 'float' },
-    { name: 'clustering_y', type: 'float' }
+    { name: 'cluster', type: 'int' },
+    { name: 'cluster_x', type: 'float' },
+    { name: 'cluster_y', type: 'float' }
   ];
   const cv = getColumnsVisible(st);
   const hasCv = cv && Object.keys(cv).length > 0;
@@ -14124,7 +14124,7 @@ function addClustersAsColumn(st = state) {
   });
   
   logOperation(st, { op: 'clusters_as_column', columns: colDefs.map(d => d.name), num_clusters: new Set(nodes.map(n => n.cluster)).size });
-  showToast('Columns "clusters", "clustering_x", "clustering_y" ' + (anyNew ? 'added' : 'updated'));
+  showToast('Columns "cluster", "cluster_x", "cluster_y" ' + (anyNew ? 'added' : 'updated'));
 }
 
 // K-means clustering algorithm
