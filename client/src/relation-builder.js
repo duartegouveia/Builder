@@ -14117,7 +14117,7 @@ function addClustersAsColumn(st = state) {
   nodes.forEach(node => {
     if (node.idx != null && node.idx < st.relation.items.length) {
       const row = st.relation.items[node.idx];
-      row[colIndices[0]] = node.cluster;
+      row[colIndices[0]] = node.cluster + 1;
       row[colIndices[1]] = Math.round((node.tsneX ?? node.x) * 1000) / 1000;
       row[colIndices[2]] = Math.round((node.tsneY ?? node.y) * 1000) / 1000;
     }
