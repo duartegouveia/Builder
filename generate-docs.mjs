@@ -304,8 +304,24 @@ function generateRequirementsDoc() {
   sections.push(bullet('Indicadores visuais de direção (▲/▼) com número de posição para multi-coluna.'));
   sections.push(bullet('Suporte para todos os tipos de dados com comparação adequada (numérica, textual, data).'));
   sections.push(bullet('Tratamento consistente de valores nulos (colocados no final).'));
-  sections.push(heading2('12.2 Justificação'));
-  sections.push(para('A ordenação multi-coluna é essencial para análise de dados complexos. A interação via Shift+clique segue padrões de interface conhecidos (Excel, bases de dados), reduzindo a curva de aprendizagem.'));
+  sections.push(heading2('12.2 Sort Panel'));
+  sections.push(para('O Sort Panel é um diálogo dedicado acessível como primeira opção na secção Sort do menu de contexto da coluna (right-click no cabeçalho). Permite gestão completa dos critérios de ordenação:'));
+  sections.push(bullet('Lista ordenada de critérios de ordenação com seleção de coluna e direção (ASC/DESC).'));
+  sections.push(bullet('Acrescentar novos critérios no fundo da lista.'));
+  sections.push(bullet('Remover critérios individuais ou limpar todos.'));
+  sections.push(bullet('Reordenação de critérios via drag & drop.'));
+  sections.push(bullet('Opções de ordenação por coluna com checkboxes (todas assinaladas por omissão):'));
+  sections.push(bullet('  • Case Insensitive: ignora diferenças maiúsculas/minúsculas.'));
+  sections.push(bullet('  • Accent Insensitive: ignora diferenças de acentuação.'));
+  sections.push(bullet('  • Punctuation Insensitive: ignora pontuação na comparação.'));
+  sections.push(bullet('  • Parse Numbers: trata sequências numéricas como números (file2 antes de file10).'));
+  sections.push(heading2('12.3 Motor de Ordenação'));
+  sections.push(para('A ordenação utiliza Intl.Collator com locale \'und\' (undetermined/neutro), que aplica as regras padrão do Unicode Collation Algorithm (UCA) sem viés para nenhuma língua específica. As opções por coluna mapeiam para os parâmetros do Intl.Collator:'));
+  sections.push(bullet('sensitivity: \'base\' (case+accent insensitive), \'accent\' (case insensitive), \'case\' (accent insensitive), \'variant\' (tudo sensível).'));
+  sections.push(bullet('numeric: true/false para ordenação natural de números em strings.'));
+  sections.push(bullet('ignorePunctuation: true/false para ignorar pontuação.'));
+  sections.push(heading2('12.4 Justificação'));
+  sections.push(para('A ordenação multi-coluna é essencial para análise de dados complexos. A interação via Shift+clique segue padrões de interface conhecidos (Excel, bases de dados), reduzindo a curva de aprendizagem. O Sort Panel complementa esta funcionalidade com uma interface visual para gestão avançada de critérios, incluindo opções de comparação Unicode que permitem ordenação correta de textos multilíngues.'));
 
   // 13. Grouping
   sections.push(heading1('13. Agrupamento'));
@@ -402,6 +418,8 @@ function generateRequirementsDoc() {
   sections.push(heading1('20. Exportação'));
   sections.push(heading2('20.1 Funcionalidades'));
   sections.push(bullet('Âmbito: todos os registos, selecionados (checked), ou linha selecionada.'));
+  sections.push(bullet('A opção "Linha selecionada" apenas é mostrada quando existe efetivamente uma linha selecionada/highlighted na relação.'));
+  sections.push(bullet('A ação "Export to File" está inativa (mostra aviso) quando a relação tem zero linhas.'));
   sections.push(bullet('Formatos: CSV, Excel XML, XML, Word/HTML, PDF/HTML.'));
   sections.push(bullet('Templates server-side com interpolação de variáveis.'));
   sections.push(bullet('Templates armazenados em client/public/export/ organizados por nome de relação e formato.'));
@@ -836,6 +854,11 @@ function generateTestsDoc() {
     'Vista de tabela com dados.',
     ['Clicar no cabeçalho da coluna A (ordena por A).', 'Shift+clicar no cabeçalho da coluna B.', 'Verificar que os dados são ordenados por A e depois por B.', 'Verificar que os indicadores mostram ▲₁ e ▲₂ respetivamente.'],
     'Ordenação multi-coluna aplicada com indicadores de posição.'
+  ));
+  sections.push(...testCase('028b', 'Sort Panel',
+    'Vista de tabela com dados.',
+    ['Right-click no cabeçalho de uma coluna.', 'Expandir secção Sort.', 'Verificar que "Sort Panel" é a primeira opção.', 'Clicar em "Sort Panel".', 'Verificar que o diálogo Sort Panel abre.', 'Clicar em "+ Acrescentar critério" para adicionar um critério.', 'Verificar que aparece uma linha com seleção de coluna, direção (ASC/DESC), e 4 checkboxes (Case Insensitive, Accent Insensitive, Punctuation Insensitive, Parse Numbers) todas assinaladas.', 'Adicionar um segundo critério.', 'Arrastar o segundo critério para cima do primeiro (drag & drop).', 'Verificar que a ordem é trocada.', 'Mudar a direção de um critério para DESC.', 'Desmarcar checkbox "Case Insensitive" num critério.', 'Clicar "Aplicar".', 'Verificar que a tabela é reordenada conforme os critérios definidos.', 'Verificar que os indicadores de ordenação multi-coluna aparecem nos cabeçalhos.'],
+    'Sort Panel permite gestão completa de critérios de ordenação multi-coluna com opções avançadas de comparação Unicode via Intl.Collator.'
   ));
 
   // Section 12: Grouping
@@ -1317,13 +1340,13 @@ function generateReflectionDoc() {
     'Combinação de filtros com lógica OR (atualmente AND implícito). Filtros salvos como presets. Filtros temporários vs. persistentes. Historial de filtros aplicados.'
   ));
   sections.push(...reflectionBlock(
-    '3.2 Ordenação Multi-Coluna',
-    'Essencial. Ordenação é a operação mais básica de manipulação de dados tabulares.',
-    'Apenas ordenação simples (sem multi-coluna). Ordenação via diálogo dedicado (em vez de clique no cabeçalho). Ordenação natural/smart sorting (deteção automática de padrões).',
-    'O paradigma clique/shift+clique é standard e eficiente. O ciclo ascendente→descendente→sem é previsível. Os indicadores visuais com posição (₁, ₂) são informativos sem serem intrusivos.',
-    'Utilizadores esperam "clicar no cabeçalho ordena" — isto está perfeitamente alinhado com Excel e outras ferramentas.',
-    'Custo baixo-moderado. Benefício alto. A implementação multi-coluna adiciona pouca complexidade sobre a simples.',
-    'Ordenação custom (funções de comparação definidas pelo utilizador). Ordenação agrupada (manter grupos juntos). Natural sort para strings alfanuméricas.'
+    '3.2 Ordenação Multi-Coluna e Sort Panel',
+    'Essencial. Ordenação é a operação mais básica de manipulação de dados tabulares. O Sort Panel eleva a funcionalidade com gestão visual completa de critérios.',
+    'Apenas ordenação simples (sem multi-coluna). Apenas clique no cabeçalho (sem diálogo). Ordenação natural/smart sorting (deteção automática de padrões).',
+    'O paradigma clique/shift+clique é standard e eficiente para uso rápido. O Sort Panel complementa com uma interface visual para cenários avançados: drag & drop para reordenar prioridades, opções por coluna (Case/Accent/Punctuation Insensitive, Parse Numbers). O motor de ordenação usa Intl.Collator com locale \'und\' para máxima compatibilidade multilíngue.',
+    'Utilizadores esperam "clicar no cabeçalho ordena" para uso rápido. Para cenários complexos (multi-coluna com opções), o Sort Panel oferece controlo granular sem sacrificar a simplicidade da interação básica.',
+    'Custo moderado. Benefício alto. O Sort Panel adiciona valor significativo para utilizadores avançados. A integração com Intl.Collator garante ordenação correta para textos em qualquer idioma.',
+    'Ordenação custom (funções de comparação definidas pelo utilizador). Ordenação agrupada (manter grupos juntos). Presets de ordenação salvos. Ordenação por expressão calculada.'
   ));
   sections.push(...reflectionBlock(
     '3.3 Agrupamento com Drill-Down',

@@ -5073,3 +5073,38 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   gap: 8px;
   margin-bottom: 4px;
 }
+.sort-panel-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light, #f1f5f9);
+  border-radius: 6px;
+  background: var(--bg-surface, #ffffff);
+  transition: box-shadow 0.15s;
+}
+.sort-panel-row:hover {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.sort-panel-row.cv-drag-over {
+  border-top: 2px solid var(--blue-400, #60a5fa);
+}
+.sort-panel-col-select,
+.sort-panel-dir-select {
+  padding: 3px 6px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 4px;
+  font-size: 12px;
+  background: var(--bg-input, #fff);
+}
+.sort-panel-col-select {
+  flex: 1;
+  min-width: 120px;
+}
+.sort-panel-empty {
+  color: var(--text-secondary, #94a3b8);
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+}

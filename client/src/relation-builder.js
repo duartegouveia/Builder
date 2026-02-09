@@ -2262,7 +2262,7 @@ function applySorting(st = state) {
       const valA = rowA[criterion.column];
       const valB = rowB[criterion.column];
       
-      let cmp = compareValues(valA, valB, st.columnTypes[criterion.column]);
+      let cmp = compareValues(valA, valB, st.columnTypes[criterion.column], criterion.options);
       if (criterion.direction === 'desc') cmp = -cmp;
       
       if (cmp !== 0) return cmp;
@@ -2272,7 +2272,7 @@ function applySorting(st = state) {
   setSortedIndices(st, sortedIndices);
 }
 
-function compareValues(a, b, type) {
+function compareValues(a, b, type, options) {
   if (a === null || a === undefined) return b === null || b === undefined ? 0 : 1;
   if (b === null || b === undefined) return -1;
   
@@ -2285,7 +2285,215 @@ function compareValues(a, b, type) {
   if (type === 'date' || type === 'datetime' || type === 'time') {
     return String(a).localeCompare(String(b));
   }
-  return String(a).localeCompare(String(b));
+  return buildCollator(options).compare(String(a), String(b));
+}
+
+function buildCollator(options) {
+  const opts = options || {};
+  const caseInsensitive = opts.caseInsensitive !== false;
+  const accentInsensitive = opts.accentInsensitive !== false;
+  const punctuationInsensitive = opts.punctuationInsensitive !== false;
+  const parseNumbers = opts.parseNumbers !== false;
+
+  let sensitivity = 'variant';
+  if (caseInsensitive && accentInsensitive) sensitivity = 'base';
+  else if (caseInsensitive) sensitivity = 'accent';
+  else if (accentInsensitive) sensitivity = 'case';
+
+  return new Intl.Collator('und', {
+    sensitivity,
+    numeric: parseNumbers,
+    ignorePunctuation: punctuationInsensitive
+  });
+}
+
+function showSortPanelDialog(st) {
+  closeAllMenus();
+
+  const criteria = JSON.parse(JSON.stringify(getSortCriteria(st)));
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.style.zIndex = '100001';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'export-dialog';
+  dialog.style.maxWidth = '600px';
+  dialog.style.minWidth = '450px';
+
+  function renderCriteriaList() {
+    const listEl = dialog.querySelector('.sort-panel-list');
+    if (!listEl) return;
+    if (criteria.length === 0) {
+      listEl.innerHTML = '<div class="sort-panel-empty">Sem critérios de ordenação.</div>';
+      return;
+    }
+    listEl.innerHTML = criteria.map((c, idx) => {
+      const opts = c.options || {};
+      const colType = st.columnTypes[c.column];
+      const isTextType = colType === 'string' || colType === 'multilinestring' || colType === 'textarea' || colType === 'select';
+      const disabledAttr = isTextType ? '' : 'disabled';
+      const disabledStyle = isTextType ? '' : 'opacity:0.4;';
+      return `
+        <div class="sort-panel-row" draggable="true" data-sort-idx="${idx}" data-testid="sort-panel-row-${idx}">
+          <span class="cv-drag-handle" style="cursor:grab;margin-right:6px;">☰</span>
+          <select class="sort-panel-col-select" data-sort-idx="${idx}" data-testid="sort-panel-col-${idx}">
+            ${st.columnNames.map((n, i) => `<option value="${i}" ${i === c.column ? 'selected' : ''}>${n} (${st.columnTypes[i]})</option>`).join('')}
+          </select>
+          <select class="sort-panel-dir-select" data-sort-idx="${idx}" data-testid="sort-panel-dir-${idx}">
+            <option value="asc" ${c.direction === 'asc' ? 'selected' : ''}>ASC ↑</option>
+            <option value="desc" ${c.direction === 'desc' ? 'selected' : ''}>DESC ↓</option>
+          </select>
+          <button class="btn btn-outline sort-panel-remove" data-sort-idx="${idx}" title="Remover critério" style="padding:2px 6px;font-size:12px;" data-testid="sort-panel-remove-${idx}">✕</button>
+          <div class="sort-panel-options" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;width:100%;">
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-case" data-sort-idx="${idx}" ${opts.caseInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-case-${idx}"> Case Insensitive</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-accent" data-sort-idx="${idx}" ${opts.accentInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-accent-${idx}"> Accent Insensitive</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-punct" data-sort-idx="${idx}" ${opts.punctuationInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-punct-${idx}"> Punctuation Insensitive</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-num" data-sort-idx="${idx}" ${opts.parseNumbers !== false ? 'checked' : ''} data-testid="sort-opt-num-${idx}"> Parse Numbers</label>
+          </div>
+        </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.sort-panel-col-select').forEach(sel => {
+      sel.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        criteria[idx].column = parseInt(e.target.value);
+        renderCriteriaList();
+      });
+    });
+    listEl.querySelectorAll('.sort-panel-dir-select').forEach(sel => {
+      sel.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        criteria[idx].direction = e.target.value;
+      });
+    });
+    listEl.querySelectorAll('.sort-panel-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        criteria.splice(idx, 1);
+        renderCriteriaList();
+      });
+    });
+    listEl.querySelectorAll('.sort-opt-case').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        if (!criteria[idx].options) criteria[idx].options = {};
+        criteria[idx].options.caseInsensitive = e.target.checked;
+      });
+    });
+    listEl.querySelectorAll('.sort-opt-accent').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        if (!criteria[idx].options) criteria[idx].options = {};
+        criteria[idx].options.accentInsensitive = e.target.checked;
+      });
+    });
+    listEl.querySelectorAll('.sort-opt-punct').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        if (!criteria[idx].options) criteria[idx].options = {};
+        criteria[idx].options.punctuationInsensitive = e.target.checked;
+      });
+    });
+    listEl.querySelectorAll('.sort-opt-num').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const idx = parseInt(e.target.dataset.sortIdx);
+        if (!criteria[idx].options) criteria[idx].options = {};
+        criteria[idx].options.parseNumbers = e.target.checked;
+      });
+    });
+
+    let dragIdx = null;
+    listEl.querySelectorAll('.sort-panel-row').forEach(row => {
+      row.addEventListener('dragstart', e => {
+        dragIdx = parseInt(row.dataset.sortIdx);
+        row.style.opacity = '0.5';
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      row.addEventListener('dragend', () => {
+        row.style.opacity = '1';
+        dragIdx = null;
+        listEl.querySelectorAll('.sort-panel-row').forEach(r => r.classList.remove('cv-drag-over'));
+      });
+      row.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        row.classList.add('cv-drag-over');
+      });
+      row.addEventListener('dragleave', () => {
+        row.classList.remove('cv-drag-over');
+      });
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        const dropIdx = parseInt(row.dataset.sortIdx);
+        if (dragIdx !== null && dragIdx !== dropIdx) {
+          const moved = criteria.splice(dragIdx, 1)[0];
+          criteria.splice(dropIdx, 0, moved);
+          renderCriteriaList();
+        }
+        row.classList.remove('cv-drag-over');
+      });
+    });
+  }
+
+  dialog.innerHTML = `
+    <div class="export-dialog-header">
+      <h3>Sort Panel</h3>
+      <button class="btn btn-outline export-close">✕</button>
+    </div>
+    <div class="export-dialog-body" style="padding:12px;">
+      <div class="sort-panel-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
+      <div style="margin-top:10px;">
+        <button class="btn btn-outline sort-panel-add" style="font-size:12px;" data-testid="sort-panel-add">+ Acrescentar critério</button>
+        <button class="btn btn-outline sort-panel-clear-all" style="font-size:12px;margin-left:6px;" data-testid="sort-panel-clear-all">✕ Limpar tudo</button>
+      </div>
+    </div>
+    <div class="export-dialog-footer">
+      <button class="btn btn-outline export-cancel" data-testid="sort-panel-cancel">Cancelar</button>
+      <button class="btn btn-primary sort-panel-apply" data-testid="sort-panel-apply">Aplicar</button>
+    </div>
+  `;
+
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  renderCriteriaList();
+
+  const closeDialog = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeDialog(); });
+  dialog.querySelector('.export-close').addEventListener('click', closeDialog);
+  dialog.querySelector('.export-cancel').addEventListener('click', closeDialog);
+
+  dialog.querySelector('.sort-panel-add').addEventListener('click', () => {
+    const usedCols = new Set(criteria.map(c => c.column));
+    let nextCol = 0;
+    for (let i = 0; i < st.columnNames.length; i++) {
+      if (!usedCols.has(i)) { nextCol = i; break; }
+    }
+    criteria.push({
+      column: nextCol,
+      direction: 'asc',
+      options: { caseInsensitive: true, accentInsensitive: true, punctuationInsensitive: true, parseNumbers: true }
+    });
+    renderCriteriaList();
+  });
+
+  dialog.querySelector('.sort-panel-clear-all').addEventListener('click', () => {
+    criteria.length = 0;
+    renderCriteriaList();
+  });
+
+  dialog.querySelector('.sort-panel-apply').addEventListener('click', () => {
+    setSortCriteria(st, criteria);
+    const logCriteria = criteria.map(c => ({
+      column: st.columnNames[c.column],
+      direction: c.direction,
+      options: c.options || {}
+    }));
+    logOperation(st, { op: 'sort_panel', criteria: logCriteria });
+    renderTable(st);
+    closeDialog();
+  });
 }
 
 // Categorical Histogram SVG Generator
@@ -3817,7 +4025,7 @@ function openInNewTab(content, mimeType) {
 
 function showExportDialog(st) {
   const hasChecked = getSelectedRows(st).size > 0;
-  const hasHighlighted = getHighlightedRow(st) >= 0;
+  const hasHighlighted = getHighlightedRow(st) !== null && getHighlightedRow(st) >= 0;
   const totalItems = st.relation.items.length;
   const relationName = st.relation.name || 'relation';
 
@@ -5077,6 +5285,10 @@ function handleAlwaysVisibleAction(st, action) {
 
   // Export to file
   if (action === 'export-file') {
+    if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
+      showToast('Nenhum registo para exportar.', 'warning');
+      return;
+    }
     showExportDialog(st);
     return;
   }
@@ -7092,6 +7304,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
       <div class="accordion-section" data-section="sort">
         <div class="accordion-header">Sort <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
+          <button class="column-menu-item" data-action="sort-panel">🔀 Sort Panel</button>
           <button class="column-menu-item" data-action="sort-asc">↑ Ascending</button>
           <button class="column-menu-item" data-action="sort-desc">↓ Descending</button>
           <button class="column-menu-item" data-action="sort-clear">✕ Clear Sort</button>
@@ -7523,6 +7736,9 @@ function showColumnsVisibilityDialog(st) {
 
 function handleColumnMenuAction(colIdx, action, st = state) {
   switch (action) {
+    case 'sort-panel':
+      showSortPanelDialog(st);
+      return;
     case 'sort-asc':
       setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
       logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'asc' });
