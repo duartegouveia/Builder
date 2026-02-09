@@ -4610,6 +4610,11 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   gap: 8px;
 }
 
+.confirm-dialog-buttons .btn-primary {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
 .confirm-dialog-buttons .btn-danger {
   background: var(--red-600, #dc2626);
   color: #fff;
