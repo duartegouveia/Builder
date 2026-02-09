@@ -11144,6 +11144,10 @@ function applyAIFilter(conditions, st = state) {
 }
 
 // View tab icons SVG definitions
+const VIEW_DISPLAY_NAMES = {
+  diagram: 'Clustering'
+};
+
 const VIEW_TAB_ICONS = {
   table: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
   cards: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>',
@@ -11175,7 +11179,7 @@ function renderViewTabs() {
     btn.className = 'view-tab' + (idx === 0 ? ' active' : '');
     btn.dataset.view = viewKey;
     btn.dataset.testid = 'tab-' + viewKey;
-    btn.innerHTML = (VIEW_TAB_ICONS[viewKey] || '') + ' ' + viewName;
+    btn.innerHTML = (VIEW_TAB_ICONS[viewKey] || '') + ' ' + (VIEW_DISPLAY_NAMES[viewKey] || viewName);
     
     btn.addEventListener('click', () => {
       switchView(viewKey);
@@ -14065,8 +14069,43 @@ function runClustering(st = state) {
     st.diagramBallRadius = ballRadius;
     
     if (progressEl) progressEl.style.display = 'none';
+    
+    const clustersBtn = diagramView?.querySelector('.btn-clusters-as-column');
+    if (clustersBtn) clustersBtn.disabled = false;
+    
     renderDiagram(st);
   }, 50);
+}
+
+function addClustersAsColumn(st = state) {
+  const nodes = getDiagramNodes(st);
+  if (!nodes || nodes.length === 0) return;
+  
+  const colName = 'clusters';
+  let colIdx = st.columnNames.indexOf(colName);
+  const isNew = colIdx === -1;
+  
+  if (isNew) {
+    st.relation.columns[colName] = 'int';
+    st.columnNames.push(colName);
+    st.columnTypes.push('int');
+    st.relation.items.forEach(row => row.push(null));
+    colIdx = st.columnNames.length - 1;
+    const cv = getColumnsVisible(st);
+    if (cv && Object.keys(cv).length > 0) {
+      cv[colName] = 0;
+      setColumnsVisible(st, cv);
+    }
+  }
+  
+  nodes.forEach(node => {
+    if (node.idx != null && node.idx < st.relation.items.length) {
+      st.relation.items[node.idx][colIdx] = node.cluster;
+    }
+  });
+  
+  logOperation(st, { op: 'clusters_as_column', column: colName, num_clusters: new Set(nodes.map(n => n.cluster)).size });
+  showToast('Column "clusters" ' + (isNew ? 'added' : 'updated'));
 }
 
 // K-means clustering algorithm
@@ -14664,7 +14703,7 @@ function initRelationInstance(container, relationData, options = {}) {
         ${viewOptions.map((view, idx) => {
           const viewKey = view.toLowerCase();
           const icon = VIEW_TAB_ICONS[viewKey] || '';
-          return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${view}</button>`;
+          return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${VIEW_DISPLAY_NAMES[viewKey] || view}</button>`;
         }).join('')}
       </div>` : ''}
       ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
@@ -14782,6 +14821,7 @@ function initRelationInstance(container, relationData, options = {}) {
           <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
         </div>
         <button class="btn-run-clustering btn btn-primary btn-sm">Run t-SNE</button>
+        <button class="btn-clusters-as-column btn btn-outline btn-sm" disabled>Clusters as Column</button>
         <span class="tsne-progress" style="display: none;">Calculating...</span>
       </div>
       <div class="diagram-container">
@@ -15038,6 +15078,12 @@ function initDiagramView(st = state) {
     const newBtn = clusterBtn.cloneNode(true);
     clusterBtn.parentNode.replaceChild(newBtn, clusterBtn);
     newBtn.addEventListener('click', () => runClustering(st));
+  }
+  const clustersColBtn = diagramView.querySelector('.btn-clusters-as-column');
+  if (clustersColBtn) {
+    const newBtn2 = clustersColBtn.cloneNode(true);
+    clustersColBtn.parentNode.replaceChild(newBtn2, clustersColBtn);
+    newBtn2.addEventListener('click', () => addClustersAsColumn(st));
   }
 }
 
@@ -16255,6 +16301,7 @@ function init() {
   
   // Diagram events
   el('.btn-run-clustering')?.addEventListener('click', () => runClustering());
+  el('.btn-clusters-as-column')?.addEventListener('click', () => addClustersAsColumn());
   
   // AI events
   btnAiAsk?.addEventListener('click', () => {
