@@ -5031,6 +5031,25 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-radius: 6px;
   margin: 8px 0;
 }
+.cv-columns-header {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.cv-header-col {
+  flex: 1;
+  padding-left: 28px;
+}
+.cv-header-width {
+  width: 60px;
+  text-align: right;
+}
 .cv-row {
   display: flex;
   align-items: center;

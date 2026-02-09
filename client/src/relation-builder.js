@@ -7118,6 +7118,20 @@ function attachTableEventListeners(st = state, container = null) {
   
   // Column resize handles
   tableContainer.querySelectorAll('.col-resize-handle').forEach(handle => {
+    handle.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const colIdx = parseInt(handle.dataset.col);
+      const cv = getColumnsVisible(st) || {};
+      const newCV = Object.keys(cv).length > 0 ? { ...cv } : {};
+      if (Object.keys(newCV).length === 0) {
+        st.columnNames.forEach((n) => { newCV[n] = 0; });
+      }
+      newCV[st.columnNames[colIdx]] = 0;
+      setColumnsVisible(st, newCV);
+      logOperation(st, { op: 'resize_column', column: st.columnNames[colIdx], width: 0 });
+      renderTable(st);
+    });
     handle.addEventListener('mousedown', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -7668,6 +7682,10 @@ function showColumnsVisibilityDialog(st) {
       <div class="cv-actions-bar">
         <button class="btn btn-sm cv-select-all">Select All</button>
         <button class="btn btn-sm cv-deselect-all">Deselect All</button>
+      </div>
+      <div class="cv-columns-header">
+        <span class="cv-header-col">Column</span>
+        <span class="cv-header-width">Width (0 = auto)</span>
       </div>
       <div class="cv-columns-list">${listHtml}</div>
     </div>
