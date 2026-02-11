@@ -90,7 +90,7 @@ const DEFAULT_REL_OPTIONS = {
   hierarchy_root_value: '',
   single_item_mode: 'dialog',
   label_field_top_down: true,
-  OnDoubleClickAction: '',
+  OnDoubleClickAction: 'view',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
   general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
@@ -132,7 +132,7 @@ const PRODUCTS_JSON = {
     "hierarchy_root_value": "",
     "single_item_mode": "right",
     "label_field_top_down": true,
-    "OnDoubleClickAction": "",
+    "OnDoubleClickAction": "view",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
@@ -181,7 +181,7 @@ const CATEGORIES_JSON = {
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
-    "OnDoubleClickAction": "",
+    "OnDoubleClickAction": "view",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
@@ -239,7 +239,7 @@ const STOCKS_JSON = {
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
-    "OnDoubleClickAction": "",
+    "OnDoubleClickAction": "view",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
@@ -351,7 +351,7 @@ const PRICELISTS_JSON = {
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
-    "OnDoubleClickAction": "",
+    "OnDoubleClickAction": "view",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
@@ -1976,7 +1976,7 @@ function generateDemoRelation() {
     hierarchy_column: 'parent',
     single_item_mode: 'dialog',
     label_field_top_down: true,
-    OnDoubleClickAction: '',
+    OnDoubleClickAction: 'view',
     general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
     general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
     general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
@@ -5417,7 +5417,7 @@ const SELECTION_REL_OPTIONS = {
   hierarchy_column: 'parent',
   single_item_mode: 'bottom',
   label_field_top_down: true,
-  OnDoubleClickAction: '',
+  OnDoubleClickAction: 'view',
   general_view_options: [],
   general_always_visible_options: [],
   general_line_options: [],
@@ -7236,21 +7236,37 @@ function attachTableEventListeners(st = state, container = null) {
     });
   });
 
-  // Double-click on row - navigate into children (hierarchy drill-down)
-  if (shouldShowHierarchy(st)) {
-    tableContainer.querySelectorAll('tbody tr').forEach(tr => {
-      tr.addEventListener('dblclick', (e) => {
-        // Skip if clicking on interactive elements
-        if (e.target.matches('input, button, select, textarea, .btn-row-ops')) return;
-        if (e.target.closest('.nested-relation-table-dynamic')) return;
-        
-        const rowIdx = parseInt(tr.dataset.rowIdx);
-        if (isNaN(rowIdx)) return;
-        
+  // Double-click on row - hierarchy drill-down takes priority, otherwise OnDoubleClickAction
+  const dblClickAction = st.rel_options.OnDoubleClickAction || 'view';
+  const DOUBLE_CLICK_ACTION_MAP = {
+    'view': 'view-row',
+    'edit': 'edit-row',
+    'copy': 'copy-row',
+    'new': 'new-row',
+    'new_fast': 'new-fast-row',
+    'delete': 'delete-row',
+    'paper_form': 'paper-form-row',
+    'print': 'print-row'
+  };
+  tableContainer.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('dblclick', (e) => {
+      if (e.target.matches('input, button, select, textarea, .btn-row-ops')) return;
+      if (e.target.closest('.nested-relation-table-dynamic')) return;
+      
+      const rowIdx = parseInt(tr.dataset.rowIdx);
+      if (isNaN(rowIdx)) return;
+      
+      if (shouldShowHierarchy(st)) {
         navigateHierarchyDown(rowIdx, st);
-      });
+        return;
+      }
+      
+      const mappedAction = DOUBLE_CLICK_ACTION_MAP[dblClickAction];
+      if (mappedAction) {
+        handleRowOperation(st, rowIdx, mappedAction);
+      }
     });
-  }
+  });
 }
 
 function updateBoolCheckbox(checkbox, value) {
@@ -7519,6 +7535,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         <div class="accordion-content">
           <button class="column-menu-item" data-action="format-databar">Color Bar</button>
           <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
+          <button class="column-menu-item" data-action="format-icon-set">Icon Set...</button>
           <button class="column-menu-item" data-action="format-active-filter">Color current results...</button>
           <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
         </div>
@@ -7833,6 +7850,9 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       applyColorScale(colIdx, st);
       logOperation(st, { op: 'format_color_scale', column: st.columnNames[colIdx] });
       break;
+    case 'format-icon-set':
+      showIconSetDialog(colIdx, st);
+      return;
     case 'format-clear':
       delete getFormatting(st)[colIdx];
       // Also clear persisted colors for this column
@@ -8827,6 +8847,134 @@ function applyColorScale(colIdx, st = state) {
   rules._colorScale = { min: stats.min, max: stats.max, colors: colors };
   
   getFormatting(st)[colIdx] = rules;
+}
+
+const ICON_SETS = [
+  { name: 'Arrows', icons: ['↑', '↗', '→', '↘', '↓'] },
+  { name: 'Arrows (3)', icons: ['↑', '→', '↓'] },
+  { name: 'Traffic Lights', icons: ['🟢', '🟡', '🔴'] },
+  { name: 'Traffic Lights (4)', icons: ['🟢', '🟡', '🟠', '🔴'] },
+  { name: 'Stars', icons: ['★★★', '★★☆', '★☆☆', '☆☆☆'] },
+  { name: 'Stars (3)', icons: ['★★★', '★★☆', '☆☆☆'] },
+  { name: 'Checks', icons: ['✓', '~', '✗'] },
+  { name: 'Flags', icons: ['🟩', '🟨', '🟥'] },
+  { name: 'Circles', icons: ['⬤', '◕', '◑', '◔', '○'] },
+  { name: 'Triangles', icons: ['▲', '▶', '▼'] },
+  { name: 'Bars', icons: ['█', '▆', '▄', '▂', '░'] },
+  { name: 'Thumbs', icons: ['👍', '👎'] },
+  { name: 'Medals', icons: ['🥇', '🥈', '🥉'] },
+  { name: 'Progress', icons: ['■■■■', '■■■□', '■■□□', '■□□□', '□□□□'] }
+];
+
+function showIconSetDialog(colIdx, st = state) {
+  const stats = calculateStatistics(colIdx, st);
+  if (stats.min === undefined || stats.max === undefined) {
+    showToast('Icon sets require numeric columns with values', 'warning');
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'confirm-dialog icon-set-dialog';
+
+  let selectedSetIdx = 0;
+  let reversed = false;
+
+  function getPreviewHTML(setIdx, rev) {
+    const set = ICON_SETS[setIdx];
+    const icons = rev ? [...set.icons].reverse() : set.icons;
+    const range = stats.max - stats.min;
+    const steps = icons.length;
+    let html = '<div class="icon-set-preview-table">';
+    html += '<div class="icon-set-preview-header"><span>Icon</span><span>Range</span></div>';
+    for (let i = 0; i < steps; i++) {
+      const minVal = (stats.min + (range / steps) * i).toFixed(1);
+      const maxVal = (stats.min + (range / steps) * (i + 1)).toFixed(1);
+      const rangeLabel = i === steps - 1 ? `${minVal} – ${maxVal}` : `${minVal} – <${maxVal}`;
+      html += `<div class="icon-set-preview-row"><span class="icon-set-preview-icon">${icons[i]}</span><span class="icon-set-preview-range">${rangeLabel}</span></div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderDialog() {
+    dialog.innerHTML = `
+      <div class="dialog-header">
+        <span class="dialog-title">Icon Set — ${st.columnNames[colIdx]}</span>
+        <button class="dialog-close" title="Fechar">✕</button>
+      </div>
+      <div class="dialog-body" style="overflow-y:auto;">
+        <div class="icon-set-selector">
+          <label class="icon-set-label">Icon Set:</label>
+          <select class="icon-set-select" data-testid="select-icon-set">
+            ${ICON_SETS.map((s, i) => `<option value="${i}" ${i === selectedSetIdx ? 'selected' : ''}>${s.name}  ${s.icons.join(' ')}</option>`).join('')}
+          </select>
+        </div>
+        <div class="icon-set-options">
+          <label class="icon-set-reverse-label"><input type="checkbox" class="icon-set-reverse" ${reversed ? 'checked' : ''} data-testid="checkbox-icon-set-reverse"> Reverse order</label>
+        </div>
+        <div class="icon-set-preview-label">Preview (min: ${stats.min}, max: ${stats.max}):</div>
+        <div class="icon-set-preview" data-testid="icon-set-preview">
+          ${getPreviewHTML(selectedSetIdx, reversed)}
+        </div>
+      </div>
+      <div class="dialog-footer" style="display:flex;justify-content:space-between;">
+        <button class="btn btn-primary icon-set-apply" data-testid="button-icon-set-apply">Aplicar</button>
+        <button class="btn icon-set-close" data-testid="button-icon-set-close">Fechar</button>
+      </div>
+    `;
+  }
+
+  renderDialog();
+
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  const closeDialog = () => {
+    overlay.remove();
+  };
+
+  dialog.querySelector('.dialog-close').addEventListener('click', closeDialog);
+  dialog.querySelector('.icon-set-close').addEventListener('click', closeDialog);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeDialog();
+  });
+
+  dialog.querySelector('.icon-set-select').addEventListener('change', (e) => {
+    selectedSetIdx = parseInt(e.target.value);
+    dialog.querySelector('.icon-set-preview').innerHTML = getPreviewHTML(selectedSetIdx, reversed);
+  });
+
+  dialog.querySelector('.icon-set-reverse').addEventListener('change', (e) => {
+    reversed = e.target.checked;
+    dialog.querySelector('.icon-set-preview').innerHTML = getPreviewHTML(selectedSetIdx, reversed);
+  });
+
+  dialog.querySelector('.icon-set-apply').addEventListener('click', () => {
+    const set = ICON_SETS[selectedSetIdx];
+    const icons = reversed ? [...set.icons].reverse() : set.icons;
+    const range = stats.max - stats.min;
+    const steps = icons.length;
+    const rules = [];
+
+    for (let i = 0; i < steps; i++) {
+      const minVal = stats.min + (range / steps) * i;
+      const maxVal = stats.min + (range / steps) * (i + 1);
+      const upperCondition = (i === steps - 1) ? { lte: maxVal } : { lt: maxVal };
+      rules.push({
+        condition: { gte: minVal, ...upperCondition },
+        style: { icon: icons[i] }
+      });
+    }
+
+    rules._iconSet = { name: set.name, reversed, min: stats.min, max: stats.max };
+    getFormatting(st)[colIdx] = rules;
+    logOperation(st, { op: 'format_icon_set', column: st.columnNames[colIdx], iconSet: set.name, reversed });
+    renderTable(st);
+    closeDialog();
+  });
 }
 
 function openFilterDialogForColumn(colIdx, st = state) {
@@ -15585,6 +15733,38 @@ function attachTableEventListenersWithState(st, container) {
       showNestedRelationDialog(rowIdx, colIdx, st);
     });
   });
+
+  // Double-click on row - hierarchy drill-down takes priority, otherwise OnDoubleClickAction
+  const dblClickActionNested = st.rel_options.OnDoubleClickAction || 'view';
+  const NESTED_DOUBLE_CLICK_MAP = {
+    'view': 'view-row',
+    'edit': 'edit-row',
+    'copy': 'copy-row',
+    'new': 'new-row',
+    'new_fast': 'new-fast-row',
+    'delete': 'delete-row',
+    'paper_form': 'paper-form-row',
+    'print': 'print-row'
+  };
+  container.querySelectorAll('tbody tr').forEach(tr => {
+    tr.addEventListener('dblclick', (e) => {
+      if (e.target.matches('input, button, select, textarea, .btn-row-ops')) return;
+      if (e.target.closest('.nested-relation-table-dynamic')) return;
+      
+      const rowIdx = parseInt(tr.dataset.rowIdx);
+      if (isNaN(rowIdx)) return;
+      
+      if (shouldShowHierarchy(st)) {
+        navigateHierarchyDown(rowIdx, st);
+        return;
+      }
+      
+      const mappedAction = NESTED_DOUBLE_CLICK_MAP[dblClickActionNested];
+      if (mappedAction) {
+        handleRowOperation(st, rowIdx, mappedAction);
+      }
+    });
+  });
 }
 
 function handleSortWithState(st, colIdx, addToExisting) {
@@ -15916,7 +16096,7 @@ function init() {
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "label_field_top_down": true,
-    "OnDoubleClickAction": "",
+    "OnDoubleClickAction": "view",
     "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form","Select One","Select Many","Choose Many","Import from File","Export to file","Integrity Check","Output State"],
     "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
@@ -15948,7 +16128,7 @@ function init() {
         "hierarchy_root_value": "",
         "single_item_mode": "dialog",
         "label_field_top_down": true,
-        "OnDoubleClickAction": "",
+        "OnDoubleClickAction": "view",
         "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
         "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form","Output State"],
         "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
