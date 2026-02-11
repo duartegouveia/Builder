@@ -100,35 +100,34 @@ function generateRequirementsDoc() {
   sections.push(para('4. Visualização em Tabela'));
   sections.push(para('5. Vista de Cartões'));
   sections.push(para('6. Vista Pivot'));
-  sections.push(para('7. Vista de Correlação'));
-  sections.push(para('8. Vista de Diagrama (t-SNE)'));
-  sections.push(para('9. Vista de IA'));
-  sections.push(para('10. Vistas Guardadas'));
-  sections.push(para('11. Filtragem'));
-  sections.push(para('12. Ordenação'));
-  sections.push(para('13. Agrupamento'));
-  sections.push(para('14. Estatísticas por Coluna'));
-  sections.push(para('15. Formatação Condicional'));
-  sections.push(para('16. Binning (Discretização)'));
-  sections.push(para('17. Operações sobre Linhas'));
-  sections.push(para('18. Operações Multi-Registo'));
-  sections.push(para('19. Diálogos de Seleção'));
-  sections.push(para('20. Exportação'));
-  sections.push(para('21. Importação'));
-  sections.push(para('22. Verificação de Integridade'));
-  sections.push(para('23. Navegação Hierárquica'));
-  sections.push(para('24. Relações Aninhadas'));
-  sections.push(para('25. Pesquisa Rápida'));
-  sections.push(para('26. Paginação'));
-  sections.push(para('27. Modos de Apresentação'));
-  sections.push(para('28. Opções Configuráveis (rel_options)'));
-  sections.push(para('29. Atalhos de Teclado'));
-  sections.push(para('30. Responsividade e Interface'));
-  sections.push(para('31. Colunas Derivadas'));
-  sections.push(para('32. Log de Operações'));
-  sections.push(para('33. Visibilidade de Colunas (columns_visible)'));
-  sections.push(para('34. Produto Cartesiano'));
-  sections.push(para('35. Remoção de Duplicados'));
+  sections.push(para('7. Vista de Análise'));
+  sections.push(para('8. Vista de IA'));
+  sections.push(para('9. Vistas Guardadas'));
+  sections.push(para('10. Filtragem'));
+  sections.push(para('11. Ordenação'));
+  sections.push(para('12. Agrupamento'));
+  sections.push(para('13. Estatísticas por Coluna'));
+  sections.push(para('14. Formatação Condicional'));
+  sections.push(para('15. Binning (Discretização)'));
+  sections.push(para('16. Operações sobre Linhas'));
+  sections.push(para('17. Operações Multi-Registo'));
+  sections.push(para('18. Diálogos de Seleção'));
+  sections.push(para('19. Exportação'));
+  sections.push(para('20. Importação'));
+  sections.push(para('21. Verificação de Integridade'));
+  sections.push(para('22. Navegação Hierárquica'));
+  sections.push(para('23. Relações Aninhadas'));
+  sections.push(para('24. Pesquisa Rápida'));
+  sections.push(para('25. Paginação'));
+  sections.push(para('26. Modos de Apresentação'));
+  sections.push(para('27. Opções Configuráveis (rel_options)'));
+  sections.push(para('28. Atalhos de Teclado'));
+  sections.push(para('29. Responsividade e Interface'));
+  sections.push(para('30. Colunas Derivadas'));
+  sections.push(para('31. Log de Operações'));
+  sections.push(para('32. Visibilidade de Colunas (columns_visible)'));
+  sections.push(para('33. Produto Cartesiano'));
+  sections.push(para('34. Remoção de Duplicados'));
 
   // 1. Introduction
   sections.push(heading1('1. Introdução'));
@@ -224,49 +223,69 @@ function generateRequirementsDoc() {
   sections.push(bullet('Totais por linha, por coluna e total geral.'));
   sections.push(bullet('Formatação de valores de dimensão usando options (labels).'));
   sections.push(bullet('Interface de configuração intuitiva com botão "Add Value" para múltiplas métricas.'));
-  sections.push(heading2('6.2 Justificação'));
-  sections.push(para('Tabelas pivot são essenciais para análise de dados categóricos. A capacidade de configurar múltiplas agregações simultaneamente e visualizar percentagens permite análise multidimensional sem ferramentas externas.'));
+  sections.push(heading2('6.2 Pivot Chart'));
+  sections.push(para('Painel de gráfico integrado abaixo da tabela pivot, com as seguintes funcionalidades:'));
+  sections.push(bullet('5 tipos de gráfico: barras verticais, barras horizontais, linhas, área, circular (pie).'));
+  sections.push(bullet('Modos agrupado e empilhado para gráficos de barras.'));
+  sections.push(bullet('Opções de gráfico tipo Excel: título, títulos de eixos, formatação de eixos com rotação de labels, labels de dados, barras de erro (±stddev), gridlines, legenda com posição configurável.'));
+  sections.push(bullet('Linhas de tendência (trendlines) com ajuste automático ou manual: linear, polinomial 2.º e 3.º grau, exponencial, logarítmica. Seleção automática por melhor R² (coeficiente de determinação).'));
+  sections.push(bullet('Apresentação opcional do R² e/ou da equação da linha de tendência no gráfico, cada uma controlada por checkbox independente.'));
+  sections.push(bullet('Botões toggle para mostrar/ocultar independentemente a tabela e o painel do gráfico.'));
+  sections.push(bullet('Download do gráfico em formato PNG (via canvas.toDataURL) e GIF (codificador LZW personalizado com quantização a 256 cores).'));
+  sections.push(heading2('6.3 Justificação'));
+  sections.push(para('Tabelas pivot são essenciais para análise de dados categóricos. A capacidade de configurar múltiplas agregações simultaneamente e visualizar percentagens permite análise multidimensional sem ferramentas externas. O Pivot Chart complementa a tabela com representação visual imediata, e as linhas de tendência com R² e equação permitem identificar e quantificar padrões nos dados diretamente no gráfico.'));
 
-  // 7. Correlation View
-  sections.push(heading1('7. Vista de Correlação'));
-  sections.push(heading2('7.1 Funcionalidades'));
-  sections.push(bullet('Análise de correlação entre pares de colunas.'));
-  sections.push(bullet('Métodos suportados: Pearson, Spearman, Kendall Tau, Point-Biserial, Phi, Cramér\'s V.'));
+  // 7. Analysis View (unified from Correlation + Diagram)
+  sections.push(heading1('7. Vista de Análise'));
+  sections.push(para('A vista de Análise unifica todas as funcionalidades de análise estatística num único separador com 4 sub-separadores: Pairwise, Matrix, Clustering e Multivariate.'));
+  sections.push(heading2('7.1 Pairwise (Análise por Pares)'));
+  sections.push(para('Análise de correlação/associação entre pares de colunas com 24 métodos disponíveis:'));
+  sections.push(bullet('Correlações paramétricas: Pearson (dados contínuos normais), Polyserial (contínuo × ordinal), Polychoric (dois ordinais), Biserial (contínuo × binário).'));
+  sections.push(bullet('Correlações não-paramétricas: Spearman (rank), Kendall Tau-b (concordância), Point-Biserial (contínuo × binário natural), Rank-Biserial (ordinal × binário).'));
+  sections.push(bullet('Associação categórica: Phi (2×2), Cramér\'s V (tabelas maiores), Tetrachoric (2 binários latentes), Lambda (redução proporcional do erro), Uncertainty Coefficient (entropia).'));
+  sections.push(bullet('Concordância ordinal: Somers\' D (assimétrico), Gamma (pares concordantes/discordantes), Tau-c (tabelas retangulares), Blomqvist\'s Beta (concordância mediana).'));
+  sections.push(bullet('Medidas de dependência: Eta² (variância explicada), Mutual Information (teoria da informação), Distance Correlation (dependência não-linear), Hoeffding\'s D (distribuição conjunta), Chatterjee\'s Xi (dependência funcional).'));
+  sections.push(bullet('Similaridade: Cosine Similarity (ângulo entre vetores), Jaccard Index (conjuntos binários).'));
   sections.push(bullet('Auto-deteção do método mais apropriado baseado nos tipos de dados.'));
-  sections.push(bullet('Análise de todos os pares de colunas simultaneamente com matriz de correlação.'));
-  sections.push(bullet('Painel de ajuda integrado explicando cada método e quando usar.'));
+  sections.push(bullet('Análise de todos os pares simultaneamente ("Analyze All Pairs") com resultados tabulados.'));
   sections.push(bullet('Classificação de força: desprezável, fraca, moderada, forte, muito forte.'));
-  sections.push(bullet('Testes de normalidade (Shapiro-Wilk, D\'Agostino-Pearson, Anderson-Darling, Kolmogorov-Smirnov, Jarque-Bera) integrados na análise.'));
-  sections.push(bullet('Box plots e histogramas como visualizações estatísticas auxiliares.'));
-  sections.push(heading2('7.2 Justificação'));
-  sections.push(para('A análise de correlação é fundamental para compreender relações entre variáveis. A auto-deteção reduz erros de utilizadores que não conhecem as premissas de cada método. A diversidade de métodos cobre desde dados contínuos normais até categóricos.'));
-
-  // 8. Diagram View
-  sections.push(heading1('8. Vista de Diagrama (t-SNE)'));
-  sections.push(heading2('8.1 Funcionalidades'));
+  sections.push(bullet('Scatter plot interativo para pares numéricos.'));
+  sections.push(heading2('7.2 Matrix (Matrizes de Correlação)'));
+  sections.push(bullet('Correlation Matrix: heatmap com todas as colunas numéricas, métodos Pearson/Spearman/Kendall selecionáveis.'));
+  sections.push(bullet('Mutual Information Matrix: heatmap de informação mútua entre todas as colunas.'));
+  sections.push(bullet('Escala de cores: azul(-1) → branco(0) → vermelho(+1) para correlações; branco(0) → vermelho(max) para MI.'));
+  sections.push(bullet('Valores numéricos sobrepostos nas células.'));
+  sections.push(heading2('7.3 Clustering (Agrupamento)'));
   sections.push(bullet('Visualização de similaridade usando t-SNE (t-Distributed Stochastic Neighbor Embedding).'));
   sections.push(bullet('Clustering automático por k-means com número configurável de clusters (2-20).'));
   sections.push(bullet('Parâmetros ajustáveis: perplexidade (5-100), iterações (100-2000).'));
   sections.push(bullet('Renderização em canvas HTML5 com cores distintas por cluster.'));
   sections.push(bullet('Popup de detalhes ao clicar num ponto do diagrama.'));
-  sections.push(bullet('Indicação de progresso durante o cálculo.'));
-  sections.push(heading2('8.2 Justificação'));
-  sections.push(para('t-SNE é o algoritmo de referência para redução de dimensionalidade não-linear, permitindo descobrir padrões e agrupamentos em dados multidimensionais que não seriam visíveis em tabelas ou gráficos bidimensionais simples.'));
+  sections.push(bullet('"Clusters as Column": exporta 3 colunas (cluster, cluster_x, cluster_y) para a relação.'));
+  sections.push(heading2('7.4 Multivariate (Análise Multivariada)'));
+  sections.push(bullet('PCA (Principal Component Analysis): eigenvalues, scree plot, loading matrix, scatter plot 2D dos dois primeiros componentes. Número de componentes configurável.'));
+  sections.push(bullet('Factor Analysis: extração por eixos principais (principal axis factoring), comunalidades, loading matrix. Número de fatores configurável.'));
+  sections.push(bullet('Canonical Correlation: seleção dual de grupos de colunas (X e Y), correlações canónicas e R² canónico.'));
+  sections.push(bullet('MANOVA (Multivariate ANOVA): seleção de variáveis dependentes e fator de agrupamento, Wilks\' Lambda e Pillai\'s Trace com estatísticas F aproximadas.'));
+  sections.push(heading2('7.5 Persistência de Resultados'));
+  sections.push(para('Todos os resultados de análise são armazenados em uiState.analysisResult, permitindo que a Vista de IA aceda aos últimos resultados para fornecer interpretações e recomendações contextualizadas.'));
+  sections.push(heading2('7.6 Justificação'));
+  sections.push(para('A unificação das vistas de correlação e diagrama numa única vista de Análise com sub-separadores simplifica a navegação e agrupa logicamente todas as funcionalidades analíticas. Os 24 métodos pairwise cobrem todas as combinações possíveis de tipos de dados (contínuo, ordinal, nominal, binário). As matrizes permitem visão global das relações. O clustering revela padrões em dados multidimensionais. As análises multivariadas (PCA, Factor Analysis, Canonical Correlation, MANOVA) completam o toolkit estatístico para utilizadores avançados, sem necessidade de ferramentas externas.'));
 
   // 9. AI View
-  sections.push(heading1('9. Vista de IA'));
-  sections.push(heading2('9.1 Funcionalidades'));
+  sections.push(heading1('8. Vista de IA'));
+  sections.push(heading2('8.1 Funcionalidades'));
   sections.push(bullet('Consultas em linguagem natural sobre os dados da relação.'));
   sections.push(bullet('Sugestões de filtros baseadas em IA com aplicação automática.'));
   sections.push(bullet('Entrada por voz com suporte para 16 idiomas.'));
   sections.push(bullet('Integração com backend via API /api/ai/analyze.'));
   sections.push(bullet('Seleção de idioma para reconhecimento de voz.'));
-  sections.push(heading2('9.2 Justificação'));
+  sections.push(heading2('8.2 Justificação'));
   sections.push(para('A integração de IA democratiza a análise de dados, permitindo que utilizadores sem conhecimento técnico façam perguntas sobre os seus dados em linguagem natural. A entrada por voz adiciona acessibilidade e conveniência.'));
 
   // 10. Saved Views
-  sections.push(heading1('10. Vistas Guardadas'));
-  sections.push(heading2('10.1 Funcionalidades'));
+  sections.push(heading1('9. Vistas Guardadas'));
+  sections.push(heading2('9.1 Funcionalidades'));
   sections.push(bullet('Gravação de snapshots da relação com nome personalizável.'));
   sections.push(bullet('Quatro tipos de gravação: Formato (uiState + colunas), Registos (items), Ambos, Log de Operações (sequência de operações para replay).'));
   sections.push(bullet('Âmbito: Para Ti ou Para Todos.'));
@@ -275,34 +294,34 @@ function generateRequirementsDoc() {
   sections.push(bullet('Eliminação com confirmação.'));
   sections.push(bullet('Metadados: data/hora de criação, tipo, âmbito.'));
   sections.push(bullet('Armazenamento no array saved do objeto relação.'));
-  sections.push(heading2('10.2 Justificação'));
+  sections.push(heading2('9.2 Justificação'));
   sections.push(para('Vistas guardadas permitem preservar configurações complexas (filtros, ordenações, formatação) para reutilização futura, evitando a necessidade de reconfigurar a interface repetidamente. A distinção entre formato e registos dá flexibilidade.'));
 
   // 11. Filtering
-  sections.push(heading1('11. Filtragem'));
-  sections.push(heading2('11.1 Tipos de Filtro'));
+  sections.push(heading1('10. Filtragem'));
+  sections.push(heading2('10.1 Tipos de Filtro'));
   sections.push(boldPara('Filtro por Valores: ', 'Seleção/desseleção de valores individuais com checkboxes, pesquisa dentro dos valores, seleção total/nenhuma.'));
   sections.push(boldPara('Filtro por Comparação: ', 'Operadores de comparação (=, !=, >, <, >=, <=, entre, contém, começa com, termina com, regex) com suporte para tipos numéricos, texto e datas.'));
   sections.push(boldPara('Filtro por Texto: ', 'Critérios textuais avançados incluindo contém, não contém, começa com, termina com, expressão regular, maiúsculas/minúsculas.'));
   sections.push(boldPara('Filtro por Posição: ', 'Top N, Bottom N, Middle N registos baseado em valores numéricos. Disponível em dois modos: contagem absoluta (especificar número de registos) e percentagem (especificar percentagem do total, de 1% a 100%). No modo percentagem, o sistema calcula automaticamente o número de registos correspondente à percentagem indicada.'));
   sections.push(boldPara('Filtro por Outliers: ', 'Detecção e filtragem de outliers usando método IQR ou Z-score. Opções renomeadas na v1.1: "Choose Outliers" (anteriormente "Keep Outliers") e "Choose Not Outliers" (anteriormente "Remove Outliers") para maior clareza semântica.'));
   sections.push(boldPara('Filtro por Nulos: ', 'Mostrar apenas valores nulos ou não-nulos.'));
-  sections.push(heading2('11.2 Funcionalidades Transversais'));
+  sections.push(heading2('10.2 Funcionalidades Transversais'));
   sections.push(bullet('Indicadores visuais de colunas filtradas nos cabeçalhos.'));
   sections.push(bullet('Limpar filtros individualmente ou globalmente.'));
   sections.push(bullet('Diálogo de filtro com abas para cada tipo.'));
-  sections.push(heading2('11.3 Justificação'));
+  sections.push(heading2('10.3 Justificação'));
   sections.push(para('A diversidade de métodos de filtragem permite abordar qualquer critério de seleção de dados. Filtros por posição e outliers são particularmente úteis para análise exploratória de dados, permitindo isolar rapidamente padrões extremos.'));
 
   // 12. Sorting
-  sections.push(heading1('12. Ordenação'));
-  sections.push(heading2('12.1 Funcionalidades'));
+  sections.push(heading1('11. Ordenação'));
+  sections.push(heading2('11.1 Funcionalidades'));
   sections.push(bullet('Ordenação por clique no cabeçalho da coluna (ascendente → descendente → sem ordenação).'));
   sections.push(bullet('Ordenação multi-coluna com Shift+clique para adicionar critérios.'));
   sections.push(bullet('Indicadores visuais de direção (▲/▼) com número de posição para multi-coluna.'));
   sections.push(bullet('Suporte para todos os tipos de dados com comparação adequada (numérica, textual, data).'));
   sections.push(bullet('Tratamento consistente de valores nulos (colocados no final).'));
-  sections.push(heading2('12.2 Sort Panel'));
+  sections.push(heading2('11.2 Sort Panel'));
   sections.push(para('O Sort Panel é um diálogo dedicado acessível como primeira opção na secção Sort do menu de contexto da coluna (right-click no cabeçalho). Permite gestão completa dos critérios de ordenação:'));
   sections.push(bullet('Lista ordenada de critérios de ordenação com seleção de coluna e direção (ASC/DESC).'));
   sections.push(bullet('Acrescentar novos critérios no fundo da lista.'));
@@ -313,35 +332,35 @@ function generateRequirementsDoc() {
   sections.push(bullet('  • Accent Insensitive: ignora diferenças de acentuação.'));
   sections.push(bullet('  • Punctuation Insensitive: ignora pontuação na comparação.'));
   sections.push(bullet('  • Parse Numbers: trata sequências numéricas como números (file2 antes de file10).'));
-  sections.push(heading2('12.3 Motor de Ordenação'));
+  sections.push(heading2('11.3 Motor de Ordenação'));
   sections.push(para('A ordenação utiliza Intl.Collator com locale \'und\' (undetermined/neutro), que aplica as regras padrão do Unicode Collation Algorithm (UCA) sem viés para nenhuma língua específica. As opções por coluna mapeiam para os parâmetros do Intl.Collator:'));
   sections.push(bullet('sensitivity: \'base\' (case+accent insensitive), \'accent\' (case insensitive), \'case\' (accent insensitive), \'variant\' (tudo sensível).'));
   sections.push(bullet('numeric: true/false para ordenação natural de números em strings.'));
   sections.push(bullet('ignorePunctuation: true/false para ignorar pontuação.'));
-  sections.push(heading2('12.4 Justificação'));
+  sections.push(heading2('11.4 Justificação'));
   sections.push(para('A ordenação multi-coluna é essencial para análise de dados complexos. A interação via Shift+clique segue padrões de interface conhecidos (Excel, bases de dados), reduzindo a curva de aprendizagem. O Sort Panel complementa esta funcionalidade com uma interface visual para gestão avançada de critérios, incluindo opções de comparação Unicode que permitem ordenação correta de textos multilíngues.'));
 
   // 13. Grouping
-  sections.push(heading1('13. Agrupamento'));
-  sections.push(heading2('13.1 Funcionalidades'));
+  sections.push(heading1('12. Agrupamento'));
+  sections.push(heading2('12.1 Funcionalidades'));
   sections.push(bullet('Agrupamento por uma ou mais colunas.'));
   sections.push(bullet('Painel de grupo com breadcrumbs de navegação.'));
   sections.push(bullet('Drill-down interativo: clicar num grupo filtra para mostrar apenas esses registos.'));
   sections.push(bullet('Contagem de registos por grupo.'));
   sections.push(bullet('Suporte para agrupamento hierárquico (múltiplos níveis).'));
   sections.push(bullet('Navegação de volta via breadcrumbs.'));
-  sections.push(heading2('13.2 Group by ALL Columns'));
+  sections.push(heading2('12.2 Group by ALL Columns'));
   sections.push(para('Para além do agrupamento individual por coluna ("Group by this column"), existe a opção "Group by ALL columns" que agrupa simultaneamente por todas as colunas da relação, excluindo as colunas do kind id.'));
   sections.push(bullet('Diferença principal: O agrupamento individual ("Group by this column") remove a coluna agrupada das colunas visíveis na tabela. O "Group by ALL columns" mantém todas as colunas visíveis, servindo como uma agregação de valores únicos.'));
   sections.push(bullet('Colunas do kind id são excluídas do agrupamento por serem identificadores únicos, tornando o agrupamento por elas sem significado analítico.'));
-  sections.push(heading2('13.3 Restrições'));
+  sections.push(heading2('12.3 Restrições'));
   sections.push(bullet('A opção Group By está desativada no menu de contexto para colunas do kind id, pois sendo valores únicos por definição, o agrupamento por estas colunas não produz resultados úteis.'));
-  sections.push(heading2('13.4 Justificação'));
+  sections.push(heading2('12.4 Justificação'));
   sections.push(para('O agrupamento permite exploração top-down de grandes conjuntos de dados, facilitando a compreensão da distribuição e estrutura dos dados sem filtros complexos. A opção "Group by ALL" é particularmente útil para identificar registos duplicados ou padrões de combinações de valores, funcionando como um DISTINCT sobre todas as colunas.'));
 
   // 14. Statistics
-  sections.push(heading1('14. Estatísticas por Coluna'));
-  sections.push(heading2('14.1 Funcionalidades'));
+  sections.push(heading1('13. Estatísticas por Coluna'));
+  sections.push(heading2('13.1 Funcionalidades'));
   sections.push(bullet('Painel de estatísticas com: contagem, valores únicos, nulos, mínimo, máximo, média, desvio padrão.'));
   sections.push(bullet('Quartis (Q1, mediana, Q3) e intervalo interquartil (IQR).'));
   sections.push(bullet('Box plot visual com deteção de outliers.'));
@@ -349,61 +368,78 @@ function generateRequirementsDoc() {
   sections.push(bullet('Testes de normalidade: Shapiro-Wilk, D\'Agostino-Pearson, Anderson-Darling, Kolmogorov-Smirnov, Jarque-Bera.'));
   sections.push(bullet('Indicação de p-valor e decisão sobre normalidade.'));
   sections.push(bullet('Estatísticas sumárias na linha de rodapé da tabela (configurável).'));
-  sections.push(heading2('14.2 Violin Plot'));
+  sections.push(heading2('13.2 Violin Plot'));
   sections.push(para('Complementarmente ao box plot, o sistema oferece um violin plot que pode ser ativado/desativado por checkbox (ativo por omissão). O violin plot sobrepõe-se ao box plot, combinando a informação dos quartis com a distribuição completa dos dados.'));
   sections.push(boldPara('O que é um Violin Plot: ', 'Um violin plot é uma visualização estatística que combina um box plot com uma estimação de densidade por kernel (KDE). A largura da forma ("violino") em cada ponto vertical representa a densidade de dados nesse valor — zonas mais largas indicam maior concentração de valores, zonas mais estreitas indicam valores raros.'));
   sections.push(boldPara('Como ler: ', 'A forma simétrica do violino mostra a distribuição dos dados: uma forma larga e achatada indica distribuição uniforme; uma forma estreita com pico central indica forte concentração; múltiplos "bicos" (distribuição bimodal ou multimodal) indicam subgrupos nos dados.'));
   sections.push(boldPara('Vantagem sobre o box plot isolado: ', 'O box plot mostra apenas quartis e outliers, perdendo informação sobre a forma da distribuição. Dois conjuntos de dados com quartis idênticos podem ter distribuições completamente diferentes (normal vs. bimodal, por exemplo). O violin plot revela estas diferenças.'));
   sections.push(boldPara('Estimação por Kernel (KDE): ', 'A curva é calculada usando uma estimação de densidade por kernel gaussiano. O bandwidth (largura de banda) é calculado automaticamente pela regra de Silverman, que equilibra suavização e detalhe. Valores extremos terão menor densidade, enquanto concentrações de dados criam picos visíveis.'));
   sections.push(boldPara('Badge informativo (i): ', 'Um ícone (i) junto à checkbox fornece uma explicação interativa do violin plot, incluindo como interpretá-lo e a sua relação com o box plot.'));
-  sections.push(heading2('14.3 Justificação'));
+  sections.push(heading2('13.3 Justificação'));
   sections.push(para('Estatísticas descritivas completas são essenciais para análise exploratória. Os testes de normalidade informam a escolha de métodos estatísticos adequados (paramétricos vs. não-paramétricos). Box plots e histogramas fornecem compreensão visual imediata da distribuição. O violin plot complementa o box plot revelando a forma completa da distribuição, sendo particularmente útil para identificar distribuições multimodais, assimetrias e concentrações que não são visíveis nos quartis isolados.'));
 
   // 15. Conditional Formatting
-  sections.push(heading1('15. Formatação Condicional'));
-  sections.push(heading2('15.1 Funcionalidades'));
+  sections.push(heading1('14. Formatação Condicional'));
+  sections.push(heading2('14.1 Funcionalidades'));
   sections.push(bullet('Escala de cores com legenda visual e 8 paletas: Blue-Red, Green-Yellow, Purple-Orange, Cool, Warm, Rainbow, Grayscale, Viridis.'));
   sections.push(bullet('Barras de dados sobrepostas na célula.'));
   sections.push(bullet('Ícones condicionais (setas, círculos, flags, estrelas, etc.).'));
   sections.push(bullet('Colorir resultados atuais (filtrados) com escala de cores.'));
   sections.push(bullet('Legenda de escala de cores com valores min/max.'));
   sections.push(bullet('Limpar formatação por coluna.'));
-  sections.push(heading2('15.2 Justificação'));
-  sections.push(para('A formatação condicional transforma dados numéricos em informação visual imediata. As 8 paletas suportam diferentes necessidades de contraste e acessibilidade. Barras de dados e ícones complementam a escala de cores para diferentes tipos de visualização.'));
+  sections.push(heading2('14.2 Paletas de Cores e Contraste'));
+  sections.push(para('As 8 paletas de cores foram criadas com uma lógica de design intencional:'));
+  sections.push(bullet('Pastel: cores suaves de baixa saturação para fundos não-intrusivos. Todas usam texto preto (contraste elevado sobre fundo claro).'));
+  sections.push(bullet('Vivid: cores saturadas e vibrantes para destaque visual forte. Combinação de texto preto e branco conforme a luminância de cada cor.'));
+  sections.push(bullet('Dark: cores profundas de baixa luminosidade para temas escuros. Todas usam texto branco (contraste elevado sobre fundo escuro).'));
+  sections.push(bullet('Neutral: escala de cinzentos, do claro ao escuro, para informação hierárquica sem distração cromática.'));
+  sections.push(bullet('Warm: gradiente de amarelo a vermelho, representando escalas de intensidade/calor/urgência.'));
+  sections.push(bullet('Cool: gradiente de ciano claro a azul-escuro, representando escalas de frescura/calma/profundidade.'));
+  sections.push(bullet('Danger: gradiente de amarelo a púrpura, passando por laranja e vermelho, para escalas de severidade/alerta.'));
+  sections.push(bullet('Highlight: espectro cromático completo (vermelho → violeta) para codificação categórica com máxima distinção.'));
+  sections.push(para('Cálculo de contraste: O contraste entre a cor de fundo e a cor de texto (preto ou branco) é calculado segundo a norma WCAG 2.1 (Web Content Accessibility Guidelines). A métrica utilizada é o Contrast Ratio, definido como (L1 + 0.05) / (L2 + 0.05), onde L1 e L2 são as luminâncias relativas da cor mais clara e da cor mais escura, respetivamente. A luminância relativa é calculada linearizando os canais sRGB (se C ≤ 0.04045: C/12.92, caso contrário: ((C+0.055)/1.055)^2.4) e aplicando os coeficientes ITU-R BT.709: L = 0.2126×R + 0.7152×G + 0.0722×B.'));
+  sections.push(para('Níveis de contraste WCAG:'));
+  sections.push(bullet('AA Large Text (mínimo aceitável): Contrast Ratio ≥ 3:1 — para texto de tamanho grande (≥ 18pt ou ≥ 14pt negrito).'));
+  sections.push(bullet('AA Normal Text (mínimo recomendado): Contrast Ratio ≥ 4.5:1 — para texto de tamanho normal.'));
+  sections.push(bullet('AAA Large Text: Contrast Ratio ≥ 4.5:1 — nível elevado para texto grande.'));
+  sections.push(bullet('AAA Normal Text (ideal): Contrast Ratio ≥ 7:1 — nível máximo de acessibilidade para texto normal.'));
+  sections.push(para('Cada cor nas paletas apresenta, via tooltip, o seu Contrast Ratio e o nível WCAG correspondente. O indicador "T" (branco) nas amostras de cor identifica as cores escuras onde será usado texto branco. Esta informação está igualmente acessível através do badge (ⓘ) nos diálogos de seleção de cor.'));
+  sections.push(heading2('14.3 Justificação'));
+  sections.push(para('A formatação condicional transforma dados numéricos em informação visual imediata. As 8 paletas suportam diferentes necessidades de contraste e acessibilidade, desde cores suaves (Pastel) até cores de alto impacto (Vivid, Highlight). A conformidade com WCAG 2.1 garante que o texto permanece legível sobre qualquer cor de fundo, atendendo critérios de acessibilidade internacionais. Barras de dados e ícones complementam a escala de cores para diferentes tipos de visualização.'));
 
   // 16. Binning / Bucketing
-  sections.push(heading1('16. Binning / Bucketing (Discretização)'));
-  sections.push(heading2('16.1 Funcionalidades de Binning'));
+  sections.push(heading1('15. Binning / Bucketing (Discretização)'));
+  sections.push(heading2('15.1 Funcionalidades de Binning'));
   sections.push(bullet('Discretização de colunas numéricas em intervalos.'));
   sections.push(bullet('Número de bins configurável.'));
   sections.push(bullet('Apresentação como intervalos (ex: "10-20") nos valores da tabela.'));
   sections.push(bullet('Interação com filtros por valores (filtragem por bin).'));
-  sections.push(bullet('Reversão do binning para valores originais.'));
+  
   sections.push(bullet('Menu renomeado na v1.1: "Binning / Bucketing" para maior clareza terminológica.'));
-  sections.push(heading2('16.2 Row Number / Rank / Dense Rank (v1.1)'));
+  sections.push(heading2('15.2 Row Number / Rank / Dense Rank (v1.1)'));
   sections.push(para('A secção Binning / Bucketing inclui agora três operações de classificação de registos:'));
   sections.push(boldPara('Row Number: ', 'Adiciona uma nova coluna inteira com numeração sequencial (1, 2, 3, ...) baseada na ordem de ordenação atual. Cada linha recebe um número único.'));
   sections.push(boldPara('Rank: ', 'Adiciona uma nova coluna inteira que classifica as linhas pelo valor da coluna de contexto. Empates recebem o mesmo rank, com gaps subsequentes (ex: 1, 2, 2, 4).'));
   sections.push(boldPara('Dense Rank: ', 'Similar ao Rank mas sem gaps entre classificações. Empates recebem o mesmo rank e o próximo rank distinto é consecutivo (ex: 1, 2, 2, 3).'));
-  sections.push(heading2('16.3 Justificação'));
+  sections.push(heading2('15.3 Justificação'));
   sections.push(para('O binning simplifica a análise de dados contínuos, permitindo agrupamento e filtragem por intervalos. As operações de Row Number, Rank e Dense Rank permitem classificação e numeração de registos sem necessidade de cálculos manuais, seguindo padrões SQL standard que os utilizadores analíticos conhecem.'));
 
   // 17. Row Operations
-  sections.push(heading1('17. Operações sobre Linhas'));
-  sections.push(heading2('17.1 Operações Individuais'));
+  sections.push(heading1('16. Operações sobre Linhas'));
+  sections.push(heading2('16.1 Operações Individuais'));
   sections.push(boldPara('Ver (View): ', 'Visualização formatada de todos os campos do registo em modo só-leitura.'));
   sections.push(boldPara('Editar (Edit): ', 'Formulário de edição com inputs tipados para cada campo.'));
   sections.push(boldPara('Copiar (Copy): ', 'Duplicação do registo com novo ID auto-gerado.'));
   sections.push(boldPara('Novo (New): ', 'Criação de registo vazio com ID auto-gerado.'));
   sections.push(boldPara('Eliminar (Delete): ', 'Remoção com confirmação.'));
   sections.push(boldPara('Formulário Papel (Paper Form): ', 'Visualização do registo em formato imprimível com campos e valores.'));
-  sections.push(boldPara('Imprimir (Print): ', 'Abertura de janela de impressão com formatação adequada.'));
-  sections.push(heading2('17.2 Justificação'));
-  sections.push(para('As operações sobre linhas cobrem todo o ciclo de vida de um registo. A vista de formulário em papel é particularmente útil em contextos administrativos onde são necessários documentos físicos.'));
+  
+  sections.push(heading2('16.2 Justificação'));
+  sections.push(para('As operações sobre linhas cobrem todo o ciclo de vida de um registo. O formulário em papel (Paper Form) serve para ser pré-impresso, permitindo que a organização continue a operar e a recolher dados temporariamente em papel caso o sistema informático não esteja disponível. Esta funcionalidade aumenta a resiliência da organização a falhas de eletricidade ou falhas do sistema informático, garantindo a continuidade operacional independentemente da disponibilidade tecnológica.'));
 
   // 18. Multi-Record Operations
-  sections.push(heading1('18. Operações Multi-Registo'));
-  sections.push(heading2('18.1 Operações'));
+  sections.push(heading1('17. Operações Multi-Registo'));
+  sections.push(heading2('17.1 Operações'));
   sections.push(boldPara('Multi View: ', 'Visualização simultânea de múltiplos registos selecionados.'));
   sections.push(boldPara('Multi Edit: ', 'Edição simultânea de múltiplos registos com painel sincronizado.'));
   sections.push(boldPara('Multi Copy: ', 'Duplicação de todos os registos selecionados.'));
@@ -411,23 +447,23 @@ function generateRequirementsDoc() {
   sections.push(boldPara('Group Edit: ', 'Aplicação de um valor a um campo específico em todos os registos selecionados.'));
   sections.push(boldPara('Merge: ', 'Fusão de múltiplos registos num único com controlo campo-a-campo sobre qual valor manter.'));
   sections.push(boldPara('Scrolling Multi-Panel: ', 'Visualização lado-a-lado com scroll sincronizado para comparação de registos.'));
-  sections.push(heading2('18.2 Justificação'));
+  sections.push(heading2('17.2 Justificação'));
   sections.push(para('Operações multi-registo são essenciais para eficiência em conjuntos de dados grandes. O merge com controlo campo-a-campo resolve o problema comum de dados duplicados. O scroll sincronizado facilita a comparação visual.'));
 
   // 19. Selection Dialogs
-  sections.push(heading1('19. Diálogos de Seleção'));
-  sections.push(heading2('19.1 Select One'));
+  sections.push(heading1('18. Diálogos de Seleção'));
+  sections.push(heading2('18.1 Select One'));
   sections.push(para('Abre um diálogo com cópia da relação (uiState limpo). Duplo-clique numa linha retorna o ID. O resultado é enviado para console.log, textarea.output_textarea_json e div.output_div_json.'));
-  sections.push(heading2('19.2 Select Many'));
+  sections.push(heading2('18.2 Select Many'));
   sections.push(para('Similar a Select One mas com multicheck ativado. Ao fechar retorna array de IDs das linhas selecionadas.'));
-  sections.push(heading2('19.3 Choose Many'));
+  sections.push(heading2('18.3 Choose Many'));
   sections.push(para('Duas cópias da relação empilhadas: fonte (todos os itens) e alvo (vazio). Duplo-clique na fonte copia para alvo. Duplo-clique no alvo remove. Ao fechar retorna array de IDs do alvo. Inclui pesquisa integrada.'));
-  sections.push(heading2('19.4 Justificação'));
+  sections.push(heading2('18.4 Justificação'));
   sections.push(para('Os diálogos de seleção permitem integração com sistemas externos, funcionando como componentes reutilizáveis de escolha. A abordagem de Choose Many com duas listas é particularmente intuitiva para seleção de subconjuntos.'));
 
   // 20. Export
-  sections.push(heading1('20. Exportação'));
-  sections.push(heading2('20.1 Funcionalidades'));
+  sections.push(heading1('19. Exportação'));
+  sections.push(heading2('19.1 Funcionalidades'));
   sections.push(bullet('Âmbito: todos os registos, selecionados (checked), ou linha selecionada.'));
   sections.push(bullet('A opção "Linha selecionada" apenas é mostrada quando existe efetivamente uma linha selecionada/highlighted na relação.'));
   sections.push(bullet('A ação "Export to File" está inativa (mostra aviso) quando a relação tem zero linhas.'));
@@ -437,12 +473,12 @@ function generateRequirementsDoc() {
   sections.push(bullet('API endpoints: /api/export/templates (lista) e /api/export/template/:path (conteúdo).'));
   sections.push(bullet('Proteção contra path traversal na API.'));
   sections.push(bullet('Download direto ou abertura em nova aba.'));
-  sections.push(heading2('20.2 Justificação'));
+  sections.push(heading2('19.2 Justificação'));
   sections.push(para('A exportação multi-formato garante interoperabilidade com outras ferramentas. O sistema de templates permite personalização de formatos de saída sem alteração de código. A proteção contra path traversal é uma medida de segurança essencial.'));
 
   // 21. Import
-  sections.push(heading1('21. Importação'));
-  sections.push(heading2('21.1 Funcionalidades'));
+  sections.push(heading1('20. Importação'));
+  sections.push(heading2('20.1 Funcionalidades'));
   sections.push(bullet('Upload via drag-and-drop ou clique.'));
   sections.push(bullet('Auto-deteção de formato: CSV, TSV, JSON, XML, HTML, Excel XML.'));
   sections.push(bullet('Suporte multi-tabela com dropdown de seleção.'));
@@ -452,12 +488,12 @@ function generateRequirementsDoc() {
   sections.push(bullet('Modo de edição de texto com valores tab-separated.'));
   sections.push(bullet('Atribuição automática de IDs.'));
   sections.push(bullet('Mensagem de erro clara para formato .xlsx binário (não suportado).'));
-  sections.push(heading2('21.2 Justificação'));
+  sections.push(heading2('20.2 Justificação'));
   sections.push(para('A importação flexível permite integrar dados de diversas fontes. A auto-deteção e mapeamento inteligente reduzem o esforço manual. O preview previne importações incorretas.'));
 
   // 22. Integrity Check
-  sections.push(heading1('22. Verificação de Integridade'));
-  sections.push(heading2('22.1 Funcionalidades'));
+  sections.push(heading1('21. Verificação de Integridade'));
+  sections.push(heading2('21.1 Funcionalidades'));
   sections.push(bullet('Validação do campo "pot" da relação.'));
   sections.push(bullet('Verificação de chaves de atributos conhecidas.'));
   sections.push(bullet('Validação de tipos de coluna contra KNOWN_COLUMN_KINDS.'));
@@ -467,82 +503,82 @@ function generateRequirementsDoc() {
   sections.push(bullet('Validação de propriedades rel_options.'));
   sections.push(bullet('Verificação recursiva de relações aninhadas.'));
   sections.push(bullet('Resultados em diálogo estilizado com categorias: erro, aviso, info.'));
-  sections.push(heading2('22.2 Justificação'));
+  sections.push(heading2('21.2 Justificação'));
   sections.push(para('A verificação de integridade é uma salvaguarda contra corrupção de dados. A verificação recursiva garante consistência em toda a hierarquia de relações. A categorização de resultados permite priorizar correções.'));
 
   // 23. Hierarchical Navigation
-  sections.push(heading1('23. Navegação Hierárquica'));
-  sections.push(heading2('23.1 Funcionalidades'));
+  sections.push(heading1('22. Navegação Hierárquica'));
+  sections.push(heading2('22.1 Funcionalidades'));
   sections.push(bullet('Ativação via rel_options.show_hierarchy com especificação de hierarchy_column.'));
   sections.push(bullet('Navegação em árvore baseada em relações pai-filho.'));
   sections.push(bullet('Filtragem automática ao navegar para um nó: mostra apenas os filhos diretos do nó atual.'));
   sections.push(bullet('Valor raiz configurável (hierarchy_root_value): define o topo da hierarquia acima do qual não é permitido navegar.'));
-  sections.push(heading2('23.2 Breadcrumb de Navegação'));
+  sections.push(heading2('22.2 Breadcrumb de Navegação'));
   sections.push(para('À medida que se desce na hierarquia, é apresentado um breadcrumb que mostra o caminho percorrido desde a raiz até um nível acima da posição atual. Cada elemento do breadcrumb é clicável, permitindo saltar diretamente para ter como pai o elemento escolhido.'));
   sections.push(bullet('Formato de cada elemento: nome do elemento seguido de contadores (#N1 >> #N2), onde N1 é o número de filhos diretos (nível imediatamente abaixo) e N2 é o total de descendentes em todos os níveis.'));
   sections.push(bullet('Badge informativo (i): Um único ícone explicativo descreve o significado dos números e como funciona o painel de navegação hierárquica.'));
-  sections.push(heading2('23.3 Visualização de Descendentes'));
+  sections.push(heading2('22.3 Visualização de Descendentes'));
   sections.push(para('Por omissão, a navegação hierárquica mostra apenas os elementos imediatamente abaixo do nó atual (filhos diretos). Existe uma opção para alternar e ver todos os descendentes a partir do elemento atual, independentemente da profundidade.'));
   sections.push(bullet('Quando ativada a visualização de todos os descendentes, a coluna parent (hierarchy_column) torna-se automaticamente visível na tabela, permitindo identificar a relação pai-filho de cada registo.'));
-  sections.push(heading2('23.4 Configuração de Inicialização'));
+  sections.push(heading2('22.4 Configuração de Inicialização'));
   sections.push(boldPara('hierarchy_root_value: ', 'Define o topo absoluto da hierarquia. O utilizador não pode navegar acima deste valor. Se vazio, considera como raiz os elementos com parent vazio ou null.'));
   sections.push(boldPara('hierarchy_initial_value: ', 'Define o ponto de entrada inicial na hierarquia ao carregar a relação. Não precisa de ser o mesmo que hierarchy_root_value — pode ser qualquer descendente. Se vazio, assume hierarchy_root_value como ponto inicial. Se ambos forem vazios, mostra todos os elementos com parent vazio ou null.'));
-  sections.push(heading2('23.5 Colunas Derivadas de Hierarquia'));
+  sections.push(heading2('22.5 Colunas Derivadas de Hierarquia'));
   sections.push(para('No menu de contexto do cabeçalho da coluna designada como hierarchy_column, na secção Column, estão disponíveis três operações para gerar novas colunas baseadas na estrutura hierárquica:'));
   sections.push(boldPara('hierarchy_ascendants: ', 'Nova coluna do kind relation contendo, para cada registo, uma sub-relação com as colunas id e parent preenchidas com todos os ascendentes até ao hierarchy_root_value. Permite aceder rapidamente à linhagem completa de qualquer elemento.'));
   sections.push(boldPara('hierarchy_descendants: ', 'Nova coluna do kind relation contendo, para cada registo, uma sub-relação com as colunas id e parent preenchidas com todos os descendentes do elemento. Permite visualizar toda a sub-árvore de qualquer nó.'));
   sections.push(boldPara('hierarchy_path: ', 'Nova coluna do kind string contendo o caminho concatenado desde o elemento até ao hierarchy_root_value. Um input permite configurar o separador entre cada valor (por omissão " > "). Exemplo: "Raiz > Categoria > Subcategoria > Elemento".'));
-  sections.push(heading2('23.6 Justificação'));
+  sections.push(heading2('22.6 Justificação'));
   sections.push(para('A navegação hierárquica é essencial para dados com estrutura em árvore (categorias, organogramas, taxonomias). O breadcrumb com contadores oferece orientação espacial e dimensionamento rápido da sub-árvore. A visualização de todos os descendentes complementa a navegação nível-a-nível para casos em que se pretende uma visão global. As colunas derivadas permitem materializar relações hierárquicas como dados manipuláveis, facilitando análises e exportações.'));
 
   // 24. Nested Relations
-  sections.push(heading1('24. Relações Aninhadas'));
-  sections.push(heading2('24.1 Funcionalidades'));
+  sections.push(heading1('23. Relações Aninhadas'));
+  sections.push(heading2('23.1 Funcionalidades'));
   sections.push(bullet('Colunas do tipo "relation" contêm sub-relações completas.'));
   sections.push(bullet('Abertura em diálogo modal ou painel lateral/inferior (conforme single_item_mode).'));
   sections.push(bullet('Cada sub-relação é uma instância completa com todas as funcionalidades.'));
   sections.push(bullet('Profundidade ilimitada de aninhamento.'));
   sections.push(bullet('Cleanup automático de instâncias ao fechar diálogos.'));
   sections.push(bullet('Opções por defeito aplicadas automaticamente a sub-relações.'));
-  sections.push(heading2('24.2 Justificação'));
+  sections.push(heading2('23.2 Justificação'));
   sections.push(para('O aninhamento ilimitado de relações permite modelar estruturas de dados arbitrariamente complexas. A utilização do mesmo código parametrizado garante consistência e reduz manutenção.'));
 
   // 25. Quick Search
-  sections.push(heading1('25. Pesquisa Rápida'));
-  sections.push(heading2('25.1 Funcionalidades'));
+  sections.push(heading1('24. Pesquisa Rápida'));
+  sections.push(heading2('24.1 Funcionalidades'));
   sections.push(bullet('Campo de pesquisa na barra de vistas.'));
   sections.push(bullet('Filtragem em tempo real enquanto o utilizador digita.'));
   sections.push(bullet('Pesquisa em todos os campos de cada registo.'));
   sections.push(bullet('Botão de limpar pesquisa.'));
   sections.push(bullet('Disponível nas vistas de tabela e cartões.'));
-  sections.push(heading2('25.2 Justificação'));
+  sections.push(heading2('24.2 Justificação'));
   sections.push(para('A pesquisa rápida é a forma mais imediata de encontrar registos específicos, complementando os filtros avançados para casos de uso simples.'));
 
   // 26. Pagination
-  sections.push(heading1('26. Paginação'));
-  sections.push(heading2('26.1 Funcionalidades'));
+  sections.push(heading1('25. Paginação'));
+  sections.push(heading2('25.1 Funcionalidades'));
   sections.push(bullet('Tamanhos de página: 10, 20, 50, 100, All.'));
   sections.push(bullet('Navegação: primeira, anterior, próxima, última.'));
   sections.push(bullet('Indicador de página atual e total.'));
   sections.push(bullet('Contagem de linhas totais e selecionadas.'));
   sections.push(bullet('Desativação automática de botões em limites.'));
-  sections.push(heading2('26.2 Justificação'));
+  sections.push(heading2('25.2 Justificação'));
   sections.push(para('A paginação é essencial para performance e usabilidade com grandes conjuntos de dados, evitando renderização de milhares de linhas simultaneamente.'));
 
   // 27. Display Modes
-  sections.push(heading1('27. Modos de Apresentação'));
-  sections.push(heading2('27.1 Funcionalidades'));
+  sections.push(heading1('26. Modos de Apresentação'));
+  sections.push(heading2('26.1 Funcionalidades'));
   sections.push(bullet('Dialog (modal): Conteúdo de detalhe abre em popup sobre a tabela.'));
   sections.push(bullet('Right (painel lateral): Conteúdo abre em painel à direita da tabela.'));
   sections.push(bullet('Bottom (painel inferior): Conteúdo abre em painel abaixo da tabela.'));
   sections.push(bullet('Configurável via rel_options.single_item_mode.'));
   sections.push(bullet('Transição suave com scroll automático para o painel inferior.'));
-  sections.push(heading2('27.2 Justificação'));
+  sections.push(heading2('26.2 Justificação'));
   sections.push(para('Diferentes modos de apresentação acomodam diferentes preferências de trabalho e tamanhos de ecrã. O painel lateral permite comparação simultânea com a tabela; o modal foca atenção num único registo.'));
 
   // 28. rel_options
-  sections.push(heading1('28. Opções Configuráveis (rel_options)'));
-  sections.push(heading2('28.1 Lista Completa'));
+  sections.push(heading1('27. Opções Configuráveis (rel_options)'));
+  sections.push(heading2('27.1 Lista Completa'));
   sections.push(boldPara('editable: ', 'Ativa/desativa edição inline de células.'));
   sections.push(boldPara('show_multicheck: ', 'Mostra/oculta checkboxes de seleção multi-linha.'));
   sections.push(boldPara('show_natural_order: ', 'Mostra/oculta coluna de ordem natural.'));
@@ -559,36 +595,36 @@ function generateRequirementsDoc() {
   sections.push(boldPara('general_always_visible_options: ', 'Array de ações sempre visíveis na barra de vistas.'));
   sections.push(boldPara('general_line_options: ', 'Array de operações disponíveis no menu de linha.'));
   sections.push(boldPara('general_multi_options: ', 'Array de operações multi-registo disponíveis.'));
-  sections.push(heading2('28.2 Justificação'));
+  sections.push(heading2('27.2 Justificação'));
   sections.push(para('A configurabilidade granular permite adaptar a interface a diferentes casos de uso sem alterar código. Um formulário de entrada simples pode ocultar vistas avançadas; uma aplicação de análise pode ativar todas as funcionalidades.'));
 
   // 29. Keyboard Shortcuts
-  sections.push(heading1('29. Atalhos de Teclado'));
-  sections.push(heading2('29.1 Funcionalidades'));
+  sections.push(heading1('28. Atalhos de Teclado'));
+  sections.push(heading2('28.1 Funcionalidades'));
   sections.push(bullet('Badge informativo (ℹ) na barra de vistas com tooltip de atalhos.'));
   sections.push(bullet('Ctrl+clique para seleção de colunas.'));
   sections.push(bullet('Shift+clique para ordenação multi-coluna.'));
   sections.push(bullet('Navegação por teclado nos menus.'));
-  sections.push(heading2('29.2 Justificação'));
+  sections.push(heading2('28.2 Justificação'));
   sections.push(para('Atalhos de teclado aumentam a produtividade de utilizadores avançados, reduzindo a dependência do rato para operações frequentes.'));
 
   // 30. Responsiveness
-  sections.push(heading1('30. Responsividade e Interface'));
-  sections.push(heading2('30.1 Funcionalidades'));
+  sections.push(heading1('29. Responsividade e Interface'));
+  sections.push(heading2('29.1 Funcionalidades'));
   sections.push(bullet('Design responsivo com CSS media queries.'));
   sections.push(bullet('Design tokens via CSS custom properties (variáveis).'));
   sections.push(bullet('Toast notifications para feedback de ações.'));
   sections.push(bullet('Diálogos modais com overlay para operações complexas.'));
   sections.push(bullet('Container redimensionável para a tabela.'));
   sections.push(bullet('Indicadores visuais de estado (filtros ativos, ordenação, seleção).'));
-  sections.push(heading2('30.2 Justificação'));
+  sections.push(heading2('29.2 Justificação'));
   sections.push(para('Uma interface responsiva e informativa melhora a experiência do utilizador em diferentes dispositivos. O feedback visual constante garante que o utilizador compreende o estado atual dos dados e das operações aplicadas.'));
 
   // 31. Derived Columns
-  sections.push(heading1('31. Colunas Derivadas'));
-  sections.push(heading2('31.1 Descrição'));
+  sections.push(heading1('30. Colunas Derivadas'));
+  sections.push(heading2('30.1 Descrição'));
   sections.push(para('O sistema de colunas derivadas (v1.1) permite extrair automaticamente componentes de valores existentes, criando novas colunas com dados calculados. As extrações são organizadas por tipo de dados de origem.'));
-  sections.push(heading2('31.2 Extrações de Data'));
+  sections.push(heading2('30.2 Extrações de Data'));
   sections.push(bullet('Year: Extrai o ano (ex: 2025).'));
   sections.push(bullet('Month: Extrai o mês (1-12).'));
   sections.push(bullet('Day: Extrai o dia do mês (1-31).'));
@@ -598,41 +634,41 @@ function generateRequirementsDoc() {
   sections.push(bullet('Day of Year: Extrai o dia do ano (1-366).'));
   sections.push(bullet('Week of Year: Extrai a semana do ano (1-53).'));
   sections.push(bullet('ISO Week: Extrai a semana ISO do ano.'));
-  sections.push(heading2('31.3 Extrações de Hora'));
+  sections.push(heading2('30.3 Extrações de Hora'));
   sections.push(bullet('Hour: Extrai a hora (0-23).'));
   sections.push(bullet('Minute: Extrai o minuto (0-59).'));
   sections.push(bullet('Second: Extrai o segundo (0-59).'));
   sections.push(bullet('AM/PM: Extrai indicador AM ou PM.'));
   sections.push(bullet('Hour12: Extrai a hora em formato 12h (1-12).'));
-  sections.push(heading2('31.4 Arredondamento de Float'));
+  sections.push(heading2('30.4 Arredondamento de Float'));
   sections.push(bullet('Round: Arredonda valores float para um número especificado de casas decimais.'));
-  sections.push(heading2('31.5 Métricas de String'));
+  sections.push(heading2('30.5 Métricas de String'));
   sections.push(bullet('Length: Número de caracteres do texto.'));
   sections.push(bullet('Bytes: Tamanho em bytes (codificação UTF-8).'));
   sections.push(bullet('Flesch Reading Ease: Índice de legibilidade Flesch (0-100, quanto maior mais fácil de ler).'));
   sections.push(bullet('Flesch-Kincaid Grade Level: Nível escolar estimado para compreensão do texto.'));
   sections.push(bullet('Sentence Count: Número de frases no texto.'));
-  sections.push(heading2('31.6 Justificação'));
+  sections.push(heading2('30.6 Justificação'));
   sections.push(para('As colunas derivadas eliminam a necessidade de cálculos manuais ou fórmulas para extrações comuns. A organização por tipo de dados (data, hora, float, string) facilita a descoberta de funcionalidades. As métricas de legibilidade (Flesch) são um diferenciador para análise de conteúdo textual.'));
 
   // 32. Operation Log
-  sections.push(heading1('32. Log de Operações'));
-  sections.push(heading2('32.1 Descrição'));
+  sections.push(heading1('31. Log de Operações'));
+  sections.push(heading2('31.1 Descrição'));
   sections.push(para('Todas as operações mutantes sobre a relação são registadas no array relation.log[] como objetos declarativos com a estrutura {pot: "relation_op", timestamp, op, ...params}. Este sistema permite rastreabilidade completa e prepara o caminho para funcionalidades futuras de replay e undo.'));
-  sections.push(heading2('32.2 Funcionalidades'));
+  sections.push(heading2('31.2 Funcionalidades'));
   sections.push(bullet('Registo automático de mais de 40 tipos de operações.'));
   sections.push(bullet('Cada entrada inclui timestamp ISO para auditoria temporal.'));
   sections.push(bullet('Parâmetros completos da operação são preservados para replay futuro.'));
   sections.push(bullet('O log é serializado como parte da relação e pode ser guardado/restaurado via Vistas Guardadas (tipo "Log de Operações").'));
   sections.push(bullet('Operações registadas incluem: adição/remoção de linhas, edição de células, ordenação, filtragem, binning, merge, group edit, formatação condicional, entre outras.'));
-  sections.push(heading2('32.3 Justificação'));
+  sections.push(heading2('31.3 Justificação'));
   sections.push(para('O log de operações é fundamental para auditoria e rastreabilidade. A estrutura declarativa dos registos permite que no futuro se implementem funcionalidades de undo/redo e replay de sequências de operações, transformando o Relation Builder numa ferramenta com histórico completo de transformações.'));
 
   // 33. Columns Visible
-  sections.push(heading1('33. Visibilidade de Colunas (columns_visible)'));
-  sections.push(heading2('33.1 Descrição'));
+  sections.push(heading1('32. Visibilidade de Colunas (columns_visible)'));
+  sections.push(heading2('32.1 Descrição'));
   sections.push(para('O objeto columns_visible no uiState controla a visibilidade, largura e ordem de apresentação das colunas na tabela. Este sistema substitui a abordagem anterior de mostrar todas as colunas por defeito.'));
-  sections.push(heading2('33.2 Funcionalidades'));
+  sections.push(heading2('32.2 Funcionalidades'));
   sections.push(bullet('Visibilidade: uma chave presente no objeto significa coluna visível; chave ausente significa coluna oculta.'));
   sections.push(bullet('Largura: o valor de cada chave representa a largura em pixels (0 = largura automática).'));
   sections.push(bullet('Ordem: a ordem das chaves no objeto determina a ordem de apresentação das colunas.'));
@@ -641,29 +677,29 @@ function generateRequirementsDoc() {
   sections.push(bullet('Redimensionamento de colunas via bordas arrastáveis nos cabeçalhos da tabela.'));
   sections.push(bullet('Reordenação de colunas via drag & drop diretamente nos cabeçalhos da tabela.'));
   sections.push(bullet('O submenu Column reorganiza as operações anteriormente em "Column Selection", incluindo as ações de remover colunas.'));
-  sections.push(heading2('33.3 Justificação'));
+  sections.push(heading2('32.3 Justificação'));
   sections.push(para('O controlo granular de visibilidade de colunas é essencial para relações com muitas colunas. A combinação de diálogo dedicado, ações no menu de contexto e interação direta nos cabeçalhos (resize e reorder) oferece múltiplos caminhos de interação para diferentes preferências de utilizador. A persistência via uiState garante que as configurações são mantidas entre sessões.'));
 
   // 34. Cartesian Product
-  sections.push(heading1('34. Produto Cartesiano'));
-  sections.push(heading2('34.1 Descrição'));
+  sections.push(heading1('33. Produto Cartesiano'));
+  sections.push(heading2('33.1 Descrição'));
   sections.push(para('O produto cartesiano permite expandir relações aninhadas, fazendo cross-join dos registos da sub-relação com os registos da relação principal.'));
-  sections.push(heading2('34.2 Variantes'));
+  sections.push(heading2('33.2 Variantes'));
   sections.push(boldPara('Cartesian Product (THIS): ', 'Realiza cross-join entre a coluna de relação aninhada selecionada e a relação atual. Cada linha da relação principal é multiplicada pelo número de linhas da sub-relação correspondente, com as colunas da sub-relação adicionadas como novas colunas.'));
   sections.push(boldPara('Cartesian Product (ALL): ', 'Realiza cross-join de TODAS as colunas do tipo relation na relação atual, expandindo todas as sub-relações simultaneamente.'));
-  sections.push(heading2('34.3 Justificação'));
+  sections.push(heading2('33.3 Justificação'));
   sections.push(para('O produto cartesiano é uma operação fundamental em álgebra relacional. Permite "achatamento" (flattening) de estruturas aninhadas para análise tabular, facilitando operações como filtragem, ordenação e pivot sobre dados que estavam em sub-relações.'));
 
   // 35. Remove Duplicates
-  sections.push(heading1('35. Remoção de Duplicados'));
-  sections.push(heading2('35.1 Descrição'));
+  sections.push(heading1('34. Remoção de Duplicados'));
+  sections.push(heading2('34.1 Descrição'));
   sections.push(para('A operação de remoção de duplicados identifica e remove linhas exatamente iguais da relação, mantendo apenas uma instância de cada combinação única de valores.'));
-  sections.push(heading2('35.2 Funcionalidades'));
+  sections.push(heading2('34.2 Funcionalidades'));
   sections.push(bullet('Comparação exata de todos os campos (exceto ID) para identificar duplicados.'));
   sections.push(bullet('Preservação da primeira ocorrência de cada grupo de duplicados.'));
   sections.push(bullet('Feedback ao utilizador com contagem de linhas removidas.'));
   sections.push(bullet('Operação registada no log de operações.'));
-  sections.push(heading2('35.3 Justificação'));
+  sections.push(heading2('34.3 Justificação'));
   sections.push(para('Dados duplicados são um problema frequente em conjuntos de dados importados ou resultantes de operações como produto cartesiano. A remoção automática de duplicados complementa o merge manual para casos mais simples onde os registos são exatamente iguais.'));
 
   return new Document({
@@ -1410,9 +1446,9 @@ function generateReflectionDoc() {
     '5.1 Operações Individuais (CRUD)',
     'Essenciais. View, Edit, Copy, New, Delete são as operações fundamentais de gestão de dados.',
     'Edição apenas inline (sem formulário dedicado). Modal de confirmação para todas as ações (mais seguro mas mais lento). Undo em vez de confirmação de delete.',
-    'O menu ⋯ é compacto e contextual. O formulário de edição com inputs tipados é mais estruturado que edição inline. A impressão em formato papel atende necessidades administrativas.',
+    'O menu ⋯ é compacto e contextual. O formulário de edição com inputs tipados é mais estruturado que edição inline. O formulário em papel (Paper Form) aumenta a resiliência organizacional, permitindo recolha de dados em papel durante falhas do sistema.',
     'O modelo CRUD é universalmente compreendido. "Ver", "Editar", "Copiar", "Eliminar" são ações atómicas e previsíveis.',
-    'Custo baixo-moderado. Benefício máximo (funcionalidade core). A vista de papel/impressão é um custo adicional baixo com benefício nicho significativo.',
+    'Custo baixo-moderado. Benefício máximo (funcionalidade core). O formulário em papel é um custo adicional baixo com benefício significativo para a resiliência organizacional.',
     'Undo/redo para operações. Histórico de alterações por registo (audit trail). Aprovações/workflow para alterações. Templates de formulário.'
   ));
   sections.push(...reflectionBlock(

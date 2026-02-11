@@ -10,17 +10,38 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function getRelativeLuminance(hexColor) {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+  const rLin = r <= 0.04045 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+  const gLin = g <= 0.04045 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+  const bLin = b <= 0.04045 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+
+  return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+}
+
+function getWcagContrastRatio(hexColor, textColor) {
+  const l1 = getRelativeLuminance(hexColor);
+  const l2 = getRelativeLuminance(textColor);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 function getContrastTextColor(hexColor) {
   if (!hexColor || !hexColor.startsWith('#')) return null;
-  
-  const hex = hexColor.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  
-  return luminance < 0.5 ? '#ffffff' : '#000000';
+
+  const bgLum = getRelativeLuminance(hexColor);
+  const whiteLum = 1.0;
+  const blackLum = 0.0;
+
+  const contrastWithWhite = (Math.max(bgLum, whiteLum) + 0.05) / (Math.min(bgLum, whiteLum) + 0.05);
+  const contrastWithBlack = (Math.max(bgLum, blackLum) + 0.05) / (Math.min(bgLum, blackLum) + 0.05);
+
+  return contrastWithWhite > contrastWithBlack ? '#ffffff' : '#000000';
 }
 
 function computeQuartile(sortedArr, p) {
@@ -5758,7 +5779,7 @@ const SELECTION_REL_OPTIONS = {
   show_natural_order: false,
   show_id: true,
   show_column_kind: false,
-  show_stats: false,
+  show_stats: true,
   show_hierarchy: true,
   hierarchy_column: 'parent',
   single_item_mode: 'bottom',
@@ -10363,8 +10384,10 @@ function showDataBarColorDialog(colIdx, st = state) {
         <div class="palette-colors">
           ${palette.colors.map(c => {
             const textColor = getContrastTextColor(c);
+            const ratio = getWcagContrastRatio(c, textColor);
+            const wcagLevel = ratio >= 7 ? 'AAA' : ratio >= 4.5 ? 'AA' : ratio >= 3 ? 'AA Large' : 'Below AA';
             const showT = textColor === '#ffffff';
-            return `<button class="color-swatch" data-color="${c}" style="background-color: ${c}">${showT ? '<span style="color: white; font-size: 10px; font-weight: bold;">T</span>' : ''}</button>`;
+            return `<button class="color-swatch" data-color="${c}" style="background-color: ${c}" title="Contrast ${ratio.toFixed(1)}:1 (${wcagLevel})">${showT ? '<span style="color: white; font-size: 10px; font-weight: bold;">T</span>' : ''}</button>`;
           }).join('')}
         </div>
       </div>
@@ -10374,6 +10397,7 @@ function showDataBarColorDialog(colIdx, st = state) {
   dialog.innerHTML = `
     <div class="color-palette-header">
       <span>Choose Color for Data Bar</span>
+      <span class="info-badge" title="Contrast calculated per WCAG 2.1 (Web Content Accessibility Guidelines).\nMetric: Contrast Ratio = (L1 + 0.05) / (L2 + 0.05), where L = relative luminance.\nText color is white on dark backgrounds, black on light backgrounds.\nMinimum levels: AA = 4.5:1 (normal text), AA Large = 3:1 (large text).\nRecommended: AAA = 7:1 (normal text), AAA Large = 4.5:1 (large text).\nThe &quot;T&quot; indicator shows white text will be used on that color.">ⓘ</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="color-palettes-container">
@@ -10409,8 +10433,10 @@ function showActiveFilterColorDialog(colIdx, st = state) {
         <div class="palette-colors">
           ${palette.colors.map(c => {
             const textColor = getContrastTextColor(c);
+            const ratio = getWcagContrastRatio(c, textColor);
+            const wcagLevel = ratio >= 7 ? 'AAA' : ratio >= 4.5 ? 'AA' : ratio >= 3 ? 'AA Large' : 'Below AA';
             const showT = textColor === '#ffffff';
-            return `<button class="color-swatch" data-color="${c}" style="background-color: ${c}">${showT ? '<span style="color: white; font-size: 10px; font-weight: bold;">T</span>' : ''}</button>`;
+            return `<button class="color-swatch" data-color="${c}" style="background-color: ${c}" title="Contrast ${ratio.toFixed(1)}:1 (${wcagLevel})">${showT ? '<span style="color: white; font-size: 10px; font-weight: bold;">T</span>' : ''}</button>`;
           }).join('')}
         </div>
       </div>
@@ -10420,6 +10446,7 @@ function showActiveFilterColorDialog(colIdx, st = state) {
   dialog.innerHTML = `
     <div class="color-palette-header">
       <span>Choose Color for Current Results</span>
+      <span class="info-badge" title="Contrast calculated per WCAG 2.1 (Web Content Accessibility Guidelines).\nMetric: Contrast Ratio = (L1 + 0.05) / (L2 + 0.05), where L = relative luminance.\nText color is white on dark backgrounds, black on light backgrounds.\nMinimum levels: AA = 4.5:1 (normal text), AA Large = 3:1 (large text).\nRecommended: AAA = 7:1 (normal text), AAA Large = 4.5:1 (large text).\nThe &quot;T&quot; indicator shows white text will be used on that color.">ⓘ</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="color-palettes-container">
@@ -12894,6 +12921,8 @@ function getDefaultChartOptions() {
     showLegend: true,
     legendPosition: 'bottom',
     trendline: 'auto',
+    showTrendR2: true,
+    showTrendEquation: false,
     xLabelRotation: 0,
     yMin: '',
     yMax: ''
@@ -12989,6 +13018,12 @@ function showPivotChartOptionsDialog(st = state) {
             <option value="logarithmic" ${opts.trendline === 'logarithmic' ? 'selected' : ''}>Logarithmic</option>
           </select>
         </div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-show-trend-r2" ${opts.showTrendR2 ? 'checked' : ''}> Show R²</label>
+        </div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-show-trend-equation" ${opts.showTrendEquation ? 'checked' : ''}> Show Equation</label>
+        </div>
       </div>
     </div>
     <div class="dialog-footer">
@@ -13019,6 +13054,8 @@ function showPivotChartOptionsDialog(st = state) {
       showLegend: dialog.querySelector('.opt-show-legend').checked,
       legendPosition: dialog.querySelector('.opt-legend-pos').value,
       trendline: dialog.querySelector('.opt-trendline').value,
+      showTrendR2: dialog.querySelector('.opt-show-trend-r2').checked,
+      showTrendEquation: dialog.querySelector('.opt-show-trend-equation').checked,
       xLabelRotation: parseInt(dialog.querySelector('.opt-x-rotation').value),
       yMin: dialog.querySelector('.opt-y-min').value,
       yMax: dialog.querySelector('.opt-y-max').value
@@ -13146,6 +13183,41 @@ function getTrendlineForType(points, type) {
   else if (type === 'logarithmic') trend = trendLogarithmic(points);
   if (trend) trend.r2 = computeR2(points, trend.predict);
   return trend;
+}
+
+function getTrendlineEquation(trend) {
+  if (!trend) return '';
+  const fmt = (v) => {
+    if (Math.abs(v) >= 100) return v.toFixed(1);
+    if (Math.abs(v) >= 1) return v.toFixed(2);
+    if (Math.abs(v) >= 0.01) return v.toFixed(4);
+    return v.toExponential(2);
+  };
+  if (trend.type === 'linear') {
+    return 'y = ' + fmt(trend.m) + 'x ' + (trend.b >= 0 ? '+ ' : '− ') + fmt(Math.abs(trend.b));
+  }
+  if (trend.type === 'polynomial2' && trend.coeffs) {
+    const c = trend.coeffs;
+    let eq = 'y = ' + fmt(c[2]) + 'x²';
+    eq += (c[1] >= 0 ? ' + ' : ' − ') + fmt(Math.abs(c[1])) + 'x';
+    eq += (c[0] >= 0 ? ' + ' : ' − ') + fmt(Math.abs(c[0]));
+    return eq;
+  }
+  if (trend.type === 'polynomial3' && trend.coeffs) {
+    const c = trend.coeffs;
+    let eq = 'y = ' + fmt(c[3]) + 'x³';
+    eq += (c[2] >= 0 ? ' + ' : ' − ') + fmt(Math.abs(c[2])) + 'x²';
+    eq += (c[1] >= 0 ? ' + ' : ' − ') + fmt(Math.abs(c[1])) + 'x';
+    eq += (c[0] >= 0 ? ' + ' : ' − ') + fmt(Math.abs(c[0]));
+    return eq;
+  }
+  if (trend.type === 'exponential') {
+    return 'y = ' + fmt(trend.a) + 'e^(' + fmt(trend.b) + 'x)';
+  }
+  if (trend.type === 'logarithmic') {
+    return 'y = ' + fmt(trend.b) + 'ln(x) ' + (trend.a >= 0 ? '+ ' : '− ') + fmt(Math.abs(trend.a));
+  }
+  return '';
 }
 
 function renderPivotChart(st = state) {
@@ -13546,13 +13618,24 @@ function renderPivotChart(st = state) {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      if (trend.r2 !== undefined) {
+      const labelParts = [];
+      if (opts.showTrendR2 && trend.r2 !== undefined) {
+        labelParts.push('R²=' + trend.r2.toFixed(3));
+      }
+      if (opts.showTrendEquation) {
+        const eq = getTrendlineEquation(trend);
+        if (eq) labelParts.push(eq);
+      }
+      if (labelParts.length > 0) {
         ctx.fillStyle = color;
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'left';
         const lx = toCanvasX(rowValuesArr.length - 1) + 4;
         const ly = toCanvasY(trend.predict(rowValuesArr.length - 1));
-        ctx.fillText('R²=' + trend.r2.toFixed(3), Math.min(lx, displayWidth - marginRight - 50), Math.max(ly, marginTop + 12));
+        const startX = Math.min(lx, displayWidth - marginRight - 120);
+        labelParts.forEach((part, i) => {
+          ctx.fillText(part, startX, Math.max(ly + i * 14, marginTop + 12 + i * 14));
+        });
       }
     });
   }
