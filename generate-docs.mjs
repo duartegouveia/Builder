@@ -439,27 +439,69 @@ function generateRequirementsDoc() {
 
   // 18. Multi-Record Operations
   sections.push(heading1('17. Operações Multi-Registo'));
-  sections.push(heading2('17.1 Operações'));
-  sections.push(boldPara('Multi View: ', 'Visualização simultânea de múltiplos registos selecionados.'));
-  sections.push(boldPara('Multi Edit: ', 'Edição simultânea de múltiplos registos com painel sincronizado.'));
-  sections.push(boldPara('Multi Copy: ', 'Duplicação de todos os registos selecionados.'));
-  sections.push(boldPara('Multi Delete: ', 'Eliminação em massa com confirmação e contagem.'));
-  sections.push(boldPara('Group Edit: ', 'Aplicação de um valor a um campo específico em todos os registos selecionados.'));
-  sections.push(boldPara('Merge: ', 'Fusão de múltiplos registos num único com controlo campo-a-campo sobre qual valor manter.'));
-  sections.push(boldPara('Scrolling Multi-Panel: ', 'Visualização lado-a-lado com scroll sincronizado para comparação de registos.'));
-  sections.push(heading2('17.2 Justificação'));
-  sections.push(para('Operações multi-registo são essenciais para eficiência em conjuntos de dados grandes. O merge com controlo campo-a-campo resolve o problema comum de dados duplicados. O scroll sincronizado facilita a comparação visual.'));
+  sections.push(para('As operações multi-registo permitem atuar sobre vários registos assinalados (checked) de uma só vez. Todas estas operações só ficam disponíveis quando existem registos assinalados — o utilizador assinala registos através das checkboxes na primeira coluna da tabela.'));
+
+  sections.push(heading2('17.1 Sistema de Painéis Múltiplos'));
+  sections.push(para('As operações Multi View, Multi Edit e Merge partilham um sistema de painéis múltiplos lado-a-lado (2, 3 ou 4 painéis, configurável por dropdown). Cada painel mostra um dos registos assinalados, com as seguintes características:'));
+  sections.push(bullet('Navegação independente: cada painel tem os seus próprios controlos de navegação (primeiro, anterior, próximo, último, e campo numérico de posição). O utilizador pode navegar livremente em cada painel entre todos os registos assinalados, sem afetar os outros painéis.'));
+  sections.push(bullet('Scroll sincronizado: quando o utilizador faz scroll num painel, todos os outros painéis acompanham a mesma posição de scroll. Isto permite comparar o mesmo campo entre registos diferentes sem perder o alinhamento.'));
+  sections.push(bullet('Alinhamento de altura por campo: a altura de cada campo é automaticamente ajustada para que o mesmo campo ocupe a mesma altura em todos os painéis. Se um campo tem conteúdo mais extenso num registo, os painéis vizinhos expandem esse campo para a mesma altura, garantindo que os campos ficam sempre alinhados horizontalmente.'));
+  sections.push(para('A operação Group Edit não utiliza o sistema de painéis — tem uma interface própria descrita abaixo.'));
+
+  sections.push(heading2('17.2 Multi View'));
+  sections.push(para('Permite visualizar simultaneamente vários registos assinalados lado-a-lado, em modo apenas de leitura. É útil para comparar valores entre registos, verificar diferenças ou confirmar dados antes de outras operações. Cada painel mostra todos os campos do registo com navegação independente entre os assinalados.'));
+
+  sections.push(heading2('17.3 Multi Edit'));
+  sections.push(para('Permite editar simultaneamente vários registos assinalados. Cada painel apresenta os campos em modo de edição (excepto campos do tipo id e relation). O utilizador pode navegar independentemente em cada painel, editar os valores desejados e depois clicar "Gravar" para aplicar todas as alterações de uma vez. Útil para corrigir ou atualizar dados em múltiplos registos sem ter de abrir cada um individualmente.'));
+
+  sections.push(heading2('17.4 Group Edit'));
+  sections.push(para('Aplica o mesmo valor a um campo específico em todos os registos assinalados de uma só vez. É a operação mais eficiente quando se pretende uniformizar um campo — por exemplo, alterar a categoria, o estado ou a data de todos os registos assinalados para o mesmo valor.'));
+  sections.push(para('A interface apresenta um formulário com todos os campos editáveis do registo. Para cada campo, o utilizador:'));
+  sections.push(bullet('Vê um histograma dos valores atuais desse campo nos registos assinalados, mostrando cada valor distinto e quantos registos o têm.'));
+  sections.push(bullet('Assinala a checkbox do campo que pretende alterar — ao assinalar, o histograma é substituído por um campo de edição onde se define o novo valor.'));
+  sections.push(bullet('Pode assinalar múltiplos campos para alterar vários de uma só vez.'));
+  sections.push(para('Ao clicar "Gravar para Todos", o valor definido em cada campo assinalado é aplicado a todos os registos checked. Um badge informativo (ℹ) explica o funcionamento.'));
+
+  sections.push(heading2('17.5 Merge'));
+  sections.push(para('Funde múltiplos registos assinalados num único registo, com controlo campo-a-campo sobre qual valor manter. É a operação ideal para resolver duplicados — quando existem dois ou mais registos que representam a mesma entidade mas com dados diferentes ou complementares.'));
+  sections.push(para('O funcionamento utiliza o sistema de painéis múltiplos:'));
+  sections.push(bullet('O primeiro painel (esquerda) é o painel de edição — é o registo que vai receber o resultado final do merge. Os seus campos são editáveis.'));
+  sections.push(bullet('Os painéis seguintes mostram os outros registos assinalados em modo de leitura. Cada campo destes painéis tem um radiobutton — ao clicar, o valor desse campo é copiado para o painel de edição.'));
+  sections.push(bullet('Para campos do tipo relation, checkboxes permitem escolher quais sub-registos de cada painel copiar para o resultado.'));
+  sections.push(bullet('Ao clicar "Juntar Todos num Só", os valores do painel de edição são guardados e todos os outros registos assinalados são eliminados, ficando apenas o registo fundido.'));
+  sections.push(para('Um badge informativo (ℹ) explica o processo passo-a-passo.'));
+
+  sections.push(heading2('17.6 Multi Copy'));
+  sections.push(para('Duplica todos os registos assinalados de uma só vez. Cada registo assinalado é copiado com um novo ID. Útil para criar variantes de registos existentes ou para preparar dados de teste.'));
+
+  sections.push(heading2('17.7 Multi Delete'));
+  sections.push(para('Elimina todos os registos assinalados após confirmação. Um diálogo mostra o número exato de registos que serão eliminados, pedindo confirmação antes de proceder. Útil para limpeza de dados em massa.'));
+
+  sections.push(heading2('17.8 Justificação'));
+  sections.push(para('Operações multi-registo são essenciais para eficiência em conjuntos de dados grandes. O sistema de painéis com scroll sincronizado e alinhamento de campos facilita a comparação visual. O Group Edit permite uniformizar campos rapidamente. O Merge com controlo campo-a-campo resolve o problema comum de dados duplicados de forma precisa.'));
 
   // 19. Selection Dialogs
   sections.push(heading1('18. Diálogos de Seleção'));
+  sections.push(para('Os diálogos de seleção servem para escolher registos de uma relação e devolver os IDs escolhidos. São úteis para integração com sistemas externos, formulários que precisam de referenciar registos, ou simplesmente para extrair um subconjunto de dados. Os IDs resultantes são enviados para a consola do browser, para um textarea (output_textarea_json) e para um div (output_div_json), permitindo que outros componentes da página os capturem.'));
+  sections.push(para('Pesquisa integrada: todos os diálogos de seleção incluem um campo de pesquisa rápida que filtra os registos apresentados. No diálogo Choose Many, a pesquisa aplica-se apenas à lista de disponíveis (primeira tabela), não à lista de escolhidos.'));
+
   sections.push(heading2('18.1 Select One'));
-  sections.push(para('Abre um diálogo com cópia da relação (uiState limpo). Duplo-clique numa linha retorna o ID. O resultado é enviado para console.log, textarea.output_textarea_json e div.output_div_json.'));
+  sections.push(para('Permite escolher exatamente um registo. O diálogo abre uma cópia da relação numa tabela interativa. O utilizador navega, filtra e pesquisa até encontrar o registo desejado. Um duplo-clique sobre a linha devolve o ID desse registo e fecha o diálogo. Se o utilizador fechar sem duplo-clique, é devolvido o ID da linha que estiver highlighted (ou vazio se nenhuma estiver).'));
+
   sections.push(heading2('18.2 Select Many'));
-  sections.push(para('Similar a Select One mas com multicheck ativado. Ao fechar retorna array de IDs das linhas selecionadas.'));
+  sections.push(para('Permite escolher vários registos usando checkboxes. O diálogo abre uma cópia da relação com multicheck ativado. O utilizador assinala (check) todos os registos desejados — pode navegar entre páginas e usar filtros sem perder as seleções anteriores. Ao fechar o diálogo, é devolvido um array com os IDs de todos os registos assinalados.'));
+
   sections.push(heading2('18.3 Choose Many'));
-  sections.push(para('Duas cópias da relação empilhadas: fonte (todos os itens) e alvo (vazio). Duplo-clique na fonte copia para alvo. Duplo-clique no alvo remove. Ao fechar retorna array de IDs do alvo. Inclui pesquisa integrada.'));
+  sections.push(para('Permite construir uma lista de registos escolhidos através de uma interface com duas listas em accordion:'));
+  sections.push(bullet('Lista de Disponíveis (accordion superior): contém todos os registos da relação. O header do accordion mostra o número total de registos disponíveis.'));
+  sections.push(bullet('Lista de Escolhidos (accordion inferior): começa vazia. O header do accordion mostra o número de registos já escolhidos.'));
+  sections.push(para('Cada accordion pode ser aberto ou fechado independentemente, permitindo ver uma lista, a outra, ou ambas em simultâneo.'));
+  sections.push(para('Para adicionar um registo: duplo-clique numa linha da lista de disponíveis. O registo é copiado para a lista de escolhidos e o contador no header do accordion de escolhidos é incrementado. Se o registo já existir na lista de escolhidos, não é adicionado novamente e o header mostra um aviso temporário indicando que o registo já foi escolhido.'));
+  sections.push(para('Para remover um registo: duplo-clique numa linha da lista de escolhidos.'));
+  sections.push(para('O utilizador pode acompanhar a evolução do número de escolhidos diretamente pelo contador no header do accordion, sem necessidade de abrir a lista. Ao fechar o diálogo, é devolvido um array com os IDs dos registos na lista de escolhidos.'));
+
   sections.push(heading2('18.4 Justificação'));
-  sections.push(para('Os diálogos de seleção permitem integração com sistemas externos, funcionando como componentes reutilizáveis de escolha. A abordagem de Choose Many com duas listas é particularmente intuitiva para seleção de subconjuntos.'));
+  sections.push(para('Os diálogos de seleção funcionam como componentes reutilizáveis de escolha, permitindo que qualquer parte do sistema solicite ao utilizador a seleção de registos. A interface do Choose Many com accordion e contadores no header torna a experiência mais compacta e informativa, permitindo ao utilizador monitorizar o progresso sem ter ambas as listas permanentemente visíveis.'));
 
   // 20. Export
   sections.push(heading1('19. Exportação'));
@@ -471,7 +513,7 @@ function generateRequirementsDoc() {
   sections.push(bullet('Templates server-side com interpolação de variáveis.'));
   sections.push(bullet('Templates armazenados em client/public/export/ organizados por nome de relação e formato.'));
   sections.push(bullet('API endpoints: /api/export/templates (lista) e /api/export/template/:path (conteúdo).'));
-  sections.push(bullet('Proteção contra path traversal na API.'));
+  sections.push(bullet('Proteção contra path traversal (directory traversal) na API: impede que pedidos maliciosos acedam a ficheiros fora da pasta de templates, validando que o caminho solicitado não contém sequências como "../" que permitiriam navegar para diretórios superiores.'));
   sections.push(bullet('Download direto ou abertura em nova aba.'));
   sections.push(heading2('19.2 Justificação'));
   sections.push(para('A exportação multi-formato garante interoperabilidade com outras ferramentas. O sistema de templates permite personalização de formatos de saída sem alteração de código. A proteção contra path traversal é uma medida de segurança essencial.'));

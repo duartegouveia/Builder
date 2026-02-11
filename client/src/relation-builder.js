@@ -5994,13 +5994,25 @@ function openChooseManyDialog(st) {
     </div>
     <div class="popup-content-body choose-many-body">
       <div class="choose-many-section">
-        <div class="choose-many-label">Disponíveis (${relSource.items.length})</div>
-        ${selectionSearchHtml()}
-        <div class="selection-relation-container choose-source-container" id="${dialogId}-source"></div>
+        <div class="choose-many-accordion-header" data-accordion="source" data-expanded="true">
+          <span class="choose-many-accordion-arrow">▼</span>
+          <span class="choose-many-label">Disponíveis (<span class="cm-source-count">${relSource.items.length}</span>)</span>
+          <span class="cm-feedback hidden"></span>
+        </div>
+        <div class="choose-many-accordion-body" data-accordion="source">
+          ${selectionSearchHtml()}
+          <div class="selection-relation-container choose-source-container" id="${dialogId}-source"></div>
+        </div>
       </div>
       <div class="choose-many-section">
-        <div class="choose-many-label">Seleccionados (0)</div>
-        <div class="selection-relation-container choose-target-container" id="${dialogId}-target"></div>
+        <div class="choose-many-accordion-header" data-accordion="target" data-expanded="true">
+          <span class="choose-many-accordion-arrow">▼</span>
+          <span class="choose-many-label">Escolhidos (<span class="cm-target-count">0</span>)</span>
+          <span class="cm-feedback hidden"></span>
+        </div>
+        <div class="choose-many-accordion-body" data-accordion="target">
+          <div class="selection-relation-container choose-target-container" id="${dialogId}-target"></div>
+        </div>
       </div>
     </div>
     <div class="filter-dialog-footer">
@@ -6019,10 +6031,32 @@ function openChooseManyDialog(st) {
   const sourceSection = dialog.querySelector('.choose-many-section');
   setupSelectionSearch(sourceSection, sourceSt);
 
+  dialog.querySelectorAll('.choose-many-accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const expanded = header.dataset.expanded === 'true';
+      header.dataset.expanded = expanded ? 'false' : 'true';
+      const arrow = header.querySelector('.choose-many-accordion-arrow');
+      if (arrow) arrow.textContent = expanded ? '▶' : '▼';
+      const acc = header.dataset.accordion;
+      const body = dialog.querySelector(`.choose-many-accordion-body[data-accordion="${acc}"]`);
+      if (body) body.classList.toggle('hidden', expanded);
+    });
+  });
+
   const updateLabels = () => {
-    const sections = dialog.querySelectorAll('.choose-many-label');
-    if (sections[0]) sections[0].textContent = `Disponíveis (${sourceSt.relation.items.length})`;
-    if (sections[1]) sections[1].textContent = `Seleccionados (${targetSt.relation.items.length})`;
+    const srcCount = dialog.querySelector('.cm-source-count');
+    const tgtCount = dialog.querySelector('.cm-target-count');
+    if (srcCount) srcCount.textContent = sourceSt.relation.items.length;
+    if (tgtCount) tgtCount.textContent = targetSt.relation.items.length;
+  };
+
+  const showAlreadyExistsFeedback = () => {
+    const feedbackEl = dialog.querySelector('.choose-many-accordion-header[data-accordion="target"] .cm-feedback');
+    if (!feedbackEl) return;
+    feedbackEl.textContent = '— já existe na lista';
+    feedbackEl.classList.remove('hidden');
+    clearTimeout(feedbackEl._timer);
+    feedbackEl._timer = setTimeout(() => feedbackEl.classList.add('hidden'), 2000);
   };
 
   const cleanup = () => {
@@ -6046,7 +6080,7 @@ function openChooseManyDialog(st) {
     if (idCol >= 0) {
       const itemId = item[idCol];
       const alreadyExists = targetSt.relation.items.some(r => r[idCol] === itemId);
-      if (alreadyExists) return;
+      if (alreadyExists) { showAlreadyExistsFeedback(); return; }
     }
     targetSt.relation.items.push(item);
     const targetCount = targetSt.relation.items.length;

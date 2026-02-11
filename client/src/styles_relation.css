@@ -4570,7 +4570,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   flex-direction: column;
 }
 
-.choose-many-label {
+.choose-many-accordion-header {
   font-weight: 600;
   font-size: 0.85rem;
   padding: var(--space-1) var(--space-2);
@@ -4579,11 +4579,50 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border: 1px solid var(--border);
   border-bottom: none;
   color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.choose-many-accordion-header:hover {
+  background: var(--accent, #e4e4e7);
+}
+
+.choose-many-accordion-arrow {
+  font-size: 0.7rem;
+  width: 1em;
+  flex-shrink: 0;
+}
+
+.choose-many-label {
+  flex: 1;
+}
+
+.cm-feedback {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--warning, #b45309);
+  font-style: italic;
+}
+
+.choose-many-accordion-body {
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
+
+.choose-many-accordion-body.hidden {
+  display: none;
+}
+
+.choose-many-accordion-header[data-expanded="false"] {
+  border-radius: var(--radius);
+  border-bottom: 1px solid var(--border);
 }
 
 .choose-many-section .selection-relation-container {
-  border: 1px solid var(--border);
-  border-radius: 0 0 var(--radius) var(--radius);
   overflow: auto;
   max-height: 35vh;
 }
@@ -4609,7 +4648,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   }
 
   .choose-many-section .selection-relation-container {
-    max-height: 30vh;
+    max-height: 25vh;
   }
 }
 
