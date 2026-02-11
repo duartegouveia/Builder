@@ -5568,9 +5568,9 @@ function filterByQuickSearch(st, indices) {
   }
   
   const items = st.relation.items;
-  const visibleColIndices = st.columnNames.map((_, idx) => idx).filter(idx => {
+  const cvIndices = getVisibleColumnIndices(st);
+  const visibleColIndices = cvIndices.filter(idx => {
     const type = st.columnTypes[idx];
-    // Skip hidden ID columns
     if (type === 'id' && !st.rel_options.show_id) return false;
     return true;
   });

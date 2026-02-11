@@ -529,7 +529,6 @@ function generateRequirementsDoc() {
   sections.push(bullet('Conversão automática de tipos (int, float, boolean).'));
   sections.push(bullet('Modo de edição de texto com valores tab-separated.'));
   sections.push(bullet('Atribuição automática de IDs.'));
-  sections.push(bullet('Mensagem de erro clara para formato .xlsx binário (não suportado).'));
   sections.push(heading2('20.2 Justificação'));
   sections.push(para('A importação flexível permite integrar dados de diversas fontes. A auto-deteção e mapeamento inteligente reduzem o esforço manual. O preview previne importações incorretas.'));
 
@@ -538,7 +537,7 @@ function generateRequirementsDoc() {
   sections.push(heading2('21.1 Funcionalidades'));
   sections.push(bullet('Validação do campo "pot" da relação.'));
   sections.push(bullet('Verificação de chaves de atributos conhecidas.'));
-  sections.push(bullet('Validação de tipos de coluna contra KNOWN_COLUMN_KINDS.'));
+  sections.push(bullet('Validação de tipos de coluna contra os tipos conhecidos: id, string, int, float, boolean, textarea, relation, date, datetime, time, select.'));
   sections.push(bullet('Verificação de comprimentos de arrays de items.'));
   sections.push(bullet('Consistência de tipos de valores (validação int, float, boolean).'));
   sections.push(bullet('Deteção de IDs duplicados.'));
@@ -575,26 +574,26 @@ function generateRequirementsDoc() {
 
   // 24. Nested Relations
   sections.push(heading1('23. Relações Aninhadas'));
-  sections.push(heading2('23.1 Funcionalidades'));
-  sections.push(bullet('Colunas do tipo "relation" contêm sub-relações completas.'));
-  sections.push(bullet('Abertura em diálogo modal ou painel lateral/inferior (conforme single_item_mode).'));
-  sections.push(bullet('Cada sub-relação é uma instância completa com todas as funcionalidades.'));
-  sections.push(bullet('Profundidade ilimitada de aninhamento.'));
-  sections.push(bullet('Cleanup automático de instâncias ao fechar diálogos.'));
-  sections.push(bullet('Opções por defeito aplicadas automaticamente a sub-relações.'));
-  sections.push(heading2('23.2 Justificação'));
-  sections.push(para('O aninhamento ilimitado de relações permite modelar estruturas de dados arbitrariamente complexas. A utilização do mesmo código parametrizado garante consistência e reduz manutenção.'));
+  sections.push(heading2('23.1 Propósito e Funcionamento'));
+  sections.push(para('As relações aninhadas permitem que uma coluna de uma tabela contenha, dentro de si, outra tabela completa. Isto é útil para modelar dados naturalmente hierárquicos — por exemplo, uma tabela de encomendas onde cada encomenda contém uma sub-tabela com os seus itens, ou uma tabela de departamentos onde cada departamento contém a lista dos seus funcionários.'));
+  sections.push(para('Quando o utilizador clica numa célula do tipo "relation", a sub-tabela abre-se num diálogo modal ou num painel lateral/inferior (conforme a configuração single_item_mode). Essa sub-tabela é completamente funcional — suporta todas as operações disponíveis na tabela principal, incluindo filtros, ordenação, formatação condicional, estatísticas e até sub-relações adicionais dentro de si (profundidade ilimitada).'));
+  sections.push(heading2('23.2 Gestão Automática de Recursos'));
+  sections.push(para('Cada sub-tabela aberta cria uma instância interna para gerir o seu estado (filtros, ordenação, página atual, etc.). Quando o utilizador fecha o diálogo ou painel da sub-tabela, essa instância é automaticamente removida da memória. Isto garante que, mesmo ao navegar por muitas sub-relações ao longo de uma sessão, o desempenho da aplicação não se degrada — os recursos são libertados assim que deixam de ser necessários.'));
+  sections.push(para('As sub-relações herdam automaticamente as opções por defeito da aplicação, assegurando uma experiência consistente entre a tabela principal e qualquer sub-tabela.'));
+  sections.push(heading2('23.3 Justificação'));
+  sections.push(para('O aninhamento ilimitado de relações permite modelar estruturas de dados arbitrariamente complexas sem necessidade de tabelas separadas. A gestão automática de recursos garante estabilidade em sessões prolongadas com múltiplas sub-relações.'));
 
   // 25. Quick Search
   sections.push(heading1('24. Pesquisa Rápida'));
   sections.push(heading2('24.1 Funcionalidades'));
   sections.push(bullet('Campo de pesquisa na barra de vistas.'));
   sections.push(bullet('Filtragem em tempo real enquanto o utilizador digita.'));
-  sections.push(bullet('Pesquisa em todos os campos de cada registo.'));
+  sections.push(bullet('Pesquisa apenas nas colunas visíveis: a pesquisa respeita a configuração de visibilidade de colunas (columns_visible). Se uma coluna estiver oculta, os seus valores não são considerados na pesquisa. Colunas do tipo ID também são excluídas quando show_id está desativado.'));
+  sections.push(bullet('Para colunas do tipo select, a pesquisa procura pelo texto de apresentação (label) e não pelo valor interno (key), para que os resultados correspondam ao que o utilizador vê na tabela.'));
   sections.push(bullet('Botão de limpar pesquisa.'));
   sections.push(bullet('Disponível nas vistas de tabela e cartões.'));
   sections.push(heading2('24.2 Justificação'));
-  sections.push(para('A pesquisa rápida é a forma mais imediata de encontrar registos específicos, complementando os filtros avançados para casos de uso simples.'));
+  sections.push(para('A pesquisa rápida é a forma mais imediata de encontrar registos específicos, complementando os filtros avançados para casos de uso simples. A restrição a colunas visíveis garante que os resultados são coerentes com o que o utilizador vê na tabela.'));
 
   // 26. Pagination
   sections.push(heading1('25. Paginação'));
