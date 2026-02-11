@@ -5241,3 +5241,141 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   margin-top: 16px;
   gap: 8px;
 }
+
+/* Pivot Chart Panel */
+.pivot-panels-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+.pivot-panels-toolbar .btn.active {
+  background: var(--blue-500, #3b82f6);
+  color: #fff;
+  border-color: var(--blue-500, #3b82f6);
+}
+.pivot-toolbar-separator {
+  color: var(--border, #e2e8f0);
+  margin: 0 4px;
+}
+.pivot-chart-panel {
+  margin-top: 12px;
+}
+.pivot-chart-config {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--bg-subtle, #f8fafc);
+  border: 1px solid var(--border-light, #f1f5f9);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.pivot-chart-config-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pivot-chart-config-row label {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pivot-chart-config-row select {
+  padding: 4px 8px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg-input, #fff);
+}
+.pivot-chart-canvas {
+  width: 100%;
+  border: 1px solid var(--border-light, #f1f5f9);
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* Chart Options Dialog */
+.pivot-chart-options-dialog {
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.pivot-chart-options-dialog .dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.pivot-chart-options-dialog .dialog-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+.pivot-chart-options-dialog .dialog-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-secondary, #64748b);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.pivot-chart-options-dialog .dialog-close:hover {
+  background: var(--bg-hover, #f1f5f9);
+}
+.pivot-chart-options-dialog .dialog-body {
+  overflow-y: auto;
+  flex: 1;
+}
+.chart-options-section {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light, #f1f5f9);
+}
+.chart-options-section:last-child {
+  border-bottom: none;
+}
+.chart-options-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.chart-options-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.chart-options-row label {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.chart-options-row input[type="text"],
+.chart-options-row input[type="number"] {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 4px;
+  font-size: 13px;
+}
+.chart-options-row select {
+  padding: 4px 8px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 4px;
+  font-size: 13px;
+}
+.pivot-chart-options-dialog .dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 8px;
+}

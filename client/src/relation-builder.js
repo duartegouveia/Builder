@@ -11935,6 +11935,54 @@ function initPivotConfig(st = state) {
       renderPivotValuesConfig(st);
     });
   }
+
+  const toggleTableBtn = pivotView.querySelector('.pivot-toggle-table');
+  if (toggleTableBtn) {
+    toggleTableBtn.addEventListener('click', () => {
+      const container = pivotView.querySelector('.pivot-table-container');
+      if (container) container.style.display = container.style.display === 'none' ? '' : 'none';
+      toggleTableBtn.classList.toggle('active');
+    });
+  }
+
+  const toggleChartBtn = pivotView.querySelector('.pivot-toggle-chart');
+  if (toggleChartBtn) {
+    toggleChartBtn.addEventListener('click', () => {
+      const panel = pivotView.querySelector('.pivot-chart-panel');
+      if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
+      toggleChartBtn.classList.toggle('active');
+    });
+  }
+
+  const chartTypeSelect = pivotView.querySelector('.pivot-chart-type');
+  if (chartTypeSelect) {
+    chartTypeSelect.addEventListener('change', () => {
+      if (chartTypeSelect.value === 'pie' && st._pivotChartOptions) {
+        st._pivotChartOptions.showDataLabels = true;
+      }
+      renderPivotChart(st);
+    });
+  }
+
+  const barModeSelect = pivotView.querySelector('.pivot-chart-bar-mode');
+  if (barModeSelect) {
+    barModeSelect.addEventListener('change', () => renderPivotChart(st));
+  }
+
+  const optionsBtn = pivotView.querySelector('.pivot-chart-options-btn');
+  if (optionsBtn) {
+    optionsBtn.addEventListener('click', () => showPivotChartOptionsDialog(st));
+  }
+
+  const pngBtn = pivotView.querySelector('.pivot-download-png');
+  if (pngBtn) {
+    pngBtn.addEventListener('click', () => downloadPivotChart(st, 'png'));
+  }
+
+  const gifBtn = pivotView.querySelector('.pivot-download-gif');
+  if (gifBtn) {
+    gifBtn.addEventListener('click', () => downloadPivotChart(st, 'gif'));
+  }
 }
 
 function renderPivotValuesConfig(st = state) {
@@ -11993,8 +12041,221 @@ function renderPivotValuesConfig(st = state) {
   });
 }
 
+const CHART_COLORS = [
+  '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
+  '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'
+];
+
+const AGG_LABELS = { count: 'Count', sum: 'Sum', average: 'Average', median: 'Median', stddev: 'Std Dev', pctTotal: '% Total', pctRow: '% Row', pctCol: '% Col' };
+const AGG_SHORT_LABELS = { count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev', pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col' };
+
+function pivotCalcSum(arr) { return arr.reduce((a, b) => a + b, 0); }
+function pivotCalcMean(arr) { return arr.length > 0 ? pivotCalcSum(arr) / arr.length : 0; }
+function pivotCalcMedian(arr) {
+  if (arr.length === 0) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+function pivotCalcStdDev(arr) {
+  if (arr.length < 1) return 0;
+  const mean = pivotCalcMean(arr);
+  const sqDiffs = arr.map(v => (v - mean) ** 2);
+  return Math.sqrt(pivotCalcSum(sqDiffs) / arr.length);
+}
+
+function resolveAggNumeric(data, aggType) {
+  if (Array.isArray(data)) {
+    if (data.length === 0) return 0;
+    if (aggType === 'sum') return pivotCalcSum(data);
+    if (aggType === 'average') return pivotCalcMean(data);
+    if (aggType === 'median') return pivotCalcMedian(data);
+    if (aggType === 'stddev') return pivotCalcStdDev(data);
+  }
+  return typeof data === 'number' ? data : 0;
+}
+
+function computePivotData(st = state) {
+  if (!st.relation || !st.relation.items || st.relation.items.length === 0) return null;
+
+  const rowSelect = st.container ? st.container.querySelector('.pivot-rows') : el('.pivot-rows');
+  const colSelect = st.container ? st.container.querySelector('.pivot-cols') : el('.pivot-cols');
+  const rowColIdx = rowSelect?.value;
+  const colColIdx = colSelect?.value;
+
+  const hasRows = rowColIdx !== '' && rowColIdx !== null && rowColIdx !== undefined;
+  const hasCols = colColIdx !== '' && colColIdx !== null && colColIdx !== undefined;
+
+  if (!hasRows && !hasCols) return null;
+
+  const rowIdx = hasRows ? parseInt(rowColIdx) : null;
+  const colIdx = hasCols ? parseInt(colColIdx) : null;
+
+  const idColumnIdx = st.columnNames.indexOf('id') !== -1 ? st.columnNames.indexOf('id') : 0;
+  const aggregations = getPivotConfig(st).values.length > 0 ?
+    getPivotConfig(st).values.filter(v => v.column !== null || v.aggregation === 'count') :
+    [{ column: idColumnIdx, aggregation: 'count' }];
+
+  if (aggregations.length === 0) {
+    aggregations.push({ column: idColumnIdx, aggregation: 'count' });
+  }
+
+  const rowValues = new Set();
+  const colValues = new Set();
+
+  getSortedIndices(st).forEach(i => {
+    const row = st.relation.items[i];
+    if (hasRows && row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
+    if (hasCols && row[colIdx] !== null) colValues.add(String(row[colIdx]));
+  });
+
+  const rowValuesArr = hasRows ? Array.from(rowValues).sort() : ['Total'];
+  const colValuesArr = hasCols ? Array.from(colValues).sort() : ['Total'];
+
+  const rawData = {};
+  let grandTotal = 0;
+  const countRowTotals = {};
+  const countColTotals = {};
+  const rowValuesData = {};
+  const colValuesData = {};
+  const grandValuesData = {};
+
+  const numericAggs = ['sum', 'average', 'median', 'stddev'];
+
+  aggregations.forEach((agg, aggIdx) => {
+    rawData[aggIdx] = {};
+    rowValuesData[aggIdx] = {};
+    colValuesData[aggIdx] = {};
+    grandValuesData[aggIdx] = [];
+    rowValuesArr.forEach(rv => {
+      rawData[aggIdx][rv] = {};
+      rowValuesData[aggIdx][rv] = [];
+      colValuesArr.forEach(cv => {
+        rawData[aggIdx][rv][cv] = numericAggs.includes(agg.aggregation) ? [] : 0;
+      });
+    });
+    colValuesArr.forEach(cv => {
+      colValuesData[aggIdx][cv] = [];
+    });
+  });
+
+  rowValuesArr.forEach(rv => { countRowTotals[rv] = 0; });
+  colValuesArr.forEach(cv => { countColTotals[cv] = 0; });
+
+  getSortedIndices(st).forEach(i => {
+    const row = st.relation.items[i];
+    const rv = hasRows ? (row[rowIdx] !== null ? String(row[rowIdx]) : null) : 'Total';
+    const cv = hasCols ? (row[colIdx] !== null ? String(row[colIdx]) : null) : 'Total';
+    const rvValid = hasRows ? rv !== null : true;
+    const cvValid = hasCols ? cv !== null : true;
+
+    if (rvValid && cvValid) {
+      aggregations.forEach((agg, aggIdx) => {
+        if (numericAggs.includes(agg.aggregation)) {
+          if (agg.column !== null) {
+            const val = parseFloat(row[agg.column]);
+            if (!isNaN(val)) {
+              rawData[aggIdx][rv][cv].push(val);
+              rowValuesData[aggIdx][rv].push(val);
+              colValuesData[aggIdx][cv].push(val);
+              grandValuesData[aggIdx].push(val);
+            }
+          }
+        } else {
+          rawData[aggIdx][rv][cv]++;
+        }
+      });
+      countRowTotals[rv]++;
+      countColTotals[cv]++;
+      grandTotal++;
+    }
+  });
+
+  const pivotData = {};
+  const stdDevData = {};
+  const rowTotals = {};
+  const colTotals = {};
+  const grandTotals = [];
+
+  aggregations.forEach((agg, aggIdx) => {
+    pivotData[aggIdx] = {};
+    stdDevData[aggIdx] = {};
+    rowTotals[aggIdx] = {};
+    colTotals[aggIdx] = {};
+
+    rowValuesArr.forEach(rv => {
+      pivotData[aggIdx][rv] = {};
+      stdDevData[aggIdx][rv] = {};
+      colValuesArr.forEach(cv => {
+        const cellRaw = rawData[aggIdx][rv][cv];
+        if (numericAggs.includes(agg.aggregation)) {
+          pivotData[aggIdx][rv][cv] = resolveAggNumeric(cellRaw, agg.aggregation);
+          stdDevData[aggIdx][rv][cv] = Array.isArray(cellRaw) ? pivotCalcStdDev(cellRaw) : 0;
+        } else if (agg.aggregation === 'count') {
+          pivotData[aggIdx][rv][cv] = cellRaw;
+          stdDevData[aggIdx][rv][cv] = 0;
+        } else if (agg.aggregation === 'pctTotal') {
+          pivotData[aggIdx][rv][cv] = grandTotal > 0 ? (cellRaw / grandTotal * 100) : 0;
+          stdDevData[aggIdx][rv][cv] = 0;
+        } else if (agg.aggregation === 'pctRow') {
+          pivotData[aggIdx][rv][cv] = countRowTotals[rv] > 0 ? (cellRaw / countRowTotals[rv] * 100) : 0;
+          stdDevData[aggIdx][rv][cv] = 0;
+        } else if (agg.aggregation === 'pctCol') {
+          pivotData[aggIdx][rv][cv] = countColTotals[cv] > 0 ? (cellRaw / countColTotals[cv] * 100) : 0;
+          stdDevData[aggIdx][rv][cv] = 0;
+        } else {
+          pivotData[aggIdx][rv][cv] = cellRaw;
+          stdDevData[aggIdx][rv][cv] = 0;
+        }
+      });
+
+      if (numericAggs.includes(agg.aggregation)) {
+        rowTotals[aggIdx][rv] = resolveAggNumeric(rowValuesData[aggIdx][rv], agg.aggregation);
+      } else if (agg.aggregation === 'count') {
+        rowTotals[aggIdx][rv] = countRowTotals[rv];
+      } else if (agg.aggregation === 'pctTotal') {
+        rowTotals[aggIdx][rv] = grandTotal > 0 ? (countRowTotals[rv] / grandTotal * 100) : 0;
+      } else if (agg.aggregation === 'pctRow') {
+        rowTotals[aggIdx][rv] = 100;
+      } else {
+        rowTotals[aggIdx][rv] = grandTotal > 0 ? (countRowTotals[rv] / grandTotal * 100) : 0;
+      }
+    });
+
+    colValuesArr.forEach(cv => {
+      if (numericAggs.includes(agg.aggregation)) {
+        colTotals[aggIdx][cv] = resolveAggNumeric(colValuesData[aggIdx][cv], agg.aggregation);
+      } else if (agg.aggregation === 'count') {
+        colTotals[aggIdx][cv] = countColTotals[cv];
+      } else if (agg.aggregation === 'pctTotal') {
+        colTotals[aggIdx][cv] = grandTotal > 0 ? (countColTotals[cv] / grandTotal * 100) : 0;
+      } else if (agg.aggregation === 'pctRow') {
+        colTotals[aggIdx][cv] = grandTotal > 0 ? (countColTotals[cv] / grandTotal * 100) : 0;
+      } else {
+        colTotals[aggIdx][cv] = 100;
+      }
+    });
+
+    if (numericAggs.includes(agg.aggregation)) {
+      grandTotals.push(resolveAggNumeric(grandValuesData[aggIdx], agg.aggregation));
+    } else if (agg.aggregation === 'count') {
+      grandTotals.push(grandTotal);
+    } else {
+      grandTotals.push(100);
+    }
+  });
+
+  const rowLabel = hasRows ? st.columnNames[rowIdx] : '';
+  const colLabel = hasCols ? st.columnNames[colIdx] : '';
+
+  return {
+    rowValuesArr, colValuesArr, aggregations, pivotData, rowTotals, colTotals, grandTotals,
+    rowLabel, colLabel, hasRows, hasCols, numericAggs, grandTotal, stdDevData,
+    rowIdx, colIdx, rawData, countRowTotals, countColTotals, rowValuesData, colValuesData, grandValuesData
+  };
+}
+
 function generatePivotTable(st = state) {
-  // Check for empty items
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
     const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
     const pivotContainer = pivotView?.querySelector('.pivot-table-container');
@@ -12003,154 +12264,40 @@ function generatePivotTable(st = state) {
     }
     return;
   }
-  
-  const rowSelect = st.container ? st.container.querySelector('.pivot-rows') : el('.pivot-rows');
-  const colSelect = st.container ? st.container.querySelector('.pivot-cols') : el('.pivot-cols');
-  const rowColIdx = rowSelect?.value;
-  const colColIdx = colSelect?.value;
-  
-  const hasRows = rowColIdx !== '' && rowColIdx !== null && rowColIdx !== undefined;
-  const hasCols = colColIdx !== '' && colColIdx !== null && colColIdx !== undefined;
-  
-  if (!hasRows && !hasCols) {
+
+  const data = computePivotData(st);
+  if (!data) {
     alert('Please select at least one dimension (Rows or Columns)');
     return;
   }
-  
-  const rowIdx = hasRows ? parseInt(rowColIdx) : null;
-  const colIdx = hasCols ? parseInt(colColIdx) : null;
-  
-  
-  // Get aggregation configs (default to id, count if none selected)
-  const idColumnIdx = st.columnNames.indexOf('id') !== -1 ? st.columnNames.indexOf('id') : 0;
-  const aggregations = getPivotConfig(st).values.length > 0 ? 
-    getPivotConfig(st).values.filter(v => v.column !== null || v.aggregation === 'count') :
-    [{ column: idColumnIdx, aggregation: 'count' }];
-  
-  if (aggregations.length === 0) {
-    aggregations.push({ column: idColumnIdx, aggregation: 'count' });
-  }
-  
-  // Get unique values for rows and columns
-  const rowValues = new Set();
-  const colValues = new Set();
-  
-  getSortedIndices(st).forEach(i => {
-    const row = st.relation.items[i];
-    if (hasRows && row[rowIdx] !== null) rowValues.add(String(row[rowIdx]));
-    if (hasCols && row[colIdx] !== null) colValues.add(String(row[colIdx]));
-  });
-  
-  const rowValuesArr = hasRows ? Array.from(rowValues).sort() : ['Total'];
-  const colValuesArr = hasCols ? Array.from(colValues).sort() : ['Total'];
-  
-  // Build pivot data for each aggregation - store arrays of values for numeric aggregations
-  const pivotData = {}; // { aggIdx: { rowVal: { colVal: [] or count } } }
-  let grandTotal = 0;
-  const rowTotals = {};
-  const colTotals = {};
-  const rowValuesData = {}; // { aggIdx: { rowVal: [] } } for row totals
-  const colValuesData = {}; // { aggIdx: { colVal: [] } } for col totals
-  const grandValuesData = {}; // { aggIdx: [] } for grand totals
-  
-  const numericAggs = ['sum', 'average', 'median', 'stddev'];
-  
-  aggregations.forEach((agg, aggIdx) => {
-    pivotData[aggIdx] = {};
-    rowValuesData[aggIdx] = {};
-    colValuesData[aggIdx] = {};
-    grandValuesData[aggIdx] = [];
-    
-    rowValuesArr.forEach(rv => {
-      pivotData[aggIdx][rv] = {};
-      rowValuesData[aggIdx][rv] = [];
-      colValuesArr.forEach(cv => {
-        pivotData[aggIdx][rv][cv] = numericAggs.includes(agg.aggregation) ? [] : 0;
-      });
-    });
-    colValuesArr.forEach(cv => {
-      colValuesData[aggIdx][cv] = [];
-    });
-  });
-  
-  rowValuesArr.forEach(rv => {
-    rowTotals[rv] = 0;
-  });
-  colValuesArr.forEach(cv => {
-    colTotals[cv] = 0;
-  });
-  
-  getSortedIndices(st).forEach(i => {
-    const row = st.relation.items[i];
-    const rv = hasRows ? (row[rowIdx] !== null ? String(row[rowIdx]) : null) : 'Total';
-    const cv = hasCols ? (row[colIdx] !== null ? String(row[colIdx]) : null) : 'Total';
-    
-    const rvValid = hasRows ? rv !== null : true;
-    const cvValid = hasCols ? cv !== null : true;
-    
-    if (rvValid && cvValid) {
-      aggregations.forEach((agg, aggIdx) => {
-        if (numericAggs.includes(agg.aggregation)) {
-          if (agg.column !== null) {
-            const val = parseFloat(row[agg.column]);
-            if (!isNaN(val)) {
-              pivotData[aggIdx][rv][cv].push(val);
-              rowValuesData[aggIdx][rv].push(val);
-              colValuesData[aggIdx][cv].push(val);
-              grandValuesData[aggIdx].push(val);
-            }
-          }
-        } else {
-          pivotData[aggIdx][rv][cv]++;
-        }
-      });
-      rowTotals[rv]++;
-      colTotals[cv]++;
-      grandTotal++;
+
+  const { rowValuesArr, colValuesArr, aggregations, pivotData, rowTotals, colTotals, grandTotals,
+    rowLabel, colLabel, hasRows, hasCols, numericAggs, grandTotal, rawData, countRowTotals, countColTotals,
+    rowValuesData, colValuesData, grandValuesData, rowIdx, colIdx } = data;
+
+  function computeAggValue(arr, aggType) {
+    if (Array.isArray(arr)) {
+      if (arr.length === 0) return '-';
+      if (aggType === 'sum') return pivotCalcSum(arr).toFixed(2);
+      if (aggType === 'average') return pivotCalcMean(arr).toFixed(2);
+      if (aggType === 'median') return pivotCalcMedian(arr).toFixed(2);
+      if (aggType === 'stddev') return pivotCalcStdDev(arr).toFixed(2);
     }
-  });
-  
-  // Helper functions for statistics
-  function calcSum(arr) { return arr.reduce((a, b) => a + b, 0); }
-  function calcMean(arr) { return arr.length > 0 ? calcSum(arr) / arr.length : 0; }
-  function calcMedian(arr) {
-    if (arr.length === 0) return 0;
-    const sorted = [...arr].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    return arr;
   }
-  function calcStdDev(arr) {
-    if (arr.length < 1) return 0;
-    const mean = calcMean(arr);
-    const sqDiffs = arr.map(v => (v - mean) ** 2);
-    return Math.sqrt(calcSum(sqDiffs) / arr.length); // Population std dev for consistency
-  }
-  
-  function computeAggValue(data, aggType) {
-    if (Array.isArray(data)) {
-      if (data.length === 0) return '-';
-      if (aggType === 'sum') return calcSum(data).toFixed(2);
-      if (aggType === 'average') return calcMean(data).toFixed(2);
-      if (aggType === 'median') return calcMedian(data).toFixed(2);
-      if (aggType === 'stddev') return calcStdDev(data).toFixed(2);
-    }
-    return data;
-  }
-  
-  // Helper to format value based on aggregation type
-  function formatValue(data, aggType, rowVal, colVal) {
+
+  function formatValue(cellRaw, aggType, rowVal, colVal) {
     if (numericAggs.includes(aggType)) {
-      return computeAggValue(data, aggType);
+      return computeAggValue(cellRaw, aggType);
     }
-    const count = data;
+    const count = cellRaw;
     if (aggType === 'count') return count;
     if (aggType === 'pctTotal') return grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%';
-    if (aggType === 'pctRow') return rowTotals[rowVal] > 0 ? (count / rowTotals[rowVal] * 100).toFixed(1) + '%' : '0%';
-    if (aggType === 'pctCol') return colTotals[colVal] > 0 ? (count / colTotals[colVal] * 100).toFixed(1) + '%' : '0%';
+    if (aggType === 'pctRow') return countRowTotals[rowVal] > 0 ? (count / countRowTotals[rowVal] * 100).toFixed(1) + '%' : '0%';
+    if (aggType === 'pctCol') return countColTotals[colVal] > 0 ? (count / countColTotals[colVal] * 100).toFixed(1) + '%' : '0%';
     return count;
   }
-  
-  // Helper to format pivot dimension values using options
+
   function formatPivotValue(value, colIndex) {
     if (value === 'Total') return value;
     if (colIndex === null) return escapeHtml(value);
@@ -12161,19 +12308,13 @@ function generatePivotTable(st = state) {
     }
     return escapeHtml(value);
   }
-  
-  // Render pivot table
+
   let html = '<table class="pivot-table">';
-  
-  // Determine header labels
-  const rowLabel = hasRows ? escapeHtml(st.columnNames[rowIdx]) : '';
-  const colLabel = hasCols ? escapeHtml(st.columnNames[colIdx]) : '';
-  const headerLabel = hasRows && hasCols ? rowLabel + ' \\ ' + colLabel : (hasRows ? rowLabel : colLabel);
-  
-  // Header row with column values
+  const headerLabel = hasRows && hasCols ? escapeHtml(rowLabel) + ' \\ ' + escapeHtml(colLabel) : (hasRows ? escapeHtml(rowLabel) : escapeHtml(colLabel));
+
   html += '<thead><tr>';
   html += '<th class="pivot-row-header" rowspan="2">' + headerLabel + '</th>';
-  
+
   if (hasCols) {
     colValuesArr.forEach(cv => {
       html += '<th colspan="' + aggregations.length + '">' + formatPivotValue(cv, colIdx) + '</th>';
@@ -12181,55 +12322,43 @@ function generatePivotTable(st = state) {
     html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
   } else {
     aggregations.forEach(agg => {
-      const labels = {
-        count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev',
-        pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col'
-      };
-      const label = labels[agg.aggregation] || agg.aggregation;
+      const label = AGG_SHORT_LABELS[agg.aggregation] || agg.aggregation;
       html += '<th>' + label + '</th>';
     });
   }
   html += '</tr>';
-  
-  // Sub-header with aggregation labels (only if we have columns)
+
   if (hasCols) {
     html += '<tr>';
     for (let c = 0; c <= colValuesArr.length; c++) {
       aggregations.forEach(agg => {
-        const labels = {
-          count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev',
-          pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col'
-        };
-        const label = labels[agg.aggregation] || agg.aggregation;
+        const label = AGG_SHORT_LABELS[agg.aggregation] || agg.aggregation;
         html += '<th style="font-size: 0.75rem; font-weight: normal;">' + label + '</th>';
       });
     }
     html += '</tr>';
   }
   html += '</thead>';
-  
+
   html += '<tbody>';
-  
   rowValuesArr.forEach(rv => {
     html += '<tr>';
     html += '<td class="pivot-row-header">' + formatPivotValue(rv, rowIdx) + '</td>';
-    
     if (hasCols) {
       colValuesArr.forEach(cv => {
         aggregations.forEach((agg, aggIdx) => {
-          const count = pivotData[aggIdx][rv][cv];
-          const displayVal = formatValue(count, agg.aggregation, rv, cv);
+          const cellRaw = rawData[aggIdx][rv][cv];
+          const displayVal = formatValue(cellRaw, agg.aggregation, rv, cv);
           html += '<td>' + displayVal + '</td>';
         });
       });
-      // Row totals
       aggregations.forEach((agg, aggIdx) => {
         let displayVal;
         if (numericAggs.includes(agg.aggregation)) {
           displayVal = computeAggValue(rowValuesData[aggIdx][rv], agg.aggregation);
         } else {
-          const count = rowTotals[rv];
-          displayVal = agg.aggregation === 'count' ? count : 
+          const count = countRowTotals[rv];
+          displayVal = agg.aggregation === 'count' ? count :
                        agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
                        agg.aggregation === 'pctRow' ? '100%' :
                        (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%');
@@ -12237,21 +12366,18 @@ function generatePivotTable(st = state) {
         html += '<td class="pivot-total">' + displayVal + '</td>';
       });
     } else {
-      // No columns - just show values for each row
       aggregations.forEach((agg, aggIdx) => {
-        const count = pivotData[aggIdx][rv]['Total'];
-        const displayVal = formatValue(count, agg.aggregation, rv, 'Total');
+        const cellRaw = rawData[aggIdx][rv]['Total'];
+        const displayVal = formatValue(cellRaw, agg.aggregation, rv, 'Total');
         html += '<td>' + displayVal + '</td>';
       });
     }
     html += '</tr>';
   });
-  
-  // Total row (only if we have both or columns)
+
   if (hasCols || !hasRows) {
     html += '<tr class="pivot-total">';
     html += '<td class="pivot-row-header pivot-total">Total</td>';
-    
     if (hasCols) {
       colValuesArr.forEach(cv => {
         aggregations.forEach((agg, aggIdx) => {
@@ -12259,7 +12385,7 @@ function generatePivotTable(st = state) {
           if (numericAggs.includes(agg.aggregation)) {
             displayVal = computeAggValue(colValuesData[aggIdx][cv], agg.aggregation);
           } else {
-            const count = colTotals[cv];
+            const count = countColTotals[cv];
             displayVal = agg.aggregation === 'count' ? count :
                          agg.aggregation === 'pctTotal' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
                          agg.aggregation === 'pctRow' ? (grandTotal > 0 ? (count / grandTotal * 100).toFixed(1) + '%' : '0%') :
@@ -12268,7 +12394,6 @@ function generatePivotTable(st = state) {
           html += '<td>' + displayVal + '</td>';
         });
       });
-      // Grand total
       aggregations.forEach((agg, aggIdx) => {
         let displayVal;
         if (numericAggs.includes(agg.aggregation)) {
@@ -12279,7 +12404,6 @@ function generatePivotTable(st = state) {
         html += '<td>' + displayVal + '</td>';
       });
     } else {
-      // Grand total only
       aggregations.forEach((agg, aggIdx) => {
         let displayVal;
         if (numericAggs.includes(agg.aggregation)) {
@@ -12292,11 +12416,990 @@ function generatePivotTable(st = state) {
     }
     html += '</tr>';
   }
-  
+
   html += '</tbody></table>';
-  
+
   const pivotContainer = st.container ? st.container.querySelector('.pivot-table-container') : el('.pivot-table-container');
   if (pivotContainer) pivotContainer.innerHTML = html;
+
+  st._lastPivotData = data;
+
+  if (!st._pivotChartOptions) {
+    st._pivotChartOptions = { ...getDefaultChartOptions() };
+  }
+
+  const toolbar = st.container ? st.container.querySelector('.pivot-panels-toolbar') : el('.pivot-panels-toolbar');
+  if (toolbar) toolbar.style.display = 'flex';
+  const chartPanel = st.container ? st.container.querySelector('.pivot-chart-panel') : el('.pivot-chart-panel');
+  if (chartPanel) chartPanel.style.display = '';
+
+  renderPivotChart(st);
+}
+
+function getDefaultChartOptions() {
+  return {
+    title: '',
+    showTitle: true,
+    xAxisTitle: '',
+    yAxisTitle: '',
+    showAxisTitles: true,
+    showDataLabels: false,
+    showErrorBars: false,
+    showGridlines: true,
+    showLegend: true,
+    legendPosition: 'bottom',
+    trendline: 'auto',
+    xLabelRotation: 0,
+    yMin: '',
+    yMax: ''
+  };
+}
+
+function showPivotChartOptionsDialog(st = state) {
+  const opts = st._pivotChartOptions || getDefaultChartOptions();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.style.zIndex = '100001';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'confirm-dialog pivot-chart-options-dialog';
+  dialog.innerHTML = `
+    <div class="dialog-header">
+      <span class="dialog-title">Chart Options</span>
+      <button class="dialog-close" data-testid="button-chart-options-close">&times;</button>
+    </div>
+    <div class="dialog-body">
+      <div class="chart-options-section">
+        <div class="chart-options-section-title">Title</div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-show-title" ${opts.showTitle ? 'checked' : ''}> Show Title</label>
+        </div>
+        <div class="chart-options-row">
+          <input type="text" class="opt-title" value="${escapeHtml(opts.title)}" placeholder="Auto-generated if empty">
+        </div>
+      </div>
+      <div class="chart-options-section">
+        <div class="chart-options-section-title">Axes</div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-show-axis-titles" ${opts.showAxisTitles ? 'checked' : ''}> Show Axis Titles</label>
+        </div>
+        <div class="chart-options-row">
+          <span style="font-size:13px;min-width:20px;">X:</span>
+          <input type="text" class="opt-x-title" value="${escapeHtml(opts.xAxisTitle)}" placeholder="Auto">
+        </div>
+        <div class="chart-options-row">
+          <span style="font-size:13px;min-width:20px;">Y:</span>
+          <input type="text" class="opt-y-title" value="${escapeHtml(opts.yAxisTitle)}" placeholder="Auto">
+        </div>
+        <div class="chart-options-row">
+          <span style="font-size:13px;min-width:70px;">X Rotation:</span>
+          <select class="opt-x-rotation">
+            <option value="0" ${opts.xLabelRotation === 0 ? 'selected' : ''}>0°</option>
+            <option value="-45" ${opts.xLabelRotation === -45 ? 'selected' : ''}>-45°</option>
+            <option value="-90" ${opts.xLabelRotation === -90 ? 'selected' : ''}>-90°</option>
+          </select>
+        </div>
+        <div class="chart-options-row">
+          <span style="font-size:13px;min-width:50px;">Y Min:</span>
+          <input type="number" class="opt-y-min" value="${opts.yMin}" placeholder="Auto" style="width:80px;">
+          <span style="font-size:13px;min-width:50px;margin-left:8px;">Y Max:</span>
+          <input type="number" class="opt-y-max" value="${opts.yMax}" placeholder="Auto" style="width:80px;">
+        </div>
+      </div>
+      <div class="chart-options-section">
+        <div class="chart-options-section-title">Data</div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-data-labels" ${opts.showDataLabels ? 'checked' : ''}> Show Data Labels</label>
+        </div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-error-bars" ${opts.showErrorBars ? 'checked' : ''}> Show Error Bars</label>
+        </div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-gridlines" ${opts.showGridlines ? 'checked' : ''}> Show Gridlines</label>
+        </div>
+      </div>
+      <div class="chart-options-section">
+        <div class="chart-options-section-title">Legend</div>
+        <div class="chart-options-row">
+          <label><input type="checkbox" class="opt-show-legend" ${opts.showLegend ? 'checked' : ''}> Show Legend</label>
+          <select class="opt-legend-pos">
+            <option value="top" ${opts.legendPosition === 'top' ? 'selected' : ''}>Top</option>
+            <option value="bottom" ${opts.legendPosition === 'bottom' ? 'selected' : ''}>Bottom</option>
+            <option value="left" ${opts.legendPosition === 'left' ? 'selected' : ''}>Left</option>
+            <option value="right" ${opts.legendPosition === 'right' ? 'selected' : ''}>Right</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart-options-section">
+        <div class="chart-options-section-title">Trendline</div>
+        <div class="chart-options-row">
+          <select class="opt-trendline">
+            <option value="auto" ${opts.trendline === 'auto' ? 'selected' : ''}>Auto</option>
+            <option value="none" ${opts.trendline === 'none' ? 'selected' : ''}>None</option>
+            <option value="linear" ${opts.trendline === 'linear' ? 'selected' : ''}>Linear</option>
+            <option value="polynomial2" ${opts.trendline === 'polynomial2' ? 'selected' : ''}>Polynomial 2nd</option>
+            <option value="polynomial3" ${opts.trendline === 'polynomial3' ? 'selected' : ''}>Polynomial 3rd</option>
+            <option value="exponential" ${opts.trendline === 'exponential' ? 'selected' : ''}>Exponential</option>
+            <option value="logarithmic" ${opts.trendline === 'logarithmic' ? 'selected' : ''}>Logarithmic</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline btn-sm opt-close-btn">Fechar</button>
+      <button class="btn btn-primary btn-sm opt-apply-btn">Aplicar</button>
+    </div>
+  `;
+
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  const closeDialog = () => { overlay.remove(); };
+
+  dialog.querySelector('.dialog-close').addEventListener('click', closeDialog);
+  dialog.querySelector('.opt-close-btn').addEventListener('click', closeDialog);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(); });
+
+  dialog.querySelector('.opt-apply-btn').addEventListener('click', () => {
+    st._pivotChartOptions = {
+      title: dialog.querySelector('.opt-title').value,
+      showTitle: dialog.querySelector('.opt-show-title').checked,
+      xAxisTitle: dialog.querySelector('.opt-x-title').value,
+      yAxisTitle: dialog.querySelector('.opt-y-title').value,
+      showAxisTitles: dialog.querySelector('.opt-show-axis-titles').checked,
+      showDataLabels: dialog.querySelector('.opt-data-labels').checked,
+      showErrorBars: dialog.querySelector('.opt-error-bars').checked,
+      showGridlines: dialog.querySelector('.opt-gridlines').checked,
+      showLegend: dialog.querySelector('.opt-show-legend').checked,
+      legendPosition: dialog.querySelector('.opt-legend-pos').value,
+      trendline: dialog.querySelector('.opt-trendline').value,
+      xLabelRotation: parseInt(dialog.querySelector('.opt-x-rotation').value),
+      yMin: dialog.querySelector('.opt-y-min').value,
+      yMax: dialog.querySelector('.opt-y-max').value
+    };
+    renderPivotChart(st);
+    closeDialog();
+  });
+}
+
+function trendLinearRegression(points) {
+  const n = points.length;
+  if (n < 2) return null;
+  let sx = 0, sy = 0, sxy = 0, sx2 = 0;
+  points.forEach(p => { sx += p.x; sy += p.y; sxy += p.x * p.y; sx2 += p.x * p.x; });
+  const denom = n * sx2 - sx * sx;
+  if (Math.abs(denom) < 1e-12) return null;
+  const m = (n * sxy - sx * sy) / denom;
+  const b = (sy - m * sx) / n;
+  return { type: 'linear', predict: x => m * x + b, m, b };
+}
+
+function trendPolynomial(points, degree) {
+  const n = points.length;
+  if (n <= degree) return null;
+  const size = degree + 1;
+  const A = [];
+  const B = [];
+  for (let i = 0; i < size; i++) {
+    A[i] = [];
+    for (let j = 0; j < size; j++) {
+      let s = 0;
+      points.forEach(p => { s += Math.pow(p.x, i + j); });
+      A[i][j] = s;
+    }
+    let s = 0;
+    points.forEach(p => { s += p.y * Math.pow(p.x, i); });
+    B[i] = s;
+  }
+  for (let col = 0; col < size; col++) {
+    let maxRow = col;
+    for (let row = col + 1; row < size; row++) {
+      if (Math.abs(A[row][col]) > Math.abs(A[maxRow][col])) maxRow = row;
+    }
+    [A[col], A[maxRow]] = [A[maxRow], A[col]];
+    [B[col], B[maxRow]] = [B[maxRow], B[col]];
+    if (Math.abs(A[col][col]) < 1e-12) return null;
+    for (let row = col + 1; row < size; row++) {
+      const factor = A[row][col] / A[col][col];
+      for (let j = col; j < size; j++) A[row][j] -= factor * A[col][j];
+      B[row] -= factor * B[col];
+    }
+  }
+  const coeffs = new Array(size);
+  for (let i = size - 1; i >= 0; i--) {
+    let s = B[i];
+    for (let j = i + 1; j < size; j++) s -= A[i][j] * coeffs[j];
+    coeffs[i] = s / A[i][i];
+  }
+  return {
+    type: 'polynomial' + degree,
+    predict: x => { let y = 0; coeffs.forEach((c, i) => { y += c * Math.pow(x, i); }); return y; },
+    coeffs
+  };
+}
+
+function trendExponential(points) {
+  const filtered = points.filter(p => p.y > 0);
+  if (filtered.length < 2) return null;
+  const logPoints = filtered.map(p => ({ x: p.x, y: Math.log(p.y) }));
+  const lr = trendLinearRegression(logPoints);
+  if (!lr) return null;
+  const a = Math.exp(lr.b);
+  const b = lr.m;
+  return { type: 'exponential', predict: x => a * Math.exp(b * x), a, b };
+}
+
+function trendLogarithmic(points) {
+  const filtered = points.filter(p => p.x > 0);
+  if (filtered.length < 2) return null;
+  const logPoints = filtered.map(p => ({ x: Math.log(p.x), y: p.y }));
+  const lr = trendLinearRegression(logPoints);
+  if (!lr) return null;
+  return { type: 'logarithmic', predict: x => x > 0 ? lr.m * Math.log(x) + lr.b : 0, a: lr.b, b: lr.m };
+}
+
+function computeR2(points, predictFn) {
+  const n = points.length;
+  if (n < 2) return 0;
+  const meanY = points.reduce((s, p) => s + p.y, 0) / n;
+  let ssTot = 0, ssRes = 0;
+  points.forEach(p => {
+    ssTot += (p.y - meanY) ** 2;
+    ssRes += (p.y - predictFn(p.x)) ** 2;
+  });
+  if (ssTot < 1e-12) return 0;
+  return Math.max(0, 1 - ssRes / ssTot);
+}
+
+function bestTrendline(points) {
+  const candidates = [
+    trendLinearRegression(points),
+    trendPolynomial(points, 2),
+    trendPolynomial(points, 3),
+    trendExponential(points),
+    trendLogarithmic(points)
+  ].filter(Boolean);
+
+  let best = null, bestR2 = -1;
+  candidates.forEach(c => {
+    const r2 = computeR2(points, c.predict);
+    if (r2 > bestR2) { bestR2 = r2; best = c; }
+  });
+  if (bestR2 < 0.3) return null;
+  return best ? { ...best, r2: bestR2 } : null;
+}
+
+function getTrendlineForType(points, type) {
+  if (type === 'none') return null;
+  if (type === 'auto') return bestTrendline(points);
+  let trend = null;
+  if (type === 'linear') trend = trendLinearRegression(points);
+  else if (type === 'polynomial2') trend = trendPolynomial(points, 2);
+  else if (type === 'polynomial3') trend = trendPolynomial(points, 3);
+  else if (type === 'exponential') trend = trendExponential(points);
+  else if (type === 'logarithmic') trend = trendLogarithmic(points);
+  if (trend) trend.r2 = computeR2(points, trend.predict);
+  return trend;
+}
+
+function renderPivotChart(st = state) {
+  const data = st._lastPivotData;
+  if (!data) return;
+
+  const chartPanel = st.container ? st.container.querySelector('.pivot-chart-panel') : el('.pivot-chart-panel');
+  if (!chartPanel) return;
+
+  const canvas = chartPanel.querySelector('.pivot-chart-canvas');
+  if (!canvas) return;
+
+  const opts = st._pivotChartOptions || getDefaultChartOptions();
+  const chartTypeSelect = st.container ? st.container.querySelector('.pivot-chart-type') : el('.pivot-chart-type');
+  const barModeSelect = st.container ? st.container.querySelector('.pivot-chart-bar-mode') : el('.pivot-chart-bar-mode');
+  const chartType = chartTypeSelect?.value || 'bar';
+  const barMode = barModeSelect?.value || 'grouped';
+
+  const barModeRow = st.container ? st.container.querySelector('.pivot-chart-bar-mode-row') : el('.pivot-chart-bar-mode-row');
+  if (barModeRow) barModeRow.style.display = (chartType === 'bar' || chartType === 'horizontalBar') ? '' : 'none';
+
+  const { rowValuesArr, colValuesArr, aggregations, pivotData, stdDevData, hasRows, hasCols, rowLabel, colLabel } = data;
+
+  const series = [];
+  if (hasCols && colValuesArr.length > 1 && colValuesArr[0] !== 'Total') {
+    colValuesArr.forEach((cv, ci) => {
+      aggregations.forEach((agg, aggIdx) => {
+        const values = rowValuesArr.map(rv => pivotData[aggIdx][rv][cv]);
+        const stddevs = rowValuesArr.map(rv => stdDevData[aggIdx][rv][cv]);
+        const label = (aggregations.length > 1 ? (AGG_LABELS[agg.aggregation] || agg.aggregation) + ' - ' : '') + cv;
+        series.push({ values, stddevs, label, colorIdx: ci * aggregations.length + aggIdx });
+      });
+    });
+  } else {
+    aggregations.forEach((agg, aggIdx) => {
+      const cv = colValuesArr[0] || 'Total';
+      const values = rowValuesArr.map(rv => pivotData[aggIdx][rv][cv]);
+      const stddevs = rowValuesArr.map(rv => stdDevData[aggIdx][rv][cv]);
+      const colName = agg.column !== null ? st.columnNames[agg.column] : '';
+      const label = (AGG_LABELS[agg.aggregation] || agg.aggregation) + (colName ? ' of ' + colName : '');
+      series.push({ values, stddevs, label, colorIdx: aggIdx });
+    });
+  }
+
+  if (series.length === 0) return;
+
+  const autoTitle = opts.title || (() => {
+    if (series.length === 1) return series[0].label + (hasRows ? ' by ' + rowLabel : '');
+    return (hasRows ? rowLabel : '') + (hasCols ? (hasRows ? ' × ' : '') + colLabel : '');
+  })();
+
+  const autoXTitle = opts.xAxisTitle || (hasRows ? rowLabel : 'Category');
+  const autoYTitle = opts.yAxisTitle || (series.length === 1 ? series[0].label : 'Value');
+
+  const dpr = window.devicePixelRatio || 1;
+  const containerWidth = chartPanel.clientWidth || 800;
+  const displayWidth = containerWidth;
+  const displayHeight = 500;
+  canvas.style.width = displayWidth + 'px';
+  canvas.style.height = displayHeight + 'px';
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, displayWidth, displayHeight);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, displayWidth, displayHeight);
+
+  if (chartType === 'pie') {
+    drawPieChart(ctx, displayWidth, displayHeight, series, rowValuesArr, opts, autoTitle);
+    return;
+  }
+
+  let marginTop = 60, marginRight = 30, marginBottom = 80, marginLeft = 70;
+  if (opts.xLabelRotation === -45) marginBottom = 110;
+  if (opts.xLabelRotation === -90) marginBottom = 130;
+  if (opts.showLegend && opts.legendPosition === 'bottom') marginBottom += 30;
+  if (opts.showLegend && opts.legendPosition === 'top') marginTop += 30;
+  if (opts.showLegend && opts.legendPosition === 'right') marginRight += 120;
+  if (opts.showLegend && opts.legendPosition === 'left') marginLeft += 120;
+
+  const isHorizontal = chartType === 'horizontalBar';
+  const chartW = displayWidth - marginLeft - marginRight;
+  const chartH = displayHeight - marginTop - marginBottom;
+
+  if (opts.showTitle && autoTitle) {
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(autoTitle, displayWidth / 2, 24);
+  }
+
+  let allVals = [];
+  series.forEach(s => s.values.forEach(v => { if (typeof v === 'number' && isFinite(v)) allVals.push(v); }));
+  if (barMode === 'stacked' && (chartType === 'bar' || chartType === 'horizontalBar')) {
+    allVals = [];
+    rowValuesArr.forEach((rv, ri) => {
+      let stackPos = 0, stackNeg = 0;
+      series.forEach(s => {
+        const v = s.values[ri] || 0;
+        if (v >= 0) stackPos += v; else stackNeg += v;
+      });
+      allVals.push(stackPos, stackNeg);
+    });
+  }
+
+  let yMin = opts.yMin !== '' ? parseFloat(opts.yMin) : Math.min(0, ...allVals);
+  let yMax = opts.yMax !== '' ? parseFloat(opts.yMax) : Math.max(0, ...allVals);
+  if (yMin === yMax) { yMax = yMin + 1; }
+  const yRange = yMax - yMin;
+  const yPad = yRange * 0.1;
+  if (opts.yMin === '') yMin -= yPad;
+  if (opts.yMax === '') yMax += yPad;
+
+  function niceInterval(range, maxTicks) {
+    const rough = range / maxTicks;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const residual = rough / mag;
+    let nice;
+    if (residual <= 1.5) nice = 1; else if (residual <= 3) nice = 2; else if (residual <= 7) nice = 5; else nice = 10;
+    return nice * mag;
+  }
+
+  const yInterval = niceInterval(yMax - yMin, 8);
+  const yTickStart = Math.ceil(yMin / yInterval) * yInterval;
+
+  function toCanvasX(idx) { return marginLeft + (idx + 0.5) * (chartW / rowValuesArr.length); }
+  function toCanvasY(val) { return marginTop + chartH - ((val - yMin) / (yMax - yMin)) * chartH; }
+
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  if (!isHorizontal) {
+    ctx.beginPath();
+    ctx.moveTo(marginLeft, marginTop + chartH);
+    ctx.lineTo(marginLeft + chartW, marginTop + chartH);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(marginLeft, marginTop);
+    ctx.lineTo(marginLeft, marginTop + chartH);
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(marginLeft, marginTop);
+    ctx.lineTo(marginLeft, marginTop + chartH);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(marginLeft, marginTop + chartH);
+    ctx.lineTo(marginLeft + chartW, marginTop + chartH);
+    ctx.stroke();
+  }
+
+  if (opts.showGridlines) {
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#e2e8f0';
+    if (!isHorizontal) {
+      for (let y = yTickStart; y <= yMax; y += yInterval) {
+        const cy = toCanvasY(y);
+        ctx.beginPath(); ctx.moveTo(marginLeft, cy); ctx.lineTo(marginLeft + chartW, cy); ctx.stroke();
+      }
+    } else {
+      const xInterval = niceInterval(yMax - yMin, 8);
+      for (let x = yTickStart; x <= yMax; x += xInterval) {
+        const cx = marginLeft + ((x - yMin) / (yMax - yMin)) * chartW;
+        ctx.beginPath(); ctx.moveTo(cx, marginTop); ctx.lineTo(cx, marginTop + chartH); ctx.stroke();
+      }
+    }
+    ctx.setLineDash([]);
+  }
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'right';
+  if (!isHorizontal) {
+    for (let y = yTickStart; y <= yMax; y += yInterval) {
+      const cy = toCanvasY(y);
+      ctx.fillText(y % 1 === 0 ? String(y) : y.toFixed(1), marginLeft - 6, cy + 4);
+      ctx.beginPath(); ctx.moveTo(marginLeft - 3, cy); ctx.lineTo(marginLeft, cy); ctx.strokeStyle = '#94a3b8'; ctx.stroke();
+    }
+  } else {
+    for (let x = yTickStart; x <= yMax; x += yInterval) {
+      const cx = marginLeft + ((x - yMin) / (yMax - yMin)) * chartW;
+      ctx.textAlign = 'center';
+      ctx.fillText(x % 1 === 0 ? String(x) : x.toFixed(1), cx, marginTop + chartH + 16);
+    }
+  }
+
+  const rotation = (opts.xLabelRotation || 0) * Math.PI / 180;
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px sans-serif';
+  if (!isHorizontal) {
+    rowValuesArr.forEach((rv, i) => {
+      const x = toCanvasX(i);
+      const y = marginTop + chartH + 14;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.textAlign = rotation ? 'right' : 'center';
+      ctx.textBaseline = 'middle';
+      const maxLen = 20;
+      const label = rv.length > maxLen ? rv.substring(0, maxLen) + '...' : rv;
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+    });
+  } else {
+    ctx.textAlign = 'right';
+    rowValuesArr.forEach((rv, i) => {
+      const y = marginTop + (i + 0.5) * (chartH / rowValuesArr.length);
+      const maxLen = 15;
+      const label = rv.length > maxLen ? rv.substring(0, maxLen) + '...' : rv;
+      ctx.fillText(label, marginLeft - 6, y + 4);
+    });
+  }
+
+  if (chartType === 'bar' || chartType === 'horizontalBar') {
+    const numCategories = rowValuesArr.length;
+    const numSeries = series.length;
+
+    if (!isHorizontal) {
+      const catWidth = chartW / numCategories;
+      const gap = catWidth * 0.15;
+      const barAreaWidth = catWidth - gap * 2;
+
+      if (barMode === 'grouped') {
+        const barW = barAreaWidth / numSeries;
+        series.forEach((s, si) => {
+          ctx.fillStyle = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+          s.values.forEach((v, ri) => {
+            if (typeof v !== 'number' || !isFinite(v)) return;
+            const x = marginLeft + ri * catWidth + gap + si * barW;
+            const barTop = toCanvasY(Math.max(v, 0));
+            const barBottom = toCanvasY(Math.min(v, 0));
+            const barHeight = barBottom - barTop;
+            ctx.fillRect(x, barTop, barW - 1, barHeight);
+
+            if (opts.showDataLabels) {
+              ctx.fillStyle = '#1e293b';
+              ctx.font = '10px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillText(v % 1 === 0 ? String(v) : v.toFixed(1), x + barW / 2, barTop - 4);
+              ctx.fillStyle = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+            }
+
+            if (opts.showErrorBars && s.stddevs[ri] > 0) {
+              const sd = s.stddevs[ri];
+              const cx = x + barW / 2;
+              const top = toCanvasY(v + sd);
+              const bot = toCanvasY(v - sd);
+              ctx.strokeStyle = '#1e293b';
+              ctx.lineWidth = 1.5;
+              ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx, bot); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(cx - 3, top); ctx.lineTo(cx + 3, top); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(cx - 3, bot); ctx.lineTo(cx + 3, bot); ctx.stroke();
+              ctx.lineWidth = 1;
+            }
+          });
+        });
+      } else {
+        rowValuesArr.forEach((rv, ri) => {
+          let stackPos = 0, stackNeg = 0;
+          series.forEach((s, si) => {
+            const v = s.values[ri] || 0;
+            ctx.fillStyle = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+            const x = marginLeft + ri * catWidth + gap;
+            if (v >= 0) {
+              const barTop = toCanvasY(stackPos + v);
+              const barBottom = toCanvasY(stackPos);
+              ctx.fillRect(x, barTop, barAreaWidth, barBottom - barTop);
+              stackPos += v;
+            } else {
+              const barTop = toCanvasY(stackNeg);
+              const barBottom = toCanvasY(stackNeg + v);
+              ctx.fillRect(x, barBottom, barAreaWidth, barTop - barBottom);
+              stackNeg += v;
+            }
+          });
+        });
+      }
+    } else {
+      const catHeight = chartH / numCategories;
+      const gap = catHeight * 0.15;
+      const barAreaH = catHeight - gap * 2;
+
+      if (barMode === 'grouped') {
+        const barH = barAreaH / numSeries;
+        series.forEach((s, si) => {
+          ctx.fillStyle = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+          s.values.forEach((v, ri) => {
+            if (typeof v !== 'number' || !isFinite(v)) return;
+            const y = marginTop + ri * catHeight + gap + si * barH;
+            const barLeft = marginLeft;
+            const barRight = marginLeft + ((v - yMin) / (yMax - yMin)) * chartW;
+            ctx.fillRect(barLeft, y, barRight - barLeft, barH - 1);
+
+            if (opts.showDataLabels) {
+              ctx.fillStyle = '#1e293b';
+              ctx.font = '10px sans-serif';
+              ctx.textAlign = 'left';
+              ctx.fillText(v % 1 === 0 ? String(v) : v.toFixed(1), barRight + 4, y + barH / 2 + 4);
+              ctx.fillStyle = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+            }
+          });
+        });
+      } else {
+        rowValuesArr.forEach((rv, ri) => {
+          let stack = 0;
+          series.forEach((s, si) => {
+            const v = s.values[ri] || 0;
+            ctx.fillStyle = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+            const y = marginTop + ri * catHeight + gap;
+            const x0 = marginLeft + ((stack - yMin) / (yMax - yMin)) * chartW;
+            const x1 = marginLeft + ((stack + v - yMin) / (yMax - yMin)) * chartW;
+            ctx.fillRect(x0, y, x1 - x0, barAreaH);
+            stack += v;
+          });
+        });
+      }
+    }
+  }
+
+  if (chartType === 'line' || chartType === 'area') {
+    series.forEach((s, si) => {
+      const color = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+      const points = [];
+      s.values.forEach((v, ri) => {
+        if (typeof v === 'number' && isFinite(v)) {
+          points.push({ ri, x: toCanvasX(ri), y: toCanvasY(v), val: v });
+        }
+      });
+      if (points.length === 0) return;
+
+      if (chartType === 'area') {
+        ctx.fillStyle = color + '33';
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, toCanvasY(Math.max(yMin, 0)));
+        points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(points[points.length - 1].x, toCanvasY(Math.max(yMin, 0)));
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      points.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+      ctx.stroke();
+
+      points.forEach(p => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (opts.showDataLabels) {
+          ctx.fillStyle = '#1e293b';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.val % 1 === 0 ? String(p.val) : p.val.toFixed(1), p.x, p.y - 8);
+        }
+
+        if (opts.showErrorBars) {
+          const sd = s.stddevs[p.ri] || 0;
+          if (sd > 0) {
+            const top = toCanvasY(p.val + sd);
+            const bot = toCanvasY(p.val - sd);
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(p.x, top); ctx.lineTo(p.x, bot); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(p.x - 3, top); ctx.lineTo(p.x + 3, top); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(p.x - 3, bot); ctx.lineTo(p.x + 3, bot); ctx.stroke();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = color;
+          }
+        }
+      });
+    });
+  }
+
+  if (opts.trendline !== 'none' && (chartType === 'bar' || chartType === 'line' || chartType === 'area')) {
+    series.forEach((s, si) => {
+      const pts = s.values.map((v, i) => ({ x: i, y: v })).filter(p => typeof p.y === 'number' && isFinite(p.y));
+      if (pts.length < 2) return;
+      const trend = getTrendlineForType(pts, opts.trendline);
+      if (!trend) return;
+
+      const color = CHART_COLORS[s.colorIdx % CHART_COLORS.length];
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      for (let step = 0; step <= 50; step++) {
+        const x = (step / 50) * (rowValuesArr.length - 1);
+        const y = trend.predict(x);
+        const cx = toCanvasX(x);
+        const cy = toCanvasY(y);
+        if (step === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (trend.r2 !== undefined) {
+        ctx.fillStyle = color;
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'left';
+        const lx = toCanvasX(rowValuesArr.length - 1) + 4;
+        const ly = toCanvasY(trend.predict(rowValuesArr.length - 1));
+        ctx.fillText('R²=' + trend.r2.toFixed(3), Math.min(lx, displayWidth - marginRight - 50), Math.max(ly, marginTop + 12));
+      }
+    });
+  }
+
+  if (opts.showAxisTitles) {
+    ctx.fillStyle = '#475569';
+    ctx.font = '12px sans-serif';
+    if (!isHorizontal) {
+      ctx.textAlign = 'center';
+      ctx.fillText(autoXTitle, marginLeft + chartW / 2, displayHeight - (opts.showLegend && opts.legendPosition === 'bottom' ? 40 : 10));
+      ctx.save();
+      ctx.translate(14, marginTop + chartH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText(autoYTitle, 0, 0);
+      ctx.restore();
+    } else {
+      ctx.textAlign = 'center';
+      ctx.fillText(autoYTitle, marginLeft + chartW / 2, displayHeight - (opts.showLegend && opts.legendPosition === 'bottom' ? 40 : 10));
+      ctx.save();
+      ctx.translate(14, marginTop + chartH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText(autoXTitle, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  if (opts.showLegend && series.length > 0) {
+    drawLegend(ctx, series, opts.legendPosition, marginLeft, marginTop, chartW, chartH, displayWidth, displayHeight);
+  }
+}
+
+function drawPieChart(ctx, w, h, series, labels, opts, title) {
+  if (opts.showTitle && title) {
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, w / 2, 24);
+  }
+
+  const vals = series[0]?.values || [];
+  const total = vals.reduce((s, v) => s + Math.max(0, v || 0), 0);
+  if (total === 0) return;
+
+  const cx = w / 2;
+  const cy = h / 2 + 10;
+  const radius = Math.min(w, h) / 2 - 60;
+  let startAngle = -Math.PI / 2;
+
+  vals.forEach((v, i) => {
+    if (!v || v <= 0) return;
+    const sliceAngle = (v / total) * Math.PI * 2;
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const midAngle = startAngle + sliceAngle / 2;
+    const pct = (v / total * 100).toFixed(1) + '%';
+    const labelR = radius * 0.7;
+    const lx = cx + Math.cos(midAngle) * labelR;
+    const ly = cy + Math.sin(midAngle) * labelR;
+
+    if (opts.showDataLabels || true) {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (sliceAngle > 0.15) ctx.fillText(pct, lx, ly);
+    }
+
+    startAngle += sliceAngle;
+  });
+
+  if (opts.showLegend) {
+    const legendItems = labels.map((l, i) => ({ label: l, colorIdx: i }));
+    drawLegend(ctx, legendItems, opts.legendPosition || 'bottom', 0, 0, w, h, w, h);
+  }
+}
+
+function drawLegend(ctx, items, position, ml, mt, cw, ch, dw, dh) {
+  ctx.font = '11px sans-serif';
+  const itemHeight = 16;
+  const boxSize = 10;
+  const padding = 6;
+
+  if (position === 'bottom') {
+    let x = ml + 10;
+    const y = dh - 16;
+    items.forEach((s, i) => {
+      const label = s.label || '';
+      const textW = ctx.measureText(label).width;
+      ctx.fillStyle = CHART_COLORS[(s.colorIdx || i) % CHART_COLORS.length];
+      ctx.fillRect(x, y - boxSize, boxSize, boxSize);
+      ctx.fillStyle = '#475569';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x + boxSize + 4, y);
+      x += boxSize + textW + 16;
+    });
+  } else if (position === 'top') {
+    let x = ml + 10;
+    const y = mt - 6;
+    items.forEach((s, i) => {
+      const label = s.label || '';
+      const textW = ctx.measureText(label).width;
+      ctx.fillStyle = CHART_COLORS[(s.colorIdx || i) % CHART_COLORS.length];
+      ctx.fillRect(x, y - boxSize, boxSize, boxSize);
+      ctx.fillStyle = '#475569';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x + boxSize + 4, y);
+      x += boxSize + textW + 16;
+    });
+  } else if (position === 'right') {
+    const x = ml + cw + 20;
+    items.forEach((s, i) => {
+      const y = mt + 10 + i * itemHeight;
+      const label = s.label || '';
+      ctx.fillStyle = CHART_COLORS[(s.colorIdx || i) % CHART_COLORS.length];
+      ctx.fillRect(x, y, boxSize, boxSize);
+      ctx.fillStyle = '#475569';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x + boxSize + 4, y + boxSize);
+    });
+  } else {
+    let y = mt + 10;
+    items.forEach((s, i) => {
+      const label = s.label || '';
+      ctx.fillStyle = CHART_COLORS[(s.colorIdx || i) % CHART_COLORS.length];
+      ctx.fillRect(ml - 110, y, boxSize, boxSize);
+      ctx.fillStyle = '#475569';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, ml - 96, y + boxSize);
+      y += itemHeight;
+    });
+  }
+}
+
+function encodeGif(canvas) {
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imgData.data;
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const colorMap = new Map();
+  const palette = [];
+  for (let i = 0; i < pixels.length; i += 4) {
+    const key = (pixels[i] << 16) | (pixels[i + 1] << 8) | pixels[i + 2];
+    if (!colorMap.has(key)) {
+      colorMap.set(key, (colorMap.size < 256) ? colorMap.size : 0);
+      if (palette.length < 256) palette.push([pixels[i], pixels[i + 1], pixels[i + 2]]);
+    }
+  }
+
+  while (palette.length < 256) palette.push([0, 0, 0]);
+
+  function nearestColor(r, g, b) {
+    const key = (r << 16) | (g << 8) | b;
+    if (colorMap.has(key) && colorMap.get(key) < 256) return colorMap.get(key);
+    let best = 0, bestDist = Infinity;
+    for (let i = 0; i < 256; i++) {
+      const dr = r - palette[i][0], dg = g - palette[i][1], db = b - palette[i][2];
+      const d = dr * dr + dg * dg + db * db;
+      if (d < bestDist) { bestDist = d; best = i; }
+    }
+    return best;
+  }
+
+  const indexedPixels = new Uint8Array(w * h);
+  for (let i = 0, j = 0; i < pixels.length; i += 4, j++) {
+    indexedPixels[j] = nearestColor(pixels[i], pixels[i + 1], pixels[i + 2]);
+  }
+
+  const minCodeSize = 8;
+  const clearCode = 256;
+  const eoiCode = 257;
+
+  function lzwCompress(indices) {
+    const output = [];
+    let codeSize = minCodeSize + 1;
+    let nextCode = eoiCode + 1;
+    const table = new Map();
+    for (let i = 0; i < clearCode; i++) table.set(String(i), i);
+
+    let buffer = 0, bitsInBuffer = 0;
+    const bytes = [];
+
+    function writeBits(code, bits) {
+      buffer |= (code << bitsInBuffer);
+      bitsInBuffer += bits;
+      while (bitsInBuffer >= 8) {
+        bytes.push(buffer & 0xff);
+        buffer >>= 8;
+        bitsInBuffer -= 8;
+      }
+    }
+
+    writeBits(clearCode, codeSize);
+    let current = String(indices[0]);
+
+    for (let i = 1; i < indices.length; i++) {
+      const next = current + ',' + indices[i];
+      if (table.has(next)) {
+        current = next;
+      } else {
+        writeBits(table.get(current), codeSize);
+        if (nextCode < 4096) {
+          table.set(next, nextCode++);
+          if (nextCode > (1 << codeSize) && codeSize < 12) codeSize++;
+        } else {
+          writeBits(clearCode, codeSize);
+          table.clear();
+          for (let k = 0; k < clearCode; k++) table.set(String(k), k);
+          nextCode = eoiCode + 1;
+          codeSize = minCodeSize + 1;
+        }
+        current = String(indices[i]);
+      }
+    }
+    writeBits(table.get(current), codeSize);
+    writeBits(eoiCode, codeSize);
+    if (bitsInBuffer > 0) bytes.push(buffer & 0xff);
+    return bytes;
+  }
+
+  const compressed = lzwCompress(indexedPixels);
+
+  const parts = [];
+
+  parts.push(0x47, 0x49, 0x46, 0x38, 0x39, 0x61);
+
+  parts.push(w & 0xff, (w >> 8) & 0xff);
+  parts.push(h & 0xff, (h >> 8) & 0xff);
+  parts.push(0xf7, 0x00, 0x00);
+
+  for (let i = 0; i < 256; i++) {
+    parts.push(palette[i][0], palette[i][1], palette[i][2]);
+  }
+
+  parts.push(0x2c);
+  parts.push(0, 0, 0, 0);
+  parts.push(w & 0xff, (w >> 8) & 0xff);
+  parts.push(h & 0xff, (h >> 8) & 0xff);
+  parts.push(0x00);
+
+  parts.push(minCodeSize);
+  let pos = 0;
+  while (pos < compressed.length) {
+    const chunk = Math.min(255, compressed.length - pos);
+    parts.push(chunk);
+    for (let i = 0; i < chunk; i++) parts.push(compressed[pos++]);
+  }
+  parts.push(0x00);
+
+  parts.push(0x3b);
+
+  return new Uint8Array(parts);
+}
+
+function downloadPivotChart(st, format) {
+  const chartPanel = st.container ? st.container.querySelector('.pivot-chart-panel') : el('.pivot-chart-panel');
+  if (!chartPanel) return;
+  const canvas = chartPanel.querySelector('.pivot-chart-canvas');
+  if (!canvas) { showToast('No chart to download', 'warning'); return; }
+
+  if (format === 'png') {
+    const link = document.createElement('a');
+    link.download = 'pivot-chart.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } else if (format === 'gif') {
+    try {
+      const gifData = encodeGif(canvas);
+      const blob = new Blob([gifData], { type: 'image/gif' });
+      const link = document.createElement('a');
+      link.download = 'pivot-chart.gif';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    } catch (e) {
+      showToast('Error generating GIF: ' + e.message, 'error');
+    }
+  }
 }
 
 function initCorrelationConfig(st = state) {
@@ -14914,7 +16017,37 @@ function initRelationInstance(container, relationData, options = {}) {
         </div>
         <button class="btn-generate-pivot btn btn-primary btn-sm">Generate Pivot</button>
       </div>
+      <div class="pivot-panels-toolbar" style="display:none;">
+        <button class="btn btn-sm btn-outline pivot-toggle-table active" data-testid="button-pivot-toggle-table">Table</button>
+        <button class="btn btn-sm btn-outline pivot-toggle-chart active" data-testid="button-pivot-toggle-chart">Chart</button>
+        <span class="pivot-toolbar-separator">|</span>
+        <button class="btn btn-sm btn-outline pivot-download-png" data-testid="button-pivot-download-png" title="Download PNG">⬇ PNG</button>
+        <button class="btn btn-sm btn-outline pivot-download-gif" data-testid="button-pivot-download-gif" title="Download GIF">⬇ GIF</button>
+      </div>
       <div class="pivot-table-container"></div>
+      <div class="pivot-chart-panel" style="display:none;">
+        <div class="pivot-chart-config">
+          <div class="pivot-chart-config-row">
+            <label>Chart:</label>
+            <select class="pivot-chart-type" data-testid="select-pivot-chart-type">
+              <option value="bar">Bar (Vertical)</option>
+              <option value="horizontalBar">Bar (Horizontal)</option>
+              <option value="line">Line</option>
+              <option value="area">Area</option>
+              <option value="pie">Pie</option>
+            </select>
+          </div>
+          <div class="pivot-chart-config-row pivot-chart-bar-mode-row">
+            <label>Mode:</label>
+            <select class="pivot-chart-bar-mode" data-testid="select-pivot-chart-bar-mode">
+              <option value="grouped">Side by Side</option>
+              <option value="stacked">Stacked</option>
+            </select>
+          </div>
+          <button class="btn btn-sm btn-outline pivot-chart-options-btn" data-testid="button-pivot-chart-options">Options...</button>
+        </div>
+        <canvas class="pivot-chart-canvas" width="800" height="500" data-testid="canvas-pivot-chart"></canvas>
+      </div>
     </div>
     
     <div class="view-correlation view-content" style="display: none;">
