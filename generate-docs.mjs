@@ -169,7 +169,7 @@ function generateRequirementsDoc() {
   sections.push(bullet('sortCriteria: Critérios de ordenação multi-coluna.'));
   sections.push(bullet('filters: Filtros ativos por coluna.'));
   sections.push(bullet('formatting: Regras de formatação condicional.'));
-  sections.push(bullet('selectedRows: Conjunto de linhas selecionadas.'));
+  sections.push(bullet('selectedRows: Conjunto de linhas assinaladas (checked).'));
   sections.push(bullet('selectedColumns: Conjunto de colunas selecionadas.'));
   sections.push(bullet('currentPage, pageSize: Estado de paginação.'));
   sections.push(bullet('groupByColumns: Colunas de agrupamento.'));
@@ -506,7 +506,7 @@ function generateRequirementsDoc() {
   // 20. Export
   sections.push(heading1('19. Exportação'));
   sections.push(heading2('19.1 Funcionalidades'));
-  sections.push(bullet('Âmbito: todos os registos, selecionados (checked), ou linha selecionada.'));
+  sections.push(bullet('Âmbito: todos os registos, assinalados (checked), ou linha selecionada (highlighted).'));
   sections.push(bullet('A opção "Linha selecionada" apenas é mostrada quando existe efetivamente uma linha selecionada/highlighted na relação.'));
   sections.push(bullet('A ação "Export to File" está inativa (mostra aviso) quando a relação tem zero linhas.'));
   sections.push(bullet('Formatos: CSV, Excel XML, XML, Word/HTML, PDF/HTML.'));
@@ -601,7 +601,7 @@ function generateRequirementsDoc() {
   sections.push(bullet('Tamanhos de página: 10, 20, 50, 100, All.'));
   sections.push(bullet('Navegação: primeira, anterior, próxima, última.'));
   sections.push(bullet('Indicador de página atual e total.'));
-  sections.push(bullet('Contagem de linhas totais e selecionadas.'));
+  sections.push(bullet('Contagem de linhas totais e assinaladas (checked).'));
   sections.push(bullet('Desativação automática de botões em limites.'));
   sections.push(heading2('25.2 Justificação'));
   sections.push(para('A paginação é essencial para performance e usabilidade com grandes conjuntos de dados, evitando renderização de milhares de linhas simultaneamente.'));
@@ -825,8 +825,8 @@ function generateTestsDoc() {
   ));
   sections.push(...testCase('007', 'Seleção de Linhas com Checkboxes',
     'Relação com show_multicheck=true.',
-    ['Verificar que checkboxes aparecem na primeira coluna.', 'Selecionar 3 linhas usando checkboxes.', 'Verificar que o contador na paginação atualiza para "3 checked".', 'Clicar no checkbox do cabeçalho para selecionar todas.', 'Verificar que todas as linhas da página ficam selecionadas.'],
-    'Seleção funciona individualmente e em massa, com contadores atualizados.'
+    ['Verificar que checkboxes aparecem na primeira coluna.', 'Assinalar 3 linhas usando checkboxes.', 'Verificar que o contador na paginação atualiza para "3 checked".', 'Clicar no checkbox do cabeçalho para assinalar todas.', 'Verificar que todas as linhas da página ficam assinaladas.'],
+    'Assinalação funciona individualmente e em massa, com contadores atualizados.'
   ));
 
   // Section 4: Cards View
@@ -1033,23 +1033,23 @@ function generateTestsDoc() {
   // Section 16: Multi-Record Operations
   sections.push(heading1('16. Operações Multi-Registo'));
   sections.push(...testCase('040', 'Multi View',
-    'Múltiplas linhas selecionadas via checkboxes.',
-    ['Selecionar 3 linhas.', 'Escolher ação "Multi View" no dropdown de ações.', 'Verificar que os 3 registos são apresentados simultaneamente.'],
-    'Visualização simultânea de múltiplos registos selecionados.'
+    'Múltiplas linhas assinaladas (checked) via checkboxes.',
+    ['Assinalar 3 linhas.', 'Escolher ação "Multi View" no dropdown de ações.', 'Verificar que os 3 registos são apresentados simultaneamente.'],
+    'Visualização simultânea de múltiplos registos assinalados.'
   ));
   sections.push(...testCase('041', 'Multi Delete',
-    'Múltiplas linhas selecionadas.',
-    ['Selecionar 3 linhas.', 'Escolher ação "Multi Delete".', 'Confirmar eliminação no diálogo.', 'Verificar que as 3 linhas foram removidas.', 'Verificar que a contagem decrementou por 3.'],
+    'Múltiplas linhas assinaladas (checked).',
+    ['Assinalar 3 linhas.', 'Escolher ação "Multi Delete".', 'Confirmar eliminação no diálogo.', 'Verificar que as 3 linhas foram removidas.', 'Verificar que a contagem decrementou por 3.'],
     'Eliminação em massa com confirmação e atualização correta.'
   ));
   sections.push(...testCase('042', 'Group Edit',
-    'Múltiplas linhas selecionadas.',
-    ['Selecionar 5 linhas.', 'Escolher ação "Group Edit".', 'Selecionar coluna e definir novo valor.', 'Confirmar.', 'Verificar que todas as 5 linhas têm o novo valor nessa coluna.'],
-    'Valor aplicado uniformemente a todas as linhas selecionadas.'
+    'Múltiplas linhas assinaladas (checked).',
+    ['Assinalar 5 linhas.', 'Escolher ação "Group Edit".', 'Selecionar coluna e definir novo valor.', 'Confirmar.', 'Verificar que todas as 5 linhas têm o novo valor nessa coluna.'],
+    'Valor aplicado uniformemente a todas as linhas assinaladas.'
   ));
   sections.push(...testCase('043', 'Merge de Registos',
-    'Múltiplas linhas selecionadas (mínimo 2).',
-    ['Selecionar 2 linhas.', 'Escolher ação "Merge".', 'No diálogo de merge, escolher campo-a-campo qual valor manter.', 'Confirmar merge.', 'Verificar que resta apenas 1 registo com os valores escolhidos.'],
+    'Múltiplas linhas assinaladas (checked, mínimo 2).',
+    ['Assinalar 2 linhas.', 'Escolher ação "Merge".', 'No diálogo de merge, escolher campo-a-campo qual valor manter.', 'Confirmar merge.', 'Verificar que resta apenas 1 registo com os valores escolhidos.'],
     'Merge realizado com controlo campo-a-campo e resultado correto.'
   ));
 
@@ -1062,8 +1062,8 @@ function generateTestsDoc() {
   ));
   sections.push(...testCase('045', 'Select Many',
     'Ação "Select Many" disponível.',
-    ['Clicar em "Select Many".', 'Selecionar múltiplas linhas via checkboxes.', 'Fechar o diálogo.', 'Verificar que array de IDs é retornado.'],
-    'Array de IDs das linhas selecionadas retornado.'
+    ['Clicar em "Select Many".', 'Assinalar múltiplas linhas via checkboxes.', 'Fechar o diálogo.', 'Verificar que array de IDs é retornado.'],
+    'Array de IDs das linhas assinaladas retornado.'
   ));
   sections.push(...testCase('046', 'Choose Many',
     'Ação "Choose Many" disponível.',
