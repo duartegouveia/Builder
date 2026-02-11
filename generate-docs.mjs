@@ -141,7 +141,7 @@ function generateRequirementsDoc() {
   sections.push(heading1('2. Estrutura de Dados e Modelo Relacional'));
   sections.push(heading2('2.1 Formato da Relação'));
   sections.push(para('Cada relação é um objeto JSON com a seguinte estrutura:'));
-  sections.push(bullet('columns: Objeto chave-valor onde as chaves são nomes de colunas e os valores são tipos (id, string, int, float, boolean, textarea, multilinestring, relation, date, datetime, time, select).'));
+  sections.push(bullet('columns: Objeto chave-valor onde as chaves são nomes de colunas e os valores são tipos (id, string, int, float, boolean, textarea, relation, date, datetime, time, select).'));
   sections.push(bullet('items: Array de arrays, onde cada sub-array representa uma linha com valores nas posições correspondentes às colunas.'));
   sections.push(bullet('options: Objeto com mapeamentos de valores para labels de apresentação (usado em colunas select e para formatação).'));
   sections.push(bullet('rel_options: Objeto com configurações globais da relação (editável, visibilidade de colunas, vistas disponíveis, etc.).'));
@@ -153,7 +153,6 @@ function generateRequirementsDoc() {
   sections.push(boldPara('float: ', 'Número decimal.'));
   sections.push(boldPara('boolean: ', 'Valor verdadeiro/falso (checkbox).'));
   sections.push(boldPara('textarea: ', 'Texto longo multi-linha.'));
-  sections.push(boldPara('multilinestring: ', 'Texto multi-linha alternativo.'));
   sections.push(boldPara('relation: ', 'Relação aninhada (sub-tabela completa).'));
   sections.push(boldPara('date: ', 'Data (YYYY-MM-DD).'));
   sections.push(boldPara('datetime: ', 'Data e hora.'));

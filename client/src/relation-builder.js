@@ -1,6 +1,6 @@
 import './styles.css';
 
-const COLUMN_TYPES = ['id', 'boolean', 'string', 'multilinestring', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
+const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
 
 function escapeHtml(text) {
   if (text === null || text === undefined) return '';
@@ -410,7 +410,7 @@ const USERS_JSON = {
     "PasswordExpired": "boolean",
     "IsExternal": "boolean",
     "ExternalUser": "string",
-    "Notes": "multilinestring",
+    "Notes": "textarea",
     "UserCode": "string",
     "HasMFA": "boolean",
     "MFAKey": "string",
@@ -448,7 +448,7 @@ const AUDITLOG_JSON = {
     "Context": "string",
     "Action": "string",
     "EndDate": "datetime",
-    "Error": "multilinestring"
+    "Error": "textarea"
   },
   "options": {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
@@ -1854,7 +1854,7 @@ function generateRandomValue(type, nestedRelationSchema = null) {
     case 'string':
       const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Iris', 'Jack'];
       return names[Math.floor(Math.random() * names.length)] + '_' + generateRandomString(4);
-    case 'multilinestring':
+    case 'textarea':
       const lines = Math.floor(Math.random() * 3) + 1;
       let text = '';
       for (let i = 0; i < lines; i++) {
@@ -1942,7 +1942,7 @@ function generateDemoRelation() {
     birth_date: 'date',
     created_at: 'datetime',
     start_time: 'time',
-    notes: 'multilinestring',
+    notes: 'textarea',
     orders: 'relation',
     tags: 'relation'
   };
@@ -2036,6 +2036,10 @@ function parseRelation(jsonStr) {
     }
     if (!Array.isArray(data.items)) {
       throw new Error('Invalid relation: items must be an array');
+    }
+    
+    for (const key in data.columns) {
+      if (data.columns[key] === 'multilinestring') data.columns[key] = 'textarea';
     }
     
     // Apply default rel_options if not present or incomplete
@@ -2355,7 +2359,7 @@ function showSortPanelDialog(st) {
     listEl.innerHTML = criteria.map((c, idx) => {
       const opts = c.options || {};
       const colType = st.columnTypes[c.column];
-      const isTextType = colType === 'string' || colType === 'multilinestring' || colType === 'textarea' || colType === 'select';
+      const isTextType = colType === 'string' || colType === 'textarea' || colType === 'select';
       const disabledAttr = isTextType ? '' : 'disabled';
       const disabledStyle = isTextType ? '' : 'opacity:0.4;';
       return `
@@ -2711,10 +2715,10 @@ function generateStatsExplanationsHTML(type) {
     explanations.push({ term: 'IQV', def: 'Index of Qualitative Variation. Normalized Gini-Simpson. 0 = no variation. 1 = maximum variation.' });
   }
   
-  if (type === 'string' || type === 'multilinestring') {
+  if (type === 'string' || type === 'textarea') {
     explanations.push({ term: 'Unique Values', def: 'Number of distinct text values.' });
     explanations.push({ term: 'Length Statistics', def: 'Statistics based on character count of each text value.' });
-    if (type === 'multilinestring') {
+    if (type === 'textarea') {
       explanations.push({ term: 'Line Statistics', def: 'Statistics based on number of lines in each text value.' });
     }
   }
@@ -3277,7 +3281,7 @@ function calculateStatistics(colIdx, st = state) {
     }
     
     stats.frequencies = freq;
-  } else if (type === 'string' || type === 'multilinestring') {
+  } else if (type === 'string' || type === 'textarea') {
     const freq = {};
     values.forEach(v => freq[v] = (freq[v] || 0) + 1);
     stats.uniqueCount = Object.keys(freq).length;
@@ -3337,8 +3341,8 @@ function calculateStatistics(colIdx, st = state) {
       stats.lengthStats.kurtosis = stats.lengthStats.variance > 0 ? (m4 / Math.pow(stats.lengthStats.variance, 2)) : 0;
     }
     
-    // Line count statistics (only for multilinestring)
-    if (type === 'multilinestring') {
+    // Line count statistics (only for textarea)
+    if (type === 'textarea') {
       const lineCounts = values.map(v => String(v).split('\n').length);
       lineCounts.sort((a, b) => a - b);
       
@@ -3691,7 +3695,7 @@ function formatCellValue(value, type, colName) {
     if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
     return '<span class="bool-display bool-display-null">—</span>';
   }
-  if (type === 'multilinestring') {
+  if (type === 'textarea') {
     return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
   }
   if (type === 'select') {
@@ -3706,7 +3710,7 @@ function formatCellValue(value, type, colName) {
 }
 
 // ─── Integrity Check ───────────────────────────────────────────────────
-const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'multilinestring', 'relation', 'date', 'datetime', 'time', 'select']);
+const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select']);
 const KNOWN_REL_OPTIONS_KEYS = new Set(Object.keys(DEFAULT_REL_OPTIONS));
 const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved']);
 
@@ -4969,7 +4973,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     
     const span = document.createElement('span');
     span.className = 'relation-cell-readonly';
-    if (type === 'multilinestring') {
+    if (type === 'textarea') {
       span.className = 'relation-cell-multiline';
       span.textContent = value || '—';
     } else {
@@ -5007,7 +5011,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       checkbox.classList.add('bool-tristate-null');
     }
     wrapper.appendChild(checkbox);
-  } else if (type === 'multilinestring') {
+  } else if (type === 'textarea') {
     const textarea = document.createElement('textarea');
     textarea.value = value || '';
     textarea.dataset.row = rowIdx;
@@ -7382,7 +7386,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
               <button class="btn-apply-filter" data-action="apply-topn-pct" data-testid="button-apply-topn-pct">Apply</button>
             </div>
           ` : ''}
-          ${type === 'string' || type === 'multilinestring' ? `
+          ${type === 'string' || type === 'textarea' ? `
             <button class="column-menu-item" data-action="filter-text-criteria">By Criteria...</button>
           ` : ''}
           ${type === 'int' || type === 'float' ? `
@@ -7494,14 +7498,14 @@ function showColumnMenu(colIdx, x, y, st = state) {
             <button class="btn-apply-filter" data-action="derive-round">Create</button>
           </div>
           ` : ''}
-          ${(type === 'string' || type === 'textarea' || type === 'multilinestring') ? `
+          ${(type === 'string' || type === 'textarea') ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Text)</div>
           <button class="column-menu-item" data-action="derive-length">Length (chars) → ${name}_length</button>
           <button class="column-menu-item" data-action="derive-bytes">Length (bytes) → ${name}_bytes</button>
           <button class="column-menu-item" data-action="derive-flesch-ease">Flesch Reading Ease (0-100) → ${name}_flesch_ease <span class="info-badge" data-tooltip="Flesch Reading Ease scores text readability on a 0-100 scale. Higher scores indicate easier reading: 90-100 = 5th grader, 60-70 = 8th-9th grader, 30-50 = college level, 0-30 = professional/academic. Based on average sentence length and syllable count." title="Flesch Reading Ease scores text readability on a 0-100 scale. Higher scores indicate easier reading: 90-100 = 5th grader, 60-70 = 8th-9th grader, 30-50 = college level, 0-30 = professional/academic.">ⓘ</span></button>
           <button class="column-menu-item" data-action="derive-flesch-kincaid">Flesch-Kincaid Grade Level → ${name}_flesch_kincaid <span class="info-badge" data-tooltip="Flesch-Kincaid Grade Level indicates the U.S. school grade needed to understand the text. A score of 8.0 means an 8th grader can understand it. Lower scores mean easier text. Based on average sentence length and syllable count." title="Flesch-Kincaid Grade Level indicates the U.S. school grade needed to understand the text. A score of 8.0 means an 8th grader can understand it. Lower scores mean easier text.">ⓘ</span></button>
-          ${type === 'textarea' || type === 'multilinestring' ? `
+          ${type === 'textarea' ? `
           <button class="column-menu-item" data-action="derive-sentences">Sentence Count → ${name}_sentences</button>
           ` : ''}
           ` : ''}
@@ -8831,7 +8835,7 @@ function openFilterDialogForColumn(colIdx, st = state) {
   
   if (!filter) {
     // No filter, open appropriate default dialog based on column type
-    if (type === 'string' || type === 'multilinestring') {
+    if (type === 'string' || type === 'textarea') {
       showFilterTextCriteriaDialog(colIdx, st);
     } else if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') {
       showFilterComparisonDialog(colIdx, st);
@@ -9508,7 +9512,7 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-subtitle">Frequency Table</div>
       ${generateBooleanFrequencyTableHTML(stats)}
     `;
-  } else if (type === 'string' || type === 'multilinestring') {
+  } else if (type === 'string' || type === 'textarea') {
     statsHtml += `
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Unique Values:</span><span>${stats.uniqueCount}</span></div>
@@ -9554,7 +9558,7 @@ function showStatisticsPanel(colIdx) {
       `;
     }
     
-    // Line count statistics (only for multilinestring)
+    // Line count statistics (only for textarea)
     if (stats.lineStats) {
       const lns = stats.lineStats;
       statsHtml += generateBoxPlotSVG(lns);
@@ -10378,7 +10382,7 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
     return `<span class="number-value">${value}</span>`;
   }
   
-  if (type === 'multilinestring') {
+  if (type === 'textarea') {
     return `<span class="multiline-value">${escapeHtml(String(value))}</span>`;
   }
   
@@ -10634,7 +10638,7 @@ function showRowPaperFormDialog(st, rowIdx) {
         html += `</div>`;
       } else if (type === 'boolean') {
         html += `<div class="paper-form-checkbox"><input type="checkbox" disabled> Sim</div>`;
-      } else if (type === 'multilinestring') {
+      } else if (type === 'textarea') {
         html += `<div class="paper-form-textarea-placeholder"></div>`;
       } else {
         html += `<div class="paper-form-input-placeholder"></div>`;
@@ -11589,7 +11593,7 @@ function renderCardsView(st = state) {
       }
       
       // Determine if field should span full width (multiline, relation, long text)
-      const isWide = type === 'multilinestring' || type === 'relation' || type === 'string';
+      const isWide = type === 'textarea' || type === 'relation' || type === 'string';
       const fieldClass = 'data-card-field data-card-col-' + colIdx + (isWide ? ' data-card-field-wide' : '');
       
       // Add data attributes for relation columns to enable click handling
@@ -14571,7 +14575,7 @@ function showDiagramPopup(node, clientX, clientY, st = state) {
       valueSpan.textContent = '[Relation: ' + (value.items?.length || 0) + ' rows]';
     } else if (typeof value === 'object') {
       valueSpan.textContent = JSON.stringify(value);
-    } else if (type === 'multilinestring') {
+    } else if (type === 'textarea') {
       const str = String(value);
       valueSpan.textContent = str.substring(0, 100) + (str.length > 100 ? '...' : '');
     } else {
@@ -14633,6 +14637,9 @@ function initRelationInstance(container, relationData, options = {}) {
   const instanceState = createRelationState();
   instanceState.container = container;
   instanceState.relation = relationData;
+  for (const key in relationData.columns) {
+    if (relationData.columns[key] === 'multilinestring') relationData.columns[key] = 'textarea';
+  }
   instanceState.columnNames = Object.keys(relationData.columns || {});
   instanceState.columnTypes = Object.values(relationData.columns || {});
   instanceState.options = relationData.options || {};
@@ -15770,7 +15777,7 @@ function createEditInputHtml(type, value, colIdx, st) {
     });
     html += '</select>';
     return html;
-  } else if (type === 'multilinestring') {
+  } else if (type === 'textarea') {
     return `<textarea class="relation-textarea" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
   } else if (type === 'date') {
     return `<input type="date" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
@@ -15973,7 +15980,7 @@ function init() {
         if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?/.test(value)) return 'datetime';
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'date';
         if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) return 'time';
-        if (value.length > 100) return 'multilinestring';
+        if (value.length > 100) return 'textarea';
         const trimmed = value.trim();
         if (trimmed !== '' && !isNaN(trimmed) && isFinite(trimmed)) {
           return trimmed.includes('.') ? 'float' : 'int';

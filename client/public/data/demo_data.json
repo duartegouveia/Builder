@@ -11,7 +11,7 @@
     "birth_date": "date",
     "created_at": "datetime",
     "start_time": "time",
-    "notes": "multilinestring",
+    "notes": "textarea",
     "orders": "relation",
     "tags": "relation"
   },
