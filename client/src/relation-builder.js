@@ -88,6 +88,7 @@ const DEFAULT_REL_OPTIONS = {
   show_hierarchy: false,
   hierarchy_column: 'parent',
   hierarchy_root_value: '',
+  hierarchy_initial_value: null,
   single_item_mode: 'dialog',
   label_field_top_down: true,
   OnDoubleClickAction: 'view',
@@ -133,7 +134,7 @@ const PRODUCTS_JSON = {
     "single_item_mode": "right",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
@@ -182,7 +183,7 @@ const CATEGORIES_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
@@ -240,7 +241,7 @@ const STOCKS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
@@ -352,7 +353,7 @@ const PRICELISTS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
     "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
@@ -431,7 +432,7 @@ const USERS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -464,7 +465,7 @@ const AUDITLOG_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", ""]]
 };
@@ -491,7 +492,7 @@ const COMPANY_TYPES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", ""]]
 };
@@ -524,7 +525,7 @@ const ALL_STOCKS_JSON = {
     "editable": false,
     "show_stats": true,
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [
     ["1", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584307", "PURINA DOG Chow Adulto", 23, 0, "0521", "25/10/2026", "1"],
@@ -639,7 +640,7 @@ const DISTRIBUTOR_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -674,7 +675,7 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", ""]]
 };
@@ -701,7 +702,7 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", ""]]
 };
@@ -728,7 +729,7 @@ const STOCK_IMPORTS_STATES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", ""]]
 };
@@ -759,7 +760,7 @@ const STOCK_IMPORTS_TYPES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", ""]]
 };
@@ -789,7 +790,7 @@ const STOCK_IMPORTS_DETAILS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", ""]]
 };
@@ -830,7 +831,7 @@ const STOCK_IMPORT_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -863,7 +864,7 @@ const STOCK_WAREHOUSE_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", ""]]
 };
@@ -913,7 +914,7 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -960,7 +961,7 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -1009,7 +1010,7 @@ const STOCK_INVENTORY_DETAIL_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -1057,7 +1058,7 @@ const STOCK_INVENTORY_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -1090,7 +1091,7 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", ""]]
 };
@@ -1122,7 +1123,7 @@ const PRODUCT_CATALOG_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", ""]]
 };
@@ -1150,7 +1151,7 @@ const PRICELIST_PARTNER_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", ""]]
 };
@@ -1181,7 +1182,7 @@ const PRICELIST_PRODUCTS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", ""]]
 };
@@ -1213,7 +1214,7 @@ const ALL_PRICELISTS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", ""]]
 };
@@ -1244,7 +1245,7 @@ const PRODUCT_BRANDS_JSON = {
     "hierarchy_column": "ParentID",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [
     ["1", "", "", "", "", "A"],
@@ -1285,7 +1286,7 @@ const PRODUCT_SPECIES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", ""]]
 };
@@ -1316,7 +1317,7 @@ const PRODUCT_FAMILIES_JSON = {
     "hierarchy_column": "ParentID",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", ""]]
 };
@@ -1344,7 +1345,7 @@ const PRODUCT_CATEGORY_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [
     ['1','1','Dog Food'],
@@ -1422,7 +1423,7 @@ const ALL_PRODUCTS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -1461,7 +1462,7 @@ const ALL_COMPANIES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"]
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
 };
@@ -1481,6 +1482,7 @@ const DEFAULT_UI_STATE = {
   formatting: {},
   groupByColumns: [],
   groupedData: null,
+  groupAllKeepVisible: false,
   expandedGroups: [],      // Array for JSON serialization (converted to Set at runtime)
   groupBySelectedValues: {},
   selectedColumns: [],     // Array for JSON serialization (converted to Set at runtime)
@@ -1490,7 +1492,9 @@ const DEFAULT_UI_STATE = {
   sortedIndices: [],
   quickSearchText: '',     // Quick search filter text
   currentHierarchyValue: null,  // Current hierarchy level (null = use hierarchy_root_value from rel_options)
-  columns_visible: null
+  showAllDescendants: false,    // When true, show all descendants not just direct children
+  columns_visible: null,
+  analysisResult: null
 };
 
 // Initialize uiState on a relation (ensures defaults exist)
@@ -1731,6 +1735,8 @@ function getCurrentHierarchyValue(st) {
   return val;
 }
 function setCurrentHierarchyValue(st, value) { getUiState(st).currentHierarchyValue = value; }
+function getShowAllDescendants(st) { return getUiState(st).showAllDescendants || false; }
+function setShowAllDescendants(st, value) { getUiState(st).showAllDescendants = !!value; }
 
 // Global state for main relation (backwards compatibility)
 let state = createRelationState();
@@ -1835,6 +1841,252 @@ function navigateHierarchyDown(rowIdx, st) {
   // Set the current hierarchy value to this item's ID
   setCurrentHierarchyValue(st, String(itemId));
   setCurrentPage(st, 1);
+  renderTable(st);
+}
+
+function countDirectChildren(st, parentValue) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  if (hierarchyColIdx < 0) return 0;
+  const targetVal = parentValue === null || parentValue === undefined ? '' : String(parentValue);
+  let count = 0;
+  for (const item of st.relation.items) {
+    const itemVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+    if (itemVal === targetVal) count++;
+  }
+  return count;
+}
+
+function countAllDescendants(st, parentValue) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  if (hierarchyColIdx < 0 || idColIdx < 0) return 0;
+  let total = 0;
+  const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
+  const visited = new Set();
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    for (const item of st.relation.items) {
+      const itemParentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      if (itemParentVal === current) {
+        total++;
+        const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
+        if (itemId && !visited.has(itemId)) {
+          queue.push(itemId);
+        }
+      }
+    }
+  }
+  return total;
+}
+
+function getAllDescendantValues(st, parentValue) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  if (hierarchyColIdx < 0 || idColIdx < 0) return new Set();
+  const descendants = new Set();
+  const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
+  const visited = new Set();
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    for (const item of st.relation.items) {
+      const itemParentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      if (itemParentVal === current) {
+        const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
+        descendants.add(itemParentVal);
+        if (itemId && !visited.has(itemId)) {
+          queue.push(itemId);
+        }
+      }
+    }
+  }
+  descendants.add(parentValue === null || parentValue === undefined ? '' : String(parentValue));
+  return descendants;
+}
+
+function buildHierarchyPath(st) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
+  const currentVal = getCurrentHierarchyValue(st);
+  if (hierarchyColIdx < 0 || idColIdx < 0) return [];
+  const labelColIdx = st.columnTypes.findIndex((t, i) => i !== idColIdx && (t === 'string' || t === 'textarea'));
+  const path = [];
+  path.push({ value: hierarchyRootVal, label: 'Root' });
+  if (currentVal === hierarchyRootVal || currentVal === '') {
+    return path;
+  }
+  const chain = [];
+  let traceVal = currentVal;
+  const seen = new Set();
+  while (traceVal !== '' && traceVal !== hierarchyRootVal && !seen.has(traceVal)) {
+    seen.add(traceVal);
+    let found = false;
+    for (const item of st.relation.items) {
+      const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
+      if (itemId === traceVal) {
+        const label = labelColIdx >= 0 && item[labelColIdx] ? String(item[labelColIdx]) : itemId;
+        chain.unshift({ value: traceVal, label: label });
+        const parentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+        traceVal = parentVal;
+        found = true;
+        break;
+      }
+    }
+    if (!found) break;
+  }
+  return [...path, ...chain];
+}
+
+function getHierarchyAscendants(st, itemId) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
+  if (hierarchyColIdx < 0 || idColIdx < 0) return [];
+  const ascendants = [];
+  let currentId = String(itemId);
+  const seen = new Set();
+  for (const item of st.relation.items) {
+    if (String(item[idColIdx]) === currentId) {
+      let parentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      while (parentVal !== '' && parentVal !== hierarchyRootVal && !seen.has(parentVal)) {
+        seen.add(parentVal);
+        ascendants.unshift(parentVal);
+        let found = false;
+        for (const pItem of st.relation.items) {
+          if (String(pItem[idColIdx]) === parentVal) {
+            parentVal = pItem[hierarchyColIdx] === null || pItem[hierarchyColIdx] === undefined ? '' : String(pItem[hierarchyColIdx]);
+            found = true;
+            break;
+          }
+        }
+        if (!found) break;
+      }
+      break;
+    }
+  }
+  return ascendants;
+}
+
+function getHierarchyDescendantIds(st, parentValue) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  if (hierarchyColIdx < 0 || idColIdx < 0) return [];
+  const descendants = [];
+  const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
+  const visited = new Set();
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    for (const item of st.relation.items) {
+      const itemParentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      if (itemParentVal === current) {
+        const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
+        if (itemId) {
+          descendants.push(itemId);
+          if (!visited.has(itemId)) queue.push(itemId);
+        }
+      }
+    }
+  }
+  return descendants;
+}
+
+function getHierarchyPathString(st, itemId) {
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  const labelColIdx = st.columnTypes.findIndex((t, i) => i !== idColIdx && (t === 'string' || t === 'textarea'));
+  const ascendants = getHierarchyAscendants(st, itemId);
+  const getLabel = (id) => {
+    for (const item of st.relation.items) {
+      if (String(item[idColIdx]) === String(id)) {
+        return labelColIdx >= 0 && item[labelColIdx] ? String(item[labelColIdx]) : String(id);
+      }
+    }
+    return String(id);
+  };
+  const parts = ascendants.map(id => getLabel(id));
+  parts.push(getLabel(itemId));
+  return parts.join(' > ');
+}
+
+function deriveHierarchyAscendants(st, colIdx) {
+  const colName = st.columnNames[colIdx] + '_ascendants';
+  let newColIdx = st.columnNames.indexOf(colName);
+  const isNew = newColIdx === -1;
+  if (isNew) {
+    st.relation.columns[colName] = 'string';
+    st.columnNames.push(colName);
+    st.columnTypes.push('string');
+    st.relation.items.forEach(row => row.push(null));
+    newColIdx = st.columnNames.length - 1;
+  }
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  st.relation.items.forEach(row => {
+    const itemId = row[idColIdx];
+    if (itemId === null || itemId === undefined) { row[newColIdx] = null; return; }
+    const asc = getHierarchyAscendants(st, String(itemId));
+    row[newColIdx] = asc.length > 0 ? asc.join(',') : '';
+  });
+  if (isNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], colName);
+  logOperation(st, { op: 'derive', type: 'hierarchy_ascendants', source_column: st.columnNames[colIdx], column_created: colName });
+  closeAllMenus();
+  renderTable(st);
+}
+
+function deriveHierarchyDescendants(st, colIdx) {
+  const colName = st.columnNames[colIdx] + '_descendants';
+  let newColIdx = st.columnNames.indexOf(colName);
+  const isNew = newColIdx === -1;
+  if (isNew) {
+    st.relation.columns[colName] = 'string';
+    st.columnNames.push(colName);
+    st.columnTypes.push('string');
+    st.relation.items.forEach(row => row.push(null));
+    newColIdx = st.columnNames.length - 1;
+  }
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  st.relation.items.forEach(row => {
+    const itemId = row[idColIdx];
+    if (itemId === null || itemId === undefined) { row[newColIdx] = null; return; }
+    const desc = getHierarchyDescendantIds(st, String(itemId));
+    row[newColIdx] = desc.length > 0 ? desc.join(',') : '';
+  });
+  if (isNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], colName);
+  logOperation(st, { op: 'derive', type: 'hierarchy_descendants', source_column: st.columnNames[colIdx], column_created: colName });
+  closeAllMenus();
+  renderTable(st);
+}
+
+function deriveHierarchyPath(st, colIdx) {
+  const colName = st.columnNames[colIdx] + '_path';
+  let newColIdx = st.columnNames.indexOf(colName);
+  const isNew = newColIdx === -1;
+  if (isNew) {
+    st.relation.columns[colName] = 'string';
+    st.columnNames.push(colName);
+    st.columnTypes.push('string');
+    st.relation.items.forEach(row => row.push(null));
+    newColIdx = st.columnNames.length - 1;
+  }
+  const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+  st.relation.items.forEach(row => {
+    const itemId = row[idColIdx];
+    if (itemId === null || itemId === undefined) { row[newColIdx] = null; return; }
+    row[newColIdx] = getHierarchyPathString(st, String(itemId));
+  });
+  if (isNew) insertColumnAfterInVisible(st, st.columnNames[colIdx], colName);
+  logOperation(st, { op: 'derive', type: 'hierarchy_path', source_column: st.columnNames[colIdx], column_created: colName });
+  closeAllMenus();
   renderTable(st);
 }
 
@@ -2054,6 +2306,7 @@ function parseRelation(jsonStr) {
       show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
       hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
       hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
+      hierarchy_initial_value: parsedRelOptions.hierarchy_initial_value ?? DEFAULT_REL_OPTIONS.hierarchy_initial_value,
       single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
       label_field_top_down: parsedRelOptions.label_field_top_down ?? DEFAULT_REL_OPTIONS.label_field_top_down,
       OnDoubleClickAction: parsedRelOptions.OnDoubleClickAction ?? DEFAULT_REL_OPTIONS.OnDoubleClickAction,
@@ -2088,18 +2341,30 @@ function applyFilters(st = state) {
     hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
   }
   const currentHierarchyVal = hierarchyEnabled ? getCurrentHierarchyValue(st) : null;
+  st._descendantCache = null;
   
   for (let i = 0; i < items.length; i++) {
     let passes = true;
     
     // Apply hierarchy filter first
     if (hierarchyEnabled && hierarchyColIdx >= 0) {
-      const itemHierarchyValue = items[i][hierarchyColIdx];
-      // Compare: empty string matches empty/null/undefined
-      const itemVal = itemHierarchyValue === null || itemHierarchyValue === undefined ? '' : String(itemHierarchyValue);
-      const targetVal = currentHierarchyVal === null || currentHierarchyVal === undefined ? '' : String(currentHierarchyVal);
-      if (itemVal !== targetVal) {
-        passes = false;
+      const showAll = getShowAllDescendants(st);
+      if (showAll) {
+        const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
+        if (!st._descendantCache) {
+          st._descendantCache = getAllDescendantValues(st, currentHierarchyVal);
+        }
+        const itemParentVal = items[i][hierarchyColIdx] === null || items[i][hierarchyColIdx] === undefined ? '' : String(items[i][hierarchyColIdx]);
+        if (!st._descendantCache.has(itemParentVal)) {
+          passes = false;
+        }
+      } else {
+        const itemHierarchyValue = items[i][hierarchyColIdx];
+        const itemVal = itemHierarchyValue === null || itemHierarchyValue === undefined ? '' : String(itemHierarchyValue);
+        const targetVal = currentHierarchyVal === null || currentHierarchyVal === undefined ? '' : String(currentHierarchyVal);
+        if (itemVal !== targetVal) {
+          passes = false;
+        }
       }
     }
     
@@ -2678,6 +2943,63 @@ function generateBooleanFrequencyTableHTML(stats) {
   return html;
 }
 
+// Kernel Density Estimation (KDE) with Gaussian kernel and Silverman's bandwidth
+function computeKDE(values, numPoints = 100) {
+  if (!values || values.length < 2) return null;
+  const n = values.length;
+  const sorted = values.slice().sort((a, b) => a - b);
+  const mean = sorted.reduce((s, v) => s + v, 0) / n;
+  const sigma = Math.sqrt(sorted.reduce((s, v) => s + (v - mean) * (v - mean), 0) / n);
+  if (sigma === 0) return null;
+  const h = 1.06 * sigma * Math.pow(n, -0.2);
+  if (h === 0) return null;
+  const minVal = sorted[0];
+  const maxVal = sorted[sorted.length - 1];
+  const pad = (maxVal - minVal) * 0.05 || 1;
+  const lo = minVal - pad;
+  const hi = maxVal + pad;
+  const step = (hi - lo) / (numPoints - 1);
+  const SQRT_2PI = Math.sqrt(2 * Math.PI);
+  const points = [];
+  let maxDensity = 0;
+  for (let i = 0; i < numPoints; i++) {
+    const x = lo + i * step;
+    let density = 0;
+    for (let j = 0; j < n; j++) {
+      const u = (x - sorted[j]) / h;
+      density += Math.exp(-u * u / 2) / SQRT_2PI;
+    }
+    density /= (n * h);
+    if (density > maxDensity) maxDensity = density;
+    points.push({ x, density });
+  }
+  return { points, maxDensity };
+}
+
+function generateViolinSVGPath(kde, scaleY, centerX, maxHalfWidth) {
+  if (!kde || kde.maxDensity === 0) return '';
+  const pts = kde.points;
+  let rightPath = '';
+  let leftPath = '';
+  for (let i = 0; i < pts.length; i++) {
+    const y = scaleY(pts[i].x);
+    const w = (pts[i].density / kde.maxDensity) * maxHalfWidth;
+    const rx = centerX + w;
+    const lx = centerX - w;
+    if (i === 0) {
+      rightPath += `M${rx.toFixed(1)},${y.toFixed(1)}`;
+      leftPath = `L${lx.toFixed(1)},${y.toFixed(1)}`;
+    } else {
+      rightPath += ` L${rx.toFixed(1)},${y.toFixed(1)}`;
+      leftPath = `L${lx.toFixed(1)},${y.toFixed(1)} ` + leftPath;
+    }
+  }
+  const lastY = scaleY(pts[pts.length - 1].x);
+  const lastLx = centerX - (pts[pts.length - 1].density / kde.maxDensity) * maxHalfWidth;
+  leftPath = `L${lastLx.toFixed(1)},${lastY.toFixed(1)} ` + leftPath;
+  return `<path d="${rightPath} ${leftPath} Z" fill="rgba(138, 43, 226, 0.25)" stroke="rgba(138, 43, 226, 0.6)" stroke-width="1"/>`;
+}
+
 // Box Plot SVG Generator
 function generateStatsExplanationsHTML(type) {
   let explanations = [];
@@ -2737,28 +3059,31 @@ function generateStatsExplanationsHTML(type) {
 function generateBoxPlotSVG(stats) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
   
+  const uid = 'vp_' + Math.random().toString(36).substr(2, 8);
   const width = 350;
   const height = 180;
   const padding = { top: 15, bottom: 25, left: 45, right: 15 };
   const plotHeight = height - padding.top - padding.bottom;
-  const scatterX = 70;  // X position for scatter points
-  const boxX = 115;     // X position for box plot
+  const scatterX = 70;
+  const boxX = 115;
   const boxWidth = 30;
-  const labelX = 170;   // X position for annotations
+  const labelX = 170;
   
   const min = stats.min;
   const max = stats.max;
   const range = max - min || 1;
   
-  // Scale function: value to Y position (inverted because SVG Y grows downward)
   const scaleY = (val) => padding.top + plotHeight - ((val - min) / range) * plotHeight;
+  
+  const kde = computeKDE(stats.allNumericValues);
+  const violinCenterX = boxX + boxWidth / 2;
+  const maxHalfWidth = boxWidth * 1.4;
+  const violinPath = kde ? generateViolinSVGPath(kde, scaleY, violinCenterX, maxHalfWidth) : '';
   
   let svg = `<svg width="${width}" height="${height}" class="boxplot-svg">`;
   
-  // Y-axis
   svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#666" stroke-width="1"/>`;
   
-  // Y-axis ticks and labels
   const tickValues = [min, stats.q1, stats.median, stats.q3, max];
   tickValues.forEach(val => {
     const y = scaleY(val);
@@ -2766,79 +3091,67 @@ function generateBoxPlotSVG(stats) {
     svg += `<text x="${padding.left - 6}" y="${y + 3}" text-anchor="end" font-size="9" fill="#888">${val.toFixed(1)}</text>`;
   });
   
-  // Scatter plot points (left column) with jitter
   const jitterRange = 15;
   stats.allNumericValues.forEach((val, i) => {
     const y = scaleY(val);
     const jitter = (Math.random() - 0.5) * jitterRange;
     const x = scatterX + jitter;
     
-    // Determine color based on outlier status
-    let color = 'rgba(74, 144, 226, 0.15)'; // Normal - blue with 10% opacity
+    let color = 'rgba(74, 144, 226, 0.15)';
     if (stats.farOutliers.includes(val)) {
-      color = 'rgba(220, 53, 69, 0.5)'; // Far outlier - red
+      color = 'rgba(220, 53, 69, 0.5)';
     } else if (stats.outliers.includes(val)) {
-      color = 'rgba(255, 152, 0, 0.5)'; // Outlier - orange
+      color = 'rgba(255, 152, 0, 0.5)';
     }
     
     svg += `<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`;
   });
   
-  // Box plot (right side)
+  if (violinPath) {
+    svg += `<g class="violin-overlay" data-violin-id="${uid}">${violinPath}</g>`;
+  }
+  
   const q1Y = scaleY(stats.q1);
   const q3Y = scaleY(stats.q3);
   const medianY = scaleY(stats.median);
   const whiskerLowY = scaleY(stats.whiskerLow);
   const whiskerHighY = scaleY(stats.whiskerHigh);
   
-  // Whiskers (vertical lines)
   svg += `<line x1="${boxX + boxWidth/2}" y1="${whiskerHighY}" x2="${boxX + boxWidth/2}" y2="${q3Y}" stroke="#4a90e2" stroke-width="1.5"/>`;
   svg += `<line x1="${boxX + boxWidth/2}" y1="${q1Y}" x2="${boxX + boxWidth/2}" y2="${whiskerLowY}" stroke="#4a90e2" stroke-width="1.5"/>`;
   
-  // Whisker caps (horizontal lines)
   svg += `<line x1="${boxX + boxWidth/4}" y1="${whiskerHighY}" x2="${boxX + 3*boxWidth/4}" y2="${whiskerHighY}" stroke="#4a90e2" stroke-width="1.5"/>`;
   svg += `<line x1="${boxX + boxWidth/4}" y1="${whiskerLowY}" x2="${boxX + 3*boxWidth/4}" y2="${whiskerLowY}" stroke="#4a90e2" stroke-width="1.5"/>`;
   
-  // Box (Q1 to Q3)
   svg += `<rect x="${boxX}" y="${q3Y}" width="${boxWidth}" height="${q1Y - q3Y}" fill="rgba(74, 144, 226, 0.3)" stroke="#4a90e2" stroke-width="1.5"/>`;
   
-  // Median line
   svg += `<line x1="${boxX}" y1="${medianY}" x2="${boxX + boxWidth}" y2="${medianY}" stroke="#2563eb" stroke-width="2"/>`;
   
-  // Mean marker (diamond)
   const meanY = scaleY(stats.mean);
   svg += `<polygon points="${boxX + boxWidth/2},${meanY - 4} ${boxX + boxWidth/2 + 4},${meanY} ${boxX + boxWidth/2},${meanY + 4} ${boxX + boxWidth/2 - 4},${meanY}" fill="#22c55e" stroke="#16a34a" stroke-width="1"/>`;
   
-  // Annotations (right side labels)
   const annotationStyle = 'font-size="8" fill="#666"';
   
-  // Upper whisker annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerHighY}" x2="${labelX - 5}" y2="${whiskerHighY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR (Q3−Q1)</text>`;
   
-  // Q3 annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${q3Y}" x2="${labelX - 5}" y2="${q3Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${q3Y + 3}" ${annotationStyle}>Q3 (75%)</text>`;
   
-  // Median annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${medianY}" x2="${labelX - 5}" y2="${medianY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>Median (50%)</text>`;
   
-  // Q1 annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${q1Y}" x2="${labelX - 5}" y2="${q1Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${q1Y + 3}" ${annotationStyle}>Q1 (25%)</text>`;
   
-  // Lower whisker annotation
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerLowY}" x2="${labelX - 5}" y2="${whiskerLowY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR (Q3−Q1)</text>`;
   
-  // Outliers on box plot side
   stats.outliers.forEach(val => {
     const y = scaleY(val);
     svg += `<circle cx="${boxX + boxWidth/2}" cy="${y}" r="4" fill="none" stroke="#ff9800" stroke-width="1.5"/>`;
   });
   
-  // Far outliers on box plot side
   stats.farOutliers.forEach(val => {
     const y = scaleY(val);
     svg += `<circle cx="${boxX + boxWidth/2}" cy="${y}" r="4" fill="none" stroke="#dc3545" stroke-width="2"/>`;
@@ -2846,13 +3159,11 @@ function generateBoxPlotSVG(stats) {
     svg += `<line x1="${boxX + boxWidth/2 - 2}" y1="${y + 2}" x2="${boxX + boxWidth/2 + 2}" y2="${y - 2}" stroke="#dc3545" stroke-width="1.5"/>`;
   });
   
-  // Labels
   svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Points</text>`;
   svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Box</text>`;
   
   svg += `</svg>`;
   
-  // Legend
   let legend = `<div class="boxplot-legend">
     <span><span class="legend-dot legend-normal"></span>Normal</span>
     <span><span class="legend-dot legend-outlier"></span>Outlier</span>
@@ -2860,7 +3171,15 @@ function generateBoxPlotSVG(stats) {
     <span><span class="legend-diamond"></span>Mean</span>
   </div>`;
   
-  return `<div class="boxplot-container">${svg}${legend}</div>`;
+  let violinCheckbox = '';
+  if (violinPath) {
+    violinCheckbox = `<div class="violin-toggle-row">
+      <label class="violin-toggle-label"><input type="checkbox" checked data-violin-toggle="${uid}" class="violin-checkbox" data-testid="checkbox-violin-toggle"/>Violin Plot</label>
+      <span class="info-badge violin-info-badge" title="A violin plot shows the probability density of the data at different values, smoothed by a kernel density estimator (KDE). The wider the shape, the more data points at that value.">i</span>
+    </div>`;
+  }
+  
+  return `<div class="boxplot-container">${violinCheckbox}${svg}${legend}</div>`;
 }
 
 // Skewness visualization SVG - compares with normal distribution (skewness = 0)
@@ -2998,6 +3317,7 @@ function generateKurtosisSVG(kurtosis) {
 function generateDateTimeBoxPlotSVG(stats, type) {
   if (!stats.allNumericValues || stats.allNumericValues.length === 0) return '';
   
+  const uid = 'vp_' + Math.random().toString(36).substr(2, 8);
   const width = 350;
   const height = 180;
   const padding = { top: 15, bottom: 25, left: 45, right: 15 };
@@ -3013,12 +3333,15 @@ function generateDateTimeBoxPlotSVG(stats, type) {
   
   const scaleY = (val) => padding.top + plotHeight - ((val - min) / range) * plotHeight;
   
+  const kde = computeKDE(stats.allNumericValues);
+  const violinCenterX = boxX + boxWidth / 2;
+  const maxHalfWidth = boxWidth * 1.4;
+  const violinPath = kde ? generateViolinSVGPath(kde, scaleY, violinCenterX, maxHalfWidth) : '';
+  
   let svg = `<svg width="${width}" height="${height}" class="boxplot-svg">`;
   
-  // Y-axis
   svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#666" stroke-width="1"/>`;
   
-  // Scatter plot points with jitter
   const jitterRange = 15;
   stats.allNumericValues.forEach((val) => {
     const y = scaleY(val);
@@ -3035,7 +3358,10 @@ function generateDateTimeBoxPlotSVG(stats, type) {
     svg += `<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`;
   });
   
-  // Box plot
+  if (violinPath) {
+    svg += `<g class="violin-overlay" data-violin-id="${uid}">${violinPath}</g>`;
+  }
+  
   const q1Y = scaleY(stats.numQ1);
   const q3Y = scaleY(stats.numQ3);
   const medianY = scaleY(stats.numMedian);
@@ -3102,7 +3428,15 @@ function generateDateTimeBoxPlotSVG(stats, type) {
     <span><span class="legend-diamond"></span>Mean</span>
   </div>`;
   
-  return `<div class="boxplot-container">${svg}${legend}</div>`;
+  let violinCheckbox = '';
+  if (violinPath) {
+    violinCheckbox = `<div class="violin-toggle-row">
+      <label class="violin-toggle-label"><input type="checkbox" checked data-violin-toggle="${uid}" class="violin-checkbox" data-testid="checkbox-violin-toggle"/>Violin Plot</label>
+      <span class="info-badge violin-info-badge" title="A violin plot shows the probability density of the data at different values, smoothed by a kernel density estimator (KDE). The wider the shape, the more data points at that value.">i</span>
+    </div>`;
+  }
+  
+  return `<div class="boxplot-container">${violinCheckbox}${svg}${legend}</div>`;
 }
 
 // Statistics functions
@@ -3672,9 +4006,10 @@ function applyGroupBy(st = state) {
 }
 
 function getVisibleColumns(st = state) {
+  const keepVisible = getUiState(st).groupAllKeepVisible;
   return st.columnNames
     .map((name, idx) => ({ name, type: st.columnTypes[idx], idx }))
-    .filter((_, idx) => !getGroupByColumns(st).includes(idx));
+    .filter((_, idx) => keepVisible || !getGroupByColumns(st).includes(idx));
 }
 
 
@@ -6752,31 +7087,75 @@ function renderTable(st = state) {
   parentIndexTh.className = 'relation-th-parent' + (st.rel_options.show_natural_order ? '' : ' hidden');
   parentRow.appendChild(parentIndexTh);
   
-  // Data columns - show parent item data or empty (use columns_visible order)
-  visibleColIndices.forEach((idx) => {
-    if (getGroupByColumns(st).includes(idx)) return;
-    const th = document.createElement('th');
+  // Breadcrumb trail - spans all remaining data columns
+  const visibleDataCols = visibleColIndices.filter(idx => !getGroupByColumns(st).includes(idx));
+  const hiddenIdCount = visibleDataCols.filter(idx => st.columnTypes[idx] === 'id' && !st.rel_options.show_id).length;
+  const breadcrumbColspan = visibleDataCols.length - hiddenIdCount;
+  
+  const breadcrumbTh = document.createElement('th');
+  breadcrumbTh.className = 'relation-th-parent hierarchy-breadcrumb-cell';
+  breadcrumbTh.colSpan = breadcrumbColspan;
+  
+  const breadcrumbContainer = document.createElement('div');
+  breadcrumbContainer.className = 'hierarchy-breadcrumb-bar';
+  breadcrumbContainer.dataset.testid = 'hierarchy-breadcrumb';
+  
+  const hierPath = buildHierarchyPath(st);
+  hierPath.forEach((segment, segIdx) => {
+    if (segIdx > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'hierarchy-breadcrumb-sep';
+      sep.textContent = ' > ';
+      breadcrumbContainer.appendChild(sep);
+    }
+    const segSpan = document.createElement('span');
+    segSpan.className = 'hierarchy-breadcrumb-segment' + (segIdx === hierPath.length - 1 ? ' active' : '');
+    segSpan.dataset.testid = 'breadcrumb-segment-' + segIdx;
+    const direct = countDirectChildren(st, segment.value);
+    const total = countAllDescendants(st, segment.value);
+    segSpan.textContent = segment.label + ' (#' + direct + ' >> #' + total + ')';
+    segSpan.title = segment.label + ': ' + direct + ' direct children, ' + total + ' total descendants';
+    segSpan.style.cursor = 'pointer';
+    segSpan.addEventListener('click', () => {
+      setCurrentHierarchyValue(st, segment.value);
+      setCurrentPage(st, 1);
+      renderTable(st);
+    });
+    breadcrumbContainer.appendChild(segSpan);
+  });
+  
+  const infoBadge = document.createElement('span');
+  infoBadge.className = 'info-badge hierarchy-info-badge';
+  infoBadge.textContent = 'ⓘ';
+  infoBadge.title = '#N1 = direct children at this level, #N2 = total descendants (all levels below). Click a segment to navigate.';
+  infoBadge.dataset.testid = 'hierarchy-info-badge';
+  breadcrumbContainer.appendChild(infoBadge);
+  
+  const showAllLabel = document.createElement('label');
+  showAllLabel.className = 'hierarchy-show-all-label';
+  const showAllCb = document.createElement('input');
+  showAllCb.type = 'checkbox';
+  showAllCb.checked = getShowAllDescendants(st);
+  showAllCb.className = 'hierarchy-show-all-checkbox';
+  showAllCb.dataset.testid = 'checkbox-show-all-descendants';
+  showAllLabel.appendChild(showAllCb);
+  const showAllText = document.createElement('span');
+  showAllText.textContent = ' Show all descendants';
+  showAllLabel.appendChild(showAllText);
+  breadcrumbContainer.appendChild(showAllLabel);
+  
+  breadcrumbTh.appendChild(breadcrumbContainer);
+  parentRow.appendChild(breadcrumbTh);
+  
+  // Hidden id columns still need placeholders
+  visibleDataCols.forEach((idx) => {
     const type = st.columnTypes[idx];
     const isHiddenId = type === 'id' && !st.rel_options.show_id;
-    th.className = 'relation-th-parent' + (isHiddenId ? ' hidden' : '');
-    if (parentItem) {
-      const value = parentItem[idx];
-      
-      if (type === 'relation') {
-        const btn = document.createElement('button');
-        btn.className = 'relation-cell-btn';
-        const count = value?.items?.length || 0;
-        btn.innerHTML = `📋 ${count}`;
-        btn.title = `View nested relation (${count} rows)`;
-        btn.dataset.row = parentItemIdx;
-        btn.dataset.col = idx;
-        btn.dataset.testid = `button-parent-relation-${idx}`;
-        th.appendChild(btn);
-      } else {
-        th.textContent = value !== null && value !== undefined ? String(value) : '';
-      }
+    if (isHiddenId) {
+      const th = document.createElement('th');
+      th.className = 'relation-th-parent hidden';
+      parentRow.appendChild(th);
     }
-    parentRow.appendChild(th);
   });
   
   thead.appendChild(parentRow);
@@ -7129,6 +7508,16 @@ function attachTableEventListeners(st = state, container = null) {
     });
   }
   
+  // Show all descendants checkbox
+  const showAllCb = tableContainer.querySelector('.hierarchy-show-all-checkbox');
+  if (showAllCb) {
+    showAllCb.addEventListener('change', (e) => {
+      setShowAllDescendants(st, e.target.checked);
+      setCurrentPage(st, 1);
+      renderTable(st);
+    });
+  }
+  
   // Column resize handles
   tableContainer.querySelectorAll('.col-resize-handle').forEach(handle => {
     handle.addEventListener('dblclick', (e) => {
@@ -7460,7 +7849,12 @@ function showColumnMenu(colIdx, x, y, st = state) {
       <div class="accordion-section" data-section="group">
         <div class="accordion-header">Group By <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
+          ${type === 'id' ? `
+          <button class="column-menu-item disabled" disabled title="Group By is not available for id columns">Group by this column</button>
+          ` : `
           <button class="column-menu-item ${isGrouped ? 'active' : ''}" data-action="toggle-group">${isGrouped ? '✓ Grouped' : 'Group by this column'}</button>
+          `}
+          <button class="column-menu-item" data-action="group-all">Group by ALL columns</button>
           <button class="column-menu-item" data-action="clear-groups">✕ Clear All Groups</button>
         </div>
       </div>
@@ -7524,6 +7918,13 @@ function showColumnMenu(colIdx, x, y, st = state) {
           ${type === 'textarea' ? `
           <button class="column-menu-item" data-action="derive-sentences">Sentence Count → ${name}_sentences</button>
           ` : ''}
+          ` : ''}
+          ${(shouldShowHierarchy(st) && name === st.rel_options.hierarchy_column) ? `
+          <div class="column-menu-separator"></div>
+          <div class="column-menu-sublabel">Derived Columns (Hierarchy)</div>
+          <button class="column-menu-item" data-action="derive-hierarchy-ascendants">Ascendants → ${name}_ascendants</button>
+          <button class="column-menu-item" data-action="derive-hierarchy-descendants">Descendants → ${name}_descendants</button>
+          <button class="column-menu-item" data-action="derive-hierarchy-path">Path → ${name}_path</button>
           ` : ''}
           <div class="column-menu-separator"></div>
           <button class="column-menu-item" data-action="remove-column">Remove Column</button>
@@ -7866,9 +8267,14 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       toggleGroupBy(colIdx, st);
       logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx] });
       return;
+    case 'group-all':
+      groupByAllColumns(st);
+      logOperation(st, { op: 'group_all' });
+      return;
     case 'clear-groups':
       setGroupByColumns(st, []);
       setGroupBySelectedValues(st, {});
+      getUiState(st).groupAllKeepVisible = false;
       logOperation(st, { op: 'clear_groups' });
       break;
     case 'expand-relation':
@@ -8237,6 +8643,18 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'sentences', source_column: st.columnNames[colIdx], column_created: sentColName });
       closeAllMenus();
       renderTable(st);
+      return;
+    }
+    case 'derive-hierarchy-ascendants': {
+      deriveHierarchyAscendants(st, colIdx);
+      return;
+    }
+    case 'derive-hierarchy-descendants': {
+      deriveHierarchyDescendants(st, colIdx);
+      return;
+    }
+    case 'derive-hierarchy-path': {
+      deriveHierarchyPath(st, colIdx);
       return;
     }
     case 'toggle-select-col':
@@ -9816,6 +10234,14 @@ function showStatisticsPanel(colIdx) {
   
   document.body.appendChild(panel);
   
+  panel.querySelectorAll('.violin-checkbox').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const vid = this.getAttribute('data-violin-toggle');
+      const violinG = panel.querySelector(`[data-violin-id="${vid}"]`);
+      if (violinG) violinG.style.display = this.checked ? '' : 'none';
+    });
+  });
+  
   panel.querySelector('.btn-close-dialog').addEventListener('click', () => panel.remove());
   
   document.addEventListener('click', function closePanel(e) {
@@ -10047,11 +10473,25 @@ function toggleGroupBy(colIdx, st = state) {
   const idx = getGroupByColumns(st).indexOf(colIdx);
   if (idx >= 0) {
     getGroupByColumns(st).splice(idx, 1);
-    // Also remove selected value for this column
     delete getGroupBySelectedValues(st)[colIdx];
   } else {
     getGroupByColumns(st).push(colIdx);
   }
+  getUiState(st).groupAllKeepVisible = false;
+  setCurrentPage(st, 1);
+  renderTable(st);
+}
+
+function groupByAllColumns(st = state) {
+  const allCols = [];
+  st.columnTypes.forEach((type, idx) => {
+    if (type !== 'id') {
+      allCols.push(idx);
+    }
+  });
+  setGroupByColumns(st, allCols);
+  setGroupBySelectedValues(st, {});
+  getUiState(st).groupAllKeepVisible = true;
   setCurrentPage(st, 1);
   renderTable(st);
 }
@@ -11296,16 +11736,13 @@ function applyAIFilter(conditions, st = state) {
 }
 
 // View tab icons SVG definitions
-const VIEW_DISPLAY_NAMES = {
-  diagram: 'Clustering'
-};
+const VIEW_DISPLAY_NAMES = {};
 
 const VIEW_TAB_ICONS = {
   table: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
   cards: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>',
   pivot: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v18h18V3Z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
-  correlation: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
-  diagram: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="9" cy="4" r="2"/><circle cx="5" cy="9" r="2"/><circle cx="17" cy="17" r="2"/><circle cx="20" cy="15" r="2"/><circle cx="18" cy="20" r="2"/><circle cx="17" cy="5" r="2"/><circle cx="20" cy="8" r="2"/><circle cx="14" cy="14" r="2"/></svg>',
+  analysis: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/><circle cx="7" cy="16" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="19" cy="6" r="1.5"/></svg>',
   ai: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>',
   saved: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>',
   structure: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="10" y1="6.5" x2="14" y2="6.5"/><line x1="10" y1="17.5" x2="14" y2="17.5"/><line x1="6.5" y1="10" x2="6.5" y2="14"/><line x1="17.5" y1="10" x2="17.5" y2="14"/></svg>'
@@ -11638,11 +12075,8 @@ function switchView(viewName) {
     renderCardsView();
   } else if (viewName === 'pivot') {
     initPivotConfig();
-  } else if (viewName === 'correlation') {
-    initCorrelationConfig();
-  } else if (viewName === 'diagram') {
-    // Setup click handler for diagram canvas
-    setupDiagramClickHandler();
+  } else if (viewName === 'analysis') {
+    renderAnalysis(state);
   } else if (viewName === 'ai') {
     // AI view is always ready
   } else if (viewName === 'saved') {
@@ -13403,7 +13837,7 @@ function downloadPivotChart(st, format) {
 }
 
 function initCorrelationConfig(st = state) {
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   if (!corrView) return;
   
   // Check for empty items
@@ -13460,8 +13894,105 @@ function initCorrelationConfig(st = state) {
   }
 }
 
+function corrHelperRank(arr) {
+  const sorted = arr.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+  const ranks = new Array(arr.length);
+  let i = 0;
+  while (i < sorted.length) {
+    let j = i;
+    while (j < sorted.length && sorted[j].v === sorted[i].v) j++;
+    const avgRank = (i + 1 + j) / 2;
+    for (let k = i; k < j; k++) ranks[sorted[k].i] = avgRank;
+    i = j;
+  }
+  return ranks;
+}
+
+function corrHelperNormalPdf(x) {
+  return Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+}
+
+function corrHelperNormalInvApprox(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  if (p === 0.5) return 0;
+  const a = p < 0.5 ? p : 1 - p;
+  const t = Math.sqrt(-2 * Math.log(a));
+  const c0 = 2.515517, c1 = 0.802853, c2 = 0.010328;
+  const d1 = 1.432788, d2 = 0.189269, d3 = 0.001308;
+  let x = t - (c0 + c1 * t + c2 * t * t) / (1 + d1 * t + d2 * t * t + d3 * t * t * t);
+  return p < 0.5 ? -x : x;
+}
+
+function corrHelperStrength01(v) {
+  if (v >= 0.5) return 'Strong';
+  if (v >= 0.3) return 'Moderate';
+  if (v >= 0.1) return 'Weak';
+  if (v >= 0.05) return 'Very weak';
+  return 'No association';
+}
+
+function corrHelperStrengthSigned(v) {
+  const a = Math.abs(v);
+  if (a >= 0.9) return 'Very strong';
+  if (a >= 0.7) return 'Strong';
+  if (a >= 0.5) return 'Moderate';
+  if (a >= 0.3) return 'Weak';
+  if (a >= 0.1) return 'Very weak';
+  return 'No correlation';
+}
+
+function corrHelperColorClass(v) {
+  return v > 0.1 ? 'correlation-positive' : v < -0.1 ? 'correlation-negative' : 'correlation-neutral';
+}
+
+function corrHelperColorClass01(v) {
+  return v >= 0.3 ? 'correlation-positive' : v >= 0.1 ? 'correlation-neutral' : 'correlation-neutral';
+}
+
+function corrRenderScatter(pairs, xIdx, yIdx, st, dotColor) {
+  const width = 400, height = 300, padding = 40;
+  const xMin = Math.min(...pairs.map(p => p.x));
+  const xMax = Math.max(...pairs.map(p => p.x));
+  const yMin = Math.min(...pairs.map(p => p.y));
+  const yMax = Math.max(...pairs.map(p => p.y));
+  const xScale = (v) => padding + ((v - xMin) / (xMax - xMin || 1)) * (width - 2 * padding);
+  const yScale = (v) => height - padding - ((v - yMin) / (yMax - yMin || 1)) * (height - 2 * padding);
+  let svg = '<svg class="correlation-scatter" viewBox="0 0 ' + width + ' ' + height + '">';
+  svg += '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+  svg += '<line x1="' + padding + '" y1="' + padding + '" x2="' + padding + '" y2="' + (height - padding) + '" stroke="#ccc" stroke-width="1"/>';
+  svg += '<text x="' + (width / 2) + '" y="' + (height - 5) + '" text-anchor="middle" font-size="12">' + escapeHtml(st.columnNames[xIdx]) + '</text>';
+  svg += '<text x="15" y="' + (height / 2) + '" text-anchor="middle" font-size="12" transform="rotate(-90 15 ' + (height / 2) + ')">' + escapeHtml(st.columnNames[yIdx]) + '</text>';
+  pairs.forEach(p => {
+    svg += '<circle cx="' + xScale(p.x) + '" cy="' + yScale(p.y) + '" r="4" fill="' + (dotColor || '#3b82f6') + '" opacity="0.7"/>';
+  });
+  svg += '</svg>';
+  return svg;
+}
+
+function corrRenderBar01(value, width) {
+  width = width || 300;
+  const barHeight = 30;
+  let svg = '<svg viewBox="0 0 ' + width + ' ' + (barHeight + 20) + '" style="width: ' + width + 'px; height: 50px;">';
+  svg += '<rect x="0" y="0" width="' + width + '" height="' + barHeight + '" fill="#e5e7eb" rx="4"/>';
+  svg += '<rect x="0" y="0" width="' + (Math.min(1, Math.max(0, value)) * width) + '" height="' + barHeight + '" fill="#10b981" rx="4"/>';
+  svg += '<text x="10" y="' + (barHeight + 15) + '" font-size="11" fill="#666">0</text>';
+  svg += '<text x="' + (width - 10) + '" y="' + (barHeight + 15) + '" font-size="11" fill="#666" text-anchor="end">1</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+function corrGetResultEl(st) {
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
+  return corrView ? corrView.querySelector('.correlation-result') : null;
+}
+
+function corrStoreResult(st, method, value, xIdx, yIdx) {
+  getUiState(st).analysisResult = { method: method, value: value, columns: [st.columnNames[xIdx], st.columnNames[yIdx]], timestamp: Date.now() };
+}
+
 function calculateCorrelation(st = state) {
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   if (!corrView) return;
   
   // Check for empty items
@@ -13588,6 +14119,810 @@ function calculateCorrelation(st = state) {
     }
     
     renderPhiCorrelation(pairs, xIdx, yIdx, st);
+  } else if (effectiveMethod === 'eta') {
+    const isCatX = !isNumericX && !isTemporalX;
+    const isCatY = !isNumericY && !isTemporalY;
+    const isNumX = isNumericX || isTemporalX;
+    const isNumY = isNumericY || isTemporalY;
+    if (!((isCatX && isNumY) || (isCatY && isNumX))) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Eta Squared requires one categorical and one numeric column</p>';
+      return;
+    }
+    const catIdx = isCatX ? xIdx : yIdx;
+    const numIdx = isCatX ? yIdx : xIdx;
+    const numType = isCatX ? yType : xType;
+    const groups = {};
+    const allVals = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const cat = row[catIdx] !== null ? String(row[catIdx]) : null;
+      const num = toNumeric(row[numIdx], numType);
+      if (cat !== null && num !== null) {
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(num);
+        allVals.push(num);
+      }
+    });
+    if (allVals.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Eta Squared</p>';
+      return;
+    }
+    const grandMean = allVals.reduce((s, v) => s + v, 0) / allVals.length;
+    let ssBetween = 0;
+    let ssTotal = allVals.reduce((s, v) => s + (v - grandMean) ** 2, 0);
+    Object.values(groups).forEach(g => {
+      const gMean = g.reduce((s, v) => s + v, 0) / g.length;
+      ssBetween += g.length * (gMean - grandMean) ** 2;
+    });
+    const eta2 = ssTotal === 0 ? 0 : ssBetween / ssTotal;
+    const strength = corrHelperStrength01(eta2);
+    corrStoreResult(st, 'eta', eta2, xIdx, yIdx);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Eta Squared (η²)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass01(eta2) + '">' + eta2.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' effect size</div>';
+    html += '<div class="correlation-label">n = ' + allVals.length + ' | Groups: ' + Object.keys(groups).length + '</div>';
+    html += '<div class="correlation-note">Eta Squared measures proportion of variance in the numeric variable explained by the categorical variable (ANOVA effect size).</div>';
+    html += corrRenderBar01(eta2);
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'mutual_info') {
+    const bins = 10;
+    function discretize(vals, type) {
+      if (['int', 'float'].includes(type) || ['date', 'datetime', 'time'].includes(type)) {
+        const nums = vals.map(v => toNumeric(v, type)).filter(v => v !== null);
+        if (nums.length === 0) return vals.map(() => null);
+        const mn = Math.min(...nums);
+        const mx = Math.max(...nums);
+        const range = mx - mn || 1;
+        return vals.map(v => {
+          const n = toNumeric(v, type);
+          if (n === null) return null;
+          return String(Math.min(bins - 1, Math.floor((n - mn) / range * bins)));
+        });
+      }
+      return vals.map(v => v !== null ? String(v) : null);
+    }
+    const rawX = getSortedIndices(st).map(i => st.relation.items[i][xIdx]);
+    const rawY = getSortedIndices(st).map(i => st.relation.items[i][yIdx]);
+    const dX = discretize(rawX, xType);
+    const dY = discretize(rawY, yType);
+    const joint = {};
+    const margX = {};
+    const margY = {};
+    let total = 0;
+    for (let i = 0; i < dX.length; i++) {
+      if (dX[i] === null || dY[i] === null) continue;
+      const key = dX[i] + '|' + dY[i];
+      joint[key] = (joint[key] || 0) + 1;
+      margX[dX[i]] = (margX[dX[i]] || 0) + 1;
+      margY[dY[i]] = (margY[dY[i]] || 0) + 1;
+      total++;
+    }
+    if (total < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Mutual Information</p>';
+      return;
+    }
+    let mi = 0;
+    for (const key of Object.keys(joint)) {
+      const parts = key.split('|');
+      const pxy = joint[key] / total;
+      const px = margX[parts[0]] / total;
+      const py = margY[parts[1]] / total;
+      if (pxy > 0 && px > 0 && py > 0) {
+        mi += pxy * Math.log(pxy / (px * py));
+      }
+    }
+    corrStoreResult(st, 'mutual_info', mi, xIdx, yIdx);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Mutual Information (MI)</div>';
+    html += '<div class="correlation-value correlation-positive">' + mi.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + (mi < 0.01 ? 'Near independent' : mi < 0.1 ? 'Weak dependence' : mi < 0.3 ? 'Moderate dependence' : 'Strong dependence') + '</div>';
+    html += '<div class="correlation-label">n = ' + total + '</div>';
+    html += '<div class="correlation-note">Mutual Information measures general dependence between variables. Works for any data type. Value range: 0 to ∞.</div>';
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'distance_corr') {
+    if (!(isNumericX || isTemporalX) || !(isNumericY || isTemporalY)) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Distance Correlation requires two numeric columns</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) pairs.push({ x, y });
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Distance Correlation</p>';
+      return;
+    }
+    const n = pairs.length;
+    function distMatrix(vals) {
+      const d = [];
+      for (let i = 0; i < n; i++) {
+        d[i] = [];
+        for (let j = 0; j < n; j++) d[i][j] = Math.abs(vals[i] - vals[j]);
+      }
+      return d;
+    }
+    function doubleCenter(d) {
+      const rowMeans = d.map(row => row.reduce((s, v) => s + v, 0) / n);
+      const colMeans = [];
+      for (let j = 0; j < n; j++) {
+        let s = 0;
+        for (let i = 0; i < n; i++) s += d[i][j];
+        colMeans.push(s / n);
+      }
+      const grandMean = rowMeans.reduce((s, v) => s + v, 0) / n;
+      const a = [];
+      for (let i = 0; i < n; i++) {
+        a[i] = [];
+        for (let j = 0; j < n; j++) {
+          a[i][j] = d[i][j] - rowMeans[i] - colMeans[j] + grandMean;
+        }
+      }
+      return a;
+    }
+    const aX = doubleCenter(distMatrix(pairs.map(p => p.x)));
+    const aY = doubleCenter(distMatrix(pairs.map(p => p.y)));
+    let dCovXY = 0, dCovXX = 0, dCovYY = 0;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        dCovXY += aX[i][j] * aY[i][j];
+        dCovXX += aX[i][j] * aX[i][j];
+        dCovYY += aY[i][j] * aY[i][j];
+      }
+    }
+    dCovXY /= (n * n);
+    dCovXX /= (n * n);
+    dCovYY /= (n * n);
+    const dCor = (dCovXX === 0 || dCovYY === 0) ? 0 : Math.sqrt(dCovXY / Math.sqrt(dCovXX * dCovYY));
+    corrStoreResult(st, 'distance_corr', dCor, xIdx, yIdx);
+    const strength = corrHelperStrength01(dCor);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Distance Correlation (dCor)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass01(dCor) + '">' + dCor.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' dependence</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Distance Correlation detects any type of dependence (linear and non-linear). dCor=0 iff variables are independent.</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#8b5cf6');
+    html += corrRenderBar01(dCor);
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'polyserial') {
+    const isOrdX = ['int', 'select'].includes(xType);
+    const isOrdY = ['int', 'select'].includes(yType);
+    const isContX = xType === 'float' || isTemporalX;
+    const isContY = yType === 'float' || isTemporalY;
+    if (!((isOrdX && isContY) || (isOrdY && isContX))) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Polyserial requires one ordinal (int/select) and one continuous (float/temporal) column</p>';
+      return;
+    }
+    const ordIdx = isOrdX ? xIdx : yIdx;
+    const contIdx = isOrdX ? yIdx : xIdx;
+    const contType = isOrdX ? yType : xType;
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const ordVal = row[ordIdx];
+      const contVal = toNumeric(row[contIdx], contType);
+      if (ordVal !== null && contVal !== null) {
+        pairs.push({ ord: typeof ordVal === 'number' ? ordVal : parseFloat(ordVal) || 0, cont: contVal });
+      }
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Polyserial Correlation</p>';
+      return;
+    }
+    const ordRanks = corrHelperRank(pairs.map(p => p.ord));
+    const n = pairs.length;
+    const sumR = ordRanks.reduce((s, v) => s + v, 0);
+    const sumC = pairs.reduce((s, p) => s + p.cont, 0);
+    const sumRC = ordRanks.reduce((s, r, i) => s + r * pairs[i].cont, 0);
+    const sumR2 = ordRanks.reduce((s, r) => s + r * r, 0);
+    const sumC2 = pairs.reduce((s, p) => s + p.cont * p.cont, 0);
+    const num = n * sumRC - sumR * sumC;
+    const den = Math.sqrt((n * sumR2 - sumR * sumR) * (n * sumC2 - sumC * sumC));
+    const rps = den === 0 ? 0 : num / den;
+    corrStoreResult(st, 'polyserial', rps, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(rps);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Polyserial Correlation (r<sub>ps</sub>)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(rps) + '">' + rps.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (rps > 0 ? 'positive' : rps < 0 ? 'negative' : '') + ' correlation</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Polyserial measures association between an ordinal and a continuous variable (approximated via rank-Pearson).</div>';
+    const scatterPairs = pairs.map((p, i) => ({ x: ordRanks[i], y: p.cont }));
+    html += corrRenderScatter(scatterPairs, ordIdx, contIdx, st, '#06b6d4');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'polychoric') {
+    const isOrdX = ['int', 'select'].includes(xType);
+    const isOrdY = ['int', 'select'].includes(yType);
+    if (!isOrdX || !isOrdY) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Polychoric requires both columns to be ordinal (int/select)</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = row[xIdx];
+      const y = row[yIdx];
+      if (x !== null && y !== null) {
+        pairs.push({ x: typeof x === 'number' ? x : parseFloat(x) || 0, y: typeof y === 'number' ? y : parseFloat(y) || 0 });
+      }
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Polychoric Correlation</p>';
+      return;
+    }
+    const n = pairs.length;
+    const xRanks = corrHelperRank(pairs.map(p => p.x));
+    const yRanks = corrHelperRank(pairs.map(p => p.y));
+    const xNorm = xRanks.map(r => corrHelperNormalInvApprox(r / (n + 1)));
+    const yNorm = yRanks.map(r => corrHelperNormalInvApprox(r / (n + 1)));
+    const meanXN = xNorm.reduce((s, v) => s + v, 0) / n;
+    const meanYN = yNorm.reduce((s, v) => s + v, 0) / n;
+    const num = xNorm.reduce((s, v, i) => s + (v - meanXN) * (yNorm[i] - meanYN), 0);
+    const denX = Math.sqrt(xNorm.reduce((s, v) => s + (v - meanXN) ** 2, 0));
+    const denY = Math.sqrt(yNorm.reduce((s, v) => s + (v - meanYN) ** 2, 0));
+    const rpc = (denX === 0 || denY === 0) ? 0 : num / (denX * denY);
+    corrStoreResult(st, 'polychoric', rpc, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(rpc);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Polychoric Correlation (r<sub>pc</sub>)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(rpc) + '">' + rpc.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (rpc > 0 ? 'positive' : rpc < 0 ? 'negative' : '') + ' correlation</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Polychoric estimates the correlation between two ordinal variables (approximated via rank-normalized Pearson).</div>';
+    const scatterPairs = xNorm.map((v, i) => ({ x: v, y: yNorm[i] }));
+    html += corrRenderScatter(scatterPairs, xIdx, yIdx, st, '#ec4899');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'tetrachoric') {
+    const uniqueX = new Set();
+    const uniqueY = new Set();
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      if (row[xIdx] !== null) uniqueX.add(String(row[xIdx]));
+      if (row[yIdx] !== null) uniqueY.add(String(row[yIdx]));
+    });
+    if (uniqueX.size !== 2 || uniqueY.size !== 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Tetrachoric requires both columns to be binary (exactly 2 unique values)</p>';
+      return;
+    }
+    const xVals = [...uniqueX];
+    const yVals = [...uniqueY];
+    let a = 0, b = 0, c = 0, d = 0;
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const xv = String(row[xIdx]);
+      const yv = String(row[yIdx]);
+      if (xv === xVals[0] && yv === yVals[0]) a++;
+      else if (xv === xVals[0] && yv === yVals[1]) b++;
+      else if (xv === xVals[1] && yv === yVals[0]) c++;
+      else if (xv === xVals[1] && yv === yVals[1]) d++;
+    });
+    const n = a + b + c + d;
+    if (n < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Tetrachoric Correlation</p>';
+      return;
+    }
+    let rt;
+    if (a * d === 0 && b * c === 0) rt = 0;
+    else if (b * c === 0) rt = 1;
+    else {
+      const ratio = Math.sqrt((a * d) / (b * c));
+      rt = Math.cos(Math.PI / (1 + ratio));
+    }
+    corrStoreResult(st, 'tetrachoric', rt, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(rt);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Tetrachoric Correlation (r<sub>tet</sub>)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(rt) + '">' + rt.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (rt > 0 ? 'positive' : rt < 0 ? 'negative' : '') + ' correlation</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Tetrachoric estimates the correlation between two binary variables assuming underlying bivariate normal.</div>';
+    html += '<table class="phi-table">';
+    html += '<tr><th></th><th>' + escapeHtml(yVals[0]) + '</th><th>' + escapeHtml(yVals[1]) + '</th></tr>';
+    html += '<tr><th>' + escapeHtml(xVals[0]) + '</th><td>' + a + '</td><td>' + b + '</td></tr>';
+    html += '<tr><th>' + escapeHtml(xVals[1]) + '</th><td>' + c + '</td><td>' + d + '</td></tr>';
+    html += '</table>';
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'biserial') {
+    if (!((isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX)))) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Biserial requires one binary and one continuous column</p>';
+      return;
+    }
+    const binIdx = isBinaryX ? xIdx : yIdx;
+    const contIdx = isBinaryX ? yIdx : xIdx;
+    const contType = isBinaryX ? yType : xType;
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const bv = row[binIdx];
+      const cv = toNumeric(row[contIdx], contType);
+      if (bv !== null && cv !== null) pairs.push({ b: bv ? 1 : 0, c: cv });
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Biserial Correlation</p>';
+      return;
+    }
+    const n = pairs.length;
+    const g0 = pairs.filter(p => p.b === 0).map(p => p.c);
+    const g1 = pairs.filter(p => p.b === 1).map(p => p.c);
+    if (g0.length === 0 || g1.length === 0) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Both groups need at least one observation</p>';
+      return;
+    }
+    const m0 = g0.reduce((s, v) => s + v, 0) / g0.length;
+    const m1 = g1.reduce((s, v) => s + v, 0) / g1.length;
+    const allC = pairs.map(p => p.c);
+    const meanC = allC.reduce((s, v) => s + v, 0) / n;
+    const sdC = Math.sqrt(allC.reduce((s, v) => s + (v - meanC) ** 2, 0) / n) || 1;
+    const p1 = g1.length / n;
+    const p0 = g0.length / n;
+    const z = corrHelperNormalInvApprox(p0);
+    const phiZ = corrHelperNormalPdf(z);
+    const rb = phiZ === 0 ? 0 : ((m1 - m0) / sdC) * (p1 * p0) / phiZ;
+    corrStoreResult(st, 'biserial', rb, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(rb);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Biserial Correlation (r<sub>b</sub>)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(rb) + '">' + rb.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (rb > 0 ? 'positive' : rb < 0 ? 'negative' : '') + ' correlation</div>';
+    html += '<div class="correlation-label">n = ' + n + ' | Group 0: ' + g0.length + ' (mean=' + m0.toFixed(2) + ') | Group 1: ' + g1.length + ' (mean=' + m1.toFixed(2) + ')</div>';
+    html += '<div class="correlation-note">Biserial correlation estimates the correlation assuming the binary variable is a dichotomized normal variable.</div>';
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'rank_biserial') {
+    if (!((isBinaryX && (isNumericY || isTemporalY)) || (isBinaryY && (isNumericX || isTemporalX)))) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Rank-Biserial requires one binary and one continuous column</p>';
+      return;
+    }
+    const binIdx = isBinaryX ? xIdx : yIdx;
+    const contIdx = isBinaryX ? yIdx : xIdx;
+    const contType = isBinaryX ? yType : xType;
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const bv = row[binIdx];
+      const cv = toNumeric(row[contIdx], contType);
+      if (bv !== null && cv !== null) pairs.push({ b: bv ? 1 : 0, c: cv });
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Rank-Biserial Correlation</p>';
+      return;
+    }
+    const n = pairs.length;
+    const ranks = corrHelperRank(pairs.map(p => p.c));
+    const r0 = [], r1 = [];
+    ranks.forEach((r, i) => { if (pairs[i].b === 0) r0.push(r); else r1.push(r); });
+    if (r0.length === 0 || r1.length === 0) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Both groups need at least one observation</p>';
+      return;
+    }
+    const meanR0 = r0.reduce((s, v) => s + v, 0) / r0.length;
+    const meanR1 = r1.reduce((s, v) => s + v, 0) / r1.length;
+    const rrb = 2 * (meanR1 - meanR0) / n;
+    corrStoreResult(st, 'rank_biserial', rrb, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(rrb);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Rank-Biserial Correlation (r<sub>rb</sub>)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(rrb) + '">' + rrb.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (rrb > 0 ? 'positive' : rrb < 0 ? 'negative' : '') + ' correlation</div>';
+    html += '<div class="correlation-label">n = ' + n + ' | Group 0: ' + r0.length + ' | Group 1: ' + r1.length + '</div>';
+    html += '<div class="correlation-note">Rank-Biserial measures the rank-based effect size between a binary and continuous variable.</div>';
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'somers_d') {
+    if (!(isNumericX || isTemporalX || ['int', 'select'].includes(xType)) || !(isNumericY || isTemporalY || ['int', 'select'].includes(yType))) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Somers\' D requires both columns to be ordinal or numeric</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType) !== null ? toNumeric(row[xIdx], xType) : (typeof row[xIdx] === 'number' ? row[xIdx] : parseFloat(row[xIdx]));
+      const y = toNumeric(row[yIdx], yType) !== null ? toNumeric(row[yIdx], yType) : (typeof row[yIdx] === 'number' ? row[yIdx] : parseFloat(row[yIdx]));
+      if (x !== null && !isNaN(x) && y !== null && !isNaN(y)) pairs.push({ x, y });
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Somers\' D</p>';
+      return;
+    }
+    const n = pairs.length;
+    let C = 0, D = 0, Ty = 0;
+    for (let i = 0; i < n - 1; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const dx = pairs[j].x - pairs[i].x;
+        const dy = pairs[j].y - pairs[i].y;
+        if (dx * dy > 0) C++;
+        else if (dx * dy < 0) D++;
+        else if (dx !== 0 && dy === 0) Ty++;
+      }
+    }
+    const sd = (C + D + Ty) === 0 ? 0 : (C - D) / (C + D + Ty);
+    corrStoreResult(st, 'somers_d', sd, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(sd);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Somers\' D</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(sd) + '">' + sd.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (sd > 0 ? 'positive' : sd < 0 ? 'negative' : '') + ' association</div>';
+    html += '<div class="correlation-label">n = ' + n + ' | C=' + C + ' D=' + D + ' Ty=' + Ty + '</div>';
+    html += '<div class="correlation-note">Somers\' D is an asymmetric measure of ordinal association. D(Y|X) accounts for ties on Y.</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#f59e0b');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'gamma') {
+    if (!(isNumericX || isTemporalX || ['int', 'select'].includes(xType)) || !(isNumericY || isTemporalY || ['int', 'select'].includes(yType))) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Gamma requires both columns to be ordinal or numeric</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType) !== null ? toNumeric(row[xIdx], xType) : (typeof row[xIdx] === 'number' ? row[xIdx] : parseFloat(row[xIdx]));
+      const y = toNumeric(row[yIdx], yType) !== null ? toNumeric(row[yIdx], yType) : (typeof row[yIdx] === 'number' ? row[yIdx] : parseFloat(row[yIdx]));
+      if (x !== null && !isNaN(x) && y !== null && !isNaN(y)) pairs.push({ x, y });
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Gamma</p>';
+      return;
+    }
+    const n = pairs.length;
+    let C = 0, D = 0;
+    for (let i = 0; i < n - 1; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const prod = (pairs[j].x - pairs[i].x) * (pairs[j].y - pairs[i].y);
+        if (prod > 0) C++;
+        else if (prod < 0) D++;
+      }
+    }
+    const gamma = (C + D) === 0 ? 0 : (C - D) / (C + D);
+    corrStoreResult(st, 'gamma', gamma, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(gamma);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Goodman-Kruskal Gamma (γ)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(gamma) + '">' + gamma.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (gamma > 0 ? 'positive' : gamma < 0 ? 'negative' : '') + ' association</div>';
+    html += '<div class="correlation-label">n = ' + n + ' | C=' + C + ' D=' + D + '</div>';
+    html += '<div class="correlation-note">Goodman-Kruskal Gamma measures ordinal association ignoring ties. γ = (C-D)/(C+D).</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#14b8a6');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'lambda') {
+    const contingency = {};
+    const yCounts = {};
+    const xCounts = {};
+    let total = 0;
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
+      const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
+      if (xVal !== null && yVal !== null) {
+        if (!contingency[xVal]) contingency[xVal] = {};
+        contingency[xVal][yVal] = (contingency[xVal][yVal] || 0) + 1;
+        yCounts[yVal] = (yCounts[yVal] || 0) + 1;
+        xCounts[xVal] = (xCounts[xVal] || 0) + 1;
+        total++;
+      }
+    });
+    if (total < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Lambda</p>';
+      return;
+    }
+    const e1 = total - Math.max(...Object.values(yCounts));
+    let sumMaxPerX = 0;
+    for (const xVal of Object.keys(contingency)) {
+      sumMaxPerX += Math.max(...Object.values(contingency[xVal]));
+    }
+    const e2 = total - sumMaxPerX;
+    const lambda = e1 === 0 ? 0 : (e1 - e2) / e1;
+    corrStoreResult(st, 'lambda', lambda, xIdx, yIdx);
+    const strength = corrHelperStrength01(lambda);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Goodman-Kruskal Lambda (λ)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass01(lambda) + '">' + lambda.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' predictive association</div>';
+    html += '<div class="correlation-label">n = ' + total + ' | E1=' + e1 + ' E2=' + e2 + '</div>';
+    html += '<div class="correlation-note">Lambda measures proportional reduction in error predicting Y from X. λ=0 means X provides no predictive improvement.</div>';
+    html += corrRenderBar01(lambda);
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'tau_c') {
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = row[xIdx];
+      const y = row[yIdx];
+      if (x !== null && y !== null) {
+        pairs.push({ x: typeof x === 'number' ? x : parseFloat(x) || 0, y: typeof y === 'number' ? y : parseFloat(y) || 0 });
+      }
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Kendall\'s Tau-c</p>';
+      return;
+    }
+    const n = pairs.length;
+    const uniqueXSet = new Set(pairs.map(p => p.x));
+    const uniqueYSet = new Set(pairs.map(p => p.y));
+    const m = Math.min(uniqueXSet.size, uniqueYSet.size);
+    let C = 0, D = 0;
+    for (let i = 0; i < n - 1; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const prod = (pairs[j].x - pairs[i].x) * (pairs[j].y - pairs[i].y);
+        if (prod > 0) C++;
+        else if (prod < 0) D++;
+      }
+    }
+    const tauC = m <= 1 ? 0 : (2 * m * (C - D)) / (n * n * (m - 1));
+    corrStoreResult(st, 'tau_c', tauC, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(tauC);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Kendall\'s Tau-c (τ<sub>c</sub>)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(tauC) + '">' + tauC.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (tauC > 0 ? 'positive' : tauC < 0 ? 'negative' : '') + ' association</div>';
+    html += '<div class="correlation-label">n = ' + n + ' | m=' + m + ' | C=' + C + ' D=' + D + '</div>';
+    html += '<div class="correlation-note">Kendall\'s Tau-c adjusts for table size. Suitable for rectangular ordinal tables.</div>';
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'uncertainty') {
+    const joint = {};
+    const margX = {};
+    const margY = {};
+    let total = 0;
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const xVal = row[xIdx] !== null ? String(row[xIdx]) : null;
+      const yVal = row[yIdx] !== null ? String(row[yIdx]) : null;
+      if (xVal !== null && yVal !== null) {
+        const key = xVal + '|' + yVal;
+        joint[key] = (joint[key] || 0) + 1;
+        margX[xVal] = (margX[xVal] || 0) + 1;
+        margY[yVal] = (margY[yVal] || 0) + 1;
+        total++;
+      }
+    });
+    if (total < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Uncertainty Coefficient</p>';
+      return;
+    }
+    let hY = 0;
+    for (const c of Object.values(margY)) {
+      const p = c / total;
+      if (p > 0) hY -= p * Math.log(p);
+    }
+    let mi = 0;
+    for (const key of Object.keys(joint)) {
+      const parts = key.split('|');
+      const pxy = joint[key] / total;
+      const px = margX[parts[0]] / total;
+      const py = margY[parts[1]] / total;
+      if (pxy > 0 && px > 0 && py > 0) mi += pxy * Math.log(pxy / (px * py));
+    }
+    const u = hY === 0 ? 0 : mi / hY;
+    corrStoreResult(st, 'uncertainty', u, xIdx, yIdx);
+    const strength = corrHelperStrength01(u);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Uncertainty Coefficient (Theil\'s U)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass01(u) + '">' + u.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' predictive association</div>';
+    html += '<div class="correlation-label">n = ' + total + ' | MI=' + mi.toFixed(4) + ' | H(Y)=' + hY.toFixed(4) + '</div>';
+    html += '<div class="correlation-note">Theil\'s U measures proportional reduction in entropy of Y given X. U = MI / H(Y).</div>';
+    html += corrRenderBar01(u);
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'hoeffding') {
+    if (!(isNumericX || isTemporalX) || !(isNumericY || isTemporalY)) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Hoeffding\'s D requires two numeric columns</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) pairs.push({ x, y });
+    });
+    if (pairs.length < 5) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Need at least 5 data pairs for Hoeffding\'s D</p>';
+      return;
+    }
+    const n = pairs.length;
+    const Rx = corrHelperRank(pairs.map(p => p.x));
+    const Ry = corrHelperRank(pairs.map(p => p.y));
+    let D1 = 0, D2 = 0, D3 = 0;
+    for (let i = 0; i < n; i++) {
+      let qi = 0;
+      for (let j = 0; j < n; j++) {
+        if (Rx[j] < Rx[i] && Ry[j] < Ry[i]) qi++;
+      }
+      qi += 1;
+      D1 += (qi - 1) * (qi - 2);
+      D2 += (Rx[i] - 1) * (Rx[i] - 2) * (Ry[i] - 1) * (Ry[i] - 2);
+      D3 += (Rx[i] - 2) * (Ry[i] - 2) * (qi - 1);
+    }
+    const hoefD = 30 * ((n - 2) * (n - 3) * D1 + D2 - 2 * (n - 2) * D3) / (n * (n - 1) * (n - 2) * (n - 3) * (n - 4));
+    corrStoreResult(st, 'hoeffding', hoefD, xIdx, yIdx);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Hoeffding\'s D</div>';
+    html += '<div class="correlation-value ' + (hoefD > 0.05 ? 'correlation-positive' : 'correlation-neutral') + '">' + hoefD.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + (hoefD > 0.1 ? 'Strong dependence' : hoefD > 0.05 ? 'Moderate dependence' : hoefD > 0.01 ? 'Weak dependence' : 'Near independence') + '</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Hoeffding\'s D detects any type of dependence (not just monotonic). Range: -0.5 to 1. Values near 0 suggest independence.</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#7c3aed');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'blomqvist') {
+    if (!(isNumericX || isTemporalX) || !(isNumericY || isTemporalY)) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Blomqvist\'s Beta requires two numeric columns</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) pairs.push({ x, y });
+    });
+    if (pairs.length < 2) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data pairs for Blomqvist\'s Beta</p>';
+      return;
+    }
+    const n = pairs.length;
+    const xs = pairs.map(p => p.x).sort((a, b) => a - b);
+    const ys = pairs.map(p => p.y).sort((a, b) => a - b);
+    const medX = n % 2 === 0 ? (xs[n / 2 - 1] + xs[n / 2]) / 2 : xs[Math.floor(n / 2)];
+    const medY = n % 2 === 0 ? (ys[n / 2 - 1] + ys[n / 2]) / 2 : ys[Math.floor(n / 2)];
+    let concordant = 0;
+    pairs.forEach(p => {
+      if ((p.x >= medX && p.y >= medY) || (p.x < medX && p.y < medY)) concordant++;
+    });
+    const beta = (concordant / n) * 4 - 1;
+    corrStoreResult(st, 'blomqvist', beta, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(beta);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Blomqvist\'s Beta (β)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(beta) + '">' + beta.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (beta > 0 ? 'positive' : beta < 0 ? 'negative' : '') + ' median concordance</div>';
+    html += '<div class="correlation-label">n = ' + n + ' | Concordant with medians: ' + concordant + '</div>';
+    html += '<div class="correlation-note">Blomqvist\'s Beta measures concordance relative to medians. Robust to outliers. β = 4*(concordant/n) - 1.</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#0ea5e9');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'chatterjee') {
+    if (!(isNumericX || isTemporalX) || !(isNumericY || isTemporalY)) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Chatterjee\'s Xi requires two numeric columns</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) pairs.push({ x, y });
+    });
+    if (pairs.length < 3) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Need at least 3 data pairs for Chatterjee\'s Xi</p>';
+      return;
+    }
+    pairs.sort((a, b) => a.x - b.x);
+    const n = pairs.length;
+    const yRanks = corrHelperRank(pairs.map(p => p.y));
+    let sumDiff = 0;
+    for (let i = 0; i < n - 1; i++) {
+      sumDiff += Math.abs(yRanks[i + 1] - yRanks[i]);
+    }
+    const xi = 1 - (3 * sumDiff) / (n * n - 1);
+    corrStoreResult(st, 'chatterjee', xi, xIdx, yIdx);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Chatterjee\'s Xi (ξ)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass01(xi) + '">' + xi.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + (xi > 0.5 ? 'Strong' : xi > 0.3 ? 'Moderate' : xi > 0.1 ? 'Weak' : 'No') + ' functional dependence</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Chatterjee\'s Xi detects any functional relationship (not just linear/monotonic). ξ≈0 means no functional dependence, ξ≈1 means Y is a function of X.</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#d946ef');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'cosine_sim') {
+    if (!(isNumericX || isTemporalX) || !(isNumericY || isTemporalY)) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Cosine Similarity requires two numeric columns</p>';
+      return;
+    }
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = toNumeric(row[xIdx], xType);
+      const y = toNumeric(row[yIdx], yType);
+      if (x !== null && y !== null) pairs.push({ x, y });
+    });
+    if (pairs.length < 1) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data for Cosine Similarity</p>';
+      return;
+    }
+    const n = pairs.length;
+    const dotP = pairs.reduce((s, p) => s + p.x * p.y, 0);
+    const magX = Math.sqrt(pairs.reduce((s, p) => s + p.x * p.x, 0));
+    const magY = Math.sqrt(pairs.reduce((s, p) => s + p.y * p.y, 0));
+    const cosine = (magX === 0 || magY === 0) ? 0 : dotP / (magX * magY);
+    corrStoreResult(st, 'cosine_sim', cosine, xIdx, yIdx);
+    const strength = corrHelperStrengthSigned(cosine);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Cosine Similarity (cos θ)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass(cosine) + '">' + cosine.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' ' + (cosine > 0 ? 'positive' : cosine < 0 ? 'negative' : '') + ' similarity</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">Cosine Similarity measures the angle between two vectors. Unlike Pearson, it is not mean-centered.</div>';
+    html += corrRenderScatter(pairs, xIdx, yIdx, st, '#f97316');
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
+  } else if (effectiveMethod === 'jaccard') {
+    const pairs = [];
+    getSortedIndices(st).forEach(i => {
+      const row = st.relation.items[i];
+      const x = row[xIdx];
+      const y = row[yIdx];
+      if (x !== null && y !== null) pairs.push({ x: xType === 'boolean' ? (x ? 1 : 0) : String(x), y: yType === 'boolean' ? (y ? 1 : 0) : String(y) });
+    });
+    if (pairs.length < 1) {
+      if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Not enough data for Jaccard Index</p>';
+      return;
+    }
+    const n = pairs.length;
+    const isBoolMode = (isBinaryX || xType === 'boolean') && (isBinaryY || yType === 'boolean');
+    let jaccardVal;
+    if (isBoolMode) {
+      let n11 = 0, n10 = 0, n01 = 0;
+      pairs.forEach(p => {
+        const a = p.x == 1 || p.x === 'true' || p.x === true ? 1 : 0;
+        const b = p.y == 1 || p.y === 'true' || p.y === true ? 1 : 0;
+        if (a === 1 && b === 1) n11++;
+        else if (a === 1 && b === 0) n10++;
+        else if (a === 0 && b === 1) n01++;
+      });
+      const denom = n11 + n10 + n01;
+      jaccardVal = denom === 0 ? 0 : n11 / denom;
+    } else {
+      const setA = new Set(pairs.map(p => p.x));
+      const setB = new Set(pairs.map(p => p.y));
+      let intersection = 0;
+      setA.forEach(v => { if (setB.has(v)) intersection++; });
+      const unionSize = setA.size + setB.size - intersection;
+      jaccardVal = unionSize === 0 ? 0 : intersection / unionSize;
+    }
+    corrStoreResult(st, 'jaccard', jaccardVal, xIdx, yIdx);
+    const strength = corrHelperStrength01(jaccardVal);
+    let html = '<div class="correlation-chart">';
+    html += '<div class="correlation-label">Jaccard Index (J)</div>';
+    html += '<div class="correlation-value ' + corrHelperColorClass01(jaccardVal) + '">' + jaccardVal.toFixed(4) + '</div>';
+    html += '<div class="correlation-label">' + strength + ' similarity</div>';
+    html += '<div class="correlation-label">n = ' + n + '</div>';
+    html += '<div class="correlation-note">' + (isBoolMode ? 'Jaccard Index for binary variables: J = n11 / (n11 + n10 + n01).' : 'Jaccard Index measures set overlap between category values of X and Y.') + '</div>';
+    html += corrRenderBar01(jaccardVal);
+    html += '</div>';
+    const el2 = corrGetResultEl(st);
+    if (el2) el2.innerHTML = html;
   } else {
     const contingency = {};
     const xCounts = {};
@@ -13908,7 +15243,7 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '</div>';
   html += '</div>';
   
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
@@ -13919,6 +15254,7 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx, st = state) {
       renderKendallCorrelation(pairs, xIdx, yIdx, st);
     });
   }
+  corrStoreResult(st, 'pearson', r, xIdx, yIdx);
 }
 
 function renderSpearmanCorrelation(pairs, xIdx, yIdx, st = state) {
@@ -14028,7 +15364,7 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '</div>';
   html += '</div>';
   
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
@@ -14039,6 +15375,7 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx, st = state) {
       renderKendallCorrelation(pairs, xIdx, yIdx, st);
     });
   }
+  corrStoreResult(st, 'spearman', rho, xIdx, yIdx);
 }
 
 function renderKendallCorrelation(pairs, xIdx, yIdx, st = state) {
@@ -14131,13 +15468,14 @@ function renderKendallCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '</div>';
   html += '</div>';
   
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) {
     corrResultEl.innerHTML = html;
     corrResultEl.querySelector('.btn-alt-pearson')?.addEventListener('click', () => renderPearsonCorrelation(pairs, xIdx, yIdx, st));
     corrResultEl.querySelector('.btn-alt-spearman')?.addEventListener('click', () => renderSpearmanCorrelation(pairs, xIdx, yIdx, st));
   }
+  corrStoreResult(st, 'kendall', tau, xIdx, yIdx);
 }
 
 function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx, st = state) {
@@ -14146,7 +15484,7 @@ function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx
   const group1 = pairs.filter(p => p.binary === 1).map(p => p.numeric);
   
   if (group0.length === 0 || group1.length === 0) {
-    const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+    const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
     const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
     if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Both binary groups need at least one observation</p>';
     return;
@@ -14217,9 +15555,10 @@ function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx
   html += '</svg>';
   html += '</div>';
   
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) corrResultEl.innerHTML = html;
+  corrStoreResult(st, 'pointbiserial', rpb, xIdx, yIdx);
 }
 
 function renderPhiCorrelation(pairs, xIdx, yIdx, st = state) {
@@ -14270,9 +15609,10 @@ function renderPhiCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '</table>';
   html += '</div>';
   
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) corrResultEl.innerHTML = html;
+  corrStoreResult(st, 'phi', phi, xIdx, yIdx);
 }
 
 function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories, st = state) {
@@ -14303,13 +15643,14 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories, st = state) 
   
   html += '</div>';
   
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   const corrResultEl = corrView ? corrView.querySelector('.correlation-result') : el('.correlation-result');
   if (corrResultEl) corrResultEl.innerHTML = html;
+  corrStoreResult(st, 'cramers', v, xIdx, yIdx);
 }
 
 function analyzeAllPairs(st = state) {
-  const corrView = st.container ? st.container.querySelector('.view-correlation') : el('.view-correlation');
+  const corrView = st.container ? st.container.querySelector('.view-analysis .analysis-pairwise') : el('.view-analysis .analysis-pairwise');
   if (!corrView) return;
   
   const corrResultEl = corrView.querySelector('.correlation-result');
@@ -15181,7 +16522,7 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
 
 function runClustering(st = state) {
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
-    const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+    const diagramView = st.container ? st.container.querySelector('.view-analysis .analysis-clustering') : el('.view-analysis .analysis-clustering');
     const diagramResult = diagramView?.querySelector('.diagram-result');
     if (diagramResult) {
       diagramResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para executar clustering.</p>';
@@ -15203,7 +16544,7 @@ function runClustering(st = state) {
     }
   }
   
-  const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+  const diagramView = st.container ? st.container.querySelector('.view-analysis .analysis-clustering') : el('.view-analysis .analysis-clustering');
   const numClusters = parseInt(diagramView?.querySelector('.tsne-clusters')?.value) || 5;
   const perplexity = parseInt(diagramView?.querySelector('.tsne-perplexity')?.value) || 30;
   const iterations = parseInt(diagramView?.querySelector('.tsne-iterations')?.value) || 500;
@@ -15742,7 +17083,7 @@ function renderDiagram(st = state) {
 }
 
 function setupDiagramClickHandler(st = state) {
-  const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+  const diagramView = st.container ? st.container.querySelector('.view-analysis .analysis-clustering') : el('.view-analysis .analysis-clustering');
   const canvas = diagramView?.querySelector('.diagram-canvas');
   if (!canvas) return;
   
@@ -15906,6 +17247,7 @@ function initRelationInstance(container, relationData, options = {}) {
     show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
     hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
     hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
+    hierarchy_initial_value: parsedRelOptions.hierarchy_initial_value ?? DEFAULT_REL_OPTIONS.hierarchy_initial_value,
     single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
     label_field_top_down: parsedRelOptions.label_field_top_down ?? DEFAULT_REL_OPTIONS.label_field_top_down,
     OnDoubleClickAction: parsedRelOptions.OnDoubleClickAction ?? DEFAULT_REL_OPTIONS.OnDoubleClickAction,
@@ -15916,6 +17258,12 @@ function initRelationInstance(container, relationData, options = {}) {
     // Deserialize uiState from JSON (convert arrays to Sets)
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
+  
+  if (instanceState.rel_options.hierarchy_initial_value !== null && instanceState.rel_options.hierarchy_initial_value !== undefined) {
+    if (getUiState(instanceState).currentHierarchyValue === null) {
+      setCurrentHierarchyValue(instanceState, String(instanceState.rel_options.hierarchy_initial_value));
+    }
+  }
   
   // Initialize filteredIndices and sortedIndices
   const itemCount = (relationData.items || []).length;
@@ -16050,89 +17398,173 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
     </div>
     
-    <div class="view-correlation view-content" style="display: none;">
-      <div class="correlation-config">
-        <div class="correlation-section">
-          <div class="correlation-section-header">Analyze Single Pair</div>
-          <div class="correlation-config-row">
-            <label>Column X:</label>
-            <select class="corr-col-x pivot-select"></select>
+    <div class="view-analysis view-content" style="display: none;">
+      <div class="analysis-sub-tabs">
+        <button class="analysis-sub-tab active" data-subtab="pairwise">Pairwise</button>
+        <button class="analysis-sub-tab" data-subtab="matrix">Matrix</button>
+        <button class="analysis-sub-tab" data-subtab="clustering">Clustering</button>
+        <button class="analysis-sub-tab" data-subtab="multivariate">Multivariate</button>
+      </div>
+
+      <div class="analysis-subtab-content analysis-pairwise active">
+        <div class="correlation-config">
+          <div class="correlation-section">
+            <div class="correlation-section-header">Analyze Single Pair</div>
+            <div class="correlation-config-row">
+              <label>Column X:</label>
+              <select class="corr-col-x pivot-select"></select>
+            </div>
+            <div class="correlation-config-row">
+              <label>Column Y:</label>
+              <select class="corr-col-y pivot-select"></select>
+            </div>
+            <div class="correlation-config-row">
+              <label>Method:</label>
+              <select class="corr-method pivot-select">
+                <option value="auto">Auto-detect</option>
+                <option value="pearson">Pearson (linear, normal)</option>
+                <option value="spearman">Spearman (monotonic, robust)</option>
+                <option value="kendall">Kendall's Tau (ordinal, small n)</option>
+                <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
+                <option value="phi">Phi (binary × binary)</option>
+                <option value="cramers">Cramér's V (categorical)</option>
+                <option value="eta">Eta (η) Squared (ANOVA effect size)</option>
+                <option value="mutual_info">Mutual Information (MI)</option>
+                <option value="distance_corr">Distance Correlation (dCor)</option>
+                <option value="polyserial">Polyserial (ordinal × continuous)</option>
+                <option value="polychoric">Polychoric (ordinal × ordinal)</option>
+                <option value="tetrachoric">Tetrachoric (binary × binary)</option>
+                <option value="biserial">Biserial (binary × continuous)</option>
+                <option value="rank_biserial">Rank-Biserial</option>
+                <option value="somers_d">Somers' D</option>
+                <option value="gamma">Goodman-Kruskal Gamma</option>
+                <option value="lambda">Goodman-Kruskal Lambda</option>
+                <option value="tau_c">Kendall's Tau-c</option>
+                <option value="uncertainty">Uncertainty Coefficient (Theil's U)</option>
+                <option value="hoeffding">Hoeffding's D</option>
+                <option value="blomqvist">Blomqvist's Beta</option>
+                <option value="chatterjee">Chatterjee's Xi</option>
+                <option value="cosine_sim">Cosine Similarity</option>
+                <option value="jaccard">Jaccard Index</option>
+              </select>
+            </div>
+            <div class="correlation-actions">
+              <button class="btn-calculate-corr btn btn-primary btn-sm">Calculate</button>
+              <button class="btn-corr-help btn btn-outline btn-sm">?</button>
+            </div>
           </div>
-          <div class="correlation-config-row">
-            <label>Column Y:</label>
-            <select class="corr-col-y pivot-select"></select>
+          <div class="correlation-section">
+            <div class="correlation-section-header">Analyze All Pairs</div>
+            <div class="correlation-section-desc">Calculate correlations between all column combinations</div>
+            <button class="btn-corr-all btn btn-primary btn-sm">Analyze All Pairs</button>
           </div>
-          <div class="correlation-config-row">
-            <label>Method:</label>
-            <select class="corr-method pivot-select">
-              <option value="auto">Auto-detect</option>
-              <option value="pearson">Pearson (linear, normal)</option>
-              <option value="spearman">Spearman (monotonic, robust)</option>
-              <option value="kendall">Kendall's Tau (ordinal, small n)</option>
-              <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
-              <option value="phi">Phi (binary × binary)</option>
-              <option value="cramers">Cramér's V (categorical)</option>
+        </div>
+        <div class="correlation-help" style="display: none;">
+          <p><strong>Classic methods:</strong></p>
+          <ul>
+            <li><strong>Pearson (r)</strong> - Linear relationship. Assumes normality. Range: -1 to +1.</li>
+            <li><strong>Spearman (ρ)</strong> - Monotonic relationship. Robust to outliers. Range: -1 to +1.</li>
+            <li><strong>Kendall's Tau (τ)</strong> - Rank correlation. Better for small samples. Range: -1 to +1.</li>
+            <li><strong>Point-Biserial</strong> - Binary × numeric. Range: -1 to +1.</li>
+            <li><strong>Phi (φ)</strong> - Binary × binary. Range: -1 to +1.</li>
+            <li><strong>Cramér's V</strong> - Categorical association. Range: 0 to 1.</li>
+          </ul>
+          <p><strong>Extended methods:</strong></p>
+          <ul>
+            <li><strong>Eta (η²)</strong> - ANOVA effect size (categorical × numeric). Range: 0 to 1.</li>
+            <li><strong>Mutual Information</strong> - Any pair; detects any dependence. Range: 0 to ∞.</li>
+            <li><strong>Distance Correlation</strong> - Detects non-linear dependencies. Range: 0 to 1.</li>
+            <li><strong>Polyserial / Polychoric</strong> - Ordinal × continuous / ordinal × ordinal.</li>
+            <li><strong>Tetrachoric / Biserial</strong> - Binary data latent correlations.</li>
+            <li><strong>Somers' D / Gamma / Tau-c</strong> - Ordinal association measures.</li>
+            <li><strong>Lambda / Uncertainty</strong> - Categorical prediction measures.</li>
+            <li><strong>Hoeffding's D</strong> - Non-parametric dependence. Range: -0.5 to 1.</li>
+            <li><strong>Blomqvist's Beta</strong> - Median concordance. Range: -1 to 1.</li>
+            <li><strong>Chatterjee's Xi</strong> - Functional dependence. Range: 0 to 1.</li>
+            <li><strong>Cosine Similarity</strong> - Vector angle similarity. Range: -1 to 1.</li>
+            <li><strong>Jaccard Index</strong> - Set overlap for categorical. Range: 0 to 1.</li>
+          </ul>
+          <p><strong>Auto-detect logic:</strong></p>
+          <ul>
+            <li>Both binary → Phi</li>
+            <li>One binary + one numeric → Point-Biserial</li>
+            <li>Both numeric, n&lt;30 → Kendall's Tau</li>
+            <li>Both numeric, n≥30 → Pearson</li>
+            <li>Either categorical → Cramér's V</li>
+          </ul>
+        </div>
+        <div class="correlation-result"></div>
+      </div>
+
+      <div class="analysis-subtab-content analysis-matrix" style="display: none;">
+        <div class="matrix-config">
+          <div class="matrix-config-row">
+            <label>Type:</label>
+            <select class="matrix-type-select pivot-select">
+              <option value="correlation">Correlation Matrix</option>
+              <option value="mi">Mutual Information Matrix</option>
             </select>
           </div>
-          <div class="correlation-actions">
-            <button class="btn-calculate-corr btn btn-primary btn-sm">Calculate</button>
-            <button class="btn-corr-help btn btn-outline btn-sm">?</button>
+          <div class="matrix-config-row">
+            <label>Method:</label>
+            <select class="matrix-method-select pivot-select">
+              <option value="pearson">Pearson</option>
+              <option value="spearman">Spearman</option>
+              <option value="kendall">Kendall</option>
+            </select>
           </div>
+          <button class="btn-calculate-matrix btn btn-primary btn-sm">Calculate</button>
         </div>
-        <div class="correlation-section">
-          <div class="correlation-section-header">Analyze All Pairs</div>
-          <div class="correlation-section-desc">Calculate correlations between all column combinations</div>
-          <button class="btn-corr-all btn btn-primary btn-sm">Analyze All Pairs</button>
+        <div class="matrix-result"></div>
+      </div>
+
+      <div class="analysis-subtab-content analysis-clustering" style="display: none;">
+        <div class="diagram-info">
+          <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by cluster assignment. <strong>Recommended clusters:</strong> Use 3-10 clusters for most datasets. A common rule is sqrt(n/2) where n is the number of rows. Too few clusters may oversimplify patterns; too many may create noise.</p>
+        </div>
+        <div class="diagram-config">
+          <div class="diagram-config-row">
+            <label>Clusters:</label>
+            <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;">
+            <span class="diagram-field-help">Number of color groups. Range: 2-20. Recommended: sqrt(n/2) where n is the number of rows.</span>
+          </div>
+          <div class="diagram-config-row">
+            <label>Perplexity:</label>
+            <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;">
+            <span class="diagram-field-help">Balance between local and global structure. Range: 5-100. Typical: 5-50. Lower values focus on local clusters, higher values preserve global structure.</span>
+          </div>
+          <div class="diagram-config-row">
+            <label>Iterations:</label>
+            <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;">
+            <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
+          </div>
+          <button class="btn-run-clustering btn btn-primary btn-sm">Run t-SNE</button>
+          <button class="btn-clusters-as-column btn btn-outline btn-sm" disabled>Clusters as Column</button>
+          <span class="tsne-progress" style="display: none;">Calculating...</span>
+        </div>
+        <div class="diagram-container">
+          <canvas class="diagram-canvas" width="800" height="600"></canvas>
         </div>
       </div>
-      <div class="correlation-help" style="display: none;">
-        <p><strong>Choosing a correlation method:</strong></p>
-        <ul>
-          <li><strong>Pearson (r)</strong> - Linear relationship. Assumes normality. Best for continuous data. Range: -1 to +1.</li>
-          <li><strong>Spearman (ρ)</strong> - Monotonic relationship. No normality assumption. Robust to outliers. Range: -1 to +1.</li>
-          <li><strong>Kendall's Tau (τ)</strong> - Rank correlation. Better for small samples (n&lt;30) or ordinal data. More robust than Spearman. Range: -1 to +1.</li>
-          <li><strong>Point-Biserial (r<sub>pb</sub>)</strong> - When one variable is binary (0/1) and other is numeric. Range: -1 to +1.</li>
-          <li><strong>Phi (φ)</strong> - Association between two binary variables. Special case of Pearson for 2×2 tables. Range: -1 to +1.</li>
-          <li><strong>Cramér's V</strong> - Categorical association. Based on chi-squared. Range: 0 to 1 (no direction).</li>
-        </ul>
-        <p><strong>Auto-detect logic:</strong></p>
-        <ul>
-          <li>Both binary → Phi</li>
-          <li>One binary + one numeric → Point-Biserial</li>
-          <li>Both numeric, n&lt;30 → Kendall's Tau</li>
-          <li>Both numeric, n≥30 → Pearson</li>
-          <li>Either categorical → Cramér's V</li>
-        </ul>
-      </div>
-      <div class="correlation-result"></div>
-    </div>
-    
-    <div class="view-diagram view-content" style="display: none;">
-      <div class="diagram-info">
-        <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by cluster assignment. <strong>Recommended clusters:</strong> Use 3-10 clusters for most datasets. A common rule is sqrt(n/2) where n is the number of rows. Too few clusters may oversimplify patterns; too many may create noise.</p>
-      </div>
-      <div class="diagram-config">
-        <div class="diagram-config-row">
-          <label>Clusters:</label>
-          <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;">
-          <span class="diagram-field-help">Number of color groups. Range: 2-20. Recommended: sqrt(n/2) where n is the number of rows.</span>
+
+      <div class="analysis-subtab-content analysis-multivariate" style="display: none;">
+        <div class="multivariate-config">
+          <div class="multivariate-config-row">
+            <label>Method:</label>
+            <select class="multivariate-method-select pivot-select">
+              <option value="pca">PCA (Principal Component Analysis)</option>
+              <option value="factor">Factor Analysis</option>
+              <option value="canonical">Canonical Correlation</option>
+              <option value="manova">MANOVA</option>
+            </select>
+          </div>
+          <div class="multivariate-config-row pca-components-row">
+            <label>Components:</label>
+            <input type="number" class="multivariate-components pivot-select" value="2" min="1" max="10" style="width: 80px;">
+          </div>
+          <button class="btn-run-multivariate btn btn-primary btn-sm">Run Analysis</button>
         </div>
-        <div class="diagram-config-row">
-          <label>Perplexity:</label>
-          <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;">
-          <span class="diagram-field-help">Balance between local and global structure. Range: 5-100. Typical: 5-50. Lower values focus on local clusters, higher values preserve global structure.</span>
-        </div>
-        <div class="diagram-config-row">
-          <label>Iterations:</label>
-          <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;">
-          <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
-        </div>
-        <button class="btn-run-clustering btn btn-primary btn-sm">Run t-SNE</button>
-        <button class="btn-clusters-as-column btn btn-outline btn-sm" disabled>Clusters as Column</button>
-        <span class="tsne-progress" style="display: none;">Calculating...</span>
-      </div>
-      <div class="diagram-container">
-        <canvas class="diagram-canvas" width="800" height="600"></canvas>
+        <div class="multivariate-result"></div>
       </div>
     </div>
     
@@ -16326,10 +17758,8 @@ function switchViewForInstance(st, view) {
     renderCardsView(st);
   } else if (view === 'pivot') {
     renderPivot(st);
-  } else if (view === 'correlation') {
-    renderCorrelation(st);
-  } else if (view === 'diagram') {
-    initDiagramView(st);
+  } else if (view === 'analysis') {
+    renderAnalysis(st);
   } else if (view === 'ai') {
     renderAI(st);
   } else if (view === 'saved') {
@@ -16358,6 +17788,815 @@ function renderCorrelation(st = state) {
   initCorrelationConfig(st);
 }
 
+function renderAnalysis(st = state) {
+  const container = st.container || document.querySelector('.relation-container');
+  if (!container) return;
+  const analysisView = container.querySelector('.view-analysis');
+  if (!analysisView) return;
+
+  const subTabs = analysisView.querySelectorAll('.analysis-sub-tab');
+  const subContents = analysisView.querySelectorAll('.analysis-subtab-content');
+
+  subTabs.forEach(tab => {
+    const newTab = tab.cloneNode(true);
+    tab.parentNode.replaceChild(newTab, tab);
+    newTab.addEventListener('click', () => {
+      analysisView.querySelectorAll('.analysis-sub-tab').forEach(t => t.classList.remove('active'));
+      newTab.classList.add('active');
+      subContents.forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+      const target = analysisView.querySelector('.analysis-' + newTab.dataset.subtab);
+      if (target) { target.classList.add('active'); target.style.display = ''; }
+      const subtab = newTab.dataset.subtab;
+      if (subtab === 'pairwise') initCorrelationConfig(st);
+      else if (subtab === 'matrix') initMatrixView(st);
+      else if (subtab === 'clustering') initDiagramView(st);
+      else if (subtab === 'multivariate') initMultivariateView(st);
+    });
+  });
+
+  const activeTab = analysisView.querySelector('.analysis-sub-tab.active');
+  const activeSubtab = activeTab ? activeTab.dataset.subtab : 'pairwise';
+  if (activeSubtab === 'pairwise') initCorrelationConfig(st);
+  else if (activeSubtab === 'matrix') initMatrixView(st);
+  else if (activeSubtab === 'clustering') initDiagramView(st);
+  else if (activeSubtab === 'multivariate') initMultivariateView(st);
+}
+
+function initMatrixView(st = state) {
+  const container = st.container || document.querySelector('.relation-container');
+  if (!container) return;
+  const matrixView = container.querySelector('.view-analysis .analysis-matrix');
+  if (!matrixView) return;
+  const matrixResult = matrixView.querySelector('.matrix-result');
+  if (matrixResult && !matrixResult.innerHTML.trim()) {
+    matrixResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Select matrix type and method, then click Calculate to generate the correlation matrix.</p>';
+  }
+  const calcBtn = matrixView.querySelector('.btn-calculate-matrix');
+  if (calcBtn) {
+    const newBtn = calcBtn.cloneNode(true);
+    calcBtn.parentNode.replaceChild(newBtn, calcBtn);
+    newBtn.addEventListener('click', () => calculateMatrix(st));
+  }
+  const typeSelect = matrixView.querySelector('.matrix-type-select');
+  const methodRow = matrixView.querySelector('.matrix-method-select')?.closest('.matrix-config-row');
+  if (typeSelect && methodRow) {
+    typeSelect.addEventListener('change', () => {
+      methodRow.style.display = typeSelect.value === 'mi' ? 'none' : 'flex';
+    });
+  }
+}
+
+function matrixToNumeric(val, type) {
+  if (val === null || val === undefined) return null;
+  if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : (isNaN(Number(val)) ? null : Number(val));
+  if (['date', 'datetime'].includes(type)) { const d = new Date(val); return isNaN(d.getTime()) ? null : d.getTime(); }
+  if (type === 'time') { const parts = String(val).split(':'); if (parts.length >= 2) return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + (parseInt(parts[2]) || 0); return null; }
+  return null;
+}
+
+function matrixComputePearson(xArr, yArr) {
+  const n = xArr.length;
+  if (n < 2) return 0;
+  const sumX = xArr.reduce((s, v) => s + v, 0);
+  const sumY = yArr.reduce((s, v) => s + v, 0);
+  const sumXY = xArr.reduce((s, v, i) => s + v * yArr[i], 0);
+  const sumX2 = xArr.reduce((s, v) => s + v * v, 0);
+  const sumY2 = yArr.reduce((s, v) => s + v * v, 0);
+  const num = n * sumXY - sumX * sumY;
+  const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  return den === 0 ? 0 : num / den;
+}
+
+function matrixComputeSpearman(xArr, yArr) {
+  function rank(arr) {
+    const sorted = arr.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+    const ranks = new Array(arr.length);
+    let k = 0;
+    while (k < sorted.length) {
+      let l = k;
+      while (l < sorted.length && sorted[l].v === sorted[k].v) l++;
+      const avgRank = (k + 1 + l) / 2;
+      for (let m = k; m < l; m++) ranks[sorted[m].i] = avgRank;
+      k = l;
+    }
+    return ranks;
+  }
+  const xRanks = rank(xArr);
+  const yRanks = rank(yArr);
+  return matrixComputePearson(xRanks, yRanks);
+}
+
+function matrixComputeKendall(xArr, yArr) {
+  const n = xArr.length;
+  if (n < 2) return 0;
+  let concordant = 0, discordant = 0;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const product = (xArr[j] - xArr[i]) * (yArr[j] - yArr[i]);
+      if (product > 0) concordant++;
+      else if (product < 0) discordant++;
+    }
+  }
+  const totalPairs = (n * (n - 1)) / 2;
+  return totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
+}
+
+function matrixHeatmapColor(value, isCorrelation) {
+  if (isCorrelation) {
+    const clamped = Math.max(-1, Math.min(1, value));
+    let r, g, b;
+    if (clamped < 0) {
+      const t = 1 + clamped;
+      r = Math.round(0 + t * 255);
+      g = Math.round(0 + t * 255);
+      b = Math.round(255);
+    } else {
+      const t = clamped;
+      r = Math.round(255);
+      g = Math.round(255 - t * 255);
+      b = Math.round(255 - t * 255);
+    }
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  } else {
+    const t = Math.max(0, Math.min(1, value));
+    const r = Math.round(255);
+    const g = Math.round(255 - t * 255);
+    const b = Math.round(255 - t * 255);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+}
+
+function calculateMatrix(st = state) {
+  const container = st.container || document.querySelector('.relation-container');
+  if (!container) return;
+  const matrixView = container.querySelector('.view-analysis .analysis-matrix');
+  if (!matrixView) return;
+  const resultEl = matrixView.querySelector('.matrix-result');
+  if (!resultEl) return;
+  const typeSelect = matrixView.querySelector('.matrix-type-select');
+  const methodSelect = matrixView.querySelector('.matrix-method-select');
+  const matrixType = typeSelect ? typeSelect.value : 'correlation';
+  const method = methodSelect ? methodSelect.value : 'pearson';
+
+  const numericTypes = ['int', 'float', 'date', 'datetime', 'time'];
+  const numCols = [];
+  const colNames = st.columnNames || Object.keys(st.relation.columns);
+  const colTypes = st.columnTypes || Object.values(st.relation.columns);
+  for (let i = 0; i < colNames.length; i++) {
+    if (numericTypes.includes(colTypes[i])) {
+      numCols.push({ idx: i, name: colNames[i], type: colTypes[i] });
+    }
+  }
+  if (numCols.length < 2) {
+    resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 numeric columns for a matrix. Found: ' + numCols.length + '</p>';
+    return;
+  }
+
+  const indices = getSortedIndices(st);
+  const colData = numCols.map(col => {
+    return indices.map(i => matrixToNumeric(st.relation.items[i][col.idx], col.type));
+  });
+
+  const n = numCols.length;
+  const matrix = [];
+  for (let i = 0; i < n; i++) {
+    matrix[i] = [];
+    for (let j = 0; j < n; j++) {
+      if (i === j) {
+        matrix[i][j] = matrixType === 'correlation' ? 1 : 0;
+      } else if (j < i) {
+        matrix[i][j] = matrix[j][i];
+      } else {
+        const pairs = [];
+        const xData = [], yData = [];
+        for (let k = 0; k < colData[i].length; k++) {
+          if (colData[i][k] !== null && colData[j][k] !== null) {
+            xData.push(colData[i][k]);
+            yData.push(colData[j][k]);
+          }
+        }
+        if (xData.length < 2) {
+          matrix[i][j] = 0;
+        } else if (matrixType === 'mi') {
+          const bins = 10;
+          function discretizeArr(arr) {
+            const mn = Math.min(...arr);
+            const mx = Math.max(...arr);
+            const range = mx - mn || 1;
+            return arr.map(v => Math.min(bins - 1, Math.floor((v - mn) / range * bins)));
+          }
+          const dX = discretizeArr(xData);
+          const dY = discretizeArr(yData);
+          const joint = {}, margX = {}, margY = {};
+          let total = dX.length;
+          for (let k = 0; k < total; k++) {
+            const key = dX[k] + '|' + dY[k];
+            joint[key] = (joint[key] || 0) + 1;
+            margX[dX[k]] = (margX[dX[k]] || 0) + 1;
+            margY[dY[k]] = (margY[dY[k]] || 0) + 1;
+          }
+          let mi = 0;
+          for (const key of Object.keys(joint)) {
+            const parts = key.split('|');
+            const pxy = joint[key] / total;
+            const px = margX[parts[0]] / total;
+            const py = margY[parts[1]] / total;
+            if (pxy > 0 && px > 0 && py > 0) mi += pxy * Math.log(pxy / (px * py));
+          }
+          matrix[i][j] = mi;
+        } else {
+          if (method === 'spearman') matrix[i][j] = matrixComputeSpearman(xData, yData);
+          else if (method === 'kendall') matrix[i][j] = matrixComputeKendall(xData, yData);
+          else matrix[i][j] = matrixComputePearson(xData, yData);
+        }
+      }
+    }
+  }
+
+  if (matrixType === 'mi') {
+    let maxMi = 0;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (i !== j && matrix[i][j] > maxMi) maxMi = matrix[i][j];
+    if (maxMi === 0) maxMi = 1;
+    for (let i = 0; i < n; i++) matrix[i][i] = maxMi;
+  }
+
+  const isCorrelation = matrixType === 'correlation';
+  const maxMiVal = isCorrelation ? 1 : Math.max(...matrix.flat());
+
+  let html = '<div style="overflow-x:auto;"><table class="matrix-heatmap"><thead><tr><th></th>';
+  numCols.forEach(col => {
+    html += '<th class="rotated">' + escapeHtml(col.name) + '</th>';
+  });
+  html += '</tr></thead><tbody>';
+  for (let i = 0; i < n; i++) {
+    html += '<tr><th>' + escapeHtml(numCols[i].name) + '</th>';
+    for (let j = 0; j < n; j++) {
+      const val = matrix[i][j];
+      const normalizedVal = isCorrelation ? val : (maxMiVal > 0 ? val / maxMiVal : 0);
+      const bgColor = matrixHeatmapColor(isCorrelation ? val : normalizedVal, isCorrelation);
+      const textColor = Math.abs(isCorrelation ? val : normalizedVal) > 0.6 ? '#fff' : '#000';
+      const tooltip = escapeHtml(numCols[i].name) + ' × ' + escapeHtml(numCols[j].name) + ' = ' + val.toFixed(3);
+      html += '<td style="background:' + bgColor + ';color:' + textColor + ';" title="' + tooltip + '">' + val.toFixed(3) + '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+
+  resultEl.innerHTML = html;
+  getUiState(st).analysisResult = { type: 'matrix', matrixType, method, matrix, columns: numCols.map(c => c.name) };
+}
+
+function initMultivariateView(st = state) {
+  const container = st.container || document.querySelector('.relation-container');
+  if (!container) return;
+  const mvView = container.querySelector('.view-analysis .analysis-multivariate');
+  if (!mvView) return;
+  const mvResult = mvView.querySelector('.multivariate-result');
+  if (mvResult && !mvResult.innerHTML.trim()) {
+    mvResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Select a method and configure parameters, then click Run Analysis to perform multivariate analysis.</p>';
+  }
+  const runBtn = mvView.querySelector('.btn-run-multivariate');
+  if (runBtn) {
+    const newBtn = runBtn.cloneNode(true);
+    runBtn.parentNode.replaceChild(newBtn, runBtn);
+    newBtn.addEventListener('click', () => runMultivariate(st));
+  }
+  const methodSelect = mvView.querySelector('.multivariate-method-select');
+  if (methodSelect) {
+    const newSelect = methodSelect.cloneNode(true);
+    methodSelect.parentNode.replaceChild(newSelect, methodSelect);
+    newSelect.addEventListener('change', () => updateMultivariateUI(st));
+    updateMultivariateUI(st);
+  }
+}
+
+function updateMultivariateUI(st = state) {
+  const container = st.container || document.querySelector('.relation-container');
+  if (!container) return;
+  const mvView = container.querySelector('.view-analysis .analysis-multivariate');
+  if (!mvView) return;
+  const methodSelect = mvView.querySelector('.multivariate-method-select');
+  const method = methodSelect ? methodSelect.value : 'pca';
+  const componentsRow = mvView.querySelector('.pca-components-row');
+  if (componentsRow) componentsRow.style.display = (method === 'pca' || method === 'factor') ? 'flex' : 'none';
+
+  let canonicalConfig = mvView.querySelector('.canonical-config-dynamic');
+  let manovaConfig = mvView.querySelector('.manova-config-dynamic');
+  if (canonicalConfig) canonicalConfig.remove();
+  if (manovaConfig) manovaConfig.remove();
+
+  const colNames = st.columnNames || Object.keys(st.relation.columns);
+  const colTypes = st.columnTypes || Object.values(st.relation.columns);
+  const numericTypes = ['int', 'float', 'date', 'datetime', 'time'];
+  const numCols = [];
+  const catCols = [];
+  for (let i = 0; i < colNames.length; i++) {
+    if (numericTypes.includes(colTypes[i])) numCols.push({ idx: i, name: colNames[i] });
+    else if (!['id'].includes(colTypes[i])) catCols.push({ idx: i, name: colNames[i] });
+  }
+
+  const configArea = mvView.querySelector('.multivariate-config');
+  if (!configArea) return;
+
+  if (method === 'canonical') {
+    const div = document.createElement('div');
+    div.className = 'canonical-config-dynamic';
+    let optionsHtml = numCols.map(c => '<option value="' + c.idx + '">' + escapeHtml(c.name) + '</option>').join('');
+    div.innerHTML = '<div class="canonical-column-lists">' +
+      '<div class="canonical-column-list"><label>X Set (predictors):</label><select class="canonical-x-select" multiple>' + optionsHtml + '</select></div>' +
+      '<div class="canonical-column-list"><label>Y Set (outcomes):</label><select class="canonical-y-select" multiple>' + optionsHtml + '</select></div>' +
+      '</div>';
+    configArea.appendChild(div);
+  }
+
+  if (method === 'manova') {
+    const div = document.createElement('div');
+    div.className = 'manova-config-dynamic';
+    let catOptions = catCols.map(c => '<option value="' + c.idx + '">' + escapeHtml(c.name) + '</option>').join('');
+    div.innerHTML = '<div class="manova-group-config"><label>Grouping column:</label><select class="manova-group-select pivot-select">' + catOptions + '</select>' +
+      '<span class="text-muted-foreground" style="font-size:12px;">Numeric columns auto-selected (' + numCols.length + ' found)</span></div>';
+    configArea.appendChild(div);
+  }
+}
+
+function mvGetNumericData(st) {
+  const numericTypes = ['int', 'float', 'date', 'datetime', 'time'];
+  const colNames = st.columnNames || Object.keys(st.relation.columns);
+  const colTypes = st.columnTypes || Object.values(st.relation.columns);
+  const numCols = [];
+  for (let i = 0; i < colNames.length; i++) {
+    if (numericTypes.includes(colTypes[i])) numCols.push({ idx: i, name: colNames[i], type: colTypes[i] });
+  }
+  const indices = getSortedIndices(st);
+  const rows = [];
+  indices.forEach(i => {
+    const row = numCols.map(c => matrixToNumeric(st.relation.items[i][c.idx], c.type));
+    if (row.every(v => v !== null)) rows.push(row);
+  });
+  return { numCols, rows };
+}
+
+function mvStandardize(rows, p) {
+  const n = rows.length;
+  const means = new Array(p).fill(0);
+  const stds = new Array(p).fill(0);
+  for (let j = 0; j < p; j++) {
+    for (let i = 0; i < n; i++) means[j] += rows[i][j];
+    means[j] /= n;
+    for (let i = 0; i < n; i++) stds[j] += (rows[i][j] - means[j]) ** 2;
+    stds[j] = Math.sqrt(stds[j] / n) || 1;
+  }
+  const std = rows.map(row => row.map((v, j) => (v - means[j]) / stds[j]));
+  return { standardized: std, means, stds };
+}
+
+function mvCovarianceMatrix(data, p) {
+  const n = data.length;
+  const cov = [];
+  for (let i = 0; i < p; i++) {
+    cov[i] = new Array(p).fill(0);
+    for (let j = 0; j <= i; j++) {
+      let sum = 0;
+      for (let k = 0; k < n; k++) sum += data[k][i] * data[k][j];
+      cov[i][j] = sum / (n - 1 || 1);
+      if (i !== j) cov[j][i] = cov[i][j];
+    }
+  }
+  return cov;
+}
+
+function mvPowerIteration(matrix, p, maxIter) {
+  maxIter = maxIter || 200;
+  const A = matrix.map(r => [...r]);
+  const eigenvalues = [];
+  const eigenvectors = [];
+  for (let ev = 0; ev < p; ev++) {
+    let v = new Array(p);
+    for (let i = 0; i < p; i++) v[i] = Math.random() - 0.5;
+    let norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+    v = v.map(x => x / norm);
+    let eigenvalue = 0;
+    for (let iter = 0; iter < maxIter; iter++) {
+      const Av = new Array(p).fill(0);
+      for (let i = 0; i < p; i++) for (let j = 0; j < p; j++) Av[i] += A[i][j] * v[j];
+      eigenvalue = Math.sqrt(Av.reduce((s, x) => s + x * x, 0));
+      if (eigenvalue === 0) break;
+      const sign = Av.reduce((s, x, i) => s + x * v[i], 0) >= 0 ? 1 : -1;
+      eigenvalue *= sign;
+      v = Av.map(x => x / Math.abs(eigenvalue));
+      norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+      v = v.map(x => x / norm);
+    }
+    eigenvalues.push(eigenvalue);
+    eigenvectors.push([...v]);
+    for (let i = 0; i < p; i++) for (let j = 0; j < p; j++) A[i][j] -= eigenvalue * v[i] * v[j];
+  }
+  return { eigenvalues, eigenvectors };
+}
+
+function mvMatDet(A) {
+  const n = A.length;
+  if (n === 1) return A[0][0];
+  if (n === 2) return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+  const M = A.map(r => [...r]);
+  let det = 1;
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let row = col + 1; row < n; row++) if (Math.abs(M[row][col]) > Math.abs(M[maxRow][col])) maxRow = row;
+    if (maxRow !== col) { [M[col], M[maxRow]] = [M[maxRow], M[col]]; det *= -1; }
+    if (Math.abs(M[col][col]) < 1e-12) return 0;
+    det *= M[col][col];
+    for (let row = col + 1; row < n; row++) {
+      const factor = M[row][col] / M[col][col];
+      for (let j = col; j < n; j++) M[row][j] -= factor * M[col][j];
+    }
+  }
+  return det;
+}
+
+function mvMatAdd(A, B) {
+  return A.map((row, i) => row.map((v, j) => v + B[i][j]));
+}
+
+function mvMatTrace(A) {
+  let t = 0;
+  for (let i = 0; i < A.length; i++) t += A[i][i];
+  return t;
+}
+
+function mvMatInverse(A) {
+  const n = A.length;
+  const M = A.map((r, i) => {
+    const row = [...r];
+    for (let j = 0; j < n; j++) row.push(i === j ? 1 : 0);
+    return row;
+  });
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let row = col + 1; row < n; row++) if (Math.abs(M[row][col]) > Math.abs(M[maxRow][col])) maxRow = row;
+    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
+    if (Math.abs(M[col][col]) < 1e-12) return null;
+    const pivot = M[col][col];
+    for (let j = 0; j < 2 * n; j++) M[col][j] /= pivot;
+    for (let row = 0; row < n; row++) {
+      if (row === col) continue;
+      const factor = M[row][col];
+      for (let j = 0; j < 2 * n; j++) M[row][j] -= factor * M[col][j];
+    }
+  }
+  return M.map(r => r.slice(n));
+}
+
+function mvMatMul(A, B) {
+  const m = A.length, n = B[0].length, k = B.length;
+  const C = [];
+  for (let i = 0; i < m; i++) {
+    C[i] = new Array(n).fill(0);
+    for (let j = 0; j < n; j++) for (let l = 0; l < k; l++) C[i][j] += A[i][l] * B[l][j];
+  }
+  return C;
+}
+
+function runMultivariate(st = state) {
+  const container = st.container || document.querySelector('.relation-container');
+  if (!container) return;
+  const mvView = container.querySelector('.view-analysis .analysis-multivariate');
+  if (!mvView) return;
+  const resultEl = mvView.querySelector('.multivariate-result');
+  if (!resultEl) return;
+  const methodSelect = mvView.querySelector('.multivariate-method-select');
+  const method = methodSelect ? methodSelect.value : 'pca';
+  const componentsInput = mvView.querySelector('.multivariate-components');
+  const nComponents = componentsInput ? parseInt(componentsInput.value) || 2 : 2;
+
+  if (method === 'pca') runPCA(st, resultEl, nComponents);
+  else if (method === 'factor') runFactorAnalysis(st, resultEl, nComponents);
+  else if (method === 'canonical') runCanonicalCorrelation(st, resultEl, mvView);
+  else if (method === 'manova') runMANOVA(st, resultEl, mvView);
+}
+
+function runPCA(st, resultEl, nComponents) {
+  const { numCols, rows } = mvGetNumericData(st);
+  if (numCols.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 numeric columns.</p>'; return; }
+  if (rows.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 complete rows.</p>'; return; }
+  const p = numCols.length;
+  const nComp = Math.min(nComponents, p);
+  const { standardized } = mvStandardize(rows, p);
+  const covMatrix = mvCovarianceMatrix(standardized, p);
+  const { eigenvalues, eigenvectors } = mvPowerIteration(covMatrix, p, 300);
+
+  const totalVariance = eigenvalues.reduce((s, v) => s + Math.max(0, v), 0) || 1;
+  let html = '<div class="multivariate-section"><h4>Eigenvalues & Variance Explained</h4>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>Component</th><th>Eigenvalue</th><th>% Variance</th><th>Cumulative %</th></tr></thead><tbody>';
+  let cumulative = 0;
+  for (let i = 0; i < Math.min(nComp, p); i++) {
+    const pct = (Math.max(0, eigenvalues[i]) / totalVariance) * 100;
+    cumulative += pct;
+    html += '<tr><td>PC' + (i + 1) + '</td><td>' + eigenvalues[i].toFixed(4) + '</td><td>' + pct.toFixed(2) + '%</td><td>' + cumulative.toFixed(2) + '%</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  html += '<div class="multivariate-section"><h4>Scree Plot</h4><div class="scree-plot">';
+  const svgW = 400, svgH = 200, barW = Math.min(50, (svgW - 40) / p);
+  const maxEv = Math.max(...eigenvalues.map(v => Math.max(0, v)), 0.001);
+  html += '<svg width="' + svgW + '" height="' + svgH + '" style="border:1px solid var(--border-color,#e0e0e0);border-radius:4px;">';
+  for (let i = 0; i < p; i++) {
+    const barH = (Math.max(0, eigenvalues[i]) / maxEv) * (svgH - 40);
+    const x = 30 + i * (barW + 4);
+    const y = svgH - 20 - barH;
+    html += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + barH + '" fill="' + (i < nComp ? '#3b82f6' : '#d4d4d4') + '" rx="2"/>';
+    html += '<text x="' + (x + barW / 2) + '" y="' + (svgH - 6) + '" text-anchor="middle" font-size="10">PC' + (i + 1) + '</text>';
+    html += '<text x="' + (x + barW / 2) + '" y="' + (y - 4) + '" text-anchor="middle" font-size="9">' + eigenvalues[i].toFixed(2) + '</text>';
+  }
+  html += '</svg></div></div>';
+
+  html += '<div class="multivariate-section"><h4>Loading Matrix (Eigenvectors)</h4>';
+  html += '<table class="loading-matrix"><thead><tr><th>Variable</th>';
+  for (let i = 0; i < nComp; i++) html += '<th>PC' + (i + 1) + '</th>';
+  html += '</tr></thead><tbody>';
+  for (let j = 0; j < p; j++) {
+    html += '<tr><td style="text-align:left;font-weight:600;">' + escapeHtml(numCols[j].name) + '</td>';
+    for (let i = 0; i < nComp; i++) {
+      const val = eigenvectors[i][j];
+      const absVal = Math.abs(val);
+      const bg = absVal > 0.5 ? (val > 0 ? 'rgba(59,130,246,0.3)' : 'rgba(239,68,68,0.3)') : absVal > 0.3 ? (val > 0 ? 'rgba(59,130,246,0.15)' : 'rgba(239,68,68,0.15)') : 'transparent';
+      html += '<td style="background:' + bg + ';">' + val.toFixed(4) + '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+
+  if (nComp >= 2 && rows.length > 0) {
+    html += '<div class="multivariate-section"><h4>2D Component Scatter Plot</h4>';
+    const scores = standardized.map(row => {
+      const pc1 = row.reduce((s, v, j) => s + v * eigenvectors[0][j], 0);
+      const pc2 = row.reduce((s, v, j) => s + v * eigenvectors[1][j], 0);
+      return [pc1, pc2];
+    });
+    const minX = Math.min(...scores.map(s => s[0]));
+    const maxX = Math.max(...scores.map(s => s[0]));
+    const minY = Math.min(...scores.map(s => s[1]));
+    const maxY = Math.max(...scores.map(s => s[1]));
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const plotW = 500, plotH = 400, pad = 40;
+    html += '<svg width="' + plotW + '" height="' + plotH + '" style="border:1px solid var(--border-color,#e0e0e0);border-radius:4px;">';
+    html += '<line x1="' + pad + '" y1="' + (plotH - pad) + '" x2="' + (plotW - pad) + '" y2="' + (plotH - pad) + '" stroke="#ccc"/>';
+    html += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (plotH - pad) + '" stroke="#ccc"/>';
+    html += '<text x="' + (plotW / 2) + '" y="' + (plotH - 5) + '" text-anchor="middle" font-size="12">PC1</text>';
+    html += '<text x="12" y="' + (plotH / 2) + '" text-anchor="middle" font-size="12" transform="rotate(-90,12,' + (plotH / 2) + ')">PC2</text>';
+    scores.forEach(s => {
+      const cx = pad + ((s[0] - minX) / rangeX) * (plotW - 2 * pad);
+      const cy = (plotH - pad) - ((s[1] - minY) / rangeY) * (plotH - 2 * pad);
+      html += '<circle cx="' + cx + '" cy="' + cy + '" r="3" fill="#3b82f6" opacity="0.6"/>';
+    });
+    html += '</svg></div>';
+  }
+
+  resultEl.innerHTML = html;
+  getUiState(st).analysisResult = { type: 'pca', eigenvalues, eigenvectors, columns: numCols.map(c => c.name) };
+}
+
+function runFactorAnalysis(st, resultEl, nFactors) {
+  const { numCols, rows } = mvGetNumericData(st);
+  if (numCols.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 numeric columns.</p>'; return; }
+  if (rows.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 complete rows.</p>'; return; }
+  const p = numCols.length;
+  const nF = Math.min(nFactors, p);
+  const { standardized } = mvStandardize(rows, p);
+  const R = mvCovarianceMatrix(standardized, p);
+
+  let communalities = new Array(p).fill(0.5);
+  for (let iter = 0; iter < 50; iter++) {
+    const reduced = R.map((row, i) => row.map((v, j) => i === j ? communalities[i] : v));
+    const { eigenvalues, eigenvectors } = mvPowerIteration(reduced, p, 200);
+    const newComm = new Array(p).fill(0);
+    for (let j = 0; j < p; j++) {
+      for (let f = 0; f < nF; f++) {
+        const loading = eigenvectors[f][j] * Math.sqrt(Math.max(0, eigenvalues[f]));
+        newComm[j] += loading * loading;
+      }
+      newComm[j] = Math.min(1, newComm[j]);
+    }
+    let maxDiff = 0;
+    for (let j = 0; j < p; j++) maxDiff = Math.max(maxDiff, Math.abs(newComm[j] - communalities[j]));
+    communalities = newComm;
+    if (maxDiff < 0.001) break;
+  }
+
+  const reduced = R.map((row, i) => row.map((v, j) => i === j ? communalities[i] : v));
+  const { eigenvalues, eigenvectors } = mvPowerIteration(reduced, p, 300);
+  const loadings = [];
+  for (let f = 0; f < nF; f++) {
+    loadings[f] = eigenvectors[f].map(v => v * Math.sqrt(Math.max(0, eigenvalues[f])));
+  }
+
+  let html = '<div class="multivariate-section"><h4>Factor Loadings</h4>';
+  html += '<table class="loading-matrix"><thead><tr><th>Variable</th>';
+  for (let f = 0; f < nF; f++) html += '<th>Factor ' + (f + 1) + '</th>';
+  html += '<th>Communality</th></tr></thead><tbody>';
+  for (let j = 0; j < p; j++) {
+    html += '<tr><td style="text-align:left;font-weight:600;">' + escapeHtml(numCols[j].name) + '</td>';
+    for (let f = 0; f < nF; f++) {
+      const val = loadings[f][j];
+      const absVal = Math.abs(val);
+      const bg = absVal > 0.5 ? (val > 0 ? 'rgba(59,130,246,0.3)' : 'rgba(239,68,68,0.3)') : absVal > 0.3 ? (val > 0 ? 'rgba(59,130,246,0.15)' : 'rgba(239,68,68,0.15)') : 'transparent';
+      html += '<td style="background:' + bg + ';">' + val.toFixed(4) + '</td>';
+    }
+    html += '<td>' + communalities[j].toFixed(4) + '</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  html += '<div class="multivariate-section"><h4>Eigenvalues</h4>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>Factor</th><th>Eigenvalue</th></tr></thead><tbody>';
+  for (let f = 0; f < nF; f++) {
+    html += '<tr><td>Factor ' + (f + 1) + '</td><td>' + eigenvalues[f].toFixed(4) + '</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  resultEl.innerHTML = html;
+  getUiState(st).analysisResult = { type: 'factor', loadings, communalities, eigenvalues: eigenvalues.slice(0, nF), columns: numCols.map(c => c.name) };
+}
+
+function runCanonicalCorrelation(st, resultEl, mvView) {
+  const xSelect = mvView.querySelector('.canonical-x-select');
+  const ySelect = mvView.querySelector('.canonical-y-select');
+  if (!xSelect || !ySelect) { resultEl.innerHTML = '<p class="text-muted-foreground">Please select columns for X and Y sets.</p>'; return; }
+  const xIndices = Array.from(xSelect.selectedOptions).map(o => parseInt(o.value));
+  const yIndices = Array.from(ySelect.selectedOptions).map(o => parseInt(o.value));
+  if (xIndices.length === 0 || yIndices.length === 0) { resultEl.innerHTML = '<p class="text-muted-foreground">Please select at least one column in each set.</p>'; return; }
+  const overlap = xIndices.filter(v => yIndices.includes(v));
+  if (overlap.length > 0) { resultEl.innerHTML = '<p class="text-muted-foreground">X and Y sets must not share columns.</p>'; return; }
+
+  const colNames = st.columnNames || Object.keys(st.relation.columns);
+  const colTypes = st.columnTypes || Object.values(st.relation.columns);
+  const indices = getSortedIndices(st);
+  const allIndices = [...xIndices, ...yIndices];
+  const allTypes = allIndices.map(i => colTypes[i]);
+  const validRows = [];
+  indices.forEach(idx => {
+    const row = st.relation.items[idx];
+    const vals = allIndices.map((ci, k) => matrixToNumeric(row[ci], allTypes[k]));
+    if (vals.every(v => v !== null)) validRows.push(vals);
+  });
+  if (validRows.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Not enough complete rows.</p>'; return; }
+
+  const px = xIndices.length, py = yIndices.length;
+  const p = px + py;
+  const { standardized } = mvStandardize(validRows, p);
+
+  const xData = standardized.map(r => r.slice(0, px));
+  const yData = standardized.map(r => r.slice(px));
+
+  const Rxx = mvCovarianceMatrix(xData, px);
+  const Ryy = mvCovarianceMatrix(yData, py);
+  const n = xData.length;
+  const Rxy = [];
+  for (let i = 0; i < px; i++) {
+    Rxy[i] = new Array(py).fill(0);
+    for (let j = 0; j < py; j++) {
+      for (let k = 0; k < n; k++) Rxy[i][j] += xData[k][i] * yData[k][j];
+      Rxy[i][j] /= (n - 1 || 1);
+    }
+  }
+  const Ryx = Rxy[0].map((_, j) => Rxy.map(row => row[j]));
+
+  const RxxInv = mvMatInverse(Rxx);
+  const RyyInv = mvMatInverse(Ryy);
+  if (!RxxInv || !RyyInv) { resultEl.innerHTML = '<p class="text-muted-foreground">Singular correlation matrix. Cannot compute canonical correlations.</p>'; return; }
+
+  const M = mvMatMul(mvMatMul(RxxInv, Rxy), mvMatMul(RyyInv, Ryx));
+  const { eigenvalues } = mvPowerIteration(M, px, 300);
+  const canonCorrs = eigenvalues.map(v => Math.sqrt(Math.max(0, v)));
+
+  let html = '<div class="multivariate-section"><h4>Canonical Correlations</h4>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>#</th><th>Canonical Correlation</th><th>Canonical R²</th></tr></thead><tbody>';
+  const nCanon = Math.min(px, py);
+  for (let i = 0; i < nCanon; i++) {
+    html += '<tr><td>' + (i + 1) + '</td><td>' + canonCorrs[i].toFixed(4) + '</td><td>' + (canonCorrs[i] * canonCorrs[i]).toFixed(4) + '</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  html += '<div class="multivariate-section"><h4>Cross-Correlation Matrix (X × Y)</h4>';
+  html += '<table class="loading-matrix"><thead><tr><th></th>';
+  yIndices.forEach(yi => { html += '<th>' + escapeHtml(colNames[yi]) + '</th>'; });
+  html += '</tr></thead><tbody>';
+  xIndices.forEach((xi, i) => {
+    html += '<tr><td style="text-align:left;font-weight:600;">' + escapeHtml(colNames[xi]) + '</td>';
+    yIndices.forEach((yi, j) => {
+      const val = Rxy[i][j];
+      const absVal = Math.abs(val);
+      const bg = absVal > 0.5 ? (val > 0 ? 'rgba(59,130,246,0.3)' : 'rgba(239,68,68,0.3)') : absVal > 0.3 ? (val > 0 ? 'rgba(59,130,246,0.15)' : 'rgba(239,68,68,0.15)') : 'transparent';
+      html += '<td style="background:' + bg + ';">' + val.toFixed(4) + '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+
+  resultEl.innerHTML = html;
+  getUiState(st).analysisResult = { type: 'canonical', canonCorrs, xCols: xIndices.map(i => colNames[i]), yCols: yIndices.map(i => colNames[i]) };
+}
+
+function runMANOVA(st, resultEl, mvView) {
+  const groupSelect = mvView.querySelector('.manova-group-select');
+  if (!groupSelect) { resultEl.innerHTML = '<p class="text-muted-foreground">Please configure a grouping column.</p>'; return; }
+  const groupIdx = parseInt(groupSelect.value);
+  const colNames = st.columnNames || Object.keys(st.relation.columns);
+  const colTypes = st.columnTypes || Object.values(st.relation.columns);
+
+  const numericTypes = ['int', 'float'];
+  const numCols = [];
+  for (let i = 0; i < colNames.length; i++) {
+    if (numericTypes.includes(colTypes[i]) && i !== groupIdx) numCols.push({ idx: i, name: colNames[i], type: colTypes[i] });
+  }
+  if (numCols.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 numeric columns for MANOVA.</p>'; return; }
+
+  const indices = getSortedIndices(st);
+  const groups = {};
+  indices.forEach(i => {
+    const row = st.relation.items[i];
+    const g = row[groupIdx] !== null ? String(row[groupIdx]) : null;
+    if (!g) return;
+    const vals = numCols.map(c => matrixToNumeric(row[c.idx], c.type));
+    if (vals.some(v => v === null)) return;
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(vals);
+  });
+
+  const groupKeys = Object.keys(groups);
+  if (groupKeys.length < 2) { resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 groups for MANOVA.</p>'; return; }
+
+  const p = numCols.length;
+  const allRows = groupKeys.flatMap(g => groups[g]);
+  const N = allRows.length;
+  const grandMean = new Array(p).fill(0);
+  allRows.forEach(row => row.forEach((v, j) => { grandMean[j] += v; }));
+  grandMean.forEach((_, j) => { grandMean[j] /= N; });
+
+  const W = Array.from({ length: p }, () => new Array(p).fill(0));
+  const B = Array.from({ length: p }, () => new Array(p).fill(0));
+
+  groupKeys.forEach(g => {
+    const gRows = groups[g];
+    const ng = gRows.length;
+    const gMean = new Array(p).fill(0);
+    gRows.forEach(row => row.forEach((v, j) => { gMean[j] += v; }));
+    gMean.forEach((_, j) => { gMean[j] /= ng; });
+
+    gRows.forEach(row => {
+      for (let i = 0; i < p; i++) for (let j = 0; j < p; j++) W[i][j] += (row[i] - gMean[i]) * (row[j] - gMean[j]);
+    });
+
+    for (let i = 0; i < p; i++) for (let j = 0; j < p; j++) B[i][j] += ng * (gMean[i] - grandMean[i]) * (gMean[j] - grandMean[j]);
+  });
+
+  const T = mvMatAdd(W, B);
+  const detW = mvMatDet(W);
+  const detT = mvMatDet(T);
+  const wilksLambda = detT !== 0 ? detW / detT : 0;
+
+  const WInv = mvMatInverse(W);
+  let pillaisTrace = 0;
+  if (WInv) {
+    const WInvB = mvMatMul(WInv, B);
+    const { eigenvalues } = mvPowerIteration(WInvB, p, 200);
+    pillaisTrace = eigenvalues.reduce((s, ev) => s + Math.max(0, ev) / (1 + Math.max(0, ev)), 0);
+  }
+
+  const k = groupKeys.length;
+  const dfB = k - 1;
+  const dfW = N - k;
+
+  let html = '<div class="multivariate-section"><h4>MANOVA Summary</h4>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>Statistic</th><th>Value</th><th>Description</th></tr></thead><tbody>';
+  html += '<tr><td>Wilks\' Lambda (Λ)</td><td>' + wilksLambda.toFixed(6) + '</td><td>Closer to 0 = stronger group differences</td></tr>';
+  html += '<tr><td>Pillai\'s Trace</td><td>' + pillaisTrace.toFixed(6) + '</td><td>Higher values = stronger group differences</td></tr>';
+  html += '<tr><td>Number of groups</td><td>' + k + '</td><td></td></tr>';
+  html += '<tr><td>Total N</td><td>' + N + '</td><td></td></tr>';
+  html += '<tr><td>df (between)</td><td>' + dfB + '</td><td></td></tr>';
+  html += '<tr><td>df (within)</td><td>' + dfW + '</td><td></td></tr>';
+  html += '<tr><td>Numeric variables</td><td>' + p + '</td><td></td></tr>';
+  html += '</tbody></table></div>';
+
+  html += '<div class="multivariate-section"><h4>Group Means</h4>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>Group</th>';
+  numCols.forEach(c => { html += '<th>' + escapeHtml(c.name) + '</th>'; });
+  html += '<th>n</th></tr></thead><tbody>';
+  groupKeys.forEach(g => {
+    const gRows = groups[g];
+    html += '<tr><td>' + escapeHtml(g) + '</td>';
+    numCols.forEach((c, j) => {
+      const mean = gRows.reduce((s, r) => s + r[j], 0) / gRows.length;
+      html += '<td>' + mean.toFixed(3) + '</td>';
+    });
+    html += '<td>' + gRows.length + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+
+  resultEl.innerHTML = html;
+  getUiState(st).analysisResult = { type: 'manova', wilksLambda, pillaisTrace, groups: groupKeys, variables: numCols.map(c => c.name) };
+}
+
 function renderAI(st = state) {
   initAIView(st);
 }
@@ -16377,7 +18616,7 @@ function initDiagramView(st = state) {
   renderDiagram(st);
   setupDiagramClickHandler(st);
   
-  const diagramView = st.container ? st.container.querySelector('.view-diagram') : el('.view-diagram');
+  const diagramView = st.container ? st.container.querySelector('.view-analysis .analysis-clustering') : el('.view-analysis .analysis-clustering');
   if (!diagramView) return;
   
   const clusterBtn = diagramView.querySelector('.btn-run-clustering');
@@ -17230,7 +19469,7 @@ function init() {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
+    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
     "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form","Select One","Select Many","Choose Many","Import from File","Export to file","Integrity Check","Output State"],
     "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
     "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Multi Copy","Multi Delete","Group Edit","Merge"]
@@ -17262,7 +19501,7 @@ function init() {
         "single_item_mode": "dialog",
         "label_field_top_down": true,
         "OnDoubleClickAction": "view",
-        "general_view_options": ["Table", "Cards", "Pivot", "Correlation", "Diagram", "AI", "Saved", "Structure"],
+        "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
         "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form","Output State"],
         "general_line_options": ["View","Edit","Copy","New","New Fast","Delete","Paper Form"],
         "general_multi_options": ["Invert Page","Invert All","Remove Checked","Remove Unchecked","Multi View","Multi Edit","Multi Copy","Multi Delete","Group Edit","Merge"]

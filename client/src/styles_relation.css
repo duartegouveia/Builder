@@ -1615,6 +1615,39 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-top-color: #22c55e;
 }
 
+/* Violin Plot Toggle */
+.violin-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--space-2);
+  align-self: flex-start;
+}
+
+.violin-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+.violin-checkbox {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: rgba(138, 43, 226, 0.8);
+}
+
+.violin-info-badge {
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  background: rgba(138, 43, 226, 0.7);
+}
+
 /* Histogram Styles */
 .histogram-container {
   display: flex;
@@ -5379,3 +5412,156 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   margin-top: 16px;
   gap: 8px;
 }
+
+/* Hierarchy Breadcrumb Trail */
+.hierarchy-breadcrumb-cell {
+  padding: 4px 8px !important;
+}
+
+.hierarchy-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: 0.8125rem;
+}
+
+.hierarchy-breadcrumb-segment {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 3px);
+  color: var(--primary-700, #1d4ed8);
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.hierarchy-breadcrumb-segment:hover {
+  background: var(--primary-100, #dbeafe);
+  text-decoration: underline;
+}
+
+.hierarchy-breadcrumb-segment.active {
+  font-weight: 600;
+  color: var(--foreground, #1e293b);
+  background: var(--primary-50, #eff6ff);
+  cursor: default;
+}
+
+.hierarchy-breadcrumb-segment.active:hover {
+  text-decoration: none;
+}
+
+.hierarchy-breadcrumb-sep {
+  color: var(--muted-foreground, #94a3b8);
+  font-size: 0.75rem;
+}
+
+.hierarchy-info-badge {
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.hierarchy-show-all-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  font-size: 0.75rem;
+  color: var(--foreground, #1e293b);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 3px);
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--white, #fff);
+}
+
+.hierarchy-show-all-label:hover {
+  background: var(--slate-50, #f8fafc);
+  border-color: var(--primary-300, #93c5fd);
+}
+
+.hierarchy-show-all-checkbox {
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.analysis-sub-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  background: var(--muted, #f5f5f5);
+}
+.analysis-sub-tab {
+  padding: 6px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted-foreground, #666);
+  transition: background 0.15s, color 0.15s;
+}
+.analysis-sub-tab:hover {
+  background: var(--accent, #eee);
+  color: var(--foreground, #333);
+}
+.analysis-sub-tab.active {
+  background: var(--background, #fff);
+  color: var(--foreground, #333);
+  border-color: var(--border-color, #e0e0e0);
+  font-weight: 600;
+}
+.analysis-subtab-content {
+  display: none;
+  padding: 12px;
+}
+.analysis-subtab-content.active {
+  display: block;
+}
+.matrix-config, .multivariate-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: var(--muted, #f5f5f5);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.matrix-config-row, .multivariate-config-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.matrix-result, .multivariate-result {
+  padding: 8px;
+}
+
+.matrix-heatmap { border-collapse: collapse; font-size: 12px; }
+.matrix-heatmap th { padding: 4px 8px; font-weight: 600; font-size: 11px; white-space: nowrap; }
+.matrix-heatmap th.rotated { writing-mode: vertical-lr; transform: rotate(180deg); text-align: left; height: 100px; }
+.matrix-heatmap td { padding: 4px 8px; text-align: center; min-width: 50px; border: 1px solid var(--border-color, #e0e0e0); cursor: default; }
+.matrix-heatmap td:hover { outline: 2px solid var(--primary, #333); z-index: 1; position: relative; }
+
+.scree-plot { margin: 16px 0; }
+.loading-matrix { border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+.loading-matrix th, .loading-matrix td { padding: 4px 8px; border: 1px solid var(--border-color, #e0e0e0); }
+.loading-matrix td { text-align: right; }
+
+.multivariate-section { margin: 16px 0; }
+.multivariate-section h4 { margin: 8px 0 4px; font-size: 14px; }
+.multivariate-summary-table { border-collapse: collapse; font-size: 13px; width: 100%; }
+.multivariate-summary-table th, .multivariate-summary-table td { padding: 6px 10px; border: 1px solid var(--border-color, #e0e0e0); }
+.multivariate-summary-table th { background: var(--muted, #f5f5f5); font-weight: 600; }
+
+.canonical-column-lists { display: flex; gap: 16px; margin: 12px 0; }
+.canonical-column-list { flex: 1; }
+.canonical-column-list select { width: 100%; height: 150px; }
+.canonical-column-list label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px; }
+
+.manova-group-config { margin: 8px 0; display: flex; align-items: center; gap: 8px; }

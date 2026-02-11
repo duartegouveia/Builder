@@ -284,14 +284,13 @@ function generateRequirementsDoc() {
   sections.push(boldPara('Filtro por Valores: ', 'Seleção/desseleção de valores individuais com checkboxes, pesquisa dentro dos valores, seleção total/nenhuma.'));
   sections.push(boldPara('Filtro por Comparação: ', 'Operadores de comparação (=, !=, >, <, >=, <=, entre, contém, começa com, termina com, regex) com suporte para tipos numéricos, texto e datas.'));
   sections.push(boldPara('Filtro por Texto: ', 'Critérios textuais avançados incluindo contém, não contém, começa com, termina com, expressão regular, maiúsculas/minúsculas.'));
-  sections.push(boldPara('Filtro por Posição: ', 'Top N, Bottom N, Middle N registos baseado em valores numéricos.'));
+  sections.push(boldPara('Filtro por Posição: ', 'Top N, Bottom N, Middle N registos baseado em valores numéricos. Disponível em dois modos: contagem absoluta (especificar número de registos) e percentagem (especificar percentagem do total, de 1% a 100%). No modo percentagem, o sistema calcula automaticamente o número de registos correspondente à percentagem indicada.'));
   sections.push(boldPara('Filtro por Outliers: ', 'Detecção e filtragem de outliers usando método IQR ou Z-score. Opções renomeadas na v1.1: "Choose Outliers" (anteriormente "Keep Outliers") e "Choose Not Outliers" (anteriormente "Remove Outliers") para maior clareza semântica.'));
   sections.push(boldPara('Filtro por Nulos: ', 'Mostrar apenas valores nulos ou não-nulos.'));
   sections.push(heading2('11.2 Funcionalidades Transversais'));
   sections.push(bullet('Indicadores visuais de colunas filtradas nos cabeçalhos.'));
   sections.push(bullet('Limpar filtros individualmente ou globalmente.'));
   sections.push(bullet('Diálogo de filtro com abas para cada tipo.'));
-  sections.push(bullet('Preview do impacto do filtro antes de aplicar.'));
   sections.push(heading2('11.3 Justificação'));
   sections.push(para('A diversidade de métodos de filtragem permite abordar qualquer critério de seleção de dados. Filtros por posição e outliers são particularmente úteis para análise exploratória de dados, permitindo isolar rapidamente padrões extremos.'));
 
@@ -331,8 +330,14 @@ function generateRequirementsDoc() {
   sections.push(bullet('Contagem de registos por grupo.'));
   sections.push(bullet('Suporte para agrupamento hierárquico (múltiplos níveis).'));
   sections.push(bullet('Navegação de volta via breadcrumbs.'));
-  sections.push(heading2('13.2 Justificação'));
-  sections.push(para('O agrupamento permite exploração top-down de grandes conjuntos de dados, facilitando a compreensão da distribuição e estrutura dos dados sem filtros complexos.'));
+  sections.push(heading2('13.2 Group by ALL Columns'));
+  sections.push(para('Para além do agrupamento individual por coluna ("Group by this column"), existe a opção "Group by ALL columns" que agrupa simultaneamente por todas as colunas da relação, excluindo as colunas do kind id.'));
+  sections.push(bullet('Diferença principal: O agrupamento individual ("Group by this column") remove a coluna agrupada das colunas visíveis na tabela. O "Group by ALL columns" mantém todas as colunas visíveis, servindo como uma agregação de valores únicos.'));
+  sections.push(bullet('Colunas do kind id são excluídas do agrupamento por serem identificadores únicos, tornando o agrupamento por elas sem significado analítico.'));
+  sections.push(heading2('13.3 Restrições'));
+  sections.push(bullet('A opção Group By está desativada no menu de contexto para colunas do kind id, pois sendo valores únicos por definição, o agrupamento por estas colunas não produz resultados úteis.'));
+  sections.push(heading2('13.4 Justificação'));
+  sections.push(para('O agrupamento permite exploração top-down de grandes conjuntos de dados, facilitando a compreensão da distribuição e estrutura dos dados sem filtros complexos. A opção "Group by ALL" é particularmente útil para identificar registos duplicados ou padrões de combinações de valores, funcionando como um DISTINCT sobre todas as colunas.'));
 
   // 14. Statistics
   sections.push(heading1('14. Estatísticas por Coluna'));
@@ -344,8 +349,15 @@ function generateRequirementsDoc() {
   sections.push(bullet('Testes de normalidade: Shapiro-Wilk, D\'Agostino-Pearson, Anderson-Darling, Kolmogorov-Smirnov, Jarque-Bera.'));
   sections.push(bullet('Indicação de p-valor e decisão sobre normalidade.'));
   sections.push(bullet('Estatísticas sumárias na linha de rodapé da tabela (configurável).'));
-  sections.push(heading2('14.2 Justificação'));
-  sections.push(para('Estatísticas descritivas completas são essenciais para análise exploratória. Os testes de normalidade informam a escolha de métodos estatísticos adequados (paramétricos vs. não-paramétricos). Box plots e histogramas fornecem compreensão visual imediata da distribuição.'));
+  sections.push(heading2('14.2 Violin Plot'));
+  sections.push(para('Complementarmente ao box plot, o sistema oferece um violin plot que pode ser ativado/desativado por checkbox (ativo por omissão). O violin plot sobrepõe-se ao box plot, combinando a informação dos quartis com a distribuição completa dos dados.'));
+  sections.push(boldPara('O que é um Violin Plot: ', 'Um violin plot é uma visualização estatística que combina um box plot com uma estimação de densidade por kernel (KDE). A largura da forma ("violino") em cada ponto vertical representa a densidade de dados nesse valor — zonas mais largas indicam maior concentração de valores, zonas mais estreitas indicam valores raros.'));
+  sections.push(boldPara('Como ler: ', 'A forma simétrica do violino mostra a distribuição dos dados: uma forma larga e achatada indica distribuição uniforme; uma forma estreita com pico central indica forte concentração; múltiplos "bicos" (distribuição bimodal ou multimodal) indicam subgrupos nos dados.'));
+  sections.push(boldPara('Vantagem sobre o box plot isolado: ', 'O box plot mostra apenas quartis e outliers, perdendo informação sobre a forma da distribuição. Dois conjuntos de dados com quartis idênticos podem ter distribuições completamente diferentes (normal vs. bimodal, por exemplo). O violin plot revela estas diferenças.'));
+  sections.push(boldPara('Estimação por Kernel (KDE): ', 'A curva é calculada usando uma estimação de densidade por kernel gaussiano. O bandwidth (largura de banda) é calculado automaticamente pela regra de Silverman, que equilibra suavização e detalhe. Valores extremos terão menor densidade, enquanto concentrações de dados criam picos visíveis.'));
+  sections.push(boldPara('Badge informativo (i): ', 'Um ícone (i) junto à checkbox fornece uma explicação interativa do violin plot, incluindo como interpretá-lo e a sua relação com o box plot.'));
+  sections.push(heading2('14.3 Justificação'));
+  sections.push(para('Estatísticas descritivas completas são essenciais para análise exploratória. Os testes de normalidade informam a escolha de métodos estatísticos adequados (paramétricos vs. não-paramétricos). Box plots e histogramas fornecem compreensão visual imediata da distribuição. O violin plot complementa o box plot revelando a forma completa da distribuição, sendo particularmente útil para identificar distribuições multimodais, assimetrias e concentrações que não são visíveis nos quartis isolados.'));
 
   // 15. Conditional Formatting
   sections.push(heading1('15. Formatação Condicional'));
@@ -463,11 +475,25 @@ function generateRequirementsDoc() {
   sections.push(heading2('23.1 Funcionalidades'));
   sections.push(bullet('Ativação via rel_options.show_hierarchy com especificação de hierarchy_column.'));
   sections.push(bullet('Navegação em árvore baseada em relações pai-filho.'));
-  sections.push(bullet('Breadcrumbs de localização na hierarquia.'));
-  sections.push(bullet('Filtragem automática ao navegar para um nó.'));
-  sections.push(bullet('Valor raiz configurável (hierarchy_root_value).'));
-  sections.push(heading2('23.2 Justificação'));
-  sections.push(para('A navegação hierárquica é essencial para dados com estrutura em árvore (categorias, organogramas, taxonomias). Permite exploração natural de relações pai-filho sem configuração complexa.'));
+  sections.push(bullet('Filtragem automática ao navegar para um nó: mostra apenas os filhos diretos do nó atual.'));
+  sections.push(bullet('Valor raiz configurável (hierarchy_root_value): define o topo da hierarquia acima do qual não é permitido navegar.'));
+  sections.push(heading2('23.2 Breadcrumb de Navegação'));
+  sections.push(para('À medida que se desce na hierarquia, é apresentado um breadcrumb que mostra o caminho percorrido desde a raiz até um nível acima da posição atual. Cada elemento do breadcrumb é clicável, permitindo saltar diretamente para ter como pai o elemento escolhido.'));
+  sections.push(bullet('Formato de cada elemento: nome do elemento seguido de contadores (#N1 >> #N2), onde N1 é o número de filhos diretos (nível imediatamente abaixo) e N2 é o total de descendentes em todos os níveis.'));
+  sections.push(bullet('Badge informativo (i): Um único ícone explicativo descreve o significado dos números e como funciona o painel de navegação hierárquica.'));
+  sections.push(heading2('23.3 Visualização de Descendentes'));
+  sections.push(para('Por omissão, a navegação hierárquica mostra apenas os elementos imediatamente abaixo do nó atual (filhos diretos). Existe uma opção para alternar e ver todos os descendentes a partir do elemento atual, independentemente da profundidade.'));
+  sections.push(bullet('Quando ativada a visualização de todos os descendentes, a coluna parent (hierarchy_column) torna-se automaticamente visível na tabela, permitindo identificar a relação pai-filho de cada registo.'));
+  sections.push(heading2('23.4 Configuração de Inicialização'));
+  sections.push(boldPara('hierarchy_root_value: ', 'Define o topo absoluto da hierarquia. O utilizador não pode navegar acima deste valor. Se vazio, considera como raiz os elementos com parent vazio ou null.'));
+  sections.push(boldPara('hierarchy_initial_value: ', 'Define o ponto de entrada inicial na hierarquia ao carregar a relação. Não precisa de ser o mesmo que hierarchy_root_value — pode ser qualquer descendente. Se vazio, assume hierarchy_root_value como ponto inicial. Se ambos forem vazios, mostra todos os elementos com parent vazio ou null.'));
+  sections.push(heading2('23.5 Colunas Derivadas de Hierarquia'));
+  sections.push(para('No menu de contexto do cabeçalho da coluna designada como hierarchy_column, na secção Column, estão disponíveis três operações para gerar novas colunas baseadas na estrutura hierárquica:'));
+  sections.push(boldPara('hierarchy_ascendants: ', 'Nova coluna do kind relation contendo, para cada registo, uma sub-relação com as colunas id e parent preenchidas com todos os ascendentes até ao hierarchy_root_value. Permite aceder rapidamente à linhagem completa de qualquer elemento.'));
+  sections.push(boldPara('hierarchy_descendants: ', 'Nova coluna do kind relation contendo, para cada registo, uma sub-relação com as colunas id e parent preenchidas com todos os descendentes do elemento. Permite visualizar toda a sub-árvore de qualquer nó.'));
+  sections.push(boldPara('hierarchy_path: ', 'Nova coluna do kind string contendo o caminho concatenado desde o elemento até ao hierarchy_root_value. Um input permite configurar o separador entre cada valor (por omissão " > "). Exemplo: "Raiz > Categoria > Subcategoria > Elemento".'));
+  sections.push(heading2('23.6 Justificação'));
+  sections.push(para('A navegação hierárquica é essencial para dados com estrutura em árvore (categorias, organogramas, taxonomias). O breadcrumb com contadores oferece orientação espacial e dimensionamento rápido da sub-árvore. A visualização de todos os descendentes complementa a navegação nível-a-nível para casos em que se pretende uma visão global. As colunas derivadas permitem materializar relações hierárquicas como dados manipuláveis, facilitando análises e exportações.'));
 
   // 24. Nested Relations
   sections.push(heading1('24. Relações Aninhadas'));
