@@ -630,13 +630,24 @@ function generateRequirementsDoc() {
   sections.push(boldPara('hierarchy_column: ', 'Coluna usada para relações pai-filho na hierarquia.'));
   sections.push(boldPara('hierarchy_root_value: ', 'Valor que identifica os nós raiz na navegação hierárquica (valor do campo pai para elementos de topo).'));
   sections.push(boldPara('single_item_mode: ', 'Modo de apresentação de detalhe (dialog, right, bottom).'));
-  sections.push(boldPara('label_field_top_down: ', 'Campo usado como label em breadcrumbs e títulos.'));
+  sections.push(boldPara('label_field_top_down: ', 'Controla a disposição label/campo nos formulários de detalhe. Quando true (predefinição), a label aparece em cima e o campo em baixo, facilitando a leitura. Quando false, a label aparece à esquerda e o campo à direita, aproveitando melhor o espaço horizontal.'));
   sections.push(boldPara('OnDoubleClickAction: ', 'Ação ao duplo-clicar numa linha (view, edit).'));
   sections.push(boldPara('general_view_options: ', 'Array de vistas disponíveis (Table, Cards, Pivot, Correlation, Diagram, AI, Saved, Structure).'));
   sections.push(boldPara('general_always_visible_options: ', 'Array de ações sempre visíveis na barra de vistas.'));
   sections.push(boldPara('general_line_options: ', 'Array de operações disponíveis no menu de linha.'));
   sections.push(boldPara('general_multi_options: ', 'Array de operações multi-registo disponíveis.'));
-  sections.push(heading2('27.2 Justificação'));
+  sections.push(heading2('27.2 Visibilidade de Funcionalidades do Menu de Coluna'));
+  sections.push(para('Estas opções booleanas (todas true por omissão) permitem ocultar grupos de funcionalidades do menu de contexto do cabeçalho de coluna. Útil para simplificar a interface quando certas operações não são relevantes para o caso de uso.'));
+  sections.push(boldPara('show_filter_comparison: ', 'Mostra/oculta filtro por comparação (>, <, =, entre). Aplica-se a colunas numéricas (int, float) e temporais (date, datetime, time).'));
+  sections.push(boldPara('show_filter_criteria: ', 'Mostra/oculta filtro por critérios de texto (contém, começa por, termina com, regex). Aplica-se a colunas de texto (string, textarea).'));
+  sections.push(boldPara('show_filter_topn: ', 'Mostra/oculta filtros Top/Bottom/Middle N e N%. Aplica-se a colunas numéricas e temporais.'));
+  sections.push(boldPara('show_filter_outliers: ', 'Mostra/oculta filtro de outliers (IQR, desvio padrão). Aplica-se a colunas numéricas (int, float).'));
+  sections.push(boldPara('show_binning: ', 'Mostra/oculta secção de binning/bucketing (agrupamento em intervalos). Aplica-se a colunas numéricas (int, float).'));
+  sections.push(boldPara('show_derived_columns: ', 'Mostra/oculta opções de criação de colunas derivadas (extrações de data, hora, arredondamento, métricas de texto, hierarquia).'));
+  sections.push(boldPara('show_cartesian_product: ', 'Mostra/oculta opções de Produto Cartesiano. Aplica-se a colunas do tipo relation.'));
+  sections.push(boldPara('show_formatting: ', 'Mostra/oculta secção de Formatação Condicional (barras de cor, escala de cores, ícones).'));
+  sections.push(boldPara('show_groupby: ', 'Mostra/oculta secção de agrupamento (Group By) no menu de coluna.'));
+  sections.push(heading2('27.3 Justificação'));
   sections.push(para('A configurabilidade granular permite adaptar a interface a diferentes casos de uso sem alterar código. Um formulário de entrada simples pode ocultar vistas avançadas; uma aplicação de análise pode ativar todas as funcionalidades.'));
 
   // 29. Keyboard Shortcuts
@@ -645,7 +656,10 @@ function generateRequirementsDoc() {
   sections.push(bullet('Badge informativo (ℹ) na barra de vistas com tooltip de atalhos.'));
   sections.push(bullet('Ctrl+clique para seleção de colunas.'));
   sections.push(bullet('Shift+clique para ordenação multi-coluna.'));
-  sections.push(bullet('Navegação por teclado nos menus.'));
+  sections.push(bullet('TAB e SHIFT+TAB: Navegação entre campos de input (avança e recua entre campos editáveis em formulários e diálogos).'));
+  sections.push(bullet('Setas (↑ ↓): Navegação entre opções dentro de menus e listas.'));
+  sections.push(bullet('Enter: Confirma a opção selecionada num menu.'));
+  sections.push(bullet('Escape: Fecha o menu ou diálogo ativo.'));
   sections.push(heading2('28.2 Justificação'));
   sections.push(para('Atalhos de teclado aumentam a produtividade de utilizadores avançados, reduzindo a dependência do rato para operações frequentes.'));
 
@@ -653,8 +667,7 @@ function generateRequirementsDoc() {
   sections.push(heading1('29. Responsividade e Interface'));
   sections.push(heading2('29.1 Funcionalidades'));
   sections.push(bullet('Design responsivo com CSS media queries.'));
-  sections.push(bullet('Design tokens via CSS custom properties (variáveis).'));
-  sections.push(bullet('Toast notifications para feedback de ações.'));
+  sections.push(bullet('Toast notifications para feedback de todas as ações (sucesso, erro, aviso).'));
   sections.push(bullet('Diálogos modais com overlay para operações complexas.'));
   sections.push(bullet('Container redimensionável para a tabela.'));
   sections.push(bullet('Indicadores visuais de estado (filtros ativos, ordenação, seleção).'));

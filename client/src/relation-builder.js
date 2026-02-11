@@ -116,7 +116,16 @@ const DEFAULT_REL_OPTIONS = {
   general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
   general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
-  general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
+  general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge'],
+  show_filter_comparison: true,
+  show_filter_criteria: true,
+  show_filter_topn: true,
+  show_filter_outliers: true,
+  show_binning: true,
+  show_derived_columns: true,
+  show_cartesian_product: true,
+  show_formatting: true,
+  show_groupby: true
 };
 
 function logOperation(st, op) {
@@ -2334,7 +2343,16 @@ function parseRelation(jsonStr) {
       general_view_options: parsedRelOptions.general_view_options ?? [...DEFAULT_REL_OPTIONS.general_view_options],
       general_always_visible_options: parsedRelOptions.general_always_visible_options ?? [...DEFAULT_REL_OPTIONS.general_always_visible_options],
       general_line_options: parsedRelOptions.general_line_options ?? [...DEFAULT_REL_OPTIONS.general_line_options],
-      general_multi_options: parsedRelOptions.general_multi_options ?? [...DEFAULT_REL_OPTIONS.general_multi_options]
+      general_multi_options: parsedRelOptions.general_multi_options ?? [...DEFAULT_REL_OPTIONS.general_multi_options],
+      show_filter_comparison: parsedRelOptions.show_filter_comparison ?? DEFAULT_REL_OPTIONS.show_filter_comparison,
+      show_filter_criteria: parsedRelOptions.show_filter_criteria ?? DEFAULT_REL_OPTIONS.show_filter_criteria,
+      show_filter_topn: parsedRelOptions.show_filter_topn ?? DEFAULT_REL_OPTIONS.show_filter_topn,
+      show_filter_outliers: parsedRelOptions.show_filter_outliers ?? DEFAULT_REL_OPTIONS.show_filter_outliers,
+      show_binning: parsedRelOptions.show_binning ?? DEFAULT_REL_OPTIONS.show_binning,
+      show_derived_columns: parsedRelOptions.show_derived_columns ?? DEFAULT_REL_OPTIONS.show_derived_columns,
+      show_cartesian_product: parsedRelOptions.show_cartesian_product ?? DEFAULT_REL_OPTIONS.show_cartesian_product,
+      show_formatting: parsedRelOptions.show_formatting ?? DEFAULT_REL_OPTIONS.show_formatting,
+      show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby
     };
 
     const gvo = data.rel_options.general_view_options;
@@ -5263,6 +5281,7 @@ function removeSelectedRows(st = state, skipConfirm = false) {
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
+  showToast(removedCount + ' registos removidos.', 'success');
 }
 
 function removeUnselectedRows(st = state) {
@@ -5280,6 +5299,7 @@ function removeUnselectedRows(st = state) {
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
+  showToast(unselectedCount + ' registos não assinalados removidos.', 'success');
 }
 
 // Render functions
@@ -7835,8 +7855,10 @@ function showColumnMenu(colIdx, x, y, st = state) {
         <div class="accordion-header">Filter <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item" data-action="filter-values">By Values...</button>
-          ${type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' ? `
+          ${(type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_comparison ? `
             <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
+          ` : ''}
+          ${(type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_topn ? `
             <div class="column-menu-item-inline" data-testid="filter-topn-row">
               <select class="filter-position-select" data-testid="select-filter-position">
                 <option value="top">Top</option>
@@ -7857,10 +7879,10 @@ function showColumnMenu(colIdx, x, y, st = state) {
               <button class="btn-apply-filter" data-action="apply-topn-pct" data-testid="button-apply-topn-pct">Apply</button>
             </div>
           ` : ''}
-          ${type === 'string' || type === 'textarea' ? `
+          ${(type === 'string' || type === 'textarea') && st.rel_options.show_filter_criteria ? `
             <button class="column-menu-item" data-action="filter-text-criteria">By Criteria...</button>
           ` : ''}
-          ${type === 'int' || type === 'float' ? `
+          ${(type === 'int' || type === 'float') && st.rel_options.show_filter_outliers ? `
             <div class="column-menu-item-inline outliers-row" data-testid="filter-outliers-row">
               <span class="filter-label">Outliers:</span>
               <select class="filter-outlier-method" data-testid="select-outlier-method">
@@ -7885,7 +7907,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
       <div class="accordion-section" data-section="binning">
         <div class="accordion-header">Binning / Bucketing <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          ${type === 'int' || type === 'float' ? `
+          ${(type === 'int' || type === 'float') && st.rel_options.show_binning ? `
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
             <span class="filter-label">Bins:</span>
             <input type="number" class="filter-n-input binning-count-input" value="5" min="2" max="50" step="1" data-testid="input-binning-count">
@@ -7912,6 +7934,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <div class="binning-note">Creates a new column with bin numbers (1 to N)</div>
         </div>
       </div>
+      ${st.rel_options.show_groupby ? `
       <div class="accordion-section" data-section="group">
         <div class="accordion-header">Group By <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
@@ -7924,7 +7947,8 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="clear-groups">✕ Clear All Groups</button>
         </div>
       </div>
-      ${type === 'relation' ? `
+      ` : ''}
+      ${type === 'relation' && st.rel_options.show_cartesian_product ? `
       <div class="accordion-section" data-section="relation">
         <div class="accordion-header">Relation <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
@@ -7944,7 +7968,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
           <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
           <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Clear Selection</button>
-          ${(type === 'date' || type === 'datetime') ? `
+          ${(type === 'date' || type === 'datetime') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Date)</div>
           <button class="column-menu-item" data-action="derive-year">Extract Year → ${name}_year</button>
@@ -7955,7 +7979,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-quarter">Extract Quarter (1-4) → ${name}_quarter</button>
           <button class="column-menu-item" data-action="derive-semester">Extract Semester (1-2) → ${name}_semester</button>
           ` : ''}
-          ${(type === 'time' || type === 'datetime') ? `
+          ${(type === 'time' || type === 'datetime') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Time)</div>
           <button class="column-menu-item" data-action="derive-hour">Extract Hour → ${name}_hour</button>
@@ -7964,7 +7988,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-ampm">Extract AM/PM → ${name}_ampm</button>
           <button class="column-menu-item" data-action="derive-hour12">Extract Hour (12h) → ${name}_hour12</button>
           ` : ''}
-          ${type === 'float' ? `
+          ${type === 'float' && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Float)</div>
           <div class="column-menu-item-inline">
@@ -7974,7 +7998,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
             <button class="btn-apply-filter" data-action="derive-round">Create</button>
           </div>
           ` : ''}
-          ${(type === 'string' || type === 'textarea') ? `
+          ${(type === 'string' || type === 'textarea') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Text)</div>
           <button class="column-menu-item" data-action="derive-length">Length (chars) → ${name}_length</button>
@@ -7985,7 +8009,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-sentences">Sentence Count → ${name}_sentences</button>
           ` : ''}
           ` : ''}
-          ${(shouldShowHierarchy(st) && name === st.rel_options.hierarchy_column) ? `
+          ${(shouldShowHierarchy(st) && name === st.rel_options.hierarchy_column) && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Hierarchy)</div>
           <button class="column-menu-item" data-action="derive-hierarchy-ascendants">Ascendants → ${name}_ascendants</button>
@@ -7997,6 +8021,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(st).size})</button>
         </div>
       </div>
+      ${st.rel_options.show_formatting ? `
       <div class="accordion-section" data-section="formatting">
         <div class="accordion-header">Conditional Formatting <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
@@ -8007,6 +8032,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
         </div>
       </div>
+      ` : ''}
     </div>
   `;
   
@@ -8062,6 +8088,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         setCurrentPage(st, 1);
         renderTable(st);
+        showToast('Filtro Top/Bottom/Middle N aplicado.', 'success');
       }
       return;
     }
@@ -8074,6 +8101,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         setCurrentPage(st, 1);
         renderTable(st);
+        showToast('Filtro percentual aplicado.', 'success');
       }
       return;
     }
@@ -8087,6 +8115,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         setCurrentPage(st, 1);
         renderTable(st);
+        showToast('Filtro de outliers aplicado.', 'success');
       }
       return;
     }
@@ -8094,6 +8123,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
       applyColorBinning(colIdx, st);
       menu.remove();
       renderTable(st);
+      showToast('Coluna criada a partir de cores.', 'success');
       return;
     }
     if (action === 'apply-binning') {
@@ -8104,6 +8134,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         applyBinning(colIdx, bins, method, st);
         menu.remove();
         renderTable(st);
+        showToast('Binning aplicado com sucesso.', 'success');
       }
       return;
     }
@@ -8269,6 +8300,7 @@ function showColumnsVisibilityDialog(st) {
     logOperation(st, { op: 'columns_visible', columns_visible: getColumnsVisible(st) });
     overlay.remove();
     renderTable(st);
+    showToast('Visibilidade das colunas atualizada.', 'success');
   });
 }
 
@@ -8280,14 +8312,17 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'sort-asc':
       setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
       logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'asc' });
+      showToast('Ordenação ascendente aplicada a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'sort-desc':
       setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
       logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'desc' });
+      showToast('Ordenação descendente aplicada a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'sort-clear':
       setSortCriteria(st, getSortCriteria(st).filter(c => c.column !== colIdx));
       logOperation(st, { op: 'sort_clear', column: st.columnNames[colIdx] });
+      showToast('Ordenação removida de "' + st.columnNames[colIdx] + '".', 'info');
       break;
     case 'filter-values':
       showFilterValuesDialog(colIdx, st);
@@ -8301,14 +8336,17 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'filter-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
       logOperation(st, { op: 'filter_null', column: st.columnNames[colIdx] });
+      showToast('Filtro "Only Null" aplicado a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'filter-not-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
       logOperation(st, { op: 'filter_not_null', column: st.columnNames[colIdx] });
+      showToast('Filtro "Not Null" aplicado a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'filter-clear':
       delete getFilters(st)[colIdx];
       logOperation(st, { op: 'filter_clear', column: st.columnNames[colIdx] });
+      showToast('Filtro removido de "' + st.columnNames[colIdx] + '".', 'info');
       break;
     case 'format-databar':
       showDataBarColorDialog(colIdx, st);
@@ -8316,6 +8354,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'format-color-scale':
       applyColorScale(colIdx, st);
       logOperation(st, { op: 'format_color_scale', column: st.columnNames[colIdx] });
+      showToast('Escala de cores aplicada a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'format-icon-set':
       showIconSetDialog(colIdx, st);
@@ -8328,28 +8367,34 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         delete st.relation.colored_items[colName];
       }
       logOperation(st, { op: 'format_clear', column: st.columnNames[colIdx] });
+      showToast('Formatação removida de "' + st.columnNames[colIdx] + '".', 'info');
       break;
     case 'toggle-group':
       toggleGroupBy(colIdx, st);
       logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx] });
+      showToast('Agrupamento alterado para "' + st.columnNames[colIdx] + '".', 'success');
       return;
     case 'group-all':
       groupByAllColumns(st);
       logOperation(st, { op: 'group_all' });
+      showToast('Agrupamento por todas as colunas aplicado.', 'success');
       return;
     case 'clear-groups':
       setGroupByColumns(st, []);
       setGroupBySelectedValues(st, {});
       getUiState(st).groupAllKeepVisible = false;
       logOperation(st, { op: 'clear_groups' });
+      showToast('Todos os agrupamentos removidos.', 'info');
       break;
     case 'expand-relation':
       expandRelationColumn(colIdx, st);
       logOperation(st, { op: 'expand_relation', column: st.columnNames[colIdx] });
+      showToast('Produto cartesiano (ALL) aplicado a "' + st.columnNames[colIdx] + '".', 'success');
       return;
     case 'expand-relation-this':
       expandRelationColumnThis(colIdx, st);
       logOperation(st, { op: 'expand_relation_this', column: st.columnNames[colIdx] });
+      showToast('Produto cartesiano (THIS) aplicado a "' + st.columnNames[colIdx] + '".', 'success');
       return;
     case 'row-number': {
       let newColName = 'row_number';
@@ -8371,6 +8416,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'row_number', column_created: newColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + newColName + '" criada.', 'success');
       break;
     }
     case 'rank': {
@@ -8404,6 +8450,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'rank', column: name, column_created: rankColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + rankColName + '" criada.', 'success');
       break;
     }
     case 'dense-rank': {
@@ -8437,6 +8484,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'dense_rank', column: name, column_created: denseColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + denseColName + '" criada.', 'success');
       break;
     }
     // === Derived Columns: Date ===
@@ -8485,6 +8533,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: deriveName, source_column: st.columnNames[colIdx], column_created: deriveColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + deriveColName + '" criada.', 'success');
       return;
     }
     // === Derived Columns: Time ===
@@ -8530,6 +8579,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: tDeriveName, source_column: st.columnNames[colIdx], column_created: tColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + tColName + '" criada.', 'success');
       return;
     }
     case 'derive-ampm': {
@@ -8560,6 +8610,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'ampm', source_column: st.columnNames[colIdx], column_created: ampmColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + ampmColName + '" criada.', 'success');
       return;
     }
     // === Derived Columns: Float rounding ===
@@ -8588,6 +8639,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'round', source_column: st.columnNames[colIdx], column_created: roundColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + roundColName + '" criada.', 'success');
       return;
     }
     // === Derived Columns: String metrics ===
@@ -8610,6 +8662,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'length', source_column: st.columnNames[colIdx], column_created: lenColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + lenColName + '" criada.', 'success');
       return;
     }
     case 'derive-bytes': {
@@ -8631,6 +8684,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'bytes', source_column: st.columnNames[colIdx], column_created: bytesColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + bytesColName + '" criada.', 'success');
       return;
     }
     case 'derive-flesch-ease': {
@@ -8659,6 +8713,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'flesch_ease', source_column: st.columnNames[colIdx], column_created: feColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + feColName + '" criada.', 'success');
       return;
     }
     case 'derive-flesch-kincaid': {
@@ -8687,6 +8742,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'flesch_kincaid', source_column: st.columnNames[colIdx], column_created: fkColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + fkColName + '" criada.', 'success');
       return;
     }
     case 'derive-sentences': {
@@ -8709,6 +8765,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'sentences', source_column: st.columnNames[colIdx], column_created: sentColName });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna "' + sentColName + '" criada.', 'success');
       return;
     }
     case 'derive-hierarchy-ascendants': {
@@ -8758,6 +8815,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'hide_column', column: st.columnNames[colIdx] });
       closeAllMenus();
       renderTable(st);
+      showToast('Coluna ocultada.', 'success');
       return;
     }
     case 'hide-selected-cols': {
@@ -8777,18 +8835,23 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       getSelectedColumns(st).clear();
       closeAllMenus();
       renderTable(st);
+      showToast('Colunas selecionadas ocultadas.', 'success');
       return;
     }
     case 'format-active-filter':
       showActiveFilterColorDialog(colIdx, st);
       return;
-    case 'remove-column':
-      logOperation(st, { op: 'remove_column', column: st.columnNames[colIdx] });
+    case 'remove-column': {
+      const removedColName = st.columnNames[colIdx];
+      logOperation(st, { op: 'remove_column', column: removedColName });
       removeColumn(colIdx, st);
+      showToast('Coluna "' + removedColName + '" removida.', 'success');
       break;
+    }
     case 'remove-selected-cols':
       logOperation(st, { op: 'remove_selected_columns' });
       removeSelectedColumns(st);
+      showToast('Colunas selecionadas removidas.', 'success');
       break;
   }
   
@@ -10947,6 +11010,7 @@ function handleRowOperation(st, rowIdx, action) {
         setSortedIndices(st, [...getFilteredIndices(st)]);
         logOperation(st, { op: 'delete_selected', count: deleteCount });
         renderTable(st);
+        showToast(deleteCount + ' registos eliminados.', 'success');
       }
       break;
     case 'new-fast-row':
@@ -11146,6 +11210,7 @@ function showRowCopyDialog(st, rowIdx) {
           logOperation(st, { op: 'copy_row', source_row: rowIdx, copies: count });
           renderTable(st);
           closeRowOperationPanel(st);
+          showToast(count + ' cópia(s) gerada(s).', 'success');
         });
       }
     }, 0);
@@ -11163,6 +11228,7 @@ function showRowDeleteDialog(st, rowIdx) {
     logOperation(st, { op: 'delete_row', row_index: rowIdx });
     renderTable(st);
     outputRelationState(st);
+    showToast('Registo eliminado.', 'success');
   }, { confirmText: 'Eliminar' });
 }
 
@@ -11245,10 +11311,12 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
           saveRecord();
           outputRelationState(st);
           closeRowOperationPanel(st);
+          showToast('Registo criado.', 'success');
         });
         footer.querySelector('.save-and-new')?.addEventListener('click', () => {
           saveRecord();
           outputRelationState(st);
+          showToast('Registo criado. Formulário limpo para novo registo.', 'success');
           clearForm();
           const idColIdx = st.columnTypes.findIndex(t => t === 'id');
           if (idColIdx !== -1) {
@@ -11408,7 +11476,7 @@ function showRowEditDialog(st, rowIdx) {
           }
           
           if (targetRowIdx === -1) {
-            alert('Registo não encontrado');
+            showToast('Registo não encontrado.', 'error');
             return;
           }
           
@@ -11435,6 +11503,7 @@ function showRowEditDialog(st, rowIdx) {
           renderTable(st);
           outputRelationState(st);
           closeRowOperationPanel(st);
+          showToast('Registo gravado.', 'success');
         });
       }
     }, 0);
@@ -11961,10 +12030,14 @@ function showKeyboardHelpTooltip(e) {
   keyboardHelpTooltipEl.className = 'keyboard-help-tooltip-fixed';
   keyboardHelpTooltipEl.dataset.testid = 'text-keyboard-shortcuts';
   keyboardHelpTooltipEl.innerHTML = `
-    <strong>Atalhos de teclado e rato para o cabeçalho da coluna da tabela</strong><br>
-    <b>Right-click</b> — menu de contexto<br>
+    <strong>Atalhos de teclado e rato</strong><br>
+    <b>Right-click</b> — menu de contexto da coluna<br>
     <b>Shift+click</b> — ordenar por várias colunas<br>
-    <b>Ctrl+click</b> — selecionar colunas
+    <b>Ctrl+click</b> — selecionar colunas<br>
+    <b>TAB / SHIFT+TAB</b> — avançar / recuar entre campos de input<br>
+    <b>↑ ↓</b> — navegar entre opções em menus e listas<br>
+    <b>Enter</b> — confirmar opção selecionada<br>
+    <b>Escape</b> — fechar menu ou diálogo ativo
   `;
   
   document.body.appendChild(keyboardHelpTooltipEl);
@@ -17383,6 +17456,15 @@ function initRelationInstance(container, relationData, options = {}) {
     general_always_visible_options: parsedRelOptions.general_always_visible_options ?? [...DEFAULT_REL_OPTIONS.general_always_visible_options],
     general_line_options: parsedRelOptions.general_line_options ?? [...DEFAULT_REL_OPTIONS.general_line_options],
     general_multi_options: parsedRelOptions.general_multi_options ?? [...DEFAULT_REL_OPTIONS.general_multi_options],
+    show_filter_comparison: parsedRelOptions.show_filter_comparison ?? DEFAULT_REL_OPTIONS.show_filter_comparison,
+    show_filter_criteria: parsedRelOptions.show_filter_criteria ?? DEFAULT_REL_OPTIONS.show_filter_criteria,
+    show_filter_topn: parsedRelOptions.show_filter_topn ?? DEFAULT_REL_OPTIONS.show_filter_topn,
+    show_filter_outliers: parsedRelOptions.show_filter_outliers ?? DEFAULT_REL_OPTIONS.show_filter_outliers,
+    show_binning: parsedRelOptions.show_binning ?? DEFAULT_REL_OPTIONS.show_binning,
+    show_derived_columns: parsedRelOptions.show_derived_columns ?? DEFAULT_REL_OPTIONS.show_derived_columns,
+    show_cartesian_product: parsedRelOptions.show_cartesian_product ?? DEFAULT_REL_OPTIONS.show_cartesian_product,
+    show_formatting: parsedRelOptions.show_formatting ?? DEFAULT_REL_OPTIONS.show_formatting,
+    show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby,
     // Deserialize uiState from JSON (convert arrays to Sets)
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
@@ -18881,6 +18963,7 @@ function initSavedView(st = state) {
       });
       nameInput.value = '';
       renderSavedViewsList(st);
+      showToast('Vista guardada.', 'success');
     });
   }
 
@@ -19003,6 +19086,7 @@ function renderSavedViewsList(st) {
       const idx = parseInt(item.dataset.savedIdx);
       if (idx >= 0 && idx < saved.length) {
         restoreSavedSnapshot(st, saved[idx]);
+        showToast('Vista restaurada.', 'success');
       }
     });
   });
@@ -19013,6 +19097,7 @@ function renderSavedViewsList(st) {
       const idx = parseInt(btn.dataset.savedIdx);
       if (idx >= 0 && idx < saved.length) {
         restoreSavedSnapshot(st, saved[idx]);
+        showToast('Vista restaurada.', 'success');
       }
     });
   });
@@ -19024,6 +19109,7 @@ function renderSavedViewsList(st) {
       if (idx >= 0 && idx < saved.length) {
         if (confirm(`Eliminar vista "${saved[idx].name}"?`)) {
           deleteSavedView(st, saved[idx].name);
+          showToast('Vista eliminada.', 'success');
         }
       }
     });
