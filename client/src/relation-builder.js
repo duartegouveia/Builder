@@ -92,7 +92,7 @@ const DEFAULT_REL_OPTIONS = {
   single_item_mode: 'dialog',
   label_field_top_down: true,
   OnDoubleClickAction: 'view',
-  general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
+  general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
   general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
@@ -2229,7 +2229,7 @@ function generateDemoRelation() {
     single_item_mode: 'dialog',
     label_field_top_down: true,
     OnDoubleClickAction: 'view',
-    general_view_options: ['Table', 'Cards', 'Pivot', 'Correlation', 'Diagram', 'AI', 'Saved', 'Structure'],
+    general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
     general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
     general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
     general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
@@ -2315,6 +2315,17 @@ function parseRelation(jsonStr) {
       general_line_options: parsedRelOptions.general_line_options ?? [...DEFAULT_REL_OPTIONS.general_line_options],
       general_multi_options: parsedRelOptions.general_multi_options ?? [...DEFAULT_REL_OPTIONS.general_multi_options]
     };
+
+    const gvo = data.rel_options.general_view_options;
+    const hasCorr = gvo.indexOf('Correlation');
+    const hasDiag = gvo.indexOf('Diagram');
+    const hasAnalysis = gvo.indexOf('Analysis');
+    if ((hasCorr >= 0 || hasDiag >= 0) && hasAnalysis < 0) {
+      const insertAt = hasCorr >= 0 ? hasCorr : hasDiag;
+      gvo.splice(insertAt, 0, 'Analysis');
+    }
+    if (hasCorr >= 0) gvo.splice(gvo.indexOf('Correlation'), 1);
+    if (hasDiag >= 0) gvo.splice(gvo.indexOf('Diagram'), 1);
     
     // Ensure options exists
     if (!data.options) {
@@ -17258,6 +17269,17 @@ function initRelationInstance(container, relationData, options = {}) {
     // Deserialize uiState from JSON (convert arrays to Sets)
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
+
+  const gvoI = instanceState.rel_options.general_view_options;
+  const hasCorrI = gvoI.indexOf('Correlation');
+  const hasDiagI = gvoI.indexOf('Diagram');
+  const hasAnalysisI = gvoI.indexOf('Analysis');
+  if ((hasCorrI >= 0 || hasDiagI >= 0) && hasAnalysisI < 0) {
+    const insertAt = hasCorrI >= 0 ? hasCorrI : hasDiagI;
+    gvoI.splice(insertAt, 0, 'Analysis');
+  }
+  if (hasCorrI >= 0) gvoI.splice(gvoI.indexOf('Correlation'), 1);
+  if (hasDiagI >= 0) gvoI.splice(gvoI.indexOf('Diagram'), 1);
   
   if (instanceState.rel_options.hierarchy_initial_value !== null && instanceState.rel_options.hierarchy_initial_value !== undefined) {
     if (getUiState(instanceState).currentHierarchyValue === null) {
