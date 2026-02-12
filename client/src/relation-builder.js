@@ -6594,6 +6594,7 @@ const SELECTION_REL_OPTIONS = {
 
 function cloneRelationForSelection(st, clearItems = false, overrideOptions = {}) {
   const copy = JSON.parse(JSON.stringify(st.relation));
+  delete copy.name;
   copy.rel_options = { ...SELECTION_REL_OPTIONS, ...overrideOptions };
   if (clearItems) copy.items = [];
   return copy;
