@@ -20599,7 +20599,7 @@ function init() {
 
         if (kind === 'relation') {
           const subRel = objectToRelation(value);
-          rowValues.push(JSON.stringify(subRel, null, 2));
+          rowValues.push(subRel);
         } else if (typeof value === 'string' && (kind === 'int' || kind === 'float')) {
           rowValues.push(kind === 'int' ? parseInt(value) : parseFloat(value));
         } else {
