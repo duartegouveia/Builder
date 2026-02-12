@@ -1,0 +1,179 @@
+Ficou incompleto. Vou completar.
+A ideia é, quando é necessário gerar a relation, ou aceder à informação do kind da relation, ou o valor é uma string, e faz o código com base no kind já identificado pela string, ou o value é um objeto do tipo att, e a funcionalidade é adaptada com base nos atributos que passo a descrever:
+
+"attribute_kind"
+Existem kinds adicionais, especiais ou apenas os já conhecidos, mas extendidos.
+Os valores possíveis para attribute kind são:
+  "text"
+  "checkbox"
+  "color"
+  "date"
+  "number"
+  "password"
+  "media"
+  "radio_button"
+  "association"
+  "search"
+  "select"
+  "textarea"
+  "range"
+  "button"
+  "gps"
+  "html"
+  "lookup"
+  "multi_text"
+  "qr_code"
+  "tabsheet"
+  "pointer"
+  "object"
+  "group"
+  
+  Os primeiros 12 (do text à textarea) correspondem aos atributos que já existem como atributos indicados como string, mas que usam as propriedades a seguir para melhorar/customizar a seu funcionalidade e apresentação.
+  
+  Os seguintes, do range ao group, correspondem a novas funcionalidades que descreverei mais tarde.
+  
+  Um attribute_kind é represendado com um array, porque deve ser possível poder apresentar como valor de um atributo vários kinds alternativos.
+  A ideia é poder indicar vários kinds alternativos e usar a interface usada na página "logic builder" para poder escolher qual dos knds queremos utilizar. Faz include do javascript, css e eventualmente templates de html que façam sentido.
+  Note-se que os kinds que aqui podem aparecer são os possíveis valores de "attribute_kind". Na interface "logic builder" permite escolher kinds de tipos que ainda não existem nos attribute_kinds.
+  
+"entity"
+  Um atributo pode estar indicado como pretencendo a uma determinada entidade. Quando tal acontece, numa operação de edit, multi_edit, merge, ou group_edit, deve ser propagada a alteração daquele atributo (identificado pelo nome).
+  Nota que as relations podem existir como resultado de pesquisas ou operações algebricas diversas. Mas uma relation pode resultar de uma entidade, que para todos os efeitos é uma relation, mas uma relation com dados persistentes, guardados numa base de dados.
+  
+"entity_as"
+  Por vezes uma mesma entity surge numa relation mais do que uma vez (por produto carteseano/inner join) pelo que pode ser necessário dar-lhe um nome distintivo. O "entity" diz a que entidade se refere, o "entity_as" distingue ocorrências de entidades iguais dentro da mesma relation.
+  
+"visible"
+  Por vezes existem atributos que não queremos que sejam visíveis, apesar de querermos que existam. Este booleano sobrepõe-se às opções da relation. Não é visível nem na relation, nem nas operações, mas continua a existir nos dados.
+  
+"readonly"
+  O atributo readonly permite que um determinado atributo não exista nas operações de edição, mas exista nas operações de visualização e equivalentes (no copy, delete, usa-se a vista idêntica ao view).
+
+"autocomplete":false,
+  Este atributo serve apenas para acrescentar a propriedade autocomplete no input, no html, quando é gerado para operações de edição. Isso ativa no browser a funcionalidade de guardar valores de referência.
+  
+"save_to_database"
+	Existem atributos que queremos que existam na interface, mas que não queremos que sejam guardados na base de dados. Isto acontece com atributos quesão acedidos como lookup (que descreveremos oportunamente) ou que são campos calculados a partir de outros ou de informações do sistema.
+	Ou seja, se "save_to_database" for false num determinado atributo, no momento de gravar para a base de dados, ele não é acrescentado aos dados a guardar.
+	
+"display_orientation"
+   O display_orientation é uma string, mas que só pode ter os valores de "horizontal" ou "vertical". Serve para configurar como os elementos aparecem. Por exemplo, um radiobutton, pode fazer aparecer as opções na vertical (que é a opção por omissão), mas também pode dispô-los na horizontal. O mesmo acontece com group ou com o object.
+
+"label_field_orientation":"",
+   O label_field_orientation é uma string, mas que só pode ter os valores de "horizontal" ou "vertical". Serve para indicar a relação entre a label e o valor/input.
+   Ainda que uma relation tenha uma opção por omissão, em "rel_options">"label_field_top_down" (true=vertical, false=horizontal), um campo específico pode querer contrariar essa opção geral.
+   
+"show_label"
+  Nem sempre queremos que a label com o nome de um atributo apareça. Por vezes o seu contexto ou formato é suficiente para que fique claro o seu propósito, por exemplo, num código postal.
+  O programador pode escolher construir as interfaces mostrando ou não mostrando a label.
+  
+"name"
+  O atributo name pode existir para que se possa customizar o nome a apresentar. O nome dos atributos tente a ser um identificados em snake_case ou camelCase ou PascalCase ou com ifens. Estes nomes que até são requisitos para bases de dados ou similares, para interfaces não são a melhor opção para permitir espaços, maíusculas/minúsculas, e caracteres acentuádos.
+  O value para este atributo, pode ser um text, ou um objecto com um i18n, que contem as traduções para várias línguas.
+  
+"label_prefix":"",
+  Por vezes há a necessidade de acrescentar informação antes do "name" do atributo. Pare ter um icon, ou um link ou outra customização. Para esse efeito utilizamos este atributo label_prefix que pode ser um text ou um objeto i18n (multi-língua).
+  
+"label_suffix":"",
+  De igual forma pode existir a necessidade de acrescentar informação como sufixo à label.
+
+"show_description":true,
+  Show_description é um atributo booleano que indica se o conteúdo apresentado em description deve ser apresentado na interface. O atributo description pode ter conteúdo, mesmo que não seja apresentado na interface, porque pode ser útil para a documentação escrita ou documentação online. 
+
+"description"
+  A description, na sequência do campo anterior, pode servir para dar contexto a um determinado atributo, para lá do nome do campo, por ser demasiado técnico, por ser um standard definido por alguém. Essa informação pode ser uma string ou um i18n.
+
+"short_name"
+  Por vezes o nome do atributo é relativamente longo, para poder ser usado nas operações de linha, operações checked, ou operações always visible. O "short_name" é uma variante mais compacta para quando há falta de espaço na interface. Por exemplo, para colocar no header das colunas na relation.
+  
+"interface_width"
+  O atributo width indica se pretendemos que a interface ocupe a totalidade do espaço disponível, na opção "long" (com as excepções já mencionadas: group_edit e merge), na opção doubleshort, na opção short ou na opção tiny. Cada tipo de atributo já tem um tamanho por omissão, mas esta opção permite mudar essa opção default combase no tipo.
+  Os nomes aqui referenciados "long", "doubleshort", "short" e "tiny" corresponde a tamanhos definidos em classes CSS.
+
+"mandatory"
+  O atributo "mandatory" indica que este campo é de preenchimento obrigatório, ou seja, não se pode "gravar" uma operação, new, new_fast ou as variantes de edit, com o valor deste campo por preencher.
+  Nas colunas em que o atribute object diz que são mandatory, as labels aparecem com uma classe "mandatory", que tipicamente coloca o texto da label (incluindo prefixo e sufixo) com a cor vermelho escuro.
+  Na operação de linha new_fast, apenas se inclui no formulário os campos mandatory e os recomended, exatamente para permitir um preenchimento com o mínimo de campos, logo fast.
+  
+"recomended"
+  O atributo "recomended" indica que este campo é de preenchimento facultativo, mas recomendado, ou seja, pode "gravar" uma operação, new, new_fast ou as variantes de edit, com o valor deste campo por preencher.
+  Nas colunas em que o atribute object diz que são recommended, as labels aparecem com uma classe "recomended", que tipicamente coloca o texto da label (incluindo prefixo e sufixo) com a cor azul escuro escuro.
+  Na operação de linha new_fast, apenas se inclui no formulário os campos mandatory e os recomended, exatamente para permitir um preenchimento com o mínimo de campos, logo fast.
+
+"prefix"
+  Da mesma forma que pode existe um prefixo para as labels, também para os valores pode haver a necessidade de um prefixo, ou seja, que aparece antes do valor/input do campo propriamente dito.
+  Se o atributo "interface_width" for long, então o prefixo aparece na linha anterior, também com long. Se for menor que long, aparece à esquerda.
+  Este atributo pode ser um text ou um i18n.
+  O prefixo costuma ser usado quando existe uma prescrição de formato ou norma, para ajudar o preenchimento.
+  
+"suffix"
+  Da mesma forma que pode existe um sufixo para as labels, também para os valores pode haver a necessidade de um sufixofixo, ou seja, que aparece depois do valor/input do campo propriamente dito.
+  Se o atributo "interface_width" for long, então o sufixo aparece na linha seguinte, também com long. Se for menor que long, aparece à direita do value/input.
+  Este atributo pode ser um text ou um i18n.
+  O sufixo costuma ser usado para indicar unidades fixas. Para unidades flexíveis existirão atributos específicos.
+
+"class":[],
+  Pode ser necessário para efeitos de CSS aplicar a um atributo específico classes CSS específicas para este atributo ou para um conjunto de atributos. As strings que são colocadas dentro do array "class" devem ser colocadas no div mais exterior deste atributo, para a representação visual deste atributo nas diversas visualizações. Porque é colocado no div exterior, permite ser utilizado como seletor para as diversas partes internas.
+  Não devem ser utilizados nomes de classes a que já estejam atribuído um significado no css.
+
+"statistical
+  O atributo statistical deve ser retirado, porque já pensei numa forma alternativa de fazer isto sem precisar deste atributo.
+
+Os sete atributos que se seguem "datapot_*" dizem respeito a uma funcionalidade que não será implementada agora. Assim, mantém os atributos, mas não documentes ainda. Fica para quando for feita essa imlementação.
+  
+"datapot_show_attribute_details":false,
+"datapot_temporal":false,
+"datapot_objective":false,
+"datapot_subjective":false,
+"datapot_subjective_fuzzy_belief":false,
+"datapot_subjective_justified":false,
+"datapot_subjective_justified_fuzzy_belief":false,
+
+"default_value"
+  O valor por omissão, se definido, sobrepõe-se ao valor por omissão deste kind, natualmente apenas para o presente atributo.
+
+"length_max"
+  Pode ser definido um tamanho máximo (inteiro positivo >=1) para o comprimento dos valores deste atributo. Se for null, ignora esta validação.
+  Este atributo, quando preenchido, corresponde a colocar uma função passada a string em validations.
+  
+"length_min"
+  Pode ser definido um tamanho mínimo (inteiro positivo >=1) para o comprimento dos valores deste atributo. Se for null, ignora esta validação.
+  Este atributo, quando preenchido, corresponde a colocar uma função passada a string em validations.
+
+"demo_data_use_ai"
+  Este atributo booleano serve para indicar que autorizamos que o gerados de dados de demonstração tente preencher este campo com valores. Se for false, não irá preencher este campo com valores de demonstração, um para caa registo, naturalmente.
+  
+"demo_data_relevant_attributes":[],
+  Ainda associado à geração de dados de demonstração, o array deste atributo permite referenciar pelo nome outros atributos deste entidade ou referênciados por esta identidade (lookup), podem ser usados como contexto para a geração de nomes.
+  Por exemplo, se um campo tem um nome de uma pessoas, e geremos gerar nomes aleatorios, faz sentido acrescentar o contexto dos valores do país, género e língua. Se queremos gerar moradas, faz sentido conhecer a cidade, para que os nomes de demonstração criados sejam realistas. 
+
+"validations": [],
+	As validations são funções de javascript que validam seo valor introduzido na operações new, new_fast e variantes de editar, está de acordo com as regras definidas pelo próprio código da função. As funções são guardadas no array no formato de strings. A função devolve uma string a ser colocada no fundo do respetivo campo, com a indicação do tipo: error, warning, info.
+	Quando o texto de um input/textarea é alterado, vão-se chamando as funções de validação para corrigir as mensagens de erro apropriadamente.
+	Na primeira vez que um campo é editado, só se chama as funções de validação quando o utilizador sai do campo. A partir desse momento, desde que já existam mensagens visiveis o seu estado é verificado e as mensagens atualizadas Cada tipo de mensagem tem uma cor: erro vermelho escuro, warning, amarelo acastanhado e info azul. Tudo definido no css.
+	
+"conditions":[],
+	As condições também são funções serializadas em javascript. São de diversos tipos, as para serem chamadas no início das operações, ou quando de faz clear inputs, ou imediatamente antes de gravar.
+	Documenta este requisito mas não o implementes ainda.
+
+Os atributos booleanos que se seguem "visible_in_*" servem para indicar se o presente atributo deve ser incluído no painel da operação respetiva. Faz o código para garantir que este requisito é aplicado.
+
+"visible_in_view":true,
+"visible_in_edit":true,
+"visible_in_new":true,
+"visible_in_advanced_search":true,
+"visible_in_delete":true,
+"visible_in_copy":true,
+"visible_in_multi_copy":true,
+"visible_in_multi_delete":true,
+"visible_in_multi_view":true,
+"visible_in_multi_edit":true,
+"visible_in_multi_merge":true,
+"visible_in_multi_group_edit":true,
+"visible_in_export_pdf":true,
+"visible_in_export_excel":true,
+"visible_in_export_csv":true
+
+Documenta todos estes requisitos no manual de requisitos.
+
+Inclui o javascript, o html e o css para poder ter o virtual keyboard nos atributos do kind text e textarea, que os definidos como string, quer os definidos dentro de um object "att". 
