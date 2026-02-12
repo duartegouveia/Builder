@@ -12436,6 +12436,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, defaultRow, 'edit');
+    initRelationFieldsInContainer(container, st, defaultRow);
     initFileFieldsInContainer(container, st, defaultRow, 'edit');
     
     const clearForm = () => {
@@ -12656,6 +12657,7 @@ function showRowEditDialog(st, rowIdx) {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'edit');
+    initRelationFieldsInContainer(container, st, row);
     initFileFieldsInContainer(container, st, row, 'edit');
     
     const idColIdx = st.columnTypes.findIndex(t => t === 'id');
