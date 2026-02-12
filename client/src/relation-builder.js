@@ -21269,13 +21269,12 @@ function init() {
   });
   
   btnParse?.addEventListener('click', () => {
-    const result = parseRelation(textarea.value);
+    const val = textarea.value.trim();
+    if (!val) return;
+    const result = parseRelation(val);
     
     if (result.success) {
-      // Create main relation instance using unified code
       createMainRelationInstance(result.data);
-      
-      // Create a second relation instance at the bottom of the page
       createSecondRelationInstance(result.data);
     } else {
       alert('Parse error: ' + result.error);
