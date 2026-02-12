@@ -4561,6 +4561,22 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   margin-bottom: 0;
 }
 
+.info-badge-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  box-shadow: var(--shadow-lg);
+  z-index: 1010;
+  font-size: 0.8125rem;
+  max-width: 320px;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
 .ge-field {
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--border-light);
@@ -5887,6 +5903,44 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 .canonical-column-list label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px; }
 
 .manova-group-config { margin: 8px 0; display: flex; align-items: center; gap: 8px; }
+
+.multivariate-column-selector {
+  margin: 8px 0;
+}
+.multivariate-column-selector > label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.mv-col-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.mv-col-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.mv-col-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-xs {
+  padding: 2px 8px;
+  font-size: 11px;
+}
 
 .file-upload-zone {
   border: 2px dashed var(--border-color, #ccc);

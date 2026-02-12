@@ -2531,8 +2531,9 @@ function generateDemoRelation() {
       if (colName === 'id') return String(i + 1);
       if (Math.random() < 0.05) return null; // 5% nulls
       
-      // Handle nested relations with their schemas
-      if (type === 'relation') {
+      const resolvedType = resolveColumnKind(type);
+      
+      if (resolvedType === 'relation') {
         if (colName === 'orders') {
           return generateNestedRelation(ordersSchema, ordersIdCounter);
         } else if (colName === 'tags') {
@@ -2540,20 +2541,20 @@ function generateDemoRelation() {
         }
       }
       
-      if (type === 'select' && colName === 'country') {
+      if (resolvedType === 'select' && colName === 'country') {
         return countryKeys[Math.floor(Math.random() * countryKeys.length)];
       }
       
-      if (type === 'radio' && options[colName]) {
+      if (resolvedType === 'radio' && options[colName]) {
         const keys = Object.keys(options[colName]);
         return keys[Math.floor(Math.random() * keys.length)];
       }
       
-      if (type === 'file') {
+      if (resolvedType === 'file') {
         return createEmptyFileRelation();
       }
       
-      return generateRandomValue(type);
+      return generateRandomValue(resolvedType);
     });
     items.push(row);
   }
@@ -3487,7 +3488,7 @@ function generateBoxPlotSVG(stats) {
   if (violinPath) {
     violinCheckbox = `<div class="violin-toggle-row">
       <label class="violin-toggle-label"><input type="checkbox" checked data-violin-toggle="${uid}" class="violin-checkbox" data-testid="checkbox-violin-toggle"/>Violin Plot</label>
-      <span class="info-badge violin-info-badge" title="A violin plot shows the probability density of the data at different values, smoothed by a kernel density estimator (KDE). The wider the shape, the more data points at that value.">i</span>
+      <span class="info-badge violin-info-badge" data-info-text="A violin plot shows the probability density of the data at different values, smoothed by a kernel density estimator (KDE). The wider the shape, the more data points at that value." title="Click for info">i</span>
     </div>`;
   }
   
@@ -3744,7 +3745,7 @@ function generateDateTimeBoxPlotSVG(stats, type) {
   if (violinPath) {
     violinCheckbox = `<div class="violin-toggle-row">
       <label class="violin-toggle-label"><input type="checkbox" checked data-violin-toggle="${uid}" class="violin-checkbox" data-testid="checkbox-violin-toggle"/>Violin Plot</label>
-      <span class="info-badge violin-info-badge" title="A violin plot shows the probability density of the data at different values, smoothed by a kernel density estimator (KDE). The wider the shape, the more data points at that value.">i</span>
+      <span class="info-badge violin-info-badge" data-info-text="A violin plot shows the probability density of the data at different values, smoothed by a kernel density estimator (KDE). The wider the shape, the more data points at that value." title="Click for info">i</span>
     </div>`;
   }
   
@@ -9824,13 +9825,15 @@ function showIconSetDialog(colIdx, st = state) {
   function getPreviewHTML(setIdx, rev) {
     const set = ICON_SETS[setIdx];
     const icons = rev ? [...set.icons].reverse() : set.icons;
-    const range = stats.max - stats.min;
+    const numMin = typeof stats.min === 'number' ? stats.min : (typeof stats.numMin === 'number' ? stats.numMin : 0);
+    const numMax = typeof stats.max === 'number' ? stats.max : (typeof stats.numMax === 'number' ? stats.numMax : 1);
+    const range = numMax - numMin;
     const steps = icons.length;
     let html = '<div class="icon-set-preview-table">';
     html += '<div class="icon-set-preview-header"><span>Icon</span><span>Range</span></div>';
     for (let i = 0; i < steps; i++) {
-      const minVal = (stats.min + (range / steps) * i).toFixed(1);
-      const maxVal = (stats.min + (range / steps) * (i + 1)).toFixed(1);
+      const minVal = (numMin + (range / steps) * i).toFixed(1);
+      const maxVal = (numMin + (range / steps) * (i + 1)).toFixed(1);
       const rangeLabel = i === steps - 1 ? `${minVal} – ${maxVal}` : `${minVal} – <${maxVal}`;
       html += `<div class="icon-set-preview-row"><span class="icon-set-preview-icon">${icons[i]}</span><span class="icon-set-preview-range">${rangeLabel}</span></div>`;
     }
@@ -10749,8 +10752,7 @@ function showStatisticsPanel(colIdx) {
       <span>Statistics: ${name}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
-    <div class="stats-panel-content">${statsHtml}</div>
-    ${explanationsHtml}
+    <div class="stats-panel-content">${statsHtml}${explanationsHtml}</div>
   `;
   
   document.body.appendChild(panel);
@@ -10764,6 +10766,26 @@ function showStatisticsPanel(colIdx) {
   });
   
   panel.querySelector('.btn-close-dialog').addEventListener('click', () => panel.remove());
+  
+  panel.querySelectorAll('.info-badge[data-info-text]').forEach(badge => {
+    badge.style.cursor = 'pointer';
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const existing = panel.querySelector('.info-badge-popup');
+      if (existing) { existing.remove(); return; }
+      const popup = document.createElement('div');
+      popup.className = 'info-badge-popup';
+      popup.textContent = badge.dataset.infoText;
+      badge.parentElement.style.position = 'relative';
+      badge.parentElement.appendChild(popup);
+      document.addEventListener('click', function dismissPopup(ev) {
+        if (!popup.contains(ev.target) && ev.target !== badge) {
+          popup.remove();
+          document.removeEventListener('click', dismissPopup);
+        }
+      });
+    });
+  });
   
   document.addEventListener('click', function closePanel(e) {
     if (!panel.contains(e.target) && !e.target.classList.contains('btn-stats')) {
@@ -11857,14 +11879,19 @@ function renderFileGallery(container, fileRel, insertBefore) {
 
 function closeRowOperationPanel(st) {
   const singleItemMode = st.rel_options.single_item_mode || 'dialog';
-  const detailPanel = st.container.querySelector('.relation-detail-panel');
-  if (detailPanel) {
-    detailPanel.innerHTML = '';
-    const wrapper = st.container.querySelector('.relation-flex-wrapper');
-    if (wrapper) wrapper.classList.remove('has-detail');
-  }
-  if (singleItemMode === 'bottom') {
-    st.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (singleItemMode === 'dialog') {
+    document.querySelectorAll('[id^="content-dialog-"]').forEach(el => el.remove());
+    document.querySelectorAll('.nested-relation-overlay').forEach(el => el.remove());
+  } else {
+    const detailPanel = st.container.querySelector('.relation-detail-panel');
+    if (detailPanel) {
+      detailPanel.innerHTML = '';
+      const wrapper = st.container.querySelector('.relation-flex-wrapper');
+      if (wrapper) wrapper.classList.remove('has-detail');
+    }
+    if (singleItemMode === 'bottom') {
+      st.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }
 
@@ -18533,6 +18560,14 @@ function initRelationInstance(container, relationData, options = {}) {
             <label>Components:</label>
             <input type="number" class="multivariate-components pivot-select" value="2" min="1" max="10" style="width: 80px;">
           </div>
+          <div class="multivariate-column-selector">
+            <label>Columns:</label>
+            <div class="mv-col-actions">
+              <button class="btn btn-xs btn-outline mv-select-all" data-testid="btn-mv-select-all">Select All</button>
+              <button class="btn btn-xs btn-outline mv-unselect-all" data-testid="btn-mv-unselect-all">Unselect All</button>
+            </div>
+            <div class="mv-col-checkboxes"></div>
+          </div>
           <button class="btn-run-multivariate btn btn-primary btn-sm">Run Analysis</button>
         </div>
         <div class="multivariate-result"></div>
@@ -19066,6 +19101,37 @@ function updateMultivariateUI(st = state) {
     else if (!['id'].includes(colTypes[i])) catCols.push({ idx: i, name: colNames[i] });
   }
 
+  const checkboxContainer = mvView.querySelector('.mv-col-checkboxes');
+  if (checkboxContainer) {
+    const currentColKey = numCols.map(c => c.idx + ':' + c.name).join(',');
+    if (checkboxContainer.dataset.colKey !== currentColKey) {
+      checkboxContainer.dataset.colKey = currentColKey;
+      checkboxContainer.innerHTML = numCols.map(c =>
+        `<label class="mv-col-checkbox-label"><input type="checkbox" class="mv-col-cb" data-col-idx="${c.idx}" checked> ${escapeHtml(c.name)}</label>`
+      ).join('');
+    }
+  }
+
+  const selectAllBtn = mvView.querySelector('.mv-select-all');
+  const unselectAllBtn = mvView.querySelector('.mv-unselect-all');
+  if (selectAllBtn && !selectAllBtn._bound) {
+    selectAllBtn._bound = true;
+    selectAllBtn.addEventListener('click', () => {
+      mvView.querySelectorAll('.mv-col-cb').forEach(cb => cb.checked = true);
+    });
+  }
+  if (unselectAllBtn && !unselectAllBtn._bound) {
+    unselectAllBtn._bound = true;
+    unselectAllBtn.addEventListener('click', () => {
+      mvView.querySelectorAll('.mv-col-cb').forEach(cb => cb.checked = false);
+    });
+  }
+
+  const colSelector = mvView.querySelector('.multivariate-column-selector');
+  if (colSelector) {
+    colSelector.style.display = '';
+  }
+
   const configArea = mvView.querySelector('.multivariate-config');
   if (!configArea) return;
 
@@ -19094,9 +19160,22 @@ function mvGetNumericData(st) {
   const numericTypes = ['int', 'float', 'date', 'datetime', 'time'];
   const colNames = st.columnNames || Object.keys(st.relation.columns);
   const colTypes = st.columnTypes || Object.values(st.relation.columns);
+
+  const container = st.container || document.querySelector('.relation-container');
+  const mvView = container ? container.querySelector('.view-analysis .analysis-multivariate') : null;
+  const selectedIdxs = new Set();
+  if (mvView) {
+    const cbs = mvView.querySelectorAll('.mv-col-cb:checked');
+    cbs.forEach(cb => selectedIdxs.add(parseInt(cb.dataset.colIdx)));
+  }
+
   const numCols = [];
   for (let i = 0; i < colNames.length; i++) {
-    if (numericTypes.includes(colTypes[i])) numCols.push({ idx: i, name: colNames[i], type: colTypes[i] });
+    if (numericTypes.includes(colTypes[i])) {
+      if (selectedIdxs.size === 0 || selectedIdxs.has(i)) {
+        numCols.push({ idx: i, name: colNames[i], type: colTypes[i] });
+      }
+    }
   }
   const indices = getSortedIndices(st);
   const rows = [];
@@ -19808,12 +19887,34 @@ function renderSavedViewsList(st) {
     const d = new Date(entry.datetime);
     const dateStr = d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const timeStr = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    let extraMeta = '';
+    if (entry.type === 'log') {
+      try { extraMeta = ` (${(JSON.parse(entry.data).log || []).length} ops)`; } catch(e) {}
+    } else if (entry.type === 'records' || entry.type === 'both') {
+      try {
+        const parsed = JSON.parse(entry.data);
+        const itemCount = parsed.items ? parsed.items.length : (parsed.relation?.items?.length || 0);
+        const colCount = parsed.columns ? Object.keys(parsed.columns).length : (parsed.relation?.columns ? Object.keys(parsed.relation.columns).length : 0);
+        if (itemCount > 0) extraMeta += ` (${itemCount} rows`;
+        if (colCount > 0) extraMeta += `, ${colCount} cols`;
+        if (itemCount > 0 || colCount > 0) extraMeta += ')';
+      } catch(e) {}
+    } else if (entry.type === 'format') {
+      try {
+        const parsed = JSON.parse(entry.data);
+        const parts = [];
+        if (parsed.sorting && parsed.sorting.length > 0) parts.push(`${parsed.sorting.length} sort`);
+        if (parsed.filters && parsed.filters.length > 0) parts.push(`${parsed.filters.length} filter`);
+        if (parsed.columnsVisible) parts.push('cols');
+        if (parts.length > 0) extraMeta = ` (${parts.join(', ')})`;
+      } catch(e) {}
+    }
     html += `
       <div class="saved-item" data-saved-idx="${idx}" title="Duplo-clique para restaurar">
         <div class="saved-item-info">
           <span class="saved-item-name">${entry.name}</span>
           <span class="saved-item-meta">
-            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}${entry.type === 'log' ? (() => { try { return ` (${(JSON.parse(entry.data).log || []).length} ops)`; } catch(e) { return ''; } })() : ''}
+            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}${extraMeta}
             &middot; ${scopeLabels[entry.scope] || entry.scope}
             &middot; ${dateStr} ${timeStr}
           </span>
