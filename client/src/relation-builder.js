@@ -7584,7 +7584,7 @@ function renderTable(st = state) {
     segSpan.dataset.testid = 'breadcrumb-segment-' + segIdx;
     const direct = countDirectChildren(st, segment.value);
     const total = countAllDescendants(st, segment.value);
-    segSpan.textContent = segment.label + ' (#' + direct + ' >> #' + total + ')';
+    segSpan.textContent = segment.label + ' ' + direct + '>' + total;
     segSpan.title = segment.label + ': ' + direct + ' direct children, ' + total + ' total descendants';
     segSpan.style.cursor = 'pointer';
     segSpan.addEventListener('click', () => {
@@ -20696,14 +20696,29 @@ function init() {
       for (const key of keys) {
         const value = obj[key];
         const kind = detectKind(value);
-        ta_kind.push(kind);
 
-        if (kind === 'relation') {
+        if (kind.startsWith('multi_') && Array.isArray(value)) {
+          const baseKind = kind.replace('multi_', '');
+          ta_kind.push('relation');
+          const subRel = JSON.parse(JSON.stringify(relTemplate));
+          subRel.columns = { id: 'id', value: baseKind };
+          subRel.items = value.map((v, idx) => {
+            let cellVal = v;
+            if (typeof v === 'string' && (baseKind === 'int' || baseKind === 'float')) {
+              cellVal = baseKind === 'int' ? parseInt(v) : parseFloat(v);
+            }
+            return [String(idx + 1), cellVal];
+          });
+          rowValues.push(subRel);
+        } else if (kind === 'relation') {
+          ta_kind.push(kind);
           const subRel = objectToRelation(value);
           rowValues.push(subRel);
         } else if (typeof value === 'string' && (kind === 'int' || kind === 'float')) {
+          ta_kind.push(kind);
           rowValues.push(kind === 'int' ? parseInt(value) : parseFloat(value));
         } else {
+          ta_kind.push(kind);
           rowValues.push(value);
         }
       }

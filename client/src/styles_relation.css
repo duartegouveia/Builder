@@ -255,6 +255,15 @@
   flex: 1;
   min-width: 0;
   overflow: auto;
+  max-height: 500px;
+}
+
+.json-preview-panel .detail-panel-content {
+  height: auto;
+}
+
+.json-preview-panel .detail-panel-body {
+  overflow: visible;
 }
 
 .relation-json-textarea {
@@ -5760,12 +5769,12 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 2px;
-  font-size: 0.8125rem;
+  gap: 1px;
+  font-size: 0.7rem;
 }
 
 .hierarchy-breadcrumb-segment {
-  padding: 2px 6px;
+  padding: 1px 4px;
   border-radius: var(--radius-sm, 3px);
   color: var(--primary-700, #1d4ed8);
   cursor: pointer;
@@ -5795,8 +5804,11 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 
 .hierarchy-info-badge {
-  margin-left: 6px;
+  margin-left: 4px;
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  font-size: 0.6rem;
 }
 
 .hierarchy-show-all-label {
