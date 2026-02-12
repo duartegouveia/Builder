@@ -292,6 +292,11 @@ const DEFAULT_REL_OPTIONS = {
   show_groupby: true
 };
 
+function resolveSingleItemMode(raw) {
+  if (Array.isArray(raw)) return raw[0] || 'dialog';
+  return raw || 'dialog';
+}
+
 function logOperation(st, op) {
   if (!st.relation.log) st.relation.log = [];
   st.relation.log.push({ pot: 'relation_op', timestamp: new Date().toISOString(), ...op });
@@ -716,7 +721,7 @@ const COMPANY_TYPES_JSON = {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": false,
+    "editable": true,
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
@@ -5726,6 +5731,11 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
   const items = value?.items || [];
   const actualRow = rowRef || st.relation.items[rowIdx];
 
+  const rebuildCell = () => {
+    const newCell = buildAssociationCell(actualRow[colIdx], rowIdx, colIdx, editable, st, actualRow);
+    wrapper.replaceWith(newCell);
+  };
+
   if (maxOne) {
     if (items.length === 0) {
       const emptySpan = document.createElement('span');
@@ -5739,7 +5749,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
         selectBtn.title = 'Select associated entity';
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          openAssociationSelect(rowIdx, colIdx, st, actualRow);
+          openAssociationSelect(rowIdx, colIdx, st, actualRow, rebuildCell);
         });
         wrapper.appendChild(selectBtn);
       }
@@ -5760,6 +5770,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
         clearBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           removeAssociationRecord(rowIdx, colIdx, 0, st);
+          rebuildCell();
         });
         wrapper.appendChild(clearBtn);
       }
@@ -5780,7 +5791,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
   return wrapper;
 }
 
-function openAssociationSelect(rowIdx, colIdx, st, rowRef) {
+function openAssociationSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
   const att = getAtt(st, colIdx);
   const config = getAssociationConfig(att);
   if (!config || !config.counterparts || config.counterparts.length === 0) {
@@ -5796,74 +5807,16 @@ function openAssociationSelect(rowIdx, colIdx, st, rowRef) {
     return;
   }
 
-  const modal = document.createElement('div');
-  modal.className = 'assoc-select-modal';
-  const overlay = document.createElement('div');
-  overlay.className = 'assoc-select-overlay';
-  overlay.addEventListener('click', () => modal.remove());
-
-  const dialog = document.createElement('div');
-  dialog.className = 'assoc-select-dialog';
-  const header = document.createElement('div');
-  header.className = 'assoc-select-header';
-  header.innerHTML = '<h3>Select from ' + escapeHtml(counterpartName) + '</h3>';
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'assoc-select-close';
-  closeBtn.textContent = '\u00D7';
-  closeBtn.addEventListener('click', () => modal.remove());
-  header.appendChild(closeBtn);
-  dialog.appendChild(header);
-
-  const tableEl = document.createElement('table');
-  tableEl.className = 'assoc-select-table';
-  const counterpartCols = Object.keys(counterpartJson.columns);
-  const counterpartTypes = Object.values(counterpartJson.columns);
-  const thead = document.createElement('thead');
-  const headRow = document.createElement('tr');
-  counterpartCols.forEach(col => {
-    const th = document.createElement('th');
-    th.textContent = col;
-    headRow.appendChild(th);
-  });
-  const thAction = document.createElement('th');
-  thAction.textContent = '';
-  headRow.appendChild(thAction);
-  thead.appendChild(headRow);
-  tableEl.appendChild(thead);
-
-  const tbody = document.createElement('tbody');
-  const counterpartItems = counterpartJson.items || [];
-  counterpartItems.forEach((itemRow) => {
-    const tr = document.createElement('tr');
-    counterpartCols.forEach((col, ci) => {
-      const td = document.createElement('td');
-      const cellVal = itemRow[ci];
-      if (cellVal && typeof cellVal === 'object' && cellVal.pot === 'relation') {
-        td.textContent = '[Relation]';
-      } else {
-        td.textContent = cellVal !== null && cellVal !== undefined ? String(cellVal) : '';
+  openSelectOneDialog(st, {
+    relationData: counterpartJson,
+    title: 'Select from ' + counterpartName + ' (' + (counterpartJson.items || []).length + ' registos)',
+    onSelect: (selectedId) => {
+      if (selectedId !== null && selectedId !== undefined) {
+        addAssociationBidirectional(rowIdx, colIdx, counterpartName, String(selectedId), counterpartAttName, st, rowRef);
+        if (onCellRebuild) onCellRebuild();
       }
-      tr.appendChild(td);
-    });
-    const tdBtn = document.createElement('td');
-    const pickBtn = document.createElement('button');
-    pickBtn.className = 'assoc-pick-btn';
-    pickBtn.textContent = 'Select';
-    pickBtn.addEventListener('click', () => {
-      const selectedId = String(itemRow[0]);
-      addAssociationBidirectional(rowIdx, colIdx, counterpartName, selectedId, counterpartAttName, st, rowRef);
-      modal.remove();
-    });
-    tdBtn.appendChild(pickBtn);
-    tr.appendChild(tdBtn);
-    tbody.appendChild(tr);
+    }
   });
-  tableEl.appendChild(tbody);
-  dialog.appendChild(tableEl);
-
-  modal.appendChild(overlay);
-  modal.appendChild(dialog);
-  document.body.appendChild(modal);
 }
 
 function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpartId, counterpartAttName, st, rowRef) {
@@ -5885,18 +5838,20 @@ function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpar
   const newId = getNextAssociationId(assocRelation);
   assocRelation.items.push([newId, counterpartName, counterpartId]);
 
-  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', counterpartAttName);
-
-  logOperation(st, {
-    op: 'association_add',
-    rowIdx,
-    colIdx,
-    counterpart: counterpartName,
-    counterpartId,
-    myRowId
-  });
-  renderTable(st);
-  updateJsonOutput(st);
+  const isUnsavedRow = !st.relation.items.includes(row);
+  if (!isUnsavedRow) {
+    syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', counterpartAttName);
+    logOperation(st, {
+      op: 'association_add',
+      rowIdx,
+      colIdx,
+      counterpart: counterpartName,
+      counterpartId,
+      myRowId
+    });
+    renderTable(st);
+    updateJsonOutput(st);
+  }
   showToast('Association created with ' + counterpartName + ' #' + counterpartId, 'success');
 }
 
@@ -6642,9 +6597,13 @@ function selectionSearchHtml() {
   </div>`;
 }
 
-function openSelectOneDialog(st) {
-  const relCopy = cloneRelationForSelection(st);
+function openSelectOneDialog(st, options = {}) {
+  const { onSelect, relationData, title } = options;
+  const relCopy = relationData
+    ? cloneRelationForSelection({ relation: relationData })
+    : cloneRelationForSelection(st);
   const dialogId = `select-one-${Date.now()}`;
+  const dialogTitle = title || `Select One (${relCopy.items.length} registos)`;
 
   const overlay = document.createElement('div');
   overlay.className = 'nested-relation-overlay';
@@ -6656,7 +6615,7 @@ function openSelectOneDialog(st) {
 
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Select One (${relCopy.items.length} registos)</span>
+      <span>${escapeHtml(dialogTitle)}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     ${selectionSearchHtml()}
@@ -6685,12 +6644,19 @@ function openSelectOneDialog(st) {
   };
 
   const outputAndClose = (id) => {
-    if (id !== null && id !== undefined) {
-      outputToConsoleAndElements(JSON.stringify(id));
-    } else {
-      outputToConsoleAndElements('');
+    try {
+      if (onSelect) {
+        onSelect(id);
+      } else {
+        if (id !== null && id !== undefined) {
+          outputToConsoleAndElements(JSON.stringify(id));
+        } else {
+          outputToConsoleAndElements('');
+        }
+      }
+    } finally {
+      cleanup();
     }
-    cleanup();
   };
 
   builderContainer.addEventListener('dblclick', (e) => {
@@ -12309,7 +12275,7 @@ function renderFileGallery(container, fileRel, insertBefore) {
 }
 
 function closeRowOperationPanel(st) {
-  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  const singleItemMode = resolveSingleItemMode(st.rel_options.single_item_mode);
   if (singleItemMode === 'dialog') {
     document.querySelectorAll('[id^="content-dialog-"]').forEach(el => el.remove());
     document.querySelectorAll('.nested-relation-overlay').forEach(el => el.remove());
@@ -12472,8 +12438,10 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
         const type = st.columnTypes[colIdx];
         if (type === 'id') {
           newRow[colIdx] = getNextNegativeId(st);
-        } else if (type === 'relation' || type === 'file') {
-          // relation/file data managed via nested containers
+        } else if (type === 'relation') {
+          newRow[colIdx] = defaultRow[colIdx];
+        } else if (type === 'file') {
+          newRow[colIdx] = defaultRow[colIdx];
         } else {
           const input = container.querySelector(`[data-col="${colIdx}"]`);
           if (input) {
@@ -12498,10 +12466,34 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
     const saveRecord = () => {
       const newRow = collectFormData();
       st.relation.items.push(newRow);
+      const newRowIdx = st.relation.items.length - 1;
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
-      logOperation(st, { op: 'add_row', row_index: st.relation.items.length - 1 });
+      logOperation(st, { op: 'add_row', row_index: newRowIdx });
+      st.columnTypes.forEach((type, colIdx) => {
+        if (type === 'relation') {
+          const att = getAtt(st, colIdx);
+          if (isAssociationAtt(att)) {
+            const assocData = newRow[colIdx];
+            if (assocData && assocData.items && assocData.items.length > 0) {
+              const config = getAssociationConfig(att);
+              const counterpartDef = config && config.counterparts && config.counterparts[0];
+              if (counterpartDef) {
+                const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
+                const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
+                const myEntityName = st.relation.name || '';
+                const myRowId = String(newRow[0]);
+                assocData.items.forEach(assocItem => {
+                  const counterpartId = assocItem[2];
+                  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', counterpartAttName);
+                });
+              }
+            }
+          }
+        }
+      });
       renderTable(st);
+      updateJsonOutput(st);
     };
     
     setTimeout(() => {
@@ -12784,7 +12776,7 @@ function openNestedRelationDialog(relationData) {
     dialog.remove();
   };
   
-  overlay.addEventListener('click', closeDialog);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(); });
   dialog.querySelector('.btn-close-dialog').addEventListener('click', closeDialog);
   dialog.querySelector('.close-nested').addEventListener('click', closeDialog);
 }
@@ -12794,7 +12786,7 @@ function openNestedRelationDialog(relationData) {
 // Show content based on single_item_mode setting
 // Returns a cleanup function if content is displayed in detail panel
 function showContentBasedOnMode(st, contentBuilder, title = '', footerButtonsHtml = '') {
-  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  const singleItemMode = resolveSingleItemMode(st.rel_options.single_item_mode);
   
   if (singleItemMode === 'dialog') {
     // Show in popup dialog
@@ -12842,7 +12834,7 @@ function showContentInDetailPanel(st, contentBuilder, title = '', footerButtonsH
   updateDetailPanelState(st);
   
   // Scroll detail panel into view when mode is 'bottom'
-  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  const singleItemMode = resolveSingleItemMode(st.rel_options.single_item_mode);
   if (singleItemMode === 'bottom') {
     setTimeout(() => {
       detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -12900,7 +12892,7 @@ function showContentInPopup(contentBuilder, title = '', footerButtonsHtml = '') 
     dialog.remove();
   };
   
-  overlay.addEventListener('click', closeDialog);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(); });
   dialog.querySelector('.btn-close-dialog').addEventListener('click', closeDialog);
   dialog.querySelector('.close-popup').addEventListener('click', closeDialog);
   
@@ -12909,7 +12901,7 @@ function showContentInPopup(contentBuilder, title = '', footerButtonsHtml = '') 
 
 // Clear the detail panel content and update layout state
 function clearDetailPanel(st) {
-  const singleItemMode = st.rel_options.single_item_mode || 'dialog';
+  const singleItemMode = resolveSingleItemMode(st.rel_options.single_item_mode);
   const detailPanel = getDetailPanel(st);
   if (detailPanel) {
     detailPanel.innerHTML = '';
@@ -18713,7 +18705,7 @@ function initRelationInstance(container, relationData, options = {}) {
   const viewOptions = instanceState.rel_options.general_view_options;
   
   // Determine flex wrapper class based on single_item_mode
-  const singleItemMode = instanceState.rel_options.single_item_mode || 'dialog';
+  const singleItemMode = resolveSingleItemMode(instanceState.rel_options.single_item_mode);
   const flexWrapperClass = singleItemMode === 'right' ? 'flex-wrapper-horizontal' : 'flex-wrapper-vertical';
   
   let mainPanelHtml = '';
