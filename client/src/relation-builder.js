@@ -20908,6 +20908,15 @@ function init() {
   const btnAiAsk = el('.btn-ai-ask');
   const aiQuestion = el('.ai-question');
   
+  function loadRelationFromEntity(jsonData) {
+    textarea.value = JSON.stringify(jsonData, null, 2);
+    if (jsonData && jsonData.name && all_entities[jsonData.name]) {
+      const data = all_entities[jsonData.name];
+      createMainRelationInstance(data);
+      createSecondRelationInstance(data);
+    }
+  }
+
   btnGenerate?.addEventListener('click', () => {
     const demo = generateDemoRelation();
     textarea.value = JSON.stringify(demo, null, 2);
@@ -20915,22 +20924,22 @@ function init() {
   
   const btnLoadProducts = el('.btn-load-products');
   btnLoadProducts?.addEventListener('click', () => {
-    textarea.value = JSON.stringify(PRODUCTS_JSON, null, 2);
+    loadRelationFromEntity(PRODUCTS_JSON);
   });
   
   const btnLoadCategories = el('.btn-load-categories');
   btnLoadCategories?.addEventListener('click', () => {
-    textarea.value = JSON.stringify(CATEGORIES_JSON, null, 2);
+    loadRelationFromEntity(CATEGORIES_JSON);
   });
   
   const btnLoadStocks = el('.btn-load-stocks');
   btnLoadStocks?.addEventListener('click', () => {
-    textarea.value = JSON.stringify(STOCKS_JSON, null, 2);
+    loadRelationFromEntity(STOCKS_JSON);
   });
   
   const btnLoadPriceLists = el('.btn-load-pricelists');
   btnLoadPriceLists?.addEventListener('click', () => {
-    textarea.value = JSON.stringify(PRICELISTS_JSON, null, 2);
+    loadRelationFromEntity(PRICELISTS_JSON);
   });
   
   const btnSimpleObj = el('.btn-simple-obj');
@@ -21202,166 +21211,41 @@ function init() {
     });
   });
   
-  const menuUsers = document.querySelector('[data-testid="menu-users"]');
-  menuUsers?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(USERS_JSON, null, 2);
-  });
-  
-  const menuAuditLog = document.querySelector('[data-testid="menu-audit-log"]');
-  menuAuditLog?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(AUDITLOG_JSON, null, 2);
-  });
-  
-  const menuAllCompanies = document.querySelector('[data-testid="menu-all-companies"]');
-  menuAllCompanies?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(ALL_COMPANIES_JSON, null, 2);
-  });
-  
-  const menuCompanyTypes = document.querySelector('[data-testid="menu-company-types"]');
-  menuCompanyTypes?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(COMPANY_TYPES_JSON, null, 2);
-  });
-  
-  const menuAllProducts = document.querySelector('[data-testid="menu-all-products"]');
-  menuAllProducts?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(ALL_PRODUCTS_JSON, null, 2);
-  });
-  
-  const menuProductCategory = document.querySelector('[data-testid="menu-product-category"]');
-  menuProductCategory?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRODUCT_CATEGORY_JSON, null, 2);
-  });
-  
-  const menuProductFamilies = document.querySelector('[data-testid="menu-product-families"]');
-  menuProductFamilies?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRODUCT_FAMILIES_JSON, null, 2);
-  });
-  
-  const menuProductSpecies = document.querySelector('[data-testid="menu-product-species"]');
-  menuProductSpecies?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRODUCT_SPECIES_JSON, null, 2);
-  });
-  
-  const menuProductBrands = document.querySelector('[data-testid="menu-product-brands"]');
-  menuProductBrands?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRODUCT_BRANDS_JSON, null, 2);
-  });
-  
-  const menuProductCatalog = document.querySelector('[data-testid="menu-product-catalog"]');
-  menuProductCatalog?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRODUCT_CATALOG_JSON, null, 2);
-  });
-  
-  const menuCatalogProductConversions = document.querySelector('[data-testid="menu-product-catalog-conversions"]');
-  menuCatalogProductConversions?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(CATALOG_PRODUCT_CONVERSIONS_JSON, null, 2);
-  });
-  
-  const menuAllPricelists = document.querySelector('[data-testid="menu-all-pricelists"]');
-  menuAllPricelists?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(ALL_PRICELISTS_JSON, null, 2);
-  });
-  
-  const menuPricelistProducts = document.querySelector('[data-testid="menu-pricelist-products"]');
-  menuPricelistProducts?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRICELIST_PRODUCTS_JSON, null, 2);
-  });
-  
-  const menuPricelistPartner = document.querySelector('[data-testid="menu-pricelist-partner"]');
-  menuPricelistPartner?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(PRICELIST_PARTNER_JSON, null, 2);
-  });
-  
-  const menuInventory = document.querySelector('[data-testid="menu-inventory"]');
-  menuInventory?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_INVENTORY_JSON, null, 2);
-  });
-  
-  const menuInventoryDetail = document.querySelector('[data-testid="menu-inventory-detail"]');
-  menuInventoryDetail?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_INVENTORY_DETAIL_JSON, null, 2);
-  });
-  
-  const menuHistoricInventory = document.querySelector('[data-testid="menu-historic-inventory"]');
-  menuHistoricInventory?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_HISTORIC_INVENTORY_JSON, null, 2);
-  });
-  
-  const menuHistoricInventoryDetail = document.querySelector('[data-testid="menu-historic-inventory-detail"]');
-  menuHistoricInventoryDetail?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_HISTORIC_INVENTORY_DETAIL_JSON, null, 2);
-  });
-  
-  const menuWarehouses = document.querySelector('[data-testid="menu-wharehouses"]');
-  menuWarehouses?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_WAREHOUSE_JSON, null, 2);
-  });
-  
-  const menuImports = document.querySelector('[data-testid="menu-imports"]');
-  menuImports?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_IMPORT_JSON, null, 2);
-  });
-  
-  const menuImportsDetails = document.querySelector('[data-testid="menu-imports-details"]');
-  menuImportsDetails?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_IMPORTS_DETAILS_JSON, null, 2);
-  });
-  
-  const menuImportsTypes = document.querySelector('[data-testid="menu-imports-types"]');
-  menuImportsTypes?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_IMPORTS_TYPES_JSON, null, 2);
-  });
-  
-  const menuImportsStates = document.querySelector('[data-testid="menu-imports-states"]');
-  menuImportsStates?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_IMPORTS_STATES_JSON, null, 2);
-  });
-  
-  const menuImportsDetailStates = document.querySelector('[data-testid="menu-imports-detail-states"]');
-  menuImportsDetailStates?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(STOCK_IMPORTS_STATES_DETAILS_JSON, null, 2);
-  });
-  
-  const menuDataManagement = document.querySelector('[data-testid="menu-data-management"]');
-  menuDataManagement?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(ADMIN_DATA_MANAGEMENT_JSON, null, 2);
-  });
-  
-  const menuDistributor = document.querySelector('[data-testid="menu-distributor"]');
-  menuDistributor?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(DISTRIBUTOR_JSON, null, 2);
-  });
-  
-  const menuAllStocks = document.querySelector('[data-testid="menu-all-stocks"]');
-  menuAllStocks?.addEventListener('click', (e) => {
-    e.preventDefault();
-    textarea.value = JSON.stringify(ALL_STOCKS_JSON, null, 2);
+  const menuMapping = [
+    ['menu-users', USERS_JSON],
+    ['menu-audit-log', AUDITLOG_JSON],
+    ['menu-all-companies', ALL_COMPANIES_JSON],
+    ['menu-company-types', COMPANY_TYPES_JSON],
+    ['menu-all-products', ALL_PRODUCTS_JSON],
+    ['menu-product-category', PRODUCT_CATEGORY_JSON],
+    ['menu-product-families', PRODUCT_FAMILIES_JSON],
+    ['menu-product-species', PRODUCT_SPECIES_JSON],
+    ['menu-product-brands', PRODUCT_BRANDS_JSON],
+    ['menu-product-catalog', PRODUCT_CATALOG_JSON],
+    ['menu-product-catalog-conversions', CATALOG_PRODUCT_CONVERSIONS_JSON],
+    ['menu-all-pricelists', ALL_PRICELISTS_JSON],
+    ['menu-pricelist-products', PRICELIST_PRODUCTS_JSON],
+    ['menu-pricelist-partner', PRICELIST_PARTNER_JSON],
+    ['menu-inventory', STOCK_INVENTORY_JSON],
+    ['menu-inventory-detail', STOCK_INVENTORY_DETAIL_JSON],
+    ['menu-historic-inventory', STOCK_HISTORIC_INVENTORY_JSON],
+    ['menu-historic-inventory-detail', STOCK_HISTORIC_INVENTORY_DETAIL_JSON],
+    ['menu-wharehouses', STOCK_WAREHOUSE_JSON],
+    ['menu-imports', STOCK_IMPORT_JSON],
+    ['menu-imports-details', STOCK_IMPORTS_DETAILS_JSON],
+    ['menu-imports-types', STOCK_IMPORTS_TYPES_JSON],
+    ['menu-imports-states', STOCK_IMPORTS_STATES_JSON],
+    ['menu-imports-detail-states', STOCK_IMPORTS_STATES_DETAILS_JSON],
+    ['menu-data-management', ADMIN_DATA_MANAGEMENT_JSON],
+    ['menu-distributor', DISTRIBUTOR_JSON],
+    ['menu-all-stocks', ALL_STOCKS_JSON]
+  ];
+  menuMapping.forEach(([testId, jsonData]) => {
+    const menuItem = document.querySelector('[data-testid="' + testId + '"]');
+    menuItem?.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadRelationFromEntity(jsonData);
+    });
   });
   
   const ALL_ENTITY_JSONS = [
