@@ -48,6 +48,18 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Hierarchy Navigation**: Breadcrumb trail for hierarchical data.
 - **Cartesian Product**: Supports cross-joining nested relation columns.
 - **Remove Duplicates**: Removes exact duplicate rows.
+- **Attribute Object (att) System**: Columns can be defined as either simple type strings (e.g., `"string"`) or complex att objects with 70+ configurable properties. Key att features:
+  - **Kind Resolution**: `attribute_kind` array maps to base types via `ATT_KIND_MAP` (text→string, number→float, checkbox→boolean, etc.)
+  - **Display Names**: i18n-aware `name` and `short_name` properties; short_name used in table headers, full name in dialogs
+  - **Labels**: `label_prefix`, `label_suffix`, `show_label`, `label_field_orientation` for controlling label display
+  - **Field Decoration**: `prefix`, `suffix` shown around values; `description` shown below fields
+  - **Validation**: `mandatory` (dark red labels), `recomended` (dark blue labels), `length_min`/`length_max`, custom `validations` array
+  - **Visibility**: `visible`, plus 15 `visible_in_*` flags for operation-specific column filtering (view, edit, new, delete, copy, multi_*, export_*, advanced_search)
+  - **Readonly**: `readonly` flag overrides relation editable setting for specific columns
+  - **Layout**: `interface_width` (long/doubleshort/short/tiny), `display_orientation`, `class` array for custom CSS
+  - **New-Fast Mode**: Shows only mandatory and recommended fields when adding new rows quickly
+  - **Helpers**: `getAtt()`, `getAttProp()`, `getAttDisplayName()`, `getAttFullName()`, `getI18nText()`, `isAttVisibleInOperation()`, `isAttIncludedInNewFast()`, `resolveAttColumns()`
+  - **State**: `columnAtts` array stored alongside `columnNames`/`columnTypes` for backward compatibility
 
 ### Virtual Keyboard Features
 The Virtual Keyboard offers comprehensive Unicode character input:

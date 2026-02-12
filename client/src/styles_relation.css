@@ -363,6 +363,79 @@
   text-transform: uppercase;
 }
 
+.att-mandatory .relation-col-name {
+  color: #8b0000;
+}
+.att-recomended .relation-col-name {
+  color: #00008b;
+}
+
+.att-validation-msg {
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  margin-top: 2px;
+  border-radius: 3px;
+}
+.att-validation-error {
+  color: #8b0000;
+  background: rgba(139, 0, 0, 0.08);
+}
+.att-validation-warning {
+  color: #8b6914;
+  background: rgba(139, 105, 20, 0.08);
+}
+.att-validation-info {
+  color: #00008b;
+  background: rgba(0, 0, 139, 0.08);
+}
+
+.att-description {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.att-prefix, .att-suffix {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.att-label-prefix, .att-label-suffix {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.att-mandatory-label {
+  color: #8b0000;
+  font-weight: 600;
+}
+.att-recomended-label {
+  color: #00008b;
+  font-weight: 600;
+}
+
+.att-width-long { width: 100% !important; }
+.att-width-doubleshort { width: 50% !important; }
+.att-width-short { width: 25% !important; }
+.att-width-tiny { width: 12.5% !important; }
+
+.att-cell-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.att-cell-wrapper.att-orientation-vertical {
+  flex-direction: column;
+  align-items: stretch;
+}
+.att-cell-wrapper .att-prefix {
+  flex-shrink: 0;
+}
+.att-cell-wrapper .att-suffix {
+  flex-shrink: 0;
+}
+
 .color-scale-legend {
   display: flex;
   align-items: center;

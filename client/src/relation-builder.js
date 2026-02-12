@@ -2,6 +2,165 @@ import './styles.css';
 
 const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
 
+const ATT_KIND_MAP = {
+  'text': 'string',
+  'checkbox': 'boolean',
+  'color': 'color',
+  'date': 'date',
+  'number': 'float',
+  'password': 'password',
+  'media': 'file',
+  'radio_button': 'radio',
+  'association': 'relation',
+  'search': 'search',
+  'select': 'select',
+  'textarea': 'textarea',
+  'range': 'range',
+  'button': 'button',
+  'gps': 'gps',
+  'html': 'html',
+  'lookup': 'lookup',
+  'multi_text': 'multi_text',
+  'qr_code': 'qr_code',
+  'tabsheet': 'tabsheet',
+  'pointer': 'pointer',
+  'object': 'object',
+  'group': 'group'
+};
+
+const DEFAULT_ATT = {
+  attribute_kind: ['text'],
+  entity: '',
+  entity_as: '',
+  visible: true,
+  readonly: false,
+  autocomplete: false,
+  save_to_database: true,
+  display_orientation: 'vertical',
+  label_field_orientation: '',
+  show_label: true,
+  name: '',
+  label_prefix: '',
+  label_suffix: '',
+  show_description: true,
+  description: '',
+  short_name: '',
+  interface_width: '',
+  mandatory: false,
+  recomended: false,
+  prefix: '',
+  suffix: '',
+  class: [],
+  datapot_show_attribute_details: false,
+  datapot_temporal: false,
+  datapot_objective: false,
+  datapot_subjective: false,
+  datapot_subjective_fuzzy_belief: false,
+  datapot_subjective_justified: false,
+  datapot_subjective_justified_fuzzy_belief: false,
+  default_value: null,
+  length_max: null,
+  length_min: null,
+  demo_data_use_ai: true,
+  demo_data_relevant_attributes: [],
+  validations: [],
+  conditions: [],
+  visible_in_view: true,
+  visible_in_edit: true,
+  visible_in_new: true,
+  visible_in_advanced_search: true,
+  visible_in_delete: true,
+  visible_in_copy: true,
+  visible_in_multi_copy: true,
+  visible_in_multi_delete: true,
+  visible_in_multi_view: true,
+  visible_in_multi_edit: true,
+  visible_in_multi_merge: true,
+  visible_in_multi_group_edit: true,
+  visible_in_export_pdf: true,
+  visible_in_export_excel: true,
+  visible_in_export_csv: true
+};
+
+function resolveColumnKind(colValue) {
+  if (typeof colValue === 'string') return colValue;
+  if (colValue && typeof colValue === 'object' && Array.isArray(colValue.attribute_kind) && colValue.attribute_kind.length > 0) {
+    const activeKind = colValue._active_kind || colValue.attribute_kind[0];
+    return ATT_KIND_MAP[activeKind] || activeKind;
+  }
+  return 'string';
+}
+
+function isAttObject(colValue) {
+  return colValue && typeof colValue === 'object' && Array.isArray(colValue.attribute_kind);
+}
+
+function getAtt(st, colIdx) {
+  if (!st.columnAtts) return null;
+  const att = st.columnAtts[colIdx];
+  if (!att || typeof att === 'string') return null;
+  return att;
+}
+
+function getAttProp(st, colIdx, prop, fallback) {
+  const att = getAtt(st, colIdx);
+  if (!att) return fallback !== undefined ? fallback : DEFAULT_ATT[prop];
+  return att[prop] !== undefined ? att[prop] : (fallback !== undefined ? fallback : DEFAULT_ATT[prop]);
+}
+
+function getAttDisplayName(st, colIdx) {
+  const att = getAtt(st, colIdx);
+  if (att) {
+    const shortName = att.short_name;
+    if (shortName) {
+      if (typeof shortName === 'object' && shortName.pt) return shortName.pt;
+      if (typeof shortName === 'string' && shortName) return shortName;
+    }
+    const name = att.name;
+    if (name) {
+      if (typeof name === 'object' && name.pt) return name.pt;
+      if (typeof name === 'string' && name) return name;
+    }
+  }
+  return st.columnNames[colIdx];
+}
+
+function getAttFullName(st, colIdx) {
+  const att = getAtt(st, colIdx);
+  if (att && att.name) {
+    if (typeof att.name === 'object' && att.name.pt) return att.name.pt;
+    if (typeof att.name === 'string' && att.name) return att.name;
+  }
+  return st.columnNames[colIdx];
+}
+
+function getI18nText(value, lang) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') {
+    return value[lang || 'pt'] || value.en || Object.values(value)[0] || '';
+  }
+  return String(value);
+}
+
+function resolveAttColumns(columns) {
+  const names = [];
+  const types = [];
+  const atts = [];
+  for (const key of Object.keys(columns)) {
+    const val = columns[key];
+    names.push(key);
+    if (isAttObject(val)) {
+      types.push(resolveColumnKind(val));
+      atts.push({ ...DEFAULT_ATT, ...val });
+    } else {
+      types.push(val);
+      atts.push(val);
+    }
+  }
+  return { names, types, atts };
+}
+
 function escapeHtml(text) {
   if (text === null || text === undefined) return '';
   const str = String(text);
@@ -1634,6 +1793,7 @@ function createRelationState() {
     relation: null,            // Reference to the relation data (contains rel_options.uiState)
     columnNames: [],
     columnTypes: [],
+    columnAtts: [],
     options: {},
     rel_options: { ...DEFAULT_REL_OPTIONS, uiState: deserializeUiState({ ...DEFAULT_UI_STATE }) },
     // Runtime-only properties (not persisted)
@@ -2252,16 +2412,60 @@ function generateDemoRelation() {
   
   const columns = {
     id: 'id',
-    name: 'string',
+    name: {
+      attribute_kind: ['text'],
+      name: {"pt":"Nome Completo","en":"Full Name"},
+      short_name: 'Nome',
+      mandatory: true,
+      interface_width: 'long',
+      description: {"pt":"Nome completo do utilizador","en":"Full user name"},
+      length_min: 2,
+      length_max: 100
+    },
     country: 'select',
     active: 'boolean',
-    score: 'float',
+    score: {
+      attribute_kind: ['number'],
+      name: 'Pontuação',
+      short_name: 'Pts',
+      suffix: 'pontos',
+      interface_width: 'short',
+      recomended: true,
+      description: 'Pontuação acumulada'
+    },
     birth_date: 'date',
-    created_at: 'datetime',
+    created_at: {
+      attribute_kind: ['date'],
+      name: 'Data de Criação',
+      short_name: 'Criado',
+      readonly: true,
+      visible_in_edit: false,
+      visible_in_new: false
+    },
     start_time: 'time',
-    notes: 'textarea',
-    password: 'password',
-    email: 'email',
+    notes: {
+      attribute_kind: ['textarea'],
+      name: 'Notas',
+      interface_width: 'long',
+      show_description: true,
+      description: 'Observações e notas adicionais'
+    },
+    password: {
+      attribute_kind: ['password'],
+      name: 'Palavra-passe',
+      mandatory: true,
+      visible_in_view: false,
+      visible_in_delete: false,
+      length_min: 8
+    },
+    email: {
+      attribute_kind: ['text'],
+      name: 'Email',
+      short_name: 'Email',
+      mandatory: true,
+      autocomplete: true,
+      label_prefix: '📧 '
+    },
     phone: 'tel',
     website: 'url',
     search_terms: 'search',
@@ -2379,7 +2583,7 @@ function parseRelation(jsonStr) {
     }
     
     for (const key in data.columns) {
-      if (data.columns[key] === 'multilinestring') data.columns[key] = 'textarea';
+      if (typeof data.columns[key] === 'string' && data.columns[key] === 'multilinestring') data.columns[key] = 'textarea';
     }
     
     // Apply default rel_options if not present or incomplete
@@ -5376,6 +5580,47 @@ function removeUnselectedRows(st = state) {
 }
 
 // Render functions
+function wrapWithAttProps(wrapper, st, colIdx) {
+  const att = getAtt(st, colIdx);
+  if (!att) return wrapper;
+  const prefix = getI18nText(att.prefix);
+  const suffix = getI18nText(att.suffix);
+  if (!prefix && !suffix && !att.description) return wrapper;
+  const outer = document.createElement('div');
+  const orientation = att.display_orientation || 'vertical';
+  outer.className = 'att-cell-wrapper' + (orientation === 'vertical' ? ' att-orientation-vertical' : '');
+  if (prefix) {
+    const pre = document.createElement('span');
+    pre.className = 'att-prefix';
+    pre.textContent = prefix;
+    outer.appendChild(pre);
+  }
+  outer.appendChild(wrapper);
+  if (suffix) {
+    const suf = document.createElement('span');
+    suf.className = 'att-suffix';
+    suf.textContent = suffix;
+    outer.appendChild(suf);
+  }
+  if (att.show_description !== false && att.description) {
+    const desc = document.createElement('div');
+    desc.className = 'att-description';
+    desc.textContent = getI18nText(att.description);
+    outer.appendChild(desc);
+  }
+  return outer;
+}
+
+function applyAttInputProps(input, st, colIdx) {
+  const att = getAtt(st, colIdx);
+  if (!att) return;
+  if (att.autocomplete) input.setAttribute('autocomplete', 'on');
+  else input.setAttribute('autocomplete', 'off');
+  if (att.interface_width) input.classList.add('input-size-' + att.interface_width);
+  if (att.length_max) input.setAttribute('maxlength', att.length_max);
+  if (att.length_min) input.setAttribute('minlength', att.length_min);
+}
+
 function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
   const wrapper = document.createElement('div');
   wrapper.className = 'relation-cell-input';
@@ -5510,6 +5755,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     textarea.dataset.col = colIdx;
     textarea.className = 'relation-textarea';
     textarea.rows = 2;
+    applyAttInputProps(textarea, st, colIdx);
     wrapper.appendChild(textarea);
   } else if (type === 'select') {
     const colName = state.columnNames[colIdx];
@@ -5573,10 +5819,11 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     if (type === 'int' || type === 'float') {
       input.step = type === 'float' ? '0.001' : '1';
     }
+    applyAttInputProps(input, st, colIdx);
     wrapper.appendChild(input);
   }
   
-  return wrapper;
+  return wrapWithAttProps(wrapper, st, colIdx);
 }
 
 function getInputType(type) {
@@ -7232,11 +7479,18 @@ function renderTable(st = state) {
   const visibleColIndices = getVisibleColumnIndices(st);
   visibleColIndices.forEach((idx) => {
     if (getGroupByColumns(st).includes(idx)) return;
-    const name = st.columnNames[idx];
+    const att = getAtt(st, idx);
+    const name = att ? getAttDisplayName(st, idx) : st.columnNames[idx];
     const th = document.createElement('th');
     const type = st.columnTypes[idx];
     const isHiddenId = type === 'id' && !st.rel_options.show_id;
-    th.className = 'relation-th-sortable' + (isHiddenId ? ' hidden' : '');
+    const isHiddenAtt = att && att.visible === false;
+    th.className = 'relation-th-sortable' + (isHiddenId || isHiddenAtt ? ' hidden' : '');
+    if (att) {
+      if (att.mandatory) th.classList.add('att-mandatory');
+      if (att.recomended) th.classList.add('att-recomended');
+      if (att.class && att.class.length) att.class.forEach(c => th.classList.add(c));
+    }
     const colWidth = getColumnWidth(st, idx);
     if (colWidth > 0) {
       th.style.width = colWidth + 'px';
@@ -7271,10 +7525,15 @@ function renderTable(st = state) {
     const binConfig = getBinningConfig(st, idx);
     const binInfoBadge = binConfig ? `<span class="bin-info-badge" data-col="${idx}" title="View bin intervals">ⓘ</span>` : '';
     
+    const displayType = att ? (att._active_kind || att.attribute_kind[0]) : type;
+    const labelPrefix = att ? getI18nText(att.label_prefix) : '';
+    const labelSuffix = att ? getI18nText(att.label_suffix) : '';
+    const showLabel = att ? att.show_label !== false : true;
+    const headerName = showLabel ? `${labelPrefix}${name}${labelSuffix}` : '';
     th.innerHTML = `
       <div class="relation-th-content${filterActive}${colSelected}">
-        <span class="relation-col-name">${name}${binInfoBadge}${sortIndicator}${filterIcon}</span>
-        ${showColumnKind ? `<span class="relation-col-type">${type}</span>` : ''}
+        <span class="relation-col-name">${headerName}${binInfoBadge}${sortIndicator}${filterIcon}</span>
+        ${showColumnKind ? `<span class="relation-col-type">${displayType.toUpperCase()}</span>` : ''}
         ${colorScaleLegend}
       </div>
     `;
@@ -7456,8 +7715,13 @@ function renderTable(st = state) {
       const value = row[colIdx];
       const td = document.createElement('td');
       const type = st.columnTypes[colIdx];
+      const colAtt = getAtt(st, colIdx);
       const isHiddenId = type === 'id' && !st.rel_options.show_id;
-      if (isHiddenId) td.classList.add('hidden');
+      const isHiddenAtt = colAtt && colAtt.visible === false;
+      if (isHiddenId || isHiddenAtt) td.classList.add('hidden');
+      if (colAtt) {
+        if (colAtt.class && colAtt.class.length) colAtt.class.forEach(c => td.classList.add(c));
+      }
       const colWidth = getColumnWidth(st, colIdx);
       if (colWidth > 0) {
         td.style.width = colWidth + 'px';
@@ -7466,7 +7730,8 @@ function renderTable(st = state) {
         td.style.overflow = 'hidden';
         td.style.textOverflow = 'ellipsis';
       }
-      td.appendChild(createInputForType(type, value, rowIdx, colIdx, st.rel_options.editable, st));
+      const cellEditable = colAtt && colAtt.readonly ? false : st.rel_options.editable;
+      td.appendChild(createInputForType(type, value, rowIdx, colIdx, cellEditable, st));
       applyConditionalFormatting(value, colIdx, td, rowIdx, st);
       tr.appendChild(td);
     });
@@ -7530,8 +7795,10 @@ function renderTable(st = state) {
     
     const td = document.createElement('td');
     const type = st.columnTypes[colIdx];
+    const colAtt = getAtt(st, colIdx);
     const isHiddenId = type === 'id' && !st.rel_options.show_id;
-    td.className = 'relation-td-stats' + (isHiddenId ? ' hidden' : '');
+    const isHiddenAtt = colAtt && colAtt.visible === false;
+    td.className = 'relation-td-stats' + (isHiddenId || isHiddenAtt ? ' hidden' : '');
     td.innerHTML = `<button class="btn-stats" data-col="${colIdx}" title="Statistics">Σ</button>`;
     footerRow.appendChild(td);
   });
@@ -11197,6 +11464,39 @@ function getNextNegativeId(st) {
   return minId - 1;
 }
 
+function isAttVisibleInOperation(st, colIdx, mode) {
+  const att = getAtt(st, colIdx);
+  if (!att) return true;
+  if (att.visible === false) return false;
+  const modeMap = {
+    'view': 'visible_in_view',
+    'edit': 'visible_in_edit',
+    'new': 'visible_in_new',
+    'new-fast': 'visible_in_new',
+    'delete': 'visible_in_delete',
+    'copy': 'visible_in_copy',
+    'advanced_search': 'visible_in_advanced_search',
+    'multi_view': 'visible_in_multi_view',
+    'multi_edit': 'visible_in_multi_edit',
+    'multi_copy': 'visible_in_multi_copy',
+    'multi_delete': 'visible_in_multi_delete',
+    'multi_merge': 'visible_in_multi_merge',
+    'group_edit': 'visible_in_multi_group_edit',
+    'export_pdf': 'visible_in_export_pdf',
+    'export_excel': 'visible_in_export_excel',
+    'export_csv': 'visible_in_export_csv'
+  };
+  const prop = modeMap[mode];
+  if (prop && att[prop] === false) return false;
+  return true;
+}
+
+function isAttIncludedInNewFast(st, colIdx) {
+  const att = getAtt(st, colIdx);
+  if (!att) return true;
+  return att.mandatory || att.recomended;
+}
+
 function generateRowFormattedContent(st, row, mode = 'view') {
   const labelTopDown = st.rel_options.label_field_top_down !== false;
   const layoutClass = labelTopDown ? 'row-layout-top-down' : 'row-layout-horizontal';
@@ -11205,40 +11505,79 @@ function generateRowFormattedContent(st, row, mode = 'view') {
   st.columnNames.forEach((name, colIdx) => {
     const type = st.columnTypes[colIdx];
     const value = row[colIdx];
+    const att = getAtt(st, colIdx);
+    
+    if (!isAttVisibleInOperation(st, colIdx, mode)) return;
+    if (mode === 'new-fast' && att && !isAttIncludedInNewFast(st, colIdx) && type !== 'id') return;
+    
+    const displayName = att ? getAttFullName(st, colIdx) : name;
+    const labelPrefix = att ? getI18nText(att.label_prefix) : '';
+    const labelSuffix = att ? getI18nText(att.label_suffix) : '';
+    const showLabel = att ? att.show_label !== false : true;
+    const labelClasses = [];
+    if (att && att.mandatory) labelClasses.push('att-mandatory-label');
+    if (att && att.recomended) labelClasses.push('att-recomended-label');
+    const labelClassStr = labelClasses.length ? ' ' + labelClasses.join(' ') : '';
+    const fullLabelHtml = showLabel ? `${escapeHtml(labelPrefix)}<span class="row-field-label-text${labelClassStr}">${escapeHtml(displayName)}</span>${escapeHtml(labelSuffix)}` : '';
+    const fieldLabelOrientation = att && att.label_field_orientation ? att.label_field_orientation : '';
+    const useTopDown = fieldLabelOrientation === 'vertical' || (fieldLabelOrientation === '' && labelTopDown);
+    
+    const isReadonly = att && att.readonly;
+    const effectiveMode = isReadonly && mode === 'edit' ? 'view' : mode;
+    
+    const fieldPrefix = att ? getI18nText(att.prefix) : '';
+    const fieldSuffix = att ? getI18nText(att.suffix) : '';
+    const descriptionHtml = (att && att.show_description !== false && att.description) ? `<div class="att-description">${escapeHtml(getI18nText(att.description))}</div>` : '';
+    const widthClass = att && att.interface_width ? ' att-width-' + att.interface_width : '';
+    
+    const attClasses = att && att.class && att.class.length ? ' ' + att.class.join(' ') : '';
     
     if (type === 'relation') {
-      html += `<div class="row-field row-field-relation row-field-top-down">`;
-      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      html += `<div class="row-field row-field-relation row-field-top-down${attClasses}${widthClass}">`;
+      html += `<label class="row-field-label">${fullLabelHtml || escapeHtml(displayName)}</label>`;
       html += `<div class="row-field-relation-container" data-col="${colIdx}"></div>`;
+      html += descriptionHtml;
       html += `</div>`;
     } else if (type === 'file') {
-      html += `<div class="row-field row-field-file row-field-top-down">`;
-      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      html += `<div class="row-field row-field-file row-field-top-down${attClasses}${widthClass}">`;
+      html += `<label class="row-field-label">${fullLabelHtml || escapeHtml(displayName)}</label>`;
       html += `<div class="row-field-file-container" data-col="${colIdx}"></div>`;
+      html += descriptionHtml;
       html += `</div>`;
     } else {
-      if (labelTopDown) {
-        // Top-down layout: label above, value below
-        html += `<div class="row-field row-field-${type} row-field-top-down">`;
-        html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      const prefixHtml = fieldPrefix ? `<span class="att-prefix">${escapeHtml(fieldPrefix)}</span>` : '';
+      const suffixHtml = fieldSuffix ? `<span class="att-suffix">${escapeHtml(fieldSuffix)}</span>` : '';
+      
+      if (useTopDown) {
+        html += `<div class="row-field row-field-${type} row-field-top-down${attClasses}${widthClass}">`;
+        if (showLabel) html += `<label class="row-field-label">${fullLabelHtml}</label>`;
         
-        if (mode === 'view' || (mode === 'edit' && type === 'id')) {
+        if (effectiveMode === 'view' || (effectiveMode === 'edit' && type === 'id')) {
+          html += prefixHtml;
           html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+          html += suffixHtml;
         } else {
+          if (prefixHtml) html += prefixHtml;
           html += createEditInputHtml(type, value, colIdx, st);
+          if (suffixHtml) html += suffixHtml;
         }
+        html += descriptionHtml;
         html += `</div>`;
       } else {
-        // Horizontal layout: label left, value right
-        html += `<div class="row-field row-field-${type} row-field-horizontal">`;
-        html += `<div class="row-field-label-wrapper"><label class="row-field-label">${escapeHtml(name)}</label></div>`;
+        html += `<div class="row-field row-field-${type} row-field-horizontal${attClasses}${widthClass}">`;
+        if (showLabel) html += `<div class="row-field-label-wrapper"><label class="row-field-label">${fullLabelHtml}</label></div>`;
         html += `<div class="row-field-value-wrapper">`;
         
-        if (mode === 'view' || (mode === 'edit' && type === 'id')) {
+        if (effectiveMode === 'view' || (effectiveMode === 'edit' && type === 'id')) {
+          html += prefixHtml;
           html += `<span class="row-field-value row-field-value-${type}">${formatValueForViewDisplay(value, type, st, colIdx)}</span>`;
+          html += suffixHtml;
         } else {
+          if (prefixHtml) html += prefixHtml;
           html += createEditInputHtml(type, value, colIdx, st);
+          if (suffixHtml) html += suffixHtml;
         }
+        html += descriptionHtml;
         html += `</div>`;
         html += `</div>`;
       }
@@ -17873,10 +18212,12 @@ function initRelationInstance(container, relationData, options = {}) {
   instanceState.container = container;
   instanceState.relation = relationData;
   for (const key in relationData.columns) {
-    if (relationData.columns[key] === 'multilinestring') relationData.columns[key] = 'textarea';
+    if (typeof relationData.columns[key] === 'string' && relationData.columns[key] === 'multilinestring') relationData.columns[key] = 'textarea';
   }
-  instanceState.columnNames = Object.keys(relationData.columns || {});
-  instanceState.columnTypes = Object.values(relationData.columns || {});
+  const resolved = resolveAttColumns(relationData.columns || {});
+  instanceState.columnNames = resolved.names;
+  instanceState.columnTypes = resolved.types;
+  instanceState.columnAtts = resolved.atts;
   instanceState.options = relationData.options || {};
   if (!relationData.log) relationData.log = [];
   
@@ -20123,11 +20464,12 @@ function init() {
     textarea.value = JSON.stringify({
       "attribute_kind": ["text"],
       "entity": "",
+      "entity_as": "",
       "visible": true,
       "readonly": false,
       "autocomplete": false,
       "save_to_database": true,
-      "display_orientation": "",
+      "display_orientation": "vertical",
       "label_field_orientation": "",
       "show_label": true,
       "name": "",
@@ -20135,14 +20477,13 @@ function init() {
       "label_suffix": "",
       "show_description": true,
       "description": "",
-      "short_name": null,
+      "short_name": "",
       "interface_width": "long",
       "mandatory": false,
       "recomended": false,
       "prefix": "",
       "suffix": "",
       "class": [],
-      "statistical": "unstructured",
       "datapot_show_attribute_details": false,
       "datapot_temporal": false,
       "datapot_objective": false,
@@ -20150,10 +20491,9 @@ function init() {
       "datapot_subjective_fuzzy_belief": false,
       "datapot_subjective_justified": false,
       "datapot_subjective_justified_fuzzy_belief": false,
-      "default_value": "",
+      "default_value": null,
       "length_max": null,
       "length_min": null,
-      "in_results": false,
       "demo_data_use_ai": true,
       "demo_data_relevant_attributes": [],
       "validations": [],
