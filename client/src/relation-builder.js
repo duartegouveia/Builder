@@ -5717,13 +5717,14 @@ function applyAttInputProps(input, st, colIdx) {
   if (att.length_min) input.setAttribute('minlength', att.length_min);
 }
 
-function buildAssociationCell(value, rowIdx, colIdx, editable, st) {
+function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
   const wrapper = document.createElement('div');
   wrapper.className = 'assoc-cell';
   const att = getAtt(st, colIdx);
   const config = getAssociationConfig(att);
   const maxOne = config && config.cardinality_max === 1;
   const items = value?.items || [];
+  const actualRow = rowRef || st.relation.items[rowIdx];
 
   if (maxOne) {
     if (items.length === 0) {
@@ -5738,14 +5739,14 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st) {
         selectBtn.title = 'Select associated entity';
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          openAssociationSelect(rowIdx, colIdx, st);
+          openAssociationSelect(rowIdx, colIdx, st, actualRow);
         });
         wrapper.appendChild(selectBtn);
       }
     } else {
-      const row = items[0];
-      const entity = row[1] || '';
-      const fk = row[2] || '';
+      const assocItem = items[0];
+      const entity = assocItem[1] || '';
+      const fk = assocItem[2] || '';
       const label = document.createElement('span');
       label.className = 'assoc-link-label';
       label.textContent = entity + ' #' + fk;
@@ -5779,7 +5780,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st) {
   return wrapper;
 }
 
-function openAssociationSelect(rowIdx, colIdx, st) {
+function openAssociationSelect(rowIdx, colIdx, st, rowRef) {
   const att = getAtt(st, colIdx);
   const config = getAssociationConfig(att);
   if (!config || !config.counterparts || config.counterparts.length === 0) {
@@ -5850,7 +5851,7 @@ function openAssociationSelect(rowIdx, colIdx, st) {
     pickBtn.textContent = 'Select';
     pickBtn.addEventListener('click', () => {
       const selectedId = String(itemRow[0]);
-      addAssociationBidirectional(rowIdx, colIdx, counterpartName, selectedId, counterpartAttName, st);
+      addAssociationBidirectional(rowIdx, colIdx, counterpartName, selectedId, counterpartAttName, st, rowRef);
       modal.remove();
     });
     tdBtn.appendChild(pickBtn);
@@ -5865,8 +5866,8 @@ function openAssociationSelect(rowIdx, colIdx, st) {
   document.body.appendChild(modal);
 }
 
-function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpartId, counterpartAttName, st) {
-  const row = st.relation.items[rowIdx];
+function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpartId, counterpartAttName, st, rowRef) {
+  const row = rowRef || st.relation.items[rowIdx];
   let assocRelation = row[colIdx];
   if (!assocRelation || !assocRelation.pot) {
     assocRelation = createEmptyAssociationRelation();
@@ -12055,7 +12056,7 @@ function initRelationFieldsInContainer(container, st, row) {
     const relValue = row[colIdx];
     if (isAssociationAtt(att)) {
       const editable = st.relation.rel_options?.editable !== false;
-      const cell = buildAssociationCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st);
+      const cell = buildAssociationCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st, row);
       relContainer.innerHTML = '';
       relContainer.appendChild(cell);
       return;
