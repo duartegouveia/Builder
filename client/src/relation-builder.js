@@ -2299,6 +2299,7 @@ function generateDemoRelation() {
   
   const rel_options = {
     editable: false,
+    show_stats: true,
     show_multicheck: true,
     show_natural_order: true,
     show_id: true,
@@ -17886,6 +17887,7 @@ function initRelationInstance(container, relationData, options = {}) {
     show_natural_order: parsedRelOptions.show_natural_order ?? DEFAULT_REL_OPTIONS.show_natural_order,
     show_id: parsedRelOptions.show_id ?? DEFAULT_REL_OPTIONS.show_id,
     show_column_kind: parsedRelOptions.show_column_kind ?? DEFAULT_REL_OPTIONS.show_column_kind,
+    show_stats: parsedRelOptions.show_stats ?? DEFAULT_REL_OPTIONS.show_stats,
     show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
     hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
     hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
