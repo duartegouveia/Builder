@@ -318,7 +318,7 @@ const PRODUCTS_JSON = {
       "association": {
         "cardinality_min": 0,
         "cardinality_max": 1,
-        "counterparts": ["category"]
+        "counterparts": [{"counterpart_entity": "category", "counterpart_association_att": "linked_products"}]
       }
     },
     "related_products": {
@@ -328,7 +328,7 @@ const PRODUCTS_JSON = {
       "association": {
         "cardinality_min": 0,
         "cardinality_max": null,
-        "counterparts": ["product"]
+        "counterparts": [{"counterpart_entity": "product", "counterpart_association_att": "related_products"}]
       }
     }
   },
@@ -387,7 +387,7 @@ const CATEGORIES_JSON = {
       "association": {
         "cardinality_min": 0,
         "cardinality_max": null,
-        "counterparts": ["product"]
+        "counterparts": [{"counterpart_entity": "product", "counterpart_association_att": "main_category"}]
       }
     }
   },
@@ -700,7 +700,17 @@ const COMPANY_TYPES_JSON = {
   "name": "company_type",
   "columns": {
     "ID": "id",
-    "Name": "string"
+    "Name": "string",
+    "references": {
+      "attribute_kind": ["association"],
+      "name": "References",
+      "short_name": "Refs",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": null,
+        "counterparts": [{"counterpart_entity": "company", "counterpart_association_att": "CompanyTypeID"}]
+      }
+    }
   },
   "options": {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
@@ -1668,7 +1678,16 @@ const ALL_COMPANIES_JSON = {
     "GLNCode": "string",
     "Inactive": "boolean",
     "IntegrationCode": "string",
-    "CompanyTypeID": "int",
+    "CompanyTypeID": {
+      "attribute_kind": ["association"],
+      "name": "Company Type",
+      "short_name": "Type",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [{"counterpart_entity": "company_type", "counterpart_association_att": "references"}]
+      }
+    },
     "StateID": "int",
     "LastUpdated": "datetime"
   },
@@ -1676,7 +1695,7 @@ const ALL_COMPANIES_JSON = {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": false,
+    "editable": true,
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
@@ -5763,7 +5782,9 @@ function openAssociationSelect(rowIdx, colIdx, st) {
     showToast('No counterpart entities configured for this association.', 'error');
     return;
   }
-  const counterpartName = config.counterparts[0];
+  const counterpartDef = config.counterparts[0];
+  const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
+  const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
   const counterpartJson = all_entities[counterpartName];
   if (!counterpartJson) {
     showToast('Counterpart entity "' + counterpartName + '" not found in registry.', 'error');
@@ -5825,7 +5846,7 @@ function openAssociationSelect(rowIdx, colIdx, st) {
     pickBtn.textContent = 'Select';
     pickBtn.addEventListener('click', () => {
       const selectedId = String(itemRow[0]);
-      addAssociationBidirectional(rowIdx, colIdx, counterpartName, selectedId, st);
+      addAssociationBidirectional(rowIdx, colIdx, counterpartName, selectedId, counterpartAttName, st);
       modal.remove();
     });
     tdBtn.appendChild(pickBtn);
@@ -5840,7 +5861,7 @@ function openAssociationSelect(rowIdx, colIdx, st) {
   document.body.appendChild(modal);
 }
 
-function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpartId, st) {
+function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpartId, counterpartAttName, st) {
   const row = st.relation.items[rowIdx];
   let assocRelation = row[colIdx];
   if (!assocRelation || !assocRelation.pot) {
@@ -5859,7 +5880,7 @@ function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpar
   const newId = getNextAssociationId(assocRelation);
   assocRelation.items.push([newId, counterpartName, counterpartId]);
 
-  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', st);
+  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', counterpartAttName);
 
   logOperation(st, {
     op: 'association_add',
@@ -5885,9 +5906,19 @@ function removeAssociationRecord(rowIdx, colIdx, assocItemIdx, st) {
   const myEntityName = st.relation.name || '';
   const myRowId = String(row[0]);
 
+  const att = getAtt(st, colIdx);
+  const config = getAssociationConfig(att);
+  let counterpartAttName = null;
+  if (config && config.counterparts) {
+    const cpDef = config.counterparts.find(c =>
+      (typeof c === 'string' ? c : c.counterpart_entity) === counterpartName
+    );
+    if (cpDef && typeof cpDef === 'object') counterpartAttName = cpDef.counterpart_association_att;
+  }
+
   assocRelation.items.splice(assocItemIdx, 1);
 
-  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'remove', st);
+  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'remove', counterpartAttName);
 
   logOperation(st, {
     op: 'association_remove',
@@ -5902,21 +5933,27 @@ function removeAssociationRecord(rowIdx, colIdx, assocItemIdx, st) {
   showToast('Association with ' + counterpartName + ' #' + counterpartId + ' removed.', 'success');
 }
 
-function syncCounterpartAssociation(counterpartName, counterpartRowId, myEntityName, myRowId, action, st) {
+function syncCounterpartAssociation(counterpartName, counterpartRowId, myEntityName, myRowId, action, counterpartAttName) {
   const counterpartJson = all_entities[counterpartName];
   if (!counterpartJson) return;
 
   const counterpartCols = Object.keys(counterpartJson.columns);
-  const counterpartTypes = Object.values(counterpartJson.columns);
 
   let assocColIdx = -1;
-  for (let i = 0; i < counterpartCols.length; i++) {
-    const colVal = counterpartJson.columns[counterpartCols[i]];
-    if (typeof colVal === 'object' && colVal !== null && isAssociationAtt(colVal)) {
-      const cfg = getAssociationConfig(colVal);
-      if (cfg && cfg.counterparts && cfg.counterparts.includes(myEntityName)) {
-        assocColIdx = i;
-        break;
+  if (counterpartAttName) {
+    assocColIdx = counterpartCols.indexOf(counterpartAttName);
+  }
+  if (assocColIdx < 0) {
+    for (let i = 0; i < counterpartCols.length; i++) {
+      const colVal = counterpartJson.columns[counterpartCols[i]];
+      if (typeof colVal === 'object' && colVal !== null && isAssociationAtt(colVal)) {
+        const cfg = getAssociationConfig(colVal);
+        if (cfg && cfg.counterparts) {
+          const match = cfg.counterparts.some(c =>
+            (typeof c === 'string' ? c : c.counterpart_entity) === myEntityName
+          );
+          if (match) { assocColIdx = i; break; }
+        }
       }
     }
   }
