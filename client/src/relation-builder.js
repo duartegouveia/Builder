@@ -658,7 +658,7 @@ const USERS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const AUDITLOG_JSON = {
@@ -691,7 +691,7 @@ const AUDITLOG_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const COMPANY_TYPES_JSON = {
@@ -718,7 +718,7 @@ const COMPANY_TYPES_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", ""]]
+  "items": []
 };
 
 const ALL_STOCKS_JSON = {
@@ -866,7 +866,7 @@ const DISTRIBUTOR_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const ADMIN_DATA_MANAGEMENT_JSON = {
@@ -901,7 +901,7 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_IMPORTS_STATES_DETAILS_JSON = {
@@ -928,7 +928,7 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", ""]]
+  "items": []
 };
 
 const STOCK_IMPORTS_STATES_JSON = {
@@ -955,7 +955,7 @@ const STOCK_IMPORTS_STATES_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", ""]]
+  "items": []
 };
 
 const STOCK_IMPORTS_TYPES_JSON = {
@@ -986,7 +986,7 @@ const STOCK_IMPORTS_TYPES_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_IMPORTS_DETAILS_JSON = {
@@ -1016,7 +1016,7 @@ const STOCK_IMPORTS_DETAILS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_IMPORT_JSON = {
@@ -1057,7 +1057,7 @@ const STOCK_IMPORT_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_WAREHOUSE_JSON = {
@@ -1090,7 +1090,7 @@ const STOCK_WAREHOUSE_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
@@ -1140,7 +1140,7 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_HISTORIC_INVENTORY_JSON = {
@@ -1187,7 +1187,7 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_INVENTORY_DETAIL_JSON = {
@@ -1236,7 +1236,7 @@ const STOCK_INVENTORY_DETAIL_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const STOCK_INVENTORY_JSON = {
@@ -1284,7 +1284,7 @@ const STOCK_INVENTORY_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const CATALOG_PRODUCT_CONVERSIONS_JSON = {
@@ -1317,7 +1317,7 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const PRODUCT_CATALOG_JSON = {
@@ -1349,7 +1349,7 @@ const PRODUCT_CATALOG_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const PRICELIST_PARTNER_JSON = {
@@ -1377,7 +1377,7 @@ const PRICELIST_PARTNER_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", ""]]
+  "items": []
 };
 
 const PRICELIST_PRODUCTS_JSON = {
@@ -1408,7 +1408,7 @@ const PRICELIST_PRODUCTS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", ""]]
+  "items": []
 };
 
 const ALL_PRICELISTS_JSON = {
@@ -1440,7 +1440,7 @@ const ALL_PRICELISTS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const PRODUCT_BRANDS_JSON = {
@@ -1512,7 +1512,7 @@ const PRODUCT_SPECIES_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", ""]]
+  "items": []
 };
 
 const PRODUCT_FAMILIES_JSON = {
@@ -1543,7 +1543,7 @@ const PRODUCT_FAMILIES_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", ""]]
+  "items": []
 };
 
 const PRODUCT_CATEGORY_JSON = {
@@ -1649,7 +1649,7 @@ const ALL_PRODUCTS_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 const ALL_COMPANIES_JSON = {
@@ -1688,7 +1688,7 @@ const ALL_COMPANIES_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": [["", "", "", "", "", "", "", "", "", "", "", "", "", ""]]
+  "items": []
 };
 
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
