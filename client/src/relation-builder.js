@@ -2158,6 +2158,41 @@ function generateRandomValue(type, nestedRelationSchema = null) {
       const m = String(Math.floor(Math.random() * 60)).padStart(2, '0');
       const s = String(Math.floor(Math.random() * 60)).padStart(2, '0');
       return `${h}:${m}:${s}`;
+    case 'password': {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+      let pw = '';
+      for (let i = 0; i < 10 + Math.floor(Math.random() * 6); i++) pw += chars[Math.floor(Math.random() * chars.length)];
+      return pw;
+    }
+    case 'email': {
+      const domains = ['gmail.com', 'outlook.com', 'yahoo.com', 'empresa.pt', 'example.org', 'mail.com'];
+      const firstNames = ['ana', 'carlos', 'maria', 'jose', 'pedro', 'sofia', 'joao', 'rita', 'miguel', 'beatriz'];
+      const lastNames = ['silva', 'santos', 'ferreira', 'pereira', 'oliveira', 'costa', 'rodrigues', 'martins'];
+      return firstNames[Math.floor(Math.random() * firstNames.length)] + '.' + lastNames[Math.floor(Math.random() * lastNames.length)] + Math.floor(Math.random() * 100) + '@' + domains[Math.floor(Math.random() * domains.length)];
+    }
+    case 'tel': {
+      const prefixes = ['+351 91', '+351 92', '+351 93', '+351 96', '+44 7', '+34 6', '+33 6', '+49 15'];
+      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      let num = '';
+      for (let i = 0; i < 7; i++) num += Math.floor(Math.random() * 10);
+      return prefix + num;
+    }
+    case 'url': {
+      const sites = ['https://www.example.com', 'https://docs.empresa.pt', 'https://github.com/user/repo', 'https://pt.wikipedia.org/wiki/Artigo', 'https://www.google.com/maps', 'https://api.service.io/v2', 'https://blog.tech.org/post'];
+      return sites[Math.floor(Math.random() * sites.length)] + '/' + generateRandomString(6);
+    }
+    case 'search': {
+      const terms = ['dados científicos', 'análise estatística', 'machine learning', 'base de dados', 'inteligência artificial', 'visualização de dados', 'algoritmo genético', 'rede neural', 'processamento de texto', 'computação distribuída'];
+      return terms[Math.floor(Math.random() * terms.length)];
+    }
+    case 'color': {
+      const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b', '#2980b9', '#27ae60', '#f1c40f', '#8e44ad'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    case 'radio':
+      return null;
+    case 'file':
+      return null;
     case 'relation':
       if (nestedRelationSchema) {
         const defaultCounter = { value: 1 };
@@ -2225,6 +2260,14 @@ function generateDemoRelation() {
     created_at: 'datetime',
     start_time: 'time',
     notes: 'textarea',
+    password: 'password',
+    email: 'email',
+    phone: 'tel',
+    website: 'url',
+    search_terms: 'search',
+    fav_color: 'color',
+    priority: 'radio',
+    attachments: 'file',
     orders: 'relation',
     tags: 'relation'
   };
@@ -2244,6 +2287,12 @@ function generateDemoRelation() {
       br: '🇧🇷 Brasil',
       jp: '🇯🇵 Japan',
       cn: '🇨🇳 China'
+    },
+    priority: {
+      low: '🟢 Baixa',
+      medium: '🟡 Média',
+      high: '🟠 Alta',
+      critical: '🔴 Crítica'
     },
     'relation.single_item_mode': [ 'dialog', 'right', 'bottom' ]
   };
@@ -2286,9 +2335,17 @@ function generateDemoRelation() {
         }
       }
       
-      // Handle select type
       if (type === 'select' && colName === 'country') {
         return countryKeys[Math.floor(Math.random() * countryKeys.length)];
+      }
+      
+      if (type === 'radio' && options[colName]) {
+        const keys = Object.keys(options[colName]);
+        return keys[Math.floor(Math.random() * keys.length)];
+      }
+      
+      if (type === 'file') {
+        return createEmptyFileRelation();
       }
       
       return generateRandomValue(type);
@@ -20014,16 +20071,9 @@ function init() {
   const btnAiAsk = el('.btn-ai-ask');
   const aiQuestion = el('.ai-question');
   
-  btnGenerate?.addEventListener('click', async () => {
-    try {
-      const response = await fetch('/data/demo_data.json');
-      const data = await response.json();
-      textarea.value = JSON.stringify(data, null, 2);
-    } catch (error) {
-      console.error('Failed to load demo_data.json:', error);
-      const demo = generateDemoRelation();
-      textarea.value = JSON.stringify(demo, null, 2);
-    }
+  btnGenerate?.addEventListener('click', () => {
+    const demo = generateDemoRelation();
+    textarea.value = JSON.stringify(demo, null, 2);
   });
   
   const btnLoadProducts = el('.btn-load-products');
@@ -20061,9 +20111,67 @@ function init() {
     textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":{"aa":"string","bb":true,"cc":"15","dd":"15.5"}}';
   });
   
+  const btnI18n = el('.btn-i18n');
+  btnI18n?.addEventListener('click', () => {
+    textarea.value = JSON.stringify({"pt":"","en":""}, null, 2);
+  });
+  
   const btnAttributeObj = el('.btn-attribute-obj');
   btnAttributeObj?.addEventListener('click', () => {
-    textarea.value = '{}';
+    textarea.value = JSON.stringify({
+      "attribute_kind": ["text"],
+      "entity": "",
+      "visible": true,
+      "readonly": false,
+      "autocomplete": false,
+      "save_to_database": true,
+      "display_orientation": "",
+      "label_field_orientation": "",
+      "show_label": true,
+      "name": "",
+      "label_prefix": "",
+      "label_suffix": "",
+      "show_description": true,
+      "description": "",
+      "short_name": null,
+      "interface_width": "long",
+      "mandatory": false,
+      "recomended": false,
+      "prefix": "",
+      "suffix": "",
+      "class": [],
+      "statistical": "unstructured",
+      "datapot_show_attribute_details": false,
+      "datapot_temporal": false,
+      "datapot_objective": false,
+      "datapot_subjective": false,
+      "datapot_subjective_fuzzy_belief": false,
+      "datapot_subjective_justified": false,
+      "datapot_subjective_justified_fuzzy_belief": false,
+      "default_value": "",
+      "length_max": null,
+      "length_min": null,
+      "in_results": false,
+      "demo_data_use_ai": true,
+      "demo_data_relevant_attributes": [],
+      "validations": [],
+      "conditions": [],
+      "visible_in_view": true,
+      "visible_in_edit": true,
+      "visible_in_new": true,
+      "visible_in_advanced_search": true,
+      "visible_in_delete": true,
+      "visible_in_copy": true,
+      "visible_in_multi_copy": true,
+      "visible_in_multi_delete": true,
+      "visible_in_multi_view": true,
+      "visible_in_multi_edit": true,
+      "visible_in_multi_merge": true,
+      "visible_in_multi_group_edit": true,
+      "visible_in_export_pdf": true,
+      "visible_in_export_excel": true,
+      "visible_in_export_csv": true
+    }, null, 2);
   });
   
   const btnRelObj = el('.btn-rel-obj');
