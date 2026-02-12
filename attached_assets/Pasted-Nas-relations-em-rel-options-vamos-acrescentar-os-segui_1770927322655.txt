@@ -1,0 +1,53 @@
+Nas relations, em rel_options, vamos acrescentar os seguintes atributos.
+	"cardinality_min":0,
+	"cardinality_max":null,
+
+O atributo "cardinality_min" é por omissão 0, e indica o número mínimo de registos obrigatórios. Este valor nunca pode ser inferior a zero.
+O atributo "cardinality_max", que por omissão é null, indica o número máximo de registos que pode conter. Se for null, podem ser adicionados tantos registos quandos pretendidos. Se for um número, e esse número máximo for atingido, os botões new, new_fast, copy, multi_copy e import from file devem passar a ficar inativos (respeitando as opções de disponibilidade já indicada anteriormente). Se o número entretanto diminuir, aqueles botões voltam a estar ativos. 
+
+Vou agora descrever os requisitos para o attrubute kind "association".
+A coluna de dados de uma association é uma relation com 3 atributos: id, entity, foreign_key. No entanto a forma como é apresentada nas operações não é necessariamente uma relation. Pode ser uma select, como descreveremos em seguida.
+
+Para ficar mais claro, vamos primeiro descrever como se cnfigura uma relation dentro de um atributo JSON att.
+Dentro do objeto json de att, quando o attribute_kind é association, é acrescentado um objecto com a key association.
+Dentro desse atributo association é guardado o seguinte objeto JSON:
+
+"association":
+{
+	"cardinality_min":0,
+	"cardinality_max":null,
+	"counterparts":[]
+}
+
+O significado de cardinality_min e cardinality_max é o mesmo que na relation principal, mas agora aplicado à relation da association.
+A informação que ainda não tem o número mínimo deve aparecer (se o mínimo for >0) e tivermos menos desse número de registos.
+
+O atributo "cardinality_max", que por omissão é null, indica o número máximo de registos que pode conter. Este atributo pode ser usado para ter um número limite de registos, mostrando uma mensagem quando se atinge o limite, e passando a desactivar osbotões que permitem adicionar registos: new, new_fast, copy, multi_copy e import from file. É a mesma funcionalidade definida para a relation principal, apenas os dados vêm da confuguração do atributo em vez de rel_options.
+
+O atributo "conterparts" é um array, pode por isso conter vários registos. Cada um desses registos tem a seguinte estrutura JSON:
+
+{
+	"counterpart_entity":"",
+	"counterpart_association_att":"",
+	"counterpart_display_atts":[]
+}
+
+O counterpart_entity indica o "name" de uma relation. Em princípio, as associações só se fazem entre entidades, e as entidades têm a característica de ter sempre o "name" preenchido com o nome único da entidade.
+
+O counterpart_association_att indica, dentro da entidade counterpart_entity, qual o atributo do tipo association que terá obrigatóriamente, no atributo association.counterparts, uma entrada que referenciará esta entidade e este atributo association.
+Isto também significa que a entidade em que estamos a colocar o este atributo association também tem de ser uma entity e ter o atributo "name" preenchido.
+
+Esta arquitetura, em que existem relations de ambos os dadosda association, independentemente da cardinalidade, é uma opção que se distância das opções habituais na construção de bases de dados relacionais. É uma opção refletida e deliberada. Quero mesmo que isto seja feito assim.
+ 
+O counterpart_display_atts, indica quais os atributos da contraparte que queremos mostrar, ou seja, os mínimos suficientes para identifar a contraparte de forma útil, que pode ser diferente em diferentes contextos, mesmo que referenciando a mesma entidade.
+Para já não é preciso implementar esta parte, porque será feito com atributos lookup e ainda não estão descritos.
+
+A forma de apresentação da association nas line operations, checked operations, always visible operations, pode ser distinda de um lado e do outro da contraparte. Ou seja, é possível ter associations 1:1, 1:N, M:1 e N:M.
+ 
+A forma de apresentação só depende do próprio lado e não da contraparte.
+Se a "cardinality_max" de uma associação for 1, então a forma de apresentar a association, é uma pequena tabela, similar à que foi usada para a hierarchy (excepto no que respeita à cor, que deve ser a convencional das relations). Essa tabela deverá conter as colunas id, entity e foreign_key. No futuro, além dessas deverá conter as colunas definidas em "counterpart_display_atts".
+
+Quando a "cardinality_max" é 1, a forma de escolher o registo na contraparte, é feita utilizando a operação select_one, sobre a relation da contraparte.
+O registo escolhido da contraparte devem ser guardados na relation do atributo association em causa. Mas os dados devem ser apresentados na tal coluna especial que referi.
+
+Se a "cardinality_max" for diferente de 1, ou seja, null, ou >=2, então a association é apresentada como uma relation, com as colunas que ela tem, ou seja, id, entity e foreign_key. No futuro, além dessas deverá conter as colunas definidas em "counterpart_display_atts".
