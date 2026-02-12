@@ -3075,7 +3075,7 @@ function generateStatsExplanationsHTML(type) {
     explanations.push({ term: 'Kurtosis', def: 'Measures "tailedness". High = more outliers. Low = fewer outliers. Normal distribution has kurtosis ≈ 0.' });
   }
   
-  if (type === 'select' || type === 'boolean') {
+  if (type === 'select' || type === 'radio' || type === 'boolean') {
     explanations.push({ term: 'Categories', def: 'Number of unique values/options in the data.' });
     explanations.push({ term: 'Mode', def: 'Most frequently occurring category.' });
     explanations.push({ term: 'Mode Count', def: 'How many times the mode appears.' });
@@ -3595,8 +3595,7 @@ function calculateStatistics(colIdx, st = state) {
       stats.sum = nums.reduce((a, b) => a + b, 0);
       stats.mean = stats.sum / nums.length;
     }
-  } else if (type === 'select') {
-    // Categorical statistics for select type
+  } else if (type === 'select' || type === 'radio') {
     const freq = {};
     values.forEach(v => freq[v] = (freq[v] || 0) + 1);
     
@@ -4083,19 +4082,35 @@ function formatCellValue(value, type, colName) {
   if (type === 'textarea') {
     return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
   }
-  if (type === 'select') {
+  if (type === 'select' || type === 'radio') {
     const colOptions = state.options[colName];
     if (colOptions && colOptions[value] !== undefined) {
-      return `<span class="select-display">${colOptions[value]}</span>`;
+      return `<span class="${type === 'radio' ? 'radio-display' : 'select-display'}">${colOptions[value]}</span>`;
     }
     return `<span class="select-display-key">${value}</span>`;
+  }
+  if (type === 'password') {
+    return '<span class="password-cell-mask">••••••••</span>';
+  }
+  if (type === 'color') {
+    return '<span class="color-cell-swatch" style="background:' + escapeHtml(String(value)) + '"></span>' + escapeHtml(String(value));
+  }
+  if (type === 'file') {
+    const count = value?.items?.length || 0;
+    return '<span class="relation-cell-icon" title="' + count + ' files">📎 ' + count + '</span>';
+  }
+  if (type === 'url' && value) {
+    return '<a href="' + escapeHtml(String(value)) + '" target="_blank" rel="noopener" title="' + escapeHtml(String(value)) + '">' + escapeHtml(String(value).substring(0, 40)) + (String(value).length > 40 ? '...' : '') + '</a>';
+  }
+  if (type === 'email' && value) {
+    return '<a href="mailto:' + escapeHtml(String(value)) + '">' + escapeHtml(String(value)) + '</a>';
   }
   
   return String(value);
 }
 
 // ─── Integrity Check ───────────────────────────────────────────────────
-const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select']);
+const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select', 'password', 'email', 'tel', 'url', 'search', 'color', 'radio', 'file']);
 const KNOWN_REL_OPTIONS_KEYS = new Set(Object.keys(DEFAULT_REL_OPTIONS));
 const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved']);
 
@@ -5330,11 +5345,11 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
     
-    if (type === 'select') {
+    if (type === 'select' || type === 'radio') {
       const colName = st.columnNames[colIdx];
       const colOptions = st.options[colName];
       const span = document.createElement('span');
-      span.className = 'relation-cell-readonly select-display';
+      span.className = 'relation-cell-readonly ' + (type === 'radio' ? 'radio-display' : 'select-display');
       if (colOptions && colOptions[value] !== undefined) {
         span.innerHTML = colOptions[value];
       } else if (value !== null && value !== undefined) {
@@ -5343,6 +5358,38 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
         span.textContent = '—';
       }
       wrapper.appendChild(span);
+      return wrapper;
+    }
+
+    if (type === 'password') {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly password-cell-mask';
+      span.textContent = value ? '••••••••' : '—';
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
+    if (type === 'color') {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly';
+      if (value) {
+        span.innerHTML = '<span class="color-cell-swatch" style="background:' + escapeHtml(value) + '"></span>' + escapeHtml(value);
+      } else {
+        span.textContent = '—';
+      }
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
+    if (type === 'file') {
+      const btn = document.createElement('button');
+      btn.className = 'relation-cell-btn';
+      const count = value?.items?.length || 0;
+      btn.innerHTML = '📎 ' + count;
+      btn.title = 'View files (' + count + ')';
+      btn.dataset.row = rowIdx;
+      btn.dataset.col = colIdx;
+      wrapper.appendChild(btn);
       return wrapper;
     }
     
@@ -5412,15 +5459,13 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     const select = document.createElement('select');
     select.dataset.row = rowIdx;
     select.dataset.col = colIdx;
-    select.className = 'relation-select';
+    select.className = 'relation-select input-size-long';
     
-    // Add empty option for null
     const emptyOpt = document.createElement('option');
     emptyOpt.value = '';
     emptyOpt.textContent = '— Select —';
     select.appendChild(emptyOpt);
     
-    // Add options
     for (const [key, html] of Object.entries(colOptions)) {
       const opt = document.createElement('option');
       opt.value = key;
@@ -5430,13 +5475,43 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     }
     
     wrapper.appendChild(select);
+  } else if (type === 'radio') {
+    const colName = state.columnNames[colIdx];
+    const colOptions = state.options[colName] || {};
+    const group = document.createElement('div');
+    group.className = 'relation-radio-group input-size-long';
+    group.dataset.row = rowIdx;
+    group.dataset.col = colIdx;
+    for (const [key, html] of Object.entries(colOptions)) {
+      const lbl = document.createElement('label');
+      const rb = document.createElement('input');
+      rb.type = 'radio';
+      rb.name = 'radio_' + colIdx + '_' + rowIdx;
+      rb.value = key;
+      if (value === key) rb.checked = true;
+      lbl.appendChild(rb);
+      const span = document.createElement('span');
+      span.innerHTML = html;
+      lbl.appendChild(span);
+      group.appendChild(lbl);
+    }
+    wrapper.appendChild(group);
+  } else if (type === 'file') {
+    const btn = document.createElement('button');
+    btn.className = 'relation-cell-btn';
+    const count = value?.items?.length || 0;
+    btn.innerHTML = '📎 ' + count;
+    btn.title = 'View files (' + count + ')';
+    btn.dataset.row = rowIdx;
+    btn.dataset.col = colIdx;
+    wrapper.appendChild(btn);
   } else {
     const input = document.createElement('input');
     input.type = getInputType(type);
     input.value = formatValueForInput(type, value);
     input.dataset.row = rowIdx;
     input.dataset.col = colIdx;
-    input.className = 'relation-input';
+    input.className = 'relation-input ' + getInputSizeClass(type);
     if (type === 'int' || type === 'float') {
       input.step = type === 'float' ? '0.001' : '1';
     }
@@ -5457,8 +5532,35 @@ function getInputType(type) {
       return 'datetime-local';
     case 'time':
       return 'time';
+    case 'password':
+      return 'password';
+    case 'email':
+      return 'email';
+    case 'tel':
+      return 'tel';
+    case 'url':
+      return 'url';
+    case 'search':
+      return 'search';
+    case 'color':
+      return 'color';
     default:
       return 'text';
+  }
+}
+
+function getInputSizeClass(type) {
+  switch (type) {
+    case 'int':
+    case 'float':
+    case 'color':
+      return 'input-size-short';
+    case 'date':
+    case 'datetime':
+    case 'time':
+      return 'input-size-doubleshort';
+    default:
+      return 'input-size-long';
   }
 }
 
@@ -5604,7 +5706,7 @@ function filterByQuickSearch(st, indices) {
       // For select columns, search in the display label instead of the key
       const type = st.columnTypes[colIdx];
       let searchValue = value;
-      if (type === 'select' && st.options && st.options[st.columnNames[colIdx]]) {
+      if ((type === 'select' || type === 'radio') && st.options && st.options[st.columnNames[colIdx]]) {
         const options = st.options[st.columnNames[colIdx]];
         searchValue = options[value] || value;
       }
@@ -6307,6 +6409,7 @@ function renderMultiPanelContent(container, st, checkedIndices, panelPositions, 
     panelDiv.innerHTML = navHtml + '<div class="multi-panel-body">' + contentHtml + '</div>';
     panelsDiv.appendChild(panelDiv);
     initRelationFieldsInContainer(panelDiv, st, row);
+    initFileFieldsInContainer(panelDiv, st, row, isMerge ? 'view' : 'edit');
     if (isMerge && p === 0) {
       injectMergeRadiosIntoEditPanel(panelDiv, st, rowIdx);
     }
@@ -10150,8 +10253,7 @@ function showStatisticsPanel(colIdx) {
         ${generateKurtosisSVG(stats.kurtosis)}
       </div>
     `;
-  } else if (type === 'select') {
-    // Get mode display value
+  } else if (type === 'select' || type === 'radio') {
     const colOptions = state.options[name] || {};
     const modeDisplay = stats.mode?.map(k => colOptions[k] || k).join(', ') || '—';
     
@@ -11047,10 +11149,14 @@ function generateRowFormattedContent(st, row, mode = 'view') {
     const value = row[colIdx];
     
     if (type === 'relation') {
-      // Relations always use top-down layout
       html += `<div class="row-field row-field-relation row-field-top-down">`;
       html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
       html += `<div class="row-field-relation-container" data-col="${colIdx}"></div>`;
+      html += `</div>`;
+    } else if (type === 'file') {
+      html += `<div class="row-field row-field-file row-field-top-down">`;
+      html += `<label class="row-field-label">${escapeHtml(name)}</label>`;
+      html += `<div class="row-field-file-container" data-col="${colIdx}"></div>`;
       html += `</div>`;
     } else {
       if (labelTopDown) {
@@ -11092,7 +11198,7 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
     return value ? '<span class="bool-true">✓ true</span>' : '<span class="bool-false">✗ false</span>';
   }
   
-  if (type === 'select' && st.options && st.options[st.columnNames[colIdx]]) {
+  if ((type === 'select' || type === 'radio') && st.options && st.options[st.columnNames[colIdx]]) {
     const options = st.options[st.columnNames[colIdx]];
     const displayValue = options[value] || value;
     return `<span class="select-value">${escapeHtml(displayValue)}</span>`;
@@ -11109,6 +11215,27 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
   if (type === 'textarea') {
     return `<span class="multiline-value">${escapeHtml(String(value))}</span>`;
   }
+
+  if (type === 'password') {
+    return '<span class="password-cell-mask">••••••••</span>';
+  }
+
+  if (type === 'color' && value) {
+    return '<span class="color-cell-swatch" style="background:' + escapeHtml(String(value)) + '"></span> ' + escapeHtml(String(value));
+  }
+
+  if (type === 'url' && value) {
+    return '<a href="' + escapeHtml(String(value)) + '" target="_blank" rel="noopener">' + escapeHtml(String(value)) + '</a>';
+  }
+
+  if (type === 'email' && value) {
+    return '<a href="mailto:' + escapeHtml(String(value)) + '">' + escapeHtml(String(value)) + '</a>';
+  }
+
+  if (type === 'file') {
+    const count = value?.items?.length || 0;
+    return '<span class="string-value">📎 ' + count + ' files</span>';
+  }
   
   return `<span class="string-value">${escapeHtml(String(value))}</span>`;
 }
@@ -11124,6 +11251,245 @@ function initRelationFieldsInContainer(container, st, row) {
       relContainer.innerHTML = '<span class="null-value">null</span>';
     }
   });
+}
+
+function createEmptyFileRelation() {
+  return {
+    pot: 'relation',
+    guid: '',
+    name: 'files',
+    columns: { id: 'id', name: 'string', type: 'string', size: 'int', is_image: 'boolean', date: 'datetime', data: 'textarea' },
+    items: [],
+    options: {},
+    rel_options: { ...DEFAULT_REL_OPTIONS, show_id: false, editable: false }
+  };
+}
+
+function processFilesForRelation(files, existingRelation) {
+  const rel = existingRelation || createEmptyFileRelation();
+  if (!rel.items) rel.items = [];
+
+  const colNames = Object.keys(rel.columns);
+  const idIdx = colNames.indexOf('id');
+  let minId = 0;
+  rel.items.forEach(row => {
+    const id = parseInt(row[idIdx]);
+    if (!isNaN(id) && id < minId) minId = id;
+  });
+
+  const promises = Array.from(files).map((file, i) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1];
+        const isImage = file.type.startsWith('image/');
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const row = [];
+        colNames.forEach(cn => {
+          if (cn === 'id') row.push(minId - i - 1);
+          else if (cn === 'name') row.push(file.name);
+          else if (cn === 'type') row.push(file.type);
+          else if (cn === 'size') row.push(file.size);
+          else if (cn === 'is_image') row.push(isImage);
+          else if (cn === 'date') row.push(now);
+          else if (cn === 'data') row.push(base64);
+          else row.push(null);
+        });
+        resolve(row);
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  });
+
+  return Promise.all(promises).then(rows => {
+    rows.forEach(r => rel.items.push(r));
+    return rel;
+  });
+}
+
+function initFileFieldsInContainer(container, st, row, mode) {
+  const fileContainers = container.querySelectorAll('.row-field-file-container');
+  fileContainers.forEach(fc => {
+    const colIdx = parseInt(fc.dataset.col);
+    let fileRel = row[colIdx];
+    if (!fileRel || !fileRel.columns) {
+      fileRel = createEmptyFileRelation();
+      row[colIdx] = fileRel;
+    }
+
+    fc.innerHTML = '';
+
+    if (mode === 'view') {
+      if (fileRel.items && fileRel.items.length > 0) {
+        const relDiv = document.createElement('div');
+        relDiv.className = 'row-field-relation-container';
+        fc.appendChild(relDiv);
+        initRelationInstance(relDiv, fileRel, { showJsonEditor: false, isNested: true });
+        renderFileGallery(fc, fileRel);
+      } else {
+        fc.innerHTML = '<span class="null-value">Sem ficheiros</span>';
+      }
+    } else if (mode === 'new-fast') {
+      fc.innerHTML = '<span class="null-value">Upload indisponível no modo rápido</span>';
+    } else {
+      if (fileRel.items && fileRel.items.length > 0) {
+        const relDiv = document.createElement('div');
+        relDiv.className = 'row-field-relation-container';
+        relDiv.style.marginBottom = '8px';
+        fc.appendChild(relDiv);
+        initRelationInstance(relDiv, { ...fileRel, rel_options: { ...fileRel.rel_options, editable: true } }, { showJsonEditor: false, isNested: true });
+        renderFileGallery(fc, fileRel);
+      }
+
+      const zone = document.createElement('div');
+      zone.className = 'file-upload-zone';
+      zone.innerHTML = '<span class="upload-icon">📁</span><span class="upload-text">Arraste ficheiros ou <strong>clique para selecionar</strong></span>';
+
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.multiple = true;
+      fileInput.style.display = 'none';
+
+      const progressDiv = document.createElement('div');
+      progressDiv.className = 'file-upload-progress';
+      progressDiv.style.display = 'none';
+      progressDiv.innerHTML = '<div class="file-upload-progress-bar"><div class="progress-fill"></div></div><div class="file-upload-progress-text"></div>';
+
+      zone.addEventListener('click', () => fileInput.click());
+      zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        handleFileUpload(e.dataTransfer.files);
+      });
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) handleFileUpload(fileInput.files);
+      });
+
+      const handleFileUpload = (files) => {
+        progressDiv.style.display = 'block';
+        const fill = progressDiv.querySelector('.progress-fill');
+        const text = progressDiv.querySelector('.file-upload-progress-text');
+        fill.style.width = '30%';
+        text.textContent = 'A processar ' + files.length + ' ficheiro(s)...';
+
+        processFilesForRelation(files, fileRel).then(updatedRel => {
+          row[colIdx] = updatedRel;
+          fill.style.width = '100%';
+          text.textContent = files.length + ' ficheiro(s) adicionado(s).';
+          showToast(files.length + ' ficheiro(s) adicionado(s).', 'success');
+
+          setTimeout(() => {
+            progressDiv.style.display = 'none';
+            fill.style.width = '0%';
+          }, 1500);
+
+          const existingRel = fc.querySelector('.row-field-relation-container');
+          if (existingRel) existingRel.remove();
+          const existingGallery = fc.querySelector('.file-gallery-accordion');
+          if (existingGallery) existingGallery.remove();
+
+          const relDiv = document.createElement('div');
+          relDiv.className = 'row-field-relation-container';
+          relDiv.style.marginBottom = '8px';
+          fc.insertBefore(relDiv, zone);
+          initRelationInstance(relDiv, { ...updatedRel, rel_options: { ...updatedRel.rel_options, editable: true } }, { showJsonEditor: false, isNested: true });
+          renderFileGallery(fc, updatedRel, zone);
+        }).catch(err => {
+          fill.style.width = '0%';
+          text.textContent = 'Erro: ' + err.message;
+          showToast('Erro ao processar ficheiros.', 'error');
+        });
+      };
+
+      fc.appendChild(zone);
+      fc.appendChild(fileInput);
+      fc.appendChild(progressDiv);
+    }
+  });
+}
+
+function renderFileGallery(container, fileRel, insertBefore) {
+  if (!fileRel || !fileRel.items || fileRel.items.length === 0) return;
+
+  const colNames = Object.keys(fileRel.columns);
+  const isImageIdx = colNames.indexOf('is_image');
+  const dataIdx = colNames.indexOf('data');
+  const typeIdx = colNames.indexOf('type');
+  const nameIdx = colNames.indexOf('name');
+
+  const images = fileRel.items.filter(row => row[isImageIdx] === true && row[dataIdx]);
+  if (images.length === 0) return;
+
+  const existing = container.querySelector('.file-gallery-accordion');
+  if (existing) existing.remove();
+
+  const galleryPerPage = 6;
+  let currentPage = 1;
+  const totalPages = Math.ceil(images.length / galleryPerPage);
+
+  const accordion = document.createElement('div');
+  accordion.className = 'file-gallery-accordion';
+
+  const header = document.createElement('div');
+  header.className = 'file-gallery-header';
+  header.innerHTML = '<span class="accordion-arrow">▶</span> Galeria de Imagens (' + images.length + ')';
+
+  const content = document.createElement('div');
+  content.className = 'file-gallery-content';
+
+  const renderPage = () => {
+    const startIdx = (currentPage - 1) * galleryPerPage;
+    const pageImages = images.slice(startIdx, startIdx + galleryPerPage);
+
+    let html = '<div class="file-gallery-grid">';
+    pageImages.forEach(row => {
+      const mimeType = row[typeIdx] || 'image/png';
+      const dataUri = 'data:' + mimeType + ';base64,' + row[dataIdx];
+      const name = row[nameIdx] || '';
+      html += '<div class="file-gallery-item">';
+      html += '<img src="' + dataUri + '" alt="' + escapeHtml(name) + '" loading="lazy">';
+      html += '<div class="file-gallery-name" title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    if (totalPages > 1) {
+      html += '<div class="file-gallery-pagination">';
+      html += '<button class="btn btn-outline btn-sm gallery-prev" ' + (currentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
+      html += '<span>Página ' + currentPage + ' de ' + totalPages + '</span>';
+      html += '<button class="btn btn-outline btn-sm gallery-next" ' + (currentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
+      html += '</div>';
+    }
+
+    content.innerHTML = html;
+
+    content.querySelector('.gallery-prev')?.addEventListener('click', () => {
+      if (currentPage > 1) { currentPage--; renderPage(); }
+    });
+    content.querySelector('.gallery-next')?.addEventListener('click', () => {
+      if (currentPage < totalPages) { currentPage++; renderPage(); }
+    });
+  };
+
+  header.addEventListener('click', () => {
+    header.classList.toggle('expanded');
+    content.classList.toggle('expanded');
+    if (content.classList.contains('expanded') && content.innerHTML === '') {
+      renderPage();
+    }
+  });
+
+  accordion.appendChild(header);
+  accordion.appendChild(content);
+
+  if (insertBefore) {
+    container.insertBefore(accordion, insertBefore);
+  } else {
+    container.appendChild(accordion);
+  }
 }
 
 function closeRowOperationPanel(st) {
@@ -11154,6 +11520,7 @@ function showRowViewDialog(st, rowIdx) {
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'view');
     initRelationFieldsInContainer(container, st, row);
+    initFileFieldsInContainer(container, st, row, 'view');
     
     // Set up footer button handlers (buttons are in parent footer)
     setTimeout(() => {
@@ -11186,6 +11553,7 @@ function showRowCopyDialog(st, rowIdx) {
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'view');
     initRelationFieldsInContainer(container, st, row);
+    initFileFieldsInContainer(container, st, row, 'view');
     
     setTimeout(() => {
       const footer = container.closest('.detail-panel-content, .nested-relation-dialog')?.querySelector('.detail-panel-footer, .filter-dialog-footer');
@@ -11253,6 +11621,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, defaultRow, 'edit');
+    initFileFieldsInContainer(container, st, defaultRow, 'edit');
     
     const clearForm = () => {
       st.columnNames.forEach((name, colIdx) => {
@@ -11263,6 +11632,11 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
             input.checked = false;
           } else if (input.tagName === 'SELECT') {
             input.selectedIndex = 0;
+          } else if (type === 'radio') {
+            const radios = input.querySelectorAll('input[type="radio"]');
+            radios.forEach(r => r.checked = false);
+          } else if (type === 'file') {
+            // file data handled via file containers
           } else {
             input.value = '';
           }
@@ -11276,6 +11650,8 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
         const type = st.columnTypes[colIdx];
         if (type === 'id') {
           newRow[colIdx] = getNextNegativeId(st);
+        } else if (type === 'relation' || type === 'file') {
+          // relation/file data managed via nested containers
         } else {
           const input = container.querySelector(`[data-col="${colIdx}"]`);
           if (input) {
@@ -11285,6 +11661,9 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
               newRow[colIdx] = input.value === '' ? null : parseInt(input.value);
             } else if (type === 'float') {
               newRow[colIdx] = input.value === '' ? null : parseFloat(input.value);
+            } else if (type === 'radio') {
+              const checked = input.querySelector('input[type="radio"]:checked');
+              newRow[colIdx] = checked ? checked.value : null;
             } else {
               newRow[colIdx] = input.value === '' ? null : input.value;
             }
@@ -11357,7 +11736,7 @@ function showRowPaperFormDialog(st, rowIdx) {
       html += `<div class="paper-form-field">`;
       html += `<label class="paper-form-label">${escapeHtml(name)}</label>`;
       
-      if (type === 'select' && st.options && st.options[st.columnNames[colIdx]]) {
+      if ((type === 'select' || type === 'radio') && st.options && st.options[st.columnNames[colIdx]]) {
         const options = st.options[st.columnNames[colIdx]];
         html += `<div class="paper-form-radio-group">`;
         Object.entries(options).forEach(([k, v]) => {
@@ -11462,6 +11841,7 @@ function showRowEditDialog(st, rowIdx) {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'edit');
+    initFileFieldsInContainer(container, st, row, 'edit');
     
     const idColIdx = st.columnTypes.findIndex(t => t === 'id');
     const rowId = idColIdx !== -1 ? row[idColIdx] : null;
@@ -11483,6 +11863,7 @@ function showRowEditDialog(st, rowIdx) {
           st.columnNames.forEach((name, colIdx) => {
             const type = st.columnTypes[colIdx];
             if (type === 'id') return;
+            if (type === 'relation' || type === 'file') return;
             
             const input = container.querySelector(`[data-col="${colIdx}"]`);
             if (input) {
@@ -11493,6 +11874,9 @@ function showRowEditDialog(st, rowIdx) {
                 value = input.value === '' ? null : parseInt(input.value);
               } else if (type === 'float') {
                 value = input.value === '' ? null : parseFloat(input.value);
+              } else if (type === 'radio') {
+                const checked = input.querySelector('input[type="radio"]:checked');
+                value = checked ? checked.value : null;
               } else {
                 value = input.value === '' ? null : input.value;
               }
@@ -11741,7 +12125,7 @@ function updateRelationFromInput(input) {
     value = parseFloat(input.value) || 0;
   } else if (type === 'datetime') {
     value = input.value.replace('T', ' ');
-  } else if (type === 'select') {
+  } else if (type === 'select' || type === 'radio') {
     value = input.value || null;
   } else {
     value = input.value;
@@ -19541,33 +19925,44 @@ function formatValueForDisplay(value, type) {
 }
 
 function createEditInputHtml(type, value, colIdx, st) {
+  const sizeClass = getInputSizeClass(type);
   if (type === 'boolean') {
     return `<input type="checkbox" data-col="${colIdx}" ${value ? 'checked' : ''}>`;
   } else if (type === 'int' || type === 'float') {
-    return `<input type="number" class="relation-input" data-col="${colIdx}" value="${value !== null ? value : ''}" ${type === 'float' ? 'step="any"' : ''}>`;
+    return `<input type="number" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? value : ''}" ${type === 'float' ? 'step="any"' : ''}>`;
   } else if (type === 'select' && st.options[st.columnNames[colIdx]]) {
     const options = st.options[st.columnNames[colIdx]];
-    let html = `<select class="relation-select" data-col="${colIdx}">`;
+    let html = `<select class="relation-select input-size-long" data-col="${colIdx}">`;
     html += '<option value="">Select...</option>';
     Object.entries(options).forEach(([k, v]) => {
       html += `<option value="${escapeHtml(k)}" ${value === k ? 'selected' : ''}>${escapeHtml(v)}</option>`;
     });
     html += '</select>';
     return html;
+  } else if (type === 'radio' && st.options[st.columnNames[colIdx]]) {
+    const options = st.options[st.columnNames[colIdx]];
+    let html = `<div class="relation-radio-group input-size-long" data-col="${colIdx}">`;
+    Object.entries(options).forEach(([k, v]) => {
+      html += `<label><input type="radio" name="edit_radio_${colIdx}" value="${escapeHtml(k)}" ${value === k ? 'checked' : ''}> <span>${escapeHtml(v)}</span></label>`;
+    });
+    html += '</div>';
+    return html;
   } else if (type === 'textarea') {
-    return `<textarea class="relation-textarea" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
+    return `<textarea class="relation-textarea input-size-long" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
   } else if (type === 'date') {
-    return `<input type="date" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+    return `<input type="date" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
   } else if (type === 'datetime') {
-    return `<input type="datetime-local" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+    return `<input type="datetime-local" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
   } else if (type === 'time') {
-    return `<input type="time" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
-  } else if (type === 'textarea') {
-    return `<textarea class="relation-textarea" data-col="${colIdx}" rows="3">${value !== null ? escapeHtml(value) : ''}</textarea>`;
+    return `<input type="time" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
   } else if (type === 'relation') {
-    return `<span class="view-value">📋 ${value?.items?.length || 0} rows (not editable here)</span>`;
+    return `<span class="view-value">📋 ${value?.items?.length || 0} rows</span>`;
+  } else if (type === 'file') {
+    return `<span class="view-value">📎 ${value?.items?.length || 0} files</span>`;
+  } else if (type === 'color') {
+    return `<input type="color" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value || '#000000'}">`;
   } else {
-    return `<input type="text" class="relation-input" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
+    return `<input type="${getInputType(type)}" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
   }
 }
 
