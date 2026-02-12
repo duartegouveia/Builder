@@ -48,6 +48,9 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Hierarchy Navigation**: Breadcrumb trail for hierarchical data.
 - **Cartesian Product**: Supports cross-joining nested relation columns.
 - **Remove Duplicates**: Removes exact duplicate rows.
+- **Cardinality Constraints**: `cardinality_min` and `cardinality_max` in `rel_options` enforce row count limits. When max is reached, New/Copy/Import buttons are disabled. Warning badges show when count is below min or at/above max. Checked via `isCardinalityMaxReached(st)` and `isCardinalityMinUnmet(st)`.
+- **Association Attribute Kind**: Columns with `attribute_kind: ['association']` manage bidirectional entity relationships. The `association` property on the att defines `cardinality_min`, `cardinality_max`, and `counterparts` (array of entity names). Data is stored as a nested relation with columns `{id, entity, foreign_key}`. For `cardinality_max===1`, renders inline with Select/Clear buttons. For unlimited cardinality, shows link count with View button. Bidirectional sync automatically creates/removes counterpart records. Helpers: `isAssociationAtt()`, `getAssociationConfig()`, `createEmptyAssociationRelation()`, `getNextAssociationId()`, `addAssociationBidirectional()`, `removeAssociationRecord()`, `syncCounterpartAssociation()`.
+- **Global Entity Registry**: `all_entities` object populated on page init with all demo JSON constants keyed by `relation.name`, enabling cross-entity lookups for associations.
 - **Attribute Object (att) System**: Columns can be defined as either simple type strings (e.g., `"string"`) or complex att objects with 70+ configurable properties. Key att features:
   - **Kind Resolution**: `attribute_kind` array maps to base types via `ATT_KIND_MAP` (text→string, number→float, checkbox→boolean, etc.)
   - **Display Names**: i18n-aware `name` and `short_name` properties; short_name used in table headers, full name in dialogs

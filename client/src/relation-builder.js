@@ -2,6 +2,8 @@ import './styles.css';
 
 const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
 
+const all_entities = {};
+
 const ATT_KIND_MAP = {
   'text': 'string',
   'checkbox': 'boolean',
@@ -79,7 +81,8 @@ const DEFAULT_ATT = {
   visible_in_multi_group_edit: true,
   visible_in_export_pdf: true,
   visible_in_export_excel: true,
-  visible_in_export_csv: true
+  visible_in_export_csv: true,
+  association: null
 };
 
 function resolveColumnKind(colValue) {
@@ -269,6 +272,8 @@ const DEFAULT_REL_OPTIONS = {
   hierarchy_column: 'parent',
   hierarchy_root_value: '',
   hierarchy_initial_value: null,
+  cardinality_min: 0,
+  cardinality_max: null,
   single_item_mode: 'dialog',
   label_field_top_down: true,
   OnDoubleClickAction: 'view',
@@ -296,7 +301,7 @@ function logOperation(st, op) {
 const PRODUCTS_JSON = {
   "pot": "relation",
   "guid": "",
-  "name": "",
+  "name": "product",
   "columns": {
     "id": "id",
     "external_ref": "string",
@@ -305,13 +310,33 @@ const PRODUCTS_JSON = {
     "subbrand": "string",
     "ean": "string",
     "min_stock": "int",
-    "category": "string"
+    "category": "string",
+    "main_category": {
+      "attribute_kind": ["association"],
+      "name": "Main Category",
+      "short_name": "Category Link",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": ["category"]
+      }
+    },
+    "related_products": {
+      "attribute_kind": ["association"],
+      "name": "Related Products",
+      "short_name": "Related",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": null,
+        "counterparts": ["product"]
+      }
+    }
   },
   "options": {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": false,
+    "editable": true,
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
@@ -329,38 +354,48 @@ const PRODUCTS_JSON = {
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
-    ["1", "1", "PURINA DOG Chow Adulto", "Nestle", "PURINA", "7613036584307", 10, "1"],
-    ["2", "2", "Purina ONE Supreme Adult", "Nestle", "PURINA", "7613036584312", 10, "2"],
-    ["3", "3", "Garden Gourmet à base de proteína vegetal", "Nestle", "Garden Gourmet", "7613036584313", 5, "3"],
-    ["4", "4", "Tablete de Chocolate Nestlé Classic", "Nestle", "Nestle", "7613036584314", 5, "4"],
-    ["5", "5", "Bombons Nestlé Sensations", "Nestle", "Nestle", "7613036584315", 0, "4"],
-    ["6", "6", "Barras de Chocolate Nestlé Crunch", "Nestle", "Nestle", "7613036584316", 0, "4"],
-    ["7", "7", "CINI MINIS Churros", "Nestle", "Nestle", "7613036584317", 5, "5"],
-    ["8", "8", "CHEERIOS Mel 375 g", "Nestle", "Nestle", "7613034626847", 10, "5"],
-    ["9", "9", "NESCAFÉ Classic 200 mg", "Nestle", "NESCAFÉ", "7613035304003", 10, "6"],
-    ["10", "10", "SICAL Torrado", "Nestle", "SICAL", "7613035304008", 10, "6"],
-    ["11", "11", "Bolero Bebida de Cevada", "Nestle", "Bolero", "7613035304013", 10, "6"],
-    ["12", "12", "Natas Longa Vida", "Nestle", "Longa Vida", "7613035304018", 10, "7"],
-    ["13", "13", "Iogurte grego Lindahls rico em proteína", "Nestle", "Lindahls", "7613035304023", 10, "7"],
-    ["14", "14", "Arroz de Marisco Longa Vida", "Nestle", "Longa Vida", "7613035304028", 5, "9"],
-    ["15", "15", "Miúdos Nutrição Infantil NAN", "Nestle", "NAN", "7613035304033", 10, "11"]
+    ["1", "1", "PURINA DOG Chow Adulto", "Nestle", "PURINA", "7613036584307", 10, "1", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","category","1"]]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","2"]]}],
+    ["2", "2", "Purina ONE Supreme Adult", "Nestle", "PURINA", "7613036584312", 10, "2", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","category","2"]]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","1"]]}],
+    ["3", "3", "Garden Gourmet à base de proteína vegetal", "Nestle", "Garden Gourmet", "7613036584313", 5, "3", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["4", "4", "Tablete de Chocolate Nestlé Classic", "Nestle", "Nestle", "7613036584314", 5, "4", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","5"],["-2","product","6"]]}],
+    ["5", "5", "Bombons Nestlé Sensations", "Nestle", "Nestle", "7613036584315", 0, "4", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","4"]]}],
+    ["6", "6", "Barras de Chocolate Nestlé Crunch", "Nestle", "Nestle", "7613036584316", 0, "4", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","4"]]}],
+    ["7", "7", "CINI MINIS Churros", "Nestle", "Nestle", "7613036584317", 5, "5", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["8", "8", "CHEERIOS Mel 375 g", "Nestle", "Nestle", "7613034626847", 10, "5", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["9", "9", "NESCAFÉ Classic 200 mg", "Nestle", "NESCAFÉ", "7613035304003", 10, "6", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["10", "10", "SICAL Torrado", "Nestle", "SICAL", "7613035304008", 10, "6", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["11", "11", "Bolero Bebida de Cevada", "Nestle", "Bolero", "7613035304013", 10, "6", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["12", "12", "Natas Longa Vida", "Nestle", "Longa Vida", "7613035304018", 10, "7", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["13", "13", "Iogurte grego Lindahls rico em proteína", "Nestle", "Lindahls", "7613035304023", 10, "7", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["14", "14", "Arroz de Marisco Longa Vida", "Nestle", "Longa Vida", "7613035304028", 5, "9", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ["15", "15", "Miúdos Nutrição Infantil NAN", "Nestle", "NAN", "7613035304033", 10, "11", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}]
   ]
 };
 
 const CATEGORIES_JSON = {
   "pot": "relation",
   "guid": "",
-  "name": "",
+  "name": "category",
   "columns": {
     "id": "id",
     "external_ref": "string",
-    "name": "string"
+    "name": "string",
+    "linked_products": {
+      "attribute_kind": ["association"],
+      "name": "Linked Products",
+      "short_name": "Products",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": null,
+        "counterparts": ["product"]
+      }
+    }
   },
   "options": {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": false,
+    "editable": true,
     "show_multicheck": true,
     "show_natural_order": true,
     "show_id": true,
@@ -378,25 +413,25 @@ const CATEGORIES_JSON = {
     "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
-    ['1','1','Dog Food'],
-    ['2','2','Cat Food'],
-    ['3','3','Vegetarian Food'],
-    ['4','4','Chocolate'],
-    ['5','5','Cereals'],
-    ['6','6','Cofee and Beverages'],
-    ['7','7','Milk and Deserts'],
-    ['8','8','Clinical Nutricion'],
-    ['9','9','Cooking'],
-    ['10','10','Cofee machines'],
-    ['11','11','Child nutrition'],
-    ['12','12','Proteins and Vitamins']
+    ['1','1','Dog Food', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","1"]]}],
+    ['2','2','Cat Food', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","2"]]}],
+    ['3','3','Vegetarian Food', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['4','4','Chocolate', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['5','5','Cereals', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['6','6','Cofee and Beverages', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['7','7','Milk and Deserts', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['8','8','Clinical Nutricion', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['9','9','Cooking', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['10','10','Cofee machines', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['11','11','Child nutrition', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}],
+    ['12','12','Proteins and Vitamins', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[]}]
   ]
 };
 
 const STOCKS_JSON = {
   "pot": "relation",
   "guid": "",
-  "name": "",
+  "name": "stock_item",
   "columns": {
     "id": "id",
     "stock_date": "date",
@@ -517,7 +552,7 @@ const STOCKS_JSON = {
 const PRICELISTS_JSON = {
   "pot": "relation",
   "guid": "",
-  "name": "",
+  "name": "pricelist",
   "columns": {
     "id": "id",
     "start_date": "date",
@@ -1980,6 +2015,63 @@ function shouldShowHierarchy(st) {
   const hierarchyColumn = st.rel_options.hierarchy_column;
   if (!hierarchyColumn) return false;
   return st.columnNames.includes(hierarchyColumn);
+}
+
+function isCardinalityMaxReached(st) {
+  const max = st.rel_options.cardinality_max;
+  if (max === null || max === undefined) return false;
+  return st.relation.items.length >= max;
+}
+
+function isCardinalityMinUnmet(st) {
+  const min = st.rel_options.cardinality_min;
+  if (!min || min <= 0) return false;
+  return st.relation.items.length < min;
+}
+
+const CARDINALITY_BLOCKED_ALWAYS_VISIBLE = new Set(['new-row', 'new-fast-row', 'import-file']);
+const CARDINALITY_BLOCKED_LINE = new Set(['copy-row', 'new-row', 'new-fast-row']);
+const CARDINALITY_BLOCKED_MULTI = new Set(['multi-copy']);
+
+function isAssociationAtt(att) {
+  if (!att || typeof att !== 'object') return false;
+  return Array.isArray(att.attribute_kind) && att.attribute_kind.includes('association');
+}
+
+function getAssociationConfig(att) {
+  if (!isAssociationAtt(att)) return null;
+  return att.association || { cardinality_min: 0, cardinality_max: null, counterparts: [] };
+}
+
+function createEmptyAssociationRelation() {
+  return {
+    pot: 'relation',
+    guid: '',
+    name: '',
+    columns: { id: 'id', entity: 'string', foreign_key: 'string' },
+    rel_options: {
+      editable: false,
+      show_multicheck: false,
+      show_natural_order: false,
+      show_id: true,
+      show_column_kind: false,
+      show_stats: false,
+      cardinality_min: 0,
+      cardinality_max: null,
+      general_view_options: [],
+      general_always_visible_options: ['New', 'Delete'],
+      general_line_options: ['Delete'],
+      general_multi_options: []
+    },
+    items: []
+  };
+}
+
+function getNextAssociationId(assocRelation) {
+  if (!assocRelation || !assocRelation.items || assocRelation.items.length === 0) return '-1';
+  const ids = assocRelation.items.map(row => parseInt(row[0]) || 0);
+  const minId = Math.min(...ids);
+  return String(minId <= 0 ? minId - 1 : -1);
 }
 
 // Navigate up in hierarchy - go to parent level
@@ -4295,10 +4387,24 @@ function getVisibleColumns(st = state) {
 
 
 // Relation type functions
-function formatCellValue(value, type, colName) {
+function formatCellValue(value, type, colName, st) {
   if (value === null || value === undefined) return '<span class="null-value">null</span>';
   
   if (type === 'relation') {
+    if (st) {
+      const colIdx = st.columnNames.indexOf(colName);
+      const att = colIdx >= 0 && st.columnAtts ? st.columnAtts[colIdx] : null;
+      if (isAssociationAtt(att)) {
+        const items = value?.items || [];
+        if (items.length === 0) return '<span class="assoc-cell-empty">—</span>';
+        const labels = items.map(row => {
+          const entity = row[1] || '';
+          const fk = row[2] || '';
+          return `${entity}#${fk}`;
+        });
+        return `<span class="assoc-cell-summary" title="${escapeHtml(labels.join(', '))}">${labels.length === 1 ? labels[0] : labels.length + ' links'}</span>`;
+      }
+    }
     const count = value?.items?.length || 0;
     return `<span class="relation-cell-icon" title="${count} rows">📋 ${count}</span>`;
   }
@@ -5588,6 +5694,254 @@ function applyAttInputProps(input, st, colIdx) {
   if (att.length_min) input.setAttribute('minlength', att.length_min);
 }
 
+function buildAssociationCell(value, rowIdx, colIdx, editable, st) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'assoc-cell';
+  const att = getAtt(st, colIdx);
+  const config = getAssociationConfig(att);
+  const maxOne = config && config.cardinality_max === 1;
+  const items = value?.items || [];
+
+  if (maxOne) {
+    if (items.length === 0) {
+      const emptySpan = document.createElement('span');
+      emptySpan.className = 'assoc-empty';
+      emptySpan.textContent = '—';
+      wrapper.appendChild(emptySpan);
+      if (editable) {
+        const selectBtn = document.createElement('button');
+        selectBtn.className = 'assoc-select-btn';
+        selectBtn.textContent = 'Select';
+        selectBtn.title = 'Select associated entity';
+        selectBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openAssociationSelect(rowIdx, colIdx, st);
+        });
+        wrapper.appendChild(selectBtn);
+      }
+    } else {
+      const row = items[0];
+      const entity = row[1] || '';
+      const fk = row[2] || '';
+      const label = document.createElement('span');
+      label.className = 'assoc-link-label';
+      label.textContent = entity + ' #' + fk;
+      label.title = 'Entity: ' + entity + ', ID: ' + fk;
+      wrapper.appendChild(label);
+      if (editable) {
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'assoc-clear-btn';
+        clearBtn.textContent = '\u00D7';
+        clearBtn.title = 'Remove association';
+        clearBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeAssociationRecord(rowIdx, colIdx, 0, st);
+        });
+        wrapper.appendChild(clearBtn);
+      }
+    }
+  } else {
+    const countSpan = document.createElement('span');
+    countSpan.className = 'assoc-count';
+    countSpan.textContent = items.length + ' link' + (items.length !== 1 ? 's' : '');
+    wrapper.appendChild(countSpan);
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'relation-cell-btn assoc-view-btn';
+    viewBtn.textContent = 'View';
+    viewBtn.dataset.row = rowIdx;
+    viewBtn.dataset.col = colIdx;
+    wrapper.appendChild(viewBtn);
+  }
+
+  return wrapper;
+}
+
+function openAssociationSelect(rowIdx, colIdx, st) {
+  const att = getAtt(st, colIdx);
+  const config = getAssociationConfig(att);
+  if (!config || !config.counterparts || config.counterparts.length === 0) {
+    showToast('No counterpart entities configured for this association.', 'error');
+    return;
+  }
+  const counterpartName = config.counterparts[0];
+  const counterpartJson = all_entities[counterpartName];
+  if (!counterpartJson) {
+    showToast('Counterpart entity "' + counterpartName + '" not found in registry.', 'error');
+    return;
+  }
+
+  const modal = document.createElement('div');
+  modal.className = 'assoc-select-modal';
+  const overlay = document.createElement('div');
+  overlay.className = 'assoc-select-overlay';
+  overlay.addEventListener('click', () => modal.remove());
+
+  const dialog = document.createElement('div');
+  dialog.className = 'assoc-select-dialog';
+  const header = document.createElement('div');
+  header.className = 'assoc-select-header';
+  header.innerHTML = '<h3>Select from ' + escapeHtml(counterpartName) + '</h3>';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'assoc-select-close';
+  closeBtn.textContent = '\u00D7';
+  closeBtn.addEventListener('click', () => modal.remove());
+  header.appendChild(closeBtn);
+  dialog.appendChild(header);
+
+  const tableEl = document.createElement('table');
+  tableEl.className = 'assoc-select-table';
+  const counterpartCols = Object.keys(counterpartJson.columns);
+  const counterpartTypes = Object.values(counterpartJson.columns);
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  counterpartCols.forEach(col => {
+    const th = document.createElement('th');
+    th.textContent = col;
+    headRow.appendChild(th);
+  });
+  const thAction = document.createElement('th');
+  thAction.textContent = '';
+  headRow.appendChild(thAction);
+  thead.appendChild(headRow);
+  tableEl.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  const counterpartItems = counterpartJson.items || [];
+  counterpartItems.forEach((itemRow) => {
+    const tr = document.createElement('tr');
+    counterpartCols.forEach((col, ci) => {
+      const td = document.createElement('td');
+      const cellVal = itemRow[ci];
+      if (cellVal && typeof cellVal === 'object' && cellVal.pot === 'relation') {
+        td.textContent = '[Relation]';
+      } else {
+        td.textContent = cellVal !== null && cellVal !== undefined ? String(cellVal) : '';
+      }
+      tr.appendChild(td);
+    });
+    const tdBtn = document.createElement('td');
+    const pickBtn = document.createElement('button');
+    pickBtn.className = 'assoc-pick-btn';
+    pickBtn.textContent = 'Select';
+    pickBtn.addEventListener('click', () => {
+      const selectedId = String(itemRow[0]);
+      addAssociationBidirectional(rowIdx, colIdx, counterpartName, selectedId, st);
+      modal.remove();
+    });
+    tdBtn.appendChild(pickBtn);
+    tr.appendChild(tdBtn);
+    tbody.appendChild(tr);
+  });
+  tableEl.appendChild(tbody);
+  dialog.appendChild(tableEl);
+
+  modal.appendChild(overlay);
+  modal.appendChild(dialog);
+  document.body.appendChild(modal);
+}
+
+function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpartId, st) {
+  const row = st.relation.items[rowIdx];
+  let assocRelation = row[colIdx];
+  if (!assocRelation || !assocRelation.pot) {
+    assocRelation = createEmptyAssociationRelation();
+    row[colIdx] = assocRelation;
+  }
+
+  const att = getAtt(st, colIdx);
+  const config = getAssociationConfig(att);
+  if (config && config.cardinality_max === 1) {
+    assocRelation.items = [];
+  }
+
+  const myEntityName = st.relation.name || '';
+  const myRowId = String(row[0]);
+  const newId = getNextAssociationId(assocRelation);
+  assocRelation.items.push([newId, counterpartName, counterpartId]);
+
+  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', st);
+
+  logOperation(st, {
+    op: 'association_add',
+    rowIdx,
+    colIdx,
+    counterpart: counterpartName,
+    counterpartId,
+    myRowId
+  });
+  renderTable(st);
+  updateJsonOutput(st);
+  showToast('Association created with ' + counterpartName + ' #' + counterpartId, 'success');
+}
+
+function removeAssociationRecord(rowIdx, colIdx, assocItemIdx, st) {
+  const row = st.relation.items[rowIdx];
+  const assocRelation = row[colIdx];
+  if (!assocRelation || !assocRelation.items || !assocRelation.items[assocItemIdx]) return;
+
+  const removedItem = assocRelation.items[assocItemIdx];
+  const counterpartName = removedItem[1];
+  const counterpartId = removedItem[2];
+  const myEntityName = st.relation.name || '';
+  const myRowId = String(row[0]);
+
+  assocRelation.items.splice(assocItemIdx, 1);
+
+  syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'remove', st);
+
+  logOperation(st, {
+    op: 'association_remove',
+    rowIdx,
+    colIdx,
+    counterpart: counterpartName,
+    counterpartId,
+    myRowId
+  });
+  renderTable(st);
+  updateJsonOutput(st);
+  showToast('Association with ' + counterpartName + ' #' + counterpartId + ' removed.', 'success');
+}
+
+function syncCounterpartAssociation(counterpartName, counterpartRowId, myEntityName, myRowId, action, st) {
+  const counterpartJson = all_entities[counterpartName];
+  if (!counterpartJson) return;
+
+  const counterpartCols = Object.keys(counterpartJson.columns);
+  const counterpartTypes = Object.values(counterpartJson.columns);
+
+  let assocColIdx = -1;
+  for (let i = 0; i < counterpartCols.length; i++) {
+    const colVal = counterpartJson.columns[counterpartCols[i]];
+    if (typeof colVal === 'object' && colVal !== null && isAssociationAtt(colVal)) {
+      const cfg = getAssociationConfig(colVal);
+      if (cfg && cfg.counterparts && cfg.counterparts.includes(myEntityName)) {
+        assocColIdx = i;
+        break;
+      }
+    }
+  }
+  if (assocColIdx < 0) return;
+
+  const counterpartItems = counterpartJson.items || [];
+  const targetRow = counterpartItems.find(r => String(r[0]) === String(counterpartRowId));
+  if (!targetRow) return;
+
+  let targetAssoc = targetRow[assocColIdx];
+  if (!targetAssoc || !targetAssoc.pot) {
+    targetAssoc = createEmptyAssociationRelation();
+    targetRow[assocColIdx] = targetAssoc;
+  }
+
+  if (action === 'add') {
+    const newId = getNextAssociationId(targetAssoc);
+    targetAssoc.items.push([newId, myEntityName, myRowId]);
+  } else if (action === 'remove') {
+    targetAssoc.items = targetAssoc.items.filter(r =>
+      !(String(r[1]) === myEntityName && String(r[2]) === String(myRowId))
+    );
+  }
+}
+
 function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
   const wrapper = document.createElement('div');
   wrapper.className = 'relation-cell-input';
@@ -5664,6 +6018,10 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     }
     
     if (type === 'relation') {
+      const att = getAtt(st, colIdx);
+      if (isAssociationAtt(att)) {
+        return buildAssociationCell(value, rowIdx, colIdx, false, st);
+      }
       const btn = document.createElement('button');
       btn.className = 'relation-cell-btn';
       const count = value?.items?.length || 0;
@@ -5688,6 +6046,10 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
   }
   
   if (type === 'relation') {
+    const att = getAtt(st, colIdx);
+    if (isAssociationAtt(att)) {
+      return buildAssociationCell(value, rowIdx, colIdx, true, st);
+    }
     const btn = document.createElement('button');
     btn.className = 'relation-cell-btn';
     const count = value?.items?.length || 0;
@@ -5990,9 +6352,7 @@ function filterByQuickSearch(st, indices) {
   return matchingIndices;
 }
 
-// Build always-visible options HTML based on general_always_visible_options configuration
-function buildAlwaysVisibleOptionsHtml(options) {
-  // Define all available always-visible operations (same icons as line operations)
+function buildAlwaysVisibleOptionsHtml(options, st) {
   const alwaysVisibleOperationsMap = {
     'View': { value: 'view-row', icon: '👁', label: 'View' },
     'Edit': { value: 'edit-row', icon: '✏️', label: 'Edit' },
@@ -6013,12 +6373,14 @@ function buildAlwaysVisibleOptionsHtml(options) {
     'Output State': { value: 'output-state', icon: '📋', label: 'Output State' }
   };
   
-  // Build options in the order defined
+  const maxReached = st ? isCardinalityMaxReached(st) : false;
+  
   const optionsHtml = options
     .filter(opt => alwaysVisibleOperationsMap[opt])
     .map(opt => {
       const op = alwaysVisibleOperationsMap[opt];
-      return `<option value="${op.value}">${op.icon} ${op.label}</option>`;
+      const disabled = maxReached && CARDINALITY_BLOCKED_ALWAYS_VISIBLE.has(op.value) ? ' disabled' : '';
+      return `<option value="${op.value}"${disabled}>${op.icon} ${op.label}</option>`;
     })
     .join('\n        ');
   
@@ -6034,7 +6396,11 @@ function handleAlwaysVisibleAction(st, action) {
   const highlightedRow = getHighlightedRow(st);
   const rowIdx = highlightedRow !== null ? highlightedRow : 0;
   
-  // Actions that don't need a specific row
+  if (CARDINALITY_BLOCKED_ALWAYS_VISIBLE.has(action) && isCardinalityMaxReached(st)) {
+    showToast(`Maximum ${st.rel_options.cardinality_max} records reached.`, 'warning');
+    return;
+  }
+  
   if (action === 'new-row' || action === 'new-fast-row') {
     handleRowOperation(st, -1, action);
     return;
@@ -6520,7 +6886,6 @@ function openChooseManyDialog(st) {
 }
 
 function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
-  // Define all available multi operations with their option HTML
   const multiOperationsMap = {
     'Invert Page': { value: 'invert-page', icon: '↔', label: 'Invert Page' },
     'Invert All': { value: 'invert-all', icon: '↔', label: 'Invert All' },
@@ -6536,15 +6901,16 @@ function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
     'Multi Delete': { value: 'multi-delete', icon: '🗑️', label: `Multi Delete (${selectedCount})`, needsSelection: true }
   };
   
-  // Get configured multi options or use defaults
   const multiOptions = st.rel_options.general_multi_options || DEFAULT_REL_OPTIONS.general_multi_options;
+  const maxReached = isCardinalityMaxReached(st);
   
-  // Build options in the order defined by general_multi_options
   return multiOptions
     .filter(opt => multiOperationsMap[opt])
     .map(opt => {
       const op = multiOperationsMap[opt];
-      const disabled = op.needsSelection && selectedCount === 0 ? ' disabled' : '';
+      const selectionDisabled = op.needsSelection && selectedCount === 0;
+      const cardinalityDisabled = maxReached && CARDINALITY_BLOCKED_MULTI.has(op.value);
+      const disabled = selectionDisabled || cardinalityDisabled ? ' disabled' : '';
       return `<option value="${op.value}"${disabled}>${op.icon} ${op.label}</option>`;
     })
     .join('\n        ');
@@ -7269,6 +7635,11 @@ function renderPagination(st = state) {
   
   const hasFilter = filteredRecords !== totalRecords;
   
+  const cardinalityMinUnmet = isCardinalityMinUnmet(st);
+  const cardinalityMaxReached = isCardinalityMaxReached(st);
+  const cardinalityMin = st.rel_options.cardinality_min || 0;
+  const cardinalityMax = st.rel_options.cardinality_max;
+  
   const showMulticheck = st.rel_options.show_multicheck;
   paginationContainer.innerHTML = `
     <div class="pagination-left">
@@ -7276,6 +7647,8 @@ function renderPagination(st = state) {
         <span class="pagination-total">${totalRecords} total</span>
         ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
         <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedRecords} checked</span>
+        ${cardinalityMinUnmet ? `<span class="cardinality-warning cardinality-min-warning" title="Minimum ${cardinalityMin} records required">⚠ min ${cardinalityMin}</span>` : ''}
+        ${cardinalityMaxReached ? `<span class="cardinality-warning cardinality-max-warning" title="Maximum ${cardinalityMax} records reached">⚠ max ${cardinalityMax}</span>` : ''}
       </div>
       <div class="pagination-actions${showMulticheck && (st.rel_options.general_multi_options || []).length > 0 ? '' : ' hidden'}">
         <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
@@ -11343,26 +11716,28 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
   menu.style.top = y + 'px';
   
   const hasSelection = getSelectedRows(st).size > 0;
+  const maxReached = isCardinalityMaxReached(st);
   
-  // Define all available line operations with their button HTML
   const lineOperationsMap = {
-    'View': '<button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>',
-    'Edit': '<button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>',
-    'Copy': '<button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>',
-    'New': '<button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>',
-    'New Fast': '<button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>',
-    'Delete': '<button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>',
-    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>',
-    'Print': '<button class="column-menu-item" data-action="print-row" data-testid="button-row-print">🖨️ Print</button>'
+    'View': { action: 'view-row', icon: '👁', label: 'View' },
+    'Edit': { action: 'edit-row', icon: '✏️', label: 'Edit' },
+    'Copy': { action: 'copy-row', icon: '📋', label: 'Copy' },
+    'New': { action: 'new-row', icon: '➕', label: 'New' },
+    'New Fast': { action: 'new-fast-row', icon: '⚡', label: 'New Fast' },
+    'Delete': { action: 'delete-row', icon: '🗑️', label: 'Delete' },
+    'Paper Form': { action: 'paper-form-row', icon: '📄', label: 'Paper Form' },
+    'Print': { action: 'print-row', icon: '🖨️', label: 'Print' }
   };
   
-  // Get configured line options or use defaults
   const lineOptions = st.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
   
-  // Build menu buttons in the order defined by general_line_options
   const lineButtonsHtml = lineOptions
     .filter(opt => lineOperationsMap[opt])
-    .map(opt => lineOperationsMap[opt])
+    .map(opt => {
+      const op = lineOperationsMap[opt];
+      const disabled = maxReached && CARDINALITY_BLOCKED_LINE.has(op.action) ? ' disabled' : '';
+      return `<button class="column-menu-item" data-action="${op.action}" data-testid="button-row-${op.action}"${disabled}>${op.icon} ${op.label}</button>`;
+    })
     .join('\n    ');
   
   menu.innerHTML = `
@@ -11398,6 +11773,10 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
 }
 
 function handleRowOperation(st, rowIdx, action) {
+  if (CARDINALITY_BLOCKED_LINE.has(action) && isCardinalityMaxReached(st)) {
+    showToast(`Maximum ${st.rel_options.cardinality_max} records reached.`, 'warning');
+    return;
+  }
   switch (action) {
     case 'view-row':
       showRowViewDialog(st, rowIdx);
@@ -11627,9 +12006,18 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
 
 function initRelationFieldsInContainer(container, st, row) {
   const relationContainers = container.querySelectorAll('.row-field-relation-container');
+  const rowIdx = st.relation.items.indexOf(row);
   relationContainers.forEach(relContainer => {
     const colIdx = parseInt(relContainer.dataset.col);
+    const att = getAtt(st, colIdx);
     const relValue = row[colIdx];
+    if (isAssociationAtt(att)) {
+      const editable = st.relation.rel_options?.editable !== false;
+      const cell = buildAssociationCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st);
+      relContainer.innerHTML = '';
+      relContainer.appendChild(cell);
+      return;
+    }
     if (relValue && relValue.columns) {
       initRelationInstance(relContainer, relValue, { showJsonEditor: false, isNested: true });
     } else {
@@ -12749,7 +13137,7 @@ function renderViewTabs() {
     const selectWrapper = document.createElement('div');
     selectWrapper.className = 'always-visible-wrapper';
     selectWrapper.style.cssText = searchActionsDisplay;
-    selectWrapper.innerHTML = buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions);
+    selectWrapper.innerHTML = buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions, state);
     tabsRight.appendChild(selectWrapper);
     
     // Add event listener for the select (for main state only)
@@ -13078,7 +13466,7 @@ function renderCardsView(st = state) {
     st.columnNames.forEach((colName, colIdx) => {
       const value = row[colIdx];
       const type = st.columnTypes[colIdx];
-      let displayValue = formatCellValue(value, type, colName);
+      let displayValue = formatCellValue(value, type, colName, st);
       
       // Get display value for tooltip (use option label for select type)
       let tooltipValue = '';
@@ -18311,7 +18699,7 @@ function initRelationInstance(container, relationData, options = {}) {
   
   // Build actions select HTML
   const alwaysVisibleSelectHtml = (showSearchAndActions && alwaysVisibleOptions.length > 0) 
-    ? `<div class="always-visible-wrapper" style="${searchActionsDisplay}">${buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions)}</div>` 
+    ? `<div class="always-visible-wrapper" style="${searchActionsDisplay}">${buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions, instanceState)}</div>` 
     : '';
   
   const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
@@ -20329,26 +20717,28 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
   menu.style.top = y + 'px';
   
   const hasSelection = getSelectedRows(st).size > 0;
+  const maxReached = isCardinalityMaxReached(st);
   
-  // Define all available line operations with their button HTML
   const lineOperationsMap = {
-    'View': '<button class="column-menu-item" data-action="view-row" data-testid="button-row-view">👁 View</button>',
-    'Edit': '<button class="column-menu-item" data-action="edit-row" data-testid="button-row-edit">✏️ Edit</button>',
-    'Copy': '<button class="column-menu-item" data-action="copy-row" data-testid="button-row-copy">📋 Copy</button>',
-    'New': '<button class="column-menu-item" data-action="new-row" data-testid="button-row-new">➕ New</button>',
-    'New Fast': '<button class="column-menu-item" data-action="new-fast-row" data-testid="button-row-new-fast">⚡ New Fast</button>',
-    'Delete': '<button class="column-menu-item" data-action="delete-row" data-testid="button-row-delete">🗑️ Delete</button>',
-    'Paper Form': '<button class="column-menu-item" data-action="paper-form-row" data-testid="button-row-paper-form">📄 Paper Form</button>',
-    'Print': '<button class="column-menu-item" data-action="print-row" data-testid="button-row-print">🖨️ Print</button>'
+    'View': { action: 'view-row', icon: '👁', label: 'View' },
+    'Edit': { action: 'edit-row', icon: '✏️', label: 'Edit' },
+    'Copy': { action: 'copy-row', icon: '📋', label: 'Copy' },
+    'New': { action: 'new-row', icon: '➕', label: 'New' },
+    'New Fast': { action: 'new-fast-row', icon: '⚡', label: 'New Fast' },
+    'Delete': { action: 'delete-row', icon: '🗑️', label: 'Delete' },
+    'Paper Form': { action: 'paper-form-row', icon: '📄', label: 'Paper Form' },
+    'Print': { action: 'print-row', icon: '🖨️', label: 'Print' }
   };
   
-  // Get configured line options or use defaults
   const lineOptions = st.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
   
-  // Build menu buttons in the order defined by general_line_options
   const lineButtonsHtml = lineOptions
     .filter(opt => lineOperationsMap[opt])
-    .map(opt => lineOperationsMap[opt])
+    .map(opt => {
+      const op = lineOperationsMap[opt];
+      const disabled = maxReached && CARDINALITY_BLOCKED_LINE.has(op.action) ? ' disabled' : '';
+      return `<button class="column-menu-item" data-action="${op.action}" data-testid="button-row-${op.action}"${disabled}>${op.icon} ${op.label}</button>`;
+    })
     .join('\n    ');
   
   menu.innerHTML = `
@@ -20935,6 +21325,26 @@ function init() {
   menuAllStocks?.addEventListener('click', (e) => {
     e.preventDefault();
     textarea.value = JSON.stringify(ALL_STOCKS_JSON, null, 2);
+  });
+  
+  const ALL_ENTITY_JSONS = [
+    PRODUCTS_JSON, CATEGORIES_JSON, STOCKS_JSON, PRICELISTS_JSON,
+    USERS_JSON, AUDITLOG_JSON, COMPANY_TYPES_JSON, ALL_STOCKS_JSON,
+    DISTRIBUTOR_JSON, ADMIN_DATA_MANAGEMENT_JSON,
+    STOCK_IMPORTS_STATES_DETAILS_JSON, STOCK_IMPORTS_STATES_JSON,
+    STOCK_IMPORTS_TYPES_JSON, STOCK_IMPORTS_DETAILS_JSON, STOCK_IMPORT_JSON,
+    STOCK_WAREHOUSE_JSON, STOCK_HISTORIC_INVENTORY_DETAIL_JSON,
+    STOCK_HISTORIC_INVENTORY_JSON, STOCK_INVENTORY_DETAIL_JSON,
+    STOCK_INVENTORY_JSON, CATALOG_PRODUCT_CONVERSIONS_JSON,
+    PRODUCT_CATALOG_JSON, PRICELIST_PARTNER_JSON, PRICELIST_PRODUCTS_JSON,
+    ALL_PRICELISTS_JSON, PRODUCT_BRANDS_JSON, PRODUCT_SPECIES_JSON,
+    PRODUCT_FAMILIES_JSON, PRODUCT_CATEGORY_JSON, ALL_PRODUCTS_JSON,
+    ALL_COMPANIES_JSON
+  ];
+  ALL_ENTITY_JSONS.forEach(json => {
+    if (json && json.name) {
+      all_entities[json.name] = json;
+    }
   });
   
   btnParse?.addEventListener('click', () => {
