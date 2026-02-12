@@ -3832,12 +3832,17 @@ function calculateStatistics(colIdx, st = state) {
       stats.range = stats.max - stats.min;
     }
   } else if (type === 'date' || type === 'datetime' || type === 'time') {
-    // Convert date/time values to numeric for statistics
     let nums;
     if (type === 'time') {
       nums = values.map(v => {
-        const [h, m, s] = String(v).split(':').map(Number);
-        return (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+        const parts = String(v).split(':').map(Number);
+        if (parts.length >= 2) {
+          const hours = parts[0] || 0;
+          const minutes = parts[1] || 0;
+          const seconds = parts[2] || 0;
+          return (hours * 3600 + minutes * 60 + seconds) * 1000;
+        }
+        return NaN;
       }).filter(n => !isNaN(n));
     } else {
       nums = values.map(v => new Date(v).getTime()).filter(n => !isNaN(n));
@@ -3845,17 +3850,91 @@ function calculateStatistics(colIdx, st = state) {
     
     if (nums.length > 0) {
       nums.sort((a, b) => a - b);
-      stats.min = nums[0];
-      stats.max = nums[nums.length - 1];
-      stats.range = stats.max - stats.min;
       
-      // Median
-      const mid = Math.floor(nums.length / 2);
-      stats.median = nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+      const formatValue = (ms) => {
+        if (type === 'time') {
+          const totalSec = Math.floor(ms / 1000);
+          const h = Math.floor(totalSec / 3600);
+          const m = Math.floor((totalSec % 3600) / 60);
+          const s = totalSec % 60;
+          return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        } else if (type === 'date') {
+          return new Date(ms).toISOString().split('T')[0];
+        } else {
+          return new Date(ms).toISOString().replace('T', ' ').slice(0, 19);
+        }
+      };
       
-      // Mean
+      stats.min = formatValue(Math.min(...nums));
+      stats.max = formatValue(Math.max(...nums));
       stats.sum = nums.reduce((a, b) => a + b, 0);
-      stats.mean = stats.sum / nums.length;
+      stats.mean = formatValue(stats.sum / nums.length);
+      
+      const mid = Math.floor(nums.length / 2);
+      const medianMs = nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+      stats.median = formatValue(medianMs);
+      
+      const rangeMs = Math.max(...nums) - Math.min(...nums);
+      if (type === 'time') {
+        stats.range = formatValue(rangeMs);
+      } else {
+        const rangeDays = rangeMs / (1000 * 60 * 60 * 24);
+        stats.range = `${rangeDays.toFixed(1)} days`;
+      }
+      
+      const meanMs = stats.sum / nums.length;
+      const variance = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 2), 0) / nums.length;
+      stats.variance = variance;
+      stats.stdDev = Math.sqrt(variance);
+      
+      if (type === 'time') {
+        stats.stdDevFormatted = formatValue(stats.stdDev);
+      } else {
+        const stdDevDays = stats.stdDev / (1000 * 60 * 60 * 24);
+        stats.stdDevFormatted = `${stdDevDays.toFixed(2)} days`;
+      }
+      
+      const q1Ms = computeQuartile(nums, 0.25);
+      const q3Ms = computeQuartile(nums, 0.75);
+      stats.q1 = formatValue(q1Ms);
+      stats.q3 = formatValue(q3Ms);
+      const iqrMs = q3Ms - q1Ms;
+      if (type === 'time') {
+        stats.iqr = formatValue(iqrMs);
+      } else {
+        stats.iqr = `${(iqrMs / (1000 * 60 * 60 * 24)).toFixed(1)} days`;
+      }
+      
+      stats.allNumericValues = nums;
+      stats.numMin = Math.min(...nums);
+      stats.numMax = Math.max(...nums);
+      stats.numQ1 = q1Ms;
+      stats.numQ3 = q3Ms;
+      stats.numMedian = medianMs;
+      stats.numMean = meanMs;
+      stats.numIqr = iqrMs;
+      
+      const whiskerLow = q1Ms - 1.5 * iqrMs;
+      const whiskerHigh = q3Ms + 1.5 * iqrMs;
+      stats.whiskerLow = Math.max(whiskerLow, stats.numMin);
+      stats.whiskerHigh = Math.min(whiskerHigh, stats.numMax);
+      
+      stats.outliers = nums.filter(n => n < whiskerLow || n > whiskerHigh);
+      const farLow = q1Ms - 3 * iqrMs;
+      const farHigh = q3Ms + 3 * iqrMs;
+      stats.farOutliers = nums.filter(n => n < farLow || n > farHigh);
+      
+      const m3 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 3), 0) / nums.length;
+      stats.skewness = stats.stdDev > 0 ? m3 / Math.pow(stats.stdDev, 3) : 0;
+      
+      const m4 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 4), 0) / nums.length;
+      stats.kurtosis = stats.variance > 0 ? (m4 / Math.pow(stats.variance, 2)) : 0;
+      
+      const freq = {};
+      values.forEach(v => freq[v] = (freq[v] || 0) + 1);
+      const maxFreq = Math.max(...Object.values(freq));
+      stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq);
+      stats.modeCount = maxFreq;
     }
   } else if (type === 'select' || type === 'radio') {
     const freq = {};
@@ -4120,119 +4199,6 @@ function calculateStatistics(colIdx, st = state) {
     }
     
     stats.frequencies = freq;
-  } else if (type === 'date' || type === 'datetime' || type === 'time') {
-    // Convert to milliseconds for statistical calculations
-    let nums;
-    if (type === 'time') {
-      // Parse time strings (HH:MM:SS or HH:MM) to milliseconds since midnight
-      nums = values.map(v => {
-        const parts = String(v).split(':').map(Number);
-        if (parts.length >= 2) {
-          const hours = parts[0] || 0;
-          const minutes = parts[1] || 0;
-          const seconds = parts[2] || 0;
-          return (hours * 3600 + minutes * 60 + seconds) * 1000;
-        }
-        return NaN;
-      }).filter(n => !isNaN(n));
-    } else {
-      nums = values.map(v => new Date(v).getTime()).filter(n => !isNaN(n));
-    }
-    
-    if (nums.length > 0) {
-      nums.sort((a, b) => a - b);
-      
-      // Format functions for display
-      const formatValue = (ms) => {
-        if (type === 'time') {
-          const totalSec = Math.floor(ms / 1000);
-          const h = Math.floor(totalSec / 3600);
-          const m = Math.floor((totalSec % 3600) / 60);
-          const s = totalSec % 60;
-          return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        } else if (type === 'date') {
-          return new Date(ms).toISOString().split('T')[0];
-        } else {
-          return new Date(ms).toISOString().replace('T', ' ').slice(0, 19);
-        }
-      };
-      
-      stats.min = formatValue(Math.min(...nums));
-      stats.max = formatValue(Math.max(...nums));
-      stats.sum = nums.reduce((a, b) => a + b, 0);
-      stats.mean = formatValue(stats.sum / nums.length);
-      
-      // Median
-      const mid = Math.floor(nums.length / 2);
-      const medianMs = nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-      stats.median = formatValue(medianMs);
-      
-      // Range in human-readable format
-      const rangeMs = Math.max(...nums) - Math.min(...nums);
-      if (type === 'time') {
-        stats.range = formatValue(rangeMs);
-      } else {
-        // For dates, show range in days
-        const rangeDays = rangeMs / (1000 * 60 * 60 * 24);
-        stats.range = `${rangeDays.toFixed(1)} days`;
-      }
-      
-      // Variance and Std Dev (in milliseconds, shown as duration)
-      const meanMs = stats.sum / nums.length;
-      const variance = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 2), 0) / nums.length;
-      stats.variance = variance;
-      stats.stdDev = Math.sqrt(variance);
-      
-      // Format std dev as duration
-      if (type === 'time') {
-        stats.stdDevFormatted = formatValue(stats.stdDev);
-      } else {
-        const stdDevDays = stats.stdDev / (1000 * 60 * 60 * 24);
-        stats.stdDevFormatted = `${stdDevDays.toFixed(2)} days`;
-      }
-      
-      // Quartiles (using linear interpolation)
-      const q1Ms = computeQuartile(nums, 0.25);
-      const q3Ms = computeQuartile(nums, 0.75);
-      stats.q1 = formatValue(q1Ms);
-      stats.q3 = formatValue(q3Ms);
-      const iqrMs = q3Ms - q1Ms;
-      if (type === 'time') {
-        stats.iqr = formatValue(iqrMs);
-      } else {
-        stats.iqr = `${(iqrMs / (1000 * 60 * 60 * 24)).toFixed(1)} days`;
-      }
-      
-      // Store numeric values for box plot generation
-      stats.allNumericValues = nums;
-      stats.numMin = Math.min(...nums);
-      stats.numMax = Math.max(...nums);
-      stats.numQ1 = q1Ms;
-      stats.numQ3 = q3Ms;
-      stats.numMedian = medianMs;
-      stats.numMean = meanMs;
-      stats.numIqr = iqrMs;
-      
-      // Whiskers for box plot
-      const whiskerLow = q1Ms - 1.5 * iqrMs;
-      const whiskerHigh = q3Ms + 1.5 * iqrMs;
-      stats.whiskerLow = Math.max(whiskerLow, stats.numMin);
-      stats.whiskerHigh = Math.min(whiskerHigh, stats.numMax);
-      
-      // Outliers
-      stats.outliers = nums.filter(n => n < whiskerLow || n > whiskerHigh);
-      const farLow = q1Ms - 3 * iqrMs;
-      const farHigh = q3Ms + 3 * iqrMs;
-      stats.farOutliers = nums.filter(n => n < farLow || n > farHigh);
-      
-      // Skewness (Fisher's)
-      const m3 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 3), 0) / nums.length;
-      stats.skewness = m3 / Math.pow(stats.stdDev, 3);
-      
-      // Kurtosis (Fisher's)
-      const m4 = nums.reduce((sum, n) => sum + Math.pow(n - meanMs, 4), 0) / nums.length;
-      stats.kurtosis = (m4 / Math.pow(stats.variance, 2));
-    }
   } else if (type === 'relation') {
     // Statistics based on row counts in nested relations
     const rowCounts = values.map(v => v?.items?.length || 0);
@@ -7487,8 +7453,6 @@ function renderTable(st = state) {
     const isHiddenAtt = att && att.visible === false;
     th.className = 'relation-th-sortable' + (isHiddenId || isHiddenAtt ? ' hidden' : '');
     if (att) {
-      if (att.mandatory) th.classList.add('att-mandatory');
-      if (att.recomended) th.classList.add('att-recomended');
       if (att.class && att.class.length) att.class.forEach(c => th.classList.add(c));
     }
     const colWidth = getColumnWidth(st, idx);
@@ -10727,6 +10691,7 @@ function showStatisticsPanel(colIdx) {
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Mean:</span><span>${stats.mean ?? '—'}</span></div>
       <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
+      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.slice(0, 3).join(', ') ?? '—'}${stats.modeCount ? ' (' + stats.modeCount + '×)' : ''}</span></div>
       <div class="stats-divider"></div>
       <div class="stats-row"><span>Std Dev:</span><span>${stats.stdDevFormatted ?? '—'}</span></div>
       <div class="stats-divider"></div>
@@ -11514,9 +11479,10 @@ function generateRowFormattedContent(st, row, mode = 'view') {
     const labelPrefix = att ? getI18nText(att.label_prefix) : '';
     const labelSuffix = att ? getI18nText(att.label_suffix) : '';
     const showLabel = att ? att.show_label !== false : true;
+    const isEditMode = ['new', 'new-fast', 'edit', 'multi_edit', 'multi_merge', 'group_edit'].includes(mode);
     const labelClasses = [];
-    if (att && att.mandatory) labelClasses.push('att-mandatory-label');
-    if (att && att.recomended) labelClasses.push('att-recomended-label');
+    if (isEditMode && att && att.mandatory) labelClasses.push('att-mandatory-label');
+    if (isEditMode && att && att.recomended) labelClasses.push('att-recomended-label');
     const labelClassStr = labelClasses.length ? ' ' + labelClasses.join(' ') : '';
     const fullLabelHtml = showLabel ? `${escapeHtml(labelPrefix)}<span class="row-field-label-text${labelClassStr}">${escapeHtml(displayName)}</span>${escapeHtml(labelSuffix)}` : '';
     const fieldLabelOrientation = att && att.label_field_orientation ? att.label_field_orientation : '';
