@@ -5566,6 +5566,10 @@ function updateTextarea(st = state) {
 // Alias for updateTextarea
 function updateJsonOutput(st = state) {
   updateTextarea(st);
+  const name = st.relation && st.relation.name;
+  if (name && all_entities[name]) {
+    all_entities[name] = st.relation;
+  }
 }
 
 // Pagination functions
@@ -20911,11 +20915,12 @@ function init() {
   const aiQuestion = el('.ai-question');
   
   function loadRelationFromEntity(jsonData) {
-    textarea.value = JSON.stringify(jsonData, null, 2);
-    if (jsonData && jsonData.name && all_entities[jsonData.name]) {
-      const data = all_entities[jsonData.name];
-      createMainRelationInstance(data);
-      createSecondRelationInstance(data);
+    const name = jsonData && jsonData.name;
+    const liveData = name && all_entities[name] ? all_entities[name] : jsonData;
+    textarea.value = JSON.stringify(liveData, null, 2);
+    if (liveData && liveData.pot === 'relation') {
+      createMainRelationInstance(liveData);
+      createSecondRelationInstance(liveData);
     }
   }
 
@@ -21308,6 +21313,12 @@ function init() {
     // Update the global state reference to point to the main instance
     // This maintains backward compatibility with any code still using global state
     Object.assign(state, mainState);
+    
+    // Sync all_entities with the live relation object from the main instance
+    const name = mainState.relation && mainState.relation.name;
+    if (name) {
+      all_entities[name] = mainState.relation;
+    }
   }
   
   // Create a second relation instance at the bottom of the body
