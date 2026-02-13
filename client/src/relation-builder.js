@@ -302,6 +302,24 @@ function logOperation(st, op) {
   st.relation.log.push({ pot: 'relation_op', timestamp: new Date().toISOString(), ...op });
 }
 
+function buildRowRecord(st, row) {
+  const record = {};
+  st.columnNames.forEach((name, i) => {
+    record[name] = row[i];
+  });
+  return record;
+}
+
+function getRowId(st, row) {
+  const idColIdx = st.columnTypes.findIndex(t => t === 'id');
+  return idColIdx !== -1 ? row[idColIdx] : null;
+}
+
+function getRowIdByIdx(st, rowIdx) {
+  const row = st.relation.items[rowIdx];
+  return row ? getRowId(st, row) : null;
+}
+
 // Sample Products JSON for quick loading
 const PRODUCTS_JSON = {
   "pot": "relation",
@@ -1700,19 +1718,17 @@ const ALL_COMPANIES_JSON = {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": true,
+    "editable": false,
     "show_multicheck": true,
     "show_natural_order": true,
-    "show_id": true,
-    "show_column_kind": true,
-    "show_stats": true,
-    "show_hierarchy": true,
-    "hierarchy_column": "parent",
-    "hierarchy_root_value": "",
-    "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
+    "show_hierarchy": true
   },
-  "items": []
+  "items": [
+    [-1, "Company 1", null, null, null, null, null, null, null, false, null, null, null, null],
+    [-2, "Company 2", null, null, null, null, null, null, null, false, null, null, null, null],
+    [-3, "Company 3", null, null, null, null, null, null, null, false, null, null, null, null]
+  ],
+  "log": []
 };
 
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
@@ -5318,7 +5334,12 @@ function showImportDialog(st) {
       newItemsCount++;
     });
 
-    logOperation(st, { op: 'import', count: newItemsCount });
+    const importedMapping = {};
+    columnMapping.forEach(({ srcIdx, destSelect }) => {
+      if (destSelect.value) importedMapping[currentTable.headers[srcIdx] || ('col_' + srcIdx)] = destSelect.value;
+    });
+    const importedRecords = st.relation.items.slice(-newItemsCount).map(row => buildRowRecord(st, row));
+    logOperation(st, { op: 'import', count: newItemsCount, column_mapping: importedMapping, records: importedRecords });
     showToast(`Importados ${newItemsCount} registos.`, 'success');
     renderTable(st);
     closeDialog();
@@ -5650,12 +5671,14 @@ function removeSelectedRows(st = state, skipConfirm = false) {
   const indicesToRemove = [...getSelectedRows(st)].sort((a, b) => b - a);
   
   const removedCount = indicesToRemove.length;
+  const removedIds = indicesToRemove.map(idx => getRowId(st, st.relation.items[idx]));
+  const removedRecords = indicesToRemove.map(idx => buildRowRecord(st, st.relation.items[idx]));
   indicesToRemove.forEach(idx => {
     st.relation.items.splice(idx, 1);
   });
   
   getSelectedRows(st).clear();
-  logOperation(st, { op: 'remove_selected', count: removedCount });
+  logOperation(st, { op: 'remove_selected', count: removedCount, ids: removedIds, records: removedRecords });
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
@@ -5668,12 +5691,15 @@ function removeUnselectedRows(st = state) {
   const unselectedCount = getSortedIndices(st).length - getSelectedRows(st).size;
   if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${getSelectedRows(st).size} selected rows will remain.`)) return;
   
-  // Keep only selected rows (create new array with selected items)
   const selectedIndices = [...getSelectedRows(st)].sort((a, b) => a - b);
+  const allIndices = new Set(selectedIndices);
+  const removedIds = st.relation.items
+    .map((row, i) => allIndices.has(i) ? null : getRowId(st, row))
+    .filter(id => id !== null);
   st.relation.items = selectedIndices.map(idx => st.relation.items[idx]);
   
   getSelectedRows(st).clear();
-  logOperation(st, { op: 'remove_unselected', removed: unselectedCount });
+  logOperation(st, { op: 'remove_unselected', removed: unselectedCount, removed_ids: removedIds });
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
@@ -5841,11 +5867,10 @@ function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpar
     syncCounterpartAssociation(counterpartName, counterpartId, myEntityName, myRowId, 'add', counterpartAttName);
     logOperation(st, {
       op: 'association_add',
-      rowIdx,
-      colIdx,
+      id: myRowId,
+      column: st.columnNames[colIdx],
       counterpart: counterpartName,
-      counterpartId,
-      myRowId
+      counterpartId
     });
     renderTable(st);
     updateJsonOutput(st);
@@ -5880,11 +5905,10 @@ function removeAssociationRecord(rowIdx, colIdx, assocItemIdx, st) {
 
   logOperation(st, {
     op: 'association_remove',
-    rowIdx,
-    colIdx,
+    id: myRowId,
+    column: st.columnNames[colIdx],
     counterpart: counterpartName,
-    counterpartId,
-    myRowId
+    counterpartId
   });
   renderTable(st);
   updateJsonOutput(st);
@@ -6475,10 +6499,11 @@ function handleAlwaysVisibleAction(st, action) {
       }
     });
     const removedCount = st.relation.items.length - uniqueItems.length;
+    const removedDupIds = st.relation.items.filter(row => !uniqueItems.includes(row)).map(row => getRowId(st, row));
     st.relation.items = uniqueItems;
     setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
     setSortedIndices(st, [...getFilteredIndices(st)]);
-    logOperation(st, { op: 'remove_duplicates', removed: removedCount });
+    logOperation(st, { op: 'remove_duplicates', removed: removedCount, removed_ids: removedDupIds });
     renderTable(st);
     showToast(`Removed ${removedCount} duplicate row(s). ${uniqueItems.length} unique rows remain.`, removedCount > 0 ? 'success' : 'info');
     return;
@@ -6561,7 +6586,7 @@ function getIdColumnIndex(instanceSt) {
   return idx;
 }
 
-function getRowId(instanceSt, rowIdx) {
+function getSelectionRowId(instanceSt, rowIdx) {
   const idCol = getIdColumnIndex(instanceSt);
   if (idCol < 0 || !instanceSt.relation.items[rowIdx]) return null;
   return instanceSt.relation.items[rowIdx][idCol];
@@ -6663,14 +6688,14 @@ function openSelectOneDialog(st, options = {}) {
     e.stopPropagation();
     const rowIdx = parseInt(tr.dataset.rowIdx);
     if (isNaN(rowIdx)) return;
-    const id = getRowId(instanceSt, rowIdx);
+    const id = getSelectionRowId(instanceSt, rowIdx);
     outputAndClose(id);
   }, true);
 
   const closeHandler = () => {
     const highlighted = getHighlightedRow(instanceSt);
     if (highlighted !== null && highlighted !== undefined) {
-      const id = getRowId(instanceSt, highlighted);
+      const id = getSelectionRowId(instanceSt, highlighted);
       outputAndClose(id);
     } else {
       outputAndClose(null);
@@ -6729,7 +6754,7 @@ function openSelectManyDialog(st) {
     const ids = [];
     if (selected && selected.size > 0) {
       selected.forEach(rowIdx => {
-        const id = getRowId(instanceSt, rowIdx);
+        const id = getSelectionRowId(instanceSt, rowIdx);
         if (id !== null && id !== undefined) ids.push(id);
       });
     }
@@ -7457,11 +7482,14 @@ function showMergeDialog(st) {
         }
       });
       const indicesToRemove = checkedIndices.filter(idx => idx !== targetRowIdx).sort((a, b) => b - a);
+      const mergedIntoId = getRowId(st, st.relation.items[targetRowIdx]);
+      const mergedIds = indicesToRemove.map(idx => getRowId(st, st.relation.items[idx]));
+      const mergedResult = buildRowRecord(st, st.relation.items[targetRowIdx]);
       indicesToRemove.forEach(idx => st.relation.items.splice(idx, 1));
       getSelectedRows(st).clear();
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
-      logOperation(st, { op: 'merge', merged_count: indicesToRemove.length });
+      logOperation(st, { op: 'merge', merged_count: indicesToRemove.length, target_id: mergedIntoId, merged_ids: mergedIds, result: mergedResult });
       renderTable(st);
       outputRelationState(st);
       showToast(`Registos fundidos com sucesso.`, 'success');
@@ -7576,7 +7604,8 @@ function showMultiCopyDialog(st) {
       });
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
-      logOperation(st, { op: 'multi_copy', count: totalCopied });
+      const copiedSourceIds = checkedIndices.map(idx => getRowId(st, st.relation.items[idx]));
+      logOperation(st, { op: 'multi_copy', count: totalCopied, copies_per_source: count, source_ids: copiedSourceIds });
       renderTable(st);
       outputRelationState(st);
       showToast(`${totalCopied} cópias geradas.`, 'success');
@@ -7619,7 +7648,6 @@ function showMultiDeleteDialog(st) {
     wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
       showConfirmDialog(`Tem a certeza que pretende eliminar ${checkedIndices.length} registos?`, () => {
         removeSelectedRows(st, true);
-        logOperation(st, { op: 'multi_delete', count: checkedIndices.length });
         showToast(`${checkedIndices.length} registos eliminados.`, 'success');
         if (closeHandler) closeHandler();
       }, { confirmText: 'Eliminar Todos' });
@@ -9087,12 +9115,12 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       return;
     case 'sort-asc':
       setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
-      logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'asc' });
+      logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'asc', options: { caseInsensitive: true, accentInsensitive: true, punctuationInsensitive: true, parseNumbers: true } });
       showToast('Ordenação ascendente aplicada a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'sort-desc':
       setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
-      logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'desc' });
+      logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'desc', options: { caseInsensitive: true, accentInsensitive: true, punctuationInsensitive: true, parseNumbers: true } });
       showToast('Ordenação descendente aplicada a "' + st.columnNames[colIdx] + '".', 'success');
       break;
     case 'sort-clear':
@@ -9147,12 +9175,12 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       break;
     case 'toggle-group':
       toggleGroupBy(colIdx, st);
-      logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx] });
+      logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx], group_by_columns: getGroupByColumns(st).map(c => st.columnNames[c]), selected_values: Object.fromEntries(Object.entries(getGroupBySelectedValues(st)).map(([k, v]) => [st.columnNames[parseInt(k)] || k, v])) });
       showToast('Agrupamento alterado para "' + st.columnNames[colIdx] + '".', 'success');
       return;
     case 'group-all':
       groupByAllColumns(st);
-      logOperation(st, { op: 'group_all' });
+      logOperation(st, { op: 'group_all', group_by_columns: getGroupByColumns(st).map(c => st.columnNames[c]) });
       showToast('Agrupamento por todas as colunas aplicado.', 'success');
       return;
     case 'clear-groups':
@@ -10603,8 +10631,10 @@ function showFilterValuesDialog(colIdx, st = state) {
   dialog.querySelector('.filter-apply').addEventListener('click', () => {
     if (selectedValues.size === 0 || selectedValues.size === naturalOrder.length) {
       delete getFilters(st)[colIdx];
+      logOperation(st, { op: 'filter_clear', column: st.columnNames[colIdx] });
     } else {
       getFilters(st)[colIdx] = { type: 'values', values: [...selectedValues] };
+      logOperation(st, { op: 'filter_values', column: st.columnNames[colIdx], values: [...selectedValues] });
     }
     
     setCurrentPage(st, 1);
@@ -10677,11 +10707,13 @@ function showFilterComparisonDialog(colIdx, st = state) {
   
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
     delete getFilters(st)[colIdx];
+    logOperation(st, { op: 'filter_clear', column: st.columnNames[colIdx] });
     setCurrentPage(st, 1);
     dialog.remove();
     renderTable(st);
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
+    logOperation(st, { op: 'filter_clear_all' });
     setFilters(st, {});
     setCurrentPage(st, 1);
     dialog.remove();
@@ -10717,6 +10749,7 @@ function showFilterComparisonDialog(colIdx, st = state) {
     }
     
     getFilters(st)[colIdx] = { type: 'criteria', criteria };
+    logOperation(st, { op: 'filter_comparison', column: st.columnNames[colIdx], comparison, value, value2: criteria.value2 || null });
     setCurrentPage(st, 1);
     dialog.remove();
     renderTable(st);
@@ -10817,11 +10850,13 @@ function showFilterTextCriteriaDialog(colIdx, st = state) {
   
   dialog.querySelector('.filter-clear').addEventListener('click', () => {
     delete getFilters(st)[colIdx];
+    logOperation(st, { op: 'filter_clear', column: st.columnNames[colIdx] });
     setCurrentPage(st, 1);
     dialog.remove();
     renderTable(st);
   });
   dialog.querySelector('.filter-clear-all').addEventListener('click', () => {
+    logOperation(st, { op: 'filter_clear_all' });
     setFilters(st, {});
     setCurrentPage(st, 1);
     dialog.remove();
@@ -10865,6 +10900,7 @@ function showFilterTextCriteriaDialog(colIdx, st = state) {
       type: 'criteria', 
       criteria: { textOp, textValue, caseSensitive } 
     };
+    logOperation(st, { op: 'filter_text', column: st.columnNames[colIdx], textOp, textValue, caseSensitive });
     setCurrentPage(st, 1);
     dialog.remove();
     renderTable(st);
@@ -11807,11 +11843,13 @@ function handleRowOperation(st, rowIdx, action) {
       if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
         const deleteCount = getSelectedRows(st).size;
         const indices = [...getSelectedRows(st)].sort((a, b) => b - a);
+        const deletedIds = indices.map(i => getRowId(st, st.relation.items[i]));
+        const deletedRecords = indices.map(i => buildRowRecord(st, st.relation.items[i]));
         indices.forEach(i => st.relation.items.splice(i, 1));
         getSelectedRows(st).clear();
         setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
         setSortedIndices(st, [...getFilteredIndices(st)]);
-        logOperation(st, { op: 'delete_selected', count: deleteCount });
+        logOperation(st, { op: 'delete_selected', count: deleteCount, ids: deletedIds, records: deletedRecords });
         renderTable(st);
         showToast(deleteCount + ' registos eliminados.', 'success');
       }
@@ -12373,7 +12411,7 @@ function showRowCopyDialog(st, rowIdx) {
           
           setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
           setSortedIndices(st, [...getFilteredIndices(st)]);
-          logOperation(st, { op: 'copy_row', source_row: rowIdx, copies: count });
+          logOperation(st, { op: 'copy_row', source_id: getRowId(st, row), copies: count, source_record: buildRowRecord(st, row) });
           renderTable(st);
           closeRowOperationPanel(st);
           showToast(count + ' cópia(s) gerada(s).', 'success');
@@ -12386,12 +12424,15 @@ function showRowCopyDialog(st, rowIdx) {
 function showRowDeleteDialog(st, rowIdx) {
   closeAllMenus();
   
+  const rowToDelete = st.relation.items[rowIdx];
+  const deleteId = getRowId(st, rowToDelete);
+  const deleteRecord = buildRowRecord(st, rowToDelete);
   showConfirmDialog(`Tem a certeza que pretende eliminar o registo ${rowIdx + 1}?`, () => {
     st.relation.items.splice(rowIdx, 1);
     getSelectedRows(st).delete(rowIdx);
     setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
     setSortedIndices(st, [...getFilteredIndices(st)]);
-    logOperation(st, { op: 'delete_row', row_index: rowIdx });
+    logOperation(st, { op: 'delete_row', id: deleteId, record: deleteRecord });
     renderTable(st);
     outputRelationState(st);
     showToast('Registo eliminado.', 'success');
@@ -12480,7 +12521,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
       const newRowIdx = st.relation.items.length - 1;
       setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
       setSortedIndices(st, [...getFilteredIndices(st)]);
-      logOperation(st, { op: 'add_row', row_index: newRowIdx });
+      logOperation(st, { op: 'add_row', record: buildRowRecord(st, newRow) });
       st.columnTypes.forEach((type, colIdx) => {
         if (type === 'relation') {
           const att = getAtt(st, colIdx);
@@ -12686,6 +12727,7 @@ function showRowEditDialog(st, rowIdx) {
             return;
           }
           
+          const changes = {};
           st.columnNames.forEach((name, colIdx) => {
             const type = st.columnTypes[colIdx];
             if (type === 'id') return;
@@ -12706,10 +12748,17 @@ function showRowEditDialog(st, rowIdx) {
               } else {
                 value = input.value === '' ? null : input.value;
               }
+              const oldValue = st.relation.items[targetRowIdx][colIdx];
+              if (oldValue !== value) {
+                changes[name] = { old: oldValue, new: value };
+              }
               st.relation.items[targetRowIdx][colIdx] = value;
             }
           });
           
+          if (Object.keys(changes).length > 0) {
+            logOperation(st, { op: 'edit_row', id: rowId, changes });
+          }
           renderTable(st);
           outputRelationState(st);
           closeRowOperationPanel(st);
@@ -12957,7 +13006,18 @@ function updateRelationFromInput(input) {
     value = input.value;
   }
   
+  const oldValue = state.relation.items[rowIdx][colIdx];
   state.relation.items[rowIdx][colIdx] = value;
+  
+  if (oldValue !== value) {
+    logOperation(state, {
+      op: 'inline_edit',
+      id: getRowId(state, state.relation.items[rowIdx]),
+      column: state.columnNames[colIdx],
+      old: oldValue,
+      new: value
+    });
+  }
   
   const textarea = el('.relation-json');
   if (textarea) textarea.value = JSON.stringify(state.relation, null, 2);
@@ -20702,7 +20762,18 @@ function updateRelationFromInputWithState(st, input) {
     value = input.value === '' ? null : input.value;
   }
   
+  const oldValue = st.relation.items[rowIdx][colIdx];
   st.relation.items[rowIdx][colIdx] = value;
+  
+  if (oldValue !== value) {
+    logOperation(st, {
+      op: 'inline_edit',
+      id: getRowId(st, st.relation.items[rowIdx]),
+      column: st.columnNames[colIdx],
+      old: oldValue,
+      new: value
+    });
+  }
 }
 
 function showColumnMenuForInstance(st, colIdx, x, y) {
