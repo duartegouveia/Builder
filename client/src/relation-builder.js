@@ -6662,11 +6662,12 @@ function openSelectOneDialog(st, options = {}) {
   builderContainer.addEventListener('dblclick', (e) => {
     const tr = e.target.closest('tbody tr[data-row-idx]');
     if (!tr) return;
+    e.stopPropagation();
     const rowIdx = parseInt(tr.dataset.rowIdx);
     if (isNaN(rowIdx)) return;
     const id = getRowId(instanceSt, rowIdx);
     outputAndClose(id);
-  });
+  }, true);
 
   const closeHandler = () => {
     const highlighted = getHighlightedRow(instanceSt);
@@ -6842,6 +6843,7 @@ function openChooseManyDialog(st) {
   sourceContainer.addEventListener('dblclick', (e) => {
     const tr = e.target.closest('tbody tr[data-row-idx]');
     if (!tr) return;
+    e.stopPropagation();
     const rowIdx = parseInt(tr.dataset.rowIdx);
     if (isNaN(rowIdx) || rowIdx >= sourceSt.relation.items.length) return;
     const item = JSON.parse(JSON.stringify(sourceSt.relation.items[rowIdx]));
@@ -6859,11 +6861,12 @@ function openChooseManyDialog(st) {
     applySorting(targetSt);
     renderTable(targetSt);
     updateLabels();
-  });
+  }, true);
 
   targetContainer.addEventListener('dblclick', (e) => {
     const tr = e.target.closest('tbody tr[data-row-idx]');
     if (!tr) return;
+    e.stopPropagation();
     const rowIdx = parseInt(tr.dataset.rowIdx);
     if (isNaN(rowIdx) || rowIdx >= targetSt.relation.items.length) return;
     targetSt.relation.items.splice(rowIdx, 1);
@@ -6875,7 +6878,7 @@ function openChooseManyDialog(st) {
     applySorting(targetSt);
     renderTable(targetSt);
     updateLabels();
-  });
+  }, true);
 
   const outputAndClose = () => {
     const ids = [];
