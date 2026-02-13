@@ -1,0 +1,460 @@
+{
+  "pot": "relation",
+  "guid": "",
+  "name": "company_type",
+  "columns": {
+    "ID": "id",
+    "Name": "string",
+    "references": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "References",
+      "short_name": "Refs",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": null,
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "CompanyTypeID"
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
+    ]
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_hierarchy": true
+  },
+  "items": [
+    [
+      -1,
+      "Company Type A",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": false,
+          "show_stats": false,
+          "cardinality_min": 0,
+          "cardinality_max": null,
+          "general_view_options": [],
+          "general_always_visible_options": [
+            "New",
+            "Delete"
+          ],
+          "general_line_options": [
+            "Delete"
+          ],
+          "general_multi_options": [],
+          "uiState": {
+            "currentView": "table",
+            "pageSize": 5,
+            "currentPage": 1,
+            "manualResizeHeight": null,
+            "cardsPageSize": 12,
+            "cardsCurrentPage": 1,
+            "selectedRows": [],
+            "highlightedRow": null,
+            "sortCriteria": [],
+            "filters": {},
+            "formatting": {},
+            "groupByColumns": [],
+            "groupedData": null,
+            "groupAllKeepVisible": false,
+            "expandedGroups": [],
+            "groupBySelectedValues": {},
+            "selectedColumns": [],
+            "pivotConfig": {
+              "rowColumn": null,
+              "colColumn": null,
+              "values": []
+            },
+            "diagramNodes": [],
+            "filteredIndices": [],
+            "sortedIndices": [],
+            "quickSearchText": "",
+            "currentHierarchyValue": null,
+            "showAllDescendants": false,
+            "columns_visible": null,
+            "analysisResult": null
+          }
+        },
+        "items": [],
+        "log": []
+      }
+    ],
+    [
+      -2,
+      "Company Type B",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": false,
+          "show_stats": false,
+          "cardinality_min": 0,
+          "cardinality_max": null,
+          "general_view_options": [],
+          "general_always_visible_options": [
+            "New",
+            "Delete"
+          ],
+          "general_line_options": [
+            "Delete"
+          ],
+          "general_multi_options": [],
+          "uiState": {
+            "currentView": "table",
+            "pageSize": 5,
+            "currentPage": 1,
+            "manualResizeHeight": null,
+            "cardsPageSize": 12,
+            "cardsCurrentPage": 1,
+            "selectedRows": [],
+            "highlightedRow": null,
+            "sortCriteria": [],
+            "filters": {},
+            "formatting": {},
+            "groupByColumns": [],
+            "groupedData": null,
+            "groupAllKeepVisible": false,
+            "expandedGroups": [],
+            "groupBySelectedValues": {},
+            "selectedColumns": [],
+            "pivotConfig": {
+              "rowColumn": null,
+              "colColumn": null,
+              "values": []
+            },
+            "diagramNodes": [],
+            "filteredIndices": [],
+            "sortedIndices": [],
+            "quickSearchText": "",
+            "currentHierarchyValue": null,
+            "showAllDescendants": false,
+            "columns_visible": null,
+            "analysisResult": null
+          }
+        },
+        "items": [],
+        "log": []
+      }
+    ],
+    [
+      -3,
+      "Company Type C",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "editable": false,
+          "show_multicheck": false,
+          "show_natural_order": false,
+          "show_id": true,
+          "show_column_kind": false,
+          "show_stats": false,
+          "cardinality_min": 0,
+          "cardinality_max": null,
+          "general_view_options": [],
+          "general_always_visible_options": [
+            "New",
+            "Delete"
+          ],
+          "general_line_options": [
+            "Delete"
+          ],
+          "general_multi_options": [],
+          "uiState": {
+            "currentView": "table",
+            "pageSize": 5,
+            "currentPage": 1,
+            "manualResizeHeight": null,
+            "cardsPageSize": 12,
+            "cardsCurrentPage": 1,
+            "selectedRows": [],
+            "highlightedRow": null,
+            "sortCriteria": [],
+            "filters": {},
+            "formatting": {},
+            "groupByColumns": [],
+            "groupedData": null,
+            "groupAllKeepVisible": false,
+            "expandedGroups": [],
+            "groupBySelectedValues": {},
+            "selectedColumns": [],
+            "pivotConfig": {
+              "rowColumn": null,
+              "colColumn": null,
+              "values": []
+            },
+            "diagramNodes": [],
+            "filteredIndices": [],
+            "sortedIndices": [],
+            "quickSearchText": "",
+            "currentHierarchyValue": null,
+            "showAllDescendants": false,
+            "columns_visible": null,
+            "analysisResult": null
+          }
+        },
+        "items": [],
+        "log": []
+      }
+    ]
+  ],
+  "log": [
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-13T14:56:56.389Z",
+      "op": "add_row",
+      "record": {
+        "ID": -1,
+        "Name": "Company Type A",
+        "references": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [
+              "New",
+              "Delete"
+            ],
+            "general_line_options": [
+              "Delete"
+            ],
+            "general_multi_options": [],
+            "uiState": {
+              "currentView": "table",
+              "pageSize": 5,
+              "currentPage": 1,
+              "manualResizeHeight": null,
+              "cardsPageSize": 12,
+              "cardsCurrentPage": 1,
+              "selectedRows": [],
+              "highlightedRow": null,
+              "sortCriteria": [],
+              "filters": {},
+              "formatting": {},
+              "groupByColumns": [],
+              "groupedData": null,
+              "groupAllKeepVisible": false,
+              "expandedGroups": [],
+              "groupBySelectedValues": {},
+              "selectedColumns": [],
+              "pivotConfig": {
+                "rowColumn": null,
+                "colColumn": null,
+                "values": []
+              },
+              "diagramNodes": [],
+              "filteredIndices": [],
+              "sortedIndices": [],
+              "quickSearchText": "",
+              "currentHierarchyValue": null,
+              "showAllDescendants": false,
+              "columns_visible": null,
+              "analysisResult": null
+            }
+          },
+          "items": [],
+          "log": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-13T14:57:04.315Z",
+      "op": "add_row",
+      "record": {
+        "ID": -2,
+        "Name": "Company Type B",
+        "references": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [
+              "New",
+              "Delete"
+            ],
+            "general_line_options": [
+              "Delete"
+            ],
+            "general_multi_options": [],
+            "uiState": {
+              "currentView": "table",
+              "pageSize": 5,
+              "currentPage": 1,
+              "manualResizeHeight": null,
+              "cardsPageSize": 12,
+              "cardsCurrentPage": 1,
+              "selectedRows": [],
+              "highlightedRow": null,
+              "sortCriteria": [],
+              "filters": {},
+              "formatting": {},
+              "groupByColumns": [],
+              "groupedData": null,
+              "groupAllKeepVisible": false,
+              "expandedGroups": [],
+              "groupBySelectedValues": {},
+              "selectedColumns": [],
+              "pivotConfig": {
+                "rowColumn": null,
+                "colColumn": null,
+                "values": []
+              },
+              "diagramNodes": [],
+              "filteredIndices": [],
+              "sortedIndices": [],
+              "quickSearchText": "",
+              "currentHierarchyValue": null,
+              "showAllDescendants": false,
+              "columns_visible": null,
+              "analysisResult": null
+            }
+          },
+          "items": [],
+          "log": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-13T14:57:10.453Z",
+      "op": "add_row",
+      "record": {
+        "ID": -3,
+        "Name": "Company Type C",
+        "references": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [
+              "New",
+              "Delete"
+            ],
+            "general_line_options": [
+              "Delete"
+            ],
+            "general_multi_options": [],
+            "uiState": {
+              "currentView": "table",
+              "pageSize": 5,
+              "currentPage": 1,
+              "manualResizeHeight": null,
+              "cardsPageSize": 12,
+              "cardsCurrentPage": 1,
+              "selectedRows": [],
+              "highlightedRow": null,
+              "sortCriteria": [],
+              "filters": {},
+              "formatting": {},
+              "groupByColumns": [],
+              "groupedData": null,
+              "groupAllKeepVisible": false,
+              "expandedGroups": [],
+              "groupBySelectedValues": {},
+              "selectedColumns": [],
+              "pivotConfig": {
+                "rowColumn": null,
+                "colColumn": null,
+                "values": []
+              },
+              "diagramNodes": [],
+              "filteredIndices": [],
+              "sortedIndices": [],
+              "quickSearchText": "",
+              "currentHierarchyValue": null,
+              "showAllDescendants": false,
+              "columns_visible": null,
+              "analysisResult": null
+            }
+          },
+          "items": [],
+          "log": []
+        }
+      }
+    }
+  ]
+}

@@ -739,19 +739,17 @@ const COMPANY_TYPES_JSON = {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": true,
+    "editable": false,
     "show_multicheck": true,
     "show_natural_order": true,
-    "show_id": true,
-    "show_column_kind": true,
-    "show_stats": true,
-    "show_hierarchy": true,
-    "hierarchy_column": "parent",
-    "hierarchy_root_value": "",
-    "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
+    "show_hierarchy": true
   },
-  "items": []
+  "items": [
+    [-1, "Company Type A", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":["New","Delete"],"general_line_options":["Delete"],"general_multi_options":[]},"items":[],"log":[]}],
+    [-2, "Company Type B", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":["New","Delete"],"general_line_options":["Delete"],"general_multi_options":[]},"items":[],"log":[]}],
+    [-3, "Company Type C", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":["New","Delete"],"general_line_options":["Delete"],"general_multi_options":[]},"items":[],"log":[]}]
+  ],
+  "log": []
 };
 
 const ALL_STOCKS_JSON = {
