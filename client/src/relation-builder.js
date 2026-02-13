@@ -5776,16 +5776,14 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
       }
     }
   } else {
-    const countSpan = document.createElement('span');
-    countSpan.className = 'assoc-count';
-    countSpan.textContent = items.length + ' link' + (items.length !== 1 ? 's' : '');
-    wrapper.appendChild(countSpan);
-    const viewBtn = document.createElement('button');
-    viewBtn.className = 'relation-cell-btn assoc-view-btn';
-    viewBtn.textContent = 'View';
-    viewBtn.dataset.row = rowIdx;
-    viewBtn.dataset.col = colIdx;
-    wrapper.appendChild(viewBtn);
+    const btn = document.createElement('button');
+    btn.className = 'relation-cell-btn';
+    const count = items.length;
+    btn.innerHTML = `📋 ${count}`;
+    btn.title = `View nested relation (${count} rows)`;
+    btn.dataset.row = rowIdx;
+    btn.dataset.col = colIdx;
+    wrapper.appendChild(btn);
   }
 
   return wrapper;
@@ -12024,10 +12022,20 @@ function initRelationFieldsInContainer(container, st, row) {
     const att = getAtt(st, colIdx);
     const relValue = row[colIdx];
     if (isAssociationAtt(att)) {
-      const editable = st.relation.rel_options?.editable !== false;
-      const cell = buildAssociationCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st, row);
-      relContainer.innerHTML = '';
-      relContainer.appendChild(cell);
+      const config = getAssociationConfig(att);
+      const maxOne = config && config.cardinality_max === 1;
+      if (maxOne) {
+        const editable = st.relation.rel_options?.editable !== false;
+        const cell = buildAssociationCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st, row);
+        relContainer.innerHTML = '';
+        relContainer.appendChild(cell);
+        return;
+      }
+      if (relValue && relValue.columns) {
+        initRelationInstance(relContainer, relValue, { showJsonEditor: false, isNested: true });
+      } else {
+        relContainer.innerHTML = '<span class="null-value">null</span>';
+      }
       return;
     }
     if (relValue && relValue.columns) {
