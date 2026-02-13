@@ -4994,6 +4994,17 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   min-width: 320px;
   max-width: 440px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.confirm-dialog-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .confirm-dialog-message {
@@ -5007,6 +5018,13 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-shrink: 0;
+  padding-top: 12px;
+}
+
+.confirm-dialog-buttons .btn {
+  font-size: 12px;
+  padding: 5px 12px;
 }
 
 .confirm-dialog-buttons .btn-primary {
@@ -5424,11 +5442,13 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 /* Show/Hide Columns Dialog */
 .cv-columns-list {
-  max-height: 400px;
+  max-height: none;
   overflow-y: auto;
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 6px;
   margin: 8px 0;
+  flex: 1;
+  min-height: 0;
 }
 .cv-columns-header {
   display: flex;
