@@ -12069,11 +12069,12 @@ function initRelationFieldsInContainer(container, st, row, mode) {
         relContainer.appendChild(cell);
         return;
       }
-      if (relValue && relValue.columns) {
-        initRelationInstance(relContainer, relValue, { showJsonEditor: false, isNested: true });
-      } else {
-        relContainer.innerHTML = '<span class="null-value">null</span>';
+      let assocVal = relValue;
+      if (!assocVal || !assocVal.columns) {
+        assocVal = createEmptyAssociationRelation();
+        row[colIdx] = assocVal;
       }
+      initRelationInstance(relContainer, assocVal, { showJsonEditor: false, isNested: true });
       return;
     }
     if (relValue && relValue.columns) {
@@ -12445,6 +12446,9 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
   const defaultRow = st.columnTypes.map((type, idx) => {
     if (type === 'id') return getNextNegativeId(st);
     if (type === 'boolean') return false;
+    const att = getAtt(st, idx);
+    if (isAssociationAtt(att)) return createEmptyAssociationRelation();
+    if (type === 'relation') return null;
     if (type === 'int' || type === 'float') return null;
     return null;
   });
