@@ -4590,16 +4590,18 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 .info-badge-popup {
   position: absolute;
   top: calc(100% + 4px);
-  right: 0;
+  left: 0;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   box-shadow: var(--shadow-lg);
   z-index: 1010;
   font-size: 0.8125rem;
-  max-width: 320px;
-  line-height: 1.5;
+  width: max-content;
+  min-width: 280px;
+  max-width: 500px;
+  line-height: 1.6;
   color: var(--foreground);
 }
 
