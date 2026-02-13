@@ -7081,7 +7081,7 @@ function renderMultiPanelContent(container, st, checkedIndices, panelPositions, 
     }
     panelDiv.innerHTML = navHtml + '<div class="multi-panel-body">' + contentHtml + '</div>';
     panelsDiv.appendChild(panelDiv);
-    initRelationFieldsInContainer(panelDiv, st, row);
+    initRelationFieldsInContainer(panelDiv, st, row, isMerge ? 'view' : 'edit');
     initFileFieldsInContainer(panelDiv, st, row, isMerge ? 'view' : 'edit');
     if (isMerge && p === 0) {
       injectMergeRadiosIntoEditPanel(panelDiv, st, rowIdx);
@@ -12052,7 +12052,7 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
   return `<span class="string-value">${escapeHtml(String(value))}</span>`;
 }
 
-function initRelationFieldsInContainer(container, st, row) {
+function initRelationFieldsInContainer(container, st, row, mode) {
   const relationContainers = container.querySelectorAll('.row-field-relation-container');
   const rowIdx = st.relation.items.indexOf(row);
   relationContainers.forEach(relContainer => {
@@ -12063,7 +12063,7 @@ function initRelationFieldsInContainer(container, st, row) {
       const config = getAssociationConfig(att);
       const maxOne = config && config.cardinality_max === 1;
       if (maxOne) {
-        const editable = st.relation.rel_options?.editable !== false;
+        const editable = mode === 'edit' || st.relation.rel_options?.editable !== false;
         const cell = buildAssociationCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st, row);
         relContainer.innerHTML = '';
         relContainer.appendChild(cell);
@@ -12355,7 +12355,7 @@ function showRowViewDialog(st, rowIdx) {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'view');
-    initRelationFieldsInContainer(container, st, row);
+    initRelationFieldsInContainer(container, st, row, 'view');
     initFileFieldsInContainer(container, st, row, 'view');
     
     // Set up footer button handlers (buttons are in parent footer)
@@ -12388,7 +12388,7 @@ function showRowCopyDialog(st, rowIdx) {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'view');
-    initRelationFieldsInContainer(container, st, row);
+    initRelationFieldsInContainer(container, st, row, 'view');
     initFileFieldsInContainer(container, st, row, 'view');
     
     setTimeout(() => {
@@ -12460,7 +12460,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, defaultRow, 'edit');
-    initRelationFieldsInContainer(container, st, defaultRow);
+    initRelationFieldsInContainer(container, st, defaultRow, 'edit');
     initFileFieldsInContainer(container, st, defaultRow, 'edit');
     
     const clearForm = () => {
@@ -12707,7 +12707,7 @@ function showRowEditDialog(st, rowIdx) {
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'edit');
-    initRelationFieldsInContainer(container, st, row);
+    initRelationFieldsInContainer(container, st, row, 'edit');
     initFileFieldsInContainer(container, st, row, 'edit');
     
     const idColIdx = st.columnTypes.findIndex(t => t === 'id');
