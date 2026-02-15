@@ -6030,6 +6030,46 @@ function getAssociatedForeignKeys(nestedSt, counterpartName) {
   return keys;
 }
 
+function findIdColIdx(columns) {
+  const colEntries = Object.entries(columns);
+  return colEntries.findIndex(([name, type]) => {
+    if (typeof type === 'string' && type === 'id') return true;
+    if (typeof type === 'object' && type !== null) {
+      const kind = type.attribute_kind;
+      if (Array.isArray(kind) && kind.includes('id')) return true;
+    }
+    return false;
+  });
+}
+
+function getCounterpartOccupiedIds(counterpartJson, counterpartAttName, myEntityName, myRowId) {
+  if (!counterpartAttName || !counterpartJson) return new Set();
+  const counterpartCols = Object.keys(counterpartJson.columns);
+  const assocColIdx = counterpartCols.indexOf(counterpartAttName);
+  if (assocColIdx < 0) return new Set();
+  const colDef = counterpartJson.columns[counterpartAttName];
+  if (!colDef || typeof colDef !== 'object') return new Set();
+  if (!isAssociationAtt(colDef)) return new Set();
+  const cfg = getAssociationConfig(colDef);
+  if (!cfg || cfg.cardinality_max !== 1) return new Set();
+
+  const occupied = new Set();
+  const idColIdx = findIdColIdx(counterpartJson.columns);
+  if (idColIdx < 0) return occupied;
+
+  (counterpartJson.items || []).forEach(row => {
+    const assocVal = row[assocColIdx];
+    if (!assocVal || !assocVal.items || assocVal.items.length === 0) return;
+    const linkedToMe = assocVal.items.some(item =>
+      String(item[1]) === String(myEntityName) && String(item[2]) === String(myRowId)
+    );
+    if (!linkedToMe) {
+      occupied.add(String(row[idColIdx]));
+    }
+  });
+  return occupied;
+}
+
 function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
   const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
   const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
@@ -6043,23 +6083,22 @@ function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
   const parentRowIdx = pa.parentRowIdx;
   const parentColIdx = pa.parentColIdx;
   const parentRow = parentSt.relation.items[parentRowIdx];
+  const myEntityName = parentSt.relation.name || '';
+  const myRowId = String(parentRow[0]);
+
+  const alreadyAssociated = getAssociatedForeignKeys(nestedSt, counterpartName);
+  const occupiedByOthers = getCounterpartOccupiedIds(counterpartJson, counterpartAttName, myEntityName, myRowId);
 
   if (mode === 'one') {
-    const alreadyAssociated = getAssociatedForeignKeys(nestedSt, counterpartName);
     const filteredJson = JSON.parse(JSON.stringify(counterpartJson));
-    if (alreadyAssociated.size > 0) {
-      const colEntries = Object.entries(filteredJson.columns);
-      const idColIdx = colEntries.findIndex(([name, type]) => {
-        if (typeof type === 'string' && type === 'id') return true;
-        if (typeof type === 'object' && type !== null) {
-          const kind = type.attribute_kind;
-          if (Array.isArray(kind) && kind.includes('id')) return true;
-        }
-        return false;
+    const idColIdx = findIdColIdx(filteredJson.columns);
+    if (idColIdx >= 0) {
+      filteredJson.items = filteredJson.items.filter(row => {
+        const rowId = String(row[idColIdx]);
+        if (alreadyAssociated.has(rowId)) return false;
+        if (occupiedByOthers.has(rowId)) return false;
+        return true;
       });
-      if (idColIdx >= 0) {
-        filteredJson.items = filteredJson.items.filter(row => !alreadyAssociated.has(String(row[idColIdx])));
-      }
     }
     openSelectOneDialog(nestedSt, {
       relationData: filteredJson,
@@ -6072,8 +6111,16 @@ function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
       }
     });
   } else {
-    const alreadyAssociated = getAssociatedForeignKeys(nestedSt, counterpartName);
-    openAssocSelectManyDialog(counterpartJson, counterpartName, alreadyAssociated, (newSelectedIds) => {
+    const filteredJson = JSON.parse(JSON.stringify(counterpartJson));
+    const idColIdx = findIdColIdx(filteredJson.columns);
+    if (idColIdx >= 0 && occupiedByOthers.size > 0) {
+      filteredJson.items = filteredJson.items.filter(row => {
+        const rowId = String(row[idColIdx]);
+        if (occupiedByOthers.has(rowId)) return false;
+        return true;
+      });
+    }
+    openAssocSelectManyDialog(filteredJson, counterpartName, alreadyAssociated, (newSelectedIds) => {
       rebuildAssociations(nestedSt, pa, counterpartName, counterpartAttName, newSelectedIds);
     });
   }
