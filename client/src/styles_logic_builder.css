@@ -419,3 +419,65 @@
   line-height: 1.2;
   height: auto;
 }
+
+/* ===== Logic Builder Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .logic-node.is-root {
+    padding: 6px;
+  }
+
+  .logic-controls {
+    padding: var(--space-3);
+    gap: var(--space-3);
+    border-radius: var(--radius-lg);
+  }
+
+  .logic-operator-container {
+    overflow: visible;
+  }
+
+  .logic-text-badge,
+  .logic-text-badge-multiline {
+    min-width: 28px;
+    font-size: 0.5625rem;
+    padding: 0 var(--space-1);
+  }
+
+  .logic-operator-divider {
+    font-size: 0.625rem;
+    padding: var(--space-1) var(--space-2);
+    min-width: auto;
+  }
+
+  .logic-bar-cell {
+    width: 40px;
+  }
+
+  .popover-content {
+    max-width: calc(100vw - 32px);
+  }
+
+  .logic-result-badge {
+    font-size: 0.875rem;
+    padding: var(--space-1) var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .logic-node {
+    gap: var(--space-1);
+  }
+
+  .logic-text-node {
+    padding: 3px;
+  }
+
+  .input-inline {
+    font-size: 0.8125rem;
+    padding: var(--space-1);
+  }
+
+  .logic-controls {
+    padding: var(--space-2);
+  }
+}

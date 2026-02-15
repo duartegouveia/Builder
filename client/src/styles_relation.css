@@ -4954,31 +4954,6 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   max-height: 35vh;
 }
 
-@media (max-width: 768px) {
-  .multi-panels-2,
-  .multi-panels-3,
-  .multi-panels-4 {
-    grid-template-columns: 1fr;
-  }
-
-  .saved-form-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .saved-name-input {
-    min-width: auto;
-  }
-
-  .selection-dialog {
-    width: 95vw;
-  }
-
-  .choose-many-section .selection-relation-container {
-    max-height: 25vh;
-  }
-}
-
 .confirm-dialog-overlay {
   position: fixed;
   inset: 0;
@@ -7116,4 +7091,243 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 .adv-add-op-menu-item:hover {
   background: var(--muted);
+}
+
+/* ===== Relation Builder Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .main-nav-menu {
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: var(--space-1);
+  }
+
+  .nav-btn {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.75rem;
+    gap: var(--space-1);
+  }
+
+  .nav-dropdown {
+    position: fixed;
+    left: var(--space-2);
+    right: var(--space-2);
+    top: auto;
+    min-width: auto;
+    max-width: calc(100vw - 16px);
+  }
+
+  .json-editor-wrapper {
+    flex-direction: column;
+  }
+
+  .relation-json-textarea {
+    min-height: 120px;
+    font-size: 0.75rem;
+  }
+
+  .card-header .flex.gap-2.flex-wrap {
+    gap: var(--space-1);
+  }
+
+  .obj-buttons-row {
+    gap: var(--space-1) !important;
+  }
+
+  .flex-wrapper-horizontal {
+    flex-direction: column;
+  }
+
+  .flex-wrapper-horizontal.has-detail > .relation-main-panel {
+    flex: 0 0 auto;
+  }
+
+  .flex-wrapper-horizontal.has-detail > .relation-detail-panel {
+    flex: 0 0 auto;
+  }
+
+  .view-tabs {
+    gap: var(--space-1);
+  }
+
+  .view-tabs-left {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .view-tab {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.6875rem;
+  }
+
+  .view-tabs-right {
+    flex-wrap: wrap;
+  }
+
+  .quick-search-input {
+    width: 80px;
+  }
+
+  .column-menu {
+    max-width: calc(100vw - 16px);
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .confirm-dialog {
+    min-width: auto;
+    max-width: calc(100vw - 32px);
+    margin: 0 var(--space-2);
+  }
+
+  .selection-dialog {
+    width: calc(100vw - 16px);
+  }
+
+  .adv-search-mode-toggle {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 8px;
+  }
+
+  .adv-search-criterion {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .adv-search-criterion select {
+    min-width: 70px;
+    max-width: 120px;
+    font-size: 11px;
+  }
+
+  .adv-search-criterion .col-select {
+    min-width: 80px;
+    max-width: 130px;
+  }
+
+  .adv-search-criterion .op-select {
+    min-width: 65px;
+    max-width: 100px;
+  }
+
+  .adv-search-criterion .val-input {
+    min-width: 50px;
+    max-width: 100px;
+  }
+
+  .adv-search-actions {
+    gap: 4px;
+  }
+
+  .adv-search-actions .adv-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .adv-search-saved-item {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .adv-op-select {
+    min-width: 90px;
+    max-width: 100%;
+  }
+
+  .adv-join-mapping-row {
+    gap: 4px;
+  }
+
+  .adv-groupby-columns {
+    max-height: 120px;
+  }
+
+  .adv-groupby-agg {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .adv-groupby-having-row {
+    gap: 4px;
+  }
+
+  .adv-add-op-menu {
+    min-width: 160px;
+  }
+
+  .integrity-check-dialog {
+    width: calc(100vw - 16px);
+    max-width: none;
+  }
+
+  .multi-panels-2,
+  .multi-panels-3,
+  .multi-panels-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .saved-name-input {
+    min-width: auto;
+  }
+
+  .choose-many-section .selection-relation-container {
+    max-height: 25vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-nav-menu {
+    padding: 2px;
+    gap: 1px;
+  }
+
+  .nav-btn {
+    padding: 2px 6px;
+    font-size: 0.6875rem;
+  }
+
+  .nav-btn::after {
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+  }
+
+  .view-tab {
+    padding: 2px 6px;
+    font-size: 0.625rem;
+  }
+
+  .relation-json-textarea {
+    min-height: 80px;
+    font-size: 0.6875rem;
+    padding: var(--space-2);
+  }
+
+  .adv-search-criterion {
+    font-size: 11px;
+  }
+
+  .adv-search-criterion select,
+  .adv-search-criterion input[type="text"],
+  .adv-search-criterion input[type="number"],
+  .adv-search-criterion input[type="date"],
+  .adv-search-criterion input[type="datetime-local"],
+  .adv-search-criterion input[type="time"] {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  .adv-search-actions .adv-btn {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .confirm-dialog {
+    padding: 16px 20px;
+  }
 }
