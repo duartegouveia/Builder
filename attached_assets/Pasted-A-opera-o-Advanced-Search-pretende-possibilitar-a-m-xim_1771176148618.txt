@@ -1,0 +1,12 @@
+A operação Advanced Search pretende possibilitar a máxima flexibilidade de agregação de entidades e resultados (union, intersection, diference), quer permita fazer tudo o que permite o SQL e a algebra relacional extendida.
+A ideia é que o conjunto de definições possa ser expresso de forma declarativa, tal como já acontece com o order, filter, etc. Aliás essas operações no formato declarativo devem ser reutilizadas na pesquisa avançada. Essas sequência de operações poderá ser guardada, como pesquisa guardada, para poder repetir a sequência de operações iniciando sobre diferentes conjuntos de resultados. 
+Parece-me que no mais alto nível está a possibilidade de fazer union, diference, intersection entre relations. Estas operações requerem que os pares de relações que as operações tratam são consistentes a nível das colunas.
+Depois, a um segundo nível temos a possibilidade de juntar duas ou mais entities/relations com inner join, left join, right join, cross join, que na maior parte destes casos requer que se indique as colunas a unir. Por omissão as uniões fazem-se com base em colunas do kind association, ainda que seja possível fazer a junção por outras colunas.
+Depois há um terceiro nível, em que podemos aplicar critérios de filtragem combinados em and/or trees com ou sem not (e not null), e os critérios sobre os campos com tantas opções, que dependem dos kinds.
+Eu acho interessante haver um modo aditivo, que começa com um conjunto vazio de resultados, e em que cada novo critério de filtragem é combinado com or ( e not null). A ideia é ir acrescentando resultados, pelos filtros que assinam resultados.
+Pelo contrário, o modo subtrativo, começam com todos os resultados, e a cada novo conjunto de critérios (and/or trees), se vão retirando resultados.
+Entre os critérios, é também necessário necessário ter a opção select in e select not in.
+Depois é necessário conseguir lidar com group by, e having.
+Também seria bom conseguir implementar as opções with recursive...
+Finalmente é necessário poder ordenar e para isso podemos utilizar o que já existe no painel order by.
+Como é que se pode implementar isto. O que me sugeres?

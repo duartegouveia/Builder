@@ -21675,6 +21675,19 @@ function renderStructure(st = state) {
         showToast('Column deleted.', 'success');
       });
       toolbar.appendChild(delBtn);
+
+      const cancelEditBtn = document.createElement('button');
+      cancelEditBtn.className = 'structure-btn-cancel';
+      cancelEditBtn.setAttribute('data-testid', 'button-cancel-edit');
+      cancelEditBtn.textContent = 'Cancel Edit';
+      cancelEditBtn.addEventListener('click', () => {
+        if (pendingChanges[selectedIdx]) delete pendingChanges[selectedIdx];
+        selectedIdx = null;
+        editingIdx = null;
+        detailIdx = null;
+        render();
+      });
+      toolbar.appendChild(cancelEditBtn);
     }
 
     if (hasPendingChanges()) {
