@@ -745,9 +745,9 @@ const COMPANY_TYPES_JSON = {
     "show_hierarchy": true
   },
   "items": [
-    [-1, "Company Type A", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":["New","Delete"],"general_line_options":["Delete"],"general_multi_options":[]},"items":[],"log":[]}],
-    [-2, "Company Type B", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":["New","Delete"],"general_line_options":["Delete"],"general_multi_options":[]},"items":[],"log":[]}],
-    [-3, "Company Type C", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":["New","Delete"],"general_line_options":["Delete"],"general_multi_options":[]},"items":[],"log":[]}]
+    [-1, "Company Type A", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
+    [-2, "Company Type B", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
+    [-3, "Company Type C", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}]
   ],
   "log": []
 };
@@ -2097,8 +2097,8 @@ function createEmptyAssociationRelation() {
       cardinality_min: 0,
       cardinality_max: null,
       general_view_options: [],
-      general_always_visible_options: ['New', 'Delete'],
-      general_line_options: ['Delete'],
+      general_always_visible_options: [],
+      general_line_options: [],
       general_multi_options: []
     },
     items: []
@@ -4426,7 +4426,7 @@ function getVisibleColumns(st = state) {
 
 // Relation type functions
 function formatCellValue(value, type, colName, st) {
-  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  if (value === null || value === undefined) return '';
   
   if (type === 'relation') {
     if (st) {
@@ -6017,6 +6017,19 @@ function showCounterpartPicker(counterparts, onSelect) {
   dialog.querySelector('.btn-close-dialog').addEventListener('click', cleanup);
 }
 
+function getAssociatedForeignKeys(nestedSt, counterpartName) {
+  const keys = new Set();
+  if (!nestedSt || !nestedSt.relation || !nestedSt.relation.items) return keys;
+  nestedSt.relation.items.forEach(row => {
+    const entity = row[1];
+    const fk = row[2];
+    if ((!counterpartName || entity === counterpartName) && fk !== null && fk !== undefined) {
+      keys.add(String(fk));
+    }
+  });
+  return keys;
+}
+
 function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
   const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
   const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
@@ -6032,9 +6045,25 @@ function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
   const parentRow = parentSt.relation.items[parentRowIdx];
 
   if (mode === 'one') {
+    const alreadyAssociated = getAssociatedForeignKeys(nestedSt, counterpartName);
+    const filteredJson = JSON.parse(JSON.stringify(counterpartJson));
+    if (alreadyAssociated.size > 0) {
+      const colEntries = Object.entries(filteredJson.columns);
+      const idColIdx = colEntries.findIndex(([name, type]) => {
+        if (typeof type === 'string' && type === 'id') return true;
+        if (typeof type === 'object' && type !== null) {
+          const kind = type.attribute_kind;
+          if (Array.isArray(kind) && kind.includes('id')) return true;
+        }
+        return false;
+      });
+      if (idColIdx >= 0) {
+        filteredJson.items = filteredJson.items.filter(row => !alreadyAssociated.has(String(row[idColIdx])));
+      }
+    }
     openSelectOneDialog(nestedSt, {
-      relationData: counterpartJson,
-      title: 'Select from ' + counterpartName + ' (' + (counterpartJson.items || []).length + ' registos)',
+      relationData: filteredJson,
+      title: 'Associar Um de ' + counterpartName + ' (' + filteredJson.items.length + ' disponíveis)',
       onSelect: (selectedId) => {
         if (selectedId !== null && selectedId !== undefined) {
           addAssociationBidirectional(parentRowIdx, parentColIdx, counterpartName, String(selectedId), counterpartAttName, parentSt, parentRow);
@@ -6043,18 +6072,85 @@ function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
       }
     });
   } else {
-    openAssocSelectManyDialog(counterpartJson, counterpartName, (selectedIds) => {
-      if (selectedIds && selectedIds.length > 0) {
-        selectedIds.forEach(id => {
-          addAssociationBidirectional(parentRowIdx, parentColIdx, counterpartName, String(id), counterpartAttName, parentSt, parentRow);
-        });
-        renderTable(nestedSt);
-      }
+    const alreadyAssociated = getAssociatedForeignKeys(nestedSt, counterpartName);
+    openAssocSelectManyDialog(counterpartJson, counterpartName, alreadyAssociated, (newSelectedIds) => {
+      rebuildAssociations(nestedSt, pa, counterpartName, counterpartAttName, newSelectedIds);
     });
   }
 }
 
-function openAssocSelectManyDialog(counterpartJson, counterpartName, onDone) {
+function rebuildAssociations(nestedSt, pa, counterpartName, counterpartAttName, newSelectedIds) {
+  const parentSt = pa.parentSt;
+  const parentRowIdx = pa.parentRowIdx;
+  const parentColIdx = pa.parentColIdx;
+  const parentRow = parentSt.relation.items[parentRowIdx];
+  let assocRelation = parentRow[parentColIdx];
+  if (!assocRelation || !assocRelation.pot) {
+    assocRelation = createEmptyAssociationRelation();
+    parentRow[parentColIdx] = assocRelation;
+  }
+
+  const newSet = new Set(newSelectedIds.map(String));
+  const oldItems = assocRelation.items.filter(row => row[1] === counterpartName);
+  const oldFks = new Set(oldItems.map(row => String(row[2])));
+  const myEntityName = parentSt.relation.name || '';
+  const myRowId = String(parentRow[0]);
+
+  const toRemove = [];
+  oldItems.forEach(row => {
+    if (!newSet.has(String(row[2]))) {
+      toRemove.push(row);
+    }
+  });
+  toRemove.forEach(row => {
+    const idx = assocRelation.items.indexOf(row);
+    if (idx >= 0) {
+      assocRelation.items.splice(idx, 1);
+      syncCounterpartAssociation(counterpartName, row[2], myEntityName, myRowId, 'remove', counterpartAttName);
+      logOperation(parentSt, {
+        op: 'association_remove',
+        id: myRowId,
+        column: parentSt.columnNames[parentColIdx],
+        counterpart: counterpartName,
+        counterpartId: row[2]
+      });
+    }
+  });
+
+  const toAdd = [];
+  newSelectedIds.forEach(id => {
+    if (!oldFks.has(String(id))) {
+      toAdd.push(String(id));
+    }
+  });
+  toAdd.forEach(fk => {
+    const newId = getNextAssociationId(assocRelation);
+    assocRelation.items.push([newId, counterpartName, fk]);
+    syncCounterpartAssociation(counterpartName, fk, myEntityName, myRowId, 'add', counterpartAttName);
+    logOperation(parentSt, {
+      op: 'association_add',
+      id: myRowId,
+      column: parentSt.columnNames[parentColIdx],
+      counterpart: counterpartName,
+      counterpartId: fk
+    });
+  });
+
+  if (toRemove.length > 0 || toAdd.length > 0) {
+    renderTable(parentSt);
+    updateJsonOutput(parentSt);
+    renderTable(nestedSt);
+    if (toRemove.length > 0 && toAdd.length > 0) {
+      showToast('Associações atualizadas: +' + toAdd.length + ' / -' + toRemove.length, 'success');
+    } else if (toAdd.length > 0) {
+      showToast(toAdd.length + ' associação(ões) adicionada(s)', 'success');
+    } else {
+      showToast(toRemove.length + ' associação(ões) removida(s)', 'success');
+    }
+  }
+}
+
+function openAssocSelectManyDialog(counterpartJson, counterpartName, alreadyAssociated, onDone) {
   const relCopy = cloneRelationForSelection({ relation: counterpartJson }, false, { show_multicheck: true });
   const dialogId = `assoc-select-many-${Date.now()}`;
 
@@ -6068,7 +6164,7 @@ function openAssocSelectManyDialog(counterpartJson, counterpartName, onDone) {
 
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Select from ${escapeHtml(counterpartName)} (${relCopy.items.length} registos)</span>
+      <span>Associar Vários de ${escapeHtml(counterpartName)} (${relCopy.items.length} registos)</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     ${selectionSearchHtml()}
@@ -6076,7 +6172,7 @@ function openAssocSelectManyDialog(counterpartJson, counterpartName, onDone) {
       <div class="selection-relation-container" id="${dialogId}-builder"></div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-primary confirm-assoc-selection">Confirm</button>
+      <button class="btn btn-primary confirm-assoc-selection">Confirmar</button>
       <button class="btn btn-outline close-selection">Fechar</button>
     </div>
   `;
@@ -6087,6 +6183,18 @@ function openAssocSelectManyDialog(counterpartJson, counterpartName, onDone) {
   const builderContainer = document.getElementById(`${dialogId}-builder`);
   const instanceSt = initRelationInstance(builderContainer, relCopy, { showJsonEditor: false, isNested: true });
   setupSelectionSearch(dialog, instanceSt);
+
+  if (alreadyAssociated && alreadyAssociated.size > 0) {
+    const idColIdx = getIdColumnIndex(instanceSt);
+    if (idColIdx >= 0) {
+      instanceSt.relation.items.forEach((row, rowIdx) => {
+        if (alreadyAssociated.has(String(row[idColIdx]))) {
+          getSelectedRows(instanceSt).add(rowIdx);
+        }
+      });
+      renderTable(instanceSt);
+    }
+  }
 
   const cleanup = () => {
     if (instanceSt) {
@@ -6111,9 +6219,9 @@ function openAssocSelectManyDialog(counterpartJson, counterpartName, onDone) {
   };
 
   dialog.querySelector('.confirm-assoc-selection').addEventListener('click', confirmAndClose);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) { cleanup(); onDone([]); } });
-  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => { cleanup(); onDone([]); });
-  dialog.querySelector('.close-selection').addEventListener('click', () => { cleanup(); onDone([]); });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) { cleanup(); } });
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => { cleanup(); });
+  dialog.querySelector('.close-selection').addEventListener('click', () => { cleanup(); });
 }
 
 function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
@@ -7696,7 +7804,7 @@ function generateMergePanelContent(st, row, rowIdx, mergeState, panelIdx) {
         });
         html += '</div>';
       } else {
-        html += '<span class="null-value">null</span>';
+        html += '<span class="null-value"></span>';
       }
     } else {
       html += `<div class="merge-radio-wrapper">`;
@@ -12159,7 +12267,7 @@ function generateRowFormattedContent(st, row, mode = 'view') {
 }
 
 function formatValueForViewDisplay(value, type, st, colIdx) {
-  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  if (value === null || value === undefined) return '';
   
   if (type === 'boolean') {
     return value ? '<span class="bool-true">✓ true</span>' : '<span class="bool-false">✗ false</span>';
@@ -12229,13 +12337,23 @@ function initRelationFieldsInContainer(container, st, row, mode) {
         assocVal = createEmptyAssociationRelation();
         row[colIdx] = assocVal;
       }
-      initRelationInstance(relContainer, assocVal, { showJsonEditor: false, isNested: true });
+      const assocOptions = { showJsonEditor: false, isNested: true };
+      if (rowIdx >= 0) {
+        assocOptions.parentAssociation = {
+          parentSt: st,
+          parentRowIdx: rowIdx,
+          parentColIdx: colIdx,
+          att: att,
+          config: config
+        };
+      }
+      initRelationInstance(relContainer, assocVal, assocOptions);
       return;
     }
     if (relValue && relValue.columns) {
       initRelationInstance(relContainer, relValue, { showJsonEditor: false, isNested: true });
     } else {
-      relContainer.innerHTML = '<span class="null-value">null</span>';
+      relContainer.innerHTML = '';
     }
   });
 }
@@ -18807,7 +18925,7 @@ function showDiagramPopup(node, clientX, clientY, st = state) {
     
     if (value === null || value === undefined) {
       valueSpan.className += ' null-value';
-      valueSpan.textContent = 'null';
+      valueSpan.textContent = '';
     } else if (type === 'relation') {
       valueSpan.textContent = '[Relation: ' + (value.items?.length || 0) + ' rows]';
     } else if (typeof value === 'object') {
@@ -18987,8 +19105,8 @@ function initRelationInstance(container, relationData, options = {}) {
   let assocButtonsHtml = '';
   if (parentAssociation) {
     assocButtonsHtml = `<div class="assoc-toolbar-buttons" style="${searchActionsDisplay}">
-      <button class="btn btn-sm assoc-add-one-btn" title="Add one association" data-testid="button-assoc-add-one">➕</button>
-      <button class="btn btn-sm assoc-add-many-btn" title="Add several associations" data-testid="button-assoc-add-many">➕➕</button>
+      <button class="btn btn-sm assoc-add-one-btn" title="Associar um registo" data-testid="button-assoc-add-one">Associar Um</button>
+      <button class="btn btn-sm assoc-add-many-btn" title="Associar vários registos" data-testid="button-assoc-add-many">Associar Vários</button>
     </div>`;
   }
   
@@ -21095,7 +21213,7 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
 }
 
 function formatValueForDisplay(value, type) {
-  if (value === null || value === undefined) return '<span class="null-value">null</span>';
+  if (value === null || value === undefined) return '';
   if (type === 'boolean') return value ? '✓ true' : '✗ false';
   if (type === 'relation') return `📋 ${value?.items?.length || 0} rows`;
   return escapeHtml(String(value));
