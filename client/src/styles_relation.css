@@ -6145,6 +6145,35 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .assoc-cell-empty { color: var(--text-muted, #888); }
 
+.assoc-toolbar-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.assoc-toolbar-buttons .btn {
+  padding: 3px 10px;
+  font-size: 12px;
+  border: 1px solid var(--primary, #4a90d9);
+  border-radius: 4px;
+  background: var(--bg-surface, #fff);
+  color: var(--primary, #4a90d9);
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.assoc-toolbar-buttons .btn:hover {
+  background: var(--primary, #4a90d9);
+  color: #fff;
+}
+
+.counterpart-picker-dialog {
+  text-align: center;
+}
+.counterpart-picker-dialog .popup-content-body {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 .assoc-select-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   z-index: 10000;

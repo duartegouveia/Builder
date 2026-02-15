@@ -5959,6 +5959,163 @@ function syncCounterpartAssociation(counterpartName, counterpartRowId, myEntityN
   }
 }
 
+function handleAssocAddFromToolbar(nestedSt, mode) {
+  const pa = nestedSt._parentAssociation;
+  if (!pa) return;
+  const config = pa.config;
+  if (!config || !config.counterparts || config.counterparts.length === 0) {
+    showToast('No counterpart entities configured for this association.', 'error');
+    return;
+  }
+
+  if (config.counterparts.length === 1) {
+    performAssocAdd(nestedSt, pa, config.counterparts[0], mode);
+  } else {
+    showCounterpartPicker(config.counterparts, (selectedCounterpart) => {
+      performAssocAdd(nestedSt, pa, selectedCounterpart, mode);
+    });
+  }
+}
+
+function showCounterpartPicker(counterparts, onSelect) {
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog counterpart-picker-dialog';
+  dialog.style.maxWidth = '340px';
+  dialog.style.minWidth = '260px';
+
+  const listHtml = counterparts.map((cp, idx) => {
+    const name = typeof cp === 'string' ? cp : cp.counterpart_entity;
+    return `<button class="btn btn-outline counterpart-pick-btn" data-idx="${idx}" data-testid="button-counterpart-${name}" style="width:100%;margin-bottom:6px;text-align:left;">${name}</button>`;
+  }).join('');
+
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Choose Entity</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    <div class="popup-content-body" style="padding:12px;">
+      ${listHtml}
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(dialog);
+
+  const cleanup = () => { overlay.remove(); dialog.remove(); };
+
+  dialog.querySelectorAll('.counterpart-pick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      cleanup();
+      onSelect(counterparts[idx]);
+    });
+  });
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(); });
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', cleanup);
+}
+
+function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
+  const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
+  const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
+  const counterpartJson = all_entities[counterpartName];
+  if (!counterpartJson) {
+    showToast('Counterpart entity "' + counterpartName + '" not found in registry.', 'error');
+    return;
+  }
+
+  const parentSt = pa.parentSt;
+  const parentRowIdx = pa.parentRowIdx;
+  const parentColIdx = pa.parentColIdx;
+  const parentRow = parentSt.relation.items[parentRowIdx];
+
+  if (mode === 'one') {
+    openSelectOneDialog(nestedSt, {
+      relationData: counterpartJson,
+      title: 'Select from ' + counterpartName + ' (' + (counterpartJson.items || []).length + ' registos)',
+      onSelect: (selectedId) => {
+        if (selectedId !== null && selectedId !== undefined) {
+          addAssociationBidirectional(parentRowIdx, parentColIdx, counterpartName, String(selectedId), counterpartAttName, parentSt, parentRow);
+          renderTable(nestedSt);
+        }
+      }
+    });
+  } else {
+    openAssocSelectManyDialog(counterpartJson, counterpartName, (selectedIds) => {
+      if (selectedIds && selectedIds.length > 0) {
+        selectedIds.forEach(id => {
+          addAssociationBidirectional(parentRowIdx, parentColIdx, counterpartName, String(id), counterpartAttName, parentSt, parentRow);
+        });
+        renderTable(nestedSt);
+      }
+    });
+  }
+}
+
+function openAssocSelectManyDialog(counterpartJson, counterpartName, onDone) {
+  const relCopy = cloneRelationForSelection({ relation: counterpartJson }, false, { show_multicheck: true });
+  const dialogId = `assoc-select-many-${Date.now()}`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.id = `${dialogId}-overlay`;
+
+  const dialog = document.createElement('div');
+  dialog.className = 'nested-relation-dialog selection-dialog';
+  dialog.id = dialogId;
+
+  dialog.innerHTML = `
+    <div class="filter-dialog-header">
+      <span>Select from ${escapeHtml(counterpartName)} (${relCopy.items.length} registos)</span>
+      <button class="btn-close-dialog">✕</button>
+    </div>
+    ${selectionSearchHtml()}
+    <div class="popup-content-body">
+      <div class="selection-relation-container" id="${dialogId}-builder"></div>
+    </div>
+    <div class="filter-dialog-footer">
+      <button class="btn btn-primary confirm-assoc-selection">Confirm</button>
+      <button class="btn btn-outline close-selection">Fechar</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(dialog);
+
+  const builderContainer = document.getElementById(`${dialogId}-builder`);
+  const instanceSt = initRelationInstance(builderContainer, relCopy, { showJsonEditor: false, isNested: true });
+  setupSelectionSearch(dialog, instanceSt);
+
+  const cleanup = () => {
+    if (instanceSt) {
+      relationInstances.delete(instanceSt.uid);
+      unregisterRelation(instanceSt.uid);
+    }
+    overlay.remove();
+    dialog.remove();
+  };
+
+  const confirmAndClose = () => {
+    const selected = getSelectedRows(instanceSt);
+    const ids = [];
+    if (selected && selected.size > 0) {
+      selected.forEach(rowIdx => {
+        const id = getSelectionRowId(instanceSt, rowIdx);
+        if (id !== null && id !== undefined) ids.push(id);
+      });
+    }
+    cleanup();
+    onDone(ids);
+  };
+
+  dialog.querySelector('.confirm-assoc-selection').addEventListener('click', confirmAndClose);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) { cleanup(); onDone([]); } });
+  dialog.querySelector('.btn-close-dialog').addEventListener('click', () => { cleanup(); onDone([]); });
+  dialog.querySelector('.close-selection').addEventListener('click', () => { cleanup(); onDone([]); });
+}
+
 function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
   const wrapper = document.createElement('div');
   wrapper.className = 'relation-cell-input';
@@ -12785,13 +12942,28 @@ function showNestedRelationDialog(rowIdx, colIdx, st = state) {
     nestedRelation.options = {};
   }
   
-  const title = `Sub-Relation (${nestedRelation.items?.length || 0} rows)`;
+  const att = getAtt(st, colIdx);
+  const isAssoc = isAssociationAtt(att);
+  const title = isAssoc
+    ? `${getAttDisplayName(st, colIdx)} (${nestedRelation.items?.length || 0} registos)`
+    : `Sub-Relation (${nestedRelation.items?.length || 0} rows)`;
+  
+  const instanceOptions = { showJsonEditor: false, isNested: true };
+  if (isAssoc) {
+    instanceOptions.parentAssociation = {
+      parentSt: st,
+      parentRowIdx: rowIdx,
+      parentColIdx: colIdx,
+      att: att,
+      config: getAssociationConfig(att)
+    };
+  }
   
   // Use mode-based display based on parent's single_item_mode
   showContentBasedOnMode(st, (container) => {
     // Create a nested relation builder inside the container
     container.classList.add('nested-relation-builder-container');
-    initRelationInstance(container, nestedRelation, { showJsonEditor: false, isNested: true });
+    initRelationInstance(container, nestedRelation, instanceOptions);
   }, title);
 }
 
@@ -18693,7 +18865,7 @@ function closeDiagramPopupOnOutsideClick(event) {
 
 // Initialize a relation instance in a container with given data
 function initRelationInstance(container, relationData, options = {}) {
-  const { showJsonEditor = false, isNested = false } = options;
+  const { showJsonEditor = false, isNested = false, parentAssociation = null } = options;
   
   // Initialize uiState on relation data if not present
   initializeUiState(relationData);
@@ -18702,6 +18874,9 @@ function initRelationInstance(container, relationData, options = {}) {
   const instanceState = createRelationState();
   instanceState.container = container;
   instanceState.relation = relationData;
+  if (parentAssociation) {
+    instanceState._parentAssociation = parentAssociation;
+  }
   for (const key in relationData.columns) {
     if (typeof relationData.columns[key] === 'string' && relationData.columns[key] === 'multilinestring') relationData.columns[key] = 'textarea';
   }
@@ -18801,11 +18976,21 @@ function initRelationInstance(container, relationData, options = {}) {
   const showSearchAndActions = hasTableView || hasCardsView;
   const searchActionsDisplay = (initialView === 'table' || initialView === 'cards') ? '' : 'display: none;';
   
-  // Build search input HTML
-  const searchHtml = showSearchAndActions ? `<div class="quick-search-wrapper" style="${searchActionsDisplay}">
+  // Build search input HTML - always show for association nested relations even if no table/cards view
+  const forceSearch = !!parentAssociation;
+  const searchHtml = (showSearchAndActions || forceSearch) ? `<div class="quick-search-wrapper" style="${searchActionsDisplay}">
     <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
     <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
   </div>` : '';
+  
+  // Build association add buttons HTML
+  let assocButtonsHtml = '';
+  if (parentAssociation) {
+    assocButtonsHtml = `<div class="assoc-toolbar-buttons" style="${searchActionsDisplay}">
+      <button class="btn btn-sm assoc-add-one-btn" title="Add one association" data-testid="button-assoc-add-one">➕</button>
+      <button class="btn btn-sm assoc-add-many-btn" title="Add several associations" data-testid="button-assoc-add-many">➕➕</button>
+    </div>`;
+  }
   
   // Build actions select HTML
   const alwaysVisibleSelectHtml = (showSearchAndActions && alwaysVisibleOptions.length > 0) 
@@ -18813,7 +18998,7 @@ function initRelationInstance(container, relationData, options = {}) {
     : '';
   
   const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
-  const hasRightContent = searchHtml || alwaysVisibleSelectHtml || badgeHtml;
+  const hasRightContent = searchHtml || assocButtonsHtml || alwaysVisibleSelectHtml || badgeHtml;
   
   const hasViewTabs = viewOptions.length > 0;
   const viewTabsStyle = hasViewTabs || hasRightContent ? 'margin-bottom: 1rem;' : 'display: none;';
@@ -18827,7 +19012,7 @@ function initRelationInstance(container, relationData, options = {}) {
           return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${VIEW_DISPLAY_NAMES[viewKey] || view}</button>`;
         }).join('')}
       </div>` : ''}
-      ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
+      ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${assocButtonsHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
     </div>
     
     <div class="view-table view-content">
@@ -19202,6 +19387,20 @@ function initInstanceEventListeners(st) {
       const action = e.target.value;
       e.target.value = ''; // Reset to placeholder
       handleAlwaysVisibleAction(st, action);
+    });
+  }
+  
+  // Association add buttons event listeners
+  const assocAddOneBtn = container.querySelector('.assoc-add-one-btn');
+  const assocAddManyBtn = container.querySelector('.assoc-add-many-btn');
+  if (assocAddOneBtn && st._parentAssociation) {
+    assocAddOneBtn.addEventListener('click', () => {
+      handleAssocAddFromToolbar(st, 'one');
+    });
+  }
+  if (assocAddManyBtn && st._parentAssociation) {
+    assocAddManyBtn.addEventListener('click', () => {
+      handleAssocAddFromToolbar(st, 'many');
     });
   }
   
