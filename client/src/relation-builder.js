@@ -1699,6 +1699,15 @@ const ALL_COMPANIES_JSON = {
     "GLNCode": "string",
     "Inactive": "boolean",
     "IntegrationCode": "string",
+    "LookupCompanyType": {
+      "attribute_kind": ["lookup"],
+      "name": ">Company Type",
+      "short_name": "CType",
+      "lookup": {
+        "path": "CompanyTypeID.name",
+        "editable": true
+      }
+    },
     "CompanyTypeID": {
       "attribute_kind": ["association"],
       "name": "Company Type",
@@ -1725,17 +1734,19 @@ const ALL_COMPANIES_JSON = {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": false,
     "show_multicheck": true,
     "show_natural_order": true,
     "show_hierarchy": true
   },
   "items": [
-    [-1, "Company 1", null, null, null, null, null, null, null, false, null, null, null, null, null],
-    [-2, "Company 2", null, null, null, null, null, null, null, false, null, null, null, null, null],
-    [-3, "Company 3", null, null, null, null, null, null, null, false, null, null, null, null, null]
+    [-1, "Company 1", null, null, null, null, null, null, null, false, null, null, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","company_type","-2"]]}, null, null, null],
+    [-2, "Company 2", null, null, null, null, null, null, null, false, null, null, null, null, null, null],
+    [-3, "Company 3", null, null, null, null, null, null, null, false, null, null, null, null, null, null]
   ],
-  "log": []
+  "log": [
+    {"pot":"relation_op","timestamp":"2026-02-15T12:18:32.179Z","op":"association_add","id":"-1","column":"CompanyTypeID","counterpart":"company_type","counterpartId":"-2"},
+    {"pot":"relation_op","timestamp":"2026-02-15T12:18:41.046Z","op":"edit_row","id":-1,"changes":{"LastUpdated":{"new":null}},"lookup_changes":[{"path":"CompanyTypeID.Name","old":"Company Type B","new":null}]}
+  ]
 };
 
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
