@@ -46,6 +46,8 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Columns Visible System**: Controls column visibility, width, and display order with UI for management.
 - **Derived Columns**: System for creating new columns based on date, time, float rounding, string metrics, and hierarchy derivations.
 - **Hierarchy Navigation**: Breadcrumb trail for hierarchical data.
+- **Structure View**: Displays all relation columns as an editable meta-table with order, name, kind, display name, short name, multiple columns. Clicking a row opens a column editor with collapsible sections (General, Visibility, Validation, Display, Kind-specific). Supports kind conversion with Apply button — data is converted automatically using `convertValueForKindChange` with a conversion matrix. Options for select/radio kinds edited via `buildMultiInput` with key+label pairs. Non-att columns can be converted to att objects.
+- **Multi-Input Component**: `buildMultiInput(values, baseType, editable, onChange)` renders a reusable list of same-type values with + to add and ✕ to remove entries. Supports `text`, `number`, `boolean`, and `keyvalue` (key+label pair) base types. Used in Structure view for options editing and available for any multi-value att fields.
 - **Cartesian Product**: Supports cross-joining nested relation columns.
 - **Remove Duplicates**: Removes exact duplicate rows.
 - **Cardinality Constraints**: `cardinality_min` and `cardinality_max` in `rel_options` enforce row count limits. When max is reached, New/Copy/Import buttons are disabled. Warning badges show when count is below min or at/above max. Checked via `isCardinalityMaxReached(st)` and `isCardinalityMinUnmet(st)`.

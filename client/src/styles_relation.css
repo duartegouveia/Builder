@@ -6259,3 +6259,223 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   flex: 0 0 auto;
   text-align: center;
 }
+
+.multi-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.multi-input-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.multi-input-entry {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.multi-input-field {
+  flex: 1;
+  padding: 4px 6px;
+  border: 1px solid var(--border, #333);
+  border-radius: 4px;
+  background: var(--input, #1a1a2e);
+  color: var(--foreground, #e0e0e0);
+  font-size: 12px;
+  font-family: inherit;
+}
+.multi-input-field:focus {
+  outline: none;
+  border-color: var(--primary, #4a90d9);
+}
+.multi-input-key {
+  flex: 0 0 30%;
+  max-width: 30%;
+}
+.multi-input-label {
+  flex: 1;
+}
+.multi-input-checkbox {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+.multi-input-remove {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: var(--destructive, #e74c3c);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  opacity: 0.7;
+}
+.multi-input-remove:hover {
+  opacity: 1;
+  background: var(--destructive, #e74c3c);
+  color: white;
+}
+.multi-input-add {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--border, #333);
+  color: var(--primary, #4a90d9);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+.multi-input-add:hover {
+  background: var(--accent, #1e3a5f);
+  border-color: var(--primary, #4a90d9);
+}
+
+.structure-panel {
+  padding: 12px;
+}
+.structure-columns-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.structure-columns-table th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 2px solid var(--border, #333);
+  font-weight: 600;
+  color: var(--muted-foreground, #888);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.structure-columns-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border, #222);
+  vertical-align: middle;
+}
+.structure-columns-table tr:hover {
+  background: var(--accent, #1e3a5f);
+}
+.structure-columns-table tr.selected {
+  background: var(--accent, #1e3a5f);
+}
+.structure-kind-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--muted, #2a2a3e);
+  color: var(--foreground, #e0e0e0);
+}
+.structure-kind-badge.kind-att {
+  background: var(--primary, #4a90d9);
+  color: white;
+}
+.structure-att-editor {
+  padding: 12px;
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  margin-top: 8px;
+  background: var(--card, #16213e);
+}
+.structure-section {
+  margin-bottom: 8px;
+}
+.structure-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 8px;
+  background: var(--muted, #2a2a3e);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground, #e0e0e0);
+  user-select: none;
+}
+.structure-section-header:hover {
+  background: var(--accent, #1e3a5f);
+}
+.structure-section-header .section-arrow {
+  transition: transform 0.15s;
+  font-size: 10px;
+}
+.structure-section.collapsed .section-arrow {
+  transform: rotate(-90deg);
+}
+.structure-section-body {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+.structure-section.collapsed .structure-section-body {
+  display: none;
+}
+.structure-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.structure-field label {
+  font-size: 10px;
+  color: var(--muted-foreground, #888);
+  font-weight: 500;
+}
+.structure-field input,
+.structure-field select {
+  padding: 3px 6px;
+  border: 1px solid var(--border, #333);
+  border-radius: 3px;
+  background: var(--input, #1a1a2e);
+  color: var(--foreground, #e0e0e0);
+  font-size: 12px;
+  font-family: inherit;
+}
+.structure-field input:focus,
+.structure-field select:focus {
+  outline: none;
+  border-color: var(--primary, #4a90d9);
+}
+.structure-field input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  align-self: flex-start;
+}
+.structure-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border, #333);
+}
+.structure-actions button {
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border, #333);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+}
+.structure-btn-apply {
+  background: var(--primary, #4a90d9);
+  color: white;
+  border-color: var(--primary, #4a90d9) !important;
+}
+.structure-btn-apply:hover {
+  opacity: 0.9;
+}
+.structure-btn-cancel {
+  background: var(--muted, #2a2a3e);
+  color: var(--foreground, #e0e0e0);
+}
+.structure-btn-cancel:hover {
+  background: var(--accent, #1e3a5f);
+}

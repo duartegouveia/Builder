@@ -82,6 +82,7 @@ const DEFAULT_ATT = {
   visible_in_export_pdf: true,
   visible_in_export_excel: true,
   visible_in_export_csv: true,
+  multiple: false,
   association: null
 };
 
@@ -6165,6 +6166,122 @@ function getNextPointerId(pointerRelation) {
     });
   }
   return String(maxId + 1);
+}
+
+function buildMultiInput(values, baseType, editable, onChange) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'multi-input-wrapper';
+  const arr = Array.isArray(values) ? [...values] : [];
+
+  function renderEntries() {
+    wrapper.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'multi-input-list';
+
+    arr.forEach((val, idx) => {
+      const row = document.createElement('div');
+      row.className = 'multi-input-entry';
+
+      if (baseType === 'keyvalue') {
+        const keyInput = document.createElement('input');
+        keyInput.type = 'text';
+        keyInput.className = 'multi-input-field multi-input-key';
+        keyInput.placeholder = 'key';
+        keyInput.value = val?.key || '';
+        keyInput.disabled = !editable;
+        keyInput.addEventListener('input', () => {
+          arr[idx] = { key: keyInput.value, label: labelInput.value };
+          if (onChange) onChange(arr);
+        });
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.className = 'multi-input-field multi-input-label';
+        labelInput.placeholder = 'label';
+        labelInput.value = val?.label || '';
+        labelInput.disabled = !editable;
+        labelInput.addEventListener('input', () => {
+          arr[idx] = { key: keyInput.value, label: labelInput.value };
+          if (onChange) onChange(arr);
+        });
+        row.appendChild(keyInput);
+        row.appendChild(labelInput);
+      } else {
+        const input = document.createElement('input');
+        input.className = 'multi-input-field';
+        if (baseType === 'number' || baseType === 'int' || baseType === 'float') {
+          input.type = 'number';
+          if (baseType === 'float') input.step = 'any';
+        } else if (baseType === 'boolean') {
+          input.type = 'checkbox';
+          input.checked = !!val;
+          input.className = 'multi-input-checkbox';
+        } else {
+          input.type = 'text';
+        }
+        if (baseType !== 'boolean') input.value = val !== null && val !== undefined ? val : '';
+        input.disabled = !editable;
+        input.addEventListener(baseType === 'boolean' ? 'change' : 'input', () => {
+          if (baseType === 'boolean') {
+            arr[idx] = input.checked;
+          } else if (baseType === 'number' || baseType === 'int' || baseType === 'float') {
+            arr[idx] = input.value === '' ? null : Number(input.value);
+          } else {
+            arr[idx] = input.value;
+          }
+          if (onChange) onChange(arr);
+        });
+        row.appendChild(input);
+      }
+
+      if (editable) {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'multi-input-remove';
+        removeBtn.innerHTML = '✕';
+        removeBtn.title = 'Remover';
+        removeBtn.addEventListener('click', () => {
+          arr.splice(idx, 1);
+          renderEntries();
+          if (onChange) onChange(arr);
+        });
+        row.appendChild(removeBtn);
+      }
+
+      list.appendChild(row);
+    });
+
+    wrapper.appendChild(list);
+
+    if (editable) {
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'multi-input-add';
+      addBtn.innerHTML = '+ Adicionar';
+      addBtn.addEventListener('click', () => {
+        if (baseType === 'keyvalue') {
+          arr.push({ key: '', label: '' });
+        } else if (baseType === 'boolean') {
+          arr.push(false);
+        } else if (baseType === 'number' || baseType === 'int' || baseType === 'float') {
+          arr.push(null);
+        } else {
+          arr.push('');
+        }
+        renderEntries();
+        if (onChange) onChange(arr);
+        const entries = wrapper.querySelectorAll('.multi-input-entry');
+        const last = entries[entries.length - 1];
+        if (last) {
+          const firstInput = last.querySelector('input');
+          if (firstInput) firstInput.focus();
+        }
+      });
+      wrapper.appendChild(addBtn);
+    }
+  }
+
+  renderEntries();
+  return wrapper;
 }
 
 function buildPointerCell(value, rowIdx, colIdx, editable, st, rowRef) {
@@ -21233,11 +21350,540 @@ function renderSaved(st = state) {
   initSavedView(st);
 }
 
+function getAllKindTypes() {
+  return [
+    'id', 'string', 'textarea', 'int', 'float', 'boolean',
+    'date', 'datetime', 'time', 'select', 'radio', 'color',
+    'password', 'email', 'tel', 'url', 'search', 'file',
+    'relation', 'range', 'association', 'pointer', 'lookup',
+    'button', 'gps', 'html', 'multi_text', 'qr_code',
+    'tabsheet', 'object', 'group'
+  ];
+}
+
+function getAttKindFromType(type) {
+  for (const [kind, mapped] of Object.entries(ATT_KIND_MAP)) {
+    if (mapped === type) return kind;
+  }
+  return type;
+}
+
+function buildStructureColumnRows(st) {
+  const rows = [];
+  if (!st.columnNames || !st.relation?.columns) return rows;
+  for (let i = 0; i < st.columnNames.length; i++) {
+    const name = st.columnNames[i];
+    const rawCol = st.relation.columns[name];
+    const type = st.columnTypes[i];
+    const att = getAtt(st, i);
+    const isAtt = isAttObject(rawCol);
+    const displayName = isAtt ? getAttDisplayName(st, i) : name;
+    const shortName = isAtt ? (typeof att.short_name === 'object' ? (att.short_name.pt || '') : (att.short_name || '')) : '';
+    rows.push({
+      order: i,
+      name: name,
+      kind: type,
+      isAtt: isAtt,
+      displayName: displayName,
+      shortName: shortName,
+      att: isAtt ? { ...att } : null,
+      originalKind: type,
+      rawCol: rawCol
+    });
+  }
+  return rows;
+}
+
+function convertValueForKindChange(value, fromType, toType) {
+  if (value === null || value === undefined) return null;
+
+  const numericTypes = ['int', 'float', 'range'];
+  const stringTypes = ['string', 'textarea', 'password', 'email', 'tel', 'url', 'search', 'html'];
+  const complexTypes = ['relation', 'file', 'pointer'];
+
+  if (fromType === toType) return value;
+
+  if (complexTypes.includes(fromType) || complexTypes.includes(toType)) return null;
+
+  if (numericTypes.includes(toType)) {
+    if (numericTypes.includes(fromType)) {
+      return toType === 'int' ? Math.round(Number(value)) : Number(value);
+    }
+    if (typeof value === 'boolean') return value ? 1 : 0;
+    const n = Number(value);
+    if (isNaN(n)) return null;
+    return toType === 'int' ? Math.round(n) : n;
+  }
+
+  if (toType === 'boolean') {
+    if (numericTypes.includes(fromType)) return value !== 0;
+    if (typeof value === 'string') {
+      const lower = value.toLowerCase().trim();
+      return lower === 'true' || lower === '1' || lower === 'yes' || lower === 'sim';
+    }
+    return Boolean(value);
+  }
+
+  if (stringTypes.includes(toType)) {
+    if (typeof value === 'boolean') return String(value);
+    return String(value);
+  }
+
+  if (toType === 'date') {
+    if (fromType === 'datetime') return String(value).split('T')[0].split(' ')[0];
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+  }
+
+  if (toType === 'datetime') {
+    if (fromType === 'date') return value + ' 00:00:00';
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d.toISOString().replace('T', ' ').substring(0, 19);
+  }
+
+  if (toType === 'time') {
+    if (fromType === 'datetime') return String(value).split('T').pop()?.split(' ').pop()?.substring(0, 8) || null;
+    return null;
+  }
+
+  if (toType === 'select' || toType === 'radio') {
+    return String(value);
+  }
+
+  if (toType === 'color') {
+    if (typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)) return value;
+    return null;
+  }
+
+  return null;
+}
+
+function canConvertKind(fromType, toType) {
+  if (fromType === toType) return { possible: true, lossless: true };
+  const complexTypes = ['relation', 'file', 'pointer', 'association'];
+  if (complexTypes.includes(fromType) || complexTypes.includes(toType)) {
+    return { possible: false, lossless: false };
+  }
+  const numericTypes = ['int', 'float', 'range'];
+  const stringTypes = ['string', 'textarea', 'password', 'email', 'tel', 'url', 'search', 'html'];
+  if (numericTypes.includes(fromType) && numericTypes.includes(toType)) {
+    return { possible: true, lossless: fromType !== 'float' || toType !== 'int' };
+  }
+  if (stringTypes.includes(fromType) && stringTypes.includes(toType)) {
+    return { possible: true, lossless: true };
+  }
+  return { possible: true, lossless: false };
+}
+
 function renderStructure(st = state) {
   const container = st.container || document.querySelector('.relation-container');
   if (!container) return;
   const structurePanel = container.querySelector('.structure-panel');
   if (!structurePanel) return;
+
+  if (!st.relation) {
+    structurePanel.innerHTML = '<p style="color:var(--muted-foreground,#888);padding:16px;">Sem relation carregada.</p>';
+    return;
+  }
+
+  const structureRows = buildStructureColumnRows(st);
+
+  let selectedIdx = null;
+  let pendingChanges = {};
+
+  function render() {
+    structurePanel.innerHTML = '';
+
+    const table = document.createElement('table');
+    table.className = 'structure-columns-table';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>#</th><th>Name</th><th>Kind</th><th>Display Name</th><th>Short Name</th><th>Multiple</th></tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    structureRows.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      if (selectedIdx === idx) tr.classList.add('selected');
+      tr.style.cursor = 'pointer';
+
+      tr.innerHTML =
+        '<td>' + row.order + '</td>' +
+        '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
+        '<td><span class="structure-kind-badge ' + (row.isAtt ? 'kind-att' : '') + '">' + escapeHtml(row.kind) + (row.isAtt ? ' (att)' : '') + '</span></td>' +
+        '<td>' + escapeHtml(row.displayName) + '</td>' +
+        '<td>' + escapeHtml(row.shortName) + '</td>' +
+        '<td>' + (row.att?.multiple ? '✓' : '') + '</td>';
+
+      tr.addEventListener('click', () => {
+        selectedIdx = idx;
+        render();
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    structurePanel.appendChild(table);
+
+    if (selectedIdx !== null && selectedIdx < structureRows.length) {
+      const editorEl = renderColumnEditor(structureRows[selectedIdx], selectedIdx, st, structureRows, pendingChanges, render);
+      structurePanel.appendChild(editorEl);
+    }
+  }
+
+  render();
+}
+
+function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRender) {
+  const editor = document.createElement('div');
+  editor.className = 'structure-att-editor';
+
+  const changes = pendingChanges[idx] || {};
+  const currentKind = changes.kind || row.kind;
+  const currentAtt = row.att ? { ...row.att, ...(changes.att || {}) } : null;
+  const isAtt = row.isAtt || !!changes.convertToAtt;
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-weight:600;font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;';
+  title.innerHTML = '<span>Column: ' + escapeHtml(row.name) + '</span>';
+
+  if (!isAtt) {
+    const convertBtn = document.createElement('button');
+    convertBtn.textContent = 'Convert to Att Object';
+    convertBtn.className = 'structure-btn-apply';
+    convertBtn.style.fontSize = '11px';
+    convertBtn.addEventListener('click', () => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].convertToAtt = true;
+      pendingChanges[idx].att = { ...DEFAULT_ATT, attribute_kind: [getAttKindFromType(row.kind)] };
+      reRender();
+    });
+    title.appendChild(convertBtn);
+  }
+  editor.appendChild(title);
+
+  const makeSection = (label, collapsed, buildBody) => {
+    const section = document.createElement('div');
+    section.className = 'structure-section' + (collapsed ? ' collapsed' : '');
+    const header = document.createElement('div');
+    header.className = 'structure-section-header';
+    header.innerHTML = '<span class="section-arrow">▼</span> ' + label;
+    header.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+    section.appendChild(header);
+    const body = document.createElement('div');
+    body.className = 'structure-section-body';
+    buildBody(body);
+    section.appendChild(body);
+    return section;
+  };
+
+  const makeField = (parent, label, type, value, onInput) => {
+    const field = document.createElement('div');
+    field.className = 'structure-field';
+    const lbl = document.createElement('label');
+    lbl.textContent = label;
+    field.appendChild(lbl);
+
+    if (type === 'checkbox') {
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = !!value;
+      input.addEventListener('change', () => onInput(input.checked));
+      field.appendChild(input);
+    } else if (type === 'select' && Array.isArray(value)) {
+      const select = document.createElement('select');
+      const currentVal = value[0];
+      const options = value[1];
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        if (opt === currentVal) option.selected = true;
+        select.appendChild(option);
+      });
+      select.addEventListener('change', () => onInput(select.value));
+      field.appendChild(select);
+    } else {
+      const input = document.createElement('input');
+      input.type = type === 'number' ? 'number' : 'text';
+      if (type === 'number') input.step = 'any';
+      input.value = value !== null && value !== undefined ? value : '';
+      input.addEventListener('input', () => {
+        if (type === 'number') {
+          onInput(input.value === '' ? null : Number(input.value));
+        } else {
+          onInput(input.value);
+        }
+      });
+      field.appendChild(input);
+    }
+    parent.appendChild(field);
+    return field;
+  };
+
+  const ensureChanges = () => {
+    if (!pendingChanges[idx]) pendingChanges[idx] = {};
+    if (!pendingChanges[idx].att) pendingChanges[idx].att = {};
+  };
+
+  editor.appendChild(makeSection('General', false, (body) => {
+    makeField(body, 'Name (readonly)', 'text', row.name, () => {});
+    body.querySelector('.structure-field:last-child input').disabled = true;
+
+    const allKinds = getAllKindTypes();
+    makeField(body, 'Kind', 'select', [currentKind, allKinds], (val) => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].kind = val;
+      reRender();
+    });
+
+    if (isAtt) {
+      makeField(body, 'Display Name', 'text', currentAtt?.name || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.name = val;
+      });
+      makeField(body, 'Short Name', 'text', currentAtt?.short_name || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.short_name = val;
+      });
+      makeField(body, 'Description', 'text', currentAtt?.description || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.description = val;
+      });
+      makeField(body, 'Multiple', 'checkbox', currentAtt?.multiple || false, (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.multiple = val;
+      });
+      makeField(body, 'Readonly', 'checkbox', currentAtt?.readonly || false, (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.readonly = val;
+      });
+      makeField(body, 'Interface Width', 'select', [currentAtt?.interface_width || '', ['', 'tiny', 'short', 'doubleshort', 'long']], (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.interface_width = val || undefined;
+      });
+    }
+  }));
+
+  if (isAtt) {
+    editor.appendChild(makeSection('Visibility', true, (body) => {
+      const visFlags = [
+        'visible', 'visible_in_view', 'visible_in_edit', 'visible_in_new',
+        'visible_in_delete', 'visible_in_copy', 'visible_in_advanced_search',
+        'visible_in_multi_view', 'visible_in_multi_edit', 'visible_in_multi_delete',
+        'visible_in_multi_copy', 'visible_in_export_csv', 'visible_in_export_excel',
+        'visible_in_export_xml', 'visible_in_export_pdf'
+      ];
+      visFlags.forEach(flag => {
+        const val = currentAtt?.[flag] !== undefined ? currentAtt[flag] : true;
+        makeField(body, flag.replace('visible_in_', '').replace('visible', 'visible (global)'), 'checkbox', val, (v) => {
+          ensureChanges();
+          pendingChanges[idx].att[flag] = v;
+        });
+      });
+    }));
+
+    editor.appendChild(makeSection('Validation', true, (body) => {
+      makeField(body, 'Mandatory', 'checkbox', currentAtt?.mandatory || false, (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.mandatory = val;
+      });
+      makeField(body, 'Recommended', 'checkbox', currentAtt?.recomended || false, (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.recomended = val;
+      });
+      makeField(body, 'Min Length', 'number', currentAtt?.length_min || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.length_min = val;
+      });
+      makeField(body, 'Max Length', 'number', currentAtt?.length_max || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.length_max = val;
+      });
+    }));
+
+    editor.appendChild(makeSection('Display', true, (body) => {
+      makeField(body, 'Prefix', 'text', currentAtt?.prefix || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.prefix = val;
+      });
+      makeField(body, 'Suffix', 'text', currentAtt?.suffix || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.suffix = val;
+      });
+      makeField(body, 'Label Prefix', 'text', currentAtt?.label_prefix || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.label_prefix = val;
+      });
+      makeField(body, 'Label Suffix', 'text', currentAtt?.label_suffix || '', (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.label_suffix = val;
+      });
+      makeField(body, 'Show Label', 'checkbox', currentAtt?.show_label !== false, (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.show_label = val;
+      });
+      makeField(body, 'Display Orientation', 'select', [currentAtt?.display_orientation || '', ['', 'horizontal', 'vertical']], (val) => {
+        ensureChanges();
+        pendingChanges[idx].att.display_orientation = val || undefined;
+      });
+    }));
+
+    const kindSpecificKinds = ['select', 'radio', 'range', 'pointer', 'association'];
+    if (kindSpecificKinds.includes(currentKind)) {
+      editor.appendChild(makeSection('Kind-specific (' + currentKind + ')', false, (body) => {
+        body.style.display = 'flex';
+        body.style.flexDirection = 'column';
+        body.style.gap = '8px';
+
+        if (currentKind === 'select' || currentKind === 'radio') {
+          const optLabel = document.createElement('label');
+          optLabel.textContent = 'Options (key + label)';
+          optLabel.style.cssText = 'font-size:11px;color:var(--muted-foreground,#888);font-weight:500;';
+          body.appendChild(optLabel);
+
+          const currentOptions = currentAtt?.options || [];
+          const optArray = Array.isArray(currentOptions)
+            ? currentOptions.map(o => typeof o === 'object' ? o : { key: String(o), label: String(o) })
+            : Object.entries(currentOptions).map(([k, v]) => ({ key: k, label: v }));
+
+          const multiInput = buildMultiInput(optArray, 'keyvalue', true, (newArr) => {
+            ensureChanges();
+            pendingChanges[idx].att.options = newArr;
+          });
+          body.appendChild(multiInput);
+        }
+
+        if (currentKind === 'range') {
+          makeField(body, 'Min', 'number', currentAtt?.range?.min ?? 0, (val) => {
+            ensureChanges();
+            if (!pendingChanges[idx].att.range) pendingChanges[idx].att.range = { ...(currentAtt?.range || {}) };
+            pendingChanges[idx].att.range.min = val;
+          });
+          makeField(body, 'Max', 'number', currentAtt?.range?.max ?? 100, (val) => {
+            ensureChanges();
+            if (!pendingChanges[idx].att.range) pendingChanges[idx].att.range = { ...(currentAtt?.range || {}) };
+            pendingChanges[idx].att.range.max = val;
+          });
+        }
+
+        if (currentKind === 'pointer') {
+          const targetInfo = document.createElement('div');
+          targetInfo.style.cssText = 'font-size:11px;color:var(--muted-foreground,#888);';
+          const pc = currentAtt?.pointer || {};
+          targetInfo.textContent = 'Targets: ' + (pc.targets ? pc.targets.map(t => t.target_entity).join(', ') : 'none');
+          body.appendChild(targetInfo);
+        }
+
+        if (currentKind === 'association') {
+          const assocInfo = document.createElement('div');
+          assocInfo.style.cssText = 'font-size:11px;color:var(--muted-foreground,#888);';
+          const ac = currentAtt?.association || {};
+          assocInfo.textContent = 'Counterparts: ' + (ac.counterparts ? ac.counterparts.join(', ') : 'none');
+          body.appendChild(assocInfo);
+        }
+      }));
+    }
+  }
+
+  const kindChanged = pendingChanges[idx]?.kind && pendingChanges[idx].kind !== row.originalKind;
+  const attChanged = pendingChanges[idx]?.att && Object.keys(pendingChanges[idx].att).length > 0;
+  const hasChanges = kindChanged || attChanged || pendingChanges[idx]?.convertToAtt;
+
+  if (hasChanges) {
+    if (kindChanged) {
+      const convInfo = canConvertKind(row.originalKind, pendingChanges[idx].kind);
+      const infoDiv = document.createElement('div');
+      infoDiv.style.cssText = 'margin-top:8px;padding:6px 10px;border-radius:4px;font-size:12px;';
+      if (!convInfo.possible) {
+        infoDiv.style.background = 'var(--destructive, #e74c3c)';
+        infoDiv.style.color = 'white';
+        infoDiv.textContent = 'Conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + ' is not possible. Existing data will be set to null.';
+      } else if (!convInfo.lossless) {
+        infoDiv.style.background = '#7f5f00';
+        infoDiv.style.color = '#ffd54f';
+        infoDiv.textContent = 'Conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + ' may lose precision.';
+      } else {
+        infoDiv.style.background = '#1b5e20';
+        infoDiv.style.color = '#a5d6a7';
+        infoDiv.textContent = 'Lossless conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + '.';
+      }
+      editor.appendChild(infoDiv);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'structure-actions';
+
+    const applyBtn = document.createElement('button');
+    applyBtn.className = 'structure-btn-apply';
+    applyBtn.textContent = 'Apply';
+    applyBtn.addEventListener('click', () => {
+      applyStructureChanges(idx, row, st, pendingChanges, structureRows);
+      pendingChanges[idx] = {};
+      const newRows = buildStructureColumnRows(st);
+      structureRows.length = 0;
+      newRows.forEach(r => structureRows.push(r));
+      reRender();
+      renderTable(st);
+      updateJsonOutput(st);
+    });
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'structure-btn-cancel';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.addEventListener('click', () => {
+      pendingChanges[idx] = {};
+      reRender();
+    });
+
+    actions.appendChild(applyBtn);
+    actions.appendChild(cancelBtn);
+    editor.appendChild(actions);
+  }
+
+  return editor;
+}
+
+function applyStructureChanges(idx, row, st, pendingChanges, structureRows) {
+  const changes = pendingChanges[idx];
+  if (!changes) return;
+
+  const colName = row.name;
+  const colIdx = st.columnNames.indexOf(colName);
+  if (colIdx === -1) return;
+
+  if (changes.kind && changes.kind !== row.originalKind) {
+    const newKind = changes.kind;
+    const oldKind = row.originalKind;
+
+    st.relation.items.forEach(item => {
+      if (item[colName] !== undefined) {
+        item[colName] = convertValueForKindChange(item[colName], oldKind, newKind);
+      }
+    });
+
+    if (st.relation.columns[colName]) {
+      if (isAttObject(st.relation.columns[colName])) {
+        st.relation.columns[colName].attribute_kind = [getAttKindFromType(newKind)];
+      } else {
+        st.relation.columns[colName] = newKind;
+      }
+    }
+  }
+
+  if (changes.convertToAtt) {
+    const oldType = changes.kind || st.columnTypes[colIdx];
+    const newAtt = { ...DEFAULT_ATT, attribute_kind: [getAttKindFromType(oldType)] };
+    if (changes.att) Object.assign(newAtt, changes.att);
+    st.relation.columns[colName] = newAtt;
+  } else if (changes.att && isAttObject(st.relation.columns[colName])) {
+    Object.assign(st.relation.columns[colName], changes.att);
+  }
+
+  const resolved = resolveAttColumns(st.relation.columns);
+  st.columnNames = resolved.names;
+  st.columnTypes = resolved.types;
+  st.columnAtts = resolved.atts;
 }
 
 function initDiagramView(st = state) {
