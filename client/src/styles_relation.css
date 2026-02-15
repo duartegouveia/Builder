@@ -6227,3 +6227,35 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   cursor: pointer;
 }
 .assoc-pick-btn:hover { opacity: 0.85; }
+
+.range-edit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  max-width: 320px;
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted-foreground, #888);
+  padding: 0 2px;
+}
+.range-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.range-slider {
+  flex: 1;
+  cursor: pointer;
+  accent-color: var(--primary, #4a90d9);
+}
+.range-number {
+  width: 6ch !important;
+  min-width: 6ch;
+  max-width: 6ch;
+  flex: 0 0 auto;
+  text-align: center;
+}

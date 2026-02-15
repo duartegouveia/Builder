@@ -724,6 +724,12 @@ const COMPANY_TYPES_JSON = {
   "columns": {
     "ID": "id",
     "Name": "string",
+    "Priority": {
+      "attribute_kind": ["range"],
+      "name": "Priority",
+      "short_name": "Prio",
+      "range": { "min": 0, "max": 10 }
+    },
     "references": {
       "attribute_kind": ["association"],
       "name": "References",
@@ -745,9 +751,9 @@ const COMPANY_TYPES_JSON = {
     "show_hierarchy": true
   },
   "items": [
-    [-1, "Company Type A", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
-    [-2, "Company Type B", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
-    [-3, "Company Type C", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}]
+    [-1, "Company Type A", 7, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
+    [-2, "Company Type B", 3, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
+    [-3, "Company Type C", 5, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}]
   ],
   "log": []
 };
@@ -2111,6 +2117,118 @@ function getLookupConfig(att) {
   return att.lookup || { path: '', editable: false };
 }
 
+function isRangeAtt(att) {
+  if (!att || typeof att !== 'object') return false;
+  return Array.isArray(att.attribute_kind) && att.attribute_kind.includes('range');
+}
+
+function getRangeConfig(att) {
+  if (!isRangeAtt(att)) return { min: 0, max: null };
+  const cfg = att.range || {};
+  return { min: cfg.min ?? 0, max: cfg.max ?? null };
+}
+
+function validateAssociationCounterparts(relationName, columnNames, columns) {
+  for (let i = 0; i < columnNames.length; i++) {
+    const colName = columnNames[i];
+    const colDef = columns[colName];
+    if (!colDef || typeof colDef !== 'object') continue;
+    if (!isAssociationAtt(colDef)) continue;
+    const cfg = getAssociationConfig(colDef);
+    if (!cfg || !cfg.counterparts) continue;
+    for (const cp of cfg.counterparts) {
+      const cpEntity = typeof cp === 'string' ? cp : cp.counterpart_entity;
+      const cpAtt = typeof cp === 'string' ? null : cp.counterpart_association_att;
+      if (!cpEntity) {
+        console.error(`[Relation "${relationName}"] Association "${colName}": counterpart has no entity defined.`);
+        continue;
+      }
+      const cpJson = all_entities[cpEntity];
+      if (!cpJson) {
+        console.error(`[Relation "${relationName}"] Association "${colName}": counterpart entity "${cpEntity}" not found in all_entities.`);
+        continue;
+      }
+      if (cpAtt) {
+        const cpColDef = cpJson.columns ? cpJson.columns[cpAtt] : undefined;
+        if (!cpColDef) {
+          console.error(`[Relation "${relationName}"] Association "${colName}": counterpart attribute "${cpAtt}" not found in entity "${cpEntity}".`);
+          continue;
+        }
+        if (!isAssociationAtt(cpColDef)) {
+          console.error(`[Relation "${relationName}"] Association "${colName}": counterpart attribute "${cpAtt}" in entity "${cpEntity}" is not an association.`);
+          continue;
+        }
+        const cpCfg = getAssociationConfig(cpColDef);
+        if (cpCfg && cpCfg.counterparts) {
+          const pointsBack = cpCfg.counterparts.some(back => {
+            const backEntity = typeof back === 'string' ? back : back.counterpart_entity;
+            const backAtt = typeof back === 'string' ? null : back.counterpart_association_att;
+            return backEntity === relationName && (!backAtt || backAtt === colName);
+          });
+          if (!pointsBack) {
+            console.error(`[Relation "${relationName}"] Association "${colName}": counterpart "${cpEntity}.${cpAtt}" does not point back to "${relationName}.${colName}".`);
+          }
+        }
+      }
+    }
+  }
+}
+
+function validateLookupPaths(relationName, columnNames, columns) {
+  for (let i = 0; i < columnNames.length; i++) {
+    const colName = columnNames[i];
+    const colDef = columns[colName];
+    if (!colDef || typeof colDef !== 'object') continue;
+    if (!isLookupAtt(colDef)) continue;
+    const lookupCfg = getLookupConfig(colDef);
+    if (!lookupCfg || !lookupCfg.path) {
+      console.error(`[Relation "${relationName}"] Lookup "${colName}": no path defined.`);
+      continue;
+    }
+    const segments = lookupCfg.path.split('.');
+    if (segments.length < 2) {
+      console.error(`[Relation "${relationName}"] Lookup "${colName}": path "${lookupCfg.path}" must have at least 2 segments (association.attribute).`);
+      continue;
+    }
+    let currentColumns = columns;
+    let currentEntityName = relationName;
+    for (let s = 0; s < segments.length; s++) {
+      const seg = segments[s];
+      const isLast = s === segments.length - 1;
+      if (!currentColumns || !currentColumns[seg]) {
+        console.error(`[Relation "${relationName}"] Lookup "${colName}": attribute "${seg}" not found in entity "${currentEntityName}" (path: "${lookupCfg.path}").`);
+        break;
+      }
+      if (!isLast) {
+        const segDef = currentColumns[seg];
+        if (!isAssociationAtt(segDef)) {
+          console.error(`[Relation "${relationName}"] Lookup "${colName}": intermediate segment "${seg}" in entity "${currentEntityName}" is not an association (path: "${lookupCfg.path}").`);
+          break;
+        }
+        const segCfg = getAssociationConfig(segDef);
+        if (!segCfg || segCfg.cardinality_max !== 1) {
+          console.error(`[Relation "${relationName}"] Lookup "${colName}": intermediate association "${seg}" in entity "${currentEntityName}" must have cardinality_max=1 (path: "${lookupCfg.path}").`);
+          break;
+        }
+        if (segCfg.counterparts && segCfg.counterparts.length > 0) {
+          const cpDef = segCfg.counterparts[0];
+          const cpEntityName = typeof cpDef === 'string' ? cpDef : cpDef.counterpart_entity;
+          const cpJson = all_entities[cpEntityName];
+          if (!cpJson) {
+            console.error(`[Relation "${relationName}"] Lookup "${colName}": counterpart entity "${cpEntityName}" for segment "${seg}" not found in all_entities (path: "${lookupCfg.path}").`);
+            break;
+          }
+          currentColumns = cpJson.columns;
+          currentEntityName = cpEntityName;
+        } else {
+          console.error(`[Relation "${relationName}"] Lookup "${colName}": association "${seg}" in entity "${currentEntityName}" has no counterparts defined (path: "${lookupCfg.path}").`);
+          break;
+        }
+      }
+    }
+  }
+}
+
 function resolveLookupPath(st, rowIdx, path) {
   if (!path || typeof path !== 'string') return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
 
@@ -3070,7 +3188,7 @@ function matchesCriteria(value, criteria, colIdx, st = state) {
     let compValue2 = criteria.value2;
     
     // Convert to comparable numbers
-    if (type === 'int' || type === 'float') {
+    if (type === 'int' || type === 'float' || type === 'range') {
       numValue = Number(value);
       compValue = Number(compValue);
       if (compValue2 !== undefined) compValue2 = Number(compValue2);
@@ -3146,7 +3264,7 @@ function compareValues(a, b, type, options) {
   if (a === null || a === undefined) return b === null || b === undefined ? 0 : (nullsFirst ? -1 : 1);
   if (b === null || b === undefined) return nullsFirst ? 1 : -1;
   
-  if (type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float' || type === 'range') {
     return a - b;
   }
   if (type === 'boolean') {
@@ -3585,7 +3703,7 @@ function generateStatsExplanationsHTML(type) {
   explanations.push({ term: 'Total Records', def: 'Total number of rows in the dataset.' });
   explanations.push({ term: 'Non-null / Null', def: 'Count of rows with/without values. Nulls may indicate missing data.' });
   
-  if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time' || type === 'relation') {
+  if (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time' || type === 'relation') {
     explanations.push({ term: 'Min / Max', def: 'Smallest and largest values in the data.' });
     explanations.push({ term: 'Range', def: 'Difference between maximum and minimum values.' });
     explanations.push({ term: 'Mean (μ)', def: 'Arithmetic average: sum of all values divided by count. Sensitive to outliers.' });
@@ -4034,7 +4152,7 @@ function calculateStatistics(colIdx, st = state) {
     nullPercent: ((nullCount / total) * 100).toFixed(2)
   };
   
-  if (type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float' || type === 'range') {
     const nums = values.map(Number).filter(n => !isNaN(n));
     if (nums.length > 0) {
       nums.sort((a, b) => a - b);
@@ -4701,7 +4819,7 @@ function checkRelationIntegrity(relation, path = 'root') {
           } else if (!Number.isInteger(parsed) && typeof cellValue !== 'string') {
             warnings.push({ path: cellPath, severity: 'warning', msg: `Valor ${cellValue} é decimal, esperado inteiro.` });
           }
-        } else if (kind === 'float') {
+        } else if (kind === 'float' || kind === 'range') {
           const parsed = Number(cellValue);
           if (isNaN(parsed) || (typeof cellValue === 'string' && cellValue.trim() === '')) {
             warnings.push({ path: cellPath, severity: 'warning', msg: `Valor "${cellValue}" não é um número válido.` });
@@ -4884,7 +5002,7 @@ function exportToExcelXML(items, columnNames, columnKinds, relationName) {
       let val = cell == null ? '' : cell;
       if (cell && typeof cell === 'object' && cell.pot === 'relation') {
         val = '[Relation]';
-      } else if (columnKinds[i] === 'int' || columnKinds[i] === 'float') {
+      } else if (columnKinds[i] === 'int' || columnKinds[i] === 'float' || columnKinds[i] === 'range') {
         type = 'Number';
         val = cell == null ? '' : cell;
       }
@@ -5485,7 +5603,7 @@ function convertValue(val, targetKind) {
     const n = parseInt(str.replace(/[^\d\-]/g, ''));
     return isNaN(n) ? str : n;
   }
-  if (targetKind === 'float') {
+  if (targetKind === 'float' || targetKind === 'range') {
     const cleaned = str.replace(/,/g, '.');
     const n = parseFloat(cleaned);
     return isNaN(n) ? str : n;
@@ -6608,8 +6726,8 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     input.dataset.row = rowIdx;
     input.dataset.col = colIdx;
     input.className = 'relation-input ' + getInputSizeClass(type);
-    if (type === 'int' || type === 'float') {
-      input.step = type === 'float' ? '0.001' : '1';
+    if (type === 'int' || type === 'float' || type === 'range') {
+      input.step = type === 'int' ? '1' : '0.001';
     }
     applyAttInputProps(input, st, colIdx);
     wrapper.appendChild(input);
@@ -6641,6 +6759,8 @@ function getInputType(type) {
       return 'search';
     case 'color':
       return 'color';
+    case 'range':
+      return 'number';
     default:
       return 'text';
   }
@@ -6696,7 +6816,7 @@ function applyConditionalFormatting(value, colIdx, cell, rowIdx, st = state) {
         if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
         if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
         
-        if (rule.style.dataBar && (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time')) {
+        if (rule.style.dataBar && (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time')) {
           const stats = calculateStatistics(colIdx, st);
           if (stats.min !== undefined && stats.max !== undefined && stats.max !== stats.min) {
             let numValue = value;
@@ -6966,22 +7086,44 @@ function handleAlwaysVisibleAction(st, action) {
 }
 
 // Output relation state as JSON to console and elements with specific classes
-function outputRelationState(st) {
-  const output = JSON.parse(JSON.stringify(st.relation));
-  if (output.rel_options) {
-    const filtered = {};
-    for (const [key, value] of Object.entries(output.rel_options)) {
-      if (key === 'uiState') continue;
-      if (JSON.stringify(value) !== JSON.stringify(DEFAULT_REL_OPTIONS[key])) {
-        filtered[key] = value;
-      }
-    }
-    if (Object.keys(filtered).length > 0) {
-      output.rel_options = filtered;
-    } else {
-      delete output.rel_options;
+function filterRelOptionsDefaults(relOptions) {
+  if (!relOptions || typeof relOptions !== 'object') return undefined;
+  const filtered = {};
+  for (const [key, value] of Object.entries(relOptions)) {
+    if (key === 'uiState') continue;
+    if (JSON.stringify(value) !== JSON.stringify(DEFAULT_REL_OPTIONS[key])) {
+      filtered[key] = value;
     }
   }
+  return Object.keys(filtered).length > 0 ? filtered : undefined;
+}
+
+function cleanRelationOutput(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (obj.rel_options) {
+    const filtered = filterRelOptionsDefaults(obj.rel_options);
+    if (filtered) {
+      obj.rel_options = filtered;
+    } else {
+      delete obj.rel_options;
+    }
+  }
+  if (Array.isArray(obj.items)) {
+    for (const row of obj.items) {
+      if (!Array.isArray(row)) continue;
+      for (let c = 0; c < row.length; c++) {
+        if (row[c] && typeof row[c] === 'object' && row[c].pot === 'relation') {
+          cleanRelationOutput(row[c]);
+        }
+      }
+    }
+  }
+  return obj;
+}
+
+function outputRelationState(st) {
+  const output = JSON.parse(JSON.stringify(st.relation));
+  cleanRelationOutput(output);
   const jsonString = JSON.stringify(output, null, 2);
   outputToConsoleAndElements(jsonString);
 }
@@ -7566,7 +7708,7 @@ function setupMergeRadioEvents(container, st, checkedIndices, panelPositions) {
       const input = editPanel.querySelector(`[data-col="${colIdx}"]`);
       if (!input) return;
       if (type === 'boolean') { input.checked = !!srcValue; }
-      else if (type === 'int' || type === 'float') { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
+      else if (type === 'int' || type === 'float' || type === 'range') { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
       else if (input.tagName === 'SELECT') { input.value = srcValue !== null ? srcValue : ''; }
       else { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
     });
@@ -7712,7 +7854,7 @@ function showMultiEditDialog(st) {
             let value;
             if (type === 'boolean') { value = input.checked; }
             else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
-            else if (type === 'float') { value = input.value === '' ? null : parseFloat(input.value); }
+            else if (type === 'float' || type === 'range') { value = input.value === '' ? null : parseFloat(input.value); }
             else { value = input.value === '' ? null : input.value; }
             st.relation.items[rowIdx][colIdx] = value;
           }
@@ -7807,7 +7949,7 @@ function showGroupEditDialog(st) {
         let value;
         if (type === 'boolean') { value = input.checked; }
         else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
-        else if (type === 'float') { value = input.value === '' ? null : parseFloat(input.value); }
+        else if (type === 'float' || type === 'range') { value = input.value === '' ? null : parseFloat(input.value); }
         else { value = input.value === '' ? null : input.value; }
         checkedIndices.forEach(rowIdx => {
           st.relation.items[rowIdx][colIdx] = value;
@@ -7919,7 +8061,7 @@ function showMergeDialog(st) {
             let value;
             if (type === 'boolean') { value = input.checked; }
             else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
-            else if (type === 'float') { value = input.value === '' ? null : parseFloat(input.value); }
+            else if (type === 'float' || type === 'range') { value = input.value === '' ? null : parseFloat(input.value); }
             else { value = input.value === '' ? null : input.value; }
             st.relation.items[targetRowIdx][colIdx] = value;
           }
@@ -9120,10 +9262,10 @@ function showColumnMenu(colIdx, x, y, st = state) {
         <div class="accordion-header">Filter <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item" data-action="filter-values">By Values...</button>
-          ${(type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_comparison ? `
+          ${(type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_comparison ? `
             <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
           ` : ''}
-          ${(type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_topn ? `
+          ${(type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_topn ? `
             <div class="column-menu-item-inline" data-testid="filter-topn-row">
               <select class="filter-position-select" data-testid="select-filter-position">
                 <option value="top">Top</option>
@@ -9147,7 +9289,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           ${(type === 'string' || type === 'textarea') && st.rel_options.show_filter_criteria ? `
             <button class="column-menu-item" data-action="filter-text-criteria">By Criteria...</button>
           ` : ''}
-          ${(type === 'int' || type === 'float') && st.rel_options.show_filter_outliers ? `
+          ${(type === 'int' || type === 'float' || type === 'range') && st.rel_options.show_filter_outliers ? `
             <div class="column-menu-item-inline outliers-row" data-testid="filter-outliers-row">
               <span class="filter-label">Outliers:</span>
               <select class="filter-outlier-method" data-testid="select-outlier-method">
@@ -9172,7 +9314,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
       <div class="accordion-section" data-section="binning">
         <div class="accordion-header">Binning / Bucketing <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          ${(type === 'int' || type === 'float') && st.rel_options.show_binning ? `
+          ${(type === 'int' || type === 'float' || type === 'range') && st.rel_options.show_binning ? `
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
             <span class="filter-label">Bins:</span>
             <input type="number" class="filter-n-input binning-count-input" value="5" min="2" max="50" step="1" data-testid="input-binning-count">
@@ -9253,7 +9395,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-ampm">Extract AM/PM → ${name}_ampm</button>
           <button class="column-menu-item" data-action="derive-hour12">Extract Hour (12h) → ${name}_hour12</button>
           ` : ''}
-          ${type === 'float' && st.rel_options.show_derived_columns ? `
+          ${(type === 'float' || type === 'range') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Float)</div>
           <div class="column-menu-item-inline">
@@ -10799,7 +10941,7 @@ function openFilterDialogForColumn(colIdx, st = state) {
     // No filter, open appropriate default dialog based on column type
     if (type === 'string' || type === 'textarea') {
       showFilterTextCriteriaDialog(colIdx, st);
-    } else if (type === 'int' || type === 'float' || type === 'date' || type === 'datetime' || type === 'time') {
+    } else if (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') {
       showFilterComparisonDialog(colIdx, st);
     } else {
       showFilterValuesDialog(colIdx, st);
@@ -11144,11 +11286,11 @@ function showFilterComparisonDialog(colIdx, st = state) {
       </div>
       <div class="filter-form-row">
         <label class="filter-value-label">Value:</label>
-        <input type="${inputType}" class="filter-comparison-value filter-input" value="${currentValue}" ${type === 'float' ? 'step="0.001"' : ''}>
+        <input type="${inputType}" class="filter-comparison-value filter-input" value="${currentValue}" ${type === 'float' || type === 'range' ? 'step="0.001"' : ''}>
       </div>
       <div class="filter-form-row filter-value2-row" style="display: ${currentComparison === 'between' ? 'flex' : 'none'}">
         <label>To:</label>
-        <input type="${inputType}" class="filter-comparison-value2 filter-input" value="${currentValue2}" ${type === 'float' ? 'step="0.001"' : ''}>
+        <input type="${inputType}" class="filter-comparison-value2 filter-input" value="${currentValue2}" ${type === 'float' || type === 'range' ? 'step="0.001"' : ''}>
       </div>
     </div>
     <div class="filter-dialog-footer">
@@ -11394,7 +11536,7 @@ function showStatisticsPanel(colIdx) {
     <div class="stats-row"><span>Null:</span><span>${stats.nullCount} (${stats.nullPercent}%)</span></div>
   `;
   
-  if (type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float' || type === 'range') {
     // Add box plot visualization
     statsHtml += generateBoxPlotSVG(stats);
     
@@ -12534,7 +12676,7 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
     return `<span class="id-value">${escapeHtml(String(value))}</span>`;
   }
   
-  if (type === 'int' || type === 'float') {
+  if (type === 'int' || type === 'float' || type === 'range') {
     return `<span class="number-value">${value}</span>`;
   }
   
@@ -12623,6 +12765,15 @@ function initRelationFieldsInContainer(container, st, row, mode) {
     } else {
       lrc.innerHTML = '<span class="assoc-cell-empty">—</span>';
     }
+  });
+
+  container.querySelectorAll('.range-slider').forEach(slider => {
+    const wrapper = slider.closest('.range-edit-wrapper');
+    if (!wrapper) return;
+    const numInput = wrapper.querySelector('.range-number');
+    if (!numInput) return;
+    slider.addEventListener('input', () => { numInput.value = slider.value; });
+    numInput.addEventListener('input', () => { slider.value = numInput.value; });
   });
 }
 
@@ -13048,6 +13199,9 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
               newRow[colIdx] = input.value === '' ? null : parseInt(input.value);
             } else if (type === 'float') {
               newRow[colIdx] = input.value === '' ? null : parseFloat(input.value);
+            } else if (type === 'range') {
+              const rangeNum = container.querySelector(`.range-number[data-col="${colIdx}"]`);
+              newRow[colIdx] = rangeNum && rangeNum.value !== '' ? parseFloat(rangeNum.value) : null;
             } else if (type === 'radio') {
               const checked = input.querySelector('input[type="radio"]:checked');
               newRow[colIdx] = checked ? checked.value : null;
@@ -13293,7 +13447,7 @@ function showRowEditDialog(st, rowIdx) {
                 newValue = input.checked;
               } else if (resolvedType === 'int') {
                 newValue = input.value === '' ? null : parseInt(input.value);
-              } else if (resolvedType === 'float') {
+              } else if (resolvedType === 'float' || resolvedType === 'range') {
                 newValue = input.value === '' ? null : parseFloat(input.value);
               } else if (resolvedType === 'radio') {
                 const checked = input.querySelector('input[type="radio"]:checked');
@@ -13318,6 +13472,9 @@ function showRowEditDialog(st, rowIdx) {
                 value = input.value === '' ? null : parseInt(input.value);
               } else if (type === 'float') {
                 value = input.value === '' ? null : parseFloat(input.value);
+              } else if (type === 'range') {
+                const rangeNum = container.querySelector(`.range-number[data-col="${colIdx}"]`);
+                value = rangeNum && rangeNum.value !== '' ? parseFloat(rangeNum.value) : null;
               } else if (type === 'radio') {
                 const checked = input.querySelector('input[type="radio"]:checked');
                 value = checked ? checked.value : null;
@@ -13589,7 +13746,7 @@ function updateRelationFromInput(input) {
     value = input.checked;
   } else if (type === 'int') {
     value = parseInt(input.value) || 0;
-  } else if (type === 'float') {
+  } else if (type === 'float' || type === 'range') {
     value = parseFloat(input.value) || 0;
   } else if (type === 'datetime') {
     value = input.value.replace('T', ' ');
@@ -16367,8 +16524,8 @@ function calculateCorrelation(st = state) {
   } else if (effectiveMethod === 'polyserial') {
     const isOrdX = ['int', 'select'].includes(xType);
     const isOrdY = ['int', 'select'].includes(yType);
-    const isContX = xType === 'float' || isTemporalX;
-    const isContY = yType === 'float' || isTemporalY;
+    const isContX = xType === 'float' || xType === 'range' || isTemporalX;
+    const isContY = yType === 'float' || yType === 'range' || isTemporalY;
     if (!((isOrdX && isContY) || (isOrdY && isContX))) {
       if (corrResultEl) corrResultEl.innerHTML = '<p class="text-muted-foreground">Polyserial requires one ordinal (int/select) and one continuous (float/temporal) column</p>';
       return;
@@ -18638,7 +18795,7 @@ function runClustering(st = state) {
       const type = st.columnTypes[colIdx];
       if (val === null) return 0;
       if (type === 'boolean') return val ? 1 : 0;
-      if (type === 'int' || type === 'float') return val;
+      if (type === 'int' || type === 'float' || type === 'range') return val;
       if (type === 'string' || type === 'select') {
         let hash = 0;
         const str = String(val);
@@ -19367,6 +19524,11 @@ function initRelationInstance(container, relationData, options = {}) {
   setFilteredIndices(instanceState, [...Array(itemCount).keys()]);
   setSortedIndices(instanceState, [...getFilteredIndices(instanceState)]);
   
+  if (relationData.name && Object.keys(all_entities).length > 0) {
+    validateAssociationCounterparts(relationData.name, instanceState.columnNames, relationData.columns);
+    validateLookupPaths(relationData.name, instanceState.columnNames, relationData.columns);
+  }
+
   // Store instance in both legacy map and new registry
   relationInstances.set(instanceState.uid, instanceState);
   registerRelation(instanceState);
@@ -21383,7 +21545,7 @@ function updateRelationFromInputWithState(st, input) {
     else value = input.checked;
   } else if (type === 'int') {
     value = input.value === '' ? null : parseInt(input.value);
-  } else if (type === 'float') {
+  } else if (type === 'float' || type === 'range') {
     value = input.value === '' ? null : parseFloat(input.value);
   } else {
     value = input.value === '' ? null : input.value;
@@ -21564,6 +21726,24 @@ function createEditInputHtml(type, value, colIdx, st) {
     return `<span class="view-value">📎 ${value?.items?.length || 0} files</span>`;
   } else if (type === 'color') {
     return `<input type="color" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value || '#000000'}">`;
+  } else if (type === 'range') {
+    const att = getAtt(st, colIdx);
+    const rangeCfg = getRangeConfig(att);
+    const minVal = rangeCfg.min;
+    const maxVal = rangeCfg.max !== null ? rangeCfg.max : 100;
+    const curVal = value !== null && value !== undefined ? value : minVal;
+    const uid = 'range_' + colIdx + '_' + Date.now();
+    let html = '<div class="range-edit-wrapper" data-col="' + colIdx + '">';
+    html += '<div class="range-labels">';
+    html += '<span class="range-label-min">' + minVal + '</span>';
+    if (rangeCfg.max !== null) html += '<span class="range-label-max">' + maxVal + '</span>';
+    html += '</div>';
+    html += '<div class="range-controls">';
+    html += '<input type="range" class="range-slider" data-col="' + colIdx + '" id="' + uid + '" min="' + minVal + '" max="' + maxVal + '" value="' + curVal + '">';
+    html += '<input type="number" class="relation-input input-size-tiny range-number" data-col="' + colIdx + '" data-range-id="' + uid + '" min="' + minVal + '" max="' + maxVal + '" value="' + curVal + '">';
+    html += '</div>';
+    html += '</div>';
+    return html;
   } else {
     return `<input type="${getInputType(type)}" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
   }
@@ -21860,7 +22040,7 @@ function init() {
           ta_kind.push(kind);
           const subRel = objectToRelation(value);
           rowValues.push(subRel);
-        } else if (typeof value === 'string' && (kind === 'int' || kind === 'float')) {
+        } else if (typeof value === 'string' && (kind === 'int' || kind === 'float' || kind === 'range')) {
           ta_kind.push(kind);
           rowValues.push(kind === 'int' ? parseInt(value) : parseFloat(value));
         } else {
