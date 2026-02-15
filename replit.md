@@ -48,6 +48,16 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Hierarchy Navigation**: Breadcrumb trail for hierarchical data.
 - **Structure View**: Displays all relation columns as an editable meta-table with order, name, kind, display name, short name, multiple columns. Clicking a row opens a column editor with collapsible sections (General, Visibility, Validation, Display, Kind-specific). Supports kind conversion with Apply button — data is converted automatically using `convertValueForKindChange` with a conversion matrix. Options for select/radio kinds edited via `buildMultiInput` with key+label pairs. Non-att columns can be converted to att objects.
 - **Multi-Input Component**: `buildMultiInput(values, baseType, editable, onChange)` renders a reusable list of same-type values with + to add and ✕ to remove entries. Supports `text`, `number`, `boolean`, and `keyvalue` (key+label pair) base types. Used in Structure view for options editing and available for any multi-value att fields.
+- **Advanced Search**: Full relational algebra-style query builder accessible from the column menu. Opens in the detail panel with the table hidden during query building. Features:
+  - **Pipeline architecture**: Declarative JSON format with ordered filter groups, each containing criteria with AND/OR logic
+  - **Mode toggle**: Subtractive (starts with all rows, AND between groups) vs Additive (starts empty, OR between groups)
+  - **AND/OR filter trees**: Each group uses AND or OR logic (toggleable), each criterion has NOT support
+  - **Kind-dependent operators**: String (equals, contains, starts_with, ends_with, regex), Numeric (=, ≠, >, ≥, <, ≤, between), Date/Time (same as numeric), Boolean (is true/false/null), plus universal in_list/not_in_list and is_null/is_not_null
+  - **Execution engine**: `executeAdvancedSearch(st, pipeline, mode)` evaluates pipeline against all rows, returns matching indices
+  - **Portable format**: Pipeline stores column names (not indices) for serialization via `pipelineToPortable`/`pipelineFromPortable`
+  - **Saved searches**: Store/load/delete named searches in `st.rel_options.savedSearches`
+  - **State persistence**: Current pipeline state stored in `uiState.advancedSearch`
+  - Helpers: `getOperatorsForType()`, `evaluateCriterion()`, `evaluateGroup()`, `buildCriterionRow()`, `showAdvancedSearchPanel()`
 - **Cartesian Product**: Supports cross-joining nested relation columns.
 - **Remove Duplicates**: Removes exact duplicate rows.
 - **Cardinality Constraints**: `cardinality_min` and `cardinality_max` in `rel_options` enforce row count limits. When max is reached, New/Copy/Import buttons are disabled. Warning badges show when count is below min or at/above max. Checked via `isCardinalityMaxReached(st)` and `isCardinalityMinUnmet(st)`.

@@ -1783,7 +1783,8 @@ const DEFAULT_UI_STATE = {
   currentHierarchyValue: null,  // Current hierarchy level (null = use hierarchy_root_value from rel_options)
   showAllDescendants: false,    // When true, show all descendants not just direct children
   columns_visible: null,
-  analysisResult: null
+  analysisResult: null,
+  advancedSearch: null
 };
 
 // Initialize uiState on a relation (ensures defaults exist)
@@ -7318,6 +7319,696 @@ function filterByQuickSearch(st, indices) {
   return matchingIndices;
 }
 
+function getOperatorsForType(type) {
+  const common = [
+    { value: 'is_null', label: 'is null' },
+    { value: 'is_not_null', label: 'is not null' },
+    { value: 'in_list', label: 'in list' },
+    { value: 'not_in_list', label: 'not in list' }
+  ];
+  if (type === 'boolean') {
+    return [
+      { value: 'is_true', label: 'is true' },
+      { value: 'is_false', label: 'is false' },
+      { value: 'is_null', label: 'is null' }
+    ];
+  }
+  if (type === 'string' || type === 'textarea' || type === 'select') {
+    return [
+      { value: 'equals', label: 'equals' },
+      { value: 'not_equals', label: 'not equals' },
+      { value: 'contains', label: 'contains' },
+      { value: 'starts_with', label: 'starts with' },
+      { value: 'ends_with', label: 'ends with' },
+      { value: 'regex', label: 'regex' },
+      ...common
+    ];
+  }
+  if (type === 'int' || type === 'float' || type === 'range') {
+    return [
+      { value: 'eq', label: '=' },
+      { value: 'neq', label: '≠' },
+      { value: 'gt', label: '>' },
+      { value: 'gte', label: '≥' },
+      { value: 'lt', label: '<' },
+      { value: 'lte', label: '≤' },
+      { value: 'between', label: 'between' },
+      ...common
+    ];
+  }
+  if (type === 'date' || type === 'datetime' || type === 'time') {
+    return [
+      { value: 'eq', label: '=' },
+      { value: 'neq', label: '≠' },
+      { value: 'gt', label: '>' },
+      { value: 'gte', label: '≥' },
+      { value: 'lt', label: '<' },
+      { value: 'lte', label: '≤' },
+      { value: 'between', label: 'between' },
+      ...common
+    ];
+  }
+  return [
+    { value: 'equals', label: 'equals' },
+    ...common
+  ];
+}
+
+function getInputTypeForColumn(type, op) {
+  if (op === 'in_list' || op === 'not_in_list') return 'text';
+  if (type === 'int' || type === 'float' || type === 'range') return 'number';
+  if (type === 'date') return 'date';
+  if (type === 'datetime') return 'datetime-local';
+  if (type === 'time') return 'time';
+  return 'text';
+}
+
+function buildCriterionRow(st, criterion, onChange, onRemove) {
+  const row = document.createElement('div');
+  row.className = 'adv-search-criterion';
+  row.setAttribute('data-testid', 'adv-search-criterion');
+
+  const colSelect = document.createElement('select');
+  colSelect.className = 'col-select';
+  colSelect.setAttribute('data-testid', 'adv-criterion-col');
+  st.columnNames.forEach((name, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = getAttDisplayName(st, idx);
+    if (idx === criterion.col) opt.selected = true;
+    colSelect.appendChild(opt);
+  });
+
+  const opSelect = document.createElement('select');
+  opSelect.className = 'op-select';
+  opSelect.setAttribute('data-testid', 'adv-criterion-op');
+
+  function populateOps() {
+    const colType = st.columnTypes[criterion.col] || 'string';
+    const ops = getOperatorsForType(colType);
+    opSelect.innerHTML = '';
+    ops.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.value;
+      opt.textContent = o.label;
+      if (o.value === criterion.op) opt.selected = true;
+      opSelect.appendChild(opt);
+    });
+    if (!ops.find(o => o.value === criterion.op)) {
+      criterion.op = ops[0].value;
+      opSelect.value = ops[0].value;
+    }
+  }
+  populateOps();
+
+  const valContainer = document.createElement('span');
+  valContainer.style.display = 'inline-flex';
+  valContainer.style.gap = '4px';
+  valContainer.style.alignItems = 'center';
+
+  function buildValueInputs() {
+    valContainer.innerHTML = '';
+    const op = criterion.op;
+    const noValueOps = ['is_null', 'is_not_null', 'is_true', 'is_false'];
+    if (noValueOps.includes(op)) return;
+
+    const colType = st.columnTypes[criterion.col] || 'string';
+    const inputType = getInputTypeForColumn(colType, op);
+
+    const inp = document.createElement('input');
+    inp.type = inputType;
+    inp.className = 'val-input';
+    inp.setAttribute('data-testid', 'adv-criterion-value');
+    inp.value = criterion.value != null ? criterion.value : '';
+    if (op === 'in_list' || op === 'not_in_list') {
+      inp.placeholder = 'val1, val2, ...';
+    }
+    inp.addEventListener('input', () => {
+      criterion.value = inp.value;
+      onChange();
+    });
+    valContainer.appendChild(inp);
+
+    if (op === 'between') {
+      const lbl = document.createElement('span');
+      lbl.textContent = '–';
+      lbl.style.color = 'var(--muted-foreground)';
+      valContainer.appendChild(lbl);
+      const inp2 = document.createElement('input');
+      inp2.type = inputType;
+      inp2.className = 'val-input';
+      inp2.setAttribute('data-testid', 'adv-criterion-value2');
+      inp2.value = criterion.value2 != null ? criterion.value2 : '';
+      inp2.addEventListener('input', () => {
+        criterion.value2 = inp2.value;
+        onChange();
+      });
+      valContainer.appendChild(inp2);
+    }
+  }
+  buildValueInputs();
+
+  const notBtn = document.createElement('button');
+  notBtn.className = 'not-toggle' + (criterion.not ? ' active' : '');
+  notBtn.textContent = 'NOT';
+  notBtn.setAttribute('data-testid', 'adv-criterion-not');
+  notBtn.addEventListener('click', () => {
+    criterion.not = !criterion.not;
+    notBtn.className = 'not-toggle' + (criterion.not ? ' active' : '');
+    onChange();
+  });
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'btn-remove-criterion';
+  removeBtn.textContent = '✕';
+  removeBtn.setAttribute('data-testid', 'adv-criterion-remove');
+  removeBtn.addEventListener('click', onRemove);
+
+  colSelect.addEventListener('change', () => {
+    criterion.col = parseInt(colSelect.value);
+    populateOps();
+    criterion.op = opSelect.value;
+    criterion.value = '';
+    criterion.value2 = '';
+    buildValueInputs();
+    onChange();
+  });
+
+  opSelect.addEventListener('change', () => {
+    criterion.op = opSelect.value;
+    criterion.value = '';
+    criterion.value2 = '';
+    buildValueInputs();
+    onChange();
+  });
+
+  row.appendChild(notBtn);
+  row.appendChild(colSelect);
+  row.appendChild(opSelect);
+  row.appendChild(valContainer);
+  row.appendChild(removeBtn);
+  return row;
+}
+
+function evaluateCriterion(row, criterion, st) {
+  const colIdx = criterion.col;
+  const value = row[colIdx];
+  const op = criterion.op;
+  const colType = st.columnTypes[colIdx] || 'string';
+  let result = false;
+
+  if (op === 'is_null') {
+    result = value === null || value === undefined || value === '';
+  } else if (op === 'is_not_null') {
+    result = value !== null && value !== undefined && value !== '';
+  } else if (op === 'is_true') {
+    result = value === true || value === 'true' || value === 1;
+  } else if (op === 'is_false') {
+    result = value === false || value === 'false' || value === 0;
+  } else if (op === 'in_list' || op === 'not_in_list') {
+    const listStr = String(criterion.value || '');
+    const list = listStr.split(',').map(v => v.trim()).filter(v => v !== '');
+    const strVal = value != null ? String(value) : '';
+    const found = list.some(v => v === strVal);
+    result = op === 'in_list' ? found : !found;
+  } else if (op === 'equals') {
+    if (value === null || value === undefined) { result = false; }
+    else { result = String(value).toLowerCase() === String(criterion.value).toLowerCase(); }
+  } else if (op === 'not_equals') {
+    if (value === null || value === undefined) { result = true; }
+    else { result = String(value).toLowerCase() !== String(criterion.value).toLowerCase(); }
+  } else if (op === 'contains') {
+    if (value === null || value === undefined) { result = false; }
+    else { result = String(value).toLowerCase().includes(String(criterion.value).toLowerCase()); }
+  } else if (op === 'starts_with') {
+    if (value === null || value === undefined) { result = false; }
+    else { result = String(value).toLowerCase().startsWith(String(criterion.value).toLowerCase()); }
+  } else if (op === 'ends_with') {
+    if (value === null || value === undefined) { result = false; }
+    else { result = String(value).toLowerCase().endsWith(String(criterion.value).toLowerCase()); }
+  } else if (op === 'regex') {
+    if (value === null || value === undefined) { result = false; }
+    else {
+      try { result = new RegExp(criterion.value, 'i').test(String(value)); }
+      catch { result = false; }
+    }
+  } else if (op === 'eq' || op === 'neq' || op === 'gt' || op === 'gte' || op === 'lt' || op === 'lte' || op === 'between') {
+    if (value === null || value === undefined) { result = false; }
+    else {
+      let numVal = value, compVal = criterion.value, compVal2 = criterion.value2;
+      if (colType === 'int' || colType === 'float' || colType === 'range') {
+        numVal = Number(value); compVal = Number(compVal);
+        if (compVal2 !== undefined && compVal2 !== '') compVal2 = Number(compVal2);
+      } else if (colType === 'date' || colType === 'datetime') {
+        numVal = new Date(value).getTime(); compVal = new Date(compVal).getTime();
+        if (compVal2 !== undefined && compVal2 !== '') compVal2 = new Date(compVal2).getTime();
+      } else if (colType === 'time') {
+        numVal = parseTimeToMs(value); compVal = parseTimeToMs(compVal);
+        if (compVal2 !== undefined && compVal2 !== '') compVal2 = parseTimeToMs(compVal2);
+      } else {
+        numVal = String(value); compVal = String(compVal);
+      }
+      switch (op) {
+        case 'eq': result = numVal === compVal; break;
+        case 'neq': result = numVal !== compVal; break;
+        case 'gt': result = numVal > compVal; break;
+        case 'gte': result = numVal >= compVal; break;
+        case 'lt': result = numVal < compVal; break;
+        case 'lte': result = numVal <= compVal; break;
+        case 'between': result = numVal >= compVal && numVal <= compVal2; break;
+        default: result = true;
+      }
+    }
+  } else {
+    result = true;
+  }
+
+  return criterion.not ? !result : result;
+}
+
+function evaluateGroup(row, group, st) {
+  if (!group.criteria || group.criteria.length === 0) return true;
+  if (group.logic === 'or') {
+    return group.criteria.some(c => evaluateCriterion(row, c, st));
+  }
+  return group.criteria.every(c => evaluateCriterion(row, c, st));
+}
+
+function executeAdvancedSearch(st, pipeline, mode) {
+  const items = st.relation.items;
+  const totalIndices = items.map((_, i) => i);
+
+  if (!pipeline || pipeline.length === 0) {
+    return totalIndices;
+  }
+
+  if (mode === 'additive') {
+    const resultSet = new Set();
+    for (const group of pipeline) {
+      for (let i = 0; i < items.length; i++) {
+        if (evaluateGroup(items[i], group, st)) {
+          resultSet.add(i);
+        }
+      }
+    }
+    return Array.from(resultSet).sort((a, b) => a - b);
+  } else {
+    let currentSet = new Set(totalIndices);
+    for (const group of pipeline) {
+      const groupMatches = new Set();
+      for (const idx of currentSet) {
+        if (evaluateGroup(items[idx], group, st)) {
+          groupMatches.add(idx);
+        }
+      }
+      currentSet = groupMatches;
+    }
+    return Array.from(currentSet).sort((a, b) => a - b);
+  }
+}
+
+function pipelineToPortable(pipeline, st) {
+  return pipeline.map(group => ({
+    logic: group.logic,
+    criteria: group.criteria.map(c => ({
+      col: st.columnNames[c.col] || c.col,
+      op: c.op,
+      value: c.value,
+      value2: c.value2,
+      not: c.not
+    }))
+  }));
+}
+
+function pipelineFromPortable(pipeline, st) {
+  return pipeline.map(group => ({
+    logic: group.logic,
+    criteria: group.criteria.map(c => {
+      let colIdx = typeof c.col === 'string' ? st.columnNames.indexOf(c.col) : c.col;
+      if (colIdx < 0) colIdx = 0;
+      return { col: colIdx, op: c.op, value: c.value, value2: c.value2, not: !!c.not };
+    })
+  }));
+}
+
+function saveAdvancedSearch(st, name, pipeline, mode) {
+  if (!st.rel_options.savedSearches) st.rel_options.savedSearches = [];
+  const existing = st.rel_options.savedSearches.findIndex(s => s.name === name);
+  const entry = { name, pipeline: pipelineToPortable(pipeline, st), mode };
+  if (existing >= 0) {
+    st.rel_options.savedSearches[existing] = entry;
+  } else {
+    st.rel_options.savedSearches.push(entry);
+  }
+  updateJsonOutput(st);
+}
+
+function loadAdvancedSearch(st, name) {
+  if (!st.rel_options.savedSearches) return null;
+  const entry = st.rel_options.savedSearches.find(s => s.name === name);
+  if (!entry) return null;
+  return { pipeline: pipelineFromPortable(entry.pipeline, st), mode: entry.mode };
+}
+
+function deleteAdvancedSearch(st, name) {
+  if (!st.rel_options.savedSearches) return;
+  st.rel_options.savedSearches = st.rel_options.savedSearches.filter(s => s.name !== name);
+  updateJsonOutput(st);
+}
+
+function showAdvancedSearchPanel(st) {
+  closeAllMenus();
+
+  let mode = 'subtractive';
+  let pipeline = [];
+
+  const uiState = getUiState(st);
+  if (uiState.advancedSearch) {
+    mode = uiState.advancedSearch.mode || 'subtractive';
+    pipeline = uiState.advancedSearch.pipeline ? pipelineFromPortable(uiState.advancedSearch.pipeline, st) : [];
+  }
+
+  const tableWrapper = el('.view-table .relation-table-wrapper', st) || el('.relation-table-wrapper', st);
+  if (tableWrapper) tableWrapper.style.display = 'none';
+
+  function persistState() {
+    getUiState(st).advancedSearch = { mode, pipeline: pipelineToPortable(pipeline, st) };
+  }
+
+  function rebuildPipeline(body) {
+    const pipelineContainer = body.querySelector('.adv-search-pipeline');
+    if (!pipelineContainer) return;
+    pipelineContainer.innerHTML = '';
+
+    if (pipeline.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'adv-search-empty';
+      empty.textContent = 'No filter groups. Click "Add Group" to begin.';
+      pipelineContainer.appendChild(empty);
+    }
+
+    pipeline.forEach((group, gIdx) => {
+      if (gIdx > 0) {
+        const sep = document.createElement('div');
+        sep.className = 'adv-search-mode-separator';
+        sep.textContent = mode === 'subtractive' ? 'AND' : 'OR';
+        pipelineContainer.appendChild(sep);
+      }
+
+      const groupEl = document.createElement('div');
+      groupEl.className = 'adv-search-group';
+      groupEl.setAttribute('data-testid', 'adv-search-group-' + gIdx);
+
+      const header = document.createElement('div');
+      header.className = 'adv-search-group-header';
+
+      const label = document.createElement('span');
+      label.className = 'group-label';
+      label.textContent = 'Group ' + (gIdx + 1);
+
+      const logicBtn = document.createElement('button');
+      logicBtn.className = 'logic-btn ' + (group.logic === 'and' ? 'logic-and' : 'logic-or');
+      logicBtn.textContent = group.logic.toUpperCase();
+      logicBtn.setAttribute('data-testid', 'adv-group-logic-' + gIdx);
+      logicBtn.addEventListener('click', () => {
+        group.logic = group.logic === 'and' ? 'or' : 'and';
+        persistState();
+        rebuildPipeline(body);
+      });
+
+      const removeGroupBtn = document.createElement('button');
+      removeGroupBtn.className = 'btn-remove-group';
+      removeGroupBtn.textContent = '✕';
+      removeGroupBtn.setAttribute('data-testid', 'adv-group-remove-' + gIdx);
+      removeGroupBtn.addEventListener('click', () => {
+        pipeline.splice(gIdx, 1);
+        persistState();
+        rebuildPipeline(body);
+      });
+
+      header.appendChild(label);
+      header.appendChild(logicBtn);
+      header.appendChild(removeGroupBtn);
+      groupEl.appendChild(header);
+
+      const groupBody = document.createElement('div');
+      groupBody.className = 'adv-search-group-body';
+
+      group.criteria.forEach((criterion, cIdx) => {
+        const cRow = buildCriterionRow(st, criterion, () => { persistState(); }, () => {
+          group.criteria.splice(cIdx, 1);
+          persistState();
+          rebuildPipeline(body);
+        });
+        groupBody.appendChild(cRow);
+      });
+
+      groupEl.appendChild(groupBody);
+
+      const groupFooter = document.createElement('div');
+      groupFooter.className = 'adv-search-group-footer';
+      const addCritBtn = document.createElement('button');
+      addCritBtn.className = 'btn-add-criterion';
+      addCritBtn.textContent = '+ Add Criterion';
+      addCritBtn.setAttribute('data-testid', 'adv-add-criterion-' + gIdx);
+      addCritBtn.addEventListener('click', () => {
+        group.criteria.push({ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false });
+        persistState();
+        rebuildPipeline(body);
+      });
+      groupFooter.appendChild(addCritBtn);
+      groupEl.appendChild(groupFooter);
+
+      pipelineContainer.appendChild(groupEl);
+    });
+
+    rebuildSavedSection(body);
+    persistState();
+  }
+
+  function rebuildSavedSection(body) {
+    const savedSection = body.querySelector('.adv-search-saved');
+    if (!savedSection) return;
+    savedSection.innerHTML = '';
+
+    const searches = st.rel_options.savedSearches || [];
+    if (searches.length === 0) return;
+
+    const header = document.createElement('div');
+    header.className = 'saved-header';
+    header.textContent = 'Saved Searches';
+    savedSection.appendChild(header);
+
+    const list = document.createElement('div');
+    list.className = 'adv-search-saved-list';
+
+    searches.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'adv-search-saved-item';
+      item.setAttribute('data-testid', 'adv-saved-item-' + s.name);
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'saved-name';
+      nameSpan.textContent = s.name;
+
+      const modeSpan = document.createElement('span');
+      modeSpan.className = 'saved-mode';
+      modeSpan.textContent = s.mode;
+
+      const loadBtn = document.createElement('button');
+      loadBtn.textContent = 'Load';
+      loadBtn.setAttribute('data-testid', 'adv-load-search-' + s.name);
+      loadBtn.addEventListener('click', () => {
+        const loaded = loadAdvancedSearch(st, s.name);
+        if (loaded) {
+          mode = loaded.mode;
+          pipeline = loaded.pipeline;
+          const subBtn = body.querySelector('[data-testid="adv-mode-subtractive"]');
+          const addBtn = body.querySelector('[data-testid="adv-mode-additive"]');
+          if (subBtn && addBtn) {
+            subBtn.className = 'mode-btn' + (mode === 'subtractive' ? ' active' : '');
+            addBtn.className = 'mode-btn' + (mode === 'additive' ? ' active' : '');
+          }
+          persistState();
+          rebuildPipeline(body);
+          showToast('Search "' + s.name + '" loaded.', 'info');
+        }
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-delete-saved';
+      delBtn.textContent = 'Delete';
+      delBtn.setAttribute('data-testid', 'adv-delete-search-' + s.name);
+      delBtn.addEventListener('click', () => {
+        deleteAdvancedSearch(st, s.name);
+        rebuildSavedSection(body);
+        showToast('Search "' + s.name + '" deleted.', 'info');
+      });
+
+      item.appendChild(nameSpan);
+      item.appendChild(modeSpan);
+      item.appendChild(loadBtn);
+      item.appendChild(delBtn);
+      list.appendChild(item);
+    });
+
+    savedSection.appendChild(list);
+  }
+
+  const closeHandler = showContentBasedOnMode(st, (body) => {
+    const panel = document.createElement('div');
+    panel.className = 'adv-search-panel';
+
+    const modeToggle = document.createElement('div');
+    modeToggle.className = 'adv-search-mode-toggle';
+
+    const modeLabel = document.createElement('label');
+    modeLabel.textContent = 'Mode:';
+
+    const subBtn = document.createElement('button');
+    subBtn.className = 'mode-btn' + (mode === 'subtractive' ? ' active' : '');
+    subBtn.textContent = 'Subtractive (AND)';
+    subBtn.setAttribute('data-testid', 'adv-mode-subtractive');
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'mode-btn' + (mode === 'additive' ? ' active' : '');
+    addBtn.textContent = 'Additive (OR)';
+    addBtn.setAttribute('data-testid', 'adv-mode-additive');
+
+    subBtn.addEventListener('click', () => {
+      mode = 'subtractive';
+      subBtn.className = 'mode-btn active';
+      addBtn.className = 'mode-btn';
+      persistState();
+      rebuildPipeline(body);
+    });
+    addBtn.addEventListener('click', () => {
+      mode = 'additive';
+      addBtn.className = 'mode-btn active';
+      subBtn.className = 'mode-btn';
+      persistState();
+      rebuildPipeline(body);
+    });
+
+    modeToggle.appendChild(modeLabel);
+    modeToggle.appendChild(subBtn);
+    modeToggle.appendChild(addBtn);
+    panel.appendChild(modeToggle);
+
+    const pipelineContainer = document.createElement('div');
+    pipelineContainer.className = 'adv-search-pipeline';
+    panel.appendChild(pipelineContainer);
+
+    const actions = document.createElement('div');
+    actions.className = 'adv-search-actions';
+
+    const addGroupBtn = document.createElement('button');
+    addGroupBtn.className = 'adv-btn';
+    addGroupBtn.textContent = '+ Add Group';
+    addGroupBtn.setAttribute('data-testid', 'adv-add-group');
+    addGroupBtn.addEventListener('click', () => {
+      pipeline.push({
+        logic: 'and',
+        criteria: [{ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false }]
+      });
+      persistState();
+      rebuildPipeline(body);
+    });
+
+    const executeBtn = document.createElement('button');
+    executeBtn.className = 'adv-btn adv-btn-primary';
+    executeBtn.textContent = '▶ Execute';
+    executeBtn.setAttribute('data-testid', 'adv-execute');
+    executeBtn.addEventListener('click', () => {
+      const validPipeline = pipeline.filter(g => g.criteria.length > 0);
+      const resultIndices = executeAdvancedSearch(st, validPipeline, mode);
+      setFilteredIndices(st, resultIndices);
+      applySorting(st);
+      if (tableWrapper) tableWrapper.style.display = '';
+      renderTable(st);
+      updateJsonOutput(st);
+      showToast('Advanced Search: ' + resultIndices.length + ' of ' + st.relation.items.length + ' rows match.', 'info');
+    });
+
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'adv-btn';
+    clearBtn.textContent = '✕ Clear';
+    clearBtn.setAttribute('data-testid', 'adv-clear');
+    clearBtn.addEventListener('click', () => {
+      pipeline = [];
+      persistState();
+      rebuildPipeline(body);
+    });
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'adv-btn';
+    resetBtn.textContent = '↺ Reset Filters';
+    resetBtn.setAttribute('data-testid', 'adv-reset');
+    resetBtn.addEventListener('click', () => {
+      pipeline = [];
+      getUiState(st).advancedSearch = null;
+      applyFilters(st);
+      applySorting(st);
+      if (tableWrapper) tableWrapper.style.display = '';
+      renderTable(st);
+      updateJsonOutput(st);
+      showToast('All advanced search filters cleared.', 'info');
+    });
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'adv-btn';
+    saveBtn.textContent = '💾 Save Search';
+    saveBtn.setAttribute('data-testid', 'adv-save');
+    saveBtn.addEventListener('click', () => {
+      const name = prompt('Enter a name for this search:');
+      if (name && name.trim()) {
+        saveAdvancedSearch(st, name.trim(), pipeline, mode);
+        rebuildSavedSection(body);
+        showToast('Search "' + name.trim() + '" saved.', 'info');
+      }
+    });
+
+    actions.appendChild(addGroupBtn);
+    actions.appendChild(executeBtn);
+    actions.appendChild(clearBtn);
+    actions.appendChild(resetBtn);
+    actions.appendChild(saveBtn);
+    panel.appendChild(actions);
+
+    const savedSection = document.createElement('div');
+    savedSection.className = 'adv-search-saved';
+    panel.appendChild(savedSection);
+
+    body.appendChild(panel);
+    rebuildPipeline(body);
+
+  }, 'Advanced Search', '');
+
+  function restoreTable() {
+    if (tableWrapper) tableWrapper.style.display = '';
+  }
+
+  const detailPanel = getDetailPanel(st);
+  if (detailPanel) {
+    const closeBtns = detailPanel.querySelectorAll('.btn-close-detail-panel, .close-panel');
+    closeBtns.forEach(btn => {
+      btn.addEventListener('click', restoreTable);
+    });
+  }
+
+  const popupOverlay = document.querySelector('.nested-relation-overlay');
+  if (popupOverlay) {
+    popupOverlay.addEventListener('click', restoreTable);
+  }
+  const popupDialog = document.querySelector('.nested-relation-dialog');
+  if (popupDialog) {
+    const closeBtns = popupDialog.querySelectorAll('.btn-close-dialog, .close-popup');
+    closeBtns.forEach(btn => {
+      btn.addEventListener('click', restoreTable);
+    });
+  }
+}
+
 function buildAlwaysVisibleOptionsHtml(options, st) {
   const alwaysVisibleOperationsMap = {
     'View': { value: 'view-row', icon: '👁', label: 'View' },
@@ -7430,7 +8121,7 @@ function handleAlwaysVisibleAction(st, action) {
 
   // Advanced Search
   if (action === 'advanced-search') {
-    showToast('Advanced Search: funcionalidade em desenvolvimento.', 'info');
+    showAdvancedSearchPanel(st);
     return;
   }
 
@@ -20507,6 +21198,10 @@ function initInstanceEventListeners(st) {
 function switchViewForInstance(st, view) {
   setCurrentView(st, view);
   const container = st.container;
+
+  const tableWrapper = container.querySelector('.relation-table-wrapper');
+  if (tableWrapper) tableWrapper.style.display = '';
+  clearDetailPanel(st);
   
   // Hide all view wrappers (using .view-content class pattern)
   container.querySelectorAll('.view-content').forEach(w => w.style.display = 'none');
