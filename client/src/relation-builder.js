@@ -1709,6 +1709,15 @@ const ALL_COMPANIES_JSON = {
         "counterparts": [{"counterpart_entity": "company_type", "counterpart_association_att": "references"}]
       }
     },
+    "CompanyTypeName": {
+      "attribute_kind": ["lookup"],
+      "name": "Nome do Tipo",
+      "short_name": "Tipo",
+      "lookup": {
+        "path": "CompanyTypeID.Name",
+        "editable": true
+      }
+    },
     "StateID": "int",
     "LastUpdated": "datetime"
   },
@@ -1722,9 +1731,9 @@ const ALL_COMPANIES_JSON = {
     "show_hierarchy": true
   },
   "items": [
-    [-1, "Company 1", null, null, null, null, null, null, null, false, null, null, null, null],
-    [-2, "Company 2", null, null, null, null, null, null, null, false, null, null, null, null],
-    [-3, "Company 3", null, null, null, null, null, null, null, false, null, null, null, null]
+    [-1, "Company 1", null, null, null, null, null, null, null, false, null, null, null, null, null],
+    [-2, "Company 2", null, null, null, null, null, null, null, false, null, null, null, null, null],
+    [-3, "Company 3", null, null, null, null, null, null, null, false, null, null, null, null, null]
   ],
   "log": []
 };
@@ -2079,6 +2088,118 @@ function isAssociationAtt(att) {
 function getAssociationConfig(att) {
   if (!isAssociationAtt(att)) return null;
   return att.association || { cardinality_min: 0, cardinality_max: null, counterparts: [] };
+}
+
+function isLookupAtt(att) {
+  if (!att || typeof att !== 'object') return false;
+  return Array.isArray(att.attribute_kind) && att.attribute_kind.includes('lookup');
+}
+
+function getLookupConfig(att) {
+  if (!isLookupAtt(att)) return null;
+  return att.lookup || { path: '', editable: false };
+}
+
+function resolveLookupPath(st, rowIdx, path) {
+  if (!path || typeof path !== 'string') return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+  const segments = path.split('.');
+  let currentEntity = st.relation;
+  let currentRow = st.relation.items[rowIdx];
+  if (!currentRow) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    const isLast = i === segments.length - 1;
+    const colNames = Object.keys(currentEntity.columns);
+    const segColIdx = colNames.indexOf(seg);
+    if (segColIdx < 0) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    const colDef = currentEntity.columns[seg];
+    const colType = resolveColumnKind(colDef);
+
+    if (isLast) {
+      return {
+        value: currentRow[segColIdx],
+        targetEntity: currentEntity,
+        targetRow: currentRow,
+        targetColIdx: segColIdx,
+        targetColDef: colDef,
+        targetType: colType,
+        targetColName: seg
+      };
+    }
+
+    const att = isAttObject(colDef) ? { ...DEFAULT_ATT, ...colDef } : null;
+    if (!isAssociationAtt(att)) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    const cfg = getAssociationConfig(att);
+    if (!cfg || cfg.cardinality_max !== 1) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    const assocVal = currentRow[segColIdx];
+    if (!assocVal || !assocVal.items || assocVal.items.length === 0) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    const foreignKey = String(assocVal.items[0][2]);
+    const counterpartDef = cfg.counterparts && cfg.counterparts[0];
+    if (!counterpartDef) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
+    const counterpartJson = all_entities[counterpartName];
+    if (!counterpartJson) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    const cpColEntries = Object.entries(counterpartJson.columns);
+    const cpIdColIdx = cpColEntries.findIndex(([n, t]) => {
+      if (typeof t === 'string' && t === 'id') return true;
+      if (typeof t === 'object' && t !== null && Array.isArray(t.attribute_kind) && t.attribute_kind.includes('id')) return true;
+      return false;
+    });
+    if (cpIdColIdx < 0) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    const targetRow = (counterpartJson.items || []).find(r => String(r[cpIdColIdx]) === foreignKey);
+    if (!targetRow) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+
+    currentEntity = counterpartJson;
+    currentRow = targetRow;
+  }
+
+  return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+}
+
+function resolveLookupColumnDef(st, path) {
+  if (!path || typeof path !== 'string') return { targetType: null, targetColDef: null, targetColName: null };
+
+  const segments = path.split('.');
+  let currentEntity = st.relation;
+
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    const isLast = i === segments.length - 1;
+    const colNames = Object.keys(currentEntity.columns);
+    const segColIdx = colNames.indexOf(seg);
+    if (segColIdx < 0) return { targetType: null, targetColDef: null, targetColName: null };
+
+    const colDef = currentEntity.columns[seg];
+    const colType = resolveColumnKind(colDef);
+
+    if (isLast) {
+      return { targetType: colType, targetColDef: colDef, targetColName: seg };
+    }
+
+    const att = isAttObject(colDef) ? { ...DEFAULT_ATT, ...colDef } : null;
+    if (!isAssociationAtt(att)) return { targetType: null, targetColDef: null, targetColName: null };
+    const cfg = getAssociationConfig(att);
+    if (!cfg || cfg.cardinality_max !== 1) return { targetType: null, targetColDef: null, targetColName: null };
+
+    const counterpartDef = cfg.counterparts && cfg.counterparts[0];
+    if (!counterpartDef) return { targetType: null, targetColDef: null, targetColName: null };
+
+    const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
+    const counterpartJson = all_entities[counterpartName];
+    if (!counterpartJson) return { targetType: null, targetColDef: null, targetColName: null };
+
+    currentEntity = counterpartJson;
+  }
+
+  return { targetType: null, targetColDef: null, targetColName: null };
 }
 
 function createEmptyAssociationRelation() {
@@ -8211,7 +8332,14 @@ function renderTable(st = state) {
     const binConfig = getBinningConfig(st, idx);
     const binInfoBadge = binConfig ? `<span class="bin-info-badge" data-col="${idx}" title="View bin intervals">ⓘ</span>` : '';
     
-    const displayType = att ? (att._active_kind || att.attribute_kind[0]) : type;
+    let displayType = att ? (att._active_kind || att.attribute_kind[0]) : type;
+    if (type === 'lookup' && isLookupAtt(att)) {
+      const lookupCfg = getLookupConfig(att);
+      const resolvedCol = resolveLookupColumnDef(st, lookupCfg.path);
+      if (resolvedCol.targetType) {
+        displayType = 'lookup:' + resolvedCol.targetType;
+      }
+    }
     const labelPrefix = att ? getI18nText(att.label_prefix) : '';
     const labelSuffix = att ? getI18nText(att.label_suffix) : '';
     const showLabel = att ? att.show_label !== false : true;
@@ -8398,7 +8526,6 @@ function renderTable(st = state) {
     // Data cells (use columns_visible order, skip grouped columns)
     visibleColIndices.forEach((colIdx) => {
       if (getGroupByColumns(st).includes(colIdx)) return;
-      const value = row[colIdx];
       const td = document.createElement('td');
       const type = st.columnTypes[colIdx];
       const colAtt = getAtt(st, colIdx);
@@ -8416,9 +8543,20 @@ function renderTable(st = state) {
         td.style.overflow = 'hidden';
         td.style.textOverflow = 'ellipsis';
       }
-      const cellEditable = colAtt && colAtt.readonly ? false : st.rel_options.editable;
-      td.appendChild(createInputForType(type, value, rowIdx, colIdx, cellEditable, st));
-      applyConditionalFormatting(value, colIdx, td, rowIdx, st);
+
+      if (type === 'lookup' && isLookupAtt(colAtt)) {
+        const lookupCfg = getLookupConfig(colAtt);
+        const resolved = resolveLookupPath(st, rowIdx, lookupCfg.path);
+        const resolvedType = resolved.targetType || 'string';
+        const resolvedValue = resolved.value;
+        td.appendChild(createInputForType(resolvedType, resolvedValue, rowIdx, colIdx, false, st));
+        applyConditionalFormatting(resolvedValue, colIdx, td, rowIdx, st);
+      } else {
+        const value = row[colIdx];
+        const cellEditable = colAtt && colAtt.readonly ? false : st.rel_options.editable;
+        td.appendChild(createInputForType(type, value, rowIdx, colIdx, cellEditable, st));
+        applyConditionalFormatting(value, colIdx, td, rowIdx, st);
+      }
       tr.appendChild(td);
     });
     
@@ -12257,7 +12395,60 @@ function generateRowFormattedContent(st, row, mode = 'view') {
     
     const attClasses = att && att.class && att.class.length ? ' ' + att.class.join(' ') : '';
     
-    if (type === 'relation') {
+    if (type === 'lookup' && isLookupAtt(att)) {
+      const lookupCfg = getLookupConfig(att);
+      const rowIdx = st.relation.items.indexOf(row);
+      const resolved = resolveLookupPath(st, rowIdx >= 0 ? rowIdx : 0, lookupCfg.path);
+      const resolvedType = resolved.targetType || 'string';
+      const resolvedValue = resolved.value;
+      const lookupEditable = lookupCfg.editable === true;
+      const lookupEffectiveMode = (!lookupEditable || effectiveMode === 'view') ? 'view' : effectiveMode;
+
+      if (resolvedType === 'relation') {
+        html += `<div class="row-field row-field-relation row-field-top-down${attClasses}${widthClass}">`;
+        html += `<label class="row-field-label">${fullLabelHtml || escapeHtml(displayName)}</label>`;
+        html += `<div class="row-field-lookup-relation-container" data-col="${colIdx}" data-lookup-path="${escapeHtml(lookupCfg.path)}"></div>`;
+        html += descriptionHtml;
+        html += `</div>`;
+      } else {
+        const prefixHtml = fieldPrefix ? `<span class="att-prefix">${escapeHtml(fieldPrefix)}</span>` : '';
+        const suffixHtml = fieldSuffix ? `<span class="att-suffix">${escapeHtml(fieldSuffix)}</span>` : '';
+
+        if (useTopDown) {
+          html += `<div class="row-field row-field-${resolvedType} row-field-top-down${attClasses}${widthClass}" data-lookup-col="${colIdx}">`;
+          if (showLabel) html += `<label class="row-field-label">${fullLabelHtml}</label>`;
+
+          if (lookupEffectiveMode === 'view') {
+            html += prefixHtml;
+            html += `<span class="row-field-value row-field-value-${resolvedType}">${formatValueForViewDisplay(resolvedValue, resolvedType, st, colIdx)}</span>`;
+            html += suffixHtml;
+          } else {
+            if (prefixHtml) html += prefixHtml;
+            html += createEditInputHtml(resolvedType, resolvedValue, colIdx, st);
+            if (suffixHtml) html += suffixHtml;
+          }
+          html += descriptionHtml;
+          html += `</div>`;
+        } else {
+          html += `<div class="row-field row-field-${resolvedType} row-field-horizontal${attClasses}${widthClass}" data-lookup-col="${colIdx}">`;
+          if (showLabel) html += `<div class="row-field-label-wrapper"><label class="row-field-label">${fullLabelHtml}</label></div>`;
+          html += `<div class="row-field-value-wrapper">`;
+
+          if (lookupEffectiveMode === 'view') {
+            html += prefixHtml;
+            html += `<span class="row-field-value row-field-value-${resolvedType}">${formatValueForViewDisplay(resolvedValue, resolvedType, st, colIdx)}</span>`;
+            html += suffixHtml;
+          } else {
+            if (prefixHtml) html += prefixHtml;
+            html += createEditInputHtml(resolvedType, resolvedValue, colIdx, st);
+            if (suffixHtml) html += suffixHtml;
+          }
+          html += descriptionHtml;
+          html += `</div>`;
+          html += `</div>`;
+        }
+      }
+    } else if (type === 'relation') {
       html += `<div class="row-field row-field-relation row-field-top-down${attClasses}${widthClass}">`;
       html += `<label class="row-field-label">${fullLabelHtml || escapeHtml(displayName)}</label>`;
       html += `<div class="row-field-relation-container" data-col="${colIdx}"></div>`;
@@ -12401,6 +12592,23 @@ function initRelationFieldsInContainer(container, st, row, mode) {
       initRelationInstance(relContainer, relValue, { showJsonEditor: false, isNested: true });
     } else {
       relContainer.innerHTML = '';
+    }
+  });
+
+  const lookupRelContainers = container.querySelectorAll('.row-field-lookup-relation-container');
+  lookupRelContainers.forEach(lrc => {
+    const colIdx = parseInt(lrc.dataset.col);
+    const att = getAtt(st, colIdx);
+    if (!isLookupAtt(att)) return;
+    const lookupCfg = getLookupConfig(att);
+    const rowIdx = st.relation.items.indexOf(row);
+    const resolved = resolveLookupPath(st, rowIdx >= 0 ? rowIdx : 0, lookupCfg.path);
+    if (resolved.value && resolved.value.columns) {
+      initRelationInstance(lrc, resolved.value, { showJsonEditor: false, isNested: true });
+    } else if (resolved.value && resolved.value.items) {
+      initRelationInstance(lrc, resolved.value, { showJsonEditor: false, isNested: true });
+    } else {
+      lrc.innerHTML = '<span class="assoc-cell-empty">—</span>';
     }
   });
 }
@@ -13052,10 +13260,41 @@ function showRowEditDialog(st, rowIdx) {
           }
           
           const changes = {};
+          const lookupChanges = [];
           st.columnNames.forEach((name, colIdx) => {
             const type = st.columnTypes[colIdx];
             if (type === 'id') return;
             if (type === 'relation' || type === 'file') return;
+
+            const colAtt = getAtt(st, colIdx);
+            if (type === 'lookup' && isLookupAtt(colAtt)) {
+              const lookupCfg = getLookupConfig(colAtt);
+              if (!lookupCfg.editable) return;
+              const input = container.querySelector(`[data-col="${colIdx}"]`);
+              if (!input) return;
+              const resolved = resolveLookupPath(st, targetRowIdx, lookupCfg.path);
+              if (!resolved.targetRow || resolved.targetColIdx < 0) return;
+              const resolvedType = resolved.targetType || 'string';
+              let newValue;
+              if (resolvedType === 'boolean') {
+                newValue = input.checked;
+              } else if (resolvedType === 'int') {
+                newValue = input.value === '' ? null : parseInt(input.value);
+              } else if (resolvedType === 'float') {
+                newValue = input.value === '' ? null : parseFloat(input.value);
+              } else if (resolvedType === 'radio') {
+                const checked = input.querySelector('input[type="radio"]:checked');
+                newValue = checked ? checked.value : null;
+              } else {
+                newValue = input.value === '' ? null : input.value;
+              }
+              const oldValue = resolved.targetRow[resolved.targetColIdx];
+              if (oldValue !== newValue) {
+                resolved.targetRow[resolved.targetColIdx] = newValue;
+                lookupChanges.push({ path: lookupCfg.path, old: oldValue, new: newValue });
+              }
+              return;
+            }
             
             const input = container.querySelector(`[data-col="${colIdx}"]`);
             if (input) {
@@ -13080,8 +13319,10 @@ function showRowEditDialog(st, rowIdx) {
             }
           });
           
-          if (Object.keys(changes).length > 0) {
-            logOperation(st, { op: 'edit_row', id: rowId, changes });
+          if (Object.keys(changes).length > 0 || lookupChanges.length > 0) {
+            const logEntry = { op: 'edit_row', id: rowId, changes };
+            if (lookupChanges.length > 0) logEntry.lookup_changes = lookupChanges;
+            logOperation(st, logEntry);
           }
           renderTable(st);
           outputRelationState(st);
@@ -13911,11 +14152,17 @@ function renderCardsView(st = state) {
     cardsHtml += '<div class="data-card-body">';
     
     st.columnNames.forEach((colName, colIdx) => {
-      const value = row[colIdx];
-      const type = st.columnTypes[colIdx];
+      let value = row[colIdx];
+      let type = st.columnTypes[colIdx];
+      const colAtt = getAtt(st, colIdx);
+      if (type === 'lookup' && isLookupAtt(colAtt)) {
+        const lookupCfg = getLookupConfig(colAtt);
+        const resolved = resolveLookupPath(st, rowIdx, lookupCfg.path);
+        value = resolved.value;
+        type = resolved.targetType || 'string';
+      }
       let displayValue = formatCellValue(value, type, colName, st);
       
-      // Get display value for tooltip (use option label for select type)
       let tooltipValue = '';
       if (value !== null && value !== undefined) {
         if (type === 'select') {
