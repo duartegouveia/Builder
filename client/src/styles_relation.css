@@ -6359,15 +6359,11 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   vertical-align: middle;
 }
 .structure-columns-table tbody tr:hover {
-  background: rgba(74, 144, 217, 0.1);
+  background: var(--primary-50, rgba(74, 144, 217, 0.1));
 }
 .structure-columns-table tbody tr.selected {
-  background: rgba(74, 144, 217, 0.15);
+  background: var(--primary-100, rgba(74, 144, 217, 0.15));
   outline: 1px solid var(--primary, #4a90d9);
-}
-.structure-columns-table tbody tr.selected td,
-.structure-columns-table tbody tr:hover td {
-  color: var(--foreground, #e0e0e0);
 }
 .structure-kind-badge {
   display: inline-block;
@@ -6384,10 +6380,10 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .structure-att-editor {
   padding: 12px;
-  border: 1px solid var(--border, #333);
+  border: 1px solid var(--border);
   border-radius: 6px;
   margin-top: 8px;
-  background: var(--card, #16213e);
+  background: var(--card, #fff);
 }
 .structure-section {
   margin-bottom: 8px;
@@ -6398,15 +6394,15 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   gap: 6px;
   cursor: pointer;
   padding: 6px 8px;
-  background: var(--muted, #2a2a3e);
+  background: var(--muted);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--foreground, #e0e0e0);
+  color: var(--foreground);
   user-select: none;
 }
 .structure-section-header:hover {
-  background: var(--accent, #1e3a5f);
+  background: var(--border);
 }
 .structure-section-header .section-arrow {
   transition: transform 0.15s;
@@ -6431,23 +6427,24 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .structure-field label {
   font-size: 10px;
-  color: var(--muted-foreground, #888);
+  color: var(--muted-foreground);
   font-weight: 500;
 }
 .structure-field input,
 .structure-field select {
   padding: 3px 6px;
-  border: 1px solid var(--border, #333);
+  border: 1px solid var(--border);
   border-radius: 3px;
-  background: var(--input, #1a1a2e);
-  color: var(--foreground, #e0e0e0);
+  background: var(--card, #fff);
+  color: var(--foreground);
   font-size: 12px;
   font-family: inherit;
 }
 .structure-field input:focus,
 .structure-field select:focus {
   outline: none;
-  border-color: var(--primary, #4a90d9);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-100, rgba(59,130,246,0.2));
 }
 .structure-field input[type="checkbox"] {
   width: 16px;
@@ -6470,19 +6467,30 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   font-family: inherit;
 }
 .structure-btn-apply {
-  background: var(--primary, #4a90d9);
-  color: white;
-  border-color: var(--primary, #4a90d9) !important;
+  background: var(--primary);
+  color: var(--primary-foreground, #fff);
+  border: 1px solid var(--primary);
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
 }
 .structure-btn-apply:hover {
-  opacity: 0.9;
+  background: var(--primary-hover, var(--primary));
 }
 .structure-btn-cancel {
-  background: var(--muted, #2a2a3e);
-  color: var(--foreground, #e0e0e0);
+  background: var(--muted);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
 }
 .structure-btn-cancel:hover {
-  background: var(--accent, #1e3a5f);
+  background: var(--border);
 }
 .structure-toolbar {
   display: flex;
@@ -6494,38 +6502,47 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 .structure-toolbar button {
   padding: 5px 12px;
   border-radius: 4px;
-  border: 1px solid var(--border, #333);
+  border: 1px solid var(--border);
   cursor: pointer;
   font-size: 12px;
   font-family: inherit;
-  background: var(--muted, #2a2a3e);
-  color: var(--foreground, #e0e0e0);
+  background: var(--muted);
+  color: var(--foreground);
 }
 .structure-toolbar button:hover {
-  background: var(--accent, #1e3a5f);
+  background: var(--border);
 }
 .structure-toolbar .structure-btn-apply {
-  background: var(--primary, #4a90d9);
-  color: white;
-  border-color: var(--primary, #4a90d9);
+  background: var(--primary);
+  color: var(--primary-foreground, #fff);
+  border-color: var(--primary);
+}
+.structure-toolbar .structure-btn-apply:hover {
+  background: var(--primary-hover, var(--primary));
 }
 .structure-toolbar .structure-btn-new {
-  background: #1b5e20;
-  color: #a5d6a7;
-  border-color: #2e7d32;
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
+}
+.structure-toolbar .structure-btn-new:hover {
+  background: #15803d;
 }
 .structure-toolbar .structure-btn-delete {
-  background: var(--destructive, #e74c3c);
-  color: white;
-  border-color: var(--destructive, #e74c3c);
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+.structure-toolbar .structure-btn-delete:hover {
+  background: #b91c1c;
 }
 .structure-columns-table td input,
 .structure-columns-table td select {
   padding: 2px 5px;
-  border: 1px solid var(--border, #444);
+  border: 1px solid var(--border);
   border-radius: 3px;
-  background: var(--input, #1a1a2e);
-  color: var(--foreground, #e0e0e0);
+  background: var(--card, #fff);
+  color: var(--foreground);
   font-size: 12px;
   font-family: inherit;
   width: 100%;
@@ -6534,7 +6551,8 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 .structure-columns-table td input:focus,
 .structure-columns-table td select:focus {
   outline: none;
-  border-color: var(--primary, #4a90d9);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-100, rgba(59,130,246,0.2));
 }
 .structure-columns-table td input[type="number"] {
   width: 50px;
@@ -6545,11 +6563,11 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .structure-columns-table td select optgroup {
   font-weight: 600;
-  color: var(--muted-foreground, #888);
+  color: var(--muted-foreground);
 }
 .structure-columns-table td select option {
-  color: var(--foreground, #e0e0e0);
-  background: var(--input, #1a1a2e);
+  color: var(--foreground);
+  background: var(--card, #fff);
 }
 .structure-conversion-info {
   padding: 6px 10px;
@@ -6558,14 +6576,17 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   margin-bottom: 8px;
 }
 .structure-conversion-info.lossless {
-  background: #1b5e20;
-  color: #a5d6a7;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
 }
 .structure-conversion-info.lossy {
-  background: #7f5f00;
-  color: #ffd54f;
+  background: #fef9c3;
+  color: #854d0e;
+  border: 1px solid #fde047;
 }
 .structure-conversion-info.impossible {
-  background: var(--destructive, #e74c3c);
-  color: white;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
 }

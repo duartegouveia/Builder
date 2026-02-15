@@ -22106,16 +22106,13 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
       const infoDiv = document.createElement('div');
       infoDiv.style.cssText = 'margin-top:8px;padding:6px 10px;border-radius:4px;font-size:12px;';
       if (!convInfo.possible) {
-        infoDiv.style.background = 'var(--destructive, #e74c3c)';
-        infoDiv.style.color = 'white';
+        infoDiv.className = 'structure-conversion-info impossible';
         infoDiv.textContent = 'Conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + ' is not possible. Existing data will be set to null.';
       } else if (!convInfo.lossless) {
-        infoDiv.style.background = '#7f5f00';
-        infoDiv.style.color = '#ffd54f';
+        infoDiv.className = 'structure-conversion-info lossy';
         infoDiv.textContent = 'Conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + ' may lose precision.';
       } else {
-        infoDiv.style.background = '#1b5e20';
-        infoDiv.style.color = '#a5d6a7';
+        infoDiv.className = 'structure-conversion-info lossless';
         infoDiv.textContent = 'Lossless conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + '.';
       }
       editor.appendChild(infoDiv);
