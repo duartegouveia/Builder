@@ -2117,6 +2117,17 @@ function getLookupConfig(att) {
   return att.lookup || { path: '', editable: false };
 }
 
+function isPointerAtt(att) {
+  if (!att || typeof att !== 'object') return false;
+  return Array.isArray(att.attribute_kind) && att.attribute_kind.includes('pointer');
+}
+
+function getPointerConfig(att) {
+  if (!isPointerAtt(att)) return null;
+  const cfg = att.pointer || {};
+  return { targets: cfg.targets || [], cardinality_min: cfg.cardinality_min ?? 0, cardinality_max: cfg.cardinality_max ?? 1 };
+}
+
 function isRangeAtt(att) {
   if (!att || typeof att !== 'object') return false;
   return Array.isArray(att.attribute_kind) && att.attribute_kind.includes('range');
@@ -2169,6 +2180,28 @@ function validateAssociationCounterparts(relationName, columnNames, columns) {
             console.error(`[Relation "${relationName}"] Association "${colName}": counterpart "${cpEntity}.${cpAtt}" does not point back to "${relationName}.${colName}".`);
           }
         }
+      }
+    }
+  }
+}
+
+function validatePointerTargets(relationName, columnNames, columns) {
+  for (let i = 0; i < columnNames.length; i++) {
+    const colName = columnNames[i];
+    const colDef = columns[colName];
+    if (!colDef || typeof colDef !== 'object') continue;
+    if (!isPointerAtt(colDef)) continue;
+    const cfg = getPointerConfig(colDef);
+    if (!cfg || !cfg.targets) continue;
+    for (const t of cfg.targets) {
+      const targetEntity = t.target_entity;
+      if (!targetEntity) {
+        console.error(`[Relation "${relationName}"] Pointer "${colName}": target has no entity defined.`);
+        continue;
+      }
+      const targetJson = all_entities[targetEntity];
+      if (!targetJson) {
+        console.error(`[Relation "${relationName}"] Pointer "${colName}": target entity "${targetEntity}" not found in all_entities.`);
       }
     }
   }
@@ -2852,6 +2885,18 @@ function generateDemoRelation() {
     fav_color: 'color',
     priority: 'radio',
     attachments: 'file',
+    ref_company_type: {
+      attribute_kind: ['pointer'],
+      name: {"pt":"Tipo de Empresa","en":"Company Type Ref"},
+      short_name: 'Tipo',
+      pointer: {
+        targets: [
+          { target_entity: 'company_type', target_display_atts: [] }
+        ],
+        cardinality_min: 0,
+        cardinality_max: 1
+      }
+    },
     orders: 'relation',
     tags: 'relation'
   };
@@ -2932,6 +2977,18 @@ function generateDemoRelation() {
       
       if (resolvedType === 'file') {
         return createEmptyFileRelation();
+      }
+      
+      if (resolvedType === 'pointer' && colName === 'ref_company_type') {
+        const targetId = String(Math.floor(Math.random() * 3) + 1);
+        return {
+          pot: 'relation',
+          guid: '',
+          name: '',
+          columns: { id: 'id', entity: 'string', foreign_key: 'string' },
+          rel_options: { editable: false },
+          items: [['1', 'company_type', targetId]]
+        };
       }
       
       return generateRandomValue(resolvedType);
@@ -6065,6 +6122,197 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
   return wrapper;
 }
 
+function createEmptyPointerRelation() {
+  return {
+    pot: 'relation',
+    guid: '',
+    name: '',
+    columns: { id: 'id', entity: 'string', foreign_key: 'string' },
+    rel_options: {
+      editable: false,
+      show_multicheck: false,
+      show_natural_order: false,
+      show_id: true,
+      show_column_kind: false,
+      show_stats: false,
+      cardinality_min: 0,
+      cardinality_max: null,
+      general_view_options: [],
+      general_always_visible_options: [],
+      general_line_options: [],
+      general_multi_options: []
+    },
+    options: {},
+    items: []
+  };
+}
+
+function getNextPointerId(pointerRelation) {
+  let maxId = 0;
+  if (pointerRelation && pointerRelation.items) {
+    pointerRelation.items.forEach(item => {
+      const id = parseInt(item[0], 10);
+      if (!isNaN(id) && id > maxId) maxId = id;
+    });
+  }
+  return String(maxId + 1);
+}
+
+function buildPointerCell(value, rowIdx, colIdx, editable, st, rowRef) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'assoc-cell';
+  const att = getAtt(st, colIdx);
+  const config = getPointerConfig(att);
+  const maxOne = config && config.cardinality_max === 1;
+  const items = value?.items || [];
+  const actualRow = rowRef || st.relation.items[rowIdx];
+
+  const rebuildCell = () => {
+    const newCell = buildPointerCell(actualRow[colIdx], rowIdx, colIdx, editable, st, actualRow);
+    wrapper.replaceWith(newCell);
+  };
+
+  if (maxOne) {
+    if (items.length === 0) {
+      const emptySpan = document.createElement('span');
+      emptySpan.className = 'assoc-empty';
+      emptySpan.textContent = '—';
+      wrapper.appendChild(emptySpan);
+      if (editable) {
+        const selectBtn = document.createElement('button');
+        selectBtn.className = 'assoc-select-btn';
+        selectBtn.textContent = 'Select';
+        selectBtn.title = 'Select target entity';
+        selectBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPointerSelect(rowIdx, colIdx, st, actualRow, rebuildCell);
+        });
+        wrapper.appendChild(selectBtn);
+      }
+    } else {
+      const ptrItem = items[0];
+      const entity = ptrItem[1] || '';
+      const fk = ptrItem[2] || '';
+      const label = document.createElement('span');
+      label.className = 'assoc-link-label';
+      label.textContent = entity + ' #' + fk;
+      label.title = 'Entity: ' + entity + ', ID: ' + fk;
+      wrapper.appendChild(label);
+      if (editable) {
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'assoc-clear-btn';
+        clearBtn.textContent = '\u00D7';
+        clearBtn.title = 'Remove pointer';
+        clearBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removePointerRecord(rowIdx, colIdx, 0, st);
+          rebuildCell();
+        });
+        wrapper.appendChild(clearBtn);
+      }
+    }
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'relation-cell-btn';
+    const count = items.length;
+    btn.innerHTML = `📋 ${count}`;
+    btn.title = `View pointer references (${count} rows)`;
+    btn.dataset.row = rowIdx;
+    btn.dataset.col = colIdx;
+    wrapper.appendChild(btn);
+  }
+
+  return wrapper;
+}
+
+function openPointerSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
+  const att = getAtt(st, colIdx);
+  const config = getPointerConfig(att);
+  if (!config || !config.targets || config.targets.length === 0) {
+    showToast('No target entities configured for this pointer.', 'error');
+    return;
+  }
+  const targetDef = config.targets[0];
+  const targetName = targetDef.target_entity;
+  const targetJson = all_entities[targetName];
+  if (!targetJson) {
+    showToast('Target entity "' + targetName + '" not found in registry.', 'error');
+    return;
+  }
+
+  openSelectOneDialog(st, {
+    relationData: targetJson,
+    title: 'Select from ' + targetName + ' (' + (targetJson.items || []).length + ' registos)',
+    onSelect: (selectedId) => {
+      if (selectedId !== null && selectedId !== undefined) {
+        addPointerRecord(rowIdx, colIdx, targetName, String(selectedId), st, rowRef);
+        if (onCellRebuild) onCellRebuild();
+      }
+    }
+  });
+}
+
+function addPointerRecord(rowIdx, colIdx, targetName, targetId, st, rowRef) {
+  const row = rowRef || st.relation.items[rowIdx];
+  let ptrRelation = row[colIdx];
+  if (!ptrRelation || !ptrRelation.pot) {
+    ptrRelation = createEmptyPointerRelation();
+    row[colIdx] = ptrRelation;
+  }
+
+  const att = getAtt(st, colIdx);
+  const config = getPointerConfig(att);
+  if (config && config.cardinality_max === 1) {
+    ptrRelation.items = [];
+  }
+
+  const isDuplicate = ptrRelation.items.some(item => item[1] === targetName && item[2] === targetId);
+  if (isDuplicate) {
+    showToast('Reference to ' + targetName + ' #' + targetId + ' already exists.', 'warning');
+    return;
+  }
+
+  const newId = getNextPointerId(ptrRelation);
+  ptrRelation.items.push([newId, targetName, targetId]);
+
+  const isUnsavedRow = !st.relation.items.includes(row);
+  if (!isUnsavedRow) {
+    logOperation(st, {
+      op: 'pointer_add',
+      id: String(row[0]),
+      column: st.columnNames[colIdx],
+      target: targetName,
+      targetId
+    });
+    renderTable(st);
+    updateJsonOutput(st);
+  }
+  showToast('Pointer to ' + targetName + ' #' + targetId + ' created.', 'success');
+}
+
+function removePointerRecord(rowIdx, colIdx, ptrItemIdx, st) {
+  const row = st.relation.items[rowIdx];
+  const ptrRelation = row[colIdx];
+  if (!ptrRelation || !ptrRelation.items || !ptrRelation.items[ptrItemIdx]) return;
+
+  const removedItem = ptrRelation.items[ptrItemIdx];
+  const targetName = removedItem[1];
+  const targetId = removedItem[2];
+
+  ptrRelation.items.splice(ptrItemIdx, 1);
+
+  logOperation(st, {
+    op: 'pointer_remove',
+    id: String(row[0]),
+    column: st.columnNames[colIdx],
+    target: targetName,
+    targetId
+  });
+  renderTable(st);
+  updateJsonOutput(st);
+  showToast('Pointer to ' + targetName + ' #' + targetId + ' removed.', 'success');
+}
+
 function openAssociationSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
   const att = getAtt(st, colIdx);
   const config = getAssociationConfig(att);
@@ -6598,6 +6846,11 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
     
+    if (type === 'pointer') {
+      const att = getAtt(st, colIdx);
+      return buildPointerCell(value, rowIdx, colIdx, false, st);
+    }
+    
     if (type === 'relation') {
       const att = getAtt(st, colIdx);
       if (isAssociationAtt(att)) {
@@ -6626,7 +6879,9 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     return wrapper;
   }
   
-  if (type === 'relation') {
+  if (type === 'pointer') {
+    return buildPointerCell(value, rowIdx, colIdx, true, st);
+  } else if (type === 'relation') {
     const att = getAtt(st, colIdx);
     if (isAssociationAtt(att)) {
       return buildAssociationCell(value, rowIdx, colIdx, true, st);
@@ -12609,6 +12864,12 @@ function generateRowFormattedContent(st, row, mode = 'view') {
       html += `<div class="row-field-relation-container" data-col="${colIdx}"></div>`;
       html += descriptionHtml;
       html += `</div>`;
+    } else if (type === 'pointer') {
+      html += `<div class="row-field row-field-relation row-field-top-down${attClasses}${widthClass}">`;
+      html += `<label class="row-field-label">${fullLabelHtml || escapeHtml(displayName)}</label>`;
+      html += `<div class="row-field-pointer-container" data-col="${colIdx}"></div>`;
+      html += descriptionHtml;
+      html += `</div>`;
     } else if (type === 'file') {
       html += `<div class="row-field row-field-file row-field-top-down${attClasses}${widthClass}">`;
       html += `<label class="row-field-label">${fullLabelHtml || escapeHtml(displayName)}</label>`;
@@ -12748,6 +13009,28 @@ function initRelationFieldsInContainer(container, st, row, mode) {
     } else {
       relContainer.innerHTML = '';
     }
+  });
+
+  const pointerContainers = container.querySelectorAll('.row-field-pointer-container');
+  pointerContainers.forEach(ptrContainer => {
+    const colIdx = parseInt(ptrContainer.dataset.col);
+    const att = getAtt(st, colIdx);
+    const config = getPointerConfig(att);
+    const relValue = row[colIdx];
+    const maxOne = config && config.cardinality_max === 1;
+    if (maxOne) {
+      const editable = mode === 'edit' || st.relation.rel_options?.editable !== false;
+      const cell = buildPointerCell(relValue, rowIdx >= 0 ? rowIdx : 0, colIdx, editable, st, row);
+      ptrContainer.innerHTML = '';
+      ptrContainer.appendChild(cell);
+      return;
+    }
+    let ptrVal = relValue;
+    if (!ptrVal || !ptrVal.columns) {
+      ptrVal = createEmptyPointerRelation();
+      row[colIdx] = ptrVal;
+    }
+    initRelationInstance(ptrContainer, ptrVal, { showJsonEditor: false, isNested: true });
   });
 
   const lookupRelContainers = container.querySelectorAll('.row-field-lookup-relation-container');
@@ -19526,6 +19809,7 @@ function initRelationInstance(container, relationData, options = {}) {
   
   if (relationData.name && Object.keys(all_entities).length > 0) {
     validateAssociationCounterparts(relationData.name, instanceState.columnNames, relationData.columns);
+    validatePointerTargets(relationData.name, instanceState.columnNames, relationData.columns);
     validateLookupPaths(relationData.name, instanceState.columnNames, relationData.columns);
   }
 
@@ -21722,6 +22006,14 @@ function createEditInputHtml(type, value, colIdx, st) {
     return `<input type="time" class="relation-input ${sizeClass}" data-col="${colIdx}" value="${value !== null ? escapeHtml(value) : ''}">`;
   } else if (type === 'relation') {
     return `<span class="view-value">📋 ${value?.items?.length || 0} rows</span>`;
+  } else if (type === 'pointer') {
+    const items = value?.items || [];
+    if (items.length > 0) {
+      const entity = items[0][1] || '';
+      const fk = items[0][2] || '';
+      return `<span class="view-value">🔗 ${entity} #${fk}</span>`;
+    }
+    return `<span class="view-value">🔗 —</span>`;
   } else if (type === 'file') {
     return `<span class="view-value">📎 ${value?.items?.length || 0} files</span>`;
   } else if (type === 'color') {
