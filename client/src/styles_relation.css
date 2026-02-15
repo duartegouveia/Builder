@@ -6928,3 +6928,192 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   font-size: 12px;
   font-style: italic;
 }
+
+.adv-search-op-set {
+  border-left: 3px solid #3b82f6;
+}
+
+.adv-search-op-join {
+  border-left: 3px solid #8b5cf6;
+}
+
+.adv-search-op-groupby {
+  border-left: 3px solid #f59e0b;
+}
+
+.adv-op-header-set {
+  background: #eff6ff;
+}
+
+.adv-op-header-join {
+  background: #f5f3ff;
+}
+
+.adv-op-header-groupby {
+  background: #fffbeb;
+}
+
+.adv-op-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.adv-op-field > label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.adv-op-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin-bottom: 4px;
+}
+
+.adv-op-select {
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  min-width: 120px;
+}
+
+.adv-op-input {
+  color: var(--foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  min-width: 60px;
+}
+
+.adv-op-info {
+  padding: 4px 0;
+}
+
+.adv-op-info-text {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.adv-join-mapping {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.adv-join-mapping-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adv-join-arrow {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+
+.adv-join-mapping-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adv-groupby-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.adv-groupby-col-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--foreground);
+}
+
+.adv-groupby-col-label input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.adv-groupby-agg-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adv-groupby-agg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--background);
+}
+
+.adv-groupby-having {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adv-groupby-having-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--background);
+  font-size: 12px;
+}
+
+.adv-add-op-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.adv-add-op-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  min-width: 180px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 4px 0;
+  margin-bottom: 4px;
+}
+
+.adv-add-op-menu-item {
+  display: block;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.adv-add-op-menu-item:hover {
+  background: var(--muted);
+}

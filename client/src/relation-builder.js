@@ -7594,6 +7594,158 @@ function evaluateGroup(row, group, st) {
   return group.criteria.every(c => evaluateCriterion(row, c, st));
 }
 
+function executePipelineOp(st, op, currentIndices) {
+  if (!op.type || op.type === 'filter') {
+    return currentIndices.filter(i => evaluateGroup(st.relation.items[i], op, st));
+  }
+  if (op.type === 'set') return executeSetOp(st, op, currentIndices);
+  if (op.type === 'join') return executeJoinOp(st, op, currentIndices);
+  if (op.type === 'groupby') return executeGroupByOp(st, op, currentIndices);
+  return currentIndices;
+}
+
+function findSharedColumns(st, otherRelation) {
+  const otherResolved = resolveAttColumns(otherRelation.columns);
+  const shared = [];
+  for (let i = 0; i < st.columnNames.length; i++) {
+    const name = st.columnNames[i];
+    const otherIdx = otherResolved.names.indexOf(name);
+    if (otherIdx !== -1) {
+      shared.push({ leftIdx: i, rightIdx: otherIdx, name: name });
+    }
+  }
+  return { shared, otherResolved };
+}
+
+function rowMatchesOnColumns(leftRow, rightRow, sharedCols) {
+  for (const sc of sharedCols) {
+    const lv = String(leftRow[sc.leftIdx] ?? '');
+    const rv = String(rightRow[sc.rightIdx] ?? '');
+    if (lv !== rv) return false;
+  }
+  return true;
+}
+
+function executeSetOp(st, op, currentIndices) {
+  const otherRelation = all_entities[op.withRelation];
+  if (!otherRelation || !otherRelation.items) return currentIndices;
+  const { shared } = findSharedColumns(st, otherRelation);
+  if (shared.length === 0) return currentIndices;
+  const otherResolved = resolveAttColumns(otherRelation.columns);
+  const otherItems = otherRelation.items;
+
+  if (op.setOp === 'union') {
+    return currentIndices;
+  }
+  if (op.setOp === 'intersection') {
+    return currentIndices.filter(i => {
+      const row = st.relation.items[i];
+      return otherItems.some(oRow => rowMatchesOnColumns(row, oRow, shared));
+    });
+  }
+  if (op.setOp === 'difference') {
+    return currentIndices.filter(i => {
+      const row = st.relation.items[i];
+      return !otherItems.some(oRow => rowMatchesOnColumns(row, oRow, shared));
+    });
+  }
+  return currentIndices;
+}
+
+function executeJoinOp(st, op, currentIndices) {
+  const otherRelation = all_entities[op.withRelation];
+  if (!otherRelation || !otherRelation.items) return currentIndices;
+  const otherResolved = resolveAttColumns(otherRelation.columns);
+  const onColumns = op.onColumns || [];
+
+  if (op.joinType === 'left' || op.joinType === 'cross') {
+    return currentIndices;
+  }
+
+  if (op.joinType === 'inner' || op.joinType === 'right') {
+    if (onColumns.length === 0) return currentIndices;
+    return currentIndices.filter(i => {
+      const row = st.relation.items[i];
+      return otherRelation.items.some(oRow => {
+        return onColumns.every(mapping => {
+          const lv = String(row[mapping.left] ?? '');
+          const rv = String(oRow[mapping.right] ?? '');
+          return lv === rv;
+        });
+      });
+    });
+  }
+  return currentIndices;
+}
+
+function executeGroupByOp(st, op, currentIndices) {
+  const groupColumns = op.groupColumns || [];
+  const aggregations = op.aggregations || [];
+  const having = op.having;
+
+  if (groupColumns.length === 0) return currentIndices;
+
+  const groups = new Map();
+  for (const idx of currentIndices) {
+    const row = st.relation.items[idx];
+    const key = groupColumns.map(c => String(row[c] ?? '')).join('\x00');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(idx);
+  }
+
+  if (!having || !having.criteria || having.criteria.length === 0) {
+    return currentIndices;
+  }
+
+  const result = [];
+  for (const [key, indices] of groups) {
+    const aggResults = [];
+    for (let ai = 0; ai < aggregations.length; ai++) {
+      const agg = aggregations[ai];
+      const vals = indices.map(i => {
+        const v = st.relation.items[i][agg.col];
+        return v !== null && v !== undefined && v !== '' ? parseFloat(v) : NaN;
+      }).filter(v => !isNaN(v));
+
+      let computed = 0;
+      switch (agg.fn) {
+        case 'count': computed = indices.length; break;
+        case 'sum': computed = vals.reduce((a, b) => a + b, 0); break;
+        case 'avg': computed = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0; break;
+        case 'min': computed = vals.length > 0 ? Math.min(...vals) : 0; break;
+        case 'max': computed = vals.length > 0 ? Math.max(...vals) : 0; break;
+      }
+      const label = agg.as || (agg.fn + '_' + agg.col);
+      aggResults.push({ index: ai, label, value: computed });
+    }
+
+    let passes = true;
+    for (const hc of having.criteria) {
+      const aggIdx = typeof hc.col === 'number' ? hc.col : aggResults.findIndex(a => a.label === hc.col);
+      const val = aggIdx >= 0 && aggIdx < aggResults.length ? aggResults[aggIdx].value : 0;
+      const compVal = parseFloat(hc.value) || 0;
+      const compVal2 = parseFloat(hc.value2) || 0;
+      let match = true;
+      switch (hc.op) {
+        case 'eq': match = val === compVal; break;
+        case 'neq': match = val !== compVal; break;
+        case 'gt': match = val > compVal; break;
+        case 'gte': match = val >= compVal; break;
+        case 'lt': match = val < compVal; break;
+        case 'lte': match = val <= compVal; break;
+        case 'between': match = val >= compVal && val <= compVal2; break;
+        default: match = true;
+      }
+      if (hc.not) match = !match;
+      if (!match) { passes = false; break; }
+    }
+
+    if (passes) result.push(...indices);
+  }
+
+  return result.sort((a, b) => a - b);
+}
+
 function executeAdvancedSearch(st, pipeline, mode) {
   const items = st.relation.items;
   const totalIndices = items.map((_, i) => i);
@@ -7604,51 +7756,104 @@ function executeAdvancedSearch(st, pipeline, mode) {
 
   if (mode === 'additive') {
     const resultSet = new Set();
-    for (const group of pipeline) {
-      for (let i = 0; i < items.length; i++) {
-        if (evaluateGroup(items[i], group, st)) {
-          resultSet.add(i);
-        }
-      }
+    for (const op of pipeline) {
+      const matches = executePipelineOp(st, op, totalIndices);
+      matches.forEach(i => resultSet.add(i));
     }
     return Array.from(resultSet).sort((a, b) => a - b);
   } else {
-    let currentSet = new Set(totalIndices);
-    for (const group of pipeline) {
-      const groupMatches = new Set();
-      for (const idx of currentSet) {
-        if (evaluateGroup(items[idx], group, st)) {
-          groupMatches.add(idx);
-        }
-      }
-      currentSet = groupMatches;
+    let currentIndices = [...totalIndices];
+    for (const op of pipeline) {
+      currentIndices = executePipelineOp(st, op, currentIndices);
     }
-    return Array.from(currentSet).sort((a, b) => a - b);
+    return currentIndices;
   }
 }
 
-function pipelineToPortable(pipeline, st) {
-  return pipeline.map(group => ({
-    logic: group.logic,
-    criteria: group.criteria.map(c => ({
-      col: st.columnNames[c.col] || c.col,
-      op: c.op,
-      value: c.value,
-      value2: c.value2,
-      not: c.not
-    }))
+function criteriaToPortable(criteria, st) {
+  return criteria.map(c => ({
+    col: st.columnNames[c.col] || c.col,
+    op: c.op,
+    value: c.value,
+    value2: c.value2,
+    not: c.not
   }));
 }
 
+function criteriaFromPortable(criteria, st) {
+  return criteria.map(c => {
+    let colIdx = typeof c.col === 'string' ? st.columnNames.indexOf(c.col) : c.col;
+    if (colIdx < 0) colIdx = 0;
+    return { col: colIdx, op: c.op, value: c.value, value2: c.value2, not: !!c.not };
+  });
+}
+
+function pipelineToPortable(pipeline, st) {
+  return pipeline.map(op => {
+    if (!op.type || op.type === 'filter') {
+      return { type: 'filter', logic: op.logic, criteria: criteriaToPortable(op.criteria || [], st) };
+    }
+    if (op.type === 'set') {
+      return { type: 'set', setOp: op.setOp, withRelation: op.withRelation };
+    }
+    if (op.type === 'join') {
+      const otherRelation = all_entities[op.withRelation];
+      const otherNames = otherRelation ? resolveAttColumns(otherRelation.columns).names : [];
+      return {
+        type: 'join', joinType: op.joinType, withRelation: op.withRelation,
+        onColumns: (op.onColumns || []).map(m => ({
+          left: st.columnNames[m.left] || m.left,
+          right: otherNames[m.right] || m.right
+        }))
+      };
+    }
+    if (op.type === 'groupby') {
+      return {
+        type: 'groupby',
+        groupColumns: (op.groupColumns || []).map(c => st.columnNames[c] || c),
+        aggregations: (op.aggregations || []).map(a => ({
+          col: st.columnNames[a.col] || a.col,
+          fn: a.fn, as: a.as
+        })),
+        having: op.having ? { logic: op.having.logic, criteria: criteriaToPortable(op.having.criteria || [], st) } : null
+      };
+    }
+    return op;
+  });
+}
+
 function pipelineFromPortable(pipeline, st) {
-  return pipeline.map(group => ({
-    logic: group.logic,
-    criteria: group.criteria.map(c => {
-      let colIdx = typeof c.col === 'string' ? st.columnNames.indexOf(c.col) : c.col;
-      if (colIdx < 0) colIdx = 0;
-      return { col: colIdx, op: c.op, value: c.value, value2: c.value2, not: !!c.not };
-    })
-  }));
+  return pipeline.map(op => {
+    if (!op.type || op.type === 'filter') {
+      return { type: 'filter', logic: op.logic, criteria: criteriaFromPortable(op.criteria || [], st) };
+    }
+    if (op.type === 'set') {
+      return { type: 'set', setOp: op.setOp, withRelation: op.withRelation };
+    }
+    if (op.type === 'join') {
+      const otherRelation = all_entities[op.withRelation];
+      const otherNames = otherRelation ? resolveAttColumns(otherRelation.columns).names : [];
+      return {
+        type: 'join', joinType: op.joinType, withRelation: op.withRelation,
+        onColumns: (op.onColumns || []).map(m => ({
+          left: typeof m.left === 'string' ? Math.max(0, st.columnNames.indexOf(m.left)) : m.left,
+          right: typeof m.right === 'string' ? Math.max(0, otherNames.indexOf(m.right)) : m.right
+        }))
+      };
+    }
+    if (op.type === 'groupby') {
+      return {
+        type: 'groupby',
+        groupColumns: (op.groupColumns || []).map(c => typeof c === 'string' ? Math.max(0, st.columnNames.indexOf(c)) : c),
+        aggregations: (op.aggregations || []).map(a => ({
+          col: typeof a.col === 'string' ? Math.max(0, st.columnNames.indexOf(a.col)) : a.col,
+          fn: a.fn, as: a.as
+        })),
+        having: op.having ? { logic: op.having.logic, criteria: criteriaFromPortable(op.having.criteria || [], st) } : null
+      };
+    }
+    return op;
+  });
 }
 
 function saveAdvancedSearch(st, name, pipeline, mode) {
@@ -7773,6 +7978,602 @@ function showAdvancedSearchPanel(st) {
     getUiState(st).advancedSearch = { mode, pipeline: pipelineToPortable(pipeline, st) };
   }
 
+  function buildFilterCard(body, group, gIdx) {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'adv-search-group';
+    groupEl.setAttribute('data-testid', 'adv-search-group-' + gIdx);
+
+    const header = document.createElement('div');
+    header.className = 'adv-search-group-header';
+
+    const label = document.createElement('span');
+    label.className = 'group-label';
+    label.textContent = 'Filter Group ' + (gIdx + 1);
+
+    const logicBtn = document.createElement('button');
+    logicBtn.className = 'logic-btn ' + (group.logic === 'and' ? 'logic-and' : 'logic-or');
+    logicBtn.textContent = group.logic.toUpperCase();
+    logicBtn.setAttribute('data-testid', 'adv-group-logic-' + gIdx);
+    logicBtn.addEventListener('click', () => {
+      group.logic = group.logic === 'and' ? 'or' : 'and';
+      persistState();
+      rebuildPipeline(body);
+    });
+
+    const removeGroupBtn = document.createElement('button');
+    removeGroupBtn.className = 'btn-remove-group';
+    removeGroupBtn.textContent = '✕';
+    removeGroupBtn.setAttribute('data-testid', 'adv-group-remove-' + gIdx);
+    removeGroupBtn.addEventListener('click', () => {
+      pipeline.splice(gIdx, 1);
+      persistState();
+      rebuildPipeline(body);
+    });
+
+    header.appendChild(label);
+    header.appendChild(logicBtn);
+    header.appendChild(removeGroupBtn);
+    groupEl.appendChild(header);
+
+    const groupBody = document.createElement('div');
+    groupBody.className = 'adv-search-group-body';
+
+    group.criteria.forEach((criterion, cIdx) => {
+      const cRow = buildCriterionRow(st, criterion, () => { persistState(); }, () => {
+        group.criteria.splice(cIdx, 1);
+        persistState();
+        rebuildPipeline(body);
+      });
+      groupBody.appendChild(cRow);
+    });
+
+    groupEl.appendChild(groupBody);
+
+    const groupFooter = document.createElement('div');
+    groupFooter.className = 'adv-search-group-footer';
+    const addCritBtn = document.createElement('button');
+    addCritBtn.className = 'btn-add-criterion';
+    addCritBtn.textContent = '+ Add Criterion';
+    addCritBtn.setAttribute('data-testid', 'adv-add-criterion-' + gIdx);
+    addCritBtn.addEventListener('click', () => {
+      group.criteria.push({ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false });
+      persistState();
+      rebuildPipeline(body);
+    });
+    groupFooter.appendChild(addCritBtn);
+    groupEl.appendChild(groupFooter);
+
+    return groupEl;
+  }
+
+  function buildRelationSelect(op, field, onChange) {
+    const sel = document.createElement('select');
+    sel.className = 'adv-op-select';
+    const emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = '— Select relation —';
+    sel.appendChild(emptyOpt);
+    Object.keys(all_entities).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if (op[field] === name) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', () => {
+      op[field] = sel.value;
+      persistState();
+      if (onChange) onChange();
+    });
+    return sel;
+  }
+
+  function buildSetCard(body, op, gIdx) {
+    const card = document.createElement('div');
+    card.className = 'adv-search-group adv-search-op-set';
+    card.setAttribute('data-testid', 'adv-search-set-' + gIdx);
+
+    const header = document.createElement('div');
+    header.className = 'adv-search-group-header adv-op-header adv-op-header-set';
+    const label = document.createElement('span');
+    label.className = 'group-label';
+    label.textContent = '⊕ Set Operation';
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove-group';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => { pipeline.splice(gIdx, 1); persistState(); rebuildPipeline(body); });
+    header.appendChild(label);
+    header.appendChild(removeBtn);
+    card.appendChild(header);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'adv-search-group-body';
+
+    const row1 = document.createElement('div');
+    row1.className = 'adv-op-field';
+    const lbl1 = document.createElement('label');
+    lbl1.textContent = 'Operation:';
+    const opSel = document.createElement('select');
+    opSel.className = 'adv-op-select';
+    ['union', 'intersection', 'difference'].forEach(v => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = v.charAt(0).toUpperCase() + v.slice(1);
+      if (op.setOp === v) o.selected = true;
+      opSel.appendChild(o);
+    });
+    opSel.addEventListener('change', () => { op.setOp = opSel.value; persistState(); });
+    row1.appendChild(lbl1);
+    row1.appendChild(opSel);
+    cardBody.appendChild(row1);
+
+    const row2 = document.createElement('div');
+    row2.className = 'adv-op-field';
+    const lbl2 = document.createElement('label');
+    lbl2.textContent = 'With Relation:';
+    row2.appendChild(lbl2);
+    row2.appendChild(buildRelationSelect(op, 'withRelation', () => {
+      rebuildSetInfo();
+    }));
+    cardBody.appendChild(row2);
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'adv-op-info';
+    cardBody.appendChild(infoDiv);
+
+    function rebuildSetInfo() {
+      infoDiv.innerHTML = '';
+      if (op.withRelation && all_entities[op.withRelation]) {
+        const otherRel = all_entities[op.withRelation];
+        const otherCols = Object.keys(otherRel.columns);
+        const shared = st.columnNames.filter(n => otherCols.includes(n));
+        const info = document.createElement('span');
+        info.className = 'adv-op-info-text';
+        info.textContent = shared.length > 0
+          ? 'Shared columns: ' + shared.join(', ') + ' (' + shared.length + ')'
+          : 'No shared columns found.';
+        infoDiv.appendChild(info);
+      }
+    }
+    rebuildSetInfo();
+
+    card.appendChild(cardBody);
+    return card;
+  }
+
+  function buildJoinCard(body, op, gIdx) {
+    const card = document.createElement('div');
+    card.className = 'adv-search-group adv-search-op-join';
+    card.setAttribute('data-testid', 'adv-search-join-' + gIdx);
+
+    const header = document.createElement('div');
+    header.className = 'adv-search-group-header adv-op-header adv-op-header-join';
+    const label = document.createElement('span');
+    label.className = 'group-label';
+    label.textContent = '⋈ Join';
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove-group';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => { pipeline.splice(gIdx, 1); persistState(); rebuildPipeline(body); });
+    header.appendChild(label);
+    header.appendChild(removeBtn);
+    card.appendChild(header);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'adv-search-group-body';
+
+    const row1 = document.createElement('div');
+    row1.className = 'adv-op-field';
+    const lbl1 = document.createElement('label');
+    lbl1.textContent = 'Join Type:';
+    const jtSel = document.createElement('select');
+    jtSel.className = 'adv-op-select';
+    [['inner', 'Inner'], ['left', 'Left'], ['right', 'Right'], ['cross', 'Cross']].forEach(([v, t]) => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = t;
+      if (op.joinType === v) o.selected = true;
+      jtSel.appendChild(o);
+    });
+    jtSel.addEventListener('change', () => { op.joinType = jtSel.value; persistState(); });
+    row1.appendChild(lbl1);
+    row1.appendChild(jtSel);
+    cardBody.appendChild(row1);
+
+    const row2 = document.createElement('div');
+    row2.className = 'adv-op-field';
+    const lbl2 = document.createElement('label');
+    lbl2.textContent = 'With Relation:';
+    row2.appendChild(lbl2);
+    row2.appendChild(buildRelationSelect(op, 'withRelation', () => {
+      rebuildJoinMappings();
+    }));
+    cardBody.appendChild(row2);
+
+    const mappingContainer = document.createElement('div');
+    mappingContainer.className = 'adv-join-mapping';
+    cardBody.appendChild(mappingContainer);
+
+    function getOtherColumnNames() {
+      if (!op.withRelation || !all_entities[op.withRelation]) return [];
+      return Object.keys(all_entities[op.withRelation].columns);
+    }
+
+    function rebuildJoinMappings() {
+      mappingContainer.innerHTML = '';
+      if (!op.onColumns) op.onColumns = [];
+      const otherNames = getOtherColumnNames();
+
+      const mappingLabel = document.createElement('div');
+      mappingLabel.className = 'adv-op-field-label';
+      mappingLabel.textContent = 'Column Mappings:';
+      mappingContainer.appendChild(mappingLabel);
+
+      op.onColumns.forEach((mapping, mIdx) => {
+        const mRow = document.createElement('div');
+        mRow.className = 'adv-join-mapping-row';
+
+        const leftSel = document.createElement('select');
+        leftSel.className = 'adv-op-select';
+        st.columnNames.forEach((name, i) => {
+          const o = document.createElement('option');
+          o.value = i;
+          o.textContent = getAttDisplayName(st, i);
+          if (mapping.left === i) o.selected = true;
+          leftSel.appendChild(o);
+        });
+        leftSel.addEventListener('change', () => { mapping.left = parseInt(leftSel.value); persistState(); });
+
+        const arrow = document.createElement('span');
+        arrow.className = 'adv-join-arrow';
+        arrow.textContent = '→';
+
+        const rightSel = document.createElement('select');
+        rightSel.className = 'adv-op-select';
+        otherNames.forEach((name, i) => {
+          const o = document.createElement('option');
+          o.value = i;
+          o.textContent = name;
+          if (mapping.right === i) o.selected = true;
+          rightSel.appendChild(o);
+        });
+        rightSel.addEventListener('change', () => { mapping.right = parseInt(rightSel.value); persistState(); });
+
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'btn-remove-criterion';
+        rmBtn.textContent = '✕';
+        rmBtn.addEventListener('click', () => {
+          op.onColumns.splice(mIdx, 1);
+          persistState();
+          rebuildJoinMappings();
+        });
+
+        mRow.appendChild(leftSel);
+        mRow.appendChild(arrow);
+        mRow.appendChild(rightSel);
+        mRow.appendChild(rmBtn);
+        mappingContainer.appendChild(mRow);
+      });
+
+      const btnRow = document.createElement('div');
+      btnRow.className = 'adv-join-mapping-actions';
+
+      const addMappingBtn = document.createElement('button');
+      addMappingBtn.className = 'btn-add-criterion';
+      addMappingBtn.textContent = '+ Add Mapping';
+      addMappingBtn.addEventListener('click', () => {
+        op.onColumns.push({ left: 0, right: 0 });
+        persistState();
+        rebuildJoinMappings();
+      });
+      btnRow.appendChild(addMappingBtn);
+
+      const autoBtn = document.createElement('button');
+      autoBtn.className = 'btn-add-criterion';
+      autoBtn.textContent = '⚡ Auto-detect';
+      autoBtn.setAttribute('data-testid', 'adv-join-autodetect-' + gIdx);
+      autoBtn.addEventListener('click', () => {
+        const detectedMappings = autoDetectJoinColumns(st, op.withRelation);
+        if (detectedMappings.length > 0) {
+          op.onColumns = detectedMappings;
+          persistState();
+          rebuildJoinMappings();
+          showToast('Detected ' + detectedMappings.length + ' column mapping(s).', 'info');
+        } else {
+          showToast('No matching columns detected automatically.', 'warning');
+        }
+      });
+      btnRow.appendChild(autoBtn);
+
+      mappingContainer.appendChild(btnRow);
+    }
+    rebuildJoinMappings();
+
+    card.appendChild(cardBody);
+    return card;
+  }
+
+  function autoDetectJoinColumns(st, targetRelation) {
+    if (!targetRelation || !all_entities[targetRelation]) return [];
+    const mappings = [];
+    const otherNames = Object.keys(all_entities[targetRelation].columns);
+
+    for (let i = 0; i < st.columnNames.length; i++) {
+      const att = getAtt(st, i);
+      if (att && isAssociationAtt(att)) {
+        const cfg = getAssociationConfig(att);
+        if (cfg && cfg.counterparts) {
+          for (const cp of cfg.counterparts) {
+            const cpEntity = typeof cp === 'string' ? cp : cp.counterpart_entity;
+            if (cpEntity === targetRelation) {
+              const rightIdx = otherNames.indexOf('id');
+              mappings.push({ left: i, right: rightIdx >= 0 ? rightIdx : 0 });
+            }
+          }
+        }
+      }
+      if (att && isPointerAtt(att)) {
+        const cfg = getPointerConfig(att);
+        if (cfg && cfg.targets) {
+          for (const t of cfg.targets) {
+            const tEntity = typeof t === 'string' ? t : t.entity;
+            if (tEntity === targetRelation) {
+              const rightIdx = otherNames.indexOf('id');
+              mappings.push({ left: i, right: rightIdx >= 0 ? rightIdx : 0 });
+            }
+          }
+        }
+      }
+    }
+
+    if (mappings.length === 0) {
+      for (let i = 0; i < st.columnNames.length; i++) {
+        const rIdx = otherNames.indexOf(st.columnNames[i]);
+        if (rIdx !== -1 && st.columnNames[i] !== 'id') {
+          mappings.push({ left: i, right: rIdx });
+        }
+      }
+    }
+
+    return mappings;
+  }
+
+  function buildGroupByCard(body, op, gIdx) {
+    const card = document.createElement('div');
+    card.className = 'adv-search-group adv-search-op-groupby';
+    card.setAttribute('data-testid', 'adv-search-groupby-' + gIdx);
+
+    const header = document.createElement('div');
+    header.className = 'adv-search-group-header adv-op-header adv-op-header-groupby';
+    const label = document.createElement('span');
+    label.className = 'group-label';
+    label.textContent = 'Σ Group By';
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove-group';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => { pipeline.splice(gIdx, 1); persistState(); rebuildPipeline(body); });
+    header.appendChild(label);
+    header.appendChild(removeBtn);
+    card.appendChild(header);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'adv-search-group-body';
+
+    const gcSection = document.createElement('div');
+    gcSection.className = 'adv-op-field';
+    const gcLabel = document.createElement('label');
+    gcLabel.textContent = 'Group Columns:';
+    gcSection.appendChild(gcLabel);
+
+    const gcCheckboxes = document.createElement('div');
+    gcCheckboxes.className = 'adv-groupby-columns';
+    if (!op.groupColumns) op.groupColumns = [];
+    st.columnNames.forEach((name, i) => {
+      const cbWrap = document.createElement('label');
+      cbWrap.className = 'adv-groupby-col-label';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = op.groupColumns.includes(i);
+      cb.addEventListener('change', () => {
+        if (cb.checked) {
+          if (!op.groupColumns.includes(i)) op.groupColumns.push(i);
+        } else {
+          op.groupColumns = op.groupColumns.filter(c => c !== i);
+        }
+        persistState();
+      });
+      cbWrap.appendChild(cb);
+      cbWrap.appendChild(document.createTextNode(' ' + getAttDisplayName(st, i)));
+      gcCheckboxes.appendChild(cbWrap);
+    });
+    gcSection.appendChild(gcCheckboxes);
+    cardBody.appendChild(gcSection);
+
+    const aggSection = document.createElement('div');
+    aggSection.className = 'adv-op-field';
+    const aggLabel = document.createElement('label');
+    aggLabel.textContent = 'Aggregations:';
+    aggSection.appendChild(aggLabel);
+
+    const aggContainer = document.createElement('div');
+    aggContainer.className = 'adv-groupby-agg-container';
+    aggSection.appendChild(aggContainer);
+    if (!op.aggregations) op.aggregations = [];
+
+    function rebuildAggregations() {
+      aggContainer.innerHTML = '';
+      op.aggregations.forEach((agg, aIdx) => {
+        const aggRow = document.createElement('div');
+        aggRow.className = 'adv-groupby-agg';
+
+        const colSel = document.createElement('select');
+        colSel.className = 'adv-op-select';
+        st.columnNames.forEach((name, i) => {
+          const o = document.createElement('option');
+          o.value = i;
+          o.textContent = getAttDisplayName(st, i);
+          if (agg.col === i) o.selected = true;
+          colSel.appendChild(o);
+        });
+        colSel.addEventListener('change', () => { agg.col = parseInt(colSel.value); persistState(); });
+
+        const fnSel = document.createElement('select');
+        fnSel.className = 'adv-op-select';
+        ['count', 'sum', 'avg', 'min', 'max'].forEach(f => {
+          const o = document.createElement('option');
+          o.value = f;
+          o.textContent = f.toUpperCase();
+          if (agg.fn === f) o.selected = true;
+          fnSel.appendChild(o);
+        });
+        fnSel.addEventListener('change', () => { agg.fn = fnSel.value; persistState(); });
+
+        const asInput = document.createElement('input');
+        asInput.type = 'text';
+        asInput.className = 'adv-op-input';
+        asInput.placeholder = 'Label';
+        asInput.value = agg.as || '';
+        asInput.addEventListener('input', () => { agg.as = asInput.value; persistState(); });
+
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'btn-remove-criterion';
+        rmBtn.textContent = '✕';
+        rmBtn.addEventListener('click', () => {
+          op.aggregations.splice(aIdx, 1);
+          persistState();
+          rebuildAggregations();
+        });
+
+        aggRow.appendChild(colSel);
+        aggRow.appendChild(fnSel);
+        aggRow.appendChild(asInput);
+        aggRow.appendChild(rmBtn);
+        aggContainer.appendChild(aggRow);
+      });
+
+      const addAggBtn = document.createElement('button');
+      addAggBtn.className = 'btn-add-criterion';
+      addAggBtn.textContent = '+ Add Aggregation';
+      addAggBtn.addEventListener('click', () => {
+        op.aggregations.push({ col: 0, fn: 'count', as: '' });
+        persistState();
+        rebuildAggregations();
+      });
+      aggContainer.appendChild(addAggBtn);
+    }
+    rebuildAggregations();
+    cardBody.appendChild(aggSection);
+
+    const havingSection = document.createElement('div');
+    havingSection.className = 'adv-op-field';
+    const havingLabel = document.createElement('label');
+    havingLabel.textContent = 'Having (filter on aggregated values):';
+    havingSection.appendChild(havingLabel);
+
+    if (!op.having) op.having = { logic: 'and', criteria: [] };
+    const havingBody = document.createElement('div');
+    havingBody.className = 'adv-groupby-having';
+
+    function rebuildHaving() {
+      havingBody.innerHTML = '';
+
+      const havingLogicBtn = document.createElement('button');
+      havingLogicBtn.className = 'logic-btn ' + (op.having.logic === 'and' ? 'logic-and' : 'logic-or');
+      havingLogicBtn.textContent = op.having.logic.toUpperCase();
+      havingLogicBtn.style.cssText = 'margin-bottom:6px;';
+      havingLogicBtn.addEventListener('click', () => {
+        op.having.logic = op.having.logic === 'and' ? 'or' : 'and';
+        persistState();
+        rebuildHaving();
+      });
+      if (op.having.criteria.length > 1) havingBody.appendChild(havingLogicBtn);
+
+      op.having.criteria.forEach((hc, hIdx) => {
+        const hRow = document.createElement('div');
+        hRow.className = 'adv-groupby-having-row';
+
+        const aggLabels = op.aggregations.map(a => a.as || (a.fn + '_' + st.columnNames[a.col]));
+        const colSel = document.createElement('select');
+        colSel.className = 'adv-op-select';
+        aggLabels.forEach((name, i) => {
+          const o = document.createElement('option');
+          o.value = name;
+          o.textContent = name;
+          if (hc.col === name) o.selected = true;
+          colSel.appendChild(o);
+        });
+        colSel.addEventListener('change', () => { hc.col = colSel.value; persistState(); });
+
+        const opSel = document.createElement('select');
+        opSel.className = 'adv-op-select';
+        [['eq', '='], ['neq', '≠'], ['gt', '>'], ['gte', '≥'], ['lt', '<'], ['lte', '≤'], ['between', 'Between']].forEach(([v, t]) => {
+          const o = document.createElement('option');
+          o.value = v;
+          o.textContent = t;
+          if (hc.op === v) o.selected = true;
+          opSel.appendChild(o);
+        });
+        opSel.addEventListener('change', () => { hc.op = opSel.value; persistState(); rebuildHaving(); });
+
+        const valInput = document.createElement('input');
+        valInput.type = 'number';
+        valInput.className = 'adv-op-input';
+        valInput.placeholder = 'Value';
+        valInput.value = hc.value || '';
+        valInput.addEventListener('input', () => { hc.value = valInput.value; persistState(); });
+
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'btn-remove-criterion';
+        rmBtn.textContent = '✕';
+        rmBtn.addEventListener('click', () => {
+          op.having.criteria.splice(hIdx, 1);
+          persistState();
+          rebuildHaving();
+        });
+
+        hRow.appendChild(colSel);
+        hRow.appendChild(opSel);
+        hRow.appendChild(valInput);
+
+        if (hc.op === 'between') {
+          const val2Input = document.createElement('input');
+          val2Input.type = 'number';
+          val2Input.className = 'adv-op-input';
+          val2Input.placeholder = 'Value 2';
+          val2Input.value = hc.value2 || '';
+          val2Input.addEventListener('input', () => { hc.value2 = val2Input.value; persistState(); });
+          hRow.appendChild(val2Input);
+        }
+
+        const notBtn = document.createElement('button');
+        notBtn.className = 'not-toggle' + (hc.not ? ' active' : '');
+        notBtn.textContent = 'NOT';
+        notBtn.addEventListener('click', () => { hc.not = !hc.not; persistState(); rebuildHaving(); });
+        hRow.appendChild(notBtn);
+
+        hRow.appendChild(rmBtn);
+        havingBody.appendChild(hRow);
+      });
+
+      const addHavingBtn = document.createElement('button');
+      addHavingBtn.className = 'btn-add-criterion';
+      addHavingBtn.textContent = '+ Add Having Criterion';
+      addHavingBtn.addEventListener('click', () => {
+        const defaultLabel = op.aggregations.length > 0 ? (op.aggregations[0].as || op.aggregations[0].fn + '_' + st.columnNames[op.aggregations[0].col]) : '';
+        op.having.criteria.push({ col: defaultLabel, op: 'gt', value: '', value2: '', not: false });
+        persistState();
+        rebuildHaving();
+      });
+      havingBody.appendChild(addHavingBtn);
+    }
+    rebuildHaving();
+    havingSection.appendChild(havingBody);
+    cardBody.appendChild(havingSection);
+
+    card.appendChild(cardBody);
+    return card;
+  }
+
   function rebuildPipeline(body) {
     const pipelineContainer = body.querySelector('.adv-search-pipeline');
     if (!pipelineContainer) return;
@@ -7781,11 +8582,11 @@ function showAdvancedSearchPanel(st) {
     if (pipeline.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'adv-search-empty';
-      empty.textContent = 'No filter groups. Click "Add Group" to begin.';
+      empty.textContent = 'No operations. Click "＋ Add Operation" to begin.';
       pipelineContainer.appendChild(empty);
     }
 
-    pipeline.forEach((group, gIdx) => {
+    pipeline.forEach((op, gIdx) => {
       if (gIdx > 0) {
         const sep = document.createElement('div');
         sep.className = 'adv-search-mode-separator';
@@ -7793,71 +8594,19 @@ function showAdvancedSearchPanel(st) {
         pipelineContainer.appendChild(sep);
       }
 
-      const groupEl = document.createElement('div');
-      groupEl.className = 'adv-search-group';
-      groupEl.setAttribute('data-testid', 'adv-search-group-' + gIdx);
+      const opType = op.type || 'filter';
+      let card;
+      if (opType === 'filter') {
+        card = buildFilterCard(body, op, gIdx);
+      } else if (opType === 'set') {
+        card = buildSetCard(body, op, gIdx);
+      } else if (opType === 'join') {
+        card = buildJoinCard(body, op, gIdx);
+      } else if (opType === 'groupby') {
+        card = buildGroupByCard(body, op, gIdx);
+      }
 
-      const header = document.createElement('div');
-      header.className = 'adv-search-group-header';
-
-      const label = document.createElement('span');
-      label.className = 'group-label';
-      label.textContent = 'Group ' + (gIdx + 1);
-
-      const logicBtn = document.createElement('button');
-      logicBtn.className = 'logic-btn ' + (group.logic === 'and' ? 'logic-and' : 'logic-or');
-      logicBtn.textContent = group.logic.toUpperCase();
-      logicBtn.setAttribute('data-testid', 'adv-group-logic-' + gIdx);
-      logicBtn.addEventListener('click', () => {
-        group.logic = group.logic === 'and' ? 'or' : 'and';
-        persistState();
-        rebuildPipeline(body);
-      });
-
-      const removeGroupBtn = document.createElement('button');
-      removeGroupBtn.className = 'btn-remove-group';
-      removeGroupBtn.textContent = '✕';
-      removeGroupBtn.setAttribute('data-testid', 'adv-group-remove-' + gIdx);
-      removeGroupBtn.addEventListener('click', () => {
-        pipeline.splice(gIdx, 1);
-        persistState();
-        rebuildPipeline(body);
-      });
-
-      header.appendChild(label);
-      header.appendChild(logicBtn);
-      header.appendChild(removeGroupBtn);
-      groupEl.appendChild(header);
-
-      const groupBody = document.createElement('div');
-      groupBody.className = 'adv-search-group-body';
-
-      group.criteria.forEach((criterion, cIdx) => {
-        const cRow = buildCriterionRow(st, criterion, () => { persistState(); }, () => {
-          group.criteria.splice(cIdx, 1);
-          persistState();
-          rebuildPipeline(body);
-        });
-        groupBody.appendChild(cRow);
-      });
-
-      groupEl.appendChild(groupBody);
-
-      const groupFooter = document.createElement('div');
-      groupFooter.className = 'adv-search-group-footer';
-      const addCritBtn = document.createElement('button');
-      addCritBtn.className = 'btn-add-criterion';
-      addCritBtn.textContent = '+ Add Criterion';
-      addCritBtn.setAttribute('data-testid', 'adv-add-criterion-' + gIdx);
-      addCritBtn.addEventListener('click', () => {
-        group.criteria.push({ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false });
-        persistState();
-        rebuildPipeline(body);
-      });
-      groupFooter.appendChild(addCritBtn);
-      groupEl.appendChild(groupFooter);
-
-      pipelineContainer.appendChild(groupEl);
+      if (card) pipelineContainer.appendChild(card);
     });
 
     rebuildSavedSection(body);
@@ -7980,25 +8729,69 @@ function showAdvancedSearchPanel(st) {
     const actions = document.createElement('div');
     actions.className = 'adv-search-actions';
 
-    const addGroupBtn = document.createElement('button');
-    addGroupBtn.className = 'adv-btn';
-    addGroupBtn.textContent = '+ Add Group';
-    addGroupBtn.setAttribute('data-testid', 'adv-add-group');
-    addGroupBtn.addEventListener('click', () => {
-      pipeline.push({
-        logic: 'and',
-        criteria: [{ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false }]
+    const addOpWrapper = document.createElement('div');
+    addOpWrapper.className = 'adv-add-op-wrapper';
+    addOpWrapper.style.position = 'relative';
+    addOpWrapper.style.display = 'inline-block';
+
+    const addOpBtn = document.createElement('button');
+    addOpBtn.className = 'adv-btn';
+    addOpBtn.textContent = '＋ Add Operation';
+    addOpBtn.setAttribute('data-testid', 'adv-add-operation');
+
+    const addOpMenu = document.createElement('div');
+    addOpMenu.className = 'adv-add-op-menu';
+    addOpMenu.style.display = 'none';
+
+    const menuItems = [
+      { label: '＋ Filter Group', type: 'filter', testid: 'adv-add-group' },
+      { label: '⊕ Set Operation', type: 'set', testid: 'adv-add-set' },
+      { label: '⋈ Join', type: 'join', testid: 'adv-add-join' },
+      { label: 'Σ Group By', type: 'groupby', testid: 'adv-add-groupby' }
+    ];
+
+    menuItems.forEach(mi => {
+      const item = document.createElement('div');
+      item.className = 'adv-add-op-menu-item';
+      item.textContent = mi.label;
+      item.setAttribute('data-testid', mi.testid);
+      item.addEventListener('click', () => {
+        addOpMenu.style.display = 'none';
+        if (mi.type === 'filter') {
+          pipeline.push({
+            type: 'filter',
+            logic: 'and',
+            criteria: [{ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false }]
+          });
+        } else if (mi.type === 'set') {
+          pipeline.push({ type: 'set', setOp: 'intersection', withRelation: '' });
+        } else if (mi.type === 'join') {
+          pipeline.push({ type: 'join', joinType: 'inner', withRelation: '', onColumns: [] });
+        } else if (mi.type === 'groupby') {
+          pipeline.push({ type: 'groupby', groupColumns: [], aggregations: [], having: { logic: 'and', criteria: [] } });
+        }
+        persistState();
+        rebuildPipeline(body);
       });
-      persistState();
-      rebuildPipeline(body);
+      addOpMenu.appendChild(item);
     });
+
+    addOpBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addOpMenu.style.display = addOpMenu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', () => { addOpMenu.style.display = 'none'; }, { once: false });
+
+    addOpWrapper.appendChild(addOpBtn);
+    addOpWrapper.appendChild(addOpMenu);
 
     const executeBtn = document.createElement('button');
     executeBtn.className = 'adv-btn adv-btn-primary';
     executeBtn.textContent = '▶ Execute';
     executeBtn.setAttribute('data-testid', 'adv-execute');
     executeBtn.addEventListener('click', () => {
-      const validPipeline = pipeline.filter(g => g.criteria.length > 0);
+      const validPipeline = pipeline.filter(g => (g.type && g.type !== 'filter') || (g.criteria && g.criteria.length > 0));
       const resultIndices = executeAdvancedSearch(st, validPipeline, mode);
       setFilteredIndices(st, resultIndices);
       applySorting(st);
@@ -8052,7 +8845,7 @@ function showAdvancedSearchPanel(st) {
     applyBtn.setAttribute('data-testid', 'adv-apply');
     applyBtn.addEventListener('click', () => {
       persistState();
-      const validPipeline = pipeline.filter(g => g.criteria.length > 0);
+      const validPipeline = pipeline.filter(g => (g.type && g.type !== 'filter') || (g.criteria && g.criteria.length > 0));
       const resultIndices = executeAdvancedSearch(st, validPipeline, mode);
       setFilteredIndices(st, resultIndices);
       applySorting(st);
@@ -8064,7 +8857,7 @@ function showAdvancedSearchPanel(st) {
     });
 
     actions.appendChild(applyBtn);
-    actions.appendChild(addGroupBtn);
+    actions.appendChild(addOpWrapper);
     actions.appendChild(executeBtn);
     actions.appendChild(clearBtn);
     actions.appendChild(resetBtn);
