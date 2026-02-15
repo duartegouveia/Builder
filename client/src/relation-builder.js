@@ -284,7 +284,7 @@ const DEFAULT_REL_OPTIONS = {
   label_field_top_down: true,
   OnDoubleClickAction: 'view',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
-  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
+  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State', 'Output State Full'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge'],
   show_filter_comparison: true,
@@ -295,7 +295,8 @@ const DEFAULT_REL_OPTIONS = {
   show_derived_columns: true,
   show_cartesian_product: true,
   show_formatting: true,
-  show_groupby: true
+  show_groupby: true,
+  kind_specific: true
 };
 
 function resolveSingleItemMode(raw) {
@@ -3063,6 +3064,7 @@ function parseRelation(jsonStr) {
       show_cartesian_product: parsedRelOptions.show_cartesian_product ?? DEFAULT_REL_OPTIONS.show_cartesian_product,
       show_formatting: parsedRelOptions.show_formatting ?? DEFAULT_REL_OPTIONS.show_formatting,
       show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby,
+      kind_specific: parsedRelOptions.kind_specific ?? DEFAULT_REL_OPTIONS.kind_specific,
       cardinality_min: parsedRelOptions.cardinality_min ?? DEFAULT_REL_OPTIONS.cardinality_min,
       cardinality_max: parsedRelOptions.cardinality_max ?? DEFAULT_REL_OPTIONS.cardinality_max
     };
@@ -7334,7 +7336,8 @@ function buildAlwaysVisibleOptionsHtml(options, st) {
     'Advanced Search': { value: 'advanced-search', icon: '🔎', label: 'Advanced Search' },
     'Remove Duplicates': { value: 'remove-duplicates', icon: '🔄', label: 'Remove Duplicates' },
     'Integrity Check': { value: 'integrity-check', icon: '🔍', label: 'Integrity Check' },
-    'Output State': { value: 'output-state', icon: '📋', label: 'Output State' }
+    'Output State': { value: 'output-state', icon: '📋', label: 'Output State' },
+    'Output State Full': { value: 'output-state-full', icon: '📋', label: 'Output State Full' }
   };
   
   const maxReached = st ? isCardinalityMaxReached(st) : false;
@@ -7373,6 +7376,11 @@ function handleAlwaysVisibleAction(st, action) {
   // Output State action
   if (action === 'output-state') {
     outputRelationState(st);
+    return;
+  }
+
+  if (action === 'output-state-full') {
+    outputRelationStateFull(st);
     return;
   }
 
@@ -7502,9 +7510,72 @@ function cleanRelationOutput(obj) {
   return obj;
 }
 
+function filterAttDefaults(att) {
+  if (!att || typeof att !== 'object' || !Array.isArray(att.attribute_kind)) return att;
+  const filtered = {};
+  for (const [key, value] of Object.entries(att)) {
+    if (key === '_active_kind') continue;
+    const defaultVal = DEFAULT_ATT[key];
+    if (defaultVal === undefined || JSON.stringify(value) !== JSON.stringify(defaultVal)) {
+      filtered[key] = value;
+    }
+  }
+  if (!filtered.attribute_kind) filtered.attribute_kind = att.attribute_kind;
+  return filtered;
+}
+
+function expandAttToFull(att) {
+  if (!att || typeof att !== 'object' || !Array.isArray(att.attribute_kind)) return att;
+  const full = {};
+  const keyOrder = Object.keys(DEFAULT_ATT);
+  for (const key of keyOrder) {
+    full[key] = att[key] !== undefined ? att[key] : JSON.parse(JSON.stringify(DEFAULT_ATT[key]));
+  }
+  for (const key of Object.keys(att)) {
+    if (key === '_active_kind') continue;
+    if (!(key in full)) full[key] = att[key];
+  }
+  return full;
+}
+
+function cleanColumnsCompact(columns) {
+  if (!columns || typeof columns !== 'object') return columns;
+  const result = {};
+  for (const [name, colDef] of Object.entries(columns)) {
+    if (isAttObject(colDef)) {
+      result[name] = filterAttDefaults(colDef);
+    } else {
+      result[name] = colDef;
+    }
+  }
+  return result;
+}
+
+function cleanColumnsFull(columns) {
+  if (!columns || typeof columns !== 'object') return columns;
+  const result = {};
+  for (const [name, colDef] of Object.entries(columns)) {
+    if (isAttObject(colDef)) {
+      result[name] = expandAttToFull(colDef);
+    } else {
+      result[name] = colDef;
+    }
+  }
+  return result;
+}
+
 function outputRelationState(st) {
   const output = JSON.parse(JSON.stringify(st.relation));
   cleanRelationOutput(output);
+  if (output.columns) output.columns = cleanColumnsCompact(output.columns);
+  const jsonString = JSON.stringify(output, null, 2);
+  outputToConsoleAndElements(jsonString);
+}
+
+function outputRelationStateFull(st) {
+  const output = JSON.parse(JSON.stringify(st.relation));
+  cleanRelationOutput(output);
+  if (output.columns) output.columns = cleanColumnsFull(output.columns);
   const jsonString = JSON.stringify(output, null, 2);
   outputToConsoleAndElements(jsonString);
 }
@@ -9695,7 +9766,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
       <div class="accordion-section" data-section="binning">
         <div class="accordion-header">Binning / Bucketing <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          ${(type === 'int' || type === 'float' || type === 'range') && st.rel_options.show_binning ? `
+          ${st.rel_options.kind_specific !== false && (type === 'int' || type === 'float' || type === 'range') && st.rel_options.show_binning ? `
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
             <span class="filter-label">Bins:</span>
             <input type="number" class="filter-n-input binning-count-input" value="5" min="2" max="50" step="1" data-testid="input-binning-count">
@@ -9736,7 +9807,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         </div>
       </div>
       ` : ''}
-      ${type === 'relation' && st.rel_options.show_cartesian_product ? `
+      ${st.rel_options.kind_specific !== false && type === 'relation' && st.rel_options.show_cartesian_product ? `
       <div class="accordion-section" data-section="relation">
         <div class="accordion-header">Relation <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
@@ -9756,7 +9827,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
           <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
           <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Clear Selection</button>
-          ${(type === 'date' || type === 'datetime') && st.rel_options.show_derived_columns ? `
+          ${st.rel_options.kind_specific !== false && (type === 'date' || type === 'datetime') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Date)</div>
           <button class="column-menu-item" data-action="derive-year">Extract Year → ${name}_year</button>
@@ -9767,7 +9838,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-quarter">Extract Quarter (1-4) → ${name}_quarter</button>
           <button class="column-menu-item" data-action="derive-semester">Extract Semester (1-2) → ${name}_semester</button>
           ` : ''}
-          ${(type === 'time' || type === 'datetime') && st.rel_options.show_derived_columns ? `
+          ${st.rel_options.kind_specific !== false && (type === 'time' || type === 'datetime') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Time)</div>
           <button class="column-menu-item" data-action="derive-hour">Extract Hour → ${name}_hour</button>
@@ -9776,7 +9847,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-ampm">Extract AM/PM → ${name}_ampm</button>
           <button class="column-menu-item" data-action="derive-hour12">Extract Hour (12h) → ${name}_hour12</button>
           ` : ''}
-          ${(type === 'float' || type === 'range') && st.rel_options.show_derived_columns ? `
+          ${st.rel_options.kind_specific !== false && (type === 'float' || type === 'range') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Float)</div>
           <div class="column-menu-item-inline">
@@ -9786,7 +9857,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
             <button class="btn-apply-filter" data-action="derive-round">Create</button>
           </div>
           ` : ''}
-          ${(type === 'string' || type === 'textarea') && st.rel_options.show_derived_columns ? `
+          ${st.rel_options.kind_specific !== false && (type === 'string' || type === 'textarea') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Text)</div>
           <button class="column-menu-item" data-action="derive-length">Length (chars) → ${name}_length</button>
@@ -9797,7 +9868,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
           <button class="column-menu-item" data-action="derive-sentences">Sentence Count → ${name}_sentences</button>
           ` : ''}
           ` : ''}
-          ${(shouldShowHierarchy(st) && name === st.rel_options.hierarchy_column) && st.rel_options.show_derived_columns ? `
+          ${st.rel_options.kind_specific !== false && (shouldShowHierarchy(st) && name === st.rel_options.hierarchy_column) && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
           <div class="column-menu-sublabel">Derived Columns (Hierarchy)</div>
           <button class="column-menu-item" data-action="derive-hierarchy-ascendants">Ascendants → ${name}_ascendants</button>
@@ -19906,6 +19977,7 @@ function initRelationInstance(container, relationData, options = {}) {
     show_cartesian_product: parsedRelOptions.show_cartesian_product ?? DEFAULT_REL_OPTIONS.show_cartesian_product,
     show_formatting: parsedRelOptions.show_formatting ?? DEFAULT_REL_OPTIONS.show_formatting,
     show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby,
+    kind_specific: parsedRelOptions.kind_specific ?? DEFAULT_REL_OPTIONS.kind_specific,
     cardinality_min: parsedRelOptions.cardinality_min ?? DEFAULT_REL_OPTIONS.cardinality_min,
     cardinality_max: parsedRelOptions.cardinality_max ?? DEFAULT_REL_OPTIONS.cardinality_max,
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
@@ -21475,6 +21547,53 @@ function canConvertKind(fromType, toType) {
   return { possible: true, lossless: false };
 }
 
+function buildKindSelect(currentKind, onChange) {
+  const select = document.createElement('select');
+
+  const simpleKinds = ['id', 'string', 'textarea', 'int', 'float', 'boolean', 'date', 'datetime', 'time', 'select', 'radio', 'color', 'relation'];
+  const attKinds = Object.keys(ATT_KIND_MAP);
+
+  const grpSimple = document.createElement('optgroup');
+  grpSimple.label = 'Simple Types';
+  simpleKinds.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    if (k === currentKind) opt.selected = true;
+    grpSimple.appendChild(opt);
+  });
+  select.appendChild(grpSimple);
+
+  const grpAtt = document.createElement('optgroup');
+  grpAtt.label = 'Att Kinds (attribute_kind)';
+  attKinds.forEach(k => {
+    const resolved = ATT_KIND_MAP[k];
+    if (simpleKinds.includes(resolved) && k !== 'association') return;
+    const opt = document.createElement('option');
+    opt.value = resolved;
+    opt.textContent = k + ' → ' + resolved;
+    if (resolved === currentKind && !simpleKinds.includes(currentKind)) opt.selected = true;
+    grpAtt.appendChild(opt);
+  });
+  select.appendChild(grpAtt);
+
+  const grpExtra = document.createElement('optgroup');
+  grpExtra.label = 'Extended Types';
+  const extraKinds = ['password', 'email', 'tel', 'url', 'search', 'file', 'range', 'pointer', 'association', 'lookup', 'button', 'gps', 'html', 'multi_text', 'qr_code', 'tabsheet', 'object', 'group'];
+  extraKinds.forEach(k => {
+    if (simpleKinds.includes(k)) return;
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    if (k === currentKind) opt.selected = true;
+    grpExtra.appendChild(opt);
+  });
+  select.appendChild(grpExtra);
+
+  select.addEventListener('change', () => onChange(select.value));
+  return select;
+}
+
 function renderStructure(st = state) {
   const container = st.container || document.querySelector('.relation-container');
   if (!container) return;
@@ -21486,45 +21605,236 @@ function renderStructure(st = state) {
     return;
   }
 
-  const structureRows = buildStructureColumnRows(st);
-
+  let structureRows = buildStructureColumnRows(st);
   let selectedIdx = null;
+  let editingIdx = null;
   let pendingChanges = {};
+  let detailIdx = null;
+
+  function hasPendingChanges() {
+    return Object.keys(pendingChanges).some(k => {
+      const c = pendingChanges[k];
+      return c && (c.kind || c.att || c.convertToAtt || c.newName || c.newOrder !== undefined || c.newDisplayName !== undefined || c.newShortName !== undefined || c.newMultiple !== undefined);
+    });
+  }
 
   function render() {
     structurePanel.innerHTML = '';
 
+    const toolbar = document.createElement('div');
+    toolbar.className = 'structure-toolbar';
+
+    const newBtn = document.createElement('button');
+    newBtn.className = 'structure-btn-new';
+    newBtn.textContent = '+ New Column';
+    newBtn.addEventListener('click', () => {
+      const newName = prompt('Column name:');
+      if (!newName || !newName.trim()) return;
+      const name = newName.trim();
+      if (st.relation.columns[name]) {
+        showToast('Column "' + name + '" already exists.', 'warning');
+        return;
+      }
+      st.relation.columns[name] = 'string';
+      st.relation.items.forEach(item => { item[name] = ''; });
+      const resolved = resolveAttColumns(st.relation.columns);
+      st.columnNames = resolved.names;
+      st.columnTypes = resolved.types;
+      st.columnAtts = resolved.atts;
+      structureRows = buildStructureColumnRows(st);
+      pendingChanges = {};
+      render();
+      renderTable(st);
+      updateJsonOutput(st);
+      showToast('Column "' + name + '" added.', 'success');
+    });
+    toolbar.appendChild(newBtn);
+
+    if (selectedIdx !== null) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'structure-btn-delete';
+      delBtn.textContent = 'Delete Column';
+      delBtn.addEventListener('click', () => {
+        const row = structureRows[selectedIdx];
+        if (!row) return;
+        if (!confirm('Delete column "' + row.name + '"? All data in this column will be lost.')) return;
+        delete st.relation.columns[row.name];
+        st.relation.items.forEach(item => { delete item[row.name]; });
+        const resolved = resolveAttColumns(st.relation.columns);
+        st.columnNames = resolved.names;
+        st.columnTypes = resolved.types;
+        st.columnAtts = resolved.atts;
+        structureRows = buildStructureColumnRows(st);
+        selectedIdx = null;
+        editingIdx = null;
+        detailIdx = null;
+        pendingChanges = {};
+        render();
+        renderTable(st);
+        updateJsonOutput(st);
+        showToast('Column deleted.', 'success');
+      });
+      toolbar.appendChild(delBtn);
+    }
+
+    if (hasPendingChanges()) {
+      const applyAllBtn = document.createElement('button');
+      applyAllBtn.className = 'structure-btn-apply';
+      applyAllBtn.textContent = 'Apply All Changes';
+      applyAllBtn.addEventListener('click', () => {
+        applyAllStructureChanges(st, structureRows, pendingChanges);
+        pendingChanges = {};
+        structureRows = buildStructureColumnRows(st);
+        render();
+        renderTable(st);
+        updateJsonOutput(st);
+        showToast('All changes applied.', 'success');
+      });
+      toolbar.appendChild(applyAllBtn);
+
+      const cancelAllBtn = document.createElement('button');
+      cancelAllBtn.className = 'structure-btn-cancel';
+      cancelAllBtn.textContent = 'Cancel All';
+      cancelAllBtn.addEventListener('click', () => {
+        pendingChanges = {};
+        structureRows = buildStructureColumnRows(st);
+        editingIdx = null;
+        detailIdx = null;
+        render();
+      });
+      toolbar.appendChild(cancelAllBtn);
+    }
+
+    structurePanel.appendChild(toolbar);
+
+    const conversionInfos = [];
+    for (const [k, c] of Object.entries(pendingChanges)) {
+      if (c && c.kind && c.kind !== structureRows[k]?.originalKind) {
+        const info = canConvertKind(structureRows[k].originalKind, c.kind);
+        let cls = 'lossless';
+        let msg = structureRows[k].name + ': ' + structureRows[k].originalKind + ' → ' + c.kind;
+        if (!info.possible) { cls = 'impossible'; msg += ' (data will be set to null)'; }
+        else if (!info.lossless) { cls = 'lossy'; msg += ' (may lose precision)'; }
+        else { msg += ' (lossless)'; }
+        conversionInfos.push({ cls, msg });
+      }
+    }
+    conversionInfos.forEach(ci => {
+      const div = document.createElement('div');
+      div.className = 'structure-conversion-info ' + ci.cls;
+      div.textContent = ci.msg;
+      structurePanel.appendChild(div);
+    });
+
     const table = document.createElement('table');
     table.className = 'structure-columns-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>#</th><th>Name</th><th>Kind</th><th>Display Name</th><th>Short Name</th><th>Multiple</th></tr>';
+    thead.innerHTML = '<tr><th style="width:40px">#</th><th>Name</th><th>Kind</th><th>Display Name</th><th>Short Name</th><th style="width:55px">Multiple</th></tr>';
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
     structureRows.forEach((row, idx) => {
+      const changes = pendingChanges[idx] || {};
+      const isEditing = editingIdx === idx;
+      const isSelected = selectedIdx === idx;
       const tr = document.createElement('tr');
-      if (selectedIdx === idx) tr.classList.add('selected');
+      if (isSelected) tr.classList.add('selected');
       tr.style.cursor = 'pointer';
 
-      tr.innerHTML =
-        '<td>' + row.order + '</td>' +
-        '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
-        '<td><span class="structure-kind-badge ' + (row.isAtt ? 'kind-att' : '') + '">' + escapeHtml(row.kind) + (row.isAtt ? ' (att)' : '') + '</span></td>' +
-        '<td>' + escapeHtml(row.displayName) + '</td>' +
-        '<td>' + escapeHtml(row.shortName) + '</td>' +
-        '<td>' + (row.att?.multiple ? '✓' : '') + '</td>';
+      if (isEditing) {
+        const tdOrder = document.createElement('td');
+        const orderInput = document.createElement('input');
+        orderInput.type = 'number';
+        orderInput.min = '0';
+        orderInput.max = String(structureRows.length - 1);
+        orderInput.value = changes.newOrder !== undefined ? changes.newOrder : row.order;
+        orderInput.addEventListener('change', () => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newOrder = parseInt(orderInput.value) || 0;
+        });
+        tdOrder.appendChild(orderInput);
+        tr.appendChild(tdOrder);
 
-      tr.addEventListener('click', () => {
+        const tdName = document.createElement('td');
+        tdName.innerHTML = '<strong>' + escapeHtml(row.name) + '</strong>';
+        tr.appendChild(tdName);
+
+        const tdKind = document.createElement('td');
+        const currentKind = changes.kind || row.kind;
+        const kindSel = buildKindSelect(currentKind, (val) => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].kind = val;
+          render();
+        });
+        tdKind.appendChild(kindSel);
+        tr.appendChild(tdKind);
+
+        const tdDisplay = document.createElement('td');
+        const dispInput = document.createElement('input');
+        dispInput.type = 'text';
+        dispInput.value = changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName;
+        dispInput.placeholder = row.name;
+        dispInput.addEventListener('input', () => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newDisplayName = dispInput.value;
+        });
+        tdDisplay.appendChild(dispInput);
+        tr.appendChild(tdDisplay);
+
+        const tdShort = document.createElement('td');
+        const shortInput = document.createElement('input');
+        shortInput.type = 'text';
+        shortInput.value = changes.newShortName !== undefined ? changes.newShortName : row.shortName;
+        shortInput.placeholder = '';
+        shortInput.addEventListener('input', () => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newShortName = shortInput.value;
+        });
+        tdShort.appendChild(shortInput);
+        tr.appendChild(tdShort);
+
+        const tdMulti = document.createElement('td');
+        const multiCheck = document.createElement('input');
+        multiCheck.type = 'checkbox';
+        multiCheck.checked = changes.newMultiple !== undefined ? changes.newMultiple : (row.att?.multiple || false);
+        multiCheck.addEventListener('change', () => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newMultiple = multiCheck.checked;
+        });
+        tdMulti.appendChild(multiCheck);
+        tr.appendChild(tdMulti);
+      } else {
+        tr.innerHTML =
+          '<td>' + row.order + '</td>' +
+          '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
+          '<td><span class="structure-kind-badge ' + (row.isAtt ? 'kind-att' : '') + '">' + escapeHtml(changes.kind || row.kind) + (row.isAtt ? ' (att)' : '') + '</span></td>' +
+          '<td>' + escapeHtml(changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName) + '</td>' +
+          '<td>' + escapeHtml(changes.newShortName !== undefined ? changes.newShortName : row.shortName) + '</td>' +
+          '<td>' + ((changes.newMultiple !== undefined ? changes.newMultiple : row.att?.multiple) ? '✓' : '') + '</td>';
+      }
+
+      tr.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
         selectedIdx = idx;
+        editingIdx = idx;
         render();
       });
+
+      tr.addEventListener('dblclick', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        selectedIdx = idx;
+        editingIdx = idx;
+        detailIdx = idx;
+        render();
+      });
+
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
     structurePanel.appendChild(table);
 
-    if (selectedIdx !== null && selectedIdx < structureRows.length) {
-      const editorEl = renderColumnEditor(structureRows[selectedIdx], selectedIdx, st, structureRows, pendingChanges, render);
+    if (detailIdx !== null && detailIdx < structureRows.length) {
+      const editorEl = renderColumnEditor(structureRows[detailIdx], detailIdx, st, structureRows, pendingChanges, render);
       structurePanel.appendChild(editorEl);
     }
   }
@@ -21818,8 +22128,12 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
     applyBtn.className = 'structure-btn-apply';
     applyBtn.textContent = 'Apply';
     applyBtn.addEventListener('click', () => {
-      applyStructureChanges(idx, row, st, pendingChanges, structureRows);
+      applySingleStructureChange(idx, row, st, pendingChanges[idx]);
       pendingChanges[idx] = {};
+      const resolved = resolveAttColumns(st.relation.columns);
+      st.columnNames = resolved.names;
+      st.columnTypes = resolved.types;
+      st.columnAtts = resolved.atts;
       const newRows = buildStructureColumnRows(st);
       structureRows.length = 0;
       newRows.forEach(r => structureRows.push(r));
@@ -21844,13 +22158,10 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
   return editor;
 }
 
-function applyStructureChanges(idx, row, st, pendingChanges, structureRows) {
-  const changes = pendingChanges[idx];
+function applySingleStructureChange(idx, row, st, changes) {
   if (!changes) return;
 
   const colName = row.name;
-  const colIdx = st.columnNames.indexOf(colName);
-  if (colIdx === -1) return;
 
   if (changes.kind && changes.kind !== row.originalKind) {
     const newKind = changes.kind;
@@ -21872,12 +22183,62 @@ function applyStructureChanges(idx, row, st, pendingChanges, structureRows) {
   }
 
   if (changes.convertToAtt) {
-    const oldType = changes.kind || st.columnTypes[colIdx];
-    const newAtt = { ...DEFAULT_ATT, attribute_kind: [getAttKindFromType(oldType)] };
+    const currentType = changes.kind || row.originalKind;
+    const newAtt = { ...DEFAULT_ATT, attribute_kind: [getAttKindFromType(currentType)] };
     if (changes.att) Object.assign(newAtt, changes.att);
     st.relation.columns[colName] = newAtt;
   } else if (changes.att && isAttObject(st.relation.columns[colName])) {
     Object.assign(st.relation.columns[colName], changes.att);
+  }
+
+  if (changes.newDisplayName !== undefined && isAttObject(st.relation.columns[colName])) {
+    st.relation.columns[colName].name = changes.newDisplayName;
+  }
+  if (changes.newShortName !== undefined && isAttObject(st.relation.columns[colName])) {
+    st.relation.columns[colName].short_name = changes.newShortName;
+  }
+  if (changes.newMultiple !== undefined) {
+    if (!isAttObject(st.relation.columns[colName])) {
+      const currentType = changes.kind || row.originalKind;
+      st.relation.columns[colName] = { ...DEFAULT_ATT, attribute_kind: [getAttKindFromType(currentType)] };
+    }
+    st.relation.columns[colName].multiple = changes.newMultiple;
+  }
+}
+
+function applyAllStructureChanges(st, structureRows, pendingChanges) {
+  for (const [idxStr, changes] of Object.entries(pendingChanges)) {
+    const idx = parseInt(idxStr);
+    if (isNaN(idx) || !structureRows[idx] || !changes) continue;
+    applySingleStructureChange(idx, structureRows[idx], st, changes);
+  }
+
+  const orderChanges = [];
+  for (const [idxStr, changes] of Object.entries(pendingChanges)) {
+    if (changes && changes.newOrder !== undefined) {
+      const idx = parseInt(idxStr);
+      orderChanges.push({ fromIdx: idx, toIdx: changes.newOrder, name: structureRows[idx].name });
+    }
+  }
+
+  if (orderChanges.length > 0) {
+    const colNames = Object.keys(st.relation.columns);
+    const reordered = [...colNames];
+
+    orderChanges.sort((a, b) => a.toIdx - b.toIdx);
+    orderChanges.forEach(oc => {
+      const currentPos = reordered.indexOf(oc.name);
+      if (currentPos === -1) return;
+      reordered.splice(currentPos, 1);
+      const insertAt = Math.max(0, Math.min(reordered.length, oc.toIdx));
+      reordered.splice(insertAt, 0, oc.name);
+    });
+
+    const newColumns = {};
+    reordered.forEach(name => {
+      newColumns[name] = st.relation.columns[name];
+    });
+    st.relation.columns = newColumns;
   }
 
   const resolved = resolveAttColumns(st.relation.columns);

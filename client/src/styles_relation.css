@@ -6358,11 +6358,16 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-bottom: 1px solid var(--border, #222);
   vertical-align: middle;
 }
-.structure-columns-table tr:hover {
-  background: var(--accent, #1e3a5f);
+.structure-columns-table tbody tr:hover {
+  background: rgba(74, 144, 217, 0.1);
 }
-.structure-columns-table tr.selected {
-  background: var(--accent, #1e3a5f);
+.structure-columns-table tbody tr.selected {
+  background: rgba(74, 144, 217, 0.15);
+  outline: 1px solid var(--primary, #4a90d9);
+}
+.structure-columns-table tbody tr.selected td,
+.structure-columns-table tbody tr:hover td {
+  color: var(--foreground, #e0e0e0);
 }
 .structure-kind-badge {
   display: inline-block;
@@ -6478,4 +6483,89 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .structure-btn-cancel:hover {
   background: var(--accent, #1e3a5f);
+}
+.structure-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.structure-toolbar button {
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border, #333);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--muted, #2a2a3e);
+  color: var(--foreground, #e0e0e0);
+}
+.structure-toolbar button:hover {
+  background: var(--accent, #1e3a5f);
+}
+.structure-toolbar .structure-btn-apply {
+  background: var(--primary, #4a90d9);
+  color: white;
+  border-color: var(--primary, #4a90d9);
+}
+.structure-toolbar .structure-btn-new {
+  background: #1b5e20;
+  color: #a5d6a7;
+  border-color: #2e7d32;
+}
+.structure-toolbar .structure-btn-delete {
+  background: var(--destructive, #e74c3c);
+  color: white;
+  border-color: var(--destructive, #e74c3c);
+}
+.structure-columns-table td input,
+.structure-columns-table td select {
+  padding: 2px 5px;
+  border: 1px solid var(--border, #444);
+  border-radius: 3px;
+  background: var(--input, #1a1a2e);
+  color: var(--foreground, #e0e0e0);
+  font-size: 12px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.structure-columns-table td input:focus,
+.structure-columns-table td select:focus {
+  outline: none;
+  border-color: var(--primary, #4a90d9);
+}
+.structure-columns-table td input[type="number"] {
+  width: 50px;
+}
+.structure-columns-table td input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+.structure-columns-table td select optgroup {
+  font-weight: 600;
+  color: var(--muted-foreground, #888);
+}
+.structure-columns-table td select option {
+  color: var(--foreground, #e0e0e0);
+  background: var(--input, #1a1a2e);
+}
+.structure-conversion-info {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.structure-conversion-info.lossless {
+  background: #1b5e20;
+  color: #a5d6a7;
+}
+.structure-conversion-info.lossy {
+  background: #7f5f00;
+  color: #ffd54f;
+}
+.structure-conversion-info.impossible {
+  background: var(--destructive, #e74c3c);
+  color: white;
 }
