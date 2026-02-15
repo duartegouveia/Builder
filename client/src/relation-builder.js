@@ -1704,7 +1704,7 @@ const ALL_COMPANIES_JSON = {
       "name": ">Company Type",
       "short_name": "CType",
       "lookup": {
-        "path": "CompanyTypeID.name",
+        "path": "CompanyTypeID.Name",
         "editable": true
       }
     },
@@ -2877,7 +2877,9 @@ function parseRelation(jsonStr) {
       show_derived_columns: parsedRelOptions.show_derived_columns ?? DEFAULT_REL_OPTIONS.show_derived_columns,
       show_cartesian_product: parsedRelOptions.show_cartesian_product ?? DEFAULT_REL_OPTIONS.show_cartesian_product,
       show_formatting: parsedRelOptions.show_formatting ?? DEFAULT_REL_OPTIONS.show_formatting,
-      show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby
+      show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby,
+      cardinality_min: parsedRelOptions.cardinality_min ?? DEFAULT_REL_OPTIONS.cardinality_min,
+      cardinality_max: parsedRelOptions.cardinality_max ?? DEFAULT_REL_OPTIONS.cardinality_max
     };
 
     const gvo = data.rel_options.general_view_options;
@@ -19338,7 +19340,8 @@ function initRelationInstance(container, relationData, options = {}) {
     show_cartesian_product: parsedRelOptions.show_cartesian_product ?? DEFAULT_REL_OPTIONS.show_cartesian_product,
     show_formatting: parsedRelOptions.show_formatting ?? DEFAULT_REL_OPTIONS.show_formatting,
     show_groupby: parsedRelOptions.show_groupby ?? DEFAULT_REL_OPTIONS.show_groupby,
-    // Deserialize uiState from JSON (convert arrays to Sets)
+    cardinality_min: parsedRelOptions.cardinality_min ?? DEFAULT_REL_OPTIONS.cardinality_min,
+    cardinality_max: parsedRelOptions.cardinality_max ?? DEFAULT_REL_OPTIONS.cardinality_max,
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
 
