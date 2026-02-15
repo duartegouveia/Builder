@@ -1,0 +1,22 @@
+Vou agora descrever os requisitos para o atributo "lookup".
+O propósito do atributo lookup, é poder mostrar um atributo de uma entidade ligada através de um caminho via associações entre entidades. Ou seja, na configuração do tipo lookup indico um caminho, que se inicia na relation atual. Escolhe-se uma association da relation atual, através do nome do respetivo campo.
+Essa association tem nas suas definições a que entidade se liga e a respetiva cardinalidade máxima. Um campo lookup só funciona, atraves de associações que têm cardinalidade máxima de 1.
+Através desta primeira association chega-se a uma nova entidade. Aí, pode-se escolher novamente uma associação (de cardinalidade máxima 1), ou escolher uma coluna dessa entidade (através do nome).
+O caminho define-se separando os nomes por pontos "." entre o nome das colunas.
+Se o elemento final de um caminho for uma association, não importa qual a cardinalidade, significa que o que queremos apresentar é a própria association no lookup, e não utilizá-la como caminho para nenhum outro lado.
+
+Os campos lookups usam "lookup" como nome único no "attribute_kind", e tem uma configuração própria, de indicar um caminho, que é definida num objeto ".lookup" com duas sub propriedades:
+{
+	path:"",
+	editable:true
+}
+
+O path é o caminho já anteriormente descrito. Note-se que como o início do caminho é a própria relation atual, se o caminho tiver o nome de uma coluna que não seja uma association, estamos a fazer uma referência a um campo da própria relation.
+
+O outro atributo, "editable", serve para indicar se queremos que esse campo lookup seja editável. Se não for editável, então o comportamento é identico a que tivesse readOnly a true, ou seja, nas operações Edit (e similares) aparece com o mesmo aspeto como o que usa na operação view.
+
+Se editable for true, então ao gravar é necessário ter em conta que o valor a ser alterado, não é na relation atual, mas na que se alcança seguindo o caminho do lookup até à entidade destino, e é aí que o novo valor deve ser guardado.
+
+A forma de apresentação de um campo lookup é a forma de apresentação da coluna para que aponta, quer na tabela, quer nas diversas operações view, edit, etc. A única excepção é a propriedade "editable" que pode fazer com que não seja possível editar.
+
+Documenta estes requisitos no manual de requisitos.
