@@ -729,12 +729,6 @@ const COMPANY_TYPES_JSON = {
   "columns": {
     "ID": "id",
     "Name": "string",
-    "Priority": {
-      "attribute_kind": ["range"],
-      "name": "Priority",
-      "short_name": "Prio",
-      "range": { "min": 0, "max": 10 }
-    },
     "references": {
       "attribute_kind": ["association"],
       "name": "References",
@@ -2888,8 +2882,14 @@ function generateDemoRelation() {
     website: 'url',
     search_terms: 'search',
     fav_color: 'color',
-    priority: 'radio',
+    priority_level: 'radio',
     attachments: 'file',
+    priority: {
+      attribute_kind: ['range'],
+      name: 'Priority',
+      short_name: 'Prio',
+      range: { min: 0, max: 10 }
+    },
     ref_company_type: {
       attribute_kind: ['pointer'],
       name: {"pt":"Tipo de Empresa","en":"Company Type Ref"},
@@ -2922,7 +2922,7 @@ function generateDemoRelation() {
       jp: '🇯🇵 Japan',
       cn: '🇨🇳 China'
     },
-    priority: {
+    priority_level: {
       low: '🟢 Baixa',
       medium: '🟡 Média',
       high: '🟠 Alta',
@@ -2982,6 +2982,10 @@ function generateDemoRelation() {
       
       if (resolvedType === 'file') {
         return createEmptyFileRelation();
+      }
+      
+      if (resolvedType === 'range' && colName === 'priority') {
+        return Math.round(Math.random() * 10 * 10) / 10;
       }
       
       if (resolvedType === 'pointer' && colName === 'ref_company_type') {
