@@ -154,8 +154,13 @@ function resolveAttColumns(columns) {
     const val = columns[key];
     names.push(key);
     if (isAttObject(val)) {
-      types.push(resolveColumnKind(val));
-      atts.push({ ...DEFAULT_ATT, ...val });
+      const kind = resolveColumnKind(val);
+      types.push(kind);
+      const merged = { ...DEFAULT_ATT, ...val };
+      if (kind === 'range' && !val.interface_width) {
+        merged.interface_width = 'long';
+      }
+      atts.push(merged);
     } else {
       types.push(val);
       atts.push(val);
@@ -22026,13 +22031,11 @@ function createEditInputHtml(type, value, colIdx, st) {
     const curVal = value !== null && value !== undefined ? value : minVal;
     const uid = 'range_' + colIdx + '_' + Date.now();
     let html = '<div class="range-edit-wrapper" data-col="' + colIdx + '">';
-    html += '<div class="range-labels">';
-    html += '<span class="range-label-min">' + minVal + '</span>';
-    if (rangeCfg.max !== null) html += '<span class="range-label-max">' + maxVal + '</span>';
-    html += '</div>';
     html += '<div class="range-controls">';
+    html += '<span class="range-label-min">' + minVal + '</span>';
     html += '<input type="range" class="range-slider" data-col="' + colIdx + '" id="' + uid + '" min="' + minVal + '" max="' + maxVal + '" value="' + curVal + '">';
-    html += '<input type="number" class="relation-input input-size-tiny range-number" data-col="' + colIdx + '" data-range-id="' + uid + '" min="' + minVal + '" max="' + maxVal + '" value="' + curVal + '">';
+    if (rangeCfg.max !== null) html += '<span class="range-label-max">' + maxVal + '</span>';
+    html += '<input type="number" class="relation-input range-number" data-col="' + colIdx + '" data-range-id="' + uid + '" min="' + minVal + '" max="' + maxVal + '" value="' + curVal + '">';
     html += '</div>';
     html += '</div>';
     return html;
