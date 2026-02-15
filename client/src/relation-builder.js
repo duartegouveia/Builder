@@ -7676,6 +7676,84 @@ function deleteAdvancedSearch(st, name) {
   updateJsonOutput(st);
 }
 
+function showSaveSearchDialog(existingNames, onSave) {
+  const overlay = document.createElement('div');
+  overlay.className = 'nested-relation-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:10000;display:flex;align-items:center;justify-content:center;';
+
+  const dialog = document.createElement('div');
+  dialog.style.cssText = 'background:var(--card,#fff);border:1px solid var(--border,#ddd);border-radius:8px;padding:16px 20px;min-width:320px;max-width:400px;box-shadow:0 4px 16px rgba(0,0,0,0.15);';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:12px;';
+  title.textContent = 'Save Search';
+
+  const label = document.createElement('label');
+  label.style.cssText = 'font-size:12px;color:var(--muted-foreground,#888);display:block;margin-bottom:4px;';
+  label.textContent = 'Search name:';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.style.cssText = 'width:100%;box-sizing:border-box;padding:6px 8px;font-size:13px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--card,#fff);color:var(--foreground);font-family:inherit;';
+  input.setAttribute('data-testid', 'save-search-name-input');
+  input.placeholder = 'Enter a unique name';
+
+  const error = document.createElement('div');
+  error.style.cssText = 'font-size:11px;color:#e53e3e;margin-top:4px;min-height:16px;';
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:12px;';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'adv-btn';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.setAttribute('data-testid', 'save-search-cancel');
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'adv-btn adv-btn-primary';
+  saveBtn.textContent = 'Save';
+  saveBtn.setAttribute('data-testid', 'save-search-confirm');
+
+  function close() { overlay.remove(); }
+
+  cancelBtn.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  saveBtn.addEventListener('click', () => {
+    const name = input.value.trim();
+    if (!name) {
+      error.textContent = 'Name cannot be empty.';
+      input.focus();
+      return;
+    }
+    if (existingNames.includes(name)) {
+      error.textContent = 'A search with this name already exists. Choose a different name.';
+      input.focus();
+      return;
+    }
+    close();
+    onSave(name);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveBtn.click();
+    if (e.key === 'Escape') close();
+  });
+
+  input.addEventListener('input', () => { error.textContent = ''; });
+
+  dialog.appendChild(title);
+  dialog.appendChild(label);
+  dialog.appendChild(input);
+  dialog.appendChild(error);
+  btnRow.appendChild(cancelBtn);
+  btnRow.appendChild(saveBtn);
+  dialog.appendChild(btnRow);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  input.focus();
+}
+
 function showAdvancedSearchPanel(st) {
   closeAllMenus();
 
@@ -7960,14 +8038,31 @@ function showAdvancedSearchPanel(st) {
     saveBtn.textContent = '💾 Save Search';
     saveBtn.setAttribute('data-testid', 'adv-save');
     saveBtn.addEventListener('click', () => {
-      const name = prompt('Enter a name for this search:');
-      if (name && name.trim()) {
-        saveAdvancedSearch(st, name.trim(), pipeline, mode);
+      const existingNames = (st.rel_options.savedSearches || []).map(s => s.name);
+      showSaveSearchDialog(existingNames, (chosenName) => {
+        saveAdvancedSearch(st, chosenName, pipeline, mode);
         rebuildSavedSection(body);
-        showToast('Search "' + name.trim() + '" saved.', 'info');
-      }
+        showToast('Search "' + chosenName + '" saved.', 'info');
+      });
     });
 
+    const applyBtn = document.createElement('button');
+    applyBtn.className = 'adv-btn adv-btn-primary';
+    applyBtn.textContent = '✔ Apply';
+    applyBtn.setAttribute('data-testid', 'adv-apply');
+    applyBtn.addEventListener('click', () => {
+      const validPipeline = pipeline.filter(g => g.criteria.length > 0);
+      const resultIndices = executeAdvancedSearch(st, validPipeline, mode);
+      setFilteredIndices(st, resultIndices);
+      applySorting(st);
+      if (tableWrapper) tableWrapper.style.display = '';
+      renderTable(st);
+      updateJsonOutput(st);
+      clearDetailPanel(st);
+      showToast('Advanced Search applied: ' + resultIndices.length + ' of ' + st.relation.items.length + ' rows match.', 'info');
+    });
+
+    actions.appendChild(applyBtn);
     actions.appendChild(addGroupBtn);
     actions.appendChild(executeBtn);
     actions.appendChild(clearBtn);
