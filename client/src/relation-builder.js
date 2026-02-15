@@ -7726,7 +7726,7 @@ function showSaveSearchDialog(existingNames, onSave) {
       input.focus();
       return;
     }
-    if (existingNames.includes(name)) {
+    if (existingNames.some(n => n.toLowerCase() === name.toLowerCase())) {
       error.textContent = 'A search with this name already exists. Choose a different name.';
       input.focus();
       return;
@@ -8051,6 +8051,7 @@ function showAdvancedSearchPanel(st) {
     applyBtn.textContent = '✔ Apply';
     applyBtn.setAttribute('data-testid', 'adv-apply');
     applyBtn.addEventListener('click', () => {
+      persistState();
       const validPipeline = pipeline.filter(g => g.criteria.length > 0);
       const resultIndices = executeAdvancedSearch(st, validPipeline, mode);
       setFilteredIndices(st, resultIndices);
