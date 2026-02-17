@@ -25780,7 +25780,7 @@ function init() {
   
   const btnArrayObj = el('.btn-array-obj');
   btnArrayObj?.addEventListener('click', () => {
-    textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":[1,2,3,4,5]}';
+    textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":[11,12,11,13,14,15]}';
   });
   
   const btnObjectObj = el('.btn-object-obj');
