@@ -1497,17 +1497,10 @@ const PRODUCT_BRANDS_JSON = {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
   "rel_options": {
-    "editable": false,
     "show_multicheck": true,
     "show_natural_order": true,
-    "show_id": true,
-    "show_column_kind": true,
-    "show_stats": true,
     "show_hierarchy": true,
-    "hierarchy_column": "ParentID",
-    "hierarchy_root_value": "",
-    "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
+    "hierarchy_column": "ParentID"
   },
   "items": [
     ["1", "", "", "", "", "A"],
@@ -1521,6 +1514,21 @@ const PRODUCT_BRANDS_JSON = {
     ["9", "", "", "3", "", "CA"],
     ["10", "", "", "4", "", "AAA"],
     ["11", "", "", "4", "", "AAB"]
+  ],
+  "log": [
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T09:48:39.960Z",
+      "op": "columns_visible",
+      "columns_visible": {
+        "ID": 0,
+        "Name": 0,
+        "OwnerID": 0,
+        "Url": 0,
+        "ParentID": 0,
+        "IntegrationID": 0
+      }
+    }
   ]
 };
 
