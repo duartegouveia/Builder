@@ -6534,10 +6534,37 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
       const assocItem = items[0];
       const entity = assocItem[1] || '';
       const fk = assocItem[2] || '';
+      const counterparts = config && config.counterparts ? config.counterparts : [];
+      const singleCounterpart = counterparts.length === 1;
+      const displayAtts = singleCounterpart && typeof counterparts[0] === 'object' && Array.isArray(counterparts[0].counterpart_display_atts) ? counterparts[0].counterpart_display_atts : [];
+      let labelText = '';
+      let titleText = '';
+      if (displayAtts.length > 0 && entity && fk) {
+        const cpJson = all_entities[entity];
+        if (cpJson && cpJson.columns && cpJson.items) {
+          const cpColNames = Object.keys(cpJson.columns);
+          const cpIdColIdx = cpColNames.findIndex(n => {
+            const t = cpJson.columns[n];
+            return t === 'id' || (typeof t === 'object' && t.kind === 'id');
+          });
+          const targetRow = cpJson.items.find(r => cpIdColIdx >= 0 && String(r[cpIdColIdx]) === String(fk));
+          if (targetRow) {
+            const vals = displayAtts.map(attName => {
+              const idx = cpColNames.indexOf(attName);
+              return idx >= 0 && targetRow[idx] != null ? String(targetRow[idx]) : '';
+            }).filter(v => v !== '');
+            if (vals.length > 0) labelText = vals.join('; ');
+          }
+        }
+      }
+      if (!labelText) {
+        labelText = singleCounterpart ? '#' + fk : entity + ' #' + fk;
+      }
+      titleText = 'Entity: ' + entity + ', ID: ' + fk;
       const label = document.createElement('span');
       label.className = 'assoc-link-label';
-      label.textContent = entity + ' #' + fk;
-      label.title = 'Entity: ' + entity + ', ID: ' + fk;
+      label.textContent = labelText;
+      label.title = titleText;
       wrapper.appendChild(label);
       if (editable) {
         const clearBtn = document.createElement('button');
