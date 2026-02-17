@@ -16017,6 +16017,13 @@ function buildObjectEditor(obj, editable, onChange, title) {
   }
 
   const entries = obj && typeof obj === 'object' ? Object.entries(obj) : [];
+  if (entries.length === 0) {
+    const empty = document.createElement('span');
+    empty.className = 'object-editor-empty';
+    empty.textContent = '{ }';
+    wrapper.appendChild(empty);
+    return wrapper;
+  }
   const container = document.createElement('div');
   container.className = 'object-editor-fields';
   if (entries.length <= 5) {
@@ -26254,7 +26261,7 @@ function init() {
   "pot": "relation",
   "guid": "",
   "name": "",
-  "columns": {},
+  "columns": { "a": "string", "b": "boolean", "c": "int", "d": "float" },
   "options": {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
   },
