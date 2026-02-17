@@ -250,6 +250,11 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttr(text) {
+  if (text === null || text === undefined) return '';
+  return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function getRelativeLuminance(hexColor) {
   const hex = hexColor.replace('#', '');
   const r = parseInt(hex.substr(0, 2), 16) / 255;
@@ -15882,9 +15887,11 @@ function initMultiInputsInContainer(container, st, row, mode) {
   container.querySelectorAll('.multi-value-editor').forEach(editor => {
     const colIdx = parseInt(editor.dataset.col);
     const baseType = editor.dataset.baseType || 'string';
-    let values;
-    try { values = JSON.parse(editor.dataset.values || '[]'); } catch(e) { values = []; }
-    if (!Array.isArray(values)) values = [];
+    let values = Array.isArray(row[colIdx]) ? row[colIdx] : [];
+    if (!values.length) {
+      try { values = JSON.parse(editor.dataset.values || '[]'); } catch(e) { values = []; }
+      if (!Array.isArray(values)) values = [];
+    }
     editor.innerHTML = '';
     editor._multiValues = values;
     const multiInput = buildMultiInput(values, baseType, isEditMode, (newArr) => {
@@ -26010,16 +26017,16 @@ function formatValueForDisplay(value, type) {
 function createEditInputHtml(type, value, colIdx, st) {
   const att = getAtt(st, colIdx);
   if (type === 'i18n') {
-    const objJson = escapeHtml(JSON.stringify(value && typeof value === 'object' ? value : {}));
+    const objJson = escapeAttr(JSON.stringify(value && typeof value === 'object' ? value : {}));
     return `<div class="i18n-editor" data-col="${colIdx}" data-values="${objJson}"></div>`;
   }
   if (type === 'object') {
-    const objJson = escapeHtml(JSON.stringify(value && typeof value === 'object' ? value : {}));
+    const objJson = escapeAttr(JSON.stringify(value && typeof value === 'object' ? value : {}));
     return `<div class="object-editor" data-col="${colIdx}" data-values="${objJson}"></div>`;
   }
   if (isMultiBehavior(type, att)) {
     const baseType = getMultiBaseType(type);
-    const arrJson = escapeHtml(JSON.stringify(Array.isArray(value) ? value : []));
+    const arrJson = escapeAttr(JSON.stringify(Array.isArray(value) ? value : []));
     return `<div class="multi-value-editor" data-col="${colIdx}" data-base-type="${baseType}" data-values="${arrJson}"></div>`;
   }
   const sizeClass = getInputSizeClass(type);
