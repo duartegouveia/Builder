@@ -1614,7 +1614,7 @@ const PRODUCT_BRANDS_JSON = {
       "short_name": "Name",
       "lookup": {
         "path": "HIERARCHY.Name",
-        "editable": true
+        "editable": false
       }
     },
     "IntegrationID": "string"
