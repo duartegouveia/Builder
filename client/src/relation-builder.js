@@ -5106,6 +5106,62 @@ function checkRelationIntegrity(relation, path = 'root') {
     warnings.push({ path, severity: 'warning', msg: 'Nenhuma coluna do tipo "id" encontrada.' });
   }
 
+  const relationName = relation.name || '(sem nome)';
+  columnKinds.forEach((kind, idx) => {
+    if (typeof kind !== 'object' || kind === null || !Array.isArray(kind.attribute_kind)) return;
+    if (!kind.attribute_kind.includes('association')) return;
+    const colName = columnNames[idx];
+    const assocCfg = kind.association;
+    if (!assocCfg || !Array.isArray(assocCfg.counterparts) || assocCfg.counterparts.length === 0) {
+      warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": association sem counterparts definidos.` });
+      return;
+    }
+    assocCfg.counterparts.forEach((cp, cpIdx) => {
+      const cpEntity = cp.counterpart_entity;
+      const cpAtt = cp.counterpart_association_att;
+      if (!cpEntity) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}" counterpart #${cpIdx + 1}: "counterpart_entity" em falta.` });
+        return;
+      }
+      if (!cpAtt) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}" → "${cpEntity}": "counterpart_association_att" em falta.` });
+        return;
+      }
+      const cpJson = all_entities[cpEntity];
+      if (!cpJson) {
+        warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}" → "${cpEntity}": entidade não encontrada em all_entities.` });
+        return;
+      }
+      const cpColumns = cpJson.columns;
+      if (!cpColumns || typeof cpColumns !== 'object') {
+        warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}" → "${cpEntity}": entidade sem columns válidas.` });
+        return;
+      }
+      const cpColDef = cpColumns[cpAtt];
+      if (cpColDef === undefined) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}" → "${cpEntity}": atributo "${cpAtt}" não existe na entidade.` });
+        return;
+      }
+      if (typeof cpColDef !== 'object' || cpColDef === null || !Array.isArray(cpColDef.attribute_kind) || !cpColDef.attribute_kind.includes('association')) {
+        warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}" → "${cpEntity}.${cpAtt}": atributo não é do tipo association.` });
+        return;
+      }
+      const cpAssoc = cpColDef.association;
+      if (!cpAssoc || !Array.isArray(cpAssoc.counterparts) || cpAssoc.counterparts.length === 0) {
+        warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}" → "${cpEntity}.${cpAtt}": association sem counterparts.` });
+        return;
+      }
+      const backRef = cpAssoc.counterparts.find(
+        bcp => bcp.counterpart_entity === relationName && bcp.counterpart_association_att === colName
+      );
+      if (!backRef) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}" → "${cpEntity}.${cpAtt}": não tem referência de volta para "${relationName}.${colName}".` });
+      } else {
+        info.push({ path, severity: 'info', msg: `Coluna "${colName}" ↔ "${cpEntity}.${cpAtt}": associação bidirecional válida.` });
+      }
+    });
+  });
+
   if (!Array.isArray(relation.items)) {
     issues.push({ path, severity: 'error', msg: '"items" deve ser um array.' });
   } else {
