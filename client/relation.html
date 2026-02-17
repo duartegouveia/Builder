@@ -40,9 +40,19 @@
               Virtual Keyboard
             </a>
           </nav>
-          <h1 class="text-3xl font-bold text-foreground tracking-tight">
-            Relation Builder
-          </h1>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <h1 class="text-3xl font-bold text-foreground tracking-tight" style="margin: 0;">
+              Relation Builder
+            </h1>
+            <select id="lang-selector" data-testid="select-lang" style="padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border, #ccc); background: var(--background, #fff); font-size: 13px; cursor: pointer;">
+              <option value="pt">PT 🇵🇹</option>
+              <option value="en">EN 🇬🇧</option>
+              <option value="es">ES 🇪🇸</option>
+              <option value="fr">FR 🇫🇷</option>
+              <option value="it">IT 🇮🇹</option>
+              <option value="de">DE 🇩🇪</option>
+            </select>
+          </div>
         </header>
 
         <div class="relation">
@@ -164,6 +174,7 @@
       </div>
     </div>
   </div>
+  <script src="/src/relation-translations.js"></script>
   <script type="module" src="/src/relation-builder.js"></script>
 </body>
 </html>

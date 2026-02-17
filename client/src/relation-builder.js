@@ -26211,6 +26211,19 @@ function showStatisticsPanelForInstance(st, colIdx) {
 // Duplicate functions removed - using parametrized versions
 
 function init() {
+  const langSelector = document.getElementById('lang-selector');
+  if (langSelector) {
+    const saved = localStorage.getItem('relation_lang');
+    if (saved && window.RELATION_TRANSLATIONS && window.RELATION_TRANSLATIONS['relation.common.close'] && window.RELATION_TRANSLATIONS['relation.common.close'][saved]) {
+      window.currentLang = saved;
+      langSelector.value = saved;
+    }
+    langSelector.addEventListener('change', (e) => {
+      window.currentLang = e.target.value;
+      localStorage.setItem('relation_lang', e.target.value);
+    });
+  }
+
   // Add unique class to relation container
   const relationContainer = document.querySelector('.relation');
   if (relationContainer) {
