@@ -3956,7 +3956,7 @@ function showSortPanelDialog(st) {
     const listEl = dialog.querySelector('.sort-panel-list');
     if (!listEl) return;
     if (criteria.length === 0) {
-      listEl.innerHTML = '<div class="sort-panel-empty">Sem critérios de ordenação.</div>';
+      listEl.innerHTML = `<div class="sort-panel-empty">${t('relation.sort.no_criteria')}</div>`;
       return;
     }
     listEl.innerHTML = criteria.map((c, idx) => {
@@ -3975,7 +3975,7 @@ function showSortPanelDialog(st) {
             <option value="asc" ${c.direction === 'asc' ? 'selected' : ''}>ASC ↑</option>
             <option value="desc" ${c.direction === 'desc' ? 'selected' : ''}>DESC ↓</option>
           </select>
-          <button class="btn btn-outline sort-panel-remove" data-sort-idx="${idx}" title="Remover critério" style="padding:2px 6px;font-size:12px;" data-testid="sort-panel-remove-${idx}">✕</button>
+          <button class="btn btn-outline sort-panel-remove" data-sort-idx="${idx}" title="${t('relation.sort.remove_criterion')}" style="padding:2px 6px;font-size:12px;" data-testid="sort-panel-remove-${idx}">✕</button>
           <div class="sort-panel-options" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;width:100%;">
             <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-case" data-sort-idx="${idx}" ${opts.caseInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-case-${idx}"> Case Insensitive</label>
             <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-accent" data-sort-idx="${idx}" ${opts.accentInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-accent-${idx}"> Accent Insensitive</label>
@@ -4077,19 +4077,19 @@ function showSortPanelDialog(st) {
 
   dialog.innerHTML = `
     <div class="export-dialog-header">
-      <h3>Sort Panel</h3>
+      <h3>${t('relation.sort.title')}</h3>
       <button class="btn btn-outline export-close">✕</button>
     </div>
     <div class="export-dialog-body" style="padding:12px;">
       <div class="sort-panel-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
       <div style="margin-top:10px;">
-        <button class="btn btn-outline sort-panel-add" style="font-size:12px;" data-testid="sort-panel-add">+ Acrescentar critério</button>
-        <button class="btn btn-outline sort-panel-clear-all" style="font-size:12px;margin-left:6px;" data-testid="sort-panel-clear-all">✕ Limpar tudo</button>
+        <button class="btn btn-outline sort-panel-add" style="font-size:12px;" data-testid="sort-panel-add">${t('relation.sort.add_criterion')}</button>
+        <button class="btn btn-outline sort-panel-clear-all" style="font-size:12px;margin-left:6px;" data-testid="sort-panel-clear-all">✕ ${t('relation.sort.clear_all')}</button>
       </div>
     </div>
     <div class="export-dialog-footer">
-      <button class="btn btn-outline export-cancel" data-testid="sort-panel-cancel">Cancelar</button>
-      <button class="btn btn-primary sort-panel-apply" data-testid="sort-panel-apply">Aplicar</button>
+      <button class="btn btn-outline export-cancel" data-testid="sort-panel-cancel">${t('relation.common.cancel')}</button>
+      <button class="btn btn-primary sort-panel-apply" data-testid="sort-panel-apply">${t('relation.common.apply')}</button>
     </div>
   `;
 
@@ -4384,7 +4384,7 @@ function generateStatsExplanationsHTML(type) {
   }
   
   let html = '<div class="stats-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stats-definitions">';
   explanations.forEach(e => {
     html += '<dt>' + e.term + '</dt><dd>' + e.def + '</dd>';
@@ -5653,7 +5653,7 @@ function performIntegrityCheck(st) {
   const header = document.createElement('div');
   header.className = 'integrity-check-header';
   const title = document.createElement('h3');
-  title.textContent = 'Integrity Check';
+  title.textContent = t('relation.integrity.title');
   const closeBtn = document.createElement('button');
   closeBtn.className = 'btn btn-outline integrity-check-close';
   closeBtn.textContent = '✕';
@@ -5669,9 +5669,9 @@ function performIntegrityCheck(st) {
   const infoCount = result.info.length;
 
   if (errCount === 0 && warnCount === 0) {
-    summary.innerHTML = '<span class="integrity-ok">✔ Estrutura consistente. Sem erros encontrados.</span>';
+    summary.innerHTML = `<span class="integrity-ok">✔ ${t('relation.integrity.all_ok')}</span>`;
   } else {
-    summary.innerHTML = `<span class="integrity-errors">${errCount} erro${errCount !== 1 ? 's' : ''}</span> · <span class="integrity-warnings">${warnCount} aviso${warnCount !== 1 ? 's' : ''}</span> · <span class="integrity-info">${infoCount} info</span>`;
+    summary.innerHTML = `<span class="integrity-errors">${tf('relation.integrity.error_count', {count: errCount})}</span> · <span class="integrity-warnings">${tf('relation.integrity.warning_count', {count: warnCount})}</span> · <span class="integrity-info">${tf('relation.integrity.info_count', {count: infoCount})}</span>`;
   }
   dialog.appendChild(summary);
 
@@ -5680,7 +5680,7 @@ function performIntegrityCheck(st) {
 
   if (allEntries.length === 0) {
     const emptyMsg = document.createElement('p');
-    emptyMsg.textContent = 'Nenhuma verificação a reportar.';
+    emptyMsg.textContent = t('relation.integrity.no_issues');
     body.appendChild(emptyMsg);
   } else {
     allEntries.forEach(entry => {
@@ -5850,20 +5850,20 @@ function showExportDialog(st) {
 
   dialog.innerHTML = `
     <div class="export-dialog-header">
-      <h3>Export to File</h3>
+      <h3>${t('relation.export.title')}</h3>
       <button class="btn btn-outline export-close">✕</button>
     </div>
     <div class="export-dialog-body">
       <div class="export-section">
-        <label class="export-label">Âmbito</label>
+        <label class="export-label">${t('relation.export.scope')}</label>
         <div class="export-radios">
-          <label><input type="radio" name="export-scope" value="all" checked> Todos (${totalItems})</label>
-          ${hasChecked ? `<label><input type="radio" name="export-scope" value="checked"> Checked (${getSelectedRows(st).size})</label>` : ''}
-          ${hasHighlighted ? `<label><input type="radio" name="export-scope" value="selected"> Linha selecionada</label>` : ''}
+          <label><input type="radio" name="export-scope" value="all" checked> ${t('relation.export.scope_all')} (${totalItems})</label>
+          ${hasChecked ? `<label><input type="radio" name="export-scope" value="checked"> ${t('relation.export.scope_checked')} (${getSelectedRows(st).size})</label>` : ''}
+          ${hasHighlighted ? `<label><input type="radio" name="export-scope" value="selected"> ${t('relation.export.scope_selected_row')}</label>` : ''}
         </div>
       </div>
       <div class="export-section">
-        <label class="export-label">Formato</label>
+        <label class="export-label">${t('relation.export.format')}</label>
         <div class="export-radios">
           <label><input type="radio" name="export-format" value="csv" checked> CSV</label>
           <label><input type="radio" name="export-format" value="excel"> Excel</label>
@@ -5873,22 +5873,22 @@ function showExportDialog(st) {
         </div>
       </div>
       <div class="export-section export-template-section" style="display:none">
-        <label class="export-label">Template</label>
+        <label class="export-label">${t('relation.export.template')}</label>
         <select class="export-template-select">
-          <option value="">Genérico (default)</option>
+          <option value="">${t('relation.export.template_default')}</option>
         </select>
       </div>
       <div class="export-section">
-        <label class="export-label">Ação</label>
+        <label class="export-label">${t('relation.export.action')}</label>
         <div class="export-radios">
-          <label><input type="radio" name="export-action" value="download" checked> Download</label>
-          <label><input type="radio" name="export-action" value="newtab"> Abrir em nova tab</label>
+          <label><input type="radio" name="export-action" value="download" checked> ${t('relation.export.action_download')}</label>
+          <label><input type="radio" name="export-action" value="newtab"> ${t('relation.export.action_newtab')}</label>
         </div>
       </div>
     </div>
     <div class="export-dialog-footer">
-      <button class="btn btn-outline export-cancel">Cancelar</button>
-      <button class="btn btn-primary export-confirm">Exportar</button>
+      <button class="btn btn-outline export-cancel">${t('relation.common.cancel')}</button>
+      <button class="btn btn-primary export-confirm">${t('relation.export.confirm_btn')}</button>
     </div>
   `;
 
@@ -5905,7 +5905,7 @@ function showExportDialog(st) {
   const templateSelect = dialog.querySelector('.export-template-select');
 
   const loadTemplates = async (format) => {
-    templateSelect.innerHTML = '<option value="">Genérico (default)</option>';
+    templateSelect.innerHTML = `<option value="">${t('relation.export.template_default')}</option>`;
     try {
       const resp = await fetch(`/api/export/templates?name=${encodeURIComponent(relationName)}&format=${encodeURIComponent(format)}`);
       const data = await resp.json();
@@ -6051,39 +6051,39 @@ function showImportDialog(st) {
 
   dialog.innerHTML = `
     <div class="import-dialog-header">
-      <h3>Import from File</h3>
+      <h3>${t('relation.import.title')}</h3>
       <button class="btn btn-outline import-close">✕</button>
     </div>
     <div class="import-dialog-body">
       <div class="import-step import-step-upload">
-        <label class="import-label">Selecionar ficheiro</label>
+        <label class="import-label">${t('relation.import.select_file')}</label>
         <div class="import-dropzone" data-testid="import-dropzone">
-          <span class="import-dropzone-text">Arraste um ficheiro para aqui ou clique para selecionar</span>
+          <span class="import-dropzone-text">${t('relation.import.dropzone_text')}</span>
           <input type="file" class="import-file-input" accept=".csv,.tsv,.txt,.xls,.xml,.html,.htm,.json" style="display:none">
         </div>
         <div class="import-file-info" style="display:none"></div>
       </div>
       <div class="import-step import-step-tables" style="display:none">
-        <label class="import-label">Tabelas encontradas</label>
+        <label class="import-label">${t('relation.import.tables_found')}</label>
         <select class="import-table-select"></select>
       </div>
       <div class="import-step import-step-preview" style="display:none">
-        <label class="import-label">Pré-visualização dos dados importados</label>
+        <label class="import-label">${t('relation.import.preview_label')}</label>
         <div class="import-preview-table-wrap"></div>
       </div>
       <div class="import-step import-step-mapping" style="display:none">
-        <label class="import-label">Mapeamento de colunas</label>
+        <label class="import-label">${t('relation.import.column_mapping')}</label>
         <div class="import-mapping-body"></div>
       </div>
       <div class="import-step import-step-text" style="display:none">
-        <label class="import-label">Editar dados (texto)</label>
+        <label class="import-label">${t('relation.import.edit_data_text')}</label>
         <textarea class="import-text-area" rows="10" spellcheck="false"></textarea>
       </div>
     </div>
     <div class="import-dialog-footer">
-      <button class="btn btn-outline import-cancel">Cancelar</button>
-      <button class="btn btn-outline import-edit-text" style="display:none">Editar Texto</button>
-      <button class="btn btn-primary import-confirm" style="display:none">Importar</button>
+      <button class="btn btn-outline import-cancel">${t('relation.common.cancel')}</button>
+      <button class="btn btn-outline import-edit-text" style="display:none">${t('relation.import.edit_text_btn')}</button>
+      <button class="btn btn-primary import-confirm" style="display:none">${t('relation.import.confirm_btn')}</button>
     </div>
   `;
 
@@ -6126,7 +6126,7 @@ function showImportDialog(st) {
   async function processFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     fileInfo.style.display = '';
-    fileInfo.textContent = `Ficheiro: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    fileInfo.textContent = tf('relation.import.file_info', {name: file.name, size: (file.size / 1024).toFixed(1)});
     dropzone.style.display = 'none';
 
     try {
@@ -10179,7 +10179,7 @@ function openSelectOneDialog(st, options = {}) {
     ? cloneRelationForSelection({ relation: relationData })
     : cloneRelationForSelection(st);
   const dialogId = `select-one-${Date.now()}`;
-  const dialogTitle = title || `Select One (${relCopy.items.length} registos)`;
+  const dialogTitle = title || tf('relation.dialog.select_one', {count: relCopy.items.length});
 
   const overlay = document.createElement('div');
   overlay.className = 'nested-relation-overlay';
@@ -10199,7 +10199,7 @@ function openSelectOneDialog(st, options = {}) {
       <div class="selection-relation-container" id="${dialogId}-builder"></div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline close-selection">Fechar</button>
+      <button class="btn btn-outline close-selection">${t('relation.common.close')}</button>
     </div>
   `;
 
@@ -10274,7 +10274,7 @@ function openSelectManyDialog(st) {
 
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Select Many (${relCopy.items.length} registos)</span>
+      <span>${tf('relation.dialog.select_many', {count: relCopy.items.length})}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     ${selectionSearchHtml()}
@@ -10282,7 +10282,7 @@ function openSelectManyDialog(st) {
       <div class="selection-relation-container" id="${dialogId}-builder"></div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline close-selection">Fechar</button>
+      <button class="btn btn-outline close-selection">${t('relation.common.close')}</button>
     </div>
   `;
 
@@ -10335,14 +10335,14 @@ function openChooseManyDialog(st) {
 
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Choose Many</span>
+      <span>${t('relation.dialog.choose_many')}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="popup-content-body choose-many-body">
       <div class="choose-many-section">
         <div class="choose-many-accordion-header" data-accordion="source" data-expanded="true">
           <span class="choose-many-accordion-arrow">▼</span>
-          <span class="choose-many-label">Disponíveis (<span class="cm-source-count">${relSource.items.length}</span>)</span>
+          <span class="choose-many-label">${t('relation.dialog.available')} (<span class="cm-source-count">${relSource.items.length}</span>)</span>
           <span class="cm-feedback hidden"></span>
         </div>
         <div class="choose-many-accordion-body" data-accordion="source">
@@ -10353,7 +10353,7 @@ function openChooseManyDialog(st) {
       <div class="choose-many-section">
         <div class="choose-many-accordion-header" data-accordion="target" data-expanded="true">
           <span class="choose-many-accordion-arrow">▼</span>
-          <span class="choose-many-label">Escolhidos (<span class="cm-target-count">0</span>)</span>
+          <span class="choose-many-label">${t('relation.dialog.chosen')} (<span class="cm-target-count">0</span>)</span>
           <span class="cm-feedback hidden"></span>
         </div>
         <div class="choose-many-accordion-body" data-accordion="target">
@@ -10362,7 +10362,7 @@ function openChooseManyDialog(st) {
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline close-selection">Fechar</button>
+      <button class="btn btn-outline close-selection">${t('relation.common.close')}</button>
     </div>
   `;
 
@@ -10481,12 +10481,12 @@ function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
     'Uncheck All': { value: 'deselect-all', icon: '✗', label: 'Uncheck All' },
     'Remove Checked': { value: 'remove-selected', icon: '✕', label: `Remove Checked (${selectedCount})`, needsSelection: true },
     'Remove Unchecked': { value: 'remove-unselected', icon: '✕', label: `Remove Unchecked (${filteredCount - selectedCount})`, needsSelection: true },
-    'Multi View': { value: 'multi-view', icon: '👁', label: `Multi View (${selectedCount})`, needsSelection: true },
-    'Multi Edit': { value: 'multi-edit', icon: '✏️', label: `Multi Edit (${selectedCount})`, needsSelection: true },
-    'Group Edit': { value: 'group-edit', icon: '📝', label: `Group Edit (${selectedCount})`, needsSelection: true },
-    'Merge': { value: 'merge', icon: '🔗', label: `Merge (${selectedCount})`, needsSelection: true },
-    'Multi Copy': { value: 'multi-copy', icon: '📋', label: `Multi Copy (${selectedCount})`, needsSelection: true },
-    'Multi Delete': { value: 'multi-delete', icon: '🗑️', label: `Multi Delete (${selectedCount})`, needsSelection: true }
+    'Multi View': { value: 'multi-view', icon: '👁', label: tf('relation.multiops.multi_view', {count: selectedCount}), needsSelection: true },
+    'Multi Edit': { value: 'multi-edit', icon: '✏️', label: tf('relation.multiops.multi_edit', {count: selectedCount}), needsSelection: true },
+    'Group Edit': { value: 'group-edit', icon: '📝', label: tf('relation.multiops.group_edit', {count: selectedCount}), needsSelection: true },
+    'Merge': { value: 'merge', icon: '🔗', label: tf('relation.multiops.merge', {count: selectedCount}), needsSelection: true },
+    'Multi Copy': { value: 'multi-copy', icon: '📋', label: tf('relation.multiops.multi_copy', {count: selectedCount}), needsSelection: true },
+    'Multi Delete': { value: 'multi-delete', icon: '🗑️', label: tf('relation.multiops.multi_delete', {count: selectedCount}), needsSelection: true }
   };
   
   const multiOptions = st.rel_options.general_multi_options || DEFAULT_REL_OPTIONS.general_multi_options;
@@ -10761,7 +10761,7 @@ function showMultiViewDialog(st) {
     bodyRef = container;
     container.innerHTML = '<div class="multi-panels-grid"></div>';
     renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view');
-  }, `👁 Multi View (${checkedIndices.length})`, footerHtml);
+  }, `👁 ${tf('relation.multiops.multi_view', {count: checkedIndices.length})}`, footerHtml);
 
   setTimeout(() => {
     const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
@@ -10789,7 +10789,7 @@ function showMultiEditDialog(st) {
       <option value="3" ${checkedIndices.length < 3 ? 'disabled' : ''}>3 panels</option>
       <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
     </select>
-    <button class="btn btn-primary mp-save-all">Gravar</button>
+    <button class="btn btn-primary mp-save-all">${t('relation.common.save')}</button>
   `;
 
   let bodyRef = null;
@@ -10797,7 +10797,7 @@ function showMultiEditDialog(st) {
     bodyRef = container;
     container.innerHTML = '<div class="multi-panels-grid"></div>';
     renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'edit', { isEdit: true });
-  }, `✏️ Multi Edit (${checkedIndices.length})`, footerHtml);
+  }, `✏️ ${tf('relation.multiops.multi_edit', {count: checkedIndices.length})}`, footerHtml);
 
   setTimeout(() => {
     const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
@@ -10841,12 +10841,12 @@ function showGroupEditDialog(st) {
   if (checkedIndices.length === 0) return;
 
   const footerHtml = `
-    <button class="btn btn-primary ge-save-all">Gravar para Todos</button>
+    <button class="btn btn-primary ge-save-all">${t('relation.multiops.save_to_all')}</button>
     <span class="info-badge ge-info-badge" title="Info">ℹ</span>
     <div class="info-popup ge-info-popup hidden">
-      <p><strong>Group Edit</strong></p>
-      <p>Esta operação permite definir valores para um ou mais campos em todos os registos checked.</p>
-      <p>Assinale a checkbox de cada campo que pretende alterar, defina o valor, e clique "Gravar para Todos".</p>
+      <p><strong>${t('relation.multiops.group_edit_title')}</strong></p>
+      <p>${t('relation.multiops.group_edit_desc')}</p>
+      <p>${t('relation.multiops.group_edit_instructions')}</p>
     </div>
   `;
 
@@ -10892,7 +10892,7 @@ function showGroupEditDialog(st) {
         }
       });
     });
-  }, `📝 Group Edit (${checkedIndices.length})`, footerHtml);
+  }, `📝 ${tf('relation.multiops.group_edit', {count: checkedIndices.length})}`, footerHtml);
 
   setTimeout(() => {
     const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
@@ -10967,14 +10967,14 @@ function showMergeDialog(st) {
 
   const footerHtml = `
     <select class="mp-panel-count">${panelCountOptions}</select>
-    <button class="btn btn-primary merge-execute">Juntar Todos num Só</button>
+    <button class="btn btn-primary merge-execute">${t('relation.multiops.merge_execute')}</button>
     <span class="info-badge merge-info-badge" title="Info">ℹ</span>
     <div class="info-popup merge-info-popup hidden">
-      <p><strong>Merge</strong></p>
-      <p>O primeiro painel (Edit) é o registo que vai receber o resultado do merge.</p>
-      <p>Nos painéis seguintes (View), clique no radiobutton de cada campo para adotar o valor desse registo.</p>
-      <p>Para campos do tipo relation, use as checkboxes para escolher quais sub-registos copiar.</p>
-      <p>Ao clicar "Juntar Todos num Só", os valores escolhidos são aplicados ao registo do painel 1 e os restantes são eliminados.</p>
+      <p><strong>${t('relation.multiops.merge_title')}</strong></p>
+      <p>${t('relation.multiops.merge_desc_1')}</p>
+      <p>${t('relation.multiops.merge_desc_2')}</p>
+      <p>${t('relation.multiops.merge_desc_3')}</p>
+      <p>${t('relation.multiops.merge_desc_4')}</p>
     </div>
   `;
 
@@ -10983,7 +10983,7 @@ function showMergeDialog(st) {
     bodyRef = container;
     container.innerHTML = '<div class="multi-panels-grid"></div>';
     renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view', { isMerge: true, mergeState });
-  }, `🔗 Merge (${checkedIndices.length})`, footerHtml);
+  }, `🔗 ${tf('relation.multiops.merge', {count: checkedIndices.length})}`, footerHtml);
 
   setTimeout(() => {
     const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
@@ -11133,7 +11133,7 @@ function showMultiCopyDialog(st) {
       <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
     </select>
     <input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">
-    <button class="btn btn-primary mp-generate-copies">Gerar Cópias</button>
+    <button class="btn btn-primary mp-generate-copies">${t('relation.dialog.generate_copies')}</button>
   `;
 
   let bodyRef = null;
@@ -11141,7 +11141,7 @@ function showMultiCopyDialog(st) {
     bodyRef = container;
     container.innerHTML = '<div class="multi-panels-grid"></div>';
     renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view');
-  }, `📋 Multi Copy (${checkedIndices.length})`, footerHtml);
+  }, `📋 ${tf('relation.multiops.multi_copy', {count: checkedIndices.length})}`, footerHtml);
 
   setTimeout(() => {
     const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
@@ -11190,7 +11190,7 @@ function showMultiDeleteDialog(st) {
       <option value="3" ${checkedIndices.length < 3 ? 'disabled' : ''}>3 panels</option>
       <option value="4" ${checkedIndices.length < 4 ? 'disabled' : ''}>4 panels</option>
     </select>
-    <button class="btn btn-danger mp-delete-all">Apagar Todos</button>
+    <button class="btn btn-danger mp-delete-all">${t('relation.multiops.delete_all')}</button>
   `;
 
   let bodyRef = null;
@@ -11198,7 +11198,7 @@ function showMultiDeleteDialog(st) {
     bodyRef = container;
     container.innerHTML = '<div class="multi-panels-grid"></div>';
     renderMultiPanelContent(container, st, checkedIndices, panelPositions, numPanels, 'view');
-  }, `🗑️ Multi Delete (${checkedIndices.length})`, footerHtml);
+  }, `🗑️ ${tf('relation.multiops.multi_delete', {count: checkedIndices.length})}`, footerHtml);
 
   setTimeout(() => {
     const wrapper = bodyRef?.closest('.detail-panel-content, .nested-relation-dialog');
@@ -11209,11 +11209,11 @@ function showMultiDeleteDialog(st) {
       if (bodyRef) renderMultiPanelContent(bodyRef, st, checkedIndices, panelPositions, numPanels, 'view');
     });
     wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
-      showConfirmDialog(`Tem a certeza que pretende eliminar ${checkedIndices.length} registos?`, () => {
+      showConfirmDialog(tf('relation.multiops.confirm_delete_all', {count: checkedIndices.length}), () => {
         removeSelectedRows(st, true);
         showToast(tf('relation.toast.records_deleted', {count: checkedIndices.length}), 'success');
         if (closeHandler) closeHandler();
-      }, { confirmText: 'Eliminar Todos' });
+      }, { confirmText: t('relation.multiops.delete_all') });
     });
   }, 0);
 }
@@ -12300,193 +12300,193 @@ function showColumnMenu(colIdx, x, y, st = state) {
     <div class="column-menu-header">${name} (${type})</div>
     <div class="column-menu-accordion">
       <div class="accordion-section" data-section="sort">
-        <div class="accordion-header">Sort <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.sort')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="sort-panel">🔀 Sort Panel</button>
-          <button class="column-menu-item" data-action="sort-asc">↑ Ascending</button>
-          <button class="column-menu-item" data-action="sort-desc">↓ Descending</button>
-          <button class="column-menu-item" data-action="sort-clear">✕ Clear Sort</button>
+          <button class="column-menu-item" data-action="sort-panel">${t('relation.colmenu.sort_panel')}</button>
+          <button class="column-menu-item" data-action="sort-asc">${t('relation.colmenu.sort_asc')}</button>
+          <button class="column-menu-item" data-action="sort-desc">${t('relation.colmenu.sort_desc')}</button>
+          <button class="column-menu-item" data-action="sort-clear">${t('relation.colmenu.sort_clear')}</button>
         </div>
       </div>
       <div class="accordion-section" data-section="filter">
-        <div class="accordion-header">Filter <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.filter')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="filter-values">By Values...</button>
+          <button class="column-menu-item" data-action="filter-values">${t('relation.colmenu.filter_values')}</button>
           ${(type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_comparison ? `
-            <button class="column-menu-item" data-action="filter-comparison">By Comparison...</button>
+            <button class="column-menu-item" data-action="filter-comparison">${t('relation.colmenu.filter_comparison')}</button>
           ` : ''}
           ${(type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_topn ? `
             <div class="column-menu-item-inline" data-testid="filter-topn-row">
               <select class="filter-position-select" data-testid="select-filter-position">
-                <option value="top">Top</option>
-                <option value="middle">Middle</option>
-                <option value="bottom">Bottom</option>
+                <option value="top">${t('relation.colmenu.top')}</option>
+                <option value="middle">${t('relation.colmenu.middle')}</option>
+                <option value="bottom">${t('relation.colmenu.bottom')}</option>
               </select>
               <input type="number" class="filter-n-input" value="10" min="1" step="1" data-testid="input-filter-n">
-              <button class="btn-apply-filter" data-action="apply-topn" data-testid="button-apply-topn">Apply</button>
+              <button class="btn-apply-filter" data-action="apply-topn" data-testid="button-apply-topn">${t('relation.common.apply')}</button>
             </div>
             <div class="column-menu-item-inline" data-testid="filter-topn-percent-row">
               <select class="filter-position-select filter-position-pct" data-testid="select-filter-position-pct">
-                <option value="top">Top</option>
-                <option value="middle">Middle</option>
-                <option value="bottom">Bottom</option>
+                <option value="top">${t('relation.colmenu.top')}</option>
+                <option value="middle">${t('relation.colmenu.middle')}</option>
+                <option value="bottom">${t('relation.colmenu.bottom')}</option>
               </select>
               <input type="number" class="filter-n-input filter-pct-input" value="10" min="1" max="100" step="1" data-testid="input-filter-pct">
               <span class="pct-symbol">%</span>
-              <button class="btn-apply-filter" data-action="apply-topn-pct" data-testid="button-apply-topn-pct">Apply</button>
+              <button class="btn-apply-filter" data-action="apply-topn-pct" data-testid="button-apply-topn-pct">${t('relation.common.apply')}</button>
             </div>
           ` : ''}
           ${(type === 'string' || type === 'textarea') && st.rel_options.show_filter_criteria ? `
-            <button class="column-menu-item" data-action="filter-text-criteria">By Criteria...</button>
+            <button class="column-menu-item" data-action="filter-text-criteria">${t('relation.colmenu.filter_criteria')}</button>
           ` : ''}
           ${(type === 'int' || type === 'float' || type === 'range') && st.rel_options.show_filter_outliers ? `
             <div class="column-menu-item-inline outliers-row" data-testid="filter-outliers-row">
-              <span class="filter-label">Outliers:</span>
+              <span class="filter-label">${t('relation.colmenu.outliers')}</span>
               <select class="filter-outlier-method" data-testid="select-outlier-method">
                 <option value="iqr">IQR</option>
-                <option value="std">Std Dev</option>
+                <option value="std">${t('relation.colmenu.std_dev')}</option>
               </select>
               <span class="filter-mult-symbol">×</span>
               <input type="number" class="filter-mult-input" value="1.5" min="0.1" step="0.1" data-testid="input-outlier-mult">
               <span class="filter-arrow-symbol">→</span>
               <select class="filter-outlier-mode" data-testid="select-outlier-mode">
-                <option value="keep">Choose Outliers</option>
-                <option value="remove">Choose Not Outliers</option>
+                <option value="keep">${t('relation.colmenu.choose_outliers')}</option>
+                <option value="remove">${t('relation.colmenu.choose_not_outliers')}</option>
               </select>
-              <button class="btn-apply-filter" data-action="apply-outliers" data-testid="button-apply-outliers">Apply</button>
+              <button class="btn-apply-filter" data-action="apply-outliers" data-testid="button-apply-outliers">${t('relation.common.apply')}</button>
             </div>
           ` : ''}
-          <button class="column-menu-item" data-action="filter-null">Only Null</button>
-          <button class="column-menu-item" data-action="filter-not-null">Not Null</button>
-          <button class="column-menu-item" data-action="filter-clear">✕ Clear Filter</button>
+          <button class="column-menu-item" data-action="filter-null">${t('relation.colmenu.only_null')}</button>
+          <button class="column-menu-item" data-action="filter-not-null">${t('relation.colmenu.not_null')}</button>
+          <button class="column-menu-item" data-action="filter-clear">${t('relation.colmenu.filter_clear')}</button>
         </div>
       </div>
       <div class="accordion-section" data-section="binning">
-        <div class="accordion-header">Binning / Bucketing <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.binning_header')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           ${st.rel_options.kind_specific !== false && (type === 'int' || type === 'float' || type === 'range') && st.rel_options.show_binning ? `
           <div class="column-menu-item-inline binning-row" data-testid="binning-row">
-            <span class="filter-label">Bins:</span>
+            <span class="filter-label">${t('relation.colmenu.bins_label')}</span>
             <input type="number" class="filter-n-input binning-count-input" value="5" min="2" max="50" step="1" data-testid="input-binning-count">
             <select class="filter-position-select binning-method-select" data-testid="select-binning-method">
-              <option value="equal_width">Equal Width</option>
-              <option value="equal_freq">Equal Freq</option>
+              <option value="equal_width">${t('relation.colmenu.equal_width')}</option>
+              <option value="equal_freq">${t('relation.colmenu.equal_freq')}</option>
               <option value="sturges">Sturges</option>
               <option value="scott">Scott</option>
             </select>
-            <button class="btn-info-small" data-action="binning-help" data-testid="button-binning-help" title="Learn about binning methods">?</button>
+            <button class="btn-info-small" data-action="binning-help" data-testid="button-binning-help" title="${t('relation.colmenu.learn_binning')}">?</button>
           </div>
           <div class="column-menu-item-inline">
-            <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">Create _bin Column</button>
+            <button class="btn-apply-filter" data-action="apply-binning" data-testid="button-apply-binning">${t('relation.colmenu.create_bin')}</button>
           </div>
           ` : ''}
           <div class="column-menu-separator"></div>
-          <button class="column-menu-item" data-action="row-number">Row Number</button>
-          <button class="column-menu-item" data-action="rank">Rank</button>
-          <button class="column-menu-item" data-action="dense-rank">Dense Rank</button>
+          <button class="column-menu-item" data-action="row-number">${t('relation.colmenu.row_number')}</button>
+          <button class="column-menu-item" data-action="rank">${t('relation.colmenu.rank')}</button>
+          <button class="column-menu-item" data-action="dense-rank">${t('relation.colmenu.dense_rank')}</button>
           <div class="column-menu-separator"></div>
           <div class="column-menu-item-inline">
-            <button class="btn-apply-filter color-binning-btn" data-action="apply-color-binning" data-testid="button-apply-color-binning" data-col="${colIdx}">Create from Colors</button>
+            <button class="btn-apply-filter color-binning-btn" data-action="apply-color-binning" data-testid="button-apply-color-binning" data-col="${colIdx}">${t('relation.colmenu.create_from_colors')}</button>
           </div>
-          <div class="binning-note">Creates a new column with bin numbers (1 to N)</div>
+          <div class="binning-note">${t('relation.colmenu.binning_note')}</div>
         </div>
       </div>
       ${st.rel_options.show_groupby ? `
       <div class="accordion-section" data-section="group">
-        <div class="accordion-header">Group By <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.group_by')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           ${type === 'id' ? `
-          <button class="column-menu-item disabled" disabled title="Group By is not available for id columns">Group by this column</button>
+          <button class="column-menu-item disabled" disabled title="${t('relation.colmenu.group_not_id')}">${t('relation.colmenu.group_this')}</button>
           ` : `
-          <button class="column-menu-item ${isGrouped ? 'active' : ''}" data-action="toggle-group">${isGrouped ? '✓ Grouped' : 'Group by this column'}</button>
+          <button class="column-menu-item ${isGrouped ? 'active' : ''}" data-action="toggle-group">${isGrouped ? t('relation.colmenu.grouped') : t('relation.colmenu.group_this')}</button>
           `}
-          <button class="column-menu-item" data-action="group-all">Group by ALL columns</button>
-          <button class="column-menu-item" data-action="clear-groups">✕ Clear All Groups</button>
+          <button class="column-menu-item" data-action="group-all">${t('relation.colmenu.group_all')}</button>
+          <button class="column-menu-item" data-action="clear-groups">${t('relation.colmenu.clear_groups')}</button>
         </div>
       </div>
       ` : ''}
       ${st.rel_options.kind_specific !== false && type === 'relation' && st.rel_options.show_cartesian_product ? `
       <div class="accordion-section" data-section="relation">
-        <div class="accordion-header">Relation <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.relation_section')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="expand-relation-this">⊗ Cartesian Product (THIS)</button>
-          <button class="column-menu-item" data-action="expand-relation">⊗ Cartesian Product (ALL)</button>
+          <button class="column-menu-item" data-action="expand-relation-this">${t('relation.colmenu.cartesian_this')}</button>
+          <button class="column-menu-item" data-action="expand-relation">${t('relation.colmenu.cartesian_all')}</button>
         </div>
       </div>
       ` : ''}
       <div class="accordion-section" data-section="column">
-        <div class="accordion-header">Column <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.column_section')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="show-hide-columns">⚙ Show/Hide Columns...</button>
-          <button class="column-menu-item" data-action="hide-column">👁‍🗨 Hide Column</button>
-          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="hide-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>👁‍🗨 Hide Selected Columns (${getSelectedColumns(st).size})</button>
+          <button class="column-menu-item" data-action="show-hide-columns">${t('relation.colmenu.show_hide')}</button>
+          <button class="column-menu-item" data-action="hide-column">${t('relation.colmenu.hide_column')}</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="hide-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>${t('relation.colmenu.hide_selected')} (${getSelectedColumns(st).size})</button>
           <div class="column-menu-separator"></div>
-          <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? '✓ Selected' : 'Select Column'}</button>
-          <button class="column-menu-item" data-action="select-all-cols">Select All Columns</button>
-          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Group Selected → Relation</button>
-          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>Clear Selection</button>
+          <button class="column-menu-item ${isSelected ? 'active' : ''}" data-action="toggle-select-col">${isSelected ? t('relation.colmenu.selected') : t('relation.colmenu.select_column')}</button>
+          <button class="column-menu-item" data-action="select-all-cols">${t('relation.colmenu.select_all_cols')}</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="group-selected-cols" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>${t('relation.colmenu.group_selected')}</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}" data-action="clear-col-selection" ${getSelectedColumns(st).size > 0 ? '' : 'disabled'}>${t('relation.colmenu.clear_selection')}</button>
           ${st.rel_options.kind_specific !== false && (type === 'date' || type === 'datetime') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
-          <div class="column-menu-sublabel">Derived Columns (Date)</div>
-          <button class="column-menu-item" data-action="derive-year">Extract Year → ${name}_year</button>
-          <button class="column-menu-item" data-action="derive-month">Extract Month (1-12) → ${name}_month</button>
-          <button class="column-menu-item" data-action="derive-day">Extract Day → ${name}_day</button>
-          <button class="column-menu-item" data-action="derive-dayofweek">Extract Day of Week (1-7) → ${name}_dayofweek</button>
-          <button class="column-menu-item" data-action="derive-weekofyear">Extract Week of Year → ${name}_weekofyear</button>
-          <button class="column-menu-item" data-action="derive-quarter">Extract Quarter (1-4) → ${name}_quarter</button>
-          <button class="column-menu-item" data-action="derive-semester">Extract Semester (1-2) → ${name}_semester</button>
+          <div class="column-menu-sublabel">${t('relation.colmenu.derived_date')}</div>
+          <button class="column-menu-item" data-action="derive-year">${t('relation.colmenu.extract_year')} → ${name}_year</button>
+          <button class="column-menu-item" data-action="derive-month">${t('relation.colmenu.extract_month')} → ${name}_month</button>
+          <button class="column-menu-item" data-action="derive-day">${t('relation.colmenu.extract_day')} → ${name}_day</button>
+          <button class="column-menu-item" data-action="derive-dayofweek">${t('relation.colmenu.extract_dayofweek')} → ${name}_dayofweek</button>
+          <button class="column-menu-item" data-action="derive-weekofyear">${t('relation.colmenu.extract_weekofyear')} → ${name}_weekofyear</button>
+          <button class="column-menu-item" data-action="derive-quarter">${t('relation.colmenu.extract_quarter')} → ${name}_quarter</button>
+          <button class="column-menu-item" data-action="derive-semester">${t('relation.colmenu.extract_semester')} → ${name}_semester</button>
           ` : ''}
           ${st.rel_options.kind_specific !== false && (type === 'time' || type === 'datetime') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
-          <div class="column-menu-sublabel">Derived Columns (Time)</div>
-          <button class="column-menu-item" data-action="derive-hour">Extract Hour → ${name}_hour</button>
-          <button class="column-menu-item" data-action="derive-minute">Extract Minute → ${name}_minute</button>
-          <button class="column-menu-item" data-action="derive-second">Extract Second → ${name}_second</button>
-          <button class="column-menu-item" data-action="derive-ampm">Extract AM/PM → ${name}_ampm</button>
-          <button class="column-menu-item" data-action="derive-hour12">Extract Hour (12h) → ${name}_hour12</button>
+          <div class="column-menu-sublabel">${t('relation.colmenu.derived_time')}</div>
+          <button class="column-menu-item" data-action="derive-hour">${t('relation.colmenu.extract_hour')} → ${name}_hour</button>
+          <button class="column-menu-item" data-action="derive-minute">${t('relation.colmenu.extract_minute')} → ${name}_minute</button>
+          <button class="column-menu-item" data-action="derive-second">${t('relation.colmenu.extract_second')} → ${name}_second</button>
+          <button class="column-menu-item" data-action="derive-ampm">${t('relation.colmenu.extract_ampm')} → ${name}_ampm</button>
+          <button class="column-menu-item" data-action="derive-hour12">${t('relation.colmenu.extract_hour12')} → ${name}_hour12</button>
           ` : ''}
           ${st.rel_options.kind_specific !== false && (type === 'float' || type === 'range') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
-          <div class="column-menu-sublabel">Derived Columns (Float)</div>
+          <div class="column-menu-sublabel">${t('relation.colmenu.derived_float')}</div>
           <div class="column-menu-item-inline">
-            <span class="filter-label">Round to</span>
+            <span class="filter-label">${t('relation.colmenu.round_to')}</span>
             <input type="number" class="filter-n-input derive-round-n" value="2" min="0" max="10" step="1">
-            <span class="filter-label">decimals</span>
-            <button class="btn-apply-filter" data-action="derive-round">Create</button>
+            <span class="filter-label">${t('relation.colmenu.decimals')}</span>
+            <button class="btn-apply-filter" data-action="derive-round">${t('relation.colmenu.create_btn')}</button>
           </div>
           ` : ''}
           ${st.rel_options.kind_specific !== false && (type === 'string' || type === 'textarea') && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
-          <div class="column-menu-sublabel">Derived Columns (Text)</div>
-          <button class="column-menu-item" data-action="derive-length">Length (chars) → ${name}_length</button>
-          <button class="column-menu-item" data-action="derive-bytes">Length (bytes) → ${name}_bytes</button>
-          <button class="column-menu-item" data-action="derive-flesch-ease">Flesch Reading Ease (0-100) → ${name}_flesch_ease <span class="info-badge" data-tooltip="Flesch Reading Ease scores text readability on a 0-100 scale. Higher scores indicate easier reading: 90-100 = 5th grader, 60-70 = 8th-9th grader, 30-50 = college level, 0-30 = professional/academic. Based on average sentence length and syllable count." title="Flesch Reading Ease scores text readability on a 0-100 scale. Higher scores indicate easier reading: 90-100 = 5th grader, 60-70 = 8th-9th grader, 30-50 = college level, 0-30 = professional/academic.">ⓘ</span></button>
-          <button class="column-menu-item" data-action="derive-flesch-kincaid">Flesch-Kincaid Grade Level → ${name}_flesch_kincaid <span class="info-badge" data-tooltip="Flesch-Kincaid Grade Level indicates the U.S. school grade needed to understand the text. A score of 8.0 means an 8th grader can understand it. Lower scores mean easier text. Based on average sentence length and syllable count." title="Flesch-Kincaid Grade Level indicates the U.S. school grade needed to understand the text. A score of 8.0 means an 8th grader can understand it. Lower scores mean easier text.">ⓘ</span></button>
+          <div class="column-menu-sublabel">${t('relation.colmenu.derived_text')}</div>
+          <button class="column-menu-item" data-action="derive-length">${t('relation.colmenu.length_chars')} → ${name}_length</button>
+          <button class="column-menu-item" data-action="derive-bytes">${t('relation.colmenu.length_bytes')} → ${name}_bytes</button>
+          <button class="column-menu-item" data-action="derive-flesch-ease">${t('relation.colmenu.flesch_ease_label')} → ${name}_flesch_ease <span class="info-badge" data-tooltip="${t('relation.colmenu.flesch_reading')}" title="${t('relation.colmenu.flesch_reading')}">ⓘ</span></button>
+          <button class="column-menu-item" data-action="derive-flesch-kincaid">${t('relation.colmenu.flesch_kincaid_label')} → ${name}_flesch_kincaid <span class="info-badge" data-tooltip="${t('relation.colmenu.flesch_kincaid')}" title="${t('relation.colmenu.flesch_kincaid')}">ⓘ</span></button>
           ${type === 'textarea' ? `
-          <button class="column-menu-item" data-action="derive-sentences">Sentence Count → ${name}_sentences</button>
+          <button class="column-menu-item" data-action="derive-sentences">${t('relation.colmenu.sentence_count')} → ${name}_sentences</button>
           ` : ''}
           ` : ''}
           ${st.rel_options.kind_specific !== false && (shouldShowHierarchy(st) && name === st.rel_options.hierarchy_column) && st.rel_options.show_derived_columns ? `
           <div class="column-menu-separator"></div>
-          <div class="column-menu-sublabel">Derived Columns (Hierarchy)</div>
-          <button class="column-menu-item" data-action="derive-hierarchy-ascendants">Ascendants → ${name}_ascendants</button>
-          <button class="column-menu-item" data-action="derive-hierarchy-descendants">Descendants → ${name}_descendants</button>
-          <button class="column-menu-item" data-action="derive-hierarchy-path">Path → ${name}_path</button>
+          <div class="column-menu-sublabel">${t('relation.colmenu.derived_hierarchy')}</div>
+          <button class="column-menu-item" data-action="derive-hierarchy-ascendants">${t('relation.colmenu.ascendants')} → ${name}_ascendants</button>
+          <button class="column-menu-item" data-action="derive-hierarchy-descendants">${t('relation.colmenu.descendants')} → ${name}_descendants</button>
+          <button class="column-menu-item" data-action="derive-hierarchy-path">${t('relation.colmenu.hierarchy_path')} → ${name}_path</button>
           ` : ''}
           <div class="column-menu-separator"></div>
-          <button class="column-menu-item" data-action="remove-column">Remove Column</button>
-          <button class="column-menu-item ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}>Remove Selected Columns (${getSelectedColumns(st).size})</button>
+          <button class="column-menu-item" data-action="remove-column">${t('relation.colmenu.remove_column')}</button>
+          <button class="column-menu-item ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}" data-action="remove-selected-cols" ${getSelectedColumns(st).size > 1 ? '' : 'disabled'}>${t('relation.colmenu.remove_selected')} (${getSelectedColumns(st).size})</button>
         </div>
       </div>
       ${st.rel_options.show_formatting ? `
       <div class="accordion-section" data-section="formatting">
-        <div class="accordion-header">Conditional Formatting <span class="accordion-arrow">▶</span></div>
+        <div class="accordion-header">${t('relation.colmenu.formatting')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
-          <button class="column-menu-item" data-action="format-databar">Color Bar</button>
-          <button class="column-menu-item" data-action="format-color-scale">Color Scale</button>
-          <button class="column-menu-item" data-action="format-icon-set">Icon Set...</button>
-          <button class="column-menu-item" data-action="format-active-filter">Color current results...</button>
-          <button class="column-menu-item" data-action="format-clear">✕ Clear Formatting</button>
+          <button class="column-menu-item" data-action="format-databar">${t('relation.colmenu.color_bar')}</button>
+          <button class="column-menu-item" data-action="format-color-scale">${t('relation.colmenu.color_scale')}</button>
+          <button class="column-menu-item" data-action="format-icon-set">${t('relation.colmenu.icon_set')}</button>
+          <button class="column-menu-item" data-action="format-active-filter">${t('relation.colmenu.color_results')}</button>
+          <button class="column-menu-item" data-action="format-clear">${t('relation.colmenu.clear_formatting')}</button>
         </div>
       </div>
       ` : ''}
@@ -12525,9 +12525,9 @@ function showColumnMenu(colIdx, x, y, st = state) {
     if (uniqueColors.length < 2) {
       colorBinBtn.disabled = true;
       colorBinBtn.classList.add('disabled');
-      colorBinBtn.title = 'Requires at least 2 different colors in this column';
+      colorBinBtn.title = t('relation.colmenu.requires_colors');
     } else {
-      colorBinBtn.title = `Create bins from ${uniqueColors.length} colors`;
+      colorBinBtn.title = tf('relation.colmenu.create_bins_from', {count: uniqueColors.length});
     }
   }
   
@@ -12657,26 +12657,26 @@ function showColumnsVisibilityDialog(st) {
           <input type="checkbox" class="cv-checkbox" ${col.visible ? 'checked' : ''} data-col-name="${col.name}">
           <span>${col.name} <small>(${col.type})</small></span>
         </label>
-        <input type="number" class="cv-width-input" value="${col.width}" min="0" max="1000" step="10" data-col-name="${col.name}" title="Width in px (0 = auto)">
+        <input type="number" class="cv-width-input" value="${col.width}" min="0" max="1000" step="10" data-col-name="${col.name}" title="${t('relation.colmenu.width_px')}">
       </div>`;
   });
   
   dialog.innerHTML = `
     <div class="confirm-dialog-content">
-      <h3>Show/Hide Columns</h3>
+      <h3>${t('relation.colmenu.show_hide_title')}</h3>
       <div class="cv-actions-bar">
-        <button class="btn btn-sm cv-select-all">Select All</button>
-        <button class="btn btn-sm cv-deselect-all">Deselect All</button>
+        <button class="btn btn-sm cv-select-all">${t('relation.colmenu.select_all_btn')}</button>
+        <button class="btn btn-sm cv-deselect-all">${t('relation.colmenu.deselect_all_btn')}</button>
       </div>
       <div class="cv-columns-header">
-        <span class="cv-header-col">Column</span>
-        <span class="cv-header-width">Width (0 = auto)</span>
+        <span class="cv-header-col">${t('relation.colmenu.cv_column_header')}</span>
+        <span class="cv-header-width">${t('relation.colmenu.cv_width_header')}</span>
       </div>
       <div class="cv-columns-list">${listHtml}</div>
     </div>
     <div class="confirm-dialog-buttons">
-      <button class="btn btn-outline cv-cancel">Cancel</button>
-      <button class="btn btn-primary cv-apply">Apply</button>
+      <button class="btn btn-outline cv-cancel">${t('relation.common.cancel')}</button>
+      <button class="btn btn-primary cv-apply">${t('relation.common.apply')}</button>
     </div>
   `;
   
@@ -13730,11 +13730,11 @@ function showBinIntervalsPopup(colIdx, x, y, st = state) {
   
   const colName = st.columnNames[colIdx];
   const methodNames = {
-    'equal_width': 'Equal Width',
-    'equal_freq': 'Equal Frequency',
+    'equal_width': t('relation.colmenu.equal_width'),
+    'equal_freq': t('relation.colmenu.equal_freq'),
     'sturges': 'Sturges',
     'scott': 'Scott',
-    'colors': 'Cell Colors'
+    'colors': t('relation.binning.cell_colors')
   };
   
   // For color binning, show color swatches
@@ -13756,9 +13756,9 @@ function showBinIntervalsPopup(colIdx, x, y, st = state) {
       <button class="btn-close-popup">✕</button>
     </div>
     <div class="bin-popup-info">
-      <div>Source: <strong>${binConfig.sourceColumn}</strong></div>
-      <div>Method: <strong>${methodNames[binConfig.method] || binConfig.method}</strong></div>
-      <div>Bins: <strong>${binConfig.bins}</strong></div>
+      <div>${t('relation.binning.source')}: <strong>${binConfig.sourceColumn}</strong></div>
+      <div>${t('relation.binning.method_label')}: <strong>${methodNames[binConfig.method] || binConfig.method}</strong></div>
+      <div>${t('relation.binning.bins_label')}: <strong>${binConfig.bins}</strong></div>
     </div>
     <div class="bin-popup-intervals">
       ${labelsHtml}
@@ -13794,24 +13794,24 @@ function showBinningHelpDialog() {
   const dialog = document.createElement('div');
   dialog.className = 'binning-help-dialog';
   dialog.innerHTML = `
-    <h3>Binning Methods</h3>
+    <h3>${t('relation.binning.title')}</h3>
     <div class="method-item">
-      <div class="method-name">Equal Width</div>
-      <div class="method-desc">Divides the range into bins of equal width. Best for uniformly distributed data.</div>
+      <div class="method-name">${t('relation.colmenu.equal_width')}</div>
+      <div class="method-desc">${t('relation.binning.equal_width_desc')}</div>
     </div>
     <div class="method-item">
-      <div class="method-name">Equal Frequency</div>
-      <div class="method-desc">Each bin contains approximately the same number of values. Best for skewed data.</div>
+      <div class="method-name">${t('relation.binning.equal_frequency')}</div>
+      <div class="method-desc">${t('relation.binning.equal_freq_desc')}</div>
     </div>
     <div class="method-item">
       <div class="method-name">Sturges</div>
-      <div class="method-desc">Calculates optimal bins using k = 1 + log₂(n). Good for normally distributed data.</div>
+      <div class="method-desc">${t('relation.binning.sturges_desc')}</div>
     </div>
     <div class="method-item">
       <div class="method-name">Scott</div>
-      <div class="method-desc">Uses bin width = 3.5σ / n^(1/3). Optimal for normally distributed data considering variance.</div>
+      <div class="method-desc">${t('relation.binning.scott_desc')}</div>
     </div>
-    <button class="btn-close-dialog">Close</button>
+    <button class="btn-close-dialog">${t('relation.common.close')}</button>
   `;
   
   document.body.appendChild(dialog);
@@ -14581,9 +14581,9 @@ function showStatisticsPanel(colIdx) {
   const nonNullPercent = ((stats.nonNull / stats.total) * 100).toFixed(2);
   
   let statsHtml = `
-    <div class="stats-row"><span>Total Records:</span><span>${stats.total} (100.00%)</span></div>
-    <div class="stats-row"><span>Non-null:</span><span>${stats.nonNull} (${nonNullPercent}%)</span></div>
-    <div class="stats-row"><span>Null:</span><span>${stats.nullCount} (${stats.nullPercent}%)</span></div>
+    <div class="stats-row"><span>${t('relation.stats.total_records')}</span><span>${stats.total} (100.00%)</span></div>
+    <div class="stats-row"><span>${t('relation.stats.non_null')}</span><span>${stats.nonNull} (${nonNullPercent}%)</span></div>
+    <div class="stats-row"><span>${t('relation.stats.null_count')}</span><span>${stats.nullCount} (${stats.nullPercent}%)</span></div>
   `;
   
   if (type === 'int' || type === 'float' || type === 'range') {
@@ -14592,26 +14592,26 @@ function showStatisticsPanel(colIdx) {
     
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Min:</span><span>${stats.min?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Max:</span><span>${stats.max?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Range |max−min|:</span><span>${stats.range?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Sum:</span><span>${stats.sum?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.min')}</span><span>${stats.min?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.max')}</span><span>${stats.max?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.range')}</span><span>${stats.range?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.sum')}</span><span>${stats.sum?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Mean:</span><span>${stats.mean?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Median:</span><span>${stats.median?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.slice(0, 3).join(', ') ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mean')}</span><span>${stats.mean?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.median')}</span><span>${stats.median?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${stats.mode?.slice(0, 3).join(', ') ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Std Dev:</span><span>${stats.stdDev?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Variance:</span><span>${stats.variance?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.std_dev')}</span><span>${stats.stdDev?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.variance')}</span><span>${stats.variance?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3?.toFixed(3) ?? '—'}</span></div>
-      <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.q1')}</span><span>${stats.q1?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.q3')}</span><span>${stats.q3?.toFixed(3) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.iqr')}</span><span>${stats.iqr?.toFixed(3) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
-      <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.outliers')}</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.far_outliers')}</span><span>${stats.farOutliers?.length ?? 0}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Distribution Shape</div>
+      <div class="stats-subtitle">${t('relation.stats.distribution_shape')}</div>
       <div class="shape-charts-row">
         ${generateSkewnessSVG(stats.skewness)}
         ${generateKurtosisSVG(stats.kurtosis)}
@@ -14627,28 +14627,28 @@ function showStatisticsPanel(colIdx) {
     // Centrality measures
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Centrality</div>
-      <div class="stats-row"><span>Categories:</span><span>${stats.categoryCount}</span></div>
-      <div class="stats-row"><span>Mode:</span><span>${modeDisplay}</span></div>
-      <div class="stats-row"><span>Mode Count:</span><span>${stats.modeCount} (${stats.modePercent}%)</span></div>
+      <div class="stats-subtitle">${t('relation.stats.centrality')}</div>
+      <div class="stats-row"><span>${t('relation.stats.categories')}</span><span>${stats.categoryCount}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${modeDisplay}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mode_count')}</span><span>${stats.modeCount} (${stats.modePercent}%)</span></div>
     `;
     
     // Dispersion measures
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Dispersion</div>
-      <div class="stats-row"><span>Variation Ratio:</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Entropy:</span><span>${stats.entropy?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Max Entropy:</span><span>${stats.maxEntropy?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Norm. Entropy:</span><span>${stats.normalizedEntropy?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Gini-Simpson:</span><span>${stats.giniSimpson?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>IQV:</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-subtitle">${t('relation.stats.dispersion')}</div>
+      <div class="stats-row"><span>${t('relation.stats.variation_ratio')}</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.entropy')}</span><span>${stats.entropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.max_entropy')}</span><span>${stats.maxEntropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.norm_entropy')}</span><span>${stats.normalizedEntropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.gini_simpson')}</span><span>${stats.giniSimpson?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.iqv')}</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
     `;
     
     // Frequency table (combined)
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Frequency Table</div>
+      <div class="stats-subtitle">${t('relation.stats.freq_table')}</div>
       ${generateFrequencyTableHTML(stats, name)}
     `;
   } else if (type === 'boolean') {
@@ -14658,28 +14658,28 @@ function showStatisticsPanel(colIdx) {
     // Basic counts
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Centrality</div>
-      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.join(', ') ?? '—'} (${stats.modePercent}%)</span></div>
-      <div class="stats-row"><span>Categories:</span><span>${stats.categoryCount}</span></div>
+      <div class="stats-subtitle">${t('relation.stats.centrality')}</div>
+      <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${stats.mode?.join(', ') ?? '—'} (${stats.modePercent}%)</span></div>
+      <div class="stats-row"><span>${t('relation.stats.categories')}</span><span>${stats.categoryCount}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Dispersion</div>
-      <div class="stats-row"><span>Entropy H(X):</span><span>${stats.entropy?.toFixed(4) ?? '—'} bits</span></div>
-      <div class="stats-row"><span>Max Entropy:</span><span>${stats.maxEntropy?.toFixed(4) ?? '—'} bits</span></div>
-      <div class="stats-row"><span>Normalized Entropy:</span><span>${stats.normalizedEntropy?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Gini-Simpson:</span><span>${stats.giniSimpson?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>IQV:</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Variation Ratio:</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-subtitle">${t('relation.stats.dispersion')}</div>
+      <div class="stats-row"><span>${t('relation.stats.entropy')}</span><span>${stats.entropy?.toFixed(4) ?? '—'} bits</span></div>
+      <div class="stats-row"><span>${t('relation.stats.max_entropy')}</span><span>${stats.maxEntropy?.toFixed(4) ?? '—'} bits</span></div>
+      <div class="stats-row"><span>${t('relation.stats.norm_entropy')}</span><span>${stats.normalizedEntropy?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.gini_simpson')}</span><span>${stats.giniSimpson?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.iqv')}</span><span>${stats.iqv?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.variation_ratio')}</span><span>${stats.variationRatio?.toFixed(4) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Frequency Table</div>
+      <div class="stats-subtitle">${t('relation.stats.freq_table')}</div>
       ${generateBooleanFrequencyTableHTML(stats)}
     `;
   } else if (type === 'string' || type === 'textarea') {
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Unique Values:</span><span>${stats.uniqueCount}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.unique_values')}</span><span>${stats.uniqueCount}</span></div>
     `;
     if (stats.topValues) {
-      statsHtml += `<div class="stats-subtitle">Top Values:</div>`;
+      statsHtml += `<div class="stats-subtitle">${t('relation.stats.top_values')}</div>`;
       stats.topValues.forEach(([val, count]) => {
         statsHtml += `<div class="stats-row stats-row-small"><span>${String(val).substring(0, 20)}</span><span>${count}</span></div>`;
       });
@@ -14691,27 +14691,27 @@ function showStatisticsPanel(colIdx) {
       statsHtml += generateBoxPlotSVG(ls);
       statsHtml += `
         <div class="stats-divider"></div>
-        <div class="stats-subtitle">Length Statistics (Unicode chars)</div>
-        <div class="stats-row"><span>Min Length:</span><span>${ls.min ?? '—'}</span></div>
-        <div class="stats-row"><span>Max Length:</span><span>${ls.max ?? '—'}</span></div>
-        <div class="stats-row"><span>Range |max−min|:</span><span>${ls.range ?? '—'}</span></div>
-        <div class="stats-row"><span>Total Chars:</span><span>${ls.sum ?? '—'}</span></div>
+        <div class="stats-subtitle">${t('relation.stats.char_count_stats')}</div>
+        <div class="stats-row"><span>${t('relation.stats.min_chars')}</span><span>${ls.min ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.max_chars')}</span><span>${ls.max ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.range')}</span><span>${ls.range ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.total_chars')}</span><span>${ls.sum ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Mean:</span><span>${ls.mean?.toFixed(2) ?? '—'}</span></div>
-        <div class="stats-row"><span>Median:</span><span>${ls.median ?? '—'}</span></div>
-        <div class="stats-row"><span>Mode:</span><span>${ls.mode?.join(', ') ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.mean')}</span><span>${ls.mean?.toFixed(2) ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.median')}</span><span>${ls.median ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${ls.mode?.join(', ') ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Std Dev σ:</span><span>${ls.stdDev?.toFixed(4) ?? '—'}</span></div>
-        <div class="stats-row"><span>Variance σ²:</span><span>${ls.variance?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.std_dev_sigma')}</span><span>${ls.stdDev?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.variance_sigma')}</span><span>${ls.variance?.toFixed(4) ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Q1 (25%):</span><span>${ls.q1 ?? '—'}</span></div>
-        <div class="stats-row"><span>Q3 (75%):</span><span>${ls.q3 ?? '—'}</span></div>
-        <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${ls.iqr ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.q1')}</span><span>${ls.q1 ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.q3')}</span><span>${ls.q3 ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.iqr')}</span><span>${ls.iqr ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${ls.outliers?.length ?? 0}</span></div>
-        <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${ls.farOutliers?.length ?? 0}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.outliers')}</span><span>${ls.outliers?.length ?? 0}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.far_outliers')}</span><span>${ls.farOutliers?.length ?? 0}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-subtitle">Distribution Shape</div>
+        <div class="stats-subtitle">${t('relation.stats.distribution_shape')}</div>
         <div class="shape-charts-row">
           ${generateSkewnessSVG(ls.skewness)}
           ${generateKurtosisSVG(ls.kurtosis)}
@@ -14725,27 +14725,27 @@ function showStatisticsPanel(colIdx) {
       statsHtml += generateBoxPlotSVG(lns);
       statsHtml += `
         <div class="stats-divider"></div>
-        <div class="stats-subtitle">Line Count Statistics</div>
-        <div class="stats-row"><span>Min Lines:</span><span>${lns.min ?? '—'}</span></div>
-        <div class="stats-row"><span>Max Lines:</span><span>${lns.max ?? '—'}</span></div>
-        <div class="stats-row"><span>Range |max−min|:</span><span>${lns.range ?? '—'}</span></div>
-        <div class="stats-row"><span>Total Lines:</span><span>${lns.sum ?? '—'}</span></div>
+        <div class="stats-subtitle">${t('relation.stats.line_count_stats')}</div>
+        <div class="stats-row"><span>${t('relation.stats.min_lines')}</span><span>${lns.min ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.max_lines')}</span><span>${lns.max ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.range')}</span><span>${lns.range ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.total_lines')}</span><span>${lns.sum ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Mean:</span><span>${lns.mean?.toFixed(2) ?? '—'}</span></div>
-        <div class="stats-row"><span>Median:</span><span>${lns.median ?? '—'}</span></div>
-        <div class="stats-row"><span>Mode:</span><span>${lns.mode?.join(', ') ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.mean')}</span><span>${lns.mean?.toFixed(2) ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.median')}</span><span>${lns.median ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${lns.mode?.join(', ') ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Std Dev σ:</span><span>${lns.stdDev?.toFixed(4) ?? '—'}</span></div>
-        <div class="stats-row"><span>Variance σ²:</span><span>${lns.variance?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.std_dev_sigma')}</span><span>${lns.stdDev?.toFixed(4) ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.variance_sigma')}</span><span>${lns.variance?.toFixed(4) ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Q1 (25%):</span><span>${lns.q1 ?? '—'}</span></div>
-        <div class="stats-row"><span>Q3 (75%):</span><span>${lns.q3 ?? '—'}</span></div>
-        <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${lns.iqr ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.q1')}</span><span>${lns.q1 ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.q3')}</span><span>${lns.q3 ?? '—'}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.iqr')}</span><span>${lns.iqr ?? '—'}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${lns.outliers?.length ?? 0}</span></div>
-        <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${lns.farOutliers?.length ?? 0}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.outliers')}</span><span>${lns.outliers?.length ?? 0}</span></div>
+        <div class="stats-row"><span>${t('relation.stats.far_outliers')}</span><span>${lns.farOutliers?.length ?? 0}</span></div>
         <div class="stats-divider"></div>
-        <div class="stats-subtitle">Distribution Shape</div>
+        <div class="stats-subtitle">${t('relation.stats.distribution_shape')}</div>
         <div class="shape-charts-row">
           ${generateSkewnessSVG(lns.skewness)}
           ${generateKurtosisSVG(lns.kurtosis)}
@@ -14760,55 +14760,54 @@ function showStatisticsPanel(colIdx) {
     
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Min ${label}:</span><span>${stats.min ?? '—'}</span></div>
-      <div class="stats-row"><span>Max ${label}:</span><span>${stats.max ?? '—'}</span></div>
-      <div class="stats-row"><span>Range |max−min|:</span><span>${stats.range ?? '—'}</span></div>
+      <div class="stats-row"><span>${tf('relation.stats.min_date', {label: label})}</span><span>${stats.min ?? '—'}</span></div>
+      <div class="stats-row"><span>${tf('relation.stats.max_date', {label: label})}</span><span>${stats.max ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.range')}</span><span>${stats.range ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Mean:</span><span>${stats.mean ?? '—'}</span></div>
-      <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
-      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.slice(0, 3).join(', ') ?? '—'}${stats.modeCount ? ' (' + stats.modeCount + '×)' : ''}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mean')}</span><span>${stats.mean ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.median')}</span><span>${stats.median ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${stats.mode?.slice(0, 3).join(', ') ?? '—'}${stats.modeCount ? ' (' + stats.modeCount + '×)' : ''}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Std Dev:</span><span>${stats.stdDevFormatted ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.std_dev')}</span><span>${stats.stdDevFormatted ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
-      <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
-      <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.q1')}</span><span>${stats.q1 ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.q3')}</span><span>${stats.q3 ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.iqr')}</span><span>${stats.iqr ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
-      <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.outliers')}</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.far_outliers')}</span><span>${stats.farOutliers?.length ?? 0}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Distribution Shape</div>
+      <div class="stats-subtitle">${t('relation.stats.distribution_shape')}</div>
       <div class="shape-charts-row">
         ${generateSkewnessSVG(stats.skewness)}
         ${generateKurtosisSVG(stats.kurtosis)}
       </div>
     `;
   } else if (type === 'relation') {
-    // Statistics based on row counts in nested relations
     statsHtml += generateBoxPlotSVG(stats);
     statsHtml += `
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Row Count Statistics</div>
-      <div class="stats-row"><span>Min Rows:</span><span>${stats.min ?? '—'}</span></div>
-      <div class="stats-row"><span>Max Rows:</span><span>${stats.max ?? '—'}</span></div>
-      <div class="stats-row"><span>Range |max−min|:</span><span>${stats.range ?? '—'}</span></div>
-      <div class="stats-row"><span>Total Rows:</span><span>${stats.sum ?? '—'}</span></div>
+      <div class="stats-subtitle">${t('relation.stats.row_count_stats')}</div>
+      <div class="stats-row"><span>${t('relation.stats.min_rows')}</span><span>${stats.min ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.max_rows')}</span><span>${stats.max ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.range')}</span><span>${stats.range ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.total_rows')}</span><span>${stats.sum ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Mean:</span><span>${stats.mean?.toFixed(2) ?? '—'}</span></div>
-      <div class="stats-row"><span>Median:</span><span>${stats.median ?? '—'}</span></div>
-      <div class="stats-row"><span>Mode:</span><span>${stats.mode?.join(', ') ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mean')}</span><span>${stats.mean?.toFixed(2) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.median')}</span><span>${stats.median ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.mode')}</span><span>${stats.mode?.join(', ') ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Std Dev σ:</span><span>${stats.stdDev?.toFixed(4) ?? '—'}</span></div>
-      <div class="stats-row"><span>Variance σ²:</span><span>${stats.variance?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.std_dev_sigma')}</span><span>${stats.stdDev?.toFixed(4) ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.variance_sigma')}</span><span>${stats.variance?.toFixed(4) ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Q1 (25%):</span><span>${stats.q1 ?? '—'}</span></div>
-      <div class="stats-row"><span>Q3 (75%):</span><span>${stats.q3 ?? '—'}</span></div>
-      <div class="stats-row"><span>IQR (Q3−Q1):</span><span>${stats.iqr ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.q1')}</span><span>${stats.q1 ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.q3')}</span><span>${stats.q3 ?? '—'}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.iqr')}</span><span>${stats.iqr ?? '—'}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-row"><span>Outliers (&lt;Q1−1.5×IQR or &gt;Q3+1.5×IQR):</span><span>${stats.outliers?.length ?? 0}</span></div>
-      <div class="stats-row"><span>Far Outliers (&lt;Q1−3×IQR or &gt;Q3+3×IQR):</span><span>${stats.farOutliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.outliers')}</span><span>${stats.outliers?.length ?? 0}</span></div>
+      <div class="stats-row"><span>${t('relation.stats.far_outliers')}</span><span>${stats.farOutliers?.length ?? 0}</span></div>
       <div class="stats-divider"></div>
-      <div class="stats-subtitle">Distribution Shape</div>
+      <div class="stats-subtitle">${t('relation.stats.distribution_shape')}</div>
       <div class="shape-charts-row">
         ${generateSkewnessSVG(stats.skewness)}
         ${generateKurtosisSVG(stats.kurtosis)}
@@ -14821,7 +14820,7 @@ function showStatisticsPanel(colIdx) {
   
   panel.innerHTML = `
     <div class="stats-panel-header">
-      <span>Statistics: ${name}</span>
+      <span>${t('relation.stats.statistics_label')} ${name}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="stats-panel-content">${statsHtml}${explanationsHtml}</div>
@@ -15418,14 +15417,14 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
   const maxReached = isCardinalityMaxReached(st);
   
   const lineOperationsMap = {
-    'View': { action: 'view-row', icon: '👁', label: 'View' },
-    'Edit': { action: 'edit-row', icon: '✏️', label: 'Edit' },
-    'Copy': { action: 'copy-row', icon: '📋', label: 'Copy' },
-    'New': { action: 'new-row', icon: '➕', label: 'New' },
-    'New Fast': { action: 'new-fast-row', icon: '⚡', label: 'New Fast' },
-    'Delete': { action: 'delete-row', icon: '🗑️', label: 'Delete' },
-    'Paper Form': { action: 'paper-form-row', icon: '📄', label: 'Paper Form' },
-    'Print': { action: 'print-row', icon: '🖨️', label: 'Print' }
+    'View': { action: 'view-row', icon: '👁', label: t('relation.lineops.view') },
+    'Edit': { action: 'edit-row', icon: '✏️', label: t('relation.lineops.edit') },
+    'Copy': { action: 'copy-row', icon: '📋', label: t('relation.lineops.copy') },
+    'New': { action: 'new-row', icon: '➕', label: t('relation.lineops.new') },
+    'New Fast': { action: 'new-fast-row', icon: '⚡', label: t('relation.lineops.new_fast') },
+    'Delete': { action: 'delete-row', icon: '🗑️', label: t('relation.lineops.delete') },
+    'Paper Form': { action: 'paper-form-row', icon: '📄', label: t('relation.lineops.paper_form') },
+    'Print': { action: 'print-row', icon: '🖨️', label: t('relation.lineops.print') }
   };
   
   const lineOptions = st.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
@@ -15440,12 +15439,12 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
     .join('\n    ');
   
   menu.innerHTML = `
-    <div class="column-menu-header">Row ${rowIdx + 1}</div>
+    <div class="column-menu-header">${tf('relation.dialog.row_number', {index: rowIdx + 1})}</div>
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
-        <div class="column-menu-title">Checked (${getSelectedRows(st).size} rows)</div>
-        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ Remove Checked</button>
+        <div class="column-menu-title">${tf('relation.multiops.checked_rows', {count: getSelectedRows(st).size})}</div>
+        <button class="column-menu-item" data-action="delete-selected" data-testid="button-delete-selected">🗑️ ${t('relation.multiops.remove_checked')}</button>
       </div>
     ` : ''}
   `;
@@ -16505,12 +16504,12 @@ function showRowViewDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = `Ver Registo ${rowIdx + 1}`;
+  const title = tf('relation.dialog.view_record', {index: rowIdx + 1});
   
   const footerButtons = `
-    <button class="btn btn-outline btn-action" data-action="edit">✏️ Edit</button>
-    <button class="btn btn-outline btn-action" data-action="copy">📋 Copy</button>
-    <button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">🗑️ Delete</button>
+    <button class="btn btn-outline btn-action" data-action="edit">${t('relation.dialog.edit_btn')}</button>
+    <button class="btn btn-outline btn-action" data-action="copy">${t('relation.dialog.copy_btn')}</button>
+    <button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">${t('relation.dialog.delete_btn')}</button>
   `;
   
   showContentBasedOnMode(st, (container) => {
@@ -16539,11 +16538,11 @@ function showRowCopyDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = `Copiar Registo ${rowIdx + 1}`;
+  const title = tf('relation.dialog.copy_record', {index: rowIdx + 1});
   
   const footerButtons = `
     <input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">
-    <button class="btn btn-primary generate-copies">Gera Cópias</button>
+    <button class="btn btn-primary generate-copies">${t('relation.dialog.generate_copies')}</button>
   `;
   
   showContentBasedOnMode(st, (container) => {
@@ -16587,7 +16586,7 @@ function showRowDeleteDialog(st, rowIdx) {
   const rowToDelete = st.relation.items[rowIdx];
   const deleteId = getRowId(st, rowToDelete);
   const deleteRecord = buildRowRecord(st, rowToDelete);
-  showConfirmDialog(`Tem a certeza que pretende eliminar o registo ${rowIdx + 1}?`, () => {
+  showConfirmDialog(tf('relation.multiops.confirm_delete_all', {count: 1}), () => {
     st.relation.items.splice(rowIdx, 1);
     getSelectedRows(st).delete(rowIdx);
     setFilteredIndices(st, [...Array(st.relation.items.length).keys()]);
@@ -16596,7 +16595,7 @@ function showRowDeleteDialog(st, rowIdx) {
     renderTable(st);
     outputRelationState(st);
     showToast(t('relation.toast.record_deleted'), 'success');
-  }, { confirmText: 'Eliminar' });
+  }, { confirmText: t('relation.common.delete') });
 }
 
 function showRowNewDialog(st, rowIdx, mode = 'new') {
@@ -16614,14 +16613,14 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
     return null;
   });
   
-  const title = mode === 'new-fast' ? 'Novo Registo Rápido' : 'Novo Registo';
+  const title = mode === 'new-fast' ? t('relation.dialog.new_fast_record') : t('relation.dialog.new_record');
   
   let footerButtons = '';
   if (mode === 'new') {
-    footerButtons += `<button class="btn btn-outline clear-form">Limpar</button>`;
+    footerButtons += `<button class="btn btn-outline clear-form">${t('relation.dialog.clear_form')}</button>`;
   }
-  footerButtons += `<button class="btn btn-primary save-record">Gravar</button>`;
-  footerButtons += `<button class="btn btn-primary save-and-new">Gravar e Novo</button>`;
+  footerButtons += `<button class="btn btn-primary save-record">${t('relation.common.save')}</button>`;
+  footerButtons += `<button class="btn btn-primary save-and-new">${t('relation.dialog.save_and_new')}</button>`;
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, defaultRow, 'edit');
@@ -16831,8 +16830,8 @@ function showRowPaperFormDialog(st, rowIdx) {
     return '';
   });
   
-  const title = 'Formulário para Impressão';
-  const footerButtons = `<button class="btn btn-primary print-form">Imprimir</button>`;
+  const title = t('relation.dialog.paper_form');
+  const footerButtons = `<button class="btn btn-primary print-form">${t('relation.dialog.print')}</button>`;
   
   showContentBasedOnMode(st, (container) => {
     let html = '<div class="paper-form-content" style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white;">';
@@ -16857,7 +16856,7 @@ function showRowPaperFormDialog(st, rowIdx) {
         });
         html += `</div>`;
       } else if (type === 'boolean') {
-        html += `<div class="paper-form-checkbox"><input type="checkbox" disabled> Sim</div>`;
+        html += `<div class="paper-form-checkbox"><input type="checkbox" disabled> ${t('relation.common.yes')}</div>`;
       } else if (type === 'textarea') {
         html += `<div class="paper-form-textarea-placeholder"></div>`;
       } else {
@@ -16878,7 +16877,7 @@ function showRowPaperFormDialog(st, rowIdx) {
           printWindow.document.write(`
             <html>
             <head>
-              <title>Formulário</title>
+              <title>${t('relation.dialog.form_title')}</title>
               <style>
                 body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
                 .paper-form-title { text-align: center; margin-bottom: 20px; font-size: 18pt; }
@@ -16905,8 +16904,8 @@ function showRowPaperFormDialog(st, rowIdx) {
 function showRowPrintDialog(st, rowIdx) {
   closeAllMenus();
   const row = st.relation.items[rowIdx];
-  const title = `🖨️ Imprimir Registo ${rowIdx + 1}`;
-  const footerButtons = `<button class="btn btn-primary print-record">Imprimir</button>`;
+  const title = `🖨️ ${tf('relation.dialog.print_record', {index: rowIdx + 1})}`;
+  const footerButtons = `<button class="btn btn-primary print-record">${t('relation.dialog.print')}</button>`;
 
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'view');
@@ -16922,7 +16921,7 @@ function showRowPrintDialog(st, rowIdx) {
           printWindow.document.write(`
             <html>
             <head>
-              <title>${escapeHtml(relationName || 'Registo')}</title>
+              <title>${escapeHtml(relationName || t('relation.dialog.record'))}</title>
               <style>
                 body { font-family: Arial, sans-serif; margin: 0; padding: 20mm; }
                 h1 { text-align: center; margin-bottom: 20px; font-size: 18pt; }
@@ -16932,7 +16931,7 @@ function showRowPrintDialog(st, rowIdx) {
               </style>
             </head>
             <body>
-              ${relationName ? `<h1>${escapeHtml(relationName)} - Registo ${rowIdx + 1}</h1>` : `<h1>Registo ${rowIdx + 1}</h1>`}
+              ${relationName ? `<h1>${escapeHtml(relationName)} - ${tf('relation.dialog.record_index', {index: rowIdx + 1})}</h1>` : `<h1>${tf('relation.dialog.record_index', {index: rowIdx + 1})}</h1>`}
               ${printContent.innerHTML}
             </body>
             </html>
@@ -16949,8 +16948,8 @@ function showRowEditDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = `Editar Registo ${rowIdx + 1}`;
-  const footerButtons = `<button class="btn btn-primary save-record">Gravar</button>`;
+  const title = tf('relation.dialog.edit_record', {index: rowIdx + 1});
+  const footerButtons = `<button class="btn btn-primary save-record">${t('relation.common.save')}</button>`;
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'edit');
@@ -17818,7 +17817,7 @@ function renderCardsView(st = state) {
   
   // Check for empty items
   if (!st.relation.items || st.relation.items.length === 0) {
-    cardsContent.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para mostrar na vista de cards.</p>';
+    cardsContent.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.cards.no_data') + '</p>';
     cardsNavigation.innerHTML = '';
     return;
   }
@@ -18053,7 +18052,7 @@ function initPivotConfig(st = state) {
   const pivotContainer = pivotView.querySelector('.pivot-table-container');
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
     if (pivotContainer) {
-      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para gerar uma tabela pivot.</p>';
+      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.pivot.no_data') + '</p>';
     }
     return;
   }
@@ -18065,7 +18064,7 @@ function initPivotConfig(st = state) {
   
   if (!rowSelect || !colSelect) return;
   
-  let options = '<option value="">Select column...</option>';
+  let options = '<option value="">' + t('relation.pivot.select_col_placeholder') + '</option>';
   cols.forEach(c => {
     options += '<option value="' + c.idx + '">' + escapeHtml(c.name) + ' (' + c.type + ')</option>';
   });
@@ -18155,20 +18154,20 @@ function renderPivotValuesConfig(st = state) {
     const colName = v.column !== null ? st.columnNames[v.column] : '';
     html += '<div class="pivot-value-item">';
     html += '<select class="pivot-value-col" data-idx="' + i + '">';
-    html += '<option value="">Column...</option>';
+    html += '<option value="">' + t('relation.pivot.select_column') + '</option>';
     cols.forEach(c => {
       html += '<option value="' + c.idx + '" ' + (v.column === c.idx ? 'selected' : '') + '>' + escapeHtml(c.name) + '</option>';
     });
     html += '</select>';
     html += '<select class="pivot-value-agg" data-idx="' + i + '">';
-    html += '<option value="count" ' + (v.aggregation === 'count' ? 'selected' : '') + '>Count</option>';
-    html += '<option value="sum" ' + (v.aggregation === 'sum' ? 'selected' : '') + '>Sum</option>';
-    html += '<option value="average" ' + (v.aggregation === 'average' ? 'selected' : '') + '>Average</option>';
-    html += '<option value="median" ' + (v.aggregation === 'median' ? 'selected' : '') + '>Median</option>';
-    html += '<option value="stddev" ' + (v.aggregation === 'stddev' ? 'selected' : '') + '>Std Dev</option>';
-    html += '<option value="pctTotal" ' + (v.aggregation === 'pctTotal' ? 'selected' : '') + '>% Total</option>';
-    html += '<option value="pctRow" ' + (v.aggregation === 'pctRow' ? 'selected' : '') + '>% Row</option>';
-    html += '<option value="pctCol" ' + (v.aggregation === 'pctCol' ? 'selected' : '') + '>% Col</option>';
+    html += '<option value="count" ' + (v.aggregation === 'count' ? 'selected' : '') + '>' + t('relation.pivot.agg_count') + '</option>';
+    html += '<option value="sum" ' + (v.aggregation === 'sum' ? 'selected' : '') + '>' + t('relation.pivot.agg_sum') + '</option>';
+    html += '<option value="average" ' + (v.aggregation === 'average' ? 'selected' : '') + '>' + t('relation.pivot.agg_average') + '</option>';
+    html += '<option value="median" ' + (v.aggregation === 'median' ? 'selected' : '') + '>' + t('relation.pivot.agg_median') + '</option>';
+    html += '<option value="stddev" ' + (v.aggregation === 'stddev' ? 'selected' : '') + '>' + t('relation.pivot.agg_stddev') + '</option>';
+    html += '<option value="pctTotal" ' + (v.aggregation === 'pctTotal' ? 'selected' : '') + '>' + t('relation.pivot.agg_pct_total') + '</option>';
+    html += '<option value="pctRow" ' + (v.aggregation === 'pctRow' ? 'selected' : '') + '>' + t('relation.pivot.agg_pct_row') + '</option>';
+    html += '<option value="pctCol" ' + (v.aggregation === 'pctCol' ? 'selected' : '') + '>' + t('relation.pivot.agg_pct_col') + '</option>';
     html += '</select>';
     html += '<button data-remove-idx="' + i + '">×</button>';
     html += '</div>';
@@ -18205,8 +18204,8 @@ const CHART_COLORS = [
   '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'
 ];
 
-const AGG_LABELS = { count: 'Count', sum: 'Sum', average: 'Average', median: 'Median', stddev: 'Std Dev', pctTotal: '% Total', pctRow: '% Row', pctCol: '% Col' };
-const AGG_SHORT_LABELS = { count: 'Count', sum: 'Sum', average: 'Avg', median: 'Med', stddev: 'StdDev', pctTotal: '%Tot', pctRow: '%Row', pctCol: '%Col' };
+function getAggLabels() { return { count: t('relation.pivot.agg_count'), sum: t('relation.pivot.agg_sum'), average: t('relation.pivot.agg_average'), median: t('relation.pivot.agg_median'), stddev: t('relation.pivot.agg_stddev'), pctTotal: t('relation.pivot.agg_pct_total'), pctRow: t('relation.pivot.agg_pct_row'), pctCol: t('relation.pivot.agg_pct_col') }; }
+function getAggShortLabels() { return { count: t('relation.pivot.agg_short_count'), sum: t('relation.pivot.agg_short_sum'), average: t('relation.pivot.agg_short_average'), median: t('relation.pivot.agg_short_median'), stddev: t('relation.pivot.agg_short_stddev'), pctTotal: t('relation.pivot.agg_short_pct_total'), pctRow: t('relation.pivot.agg_short_pct_row'), pctCol: t('relation.pivot.agg_short_pct_col') }; }
 
 function pivotCalcSum(arr) { return arr.reduce((a, b) => a + b, 0); }
 function pivotCalcMean(arr) { return arr.length > 0 ? pivotCalcSum(arr) / arr.length : 0; }
@@ -18419,7 +18418,7 @@ function generatePivotTable(st = state) {
     const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
     const pivotContainer = pivotView?.querySelector('.pivot-table-container');
     if (pivotContainer) {
-      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para gerar uma tabela pivot.</p>';
+      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.pivot.no_data') + '</p>';
     }
     return;
   }
@@ -18481,7 +18480,7 @@ function generatePivotTable(st = state) {
     html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
   } else {
     aggregations.forEach(agg => {
-      const label = AGG_SHORT_LABELS[agg.aggregation] || agg.aggregation;
+      const label = getAggShortLabels()[agg.aggregation] || agg.aggregation;
       html += '<th>' + label + '</th>';
     });
   }
@@ -18491,7 +18490,7 @@ function generatePivotTable(st = state) {
     html += '<tr>';
     for (let c = 0; c <= colValuesArr.length; c++) {
       aggregations.forEach(agg => {
-        const label = AGG_SHORT_LABELS[agg.aggregation] || agg.aggregation;
+        const label = getAggShortLabels()[agg.aggregation] || agg.aggregation;
         html += '<th style="font-size: 0.75rem; font-weight: normal;">' + label + '</th>';
       });
     }
@@ -18934,7 +18933,7 @@ function renderPivotChart(st = state) {
       aggregations.forEach((agg, aggIdx) => {
         const values = rowValuesArr.map(rv => pivotData[aggIdx][rv][cv]);
         const stddevs = rowValuesArr.map(rv => stdDevData[aggIdx][rv][cv]);
-        const label = (aggregations.length > 1 ? (AGG_LABELS[agg.aggregation] || agg.aggregation) + ' - ' : '') + cv;
+        const label = (aggregations.length > 1 ? (getAggLabels()[agg.aggregation] || agg.aggregation) + ' - ' : '') + cv;
         series.push({ values, stddevs, label, colorIdx: ci * aggregations.length + aggIdx });
       });
     });
@@ -18944,7 +18943,7 @@ function renderPivotChart(st = state) {
       const values = rowValuesArr.map(rv => pivotData[aggIdx][rv][cv]);
       const stddevs = rowValuesArr.map(rv => stdDevData[aggIdx][rv][cv]);
       const colName = agg.column !== null ? st.columnNames[agg.column] : '';
-      const label = (AGG_LABELS[agg.aggregation] || agg.aggregation) + (colName ? ' of ' + colName : '');
+      const label = (getAggLabels()[agg.aggregation] || agg.aggregation) + (colName ? ' ' + t('relation.pivot.of_label') + ' ' + colName : '');
       series.push({ values, stddevs, label, colorIdx: aggIdx });
     });
   }
@@ -18952,12 +18951,12 @@ function renderPivotChart(st = state) {
   if (series.length === 0) return;
 
   const autoTitle = opts.title || (() => {
-    if (series.length === 1) return series[0].label + (hasRows ? ' by ' + rowLabel : '');
+    if (series.length === 1) return series[0].label + (hasRows ? ' ' + t('relation.pivot.by_label') + ' ' + rowLabel : '');
     return (hasRows ? rowLabel : '') + (hasCols ? (hasRows ? ' × ' : '') + colLabel : '');
   })();
 
-  const autoXTitle = opts.xAxisTitle || (hasRows ? rowLabel : 'Category');
-  const autoYTitle = opts.yAxisTitle || (series.length === 1 ? series[0].label : 'Value');
+  const autoXTitle = opts.xAxisTitle || (hasRows ? rowLabel : t('relation.pivot.category_label'));
+  const autoYTitle = opts.yAxisTitle || (series.length === 1 ? series[0].label : t('relation.pivot.value_label'));
 
   const dpr = window.devicePixelRatio || 1;
   const containerWidth = chartPanel.clientWidth || 800;
@@ -19625,7 +19624,7 @@ function initCorrelationConfig(st = state) {
   const corrResult = corrView.querySelector('.correlation-result');
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
     if (corrResult) {
-      corrResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para calcular correlações.</p>';
+      corrResult.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.analysis.no_data_corr_calc') + '</p>';
     }
     return;
   }
@@ -19637,10 +19636,10 @@ function initCorrelationConfig(st = state) {
   
   if (!xSelect || !ySelect) return;
   
-  let options = '<option value="">Select column...</option>';
+  let options = '<option value="">' + t('relation.analysis.select_column_placeholder') + '</option>';
   cols.forEach(c => {
-    const typeLabel = ['int', 'float'].includes(c.type) ? 'numeric' : 
-                      ['boolean', 'string', 'select'].includes(c.type) ? 'categorical' : 'temporal';
+    const typeLabel = ['int', 'float'].includes(c.type) ? t('relation.analysis.numeric') : 
+                      ['boolean', 'string', 'select'].includes(c.type) ? t('relation.analysis.categorical') : t('relation.analysis.temporal');
     options += '<option value="' + c.idx + '">' + escapeHtml(c.name) + ' (' + typeLabel + ')</option>';
   });
   
@@ -19706,21 +19705,21 @@ function corrHelperNormalInvApprox(p) {
 }
 
 function corrHelperStrength01(v) {
-  if (v >= 0.5) return 'Strong';
-  if (v >= 0.3) return 'Moderate';
-  if (v >= 0.1) return 'Weak';
-  if (v >= 0.05) return 'Very weak';
-  return 'No association';
+  if (v >= 0.5) return t('relation.analysis.strong');
+  if (v >= 0.3) return t('relation.analysis.moderate');
+  if (v >= 0.1) return t('relation.analysis.weak');
+  if (v >= 0.05) return t('relation.analysis.very_weak');
+  return t('relation.analysis.no_association');
 }
 
 function corrHelperStrengthSigned(v) {
   const a = Math.abs(v);
-  if (a >= 0.9) return 'Very strong';
-  if (a >= 0.7) return 'Strong';
-  if (a >= 0.5) return 'Moderate';
-  if (a >= 0.3) return 'Weak';
-  if (a >= 0.1) return 'Very weak';
-  return 'No correlation';
+  if (a >= 0.9) return t('relation.analysis.very_strong');
+  if (a >= 0.7) return t('relation.analysis.strong');
+  if (a >= 0.5) return t('relation.analysis.moderate');
+  if (a >= 0.3) return t('relation.analysis.weak');
+  if (a >= 0.1) return t('relation.analysis.very_weak');
+  return t('relation.analysis.no_correlation');
 }
 
 function corrHelperColorClass(v) {
@@ -19780,7 +19779,7 @@ function calculateCorrelation(st = state) {
   const corrResult = corrView.querySelector('.correlation-result');
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
     if (corrResult) {
-      corrResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados para calcular correlações.</p>';
+      corrResult.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.analysis.no_data_corr_calc') + '</p>';
     }
     return;
   }
@@ -19790,7 +19789,7 @@ function calculateCorrelation(st = state) {
   const method = corrView.querySelector('.corr-method')?.value || 'auto';
   
   if (!xColIdx || !yColIdx) {
-    alert('Please select both X and Y columns');
+    alert(t('relation.analysis.select_both_cols'));
     return;
   }
   
@@ -21941,7 +21940,7 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-label">n = ' + n + ' pairs | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
   
   html += '<div class="stat-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>r (Pearson coefficient)</dt><dd>Measures linear relationship between two variables. Ranges from -1 (perfect negative) to +1 (perfect positive). 0 means no linear relationship.</dd>';
   html += '<dt>R² (Coefficient of determination)</dt><dd>Percentage of variance in Y explained by X. R²=70% means 70% of Y\'s variation can be predicted from X.</dd>';
@@ -22032,7 +22031,7 @@ function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-note">Spearman measures monotonic relationship. Robust to outliers.</div>';
   
   html += '<div class="stat-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>ρ (Spearman\'s rho)</dt><dd>Measures monotonic relationship (both variables move in the same direction, not necessarily at a constant rate). Based on ranks, not actual values. Ranges from -1 to +1.</dd>';
   html += '<dt>Monotonic relationship</dt><dd>When one variable increases, the other consistently increases (or decreases). Unlike Pearson, works for curved relationships as long as they are consistently increasing or decreasing.</dd>';
@@ -22096,7 +22095,7 @@ function renderKendallCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-note">Kendall\'s Tau is recommended for small samples and ordinal data.</div>';
   
   html += '<div class="stat-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>τ (Kendall\'s Tau)</dt><dd>Measures association based on concordant and discordant pairs. Ranges from -1 to +1. More robust than Spearman for small samples.</dd>';
   html += '<dt>Concordant pairs</dt><dd>Two observations where if one has a higher X, it also has a higher Y (or both lower). They "agree" on the direction.</dd>';
@@ -22165,7 +22164,7 @@ function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryId
   html += '<div class="correlation-label">n = ' + n + ' | Group 0: ' + n0 + ' (μ=' + mean0.toFixed(2) + ') | Group 1: ' + n1 + ' (μ=' + mean1.toFixed(2) + ')</div>';
   
   html += '<div class="stat-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>r<sub>pb</sub> (Point-Biserial)</dt><dd>Measures correlation between a binary variable (0/1) and a continuous variable. Ranges from -1 to +1. Equivalent to Pearson for this special case.</dd>';
   html += '<dt>μ (Mean)</dt><dd>Average value of the numeric variable for each group. μ₀ is the mean for group 0, μ₁ for group 1.</dd>';
@@ -22226,7 +22225,7 @@ function renderPhiCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-label">n = ' + n + '</div>';
   
   html += '<div class="stat-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>φ (Phi coefficient)</dt><dd>Measures association between two binary (yes/no) variables. Ranges from -1 to +1. Positive means both tend to be true/false together; negative means they tend to be opposite.</dd>';
   html += '<dt>Contingency table</dt><dd>2×2 table showing the count of observations for each combination of values. Cell "a" = both true, "d" = both false, "b" and "c" = one true and one false.</dd>';
@@ -22282,7 +22281,7 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
   html += '<div class="correlation-label">n = ' + total + ' | ' + xCategories + ' × ' + yCategories + ' categories | χ² = ' + chiSquared.toFixed(2) + '</div>';
   
   html += '<div class="stat-explanations">';
-  html += '<details><summary>What do these values mean?</summary>';
+  html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>V (Cramér\'s V)</dt><dd>Measures association between two categorical variables with any number of categories. Ranges from 0 (no association) to 1 (perfect association). Cannot be negative.</dd>';
   html += '<dt>χ² (Chi-squared)</dt><dd>Measures how much the observed frequencies differ from expected frequencies (if variables were independent). Higher χ² = stronger association.</dd>';
@@ -23420,7 +23419,7 @@ function initRelationInstance(container, relationData, options = {}) {
     <div class="view-ai view-content" style="display: none;">
       <div class="ai-panel-inline">
         <div class="ai-voice-row">
-          <select class="voice-language pivot-select" title="Voice recognition language">
+          <select class="voice-language pivot-select" title="${t('relation.ai.voice_lang_title')}">
             <option value="pt-PT" selected>Português (PT)</option>
             <option value="pt-BR">Português (BR)</option>
             <option value="en-US">English (US)</option>
@@ -23438,12 +23437,12 @@ function initRelationInstance(container, relationData, options = {}) {
             <option value="ar-SA">العربية</option>
             <option value="hi-IN">हिन्दी</option>
           </select>
-          <button class="btn-ai-voice btn btn-outline btn-sm" title="Voice input">
+          <button class="btn-ai-voice btn btn-outline btn-sm" title="${t('relation.ai.voice_title')}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
           </button>
         </div>
         <div class="ai-input-row">
-          <input type="text" class="ai-question ai-question-input" placeholder="Ask a question about your data...">
+          <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}">
           <button class="btn-ai-ask btn btn-primary btn-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </button>
@@ -23456,20 +23455,20 @@ function initRelationInstance(container, relationData, options = {}) {
       <div class="saved-panel">
         <div class="saved-form">
           <div class="saved-form-row">
-            <input type="text" class="saved-name-input" placeholder="Nome da vista..." maxlength="80" />
+            <input type="text" class="saved-name-input" placeholder="${t('relation.saved.name_placeholder')}" maxlength="80" />
             <select class="saved-type-select">
-              <option value="format">Formato</option>
-              <option value="records">Registos</option>
-              <option value="log">Log de Operações</option>
-              <option value="both">Todos</option>
+              <option value="format">${t('relation.saved.type_format')}</option>
+              <option value="records">${t('relation.saved.type_records')}</option>
+              <option value="log">${t('relation.saved.type_log')}</option>
+              <option value="both">${t('relation.saved.type_all')}</option>
             </select>
             <select class="saved-scope-select">
-              <option value="you">Para Ti</option>
-              <option value="everyone">Para Todos</option>
+              <option value="you">${t('relation.saved.scope_you')}</option>
+              <option value="everyone">${t('relation.saved.scope_everyone')}</option>
             </select>
-            <button class="btn-save-view" title="Guardar vista">
+            <button class="btn-save-view" title="${t('relation.saved.save_btn')}">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-              Guardar
+              ${t('relation.saved.save_btn')}
             </button>
           </div>
         </div>
@@ -23696,7 +23695,7 @@ function initMatrixView(st = state) {
   if (!matrixView) return;
   const matrixResult = matrixView.querySelector('.matrix-result');
   if (matrixResult && !matrixResult.innerHTML.trim()) {
-    matrixResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Select matrix type and method, then click Calculate to generate the correlation matrix.</p>';
+    matrixResult.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.analysis.select_calc_msg') + '</p>';
   }
   const calcBtn = matrixView.querySelector('.btn-calculate-matrix');
   if (calcBtn) {
@@ -23815,7 +23814,7 @@ function calculateMatrix(st = state) {
     }
   }
   if (numCols.length < 2) {
-    resultEl.innerHTML = '<p class="text-muted-foreground">Need at least 2 numeric columns for a matrix. Found: ' + numCols.length + '</p>';
+    resultEl.innerHTML = '<p class="text-muted-foreground">' + tf('relation.analysis.need_2_matrix', {count: numCols.length}) + '</p>';
     return;
   }
 
@@ -24651,7 +24650,7 @@ function buildKindSelect(currentKind, onChange) {
   const attKinds = Object.keys(ATT_KIND_MAP);
 
   const grpSimple = document.createElement('optgroup');
-  grpSimple.label = 'Simple Types';
+  grpSimple.label = t('relation.structure.simple_types');
   simpleKinds.forEach(k => {
     const opt = document.createElement('option');
     opt.value = k;
@@ -24662,7 +24661,7 @@ function buildKindSelect(currentKind, onChange) {
   select.appendChild(grpSimple);
 
   const grpAtt = document.createElement('optgroup');
-  grpAtt.label = 'Att Kinds (attribute_kind)';
+  grpAtt.label = t('relation.structure.att_kinds');
   attKinds.forEach(k => {
     const resolved = ATT_KIND_MAP[k];
     if (simpleKinds.includes(resolved) && k !== 'association') return;
@@ -24675,7 +24674,7 @@ function buildKindSelect(currentKind, onChange) {
   select.appendChild(grpAtt);
 
   const grpExtra = document.createElement('optgroup');
-  grpExtra.label = 'Extended Types';
+  grpExtra.label = t('relation.structure.extended_types');
   const extraKinds = ['password', 'email', 'tel', 'url', 'search', 'file', 'range', 'pointer', 'association', 'lookup', 'button', 'gps', 'html', 'multi_text', 'qr_code', 'tabsheet', 'object', 'group'];
   extraKinds.forEach(k => {
     if (simpleKinds.includes(k)) return;
@@ -24698,7 +24697,7 @@ function renderStructure(st = state) {
   if (!structurePanel) return;
 
   if (!st.relation) {
-    structurePanel.innerHTML = '<p style="color:var(--muted-foreground,#888);padding:16px;">Sem relation carregada.</p>';
+    structurePanel.innerHTML = '<p style="color:var(--muted-foreground,#888);padding:16px;">' + t('relation.structure.no_relation_loaded') + '</p>';
     return;
   }
 
@@ -24723,9 +24722,9 @@ function renderStructure(st = state) {
 
     const newBtn = document.createElement('button');
     newBtn.className = 'structure-btn-new';
-    newBtn.textContent = '+ New Column';
+    newBtn.textContent = t('relation.structure.new_column_btn');
     newBtn.addEventListener('click', () => {
-      const newName = prompt('Column name:');
+      const newName = prompt(t('relation.structure.column_name_prompt_label'));
       if (!newName || !newName.trim()) return;
       const name = newName.trim();
       if (st.relation.columns[name]) {
@@ -24751,11 +24750,11 @@ function renderStructure(st = state) {
     if (selectedIdx !== null) {
       const delBtn = document.createElement('button');
       delBtn.className = 'structure-btn-delete';
-      delBtn.textContent = 'Delete Column';
+      delBtn.textContent = t('relation.structure.delete_column_btn');
       delBtn.addEventListener('click', () => {
         const row = structureRows[selectedIdx];
         if (!row) return;
-        if (!confirm('Delete column "' + row.name + '"? All data in this column will be lost.')) return;
+        if (!confirm(tf('relation.structure.delete_col_confirm', {col: row.name}))) return;
         delete st.relation.columns[row.name];
         st.relation.items.forEach(item => { delete item[row.name]; });
         const resolved = resolveAttColumns(st.relation.columns);
@@ -24778,7 +24777,7 @@ function renderStructure(st = state) {
       const cancelEditBtn = document.createElement('button');
       cancelEditBtn.className = 'structure-btn-cancel';
       cancelEditBtn.setAttribute('data-testid', 'button-cancel-edit');
-      cancelEditBtn.textContent = 'Cancel Edit';
+      cancelEditBtn.textContent = t('relation.structure.cancel_edit_btn');
       cancelEditBtn.addEventListener('click', () => {
         if (pendingChanges[selectedIdx]) delete pendingChanges[selectedIdx];
         selectedIdx = null;
@@ -24792,7 +24791,7 @@ function renderStructure(st = state) {
     if (hasPendingChanges()) {
       const applyAllBtn = document.createElement('button');
       applyAllBtn.className = 'structure-btn-apply';
-      applyAllBtn.textContent = 'Apply All Changes';
+      applyAllBtn.textContent = t('relation.structure.apply_all_btn');
       applyAllBtn.addEventListener('click', () => {
         applyAllStructureChanges(st, structureRows, pendingChanges);
         pendingChanges = {};
@@ -24806,7 +24805,7 @@ function renderStructure(st = state) {
 
       const cancelAllBtn = document.createElement('button');
       cancelAllBtn.className = 'structure-btn-cancel';
-      cancelAllBtn.textContent = 'Cancel All';
+      cancelAllBtn.textContent = t('relation.structure.cancel_all_btn');
       cancelAllBtn.addEventListener('click', () => {
         pendingChanges = {};
         structureRows = buildStructureColumnRows(st);
@@ -24825,9 +24824,9 @@ function renderStructure(st = state) {
         const info = canConvertKind(structureRows[k].originalKind, c.kind);
         let cls = 'lossless';
         let msg = structureRows[k].name + ': ' + structureRows[k].originalKind + ' → ' + c.kind;
-        if (!info.possible) { cls = 'impossible'; msg += ' (data will be set to null)'; }
-        else if (!info.lossless) { cls = 'lossy'; msg += ' (may lose precision)'; }
-        else { msg += ' (lossless)'; }
+        if (!info.possible) { cls = 'impossible'; msg += ' ' + t('relation.structure.data_null_warn'); }
+        else if (!info.lossless) { cls = 'lossy'; msg += ' ' + t('relation.structure.may_lose_precision'); }
+        else { msg += ' ' + t('relation.structure.lossless'); }
         conversionInfos.push({ cls, msg });
       }
     }
@@ -24841,7 +24840,7 @@ function renderStructure(st = state) {
     const table = document.createElement('table');
     table.className = 'structure-columns-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th style="width:40px">#</th><th>Name</th><th>Kind</th><th>Display Name</th><th>Short Name</th><th style="width:55px">Multiple</th></tr>';
+    thead.innerHTML = '<tr><th style="width:40px">#</th><th>' + t('relation.structure.th_name') + '</th><th>' + t('relation.structure.th_kind') + '</th><th>' + t('relation.structure.th_display_name') + '</th><th>' + t('relation.structure.th_short_name') + '</th><th style="width:55px">' + t('relation.structure.th_multiple') + '</th></tr>';
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
@@ -25473,7 +25472,7 @@ function initSavedView(st = state) {
       }
       const exists = st.relation.saved.find(s => s.name === name);
       if (exists) {
-        if (!confirm(`A vista "${name}" já existe. Substituir?`)) return;
+        if (!confirm(tf('relation.saved.view_exists_confirm', {name: name}))) return;
         st.relation.saved = st.relation.saved.filter(s => s.name !== name);
       }
       const type = typeSelect.value;
@@ -25565,12 +25564,12 @@ function renderSavedViewsList(st) {
 
   const saved = st.relation.saved || [];
   if (saved.length === 0) {
-    container.innerHTML = '<p class="saved-empty-msg">Sem vistas guardadas. Guarda uma configuração para a aceder aqui.</p>';
+    container.innerHTML = '<p class="saved-empty-msg">' + t('relation.saved.no_saved_views') + '</p>';
     return;
   }
 
-  const typeLabels = { format: 'Formato', records: 'Registos', both: 'Todos', log: 'Log' };
-  const scopeLabels = { you: 'Para Ti', everyone: 'Para Todos' };
+  const typeLabels = { format: t('relation.saved.type_format_label'), records: t('relation.saved.type_records_label'), both: t('relation.saved.type_both_label'), log: t('relation.saved.type_log_label') };
+  const scopeLabels = { you: t('relation.saved.scope_you_label'), everyone: t('relation.saved.scope_everyone_label') };
   const typeIcons = {
     format: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>',
     records: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>',
@@ -25606,7 +25605,7 @@ function renderSavedViewsList(st) {
       } catch(e) {}
     }
     html += `
-      <div class="saved-item" data-saved-idx="${idx}" title="Duplo-clique para restaurar">
+      <div class="saved-item" data-saved-idx="${idx}" title="${t('relation.saved.dblclick_restore_label')}">
         <div class="saved-item-info">
           <span class="saved-item-name">${entry.name}</span>
           <span class="saved-item-meta">
@@ -25616,10 +25615,10 @@ function renderSavedViewsList(st) {
           </span>
         </div>
         <div class="saved-item-actions">
-          <button class="btn-restore-saved" data-saved-idx="${idx}" title="Restaurar">
+          <button class="btn-restore-saved" data-saved-idx="${idx}" title="${t('relation.saved.restore_btn')}">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
           </button>
-          <button class="btn-delete-saved" data-saved-idx="${idx}" title="Eliminar">
+          <button class="btn-delete-saved" data-saved-idx="${idx}" title="${t('relation.saved.delete_btn')}">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
           </button>
         </div>
@@ -25989,11 +25988,11 @@ function showColumnMenuForInstance(st, colIdx, x, y) {
   
   menu.innerHTML = `
     <div class="column-menu-header">${name} (${type})</div>
-    <div class="column-menu-item" data-action="sort-asc">Sort Ascending</div>
-    <div class="column-menu-item" data-action="sort-desc">Sort Descending</div>
+    <div class="column-menu-item" data-action="sort-asc">${t('relation.colmenu.sort_ascending')}</div>
+    <div class="column-menu-item" data-action="sort-desc">${t('relation.colmenu.sort_descending')}</div>
     <div class="column-menu-separator"></div>
-    <div class="column-menu-item" data-action="filter">Filter...</div>
-    <div class="column-menu-item" data-action="clear-filter" ${!getFilters(st)[colIdx] ? 'style="display:none"' : ''}>Clear Filter</div>
+    <div class="column-menu-item" data-action="filter">${t('relation.colmenu.filter_dots')}</div>
+    <div class="column-menu-item" data-action="clear-filter" ${!getFilters(st)[colIdx] ? 'style="display:none"' : ''}>${t('relation.colmenu.clear_filter')}</div>
   `;
   
   document.body.appendChild(menu);
