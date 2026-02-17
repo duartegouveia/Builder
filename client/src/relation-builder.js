@@ -1500,7 +1500,15 @@ const PRODUCT_BRANDS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_hierarchy": true,
-    "hierarchy_column": "ParentID"
+    "hierarchy_column": "ParentID",
+    "columns_visible": {
+      "ID": 0,
+      "Name": 0,
+      "OwnerID": 0,
+      "Url": 0,
+      "ParentID": 0,
+      "IntegrationID": 0
+    }
   },
   "items": [
     ["1", "", "", "", "", "A"],
@@ -1808,8 +1816,10 @@ function initializeUiState(relation) {
   if (!relation.rel_options.uiState) {
     relation.rel_options.uiState = { ...DEFAULT_UI_STATE };
   } else {
-    // Merge with defaults for any missing properties
     relation.rel_options.uiState = { ...DEFAULT_UI_STATE, ...relation.rel_options.uiState };
+  }
+  if (relation.rel_options.columns_visible && !relation.rel_options.uiState.columns_visible) {
+    relation.rel_options.uiState.columns_visible = relation.rel_options.columns_visible;
   }
   return relation;
 }
@@ -1954,7 +1964,15 @@ function setSortedIndices(st, value) { getUiState(st).sortedIndices = value; }
 function getQuickSearchText(st) { return getUiState(st).quickSearchText || ''; }
 function setQuickSearchText(st, value) { getUiState(st).quickSearchText = value; }
 function getColumnsVisible(st) { return getUiState(st).columns_visible; }
-function setColumnsVisible(st, value) { getUiState(st).columns_visible = value; }
+function setColumnsVisible(st, value) {
+  getUiState(st).columns_visible = value;
+  if (st.rel_options) {
+    st.rel_options.columns_visible = value;
+  }
+  if (st.relation && st.relation.rel_options) {
+    st.relation.rel_options.columns_visible = value;
+  }
+}
 
 function insertColumnAfterInVisible(st, sourceColName, newColName) {
   let cv = getColumnsVisible(st);
@@ -9080,6 +9098,43 @@ function filterRelOptionsDefaults(relOptions) {
   return Object.keys(filtered).length > 0 ? filtered : undefined;
 }
 
+function expandRelOptionsWithDefaults(relOptions) {
+  if (!relOptions || typeof relOptions !== 'object') return { ...DEFAULT_REL_OPTIONS };
+  const expanded = {};
+  for (const key of Object.keys(DEFAULT_REL_OPTIONS)) {
+    if (key === 'uiState') continue;
+    expanded[key] = relOptions[key] !== undefined ? relOptions[key] : JSON.parse(JSON.stringify(DEFAULT_REL_OPTIONS[key]));
+  }
+  for (const [key, value] of Object.entries(relOptions)) {
+    if (key === 'uiState') continue;
+    if (!(key in expanded)) expanded[key] = value;
+  }
+  return Object.keys(expanded).length > 0 ? expanded : undefined;
+}
+
+function cleanRelationOutputFull(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (obj.rel_options) {
+    const expanded = expandRelOptionsWithDefaults(obj.rel_options);
+    if (expanded) {
+      obj.rel_options = expanded;
+    } else {
+      delete obj.rel_options;
+    }
+  }
+  if (Array.isArray(obj.items)) {
+    for (const row of obj.items) {
+      if (!Array.isArray(row)) continue;
+      for (let c = 0; c < row.length; c++) {
+        if (row[c] && typeof row[c] === 'object' && row[c].pot === 'relation') {
+          cleanRelationOutputFull(row[c]);
+        }
+      }
+    }
+  }
+  return obj;
+}
+
 function cleanRelationOutput(obj) {
   if (!obj || typeof obj !== 'object') return obj;
   if (obj.rel_options) {
@@ -9167,7 +9222,7 @@ function outputRelationState(st) {
 
 function outputRelationStateFull(st) {
   const output = JSON.parse(JSON.stringify(st.relation));
-  cleanRelationOutput(output);
+  cleanRelationOutputFull(output);
   if (output.columns) output.columns = cleanColumnsFull(output.columns);
   const jsonString = JSON.stringify(output, null, 2);
   outputToConsoleAndElements(jsonString);
@@ -21638,6 +21693,7 @@ function initRelationInstance(container, relationData, options = {}) {
     kind_specific: parsedRelOptions.kind_specific ?? DEFAULT_REL_OPTIONS.kind_specific,
     cardinality_min: parsedRelOptions.cardinality_min ?? DEFAULT_REL_OPTIONS.cardinality_min,
     cardinality_max: parsedRelOptions.cardinality_max ?? DEFAULT_REL_OPTIONS.cardinality_max,
+    columns_visible: parsedRelOptions.columns_visible ?? null,
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
 
