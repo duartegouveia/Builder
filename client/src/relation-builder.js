@@ -25966,17 +25966,14 @@ function init() {
 
         if (kind.startsWith('multi_') && Array.isArray(value)) {
           const baseKind = kind.replace('multi_', '');
-          ta_kind.push('relation');
-          const subRel = JSON.parse(JSON.stringify(relTemplate));
-          subRel.columns = { id: 'id', value: baseKind };
-          subRel.items = value.map((v, idx) => {
-            let cellVal = v;
+          ta_kind.push(kind);
+          const arr = value.map(v => {
             if (typeof v === 'string' && (baseKind === 'int' || baseKind === 'float')) {
-              cellVal = baseKind === 'int' ? parseInt(v) : parseFloat(v);
+              return baseKind === 'int' ? parseInt(v) : parseFloat(v);
             }
-            return [String(idx + 1), cellVal];
+            return v;
           });
-          rowValues.push(subRel);
+          rowValues.push(arr);
         } else if (kind === 'relation') {
           ta_kind.push(kind);
           const subRel = objectToRelation(value);
