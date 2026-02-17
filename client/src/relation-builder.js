@@ -16125,14 +16125,13 @@ function initI18nEditorsInContainer(container, st, row, mode) {
   const isEditMode = ['new', 'new-fast', 'edit', 'multi_edit', 'multi_merge', 'group_edit'].includes(mode);
   container.querySelectorAll('.i18n-editor').forEach(editor => {
     const colIdx = parseInt(editor.dataset.col);
-    let values;
-    try { values = JSON.parse(editor.dataset.values || '{}'); } catch(e) { values = {}; }
+    const values = (row[colIdx] && typeof row[colIdx] === 'object' && !Array.isArray(row[colIdx])) ? row[colIdx] : {};
+    row[colIdx] = values;
     editor.innerHTML = '';
     const i18nWidget = buildI18nEditor(values, isEditMode, (newVal) => {
       row[colIdx] = newVal;
     });
     editor.appendChild(i18nWidget);
-    row[colIdx] = values;
   });
 }
 
@@ -16140,14 +16139,13 @@ function initObjectEditorsInContainer(container, st, row, mode) {
   const isEditMode = ['new', 'new-fast', 'edit', 'multi_edit', 'multi_merge', 'group_edit'].includes(mode);
   container.querySelectorAll('.object-editor').forEach(editor => {
     const colIdx = parseInt(editor.dataset.col);
-    let values;
-    try { values = JSON.parse(editor.dataset.values || '{}'); } catch(e) { values = {}; }
+    const values = (row[colIdx] && typeof row[colIdx] === 'object' && !Array.isArray(row[colIdx])) ? row[colIdx] : {};
+    row[colIdx] = values;
     editor.innerHTML = '';
     const objWidget = buildObjectEditor(values, isEditMode, (newVal) => {
       row[colIdx] = newVal;
     });
     editor.appendChild(objWidget);
-    row[colIdx] = values;
   });
 }
 
