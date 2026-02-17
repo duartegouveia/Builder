@@ -1170,9 +1170,12 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  min-width: 180px;
+  min-width: 200px;
+  max-width: 340px;
   z-index: 1000;
   overflow: hidden;
+  overflow-y: auto;
+  max-height: 80vh;
 }
 
 .column-menu-header {
@@ -3093,6 +3096,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   color: var(--foreground);
   cursor: pointer;
   min-width: 100px;
+  max-width: 220px;
 }
 
 .always-visible-actions:hover {
