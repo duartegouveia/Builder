@@ -1726,7 +1726,7 @@ const PRODUCT_CATEGORY_JSON = {
     "parent": "string"
   },
   "options": {
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": ["dialog", "right", "bottom"]
   },
   "rel_options": {
     "editable": false,
@@ -1737,27 +1737,28 @@ const PRODUCT_CATEGORY_JSON = {
     "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "parent",
+    "hierarchy_show_column": "name",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [
-    ['1','1','Pet Food',''],
-    ['2','2','Human Food',''],
-    ['3','3','Dog Food','1'],
-    ['4','4','Cat Food','1'],
-    ['5','5','Vegetarian Food','2'],
-    ['6','6','Chocolate','2'],
-    ['7','7','Cereals','2'],
-    ['8','8','Cofee and Beverages','2'],
-    ['9','9','Milk and Deserts','2'],
-    ['10','10','Clinical Nutricion','2'],
-    ['11','11','Cooking','2'],
-    ['12','12','Cofee machines','8'],
-    ['13','13','Child nutrition','10'],
-    ['14','14','Proteins and Vitamins','10'],
-    ['15','15','Dry Dog Food','3'],
-    ['16','16','Wet Dog Food','3']
+    ["1", "1", "Pet Food", ""],
+    ["2", "2", "Human Food", ""],
+    ["3", "3", "Dog Food", "1"],
+    ["4", "4", "Cat Food", "1"],
+    ["5", "5", "Vegetarian Food", "2"],
+    ["6", "6", "Chocolate", "2"],
+    ["7", "7", "Cereals", "2"],
+    ["8", "8", "Cofee and Beverages", "2"],
+    ["9", "9", "Milk and Deserts", "2"],
+    ["10", "10", "Clinical Nutricion", "2"],
+    ["11", "11", "Cooking", "2"],
+    ["12", "12", "Cofee machines", "8"],
+    ["13", "13", "Child nutrition", "10"],
+    ["14", "14", "Proteins and Vitamins", "10"],
+    ["15", "15", "Dry Dog Food", "3"],
+    ["16", "16", "Wet Dog Food", "3"]
   ]
 };
 
