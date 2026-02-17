@@ -2760,22 +2760,30 @@ function getNextAssociationId(assocRelation) {
   return String(minId <= 0 ? minId - 1 : -1);
 }
 
+function getHierarchyParentId(st, item) {
+  const hierarchyColumn = st.rel_options.hierarchy_column;
+  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  if (hierarchyColIdx < 0) return '';
+  const val = item[hierarchyColIdx];
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'object' && val !== null && val.items && Array.isArray(val.items)) {
+    if (val.items.length === 0) return '';
+    const fk = val.items[0][2];
+    return fk !== null && fk !== undefined ? String(fk) : '';
+  }
+  return String(val);
+}
+
 // Navigate up in hierarchy - go to parent level
 function navigateHierarchyUp(st) {
   const currentVal = getCurrentHierarchyValue(st);
   const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
   
-  // If at root, do nothing
   if (currentVal === '' || currentVal === hierarchyRootVal) return;
   
-  // Find the current parent item and get its hierarchy column value (grandparent)
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
+  if (idColIdx < 0) return;
   
-  if (idColIdx < 0 || hierarchyColIdx < 0) return;
-  
-  // Find the item with ID = currentVal
   let parentItem = null;
   for (const item of st.relation.items) {
     const itemId = item[idColIdx];
@@ -2786,10 +2794,8 @@ function navigateHierarchyUp(st) {
   }
   
   if (parentItem) {
-    // Get the parent's parent (grandparent) value
-    const grandparentVal = parentItem[hierarchyColIdx];
-    const newVal = grandparentVal === null || grandparentVal === undefined ? '' : String(grandparentVal);
-    setCurrentHierarchyValue(st, newVal);
+    const grandparentVal = getHierarchyParentId(st, parentItem);
+    setCurrentHierarchyValue(st, grandparentVal);
     setCurrentPage(st, 1);
     renderTable(st);
   }
@@ -2813,23 +2819,18 @@ function navigateHierarchyDown(rowIdx, st) {
 }
 
 function countDirectChildren(st, parentValue) {
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
-  if (hierarchyColIdx < 0) return 0;
   const targetVal = parentValue === null || parentValue === undefined ? '' : String(parentValue);
   let count = 0;
   for (const item of st.relation.items) {
-    const itemVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
-    if (itemVal === targetVal) count++;
+    const itemParentVal = getHierarchyParentId(st, item);
+    if (itemParentVal === targetVal) count++;
   }
   return count;
 }
 
 function countAllDescendants(st, parentValue) {
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
-  if (hierarchyColIdx < 0 || idColIdx < 0) return 0;
+  if (idColIdx < 0) return 0;
   let total = 0;
   const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
   const visited = new Set();
@@ -2838,7 +2839,7 @@ function countAllDescendants(st, parentValue) {
     if (visited.has(current)) continue;
     visited.add(current);
     for (const item of st.relation.items) {
-      const itemParentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      const itemParentVal = getHierarchyParentId(st, item);
       if (itemParentVal === current) {
         total++;
         const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
@@ -2852,10 +2853,8 @@ function countAllDescendants(st, parentValue) {
 }
 
 function getAllDescendantValues(st, parentValue) {
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
-  if (hierarchyColIdx < 0 || idColIdx < 0) return new Set();
+  if (idColIdx < 0) return new Set();
   const descendants = new Set();
   const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
   const visited = new Set();
@@ -2864,7 +2863,7 @@ function getAllDescendantValues(st, parentValue) {
     if (visited.has(current)) continue;
     visited.add(current);
     for (const item of st.relation.items) {
-      const itemParentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      const itemParentVal = getHierarchyParentId(st, item);
       if (itemParentVal === current) {
         const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
         descendants.add(itemParentVal);
@@ -2879,12 +2878,10 @@ function getAllDescendantValues(st, parentValue) {
 }
 
 function buildHierarchyPath(st) {
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
   const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
   const currentVal = getCurrentHierarchyValue(st);
-  if (hierarchyColIdx < 0 || idColIdx < 0) return [];
+  if (idColIdx < 0) return [];
   const showCol = st.rel_options.hierarchy_show_column;
   const showColIdx = showCol ? st.columnNames.indexOf(showCol) : -1;
   const labelColIdx = showColIdx >= 0 ? showColIdx : st.columnTypes.findIndex((t, i) => i !== idColIdx && (t === 'string' || t === 'textarea'));
@@ -2904,8 +2901,7 @@ function buildHierarchyPath(st) {
       if (itemId === traceVal) {
         const label = labelColIdx >= 0 && item[labelColIdx] ? String(item[labelColIdx]) : itemId;
         chain.unshift({ value: traceVal, label: label });
-        const parentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
-        traceVal = parentVal;
+        traceVal = getHierarchyParentId(st, item);
         found = true;
         break;
       }
@@ -2916,24 +2912,22 @@ function buildHierarchyPath(st) {
 }
 
 function getHierarchyAscendants(st, itemId) {
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
   const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
-  if (hierarchyColIdx < 0 || idColIdx < 0) return [];
+  if (idColIdx < 0) return [];
   const ascendants = [];
   let currentId = String(itemId);
   const seen = new Set();
   for (const item of st.relation.items) {
     if (String(item[idColIdx]) === currentId) {
-      let parentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      let parentVal = getHierarchyParentId(st, item);
       while (parentVal !== '' && parentVal !== hierarchyRootVal && !seen.has(parentVal)) {
         seen.add(parentVal);
         ascendants.unshift(parentVal);
         let found = false;
         for (const pItem of st.relation.items) {
           if (String(pItem[idColIdx]) === parentVal) {
-            parentVal = pItem[hierarchyColIdx] === null || pItem[hierarchyColIdx] === undefined ? '' : String(pItem[hierarchyColIdx]);
+            parentVal = getHierarchyParentId(st, pItem);
             found = true;
             break;
           }
@@ -2947,10 +2941,8 @@ function getHierarchyAscendants(st, itemId) {
 }
 
 function getHierarchyDescendantIds(st, parentValue) {
-  const hierarchyColumn = st.rel_options.hierarchy_column;
-  const hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
-  if (hierarchyColIdx < 0 || idColIdx < 0) return [];
+  if (idColIdx < 0) return [];
   const descendants = [];
   const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
   const visited = new Set();
@@ -2959,7 +2951,7 @@ function getHierarchyDescendantIds(st, parentValue) {
     if (visited.has(current)) continue;
     visited.add(current);
     for (const item of st.relation.items) {
-      const itemParentVal = item[hierarchyColIdx] === null || item[hierarchyColIdx] === undefined ? '' : String(item[hierarchyColIdx]);
+      const itemParentVal = getHierarchyParentId(st, item);
       if (itemParentVal === current) {
         const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
         if (itemId) {
@@ -3464,36 +3456,27 @@ function applyFilters(st = state) {
   const items = st.relation.items;
   const filteredIndices = [];
   
-  // Get hierarchy filter settings
   const hierarchyEnabled = st.rel_options.show_hierarchy && shouldShowHierarchy(st);
-  let hierarchyColIdx = -1;
-  if (hierarchyEnabled) {
-    const hierarchyColumn = st.rel_options.hierarchy_column;
-    hierarchyColIdx = st.columnNames.indexOf(hierarchyColumn);
-  }
   const currentHierarchyVal = hierarchyEnabled ? getCurrentHierarchyValue(st) : null;
   st._descendantCache = null;
   
   for (let i = 0; i < items.length; i++) {
     let passes = true;
     
-    // Apply hierarchy filter first
-    if (hierarchyEnabled && hierarchyColIdx >= 0) {
+    if (hierarchyEnabled) {
       const showAll = getShowAllDescendants(st);
       if (showAll) {
-        const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
         if (!st._descendantCache) {
           st._descendantCache = getAllDescendantValues(st, currentHierarchyVal);
         }
-        const itemParentVal = items[i][hierarchyColIdx] === null || items[i][hierarchyColIdx] === undefined ? '' : String(items[i][hierarchyColIdx]);
+        const itemParentVal = getHierarchyParentId(st, items[i]);
         if (!st._descendantCache.has(itemParentVal)) {
           passes = false;
         }
       } else {
-        const itemHierarchyValue = items[i][hierarchyColIdx];
-        const itemVal = itemHierarchyValue === null || itemHierarchyValue === undefined ? '' : String(itemHierarchyValue);
+        const itemParentVal = getHierarchyParentId(st, items[i]);
         const targetVal = currentHierarchyVal === null || currentHierarchyVal === undefined ? '' : String(currentHierarchyVal);
-        if (itemVal !== targetVal) {
+        if (itemParentVal !== targetVal) {
           passes = false;
         }
       }
