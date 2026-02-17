@@ -2546,19 +2546,40 @@ function validateLookupPaths(relationName, columnNames, columns) {
 }
 
 function resolveLookupPath(st, rowIdx, path) {
-  if (!path || typeof path !== 'string') return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+  const EMPTY = { value: '', targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+  if (!path || typeof path !== 'string') return EMPTY;
 
   const segments = path.split('.');
   let currentEntity = st.relation;
   let currentRow = st.relation.items[rowIdx];
-  if (!currentRow) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+  if (!currentRow) return EMPTY;
 
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i];
     const isLast = i === segments.length - 1;
+
+    if (seg === 'HIERARCHY') {
+      const hierCol = currentEntity === st.relation ? st.rel_options.hierarchy_column : null;
+      if (!hierCol) return EMPTY;
+      const colNames = Object.keys(currentEntity.columns);
+      const hierColIdx = colNames.indexOf(hierCol);
+      if (hierColIdx < 0) return EMPTY;
+      const parentVal = currentRow[hierColIdx];
+      if (parentVal === null || parentVal === undefined || parentVal === '') return EMPTY;
+      const idColIdx = colNames.findIndex((n, ci) => {
+        const cd = currentEntity.columns[n];
+        return (typeof cd === 'string' && cd === 'id') || (typeof cd === 'object' && cd !== null && Array.isArray(cd.attribute_kind) && cd.attribute_kind.includes('id'));
+      });
+      if (idColIdx < 0) return EMPTY;
+      const parentRow = (currentEntity.items || []).find(r => String(r[idColIdx]) === String(parentVal));
+      if (!parentRow) return EMPTY;
+      currentRow = parentRow;
+      continue;
+    }
+
     const colNames = Object.keys(currentEntity.columns);
     const segColIdx = colNames.indexOf(seg);
-    if (segColIdx < 0) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (segColIdx < 0) return EMPTY;
 
     const colDef = currentEntity.columns[seg];
     const colType = resolveColumnKind(colDef);
@@ -2576,20 +2597,20 @@ function resolveLookupPath(st, rowIdx, path) {
     }
 
     const att = isAttObject(colDef) ? { ...DEFAULT_ATT, ...colDef } : null;
-    if (!isAssociationAtt(att)) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (!isAssociationAtt(att)) return EMPTY;
     const cfg = getAssociationConfig(att);
-    if (!cfg || cfg.cardinality_max !== 1) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (!cfg || cfg.cardinality_max !== 1) return EMPTY;
 
     const assocVal = currentRow[segColIdx];
-    if (!assocVal || !assocVal.items || assocVal.items.length === 0) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (!assocVal || !assocVal.items || assocVal.items.length === 0) return EMPTY;
 
     const foreignKey = String(assocVal.items[0][2]);
     const counterpartDef = cfg.counterparts && cfg.counterparts[0];
-    if (!counterpartDef) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (!counterpartDef) return EMPTY;
 
     const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
     const counterpartJson = all_entities[counterpartName];
-    if (!counterpartJson) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (!counterpartJson) return EMPTY;
 
     const cpColEntries = Object.entries(counterpartJson.columns);
     const cpIdColIdx = cpColEntries.findIndex(([n, t]) => {
@@ -2597,20 +2618,21 @@ function resolveLookupPath(st, rowIdx, path) {
       if (typeof t === 'object' && t !== null && Array.isArray(t.attribute_kind) && t.attribute_kind.includes('id')) return true;
       return false;
     });
-    if (cpIdColIdx < 0) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (cpIdColIdx < 0) return EMPTY;
 
     const targetRow = (counterpartJson.items || []).find(r => String(r[cpIdColIdx]) === foreignKey);
-    if (!targetRow) return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+    if (!targetRow) return EMPTY;
 
     currentEntity = counterpartJson;
     currentRow = targetRow;
   }
 
-  return { value: null, targetEntity: null, targetRow: null, targetColIdx: -1, targetColDef: null, targetType: null };
+  return EMPTY;
 }
 
 function resolveLookupColumnDef(st, path) {
-  if (!path || typeof path !== 'string') return { targetType: null, targetColDef: null, targetColName: null };
+  const EMPTY_DEF = { targetType: null, targetColDef: null, targetColName: null };
+  if (!path || typeof path !== 'string') return EMPTY_DEF;
 
   const segments = path.split('.');
   let currentEntity = st.relation;
@@ -2618,9 +2640,17 @@ function resolveLookupColumnDef(st, path) {
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i];
     const isLast = i === segments.length - 1;
+
+    if (seg === 'HIERARCHY') {
+      if (!st.rel_options.show_hierarchy || !st.rel_options.hierarchy_column) return EMPTY_DEF;
+      const hierColNames = Object.keys(currentEntity.columns);
+      if (!hierColNames.includes(st.rel_options.hierarchy_column)) return EMPTY_DEF;
+      continue;
+    }
+
     const colNames = Object.keys(currentEntity.columns);
     const segColIdx = colNames.indexOf(seg);
-    if (segColIdx < 0) return { targetType: null, targetColDef: null, targetColName: null };
+    if (segColIdx < 0) return EMPTY_DEF;
 
     const colDef = currentEntity.columns[seg];
     const colType = resolveColumnKind(colDef);
@@ -2630,21 +2660,21 @@ function resolveLookupColumnDef(st, path) {
     }
 
     const att = isAttObject(colDef) ? { ...DEFAULT_ATT, ...colDef } : null;
-    if (!isAssociationAtt(att)) return { targetType: null, targetColDef: null, targetColName: null };
+    if (!isAssociationAtt(att)) return EMPTY_DEF;
     const cfg = getAssociationConfig(att);
-    if (!cfg || cfg.cardinality_max !== 1) return { targetType: null, targetColDef: null, targetColName: null };
+    if (!cfg || cfg.cardinality_max !== 1) return EMPTY_DEF;
 
     const counterpartDef = cfg.counterparts && cfg.counterparts[0];
-    if (!counterpartDef) return { targetType: null, targetColDef: null, targetColName: null };
+    if (!counterpartDef) return EMPTY_DEF;
 
     const counterpartName = typeof counterpartDef === 'string' ? counterpartDef : counterpartDef.counterpart_entity;
     const counterpartJson = all_entities[counterpartName];
-    if (!counterpartJson) return { targetType: null, targetColDef: null, targetColName: null };
+    if (!counterpartJson) return EMPTY_DEF;
 
     currentEntity = counterpartJson;
   }
 
-  return { targetType: null, targetColDef: null, targetColName: null };
+  return EMPTY_DEF;
 }
 
 function createEmptyAssociationRelation() {
