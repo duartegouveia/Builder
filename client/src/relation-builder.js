@@ -1746,6 +1746,42 @@ const PRODUCT_FAMILIES_JSON = {
   "name": "company_product_family",
   "columns": {
     "ID": "id",
+    "Name": "string",
+    "parent": {
+      "attribute_kind": ["association"],
+      "name": "Pai",
+      "short_name": "Pai",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_product_family",
+            "counterpart_association_att": "childs",
+            "counterpart_display_atts": ["Name"]
+          }
+        ]
+      }
+    },
+    "childs": {
+      "attribute_kind": ["association"],
+      "name": "Filhos",
+      "visible": false,
+      "short_name": "Filhos",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 0,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_product_family",
+            "counterpart_association_att": "parent",
+            "counterpart_display_atts": ["Name"]
+          }
+        ]
+      }
+    },
+    "Level": "int",
+    "IntegrationID": "string",
     "OwnerID": {
       "attribute_kind": ["association"],
       "name": "Pertence a",
@@ -1757,15 +1793,11 @@ const PRODUCT_FAMILIES_JSON = {
           {
             "counterpart_entity": "company",
             "counterpart_association_att": "Ownership",
-            "counterpart_display_atts": []
+            "counterpart_display_atts": ["Name"]
           }
         ]
       }
-    },
-    "Level": "int",
-    "ParentID": "int",
-    "IntegrationID": "string",
-    "Name": "string"
+    }
   },
   "options": {
     "relation.single_item_mode": ["dialog", "right", "bottom"]
@@ -1778,7 +1810,6 @@ const PRODUCT_FAMILIES_JSON = {
     "show_column_kind": true,
     "show_stats": true,
     "show_hierarchy": true,
-    "hierarchy_column": "ParentID",
     "hierarchy_show_column": "Name",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
