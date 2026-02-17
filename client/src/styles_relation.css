@@ -5852,6 +5852,94 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   font-size: 0.6rem;
 }
 
+.hierarchy-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hierarchy-help-dialog {
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 8px);
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0,0,0,.1));
+  padding: 20px 24px;
+  max-width: 480px;
+  width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.hierarchy-help-dialog h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.05rem;
+  color: var(--foreground, #1e293b);
+}
+
+.hierarchy-help-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hierarchy-help-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.hierarchy-help-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.hierarchy-help-item strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--foreground, #1e293b);
+  margin-bottom: 2px;
+}
+
+.hierarchy-help-item p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted-foreground, #64748b);
+  line-height: 1.45;
+}
+
+.hierarchy-help-item code {
+  background: var(--slate-100, #f1f5f9);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono, monospace);
+}
+
+.hierarchy-help-dialog .btn-close-dialog {
+  margin-top: 18px;
+  padding: 7px 20px;
+  background: var(--primary-600, #2563eb);
+  color: white;
+  border: none;
+  border-radius: var(--radius, 6px);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  display: block;
+  width: 100%;
+}
+
+.hierarchy-help-dialog .btn-close-dialog:hover {
+  background: var(--primary-700, #1d4ed8);
+}
+
 .hierarchy-show-all-label {
   display: inline-flex;
   align-items: center;

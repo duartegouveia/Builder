@@ -10608,8 +10608,64 @@ function renderTable(st = state) {
   const infoBadge = document.createElement('span');
   infoBadge.className = 'info-badge hierarchy-info-badge';
   infoBadge.textContent = 'ⓘ';
-  infoBadge.title = '#N1 = direct children at this level, #N2 = total descendants (all levels below). Click a segment to navigate.';
+  infoBadge.style.cursor = 'pointer';
   infoBadge.dataset.testid = 'hierarchy-info-badge';
+  infoBadge.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const existing = document.querySelector('.hierarchy-help-overlay');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'hierarchy-help-overlay';
+    const dialog = document.createElement('div');
+    dialog.className = 'hierarchy-help-dialog';
+    dialog.innerHTML = `
+      <h3>Hierarchy Navigation</h3>
+      <div class="hierarchy-help-section">
+        <div class="hierarchy-help-item">
+          <span class="hierarchy-help-icon">🗂️</span>
+          <div>
+            <strong>What is a hierarchy?</strong>
+            <p>This data is organized in a tree structure where each item can have child items. You are viewing one level of the tree at a time.</p>
+          </div>
+        </div>
+        <div class="hierarchy-help-item">
+          <span class="hierarchy-help-icon">📍</span>
+          <div>
+            <strong>Breadcrumbs</strong>
+            <p>The path above the table shows your current location in the tree. Each segment shows: <code>Name N₁ &gt; N₂</code> where <strong>N₁</strong> = direct children and <strong>N₂</strong> = total descendants across all levels below. Click any segment to jump back to that level.</p>
+          </div>
+        </div>
+        <div class="hierarchy-help-item">
+          <span class="hierarchy-help-icon">⬇️</span>
+          <div>
+            <strong>Drilling down</strong>
+            <p>Double-click on any row that has children to navigate into it and see its child items.</p>
+          </div>
+        </div>
+        <div class="hierarchy-help-item">
+          <span class="hierarchy-help-icon">⬆️</span>
+          <div>
+            <strong>Going up</strong>
+            <p>Use the <strong>↑</strong> button in the green parent row to go back up one level, or click a breadcrumb segment to jump directly to that level.</p>
+          </div>
+        </div>
+        <div class="hierarchy-help-item">
+          <span class="hierarchy-help-icon">👁️</span>
+          <div>
+            <strong>Show all descendants</strong>
+            <p>When this checkbox is checked, the table shows <em>all</em> items below the current level (children, grandchildren, etc.), not just direct children. Uncheck it to see only immediate children.</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn-close-dialog" data-testid="hierarchy-help-close">Got it</button>
+    `;
+    overlay.appendChild(dialog);
+    overlay.addEventListener('click', (ev) => {
+      if (ev.target === overlay) overlay.remove();
+    });
+    dialog.querySelector('.btn-close-dialog').addEventListener('click', () => overlay.remove());
+    document.body.appendChild(overlay);
+  });
   breadcrumbContainer.appendChild(infoBadge);
   const showAllLabel = document.createElement('label');
   showAllLabel.className = 'hierarchy-show-all-label';
