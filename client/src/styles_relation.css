@@ -6420,9 +6420,46 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   border-radius: 4px;
   margin-top: 2px;
 }
+.multi-input-add.multi-input-add-round {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary, #4a90d9);
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.multi-input-add.multi-input-add-round:hover {
+  background: #3a7cc0;
+}
 .multi-input-add:hover {
   background: var(--accent, #1e3a5f);
   border-color: var(--primary, #4a90d9);
+}
+.multi-input-textarea {
+  resize: vertical;
+  min-height: 40px;
+  font-family: inherit;
+}
+.multi-input-color {
+  width: 40px;
+  height: 28px;
+  padding: 1px 2px;
+  flex: 0 0 auto;
+}
+.multi-value-editor {
+  width: 100%;
+}
+.multi-value-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .structure-panel {

@@ -23,6 +23,20 @@ const ATT_KIND_MAP = {
   'html': 'html',
   'lookup': 'lookup',
   'multi_text': 'multi_text',
+  'multi_string': 'multi_string',
+  'multi_int': 'multi_int',
+  'multi_float': 'multi_float',
+  'multi_boolean': 'multi_boolean',
+  'multi_date': 'multi_date',
+  'multi_datetime': 'multi_datetime',
+  'multi_time': 'multi_time',
+  'multi_select': 'multi_select',
+  'multi_textarea': 'multi_textarea',
+  'multi_email': 'multi_email',
+  'multi_tel': 'multi_tel',
+  'multi_url': 'multi_url',
+  'multi_color': 'multi_color',
+  'multi_search': 'multi_search',
   'qr_code': 'qr_code',
   'tabsheet': 'tabsheet',
   'pointer': 'pointer',
@@ -93,6 +107,19 @@ function resolveColumnKind(colValue) {
     return ATT_KIND_MAP[activeKind] || activeKind;
   }
   return 'string';
+}
+
+function isMultiType(type) {
+  return typeof type === 'string' && type.startsWith('multi_');
+}
+
+function getMultiBaseType(type) {
+  if (isMultiType(type)) return type.substring(6);
+  return type;
+}
+
+function isMultiBehavior(type, att) {
+  return isMultiType(type) || (att && att.multiple === true);
 }
 
 function isAttObject(colValue) {
@@ -3375,6 +3402,27 @@ function generateDemoRelation() {
         cardinality_max: 1
       }
     },
+    multi_names: 'multi_string',
+    multi_scores: 'multi_int',
+    multi_measures: 'multi_float',
+    multi_flags: 'multi_boolean',
+    multi_dates: 'multi_date',
+    multi_emails: 'multi_email',
+    multi_colors: 'multi_color',
+    multi_notes: {
+      attribute_kind: ['textarea'],
+      name: 'Notas Múltiplas',
+      short_name: 'MNotas',
+      multiple: true,
+      interface_width: 'long'
+    },
+    multi_score_att: {
+      attribute_kind: ['number'],
+      name: 'Pontuações',
+      short_name: 'MPts',
+      multiple: true,
+      suffix: 'pts'
+    },
     orders: 'relation',
     tags: 'relation'
   };
@@ -3471,6 +3519,19 @@ function generateDemoRelation() {
           rel_options: { editable: false },
           items: [['1', 'company_type', targetId]]
         };
+      }
+
+      if (isMultiType(resolvedType)) {
+        const baseType = getMultiBaseType(resolvedType);
+        const count = Math.floor(Math.random() * 4) + 1;
+        return Array.from({ length: count }, () => generateRandomValue(baseType));
+      }
+
+      const attDef = isAttObject(type) ? type : null;
+      if (attDef && attDef.multiple) {
+        const baseKind = resolveColumnKind(type);
+        const count = Math.floor(Math.random() * 4) + 1;
+        return Array.from({ length: count }, () => generateRandomValue(baseKind));
       }
       
       return generateRandomValue(resolvedType);
@@ -5212,6 +5273,15 @@ function getVisibleColumns(st = state) {
 function formatCellValue(value, type, colName, st) {
   if (value === null || value === undefined) return '';
   
+  const colIdx = st ? st.columnNames.indexOf(colName) : -1;
+  const att = colIdx >= 0 ? getAtt(st, colIdx) : null;
+  if (isMultiBehavior(type, att)) {
+    const baseType = getMultiBaseType(type);
+    const arr = Array.isArray(value) ? value : [value];
+    if (arr.length === 0) return '';
+    return arr.map(v => formatCellValue(v, baseType, colName, null)).join('<br>');
+  }
+  
   if (type === 'relation') {
     if (st) {
       const colIdx = st.columnNames.indexOf(colName);
@@ -5267,7 +5337,7 @@ function formatCellValue(value, type, colName, st) {
 }
 
 // ─── Integrity Check ───────────────────────────────────────────────────
-const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select', 'password', 'email', 'tel', 'url', 'search', 'color', 'radio', 'file']);
+const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select', 'password', 'email', 'tel', 'url', 'search', 'color', 'radio', 'file', 'multi_text', 'multi_string', 'multi_int', 'multi_float', 'multi_boolean', 'multi_date', 'multi_datetime', 'multi_time', 'multi_select', 'multi_textarea', 'multi_email', 'multi_tel', 'multi_url', 'multi_color', 'multi_search']);
 const KNOWN_ATTRIBUTE_KINDS = new Set(['association', 'lookup', 'pointer', 'range']);
 const KNOWN_ATT_KEYS = new Set(['attribute_kind', 'name', 'short_name', 'association', 'lookup', 'pointer', 'range', 'label', 'field_decoration', 'validation', 'visibility', 'readonly', 'layout', 'new_fast', 'kind', 'display_name', 'multiple']);
 const KNOWN_REL_OPTIONS_KEYS = new Set([...Object.keys(DEFAULT_REL_OPTIONS), 'uiState']);
@@ -6779,6 +6849,17 @@ function buildMultiInput(values, baseType, editable, onChange) {
         });
         row.appendChild(keyInput);
         row.appendChild(labelInput);
+      } else if (baseType === 'textarea') {
+        const ta = document.createElement('textarea');
+        ta.className = 'multi-input-field multi-input-textarea';
+        ta.rows = 2;
+        ta.value = val !== null && val !== undefined ? val : '';
+        ta.disabled = !editable;
+        ta.addEventListener('input', () => {
+          arr[idx] = ta.value;
+          if (onChange) onChange(arr);
+        });
+        row.appendChild(ta);
       } else {
         const input = document.createElement('input');
         input.className = 'multi-input-field';
@@ -6789,10 +6870,27 @@ function buildMultiInput(values, baseType, editable, onChange) {
           input.type = 'checkbox';
           input.checked = !!val;
           input.className = 'multi-input-checkbox';
+        } else if (baseType === 'date') {
+          input.type = 'date';
+        } else if (baseType === 'datetime') {
+          input.type = 'datetime-local';
+        } else if (baseType === 'time') {
+          input.type = 'time';
+        } else if (baseType === 'email') {
+          input.type = 'email';
+        } else if (baseType === 'tel') {
+          input.type = 'tel';
+        } else if (baseType === 'url') {
+          input.type = 'url';
+        } else if (baseType === 'color') {
+          input.type = 'color';
+          input.className = 'multi-input-field multi-input-color';
+        } else if (baseType === 'search') {
+          input.type = 'search';
         } else {
           input.type = 'text';
         }
-        if (baseType !== 'boolean') input.value = val !== null && val !== undefined ? val : '';
+        if (baseType !== 'boolean') input.value = val !== null && val !== undefined ? val : (baseType === 'color' ? '#000000' : '');
         input.disabled = !editable;
         input.addEventListener(baseType === 'boolean' ? 'change' : 'input', () => {
           if (baseType === 'boolean') {
@@ -6829,8 +6927,8 @@ function buildMultiInput(values, baseType, editable, onChange) {
     if (editable) {
       const addBtn = document.createElement('button');
       addBtn.type = 'button';
-      addBtn.className = 'multi-input-add';
-      addBtn.innerHTML = '+ Adicionar';
+      addBtn.className = 'multi-input-add multi-input-add-round';
+      addBtn.innerHTML = '+';
       addBtn.addEventListener('click', () => {
         if (baseType === 'keyvalue') {
           arr.push({ key: '', label: '' });
@@ -6838,6 +6936,8 @@ function buildMultiInput(values, baseType, editable, onChange) {
           arr.push(false);
         } else if (baseType === 'number' || baseType === 'int' || baseType === 'float') {
           arr.push(null);
+        } else if (baseType === 'color') {
+          arr.push('#000000');
         } else {
           arr.push('');
         }
@@ -10703,6 +10803,16 @@ function showGroupEditDialog(st) {
       checkedFields.forEach(cb => {
         const colIdx = parseInt(cb.dataset.col);
         const type = st.columnTypes[colIdx];
+        const colAtt = getAtt(st, colIdx);
+        if (isMultiBehavior(type, colAtt)) {
+          const editor = body.querySelector(`.multi-value-editor[data-col="${colIdx}"]`);
+          if (editor && editor._multiValues) {
+            const value = [...editor._multiValues];
+            checkedIndices.forEach(rowIdx => { st.relation.items[rowIdx][colIdx] = [...value]; });
+            updated++;
+          }
+          return;
+        }
         const input = body.querySelector(`.ge-field-edit[data-col="${colIdx}"] [data-col="${colIdx}"]`);
         if (!input) return;
         let value;
@@ -15500,6 +15610,14 @@ function generateRowFormattedContent(st, row, mode = 'view') {
 function formatValueForViewDisplay(value, type, st, colIdx) {
   if (value === null || value === undefined) return '';
   
+  const att = st && colIdx >= 0 ? getAtt(st, colIdx) : null;
+  if (isMultiBehavior(type, att)) {
+    const baseType = getMultiBaseType(type);
+    const arr = Array.isArray(value) ? value : [value];
+    if (arr.length === 0) return '';
+    return arr.map(v => formatValueForViewDisplay(v, baseType, null, -1)).join('<br>');
+  }
+  
   if (type === 'boolean') {
     return value ? '<span class="bool-true">✓ true</span>' : '<span class="bool-false">✗ false</span>';
   }
@@ -15634,6 +15752,27 @@ function initRelationFieldsInContainer(container, st, row, mode) {
     if (!numInput) return;
     slider.addEventListener('input', () => { numInput.value = slider.value; });
     numInput.addEventListener('input', () => { slider.value = numInput.value; });
+  });
+
+  initMultiInputsInContainer(container, st, row, mode);
+}
+
+function initMultiInputsInContainer(container, st, row, mode) {
+  const isEditMode = ['new', 'new-fast', 'edit', 'multi_edit', 'multi_merge', 'group_edit'].includes(mode);
+  container.querySelectorAll('.multi-value-editor').forEach(editor => {
+    const colIdx = parseInt(editor.dataset.col);
+    const baseType = editor.dataset.baseType || 'string';
+    let values;
+    try { values = JSON.parse(editor.dataset.values || '[]'); } catch(e) { values = []; }
+    if (!Array.isArray(values)) values = [];
+    editor.innerHTML = '';
+    editor._multiValues = values;
+    const multiInput = buildMultiInput(values, baseType, isEditMode, (newArr) => {
+      row[colIdx] = newArr;
+      editor._multiValues = newArr;
+    });
+    editor.appendChild(multiInput);
+    row[colIdx] = values;
   });
 }
 
@@ -16059,6 +16198,21 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
           }
           return;
         }
+        if (isMultiBehavior(type, att)) {
+          defaultRow[colIdx] = [];
+          const editor = container.querySelector(`.multi-value-editor[data-col="${colIdx}"]`);
+          if (editor) {
+            editor.innerHTML = '';
+            editor._multiValues = [];
+            const baseType = getMultiBaseType(type);
+            const multiInput = buildMultiInput([], baseType, true, (newArr) => {
+              defaultRow[colIdx] = newArr;
+              editor._multiValues = newArr;
+            });
+            editor.appendChild(multiInput);
+          }
+          return;
+        }
         const input = container.querySelector(`[data-col="${colIdx}"]`);
         if (input) {
           if (type === 'boolean') {
@@ -16088,22 +16242,27 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
         } else if (type === 'file') {
           newRow[colIdx] = defaultRow[colIdx];
         } else {
-          const input = container.querySelector(`[data-col="${colIdx}"]`);
-          if (input) {
-            if (type === 'boolean') {
-              newRow[colIdx] = input.checked;
-            } else if (type === 'int') {
-              newRow[colIdx] = input.value === '' ? null : parseInt(input.value);
-            } else if (type === 'float') {
-              newRow[colIdx] = input.value === '' ? null : parseFloat(input.value);
-            } else if (type === 'range') {
-              const rangeNum = container.querySelector(`.range-number[data-col="${colIdx}"]`);
-              newRow[colIdx] = rangeNum && rangeNum.value !== '' ? parseFloat(rangeNum.value) : null;
-            } else if (type === 'radio') {
-              const checked = input.querySelector('input[type="radio"]:checked');
-              newRow[colIdx] = checked ? checked.value : null;
-            } else {
-              newRow[colIdx] = input.value === '' ? null : input.value;
+          const colAtt = getAtt(st, colIdx);
+          if (isMultiBehavior(type, colAtt)) {
+            newRow[colIdx] = defaultRow[colIdx];
+          } else {
+            const input = container.querySelector(`[data-col="${colIdx}"]`);
+            if (input) {
+              if (type === 'boolean') {
+                newRow[colIdx] = input.checked;
+              } else if (type === 'int') {
+                newRow[colIdx] = input.value === '' ? null : parseInt(input.value);
+              } else if (type === 'float') {
+                newRow[colIdx] = input.value === '' ? null : parseFloat(input.value);
+              } else if (type === 'range') {
+                const rangeNum = container.querySelector(`.range-number[data-col="${colIdx}"]`);
+                newRow[colIdx] = rangeNum && rangeNum.value !== '' ? parseFloat(rangeNum.value) : null;
+              } else if (type === 'radio') {
+                const checked = input.querySelector('input[type="radio"]:checked');
+                newRow[colIdx] = checked ? checked.value : null;
+              } else {
+                newRow[colIdx] = input.value === '' ? null : input.value;
+              }
             }
           }
         }
@@ -16332,6 +16491,7 @@ function showRowEditDialog(st, rowIdx) {
             if (type === 'relation' || type === 'file') return;
 
             const colAtt = getAtt(st, colIdx);
+            if (isMultiBehavior(type, colAtt)) return;
             if (type === 'lookup' && isLookupAtt(colAtt)) {
               const lookupCfg = getLookupConfig(colAtt);
               if (!lookupCfg.editable) return;
@@ -23864,8 +24024,11 @@ function getAllKindTypes() {
     'date', 'datetime', 'time', 'select', 'radio', 'color',
     'password', 'email', 'tel', 'url', 'search', 'file',
     'relation', 'range', 'association', 'pointer', 'lookup',
-    'button', 'gps', 'html', 'multi_text', 'qr_code',
-    'tabsheet', 'object', 'group'
+    'button', 'gps', 'html', 'multi_text', 'multi_string',
+    'multi_int', 'multi_float', 'multi_boolean', 'multi_date',
+    'multi_datetime', 'multi_time', 'multi_select', 'multi_textarea',
+    'multi_email', 'multi_tel', 'multi_url', 'multi_color',
+    'multi_search', 'qr_code', 'tabsheet', 'object', 'group'
   ];
 }
 
@@ -25440,6 +25603,12 @@ function formatValueForDisplay(value, type) {
 }
 
 function createEditInputHtml(type, value, colIdx, st) {
+  const att = getAtt(st, colIdx);
+  if (isMultiBehavior(type, att)) {
+    const baseType = getMultiBaseType(type);
+    const arrJson = escapeHtml(JSON.stringify(Array.isArray(value) ? value : []));
+    return `<div class="multi-value-editor" data-col="${colIdx}" data-base-type="${baseType}" data-values="${arrJson}"></div>`;
+  }
   const sizeClass = getInputSizeClass(type);
   if (type === 'boolean') {
     return `<input type="checkbox" data-col="${colIdx}" ${value ? 'checked' : ''}>`;
