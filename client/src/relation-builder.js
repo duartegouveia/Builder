@@ -743,12 +743,17 @@ const COMPANY_TYPES_JSON = {
       "association": {
         "cardinality_min": 0,
         "cardinality_max": null,
-        "counterparts": [{"counterpart_entity": "company", "counterpart_association_att": "CompanyTypeID"}]
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "CompanyTypeID"
+          }
+        ]
       }
     }
   },
   "options": {
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": ["dialog", "right", "bottom"]
   },
   "rel_options": {
     "editable": false,
@@ -757,9 +762,9 @@ const COMPANY_TYPES_JSON = {
     "show_hierarchy": true
   },
   "items": [
-    [-1, "Company Type A", 7, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
-    [-2, "Company Type B", 3, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
-    [-3, "Company Type C", 5, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}]
+    [-1, "Company Type A", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
+    [-2, "Company Type B", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}],
+    [-3, "Company Type C", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[],"log":[]}]
   ],
   "log": []
 };
