@@ -1492,58 +1492,38 @@ const PRODUCT_BRANDS_JSON = {
   "name": "company_product_brand",
   "columns": {
     "ID": "id",
-    "OwnerID": "int",
+    "OwnerID": {
+      "attribute_kind": ["association"],
+      "name": "Pertence a",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "Ownership",
+            "counterpart_display_atts": []
+          }
+        ]
+      }
+    },
     "Url": "string",
     "ParentID": "int",
     "IntegrationID": "string",
     "Name": "string"
   },
   "options": {
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": ["dialog", "right", "bottom"]
   },
   "rel_options": {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_hierarchy": true,
-    "hierarchy_column": "ParentID",
-    "columns_visible": {
-      "ID": 0,
-      "Name": 0,
-      "OwnerID": 0,
-      "Url": 0,
-      "ParentID": 0,
-      "IntegrationID": 0
-    },
-    "sortCriteria": [{ "column": "Name", "direction": "asc" }]
+    "hierarchy_column": "ParentID"
   },
-  "items": [
-    ["1", "", "", "", "", "A"],
-    ["2", "", "", "", "", "B"],
-    ["3", "", "", "", "", "C"],
-    ["4", "", "", "1", "", "AA"],
-    ["5", "", "", "1", "", "AB"],
-    ["6", "", "", "1", "", "AC"],
-    ["7", "", "", "2", "", "BA"],
-    ["8", "", "", "2", "", "BB"],
-    ["9", "", "", "3", "", "CA"],
-    ["10", "", "", "4", "", "AAA"],
-    ["11", "", "", "4", "", "AAB"]
-  ],
-  "log": [
-    {
-      "pot": "relation_op",
-      "timestamp": "2026-02-17T09:48:39.960Z",
-      "op": "columns_visible",
-      "columns_visible": {
-        "ID": 0,
-        "Name": 0,
-        "OwnerID": 0,
-        "Url": 0,
-        "ParentID": 0,
-        "IntegrationID": 0
-      }
-    }
-  ]
+  "items": [],
+  "log": []
 };
 
 const PRODUCT_SPECIES_JSON = {
