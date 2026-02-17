@@ -4,6 +4,51 @@ const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'da
 
 const all_entities = {};
 
+const ALL_LANGUAGES = {
+  pt: 'Português', en: 'English', es: 'Español', fr: 'Français', it: 'Italiano', de: 'Deutsch',
+  af: 'Afrikaans', ak: 'Akan', am: 'አማርኛ', an: 'Aragonés', ar: 'العربية', as: 'অসমীয়া',
+  ay: 'Aymar aru', az: 'Azərbaycan', ba: 'Башҡортса', be: 'Беларуская', bg: 'Български',
+  bh: 'भोजपुरी', bi: 'Bislama', bm: 'Bamanankan', bn: 'বাংলা', bo: 'བོད་སྐད',
+  br: 'Brezhoneg', bs: 'Bosanski', ca: 'Català', ce: 'Нохчийн', co: 'Corsu',
+  cs: 'Čeština', cu: 'Словѣньскъ', cv: 'Чӑвашла', cy: 'Cymraeg', da: 'Dansk',
+  dv: 'ދިވެހި', dz: 'རྫོང་ཁ', ee: 'Eʋegbe', el: 'Ελληνικά', eo: 'Esperanto',
+  et: 'Eesti', eu: 'Euskara', fa: 'فارسی', ff: 'Fulfulde', fi: 'Suomi',
+  fj: 'Vosa Vakaviti', fo: 'Føroyskt', fy: 'Frysk', ga: 'Gaeilge', gd: 'Gàidhlig',
+  gl: 'Galego', gn: 'Avañeʼẽ', gu: 'ગુજરાતી', gv: 'Gaelg', ha: 'Hausa',
+  he: 'עברית', hi: 'हिन्दी', ho: 'Hiri Motu', hr: 'Hrvatski', ht: 'Kreyòl ayisyen',
+  hu: 'Magyar', hy: 'Հայերեն', hz: 'Otjiherero', ia: 'Interlingua', id: 'Bahasa Indonesia',
+  ie: 'Interlingue', ig: 'Igbo', ii: 'ꆈꌠ꒿', ik: 'Iñupiaq', io: 'Ido',
+  is: 'Íslenska', ja: '日本語', jv: 'Basa Jawa', ka: 'ქართული', kg: 'KiKongo',
+  ki: 'Gĩkũyũ', kj: 'Kuanyama', kk: 'Қазақша', kl: 'Kalaallisut', km: 'ភាសាខ្មែរ',
+  kn: 'ಕನ್ನಡ', ko: '한국어', kr: 'Kanuri', ks: 'कॉशुर', ku: 'Kurdî',
+  kv: 'Коми', kw: 'Kernewek', ky: 'Кыргызча', la: 'Latina', lb: 'Lëtzebuergesch',
+  lg: 'Luganda', li: 'Limburgs', ln: 'Lingála', lo: 'ລາວ', lt: 'Lietuvių',
+  lu: 'Tshiluba', lv: 'Latviešu', mg: 'Malagasy', mh: 'Kajin M̧ajeļ', mi: 'Te Reo Māori',
+  mk: 'Македонски', ml: 'മലയാളം', mn: 'Монгол', mr: 'मराठी', ms: 'Bahasa Melayu',
+  mt: 'Malti', my: 'ဗမာစာ', na: 'Dorerin Naoero', nb: 'Norsk bokmål', nd: 'isiNdebele',
+  ne: 'नेपाली', ng: 'Owambo', nl: 'Nederlands', nn: 'Norsk nynorsk', no: 'Norsk',
+  nr: 'isiNdebele', nv: 'Diné bizaad', ny: 'Chichewa', oc: 'Occitan', oj: 'ᐊᓂᔑᓈᐯᒧᐎᓐ',
+  om: 'Afaan Oromoo', or: 'ଓଡ଼ିଆ', os: 'Ирон æвзаг', pa: 'ਪੰਜਾਬੀ', pi: 'पालि',
+  pl: 'Polski', ps: 'پښتو', qu: 'Runa Simi', rm: 'Rumantsch', rn: 'Ikirundi',
+  ro: 'Română', ru: 'Русский', rw: 'Ikinyarwanda', sa: 'संस्कृतम्', sc: 'Sardu',
+  sd: 'سنڌي', se: 'Davvisámegiella', sg: 'Sängö', si: 'සිංහල', sk: 'Slovenčina',
+  sl: 'Slovenščina', sm: 'Gagana Samoa', sn: 'chiShona', so: 'Soomaali', sq: 'Shqip',
+  sr: 'Српски', ss: 'SiSwati', st: 'Sesotho', su: 'Basa Sunda', sv: 'Svenska',
+  sw: 'Kiswahili', ta: 'தமிழ்', te: 'తెలుగు', tg: 'Тоҷикӣ', th: 'ไทย',
+  ti: 'ትግርኛ', tk: 'Türkmençe', tl: 'Tagalog', tn: 'Setswana', to: 'Lea faka-Tonga',
+  tr: 'Türkçe', ts: 'Xitsonga', tt: 'Татарча', tw: 'Twi', ty: 'Reo Tahiti',
+  ug: 'ئۇيغۇرچە', uk: 'Українська', ur: 'اردو', uz: 'Oʻzbekcha', ve: 'Tshivenḓa',
+  vi: 'Tiếng Việt', vo: 'Volapük', wa: 'Walon', wo: 'Wolof', xh: 'isiXhosa',
+  yi: 'ייִדיש', yo: 'Yorùbá', za: 'Saɯ cueŋƅ', zh: '中文', zu: 'isiZulu'
+};
+
+function isI18nObject(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+  const keys = Object.keys(obj);
+  if (keys.length === 0) return false;
+  return keys.every(k => k.length === 2 && ALL_LANGUAGES[k] !== undefined);
+}
+
 const ATT_KIND_MAP = {
   'text': 'string',
   'checkbox': 'boolean',
@@ -5326,6 +5371,19 @@ function formatCellValue(value, type, colName, st) {
     const count = value?.items?.length || 0;
     return '<span class="relation-cell-icon" title="' + count + ' files">📎 ' + count + '</span>';
   }
+  if (type === 'i18n' && value && typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return '';
+    return entries.map(([k, v]) => '<b>' + escapeHtml(k) + '</b>: ' + escapeHtml(String(v))).join('<br>');
+  }
+  if (type === 'object' && value && typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return '';
+    return entries.map(([k, v]) => {
+      const display = Array.isArray(v) ? '[' + v.join(', ') + ']' : (typeof v === 'object' && v !== null ? '{...}' : String(v));
+      return '<b>' + escapeHtml(k) + '</b>: ' + escapeHtml(display);
+    }).join('<br>');
+  }
   if (type === 'url' && value) {
     return '<a href="' + escapeHtml(String(value)) + '" target="_blank" rel="noopener" title="' + escapeHtml(String(value)) + '">' + escapeHtml(String(value).substring(0, 40)) + (String(value).length > 40 ? '...' : '') + '</a>';
   }
@@ -7671,6 +7729,27 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
     
+    if (type === 'i18n' && value && typeof value === 'object') {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly';
+      const entries = Object.entries(value);
+      span.innerHTML = entries.map(([k, v]) => '<b>' + escapeHtml(k) + '</b>: ' + escapeHtml(String(v))).join('<br>');
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
+    if (type === 'object' && value && typeof value === 'object') {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly';
+      const entries = Object.entries(value);
+      span.innerHTML = entries.map(([k, v]) => {
+        const display = Array.isArray(v) ? '[' + v.join(', ') + ']' : (typeof v === 'object' && v !== null ? '{...}' : String(v));
+        return '<b>' + escapeHtml(k) + '</b>: ' + escapeHtml(display);
+      }).join('<br>');
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
     if (Array.isArray(value)) {
       const span = document.createElement('span');
       span.className = 'relation-cell-readonly';
@@ -7786,6 +7865,18 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     btn.dataset.row = rowIdx;
     btn.dataset.col = colIdx;
     wrapper.appendChild(btn);
+  } else if (type === 'i18n') {
+    const editor = document.createElement('div');
+    editor.className = 'i18n-editor';
+    editor.dataset.col = colIdx;
+    editor.dataset.values = JSON.stringify(value && typeof value === 'object' ? value : {});
+    wrapper.appendChild(editor);
+  } else if (type === 'object') {
+    const editor = document.createElement('div');
+    editor.className = 'object-editor';
+    editor.dataset.col = colIdx;
+    editor.dataset.values = JSON.stringify(value && typeof value === 'object' ? value : {});
+    wrapper.appendChild(editor);
   } else {
     const input = document.createElement('input');
     input.type = getInputType(type);
@@ -15622,6 +15713,17 @@ function generateRowFormattedContent(st, row, mode = 'view') {
 function formatValueForViewDisplay(value, type, st, colIdx) {
   if (value === null || value === undefined) return '';
   
+  if (type === 'i18n' && value && typeof value === 'object') {
+    return Object.entries(value).map(([k, v]) => '<b>' + escapeHtml(k) + '</b>: ' + escapeHtml(String(v))).join('<br>');
+  }
+
+  if (type === 'object' && value && typeof value === 'object') {
+    return Object.entries(value).map(([k, v]) => {
+      const display = Array.isArray(v) ? '[' + v.join(', ') + ']' : (typeof v === 'object' && v !== null ? '{...}' : String(v));
+      return '<b>' + escapeHtml(k) + '</b>: ' + escapeHtml(display);
+    }).join('<br>');
+  }
+
   const att = st && colIdx >= 0 ? getAtt(st, colIdx) : null;
   if (isMultiBehavior(type, att)) {
     const baseType = getMultiBaseType(type);
@@ -15771,6 +15873,8 @@ function initRelationFieldsInContainer(container, st, row, mode) {
   });
 
   initMultiInputsInContainer(container, st, row, mode);
+  initI18nEditorsInContainer(container, st, row, mode);
+  initObjectEditorsInContainer(container, st, row, mode);
 }
 
 function initMultiInputsInContainer(container, st, row, mode) {
@@ -15788,6 +15892,261 @@ function initMultiInputsInContainer(container, st, row, mode) {
       editor._multiValues = newArr;
     });
     editor.appendChild(multiInput);
+    row[colIdx] = values;
+  });
+}
+
+function buildI18nEditor(obj, editable, onChange) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'i18n-editor-wrapper';
+
+  function getUsedCodes() {
+    const codes = [];
+    wrapper.querySelectorAll('.i18n-entry-select').forEach(sel => {
+      if (sel.value) codes.push(sel.value);
+    });
+    return codes;
+  }
+
+  function buildLangSelect(selectedCode, usedCodes) {
+    const select = document.createElement('select');
+    select.className = 'i18n-entry-select';
+    const langKeys = Object.keys(ALL_LANGUAGES);
+    langKeys.forEach(code => {
+      if (code !== selectedCode && usedCodes.includes(code)) return;
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = code + ' — ' + ALL_LANGUAGES[code];
+      if (code === selectedCode) opt.selected = true;
+      select.appendChild(opt);
+    });
+    return select;
+  }
+
+  function collectValues() {
+    const result = {};
+    wrapper.querySelectorAll('.i18n-entry').forEach(entry => {
+      const sel = entry.querySelector('.i18n-entry-select');
+      const inp = entry.querySelector('.i18n-entry-input');
+      if (sel && sel.value) result[sel.value] = inp ? inp.value : '';
+    });
+    if (onChange) onChange(result);
+  }
+
+  function refreshSelects() {
+    const used = getUsedCodes();
+    wrapper.querySelectorAll('.i18n-entry').forEach(entry => {
+      const sel = entry.querySelector('.i18n-entry-select');
+      const currentVal = sel.value;
+      const newSel = buildLangSelect(currentVal, used);
+      newSel.className = sel.className;
+      newSel.addEventListener('change', () => { collectValues(); refreshSelects(); });
+      sel.replaceWith(newSel);
+    });
+  }
+
+  function addEntry(code, text) {
+    const used = getUsedCodes();
+    const entry = document.createElement('div');
+    entry.className = 'i18n-entry';
+
+    const sel = buildLangSelect(code, used);
+    sel.addEventListener('change', () => { collectValues(); refreshSelects(); });
+    entry.appendChild(sel);
+
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'i18n-entry-input';
+    inp.value = text || '';
+    inp.addEventListener('input', collectValues);
+    entry.appendChild(inp);
+
+    if (editable) {
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'multi-input-remove';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => {
+        entry.remove();
+        collectValues();
+        refreshSelects();
+      });
+      entry.appendChild(removeBtn);
+    }
+
+    const list = wrapper.querySelector('.i18n-list');
+    list.appendChild(entry);
+    refreshSelects();
+  }
+
+  const list = document.createElement('div');
+  list.className = 'i18n-list';
+  wrapper.appendChild(list);
+
+  const entries = obj && typeof obj === 'object' ? Object.entries(obj) : [];
+  entries.forEach(([code, text]) => addEntry(code, text));
+
+  if (editable) {
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'multi-input-add multi-input-add-round';
+    addBtn.textContent = '+';
+    addBtn.addEventListener('click', () => {
+      const used = getUsedCodes();
+      const langKeys = Object.keys(ALL_LANGUAGES);
+      const nextCode = langKeys.find(c => !used.includes(c)) || '';
+      if (!nextCode) return;
+      addEntry(nextCode, '');
+      collectValues();
+    });
+    wrapper.appendChild(addBtn);
+  }
+
+  return wrapper;
+}
+
+function buildObjectEditor(obj, editable, onChange, title) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'object-editor-wrapper';
+
+  if (title) {
+    const titleEl = document.createElement('div');
+    titleEl.className = 'object-editor-title';
+    titleEl.textContent = title;
+    wrapper.appendChild(titleEl);
+  }
+
+  const entries = obj && typeof obj === 'object' ? Object.entries(obj) : [];
+  const container = document.createElement('div');
+  container.className = 'object-editor-fields';
+  if (entries.length <= 5) {
+    container.classList.add('object-editor-horizontal');
+  } else {
+    container.classList.add('object-editor-vertical');
+  }
+
+  function collectValues() {
+    const result = {};
+    wrapper.querySelectorAll(':scope > .object-editor-fields > .object-editor-field').forEach(field => {
+      const key = field.dataset.key;
+      const gatherer = field._gatherValue;
+      if (key && gatherer) result[key] = gatherer();
+    });
+    if (onChange) onChange(result);
+  }
+
+  entries.forEach(([key, value]) => {
+    const field = document.createElement('div');
+    field.className = 'object-editor-field';
+    field.dataset.key = key;
+
+    const label = document.createElement('label');
+    label.className = 'object-editor-label';
+    label.textContent = key;
+    field.appendChild(label);
+
+    const valueContainer = document.createElement('div');
+    valueContainer.className = 'object-editor-value';
+
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      if (isI18nObject(value)) {
+        const i18nEd = buildI18nEditor(value, editable, (newVal) => {
+          field._currentValue = newVal;
+          collectValues();
+        });
+        field._gatherValue = () => field._currentValue || value;
+        field._currentValue = value;
+        valueContainer.appendChild(i18nEd);
+      } else {
+        const objEd = buildObjectEditor(value, editable, (newVal) => {
+          field._currentValue = newVal;
+          collectValues();
+        });
+        field._gatherValue = () => field._currentValue || value;
+        field._currentValue = value;
+        valueContainer.appendChild(objEd);
+      }
+    } else if (Array.isArray(value)) {
+      const baseKinds = value.map(v => {
+        if (typeof v === 'boolean') return 'boolean';
+        if (typeof v === 'number') return Number.isInteger(v) ? 'int' : 'float';
+        return 'string';
+      });
+      const unique = [...new Set(baseKinds)];
+      const baseType = unique.length === 1 ? unique[0] : 'string';
+      field._currentValue = [...value];
+      const multiInput = buildMultiInput([...value], baseType, editable, (newArr) => {
+        field._currentValue = newArr;
+        collectValues();
+      });
+      field._gatherValue = () => field._currentValue;
+      valueContainer.appendChild(multiInput);
+    } else if (typeof value === 'boolean') {
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = value;
+      cb.disabled = !editable;
+      cb.addEventListener('change', collectValues);
+      field._gatherValue = () => cb.checked;
+      valueContainer.appendChild(cb);
+    } else if (typeof value === 'number') {
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.className = 'relation-input input-size-medium';
+      inp.value = value;
+      inp.readOnly = !editable;
+      if (!Number.isInteger(value)) inp.step = 'any';
+      inp.addEventListener('input', collectValues);
+      field._gatherValue = () => {
+        const v = inp.value;
+        return v === '' ? null : (inp.step === 'any' ? parseFloat(v) : parseInt(v));
+      };
+      valueContainer.appendChild(inp);
+    } else {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'relation-input input-size-long';
+      inp.value = value !== null && value !== undefined ? String(value) : '';
+      inp.readOnly = !editable;
+      inp.addEventListener('input', collectValues);
+      field._gatherValue = () => inp.value;
+      valueContainer.appendChild(inp);
+    }
+
+    field.appendChild(valueContainer);
+    container.appendChild(field);
+  });
+
+  wrapper.appendChild(container);
+  return wrapper;
+}
+
+function initI18nEditorsInContainer(container, st, row, mode) {
+  const isEditMode = ['new', 'new-fast', 'edit', 'multi_edit', 'multi_merge', 'group_edit'].includes(mode);
+  container.querySelectorAll('.i18n-editor').forEach(editor => {
+    const colIdx = parseInt(editor.dataset.col);
+    let values;
+    try { values = JSON.parse(editor.dataset.values || '{}'); } catch(e) { values = {}; }
+    editor.innerHTML = '';
+    const i18nWidget = buildI18nEditor(values, isEditMode, (newVal) => {
+      row[colIdx] = newVal;
+    });
+    editor.appendChild(i18nWidget);
+    row[colIdx] = values;
+  });
+}
+
+function initObjectEditorsInContainer(container, st, row, mode) {
+  const isEditMode = ['new', 'new-fast', 'edit', 'multi_edit', 'multi_merge', 'group_edit'].includes(mode);
+  container.querySelectorAll('.object-editor').forEach(editor => {
+    const colIdx = parseInt(editor.dataset.col);
+    let values;
+    try { values = JSON.parse(editor.dataset.values || '{}'); } catch(e) { values = {}; }
+    editor.innerHTML = '';
+    const objWidget = buildObjectEditor(values, isEditMode, (newVal) => {
+      row[colIdx] = newVal;
+    });
+    editor.appendChild(objWidget);
     row[colIdx] = values;
   });
 }
@@ -24044,7 +24403,7 @@ function getAllKindTypes() {
     'multi_int', 'multi_float', 'multi_boolean', 'multi_date',
     'multi_datetime', 'multi_time', 'multi_select', 'multi_textarea',
     'multi_email', 'multi_tel', 'multi_url', 'multi_color',
-    'multi_search', 'qr_code', 'tabsheet', 'object', 'group'
+    'multi_search', 'qr_code', 'tabsheet', 'object', 'i18n', 'group'
   ];
 }
 
@@ -25620,6 +25979,14 @@ function formatValueForDisplay(value, type) {
 
 function createEditInputHtml(type, value, colIdx, st) {
   const att = getAtt(st, colIdx);
+  if (type === 'i18n') {
+    const objJson = escapeHtml(JSON.stringify(value && typeof value === 'object' ? value : {}));
+    return `<div class="i18n-editor" data-col="${colIdx}" data-values="${objJson}"></div>`;
+  }
+  if (type === 'object') {
+    const objJson = escapeHtml(JSON.stringify(value && typeof value === 'object' ? value : {}));
+    return `<div class="object-editor" data-col="${colIdx}" data-values="${objJson}"></div>`;
+  }
   if (isMultiBehavior(type, att)) {
     const baseType = getMultiBaseType(type);
     const arrJson = escapeHtml(JSON.stringify(Array.isArray(value) ? value : []));
@@ -25950,7 +26317,10 @@ function init() {
         if (uniqueKinds.length === 1) return 'multi_' + uniqueKinds[0];
         return 'multi_string';
       }
-      if (typeof value === 'object') return 'relation';
+      if (typeof value === 'object') {
+        if (isI18nObject(value)) return 'i18n';
+        return 'object';
+      }
       return 'string';
     }
 
@@ -25974,6 +26344,12 @@ function init() {
             return v;
           });
           rowValues.push(arr);
+        } else if (kind === 'i18n') {
+          ta_kind.push('i18n');
+          rowValues.push(value);
+        } else if (kind === 'object') {
+          ta_kind.push('object');
+          rowValues.push(value);
         } else if (kind === 'relation') {
           ta_kind.push(kind);
           const subRel = objectToRelation(value);

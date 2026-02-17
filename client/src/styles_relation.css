@@ -7483,3 +7483,117 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
     padding: 16px 20px;
   }
 }
+
+.i18n-editor {
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  padding: 8px;
+  background: var(--bg-secondary, #f8f9fa);
+  width: 100%;
+  box-sizing: border-box;
+}
+.i18n-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.i18n-entry {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.i18n-entry .i18n-lang-label {
+  min-width: 28px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary, #666);
+}
+.i18n-entry input {
+  flex: 1;
+  padding: 3px 6px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 3px;
+  font-size: 13px;
+  background: var(--bg-input, #fff);
+}
+.i18n-entry .i18n-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-danger, #dc3545);
+  font-size: 14px;
+  padding: 2px 4px;
+}
+.i18n-add-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.i18n-add-row select {
+  flex: 1;
+  padding: 3px 6px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 3px;
+  font-size: 12px;
+  background: var(--bg-input, #fff);
+}
+.i18n-add-row button {
+  padding: 3px 8px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 3px;
+  background: var(--bg-secondary, #f0f0f0);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.object-editor {
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  padding: 8px;
+  background: var(--bg-secondary, #f8f9fa);
+  width: 100%;
+  box-sizing: border-box;
+}
+.object-editor-fields {
+  display: flex;
+  gap: 6px;
+}
+.object-editor-fields.object-editor-vertical {
+  flex-direction: column;
+}
+.object-editor-fields.object-editor-horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.object-field,
+.object-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.object-editor-fields.object-editor-horizontal .object-editor-field,
+.object-editor-fields.object-editor-horizontal .object-field {
+  flex: 1;
+  min-width: 80px;
+}
+.object-field-label,
+.object-editor-label {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-secondary, #666);
+}
+.object-field input,
+.object-field select,
+.object-editor-field input,
+.object-editor-field select {
+  padding: 3px 6px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 3px;
+  font-size: 13px;
+  background: var(--bg-input, #fff);
+  width: 100%;
+  box-sizing: border-box;
+}
