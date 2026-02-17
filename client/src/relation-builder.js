@@ -26180,7 +26180,15 @@ function init() {
   
   const btnI18n = el('.btn-i18n');
   btnI18n?.addEventListener('click', () => {
-    textarea.value = JSON.stringify({"pt":"","en":""}, null, 2);
+    textarea.value = JSON.stringify({
+      "a": "campo a",
+      "b": "campo b",
+      "label": {
+        "de": "xpto_de",
+        "en": "xpto_en",
+        "pt": "xpto_pt"
+      }
+    }, null, 2);
   });
   
   const btnAttributeObj = el('.btn-attribute-obj');
