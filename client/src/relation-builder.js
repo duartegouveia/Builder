@@ -1083,7 +1083,22 @@ const STOCK_IMPORT_JSON = {
   "name": "stock_import",
   "columns": {
     "ID": "id",
-    "OwnerID": "int",
+    "OwnerID": {
+      "attribute_kind": ["association"],
+      "name": "Pertence a",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "Ownership",
+            "counterpart_display_atts": []
+          }
+        ]
+      }
+    },
     "TypeID": "int",
     "StateID": "int",
     "OriginalFileName": "string",
@@ -1100,7 +1115,7 @@ const STOCK_IMPORT_JSON = {
     "ResultServerFilePath": "textarea"
   },
   "options": {
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": ["dialog", "right", "bottom"]
   },
   "rel_options": {
     "editable": false,
@@ -1115,7 +1130,8 @@ const STOCK_IMPORT_JSON = {
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
-  "items": []
+  "items": [],
+  "log": []
 };
 
 const STOCK_WAREHOUSE_JSON = {

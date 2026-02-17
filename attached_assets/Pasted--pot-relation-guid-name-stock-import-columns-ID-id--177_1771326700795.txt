@@ -1,0 +1,103 @@
+{
+  "pot": "relation",
+  "guid": "",
+  "name": "stock_import",
+  "columns": {
+    "ID": "id",
+    "OwnerID": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Pertence a",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "Ownership",
+			"counterpart_display_atts":[]			
+          }
+        ]
+      }
+    },
+    "TypeID": "int",
+    "StateID": "int",
+    "OriginalFileName": "string",
+    "ServerFilePath": "string",
+    "CreationDate": "datetime",
+    "CreationUserID": "int",
+    "ProcessedDate": "string",
+    "MessageResult": "textarea",
+    "ProfileID": "int",
+    "CompanyID": "int",
+    "StartDate": "datetime",
+    "EndDate": "datetime",
+    "ComplexFileDetailID": "int",
+    "ResultServerFilePath": "textarea"
+  },
+  "options": {
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
+    ]
+  },
+  "rel_options": {
+    "editable": false,
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_id": true,
+    "show_column_kind": true,
+    "show_stats": true,
+    "show_hierarchy": true,
+    "hierarchy_column": "parent",
+    "hierarchy_root_value": "",
+    "single_item_mode": "dialog",
+    "general_view_options": [
+      "Table",
+      "Cards",
+      "Pivot",
+      "Analysis",
+      "AI",
+      "Saved",
+      "Structure"
+    ],
+    "uiState": {
+      "currentView": "table",
+      "pageSize": 5,
+      "currentPage": 1,
+      "manualResizeHeight": null,
+      "cardsPageSize": 12,
+      "cardsCurrentPage": 1,
+      "selectedRows": [],
+      "highlightedRow": null,
+      "sortCriteria": [],
+      "filters": {},
+      "formatting": {},
+      "groupByColumns": [],
+      "groupedData": null,
+      "groupAllKeepVisible": false,
+      "expandedGroups": [],
+      "groupBySelectedValues": {},
+      "selectedColumns": [],
+      "pivotConfig": {
+        "rowColumn": null,
+        "colColumn": null,
+        "values": []
+      },
+      "diagramNodes": [],
+      "filteredIndices": [],
+      "sortedIndices": [],
+      "quickSearchText": "",
+      "currentHierarchyValue": null,
+      "showAllDescendants": false,
+      "columns_visible": null,
+      "analysisResult": null,
+      "advancedSearch": null
+    }
+  },
+  "items": [],
+  "log": []
+}
