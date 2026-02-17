@@ -1490,7 +1490,22 @@ const ALL_PRICELISTS_JSON = {
   "name": "pricelist",
   "columns": {
     "ID": "id",
-    "OwnerID": "int",
+    "OwnerID": {
+      "attribute_kind": ["association"],
+      "name": "Pertence a",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "Ownership",
+            "counterpart_display_atts": []
+          }
+        ]
+      }
+    },
     "Name": "string",
     "BeginDate": "date",
     "EndDate": "date",
@@ -1498,7 +1513,7 @@ const ALL_PRICELISTS_JSON = {
     "DefaultPriceList": "boolean"
   },
   "options": {
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": ["dialog", "right", "bottom"]
   },
   "rel_options": {
     "editable": false,
