@@ -1608,6 +1608,15 @@ const PRODUCT_BRANDS_JSON = {
     },
     "Url": "string",
     "ParentID": "int",
+    "Parent": {
+      "attribute_kind": ["lookup"],
+      "name": "Name",
+      "short_name": "Name",
+      "lookup": {
+        "path": "HIERARCHY.Name",
+        "editable": true
+      }
+    },
     "IntegrationID": "string"
   },
   "options": {
@@ -1618,7 +1627,40 @@ const PRODUCT_BRANDS_JSON = {
     "show_natural_order": true,
     "show_hierarchy": true,
     "hierarchy_column": "ParentID",
-    "hierarchy_show_column": "Name"
+    "hierarchy_show_column": "Name",
+    "uiState": {
+      "currentView": "table",
+      "pageSize": 5,
+      "currentPage": 1,
+      "manualResizeHeight": null,
+      "cardsPageSize": 12,
+      "cardsCurrentPage": 1,
+      "selectedRows": [],
+      "highlightedRow": null,
+      "sortCriteria": [],
+      "filters": {},
+      "formatting": {},
+      "groupByColumns": [],
+      "groupedData": null,
+      "groupAllKeepVisible": false,
+      "expandedGroups": [],
+      "groupBySelectedValues": {},
+      "selectedColumns": [],
+      "pivotConfig": {
+        "rowColumn": null,
+        "colColumn": null,
+        "values": []
+      },
+      "diagramNodes": [],
+      "filteredIndices": [],
+      "sortedIndices": [],
+      "quickSearchText": "",
+      "currentHierarchyValue": null,
+      "showAllDescendants": false,
+      "columns_visible": null,
+      "analysisResult": null,
+      "advancedSearch": null
+    }
   },
   "items": [],
   "log": []
