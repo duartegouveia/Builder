@@ -2379,7 +2379,7 @@ function initLookupDependencyListeners(container, st, row) {
       } else if (type === 'float') {
         newVal = sourceInput.value === '' ? null : parseFloat(sourceInput.value);
       } else {
-        newVal = sourceInput.value === '' ? null : sourceInput.value;
+        newVal = sourceInput.value;
       }
 
       let rowIdx = st.relation.items.indexOf(row);
@@ -10822,7 +10822,7 @@ function showMultiEditDialog(st) {
             if (type === 'boolean') { value = input.checked; }
             else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
             else if (type === 'float' || type === 'range') { value = input.value === '' ? null : parseFloat(input.value); }
-            else { value = input.value === '' ? null : input.value; }
+            else { value = input.value; }
             st.relation.items[rowIdx][colIdx] = value;
           }
         });
@@ -10927,7 +10927,7 @@ function showGroupEditDialog(st) {
         if (type === 'boolean') { value = input.checked; }
         else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
         else if (type === 'float' || type === 'range') { value = input.value === '' ? null : parseFloat(input.value); }
-        else { value = input.value === '' ? null : input.value; }
+        else { value = input.value; }
         checkedIndices.forEach(rowIdx => {
           st.relation.items[rowIdx][colIdx] = value;
           updated++;
@@ -11039,7 +11039,7 @@ function showMergeDialog(st) {
             if (type === 'boolean') { value = input.checked; }
             else if (type === 'int') { value = input.value === '' ? null : parseInt(input.value); }
             else if (type === 'float' || type === 'range') { value = input.value === '' ? null : parseFloat(input.value); }
-            else { value = input.value === '' ? null : input.value; }
+            else { value = input.value; }
             st.relation.items[targetRowIdx][colIdx] = value;
           }
         }
@@ -16753,7 +16753,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
                 const checked = input.querySelector('input[type="radio"]:checked');
                 newRow[colIdx] = checked ? checked.value : null;
               } else {
-                newRow[colIdx] = input.value === '' ? null : input.value;
+                newRow[colIdx] = input.value;
               }
             }
           }
@@ -17004,7 +17004,7 @@ function showRowEditDialog(st, rowIdx) {
                 const checked = input.querySelector('input[type="radio"]:checked');
                 newValue = checked ? checked.value : null;
               } else {
-                newValue = input.value === '' ? null : input.value;
+                newValue = input.value;
               }
               const oldValue = resolved.targetRow[resolved.targetColIdx];
               if (oldValue !== newValue) {
@@ -17030,7 +17030,7 @@ function showRowEditDialog(st, rowIdx) {
                 const checked = input.querySelector('input[type="radio"]:checked');
                 value = checked ? checked.value : null;
               } else {
-                value = input.value === '' ? null : input.value;
+                value = input.value;
               }
               const oldValue = st.relation.items[targetRowIdx][colIdx];
               if (oldValue !== value) {
@@ -25954,7 +25954,7 @@ function updateRelationFromInputWithState(st, input) {
   } else if (type === 'float' || type === 'range') {
     value = input.value === '' ? null : parseFloat(input.value);
   } else {
-    value = input.value === '' ? null : input.value;
+    value = input.value;
   }
   
   const oldValue = st.relation.items[rowIdx][colIdx];
