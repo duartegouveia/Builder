@@ -11316,7 +11316,7 @@ function renderTable(st = state) {
   
   // Footer table (separate, outside scroll area)
   let footerTable = null;
-  if (st.rel_options.show_stats) {
+  if (st.rel_options.show_stats && st.relation.items && st.relation.items.length > 0) {
   const footerWrapper = document.createElement('div');
   footerWrapper.className = 'relation-footer-wrapper';
   
