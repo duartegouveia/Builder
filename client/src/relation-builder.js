@@ -18425,7 +18425,7 @@ function generatePivotTable(st = state) {
 
   const data = computePivotData(st);
   if (!data) {
-    alert('Please select at least one dimension (Rows or Columns)');
+    alert(t('relation.pivot.select_dimension'));
     return;
   }
 
@@ -18457,7 +18457,7 @@ function generatePivotTable(st = state) {
   }
 
   function formatPivotValue(value, colIndex) {
-    if (value === 'Total') return value;
+    if (value === 'Total') return t('relation.pivot.total');
     if (colIndex === null) return escapeHtml(value);
     const colName = st.columnNames[colIndex];
     const colOptions = st.options[colName];
@@ -18477,7 +18477,7 @@ function generatePivotTable(st = state) {
     colValuesArr.forEach(cv => {
       html += '<th colspan="' + aggregations.length + '">' + formatPivotValue(cv, colIdx) + '</th>';
     });
-    html += '<th colspan="' + aggregations.length + '" class="pivot-total">Total</th>';
+    html += '<th colspan="' + aggregations.length + '" class="pivot-total">' + t('relation.pivot.total') + '</th>';
   } else {
     aggregations.forEach(agg => {
       const label = getAggShortLabels()[agg.aggregation] || agg.aggregation;
@@ -18535,7 +18535,7 @@ function generatePivotTable(st = state) {
 
   if (hasCols || !hasRows) {
     html += '<tr class="pivot-total">';
-    html += '<td class="pivot-row-header pivot-total">Total</td>';
+    html += '<td class="pivot-row-header pivot-total">' + t('relation.pivot.total') + '</td>';
     if (hasCols) {
       colValuesArr.forEach(cv => {
         aggregations.forEach((agg, aggIdx) => {
@@ -18626,34 +18626,34 @@ function showPivotChartOptionsDialog(st = state) {
   dialog.className = 'confirm-dialog pivot-chart-options-dialog';
   dialog.innerHTML = `
     <div class="dialog-header">
-      <span class="dialog-title">Chart Options</span>
+      <span class="dialog-title" data-i18n="relation.pivot.chart_options_title">${t('relation.pivot.chart_options_title')}</span>
       <button class="dialog-close" data-testid="button-chart-options-close">&times;</button>
     </div>
     <div class="dialog-body">
       <div class="chart-options-section">
-        <div class="chart-options-section-title">Title</div>
+        <div class="chart-options-section-title" data-i18n="relation.pivot.opt_title_section">${t('relation.pivot.opt_title_section')}</div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-show-title" ${opts.showTitle ? 'checked' : ''}> Show Title</label>
+          <label><input type="checkbox" class="opt-show-title" ${opts.showTitle ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_title">${t('relation.pivot.opt_show_title')}</span></label>
         </div>
         <div class="chart-options-row">
-          <input type="text" class="opt-title" value="${escapeHtml(opts.title)}" placeholder="Auto-generated if empty">
+          <input type="text" class="opt-title" value="${escapeHtml(opts.title)}" placeholder="${t('relation.pivot.opt_auto_title')}" data-i18n-placeholder="relation.pivot.opt_auto_title">
         </div>
       </div>
       <div class="chart-options-section">
-        <div class="chart-options-section-title">Axes</div>
+        <div class="chart-options-section-title" data-i18n="relation.pivot.opt_axes_section">${t('relation.pivot.opt_axes_section')}</div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-show-axis-titles" ${opts.showAxisTitles ? 'checked' : ''}> Show Axis Titles</label>
+          <label><input type="checkbox" class="opt-show-axis-titles" ${opts.showAxisTitles ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_axis_titles">${t('relation.pivot.opt_show_axis_titles')}</span></label>
         </div>
         <div class="chart-options-row">
           <span style="font-size:13px;min-width:20px;">X:</span>
-          <input type="text" class="opt-x-title" value="${escapeHtml(opts.xAxisTitle)}" placeholder="Auto">
+          <input type="text" class="opt-x-title" value="${escapeHtml(opts.xAxisTitle)}" placeholder="${t('relation.pivot.opt_auto')}" data-i18n-placeholder="relation.pivot.opt_auto">
         </div>
         <div class="chart-options-row">
           <span style="font-size:13px;min-width:20px;">Y:</span>
-          <input type="text" class="opt-y-title" value="${escapeHtml(opts.yAxisTitle)}" placeholder="Auto">
+          <input type="text" class="opt-y-title" value="${escapeHtml(opts.yAxisTitle)}" placeholder="${t('relation.pivot.opt_auto')}" data-i18n-placeholder="relation.pivot.opt_auto">
         </div>
         <div class="chart-options-row">
-          <span style="font-size:13px;min-width:70px;">X Rotation:</span>
+          <span style="font-size:13px;min-width:70px;" data-i18n="relation.pivot.opt_x_rotation">${t('relation.pivot.opt_x_rotation')}</span>
           <select class="opt-x-rotation">
             <option value="0" ${opts.xLabelRotation === 0 ? 'selected' : ''}>0°</option>
             <option value="-45" ${opts.xLabelRotation === -45 ? 'selected' : ''}>-45°</option>
@@ -18661,60 +18661,60 @@ function showPivotChartOptionsDialog(st = state) {
           </select>
         </div>
         <div class="chart-options-row">
-          <span style="font-size:13px;min-width:50px;">Y Min:</span>
-          <input type="number" class="opt-y-min" value="${opts.yMin}" placeholder="Auto" style="width:80px;">
-          <span style="font-size:13px;min-width:50px;margin-left:8px;">Y Max:</span>
-          <input type="number" class="opt-y-max" value="${opts.yMax}" placeholder="Auto" style="width:80px;">
+          <span style="font-size:13px;min-width:50px;" data-i18n="relation.pivot.opt_y_min">${t('relation.pivot.opt_y_min')}</span>
+          <input type="number" class="opt-y-min" value="${opts.yMin}" placeholder="${t('relation.pivot.opt_auto')}" data-i18n-placeholder="relation.pivot.opt_auto" style="width:80px;">
+          <span style="font-size:13px;min-width:50px;margin-left:8px;" data-i18n="relation.pivot.opt_y_max">${t('relation.pivot.opt_y_max')}</span>
+          <input type="number" class="opt-y-max" value="${opts.yMax}" placeholder="${t('relation.pivot.opt_auto')}" data-i18n-placeholder="relation.pivot.opt_auto" style="width:80px;">
         </div>
       </div>
       <div class="chart-options-section">
-        <div class="chart-options-section-title">Data</div>
+        <div class="chart-options-section-title" data-i18n="relation.pivot.opt_data_section">${t('relation.pivot.opt_data_section')}</div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-data-labels" ${opts.showDataLabels ? 'checked' : ''}> Show Data Labels</label>
+          <label><input type="checkbox" class="opt-data-labels" ${opts.showDataLabels ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_data_labels">${t('relation.pivot.opt_show_data_labels')}</span></label>
         </div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-error-bars" ${opts.showErrorBars ? 'checked' : ''}> Show Error Bars</label>
+          <label><input type="checkbox" class="opt-error-bars" ${opts.showErrorBars ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_error_bars">${t('relation.pivot.opt_show_error_bars')}</span></label>
         </div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-gridlines" ${opts.showGridlines ? 'checked' : ''}> Show Gridlines</label>
+          <label><input type="checkbox" class="opt-gridlines" ${opts.showGridlines ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_gridlines">${t('relation.pivot.opt_show_gridlines')}</span></label>
         </div>
       </div>
       <div class="chart-options-section">
-        <div class="chart-options-section-title">Legend</div>
+        <div class="chart-options-section-title" data-i18n="relation.pivot.opt_legend_section">${t('relation.pivot.opt_legend_section')}</div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-show-legend" ${opts.showLegend ? 'checked' : ''}> Show Legend</label>
+          <label><input type="checkbox" class="opt-show-legend" ${opts.showLegend ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_legend">${t('relation.pivot.opt_show_legend')}</span></label>
           <select class="opt-legend-pos">
-            <option value="top" ${opts.legendPosition === 'top' ? 'selected' : ''}>Top</option>
-            <option value="bottom" ${opts.legendPosition === 'bottom' ? 'selected' : ''}>Bottom</option>
-            <option value="left" ${opts.legendPosition === 'left' ? 'selected' : ''}>Left</option>
-            <option value="right" ${opts.legendPosition === 'right' ? 'selected' : ''}>Right</option>
+            <option value="top" ${opts.legendPosition === 'top' ? 'selected' : ''} data-i18n="relation.pivot.opt_top">${t('relation.pivot.opt_top')}</option>
+            <option value="bottom" ${opts.legendPosition === 'bottom' ? 'selected' : ''} data-i18n="relation.pivot.opt_bottom">${t('relation.pivot.opt_bottom')}</option>
+            <option value="left" ${opts.legendPosition === 'left' ? 'selected' : ''} data-i18n="relation.pivot.opt_left">${t('relation.pivot.opt_left')}</option>
+            <option value="right" ${opts.legendPosition === 'right' ? 'selected' : ''} data-i18n="relation.pivot.opt_right">${t('relation.pivot.opt_right')}</option>
           </select>
         </div>
       </div>
       <div class="chart-options-section">
-        <div class="chart-options-section-title">Trendline</div>
+        <div class="chart-options-section-title" data-i18n="relation.pivot.opt_trendline_section">${t('relation.pivot.opt_trendline_section')}</div>
         <div class="chart-options-row">
           <select class="opt-trendline">
-            <option value="auto" ${opts.trendline === 'auto' ? 'selected' : ''}>Auto</option>
-            <option value="none" ${opts.trendline === 'none' ? 'selected' : ''}>None</option>
-            <option value="linear" ${opts.trendline === 'linear' ? 'selected' : ''}>Linear</option>
-            <option value="polynomial2" ${opts.trendline === 'polynomial2' ? 'selected' : ''}>Polynomial 2nd</option>
-            <option value="polynomial3" ${opts.trendline === 'polynomial3' ? 'selected' : ''}>Polynomial 3rd</option>
-            <option value="exponential" ${opts.trendline === 'exponential' ? 'selected' : ''}>Exponential</option>
-            <option value="logarithmic" ${opts.trendline === 'logarithmic' ? 'selected' : ''}>Logarithmic</option>
+            <option value="auto" ${opts.trendline === 'auto' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_auto">${t('relation.pivot.opt_trend_auto')}</option>
+            <option value="none" ${opts.trendline === 'none' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_none">${t('relation.pivot.opt_trend_none')}</option>
+            <option value="linear" ${opts.trendline === 'linear' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_linear">${t('relation.pivot.opt_trend_linear')}</option>
+            <option value="polynomial2" ${opts.trendline === 'polynomial2' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_poly2">${t('relation.pivot.opt_trend_poly2')}</option>
+            <option value="polynomial3" ${opts.trendline === 'polynomial3' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_poly3">${t('relation.pivot.opt_trend_poly3')}</option>
+            <option value="exponential" ${opts.trendline === 'exponential' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_exp">${t('relation.pivot.opt_trend_exp')}</option>
+            <option value="logarithmic" ${opts.trendline === 'logarithmic' ? 'selected' : ''} data-i18n="relation.pivot.opt_trend_log">${t('relation.pivot.opt_trend_log')}</option>
           </select>
         </div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-show-trend-r2" ${opts.showTrendR2 ? 'checked' : ''}> Show R²</label>
+          <label><input type="checkbox" class="opt-show-trend-r2" ${opts.showTrendR2 ? 'checked' : ''}> <span data-i18n="relation.pivot.show_trend_r2">${t('relation.pivot.show_trend_r2')}</span></label>
         </div>
         <div class="chart-options-row">
-          <label><input type="checkbox" class="opt-show-trend-equation" ${opts.showTrendEquation ? 'checked' : ''}> Show Equation</label>
+          <label><input type="checkbox" class="opt-show-trend-equation" ${opts.showTrendEquation ? 'checked' : ''}> <span data-i18n="relation.pivot.opt_show_equation">${t('relation.pivot.opt_show_equation')}</span></label>
         </div>
       </div>
     </div>
     <div class="dialog-footer">
-      <button class="btn btn-outline btn-sm opt-close-btn">Fechar</button>
-      <button class="btn btn-primary btn-sm opt-apply-btn">Aplicar</button>
+      <button class="btn btn-outline btn-sm opt-close-btn" data-i18n="relation.common.close">${t('relation.common.close')}</button>
+      <button class="btn btn-primary btn-sm opt-apply-btn" data-i18n="relation.common.apply">${t('relation.common.apply')}</button>
     </div>
   `;
 
@@ -20943,12 +20943,12 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx, st = state) {
   const rSquared = ssTot === 0 ? 0 : 1 - ssRes / ssTot;
   
   const absR = Math.abs(r);
-  let strength = 'No correlation';
-  if (absR >= 0.9) strength = 'Very strong';
-  else if (absR >= 0.7) strength = 'Strong';
-  else if (absR >= 0.5) strength = 'Moderate';
-  else if (absR >= 0.3) strength = 'Weak';
-  else if (absR >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absR >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absR >= 0.7) strength = t('relation.analysis.strong');
+  else if (absR >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absR >= 0.3) strength = t('relation.analysis.weak');
+  else if (absR >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = r > 0.1 ? 'correlation-positive' : r < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -21073,12 +21073,12 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx, st = state) {
   const rho = denominator === 0 ? 0 : numerator / denominator;
   
   const absRho = Math.abs(rho);
-  let strength = 'No correlation';
-  if (absRho >= 0.9) strength = 'Very strong';
-  else if (absRho >= 0.7) strength = 'Strong';
-  else if (absRho >= 0.5) strength = 'Moderate';
-  else if (absRho >= 0.3) strength = 'Weak';
-  else if (absRho >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absRho >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absRho >= 0.7) strength = t('relation.analysis.strong');
+  else if (absRho >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absRho >= 0.3) strength = t('relation.analysis.weak');
+  else if (absRho >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = rho > 0.1 ? 'correlation-positive' : rho < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -21179,12 +21179,12 @@ function renderKendallCorrelation(pairs, xIdx, yIdx, st = state) {
   const tau = totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
   
   const absTau = Math.abs(tau);
-  let strength = 'No correlation';
-  if (absTau >= 0.9) strength = 'Very strong';
-  else if (absTau >= 0.7) strength = 'Strong';
-  else if (absTau >= 0.5) strength = 'Moderate';
-  else if (absTau >= 0.3) strength = 'Weak';
-  else if (absTau >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absTau >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absTau >= 0.7) strength = t('relation.analysis.strong');
+  else if (absTau >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absTau >= 0.3) strength = t('relation.analysis.weak');
+  else if (absTau >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = tau > 0.1 ? 'correlation-positive' : tau < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -21282,12 +21282,12 @@ function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx
   const rpb = ((mean1 - mean0) / std) * Math.sqrt((n0 * n1) / (n * n));
   
   const absRpb = Math.abs(rpb);
-  let strength = 'No correlation';
-  if (absRpb >= 0.9) strength = 'Very strong';
-  else if (absRpb >= 0.7) strength = 'Strong';
-  else if (absRpb >= 0.5) strength = 'Moderate';
-  else if (absRpb >= 0.3) strength = 'Weak';
-  else if (absRpb >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absRpb >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absRpb >= 0.7) strength = t('relation.analysis.strong');
+  else if (absRpb >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absRpb >= 0.3) strength = t('relation.analysis.weak');
+  else if (absRpb >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = rpb > 0.1 ? 'correlation-positive' : rpb < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -21358,11 +21358,11 @@ function renderPhiCorrelation(pairs, xIdx, yIdx, st = state) {
   const phi = denominator === 0 ? 0 : numerator / denominator;
   
   const absPhi = Math.abs(phi);
-  let strength = 'No association';
-  if (absPhi >= 0.5) strength = 'Strong';
-  else if (absPhi >= 0.3) strength = 'Moderate';
-  else if (absPhi >= 0.1) strength = 'Weak';
-  else if (absPhi >= 0.05) strength = 'Very weak';
+  let strength = t('relation.analysis.no_association');
+  if (absPhi >= 0.5) strength = t('relation.analysis.strong');
+  else if (absPhi >= 0.3) strength = t('relation.analysis.moderate');
+  else if (absPhi >= 0.1) strength = t('relation.analysis.weak');
+  else if (absPhi >= 0.05) strength = t('relation.analysis.very_weak');
   
   const colorClass = phi > 0.1 ? 'correlation-positive' : phi < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -21396,11 +21396,11 @@ function renderPhiCorrelation(pairs, xIdx, yIdx, st = state) {
 }
 
 function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories, st = state) {
-  let strength = 'No association';
-  if (v >= 0.5) strength = 'Strong';
-  else if (v >= 0.3) strength = 'Moderate';
-  else if (v >= 0.1) strength = 'Weak';
-  else if (v >= 0.05) strength = 'Very weak';
+  let strength = t('relation.analysis.no_association');
+  if (v >= 0.5) strength = t('relation.analysis.strong');
+  else if (v >= 0.3) strength = t('relation.analysis.moderate');
+  else if (v >= 0.1) strength = t('relation.analysis.weak');
+  else if (v >= 0.05) strength = t('relation.analysis.very_weak');
   
   const colorClass = v >= 0.3 ? 'correlation-positive' : v >= 0.1 ? 'correlation-neutral' : 'correlation-neutral';
   
@@ -21924,12 +21924,12 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const rSquared = ssTot === 0 ? 0 : 1 - ssRes / ssTot;
   
   const absR = Math.abs(r);
-  let strength = 'No correlation';
-  if (absR >= 0.9) strength = 'Very strong';
-  else if (absR >= 0.7) strength = 'Strong';
-  else if (absR >= 0.5) strength = 'Moderate';
-  else if (absR >= 0.3) strength = 'Weak';
-  else if (absR >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absR >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absR >= 0.7) strength = t('relation.analysis.strong');
+  else if (absR >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absR >= 0.3) strength = t('relation.analysis.weak');
+  else if (absR >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = r > 0.1 ? 'correlation-positive' : r < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -22014,12 +22014,12 @@ function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const rho = denominator === 0 ? 0 : numerator / denominator;
   
   const absRho = Math.abs(rho);
-  let strength = 'No correlation';
-  if (absRho >= 0.9) strength = 'Very strong';
-  else if (absRho >= 0.7) strength = 'Strong';
-  else if (absRho >= 0.5) strength = 'Moderate';
-  else if (absRho >= 0.3) strength = 'Weak';
-  else if (absRho >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absRho >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absRho >= 0.7) strength = t('relation.analysis.strong');
+  else if (absRho >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absRho >= 0.3) strength = t('relation.analysis.weak');
+  else if (absRho >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = rho > 0.1 ? 'correlation-positive' : rho < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -22078,12 +22078,12 @@ function renderKendallCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const tau = totalPairs > 0 ? (concordant - discordant) / totalPairs : 0;
   
   const absTau = Math.abs(tau);
-  let strength = 'No correlation';
-  if (absTau >= 0.9) strength = 'Very strong';
-  else if (absTau >= 0.7) strength = 'Strong';
-  else if (absTau >= 0.5) strength = 'Moderate';
-  else if (absTau >= 0.3) strength = 'Weak';
-  else if (absTau >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absTau >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absTau >= 0.7) strength = t('relation.analysis.strong');
+  else if (absTau >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absTau >= 0.3) strength = t('relation.analysis.weak');
+  else if (absTau >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = tau > 0.1 ? 'correlation-positive' : tau < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -22148,12 +22148,12 @@ function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryId
   const rpb = ((mean1 - mean0) / std) * Math.sqrt((n0 * n1) / (n * n));
   
   const absRpb = Math.abs(rpb);
-  let strength = 'No correlation';
-  if (absRpb >= 0.9) strength = 'Very strong';
-  else if (absRpb >= 0.7) strength = 'Strong';
-  else if (absRpb >= 0.5) strength = 'Moderate';
-  else if (absRpb >= 0.3) strength = 'Weak';
-  else if (absRpb >= 0.1) strength = 'Very weak';
+  let strength = t('relation.analysis.no_correlation');
+  if (absRpb >= 0.9) strength = t('relation.analysis.very_strong');
+  else if (absRpb >= 0.7) strength = t('relation.analysis.strong');
+  else if (absRpb >= 0.5) strength = t('relation.analysis.moderate');
+  else if (absRpb >= 0.3) strength = t('relation.analysis.weak');
+  else if (absRpb >= 0.1) strength = t('relation.analysis.very_weak');
   
   const colorClass = rpb > 0.1 ? 'correlation-positive' : rpb < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -22211,10 +22211,10 @@ function renderPhiCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   const phi = denominator === 0 ? 0 : numerator / denominator;
   
   const absPhi = Math.abs(phi);
-  let strength = 'No association';
-  if (absPhi >= 0.5) strength = 'Strong';
-  else if (absPhi >= 0.3) strength = 'Moderate';
-  else if (absPhi >= 0.1) strength = 'Weak';
+  let strength = t('relation.analysis.no_association');
+  if (absPhi >= 0.5) strength = t('relation.analysis.strong');
+  else if (absPhi >= 0.3) strength = t('relation.analysis.moderate');
+  else if (absPhi >= 0.1) strength = t('relation.analysis.weak');
   
   const colorClass = phi > 0.1 ? 'correlation-positive' : phi < -0.1 ? 'correlation-negative' : 'correlation-neutral';
   
@@ -22267,10 +22267,10 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
   const minDim = Math.min(xCategories, yCategories) - 1;
   const v = minDim > 0 ? Math.sqrt(chiSquared / (total * minDim)) : 0;
   
-  let strength = 'No association';
-  if (v >= 0.5) strength = 'Strong';
-  else if (v >= 0.3) strength = 'Moderate';
-  else if (v >= 0.1) strength = 'Weak';
+  let strength = t('relation.analysis.no_association');
+  if (v >= 0.5) strength = t('relation.analysis.strong');
+  else if (v >= 0.3) strength = t('relation.analysis.moderate');
+  else if (v >= 0.1) strength = t('relation.analysis.weak');
   
   const colorClass = v >= 0.3 ? 'correlation-positive' : v >= 0.1 ? 'correlation-neutral' : '';
   
@@ -23191,48 +23191,48 @@ function initRelationInstance(container, relationData, options = {}) {
     <div class="view-pivot view-content" style="display: none;">
       <div class="pivot-config">
         <div class="pivot-config-row">
-          <label>Rows:</label>
+          <label data-i18n="relation.pivot.rows">${t('relation.pivot.rows')}</label>
           <select class="pivot-rows pivot-select"></select>
         </div>
         <div class="pivot-config-row">
-          <label>Columns:</label>
+          <label data-i18n="relation.pivot.columns">${t('relation.pivot.columns')}</label>
           <select class="pivot-cols pivot-select"></select>
         </div>
         <div class="pivot-config-row">
-          <label>Values:</label>
+          <label data-i18n="relation.pivot.values">${t('relation.pivot.values')}</label>
           <div class="pivot-values-config"></div>
-          <button class="btn-add-pivot-value btn btn-outline btn-sm">+ Add</button>
+          <button class="btn-add-pivot-value btn btn-outline btn-sm" data-i18n="relation.pivot.add_value">${t('relation.pivot.add_value')}</button>
         </div>
-        <button class="btn-generate-pivot btn btn-primary btn-sm">Generate Pivot</button>
+        <button class="btn-generate-pivot btn btn-primary btn-sm" data-i18n="relation.pivot.generate">${t('relation.pivot.generate')}</button>
       </div>
       <div class="pivot-panels-toolbar" style="display:none;">
-        <button class="btn btn-sm btn-outline pivot-toggle-table active" data-testid="button-pivot-toggle-table">Table</button>
-        <button class="btn btn-sm btn-outline pivot-toggle-chart active" data-testid="button-pivot-toggle-chart">Chart</button>
+        <button class="btn btn-sm btn-outline pivot-toggle-table active" data-testid="button-pivot-toggle-table" data-i18n="relation.pivot.table_btn">${t('relation.pivot.table_btn')}</button>
+        <button class="btn btn-sm btn-outline pivot-toggle-chart active" data-testid="button-pivot-toggle-chart" data-i18n="relation.pivot.chart_btn">${t('relation.pivot.chart_btn')}</button>
         <span class="pivot-toolbar-separator">|</span>
-        <button class="btn btn-sm btn-outline pivot-download-png" data-testid="button-pivot-download-png" title="Download PNG">⬇ PNG</button>
-        <button class="btn btn-sm btn-outline pivot-download-gif" data-testid="button-pivot-download-gif" title="Download GIF">⬇ GIF</button>
+        <button class="btn btn-sm btn-outline pivot-download-png" data-testid="button-pivot-download-png" title="${t('relation.pivot.download_png_title')}" data-i18n="relation.pivot.download_png" data-i18n-title="relation.pivot.download_png_title">${t('relation.pivot.download_png')}</button>
+        <button class="btn btn-sm btn-outline pivot-download-gif" data-testid="button-pivot-download-gif" title="${t('relation.pivot.download_gif_title')}" data-i18n="relation.pivot.download_gif" data-i18n-title="relation.pivot.download_gif_title">${t('relation.pivot.download_gif')}</button>
       </div>
       <div class="pivot-table-container"></div>
       <div class="pivot-chart-panel" style="display:none;">
         <div class="pivot-chart-config">
           <div class="pivot-chart-config-row">
-            <label>Chart:</label>
+            <label data-i18n="relation.pivot.chart_type">${t('relation.pivot.chart_type')}</label>
             <select class="pivot-chart-type" data-testid="select-pivot-chart-type">
-              <option value="bar">Bar (Vertical)</option>
-              <option value="horizontalBar">Bar (Horizontal)</option>
-              <option value="line">Line</option>
-              <option value="area">Area</option>
-              <option value="pie">Pie</option>
+              <option value="bar" data-i18n="relation.pivot.chart_bar_v">${t('relation.pivot.chart_bar_v')}</option>
+              <option value="horizontalBar" data-i18n="relation.pivot.chart_bar_h">${t('relation.pivot.chart_bar_h')}</option>
+              <option value="line" data-i18n="relation.pivot.chart_line">${t('relation.pivot.chart_line')}</option>
+              <option value="area" data-i18n="relation.pivot.chart_area">${t('relation.pivot.chart_area')}</option>
+              <option value="pie" data-i18n="relation.pivot.chart_pie">${t('relation.pivot.chart_pie')}</option>
             </select>
           </div>
           <div class="pivot-chart-config-row pivot-chart-bar-mode-row">
-            <label>Mode:</label>
+            <label data-i18n="relation.pivot.mode_label">${t('relation.pivot.mode_label')}</label>
             <select class="pivot-chart-bar-mode" data-testid="select-pivot-chart-bar-mode">
-              <option value="grouped">Side by Side</option>
-              <option value="stacked">Stacked</option>
+              <option value="grouped" data-i18n="relation.pivot.grouped">${t('relation.pivot.grouped')}</option>
+              <option value="stacked" data-i18n="relation.pivot.stacked">${t('relation.pivot.stacked')}</option>
             </select>
           </div>
-          <button class="btn btn-sm btn-outline pivot-chart-options-btn" data-testid="button-pivot-chart-options">Options...</button>
+          <button class="btn btn-sm btn-outline pivot-chart-options-btn" data-testid="button-pivot-chart-options" data-i18n="relation.pivot.options_btn">${t('relation.pivot.options_btn')}</button>
         </div>
         <canvas class="pivot-chart-canvas" width="800" height="500" data-testid="canvas-pivot-chart"></canvas>
       </div>
@@ -23240,97 +23240,97 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-analysis view-content" style="display: none;">
       <div class="analysis-sub-tabs">
-        <button class="analysis-sub-tab active" data-subtab="pairwise">Pairwise</button>
-        <button class="analysis-sub-tab" data-subtab="matrix">Matrix</button>
-        <button class="analysis-sub-tab" data-subtab="clustering">Clustering</button>
-        <button class="analysis-sub-tab" data-subtab="multivariate">Multivariate</button>
+        <button class="analysis-sub-tab active" data-subtab="pairwise" data-i18n="relation.analysis.pairwise">${t('relation.analysis.pairwise')}</button>
+        <button class="analysis-sub-tab" data-subtab="matrix" data-i18n="relation.analysis.matrix">${t('relation.analysis.matrix')}</button>
+        <button class="analysis-sub-tab" data-subtab="clustering" data-i18n="relation.analysis.clustering">${t('relation.analysis.clustering')}</button>
+        <button class="analysis-sub-tab" data-subtab="multivariate" data-i18n="relation.analysis.multivariate">${t('relation.analysis.multivariate')}</button>
       </div>
 
       <div class="analysis-subtab-content analysis-pairwise active">
         <div class="correlation-config">
           <div class="correlation-section">
-            <div class="correlation-section-header">Analyze Single Pair</div>
+            <div class="correlation-section-header" data-i18n="relation.analysis.single_pair">${t('relation.analysis.single_pair')}</div>
             <div class="correlation-config-row">
-              <label>Column X:</label>
+              <label data-i18n="relation.analysis.column_x">${t('relation.analysis.column_x')}</label>
               <select class="corr-col-x pivot-select"></select>
             </div>
             <div class="correlation-config-row">
-              <label>Column Y:</label>
+              <label data-i18n="relation.analysis.column_y">${t('relation.analysis.column_y')}</label>
               <select class="corr-col-y pivot-select"></select>
             </div>
             <div class="correlation-config-row">
-              <label>Method:</label>
+              <label data-i18n="relation.analysis.method">${t('relation.analysis.method')}</label>
               <select class="corr-method pivot-select">
-                <option value="auto">Auto-detect</option>
-                <option value="pearson">Pearson (linear, normal)</option>
-                <option value="spearman">Spearman (monotonic, robust)</option>
-                <option value="kendall">Kendall's Tau (ordinal, small n)</option>
-                <option value="pointbiserial">Point-Biserial (binary × numeric)</option>
-                <option value="phi">Phi (binary × binary)</option>
-                <option value="cramers">Cramér's V (categorical)</option>
-                <option value="eta">Eta (η) Squared (ANOVA effect size)</option>
-                <option value="mutual_info">Mutual Information (MI)</option>
-                <option value="distance_corr">Distance Correlation (dCor)</option>
-                <option value="polyserial">Polyserial (ordinal × continuous)</option>
-                <option value="polychoric">Polychoric (ordinal × ordinal)</option>
-                <option value="tetrachoric">Tetrachoric (binary × binary)</option>
-                <option value="biserial">Biserial (binary × continuous)</option>
-                <option value="rank_biserial">Rank-Biserial</option>
-                <option value="somers_d">Somers' D</option>
-                <option value="gamma">Goodman-Kruskal Gamma</option>
-                <option value="lambda">Goodman-Kruskal Lambda</option>
-                <option value="tau_c">Kendall's Tau-c</option>
-                <option value="uncertainty">Uncertainty Coefficient (Theil's U)</option>
-                <option value="hoeffding">Hoeffding's D</option>
-                <option value="blomqvist">Blomqvist's Beta</option>
-                <option value="chatterjee">Chatterjee's Xi</option>
-                <option value="cosine_sim">Cosine Similarity</option>
-                <option value="jaccard">Jaccard Index</option>
+                <option value="auto" data-i18n="relation.analysis.method_auto">${t('relation.analysis.method_auto')}</option>
+                <option value="pearson" data-i18n="relation.analysis.method_pearson">${t('relation.analysis.method_pearson')}</option>
+                <option value="spearman" data-i18n="relation.analysis.method_spearman">${t('relation.analysis.method_spearman')}</option>
+                <option value="kendall" data-i18n="relation.analysis.method_kendall">${t('relation.analysis.method_kendall')}</option>
+                <option value="pointbiserial" data-i18n="relation.analysis.method_pointbiserial">${t('relation.analysis.method_pointbiserial')}</option>
+                <option value="phi" data-i18n="relation.analysis.method_phi">${t('relation.analysis.method_phi')}</option>
+                <option value="cramers" data-i18n="relation.analysis.method_cramers">${t('relation.analysis.method_cramers')}</option>
+                <option value="eta" data-i18n="relation.analysis.method_eta">${t('relation.analysis.method_eta')}</option>
+                <option value="mutual_info" data-i18n="relation.analysis.method_mutual_info">${t('relation.analysis.method_mutual_info')}</option>
+                <option value="distance_corr" data-i18n="relation.analysis.method_distance_corr">${t('relation.analysis.method_distance_corr')}</option>
+                <option value="polyserial" data-i18n="relation.analysis.method_polyserial">${t('relation.analysis.method_polyserial')}</option>
+                <option value="polychoric" data-i18n="relation.analysis.method_polychoric">${t('relation.analysis.method_polychoric')}</option>
+                <option value="tetrachoric" data-i18n="relation.analysis.method_tetrachoric">${t('relation.analysis.method_tetrachoric')}</option>
+                <option value="biserial" data-i18n="relation.analysis.method_biserial">${t('relation.analysis.method_biserial')}</option>
+                <option value="rank_biserial" data-i18n="relation.analysis.method_rank_biserial">${t('relation.analysis.method_rank_biserial')}</option>
+                <option value="somers_d" data-i18n="relation.analysis.method_somers_d">${t('relation.analysis.method_somers_d')}</option>
+                <option value="gamma" data-i18n="relation.analysis.method_gamma">${t('relation.analysis.method_gamma')}</option>
+                <option value="lambda" data-i18n="relation.analysis.method_lambda">${t('relation.analysis.method_lambda')}</option>
+                <option value="tau_c" data-i18n="relation.analysis.method_tau_c">${t('relation.analysis.method_tau_c')}</option>
+                <option value="uncertainty" data-i18n="relation.analysis.method_uncertainty">${t('relation.analysis.method_uncertainty')}</option>
+                <option value="hoeffding" data-i18n="relation.analysis.method_hoeffding">${t('relation.analysis.method_hoeffding')}</option>
+                <option value="blomqvist" data-i18n="relation.analysis.method_blomqvist">${t('relation.analysis.method_blomqvist')}</option>
+                <option value="chatterjee" data-i18n="relation.analysis.method_chatterjee">${t('relation.analysis.method_chatterjee')}</option>
+                <option value="cosine_sim" data-i18n="relation.analysis.method_cosine">${t('relation.analysis.method_cosine')}</option>
+                <option value="jaccard" data-i18n="relation.analysis.method_jaccard">${t('relation.analysis.method_jaccard')}</option>
               </select>
             </div>
             <div class="correlation-actions">
-              <button class="btn-calculate-corr btn btn-primary btn-sm">Calculate</button>
+              <button class="btn-calculate-corr btn btn-primary btn-sm" data-i18n="relation.analysis.calculate">${t('relation.analysis.calculate')}</button>
               <button class="btn-corr-help btn btn-outline btn-sm">?</button>
             </div>
           </div>
           <div class="correlation-section">
-            <div class="correlation-section-header">Analyze All Pairs</div>
-            <div class="correlation-section-desc">Calculate correlations between all column combinations</div>
-            <button class="btn-corr-all btn btn-primary btn-sm">Analyze All Pairs</button>
+            <div class="correlation-section-header" data-i18n="relation.analysis.analyze_all_header">${t('relation.analysis.analyze_all_header')}</div>
+            <div class="correlation-section-desc" data-i18n="relation.analysis.analyze_all_desc">${t('relation.analysis.analyze_all_desc')}</div>
+            <button class="btn-corr-all btn btn-primary btn-sm" data-i18n="relation.analysis.analyze_all">${t('relation.analysis.analyze_all')}</button>
           </div>
         </div>
         <div class="correlation-help" style="display: none;">
-          <p><strong>Classic methods:</strong></p>
+          <p><strong data-i18n="relation.analysis.help_classic">${t('relation.analysis.help_classic')}</strong></p>
           <ul>
-            <li><strong>Pearson (r)</strong> - Linear relationship. Assumes normality. Range: -1 to +1.</li>
-            <li><strong>Spearman (ρ)</strong> - Monotonic relationship. Robust to outliers. Range: -1 to +1.</li>
-            <li><strong>Kendall's Tau (τ)</strong> - Rank correlation. Better for small samples. Range: -1 to +1.</li>
-            <li><strong>Point-Biserial</strong> - Binary × numeric. Range: -1 to +1.</li>
-            <li><strong>Phi (φ)</strong> - Binary × binary. Range: -1 to +1.</li>
-            <li><strong>Cramér's V</strong> - Categorical association. Range: 0 to 1.</li>
+            <li data-i18n="relation.analysis.help_pearson">${t('relation.analysis.help_pearson')}</li>
+            <li data-i18n="relation.analysis.help_spearman">${t('relation.analysis.help_spearman')}</li>
+            <li data-i18n="relation.analysis.help_kendall">${t('relation.analysis.help_kendall')}</li>
+            <li data-i18n="relation.analysis.help_pointbiserial">${t('relation.analysis.help_pointbiserial')}</li>
+            <li data-i18n="relation.analysis.help_phi">${t('relation.analysis.help_phi')}</li>
+            <li data-i18n="relation.analysis.help_cramers">${t('relation.analysis.help_cramers')}</li>
           </ul>
-          <p><strong>Extended methods:</strong></p>
+          <p><strong data-i18n="relation.analysis.help_extended">${t('relation.analysis.help_extended')}</strong></p>
           <ul>
-            <li><strong>Eta (η²)</strong> - ANOVA effect size (categorical × numeric). Range: 0 to 1.</li>
-            <li><strong>Mutual Information</strong> - Any pair; detects any dependence. Range: 0 to ∞.</li>
-            <li><strong>Distance Correlation</strong> - Detects non-linear dependencies. Range: 0 to 1.</li>
-            <li><strong>Polyserial / Polychoric</strong> - Ordinal × continuous / ordinal × ordinal.</li>
-            <li><strong>Tetrachoric / Biserial</strong> - Binary data latent correlations.</li>
-            <li><strong>Somers' D / Gamma / Tau-c</strong> - Ordinal association measures.</li>
-            <li><strong>Lambda / Uncertainty</strong> - Categorical prediction measures.</li>
-            <li><strong>Hoeffding's D</strong> - Non-parametric dependence. Range: -0.5 to 1.</li>
-            <li><strong>Blomqvist's Beta</strong> - Median concordance. Range: -1 to 1.</li>
-            <li><strong>Chatterjee's Xi</strong> - Functional dependence. Range: 0 to 1.</li>
-            <li><strong>Cosine Similarity</strong> - Vector angle similarity. Range: -1 to 1.</li>
-            <li><strong>Jaccard Index</strong> - Set overlap for categorical. Range: 0 to 1.</li>
+            <li data-i18n="relation.analysis.help_eta">${t('relation.analysis.help_eta')}</li>
+            <li data-i18n="relation.analysis.help_mutual_info">${t('relation.analysis.help_mutual_info')}</li>
+            <li data-i18n="relation.analysis.help_distance_corr">${t('relation.analysis.help_distance_corr')}</li>
+            <li data-i18n="relation.analysis.help_polyserial">${t('relation.analysis.help_polyserial')}</li>
+            <li data-i18n="relation.analysis.help_tetrachoric">${t('relation.analysis.help_tetrachoric')}</li>
+            <li data-i18n="relation.analysis.help_somers">${t('relation.analysis.help_somers')}</li>
+            <li data-i18n="relation.analysis.help_lambda">${t('relation.analysis.help_lambda')}</li>
+            <li data-i18n="relation.analysis.help_hoeffding">${t('relation.analysis.help_hoeffding')}</li>
+            <li data-i18n="relation.analysis.help_blomqvist">${t('relation.analysis.help_blomqvist')}</li>
+            <li data-i18n="relation.analysis.help_chatterjee">${t('relation.analysis.help_chatterjee')}</li>
+            <li data-i18n="relation.analysis.help_cosine">${t('relation.analysis.help_cosine')}</li>
+            <li data-i18n="relation.analysis.help_jaccard">${t('relation.analysis.help_jaccard')}</li>
           </ul>
-          <p><strong>Auto-detect logic:</strong></p>
+          <p><strong data-i18n="relation.analysis.help_auto_detect">${t('relation.analysis.help_auto_detect')}</strong></p>
           <ul>
-            <li>Both binary → Phi</li>
-            <li>One binary + one numeric → Point-Biserial</li>
-            <li>Both numeric, n&lt;30 → Kendall's Tau</li>
-            <li>Both numeric, n≥30 → Pearson</li>
-            <li>Either categorical → Cramér's V</li>
+            <li data-i18n="relation.analysis.help_auto_both_binary">${t('relation.analysis.help_auto_both_binary')}</li>
+            <li data-i18n="relation.analysis.help_auto_binary_numeric">${t('relation.analysis.help_auto_binary_numeric')}</li>
+            <li data-i18n="relation.analysis.help_auto_numeric_small">${t('relation.analysis.help_auto_numeric_small')}</li>
+            <li data-i18n="relation.analysis.help_auto_numeric_large">${t('relation.analysis.help_auto_numeric_large')}</li>
+            <li data-i18n="relation.analysis.help_auto_categorical">${t('relation.analysis.help_auto_categorical')}</li>
           </ul>
         </div>
         <div class="correlation-result"></div>
@@ -23339,48 +23339,48 @@ function initRelationInstance(container, relationData, options = {}) {
       <div class="analysis-subtab-content analysis-matrix" style="display: none;">
         <div class="matrix-config">
           <div class="matrix-config-row">
-            <label>Type:</label>
+            <label data-i18n="relation.analysis.type">${t('relation.analysis.type')}</label>
             <select class="matrix-type-select pivot-select">
-              <option value="correlation">Correlation Matrix</option>
-              <option value="mi">Mutual Information Matrix</option>
+              <option value="correlation" data-i18n="relation.analysis.corr_matrix">${t('relation.analysis.corr_matrix')}</option>
+              <option value="mi" data-i18n="relation.analysis.mi_matrix">${t('relation.analysis.mi_matrix')}</option>
             </select>
           </div>
           <div class="matrix-config-row">
-            <label>Method:</label>
+            <label data-i18n="relation.analysis.method">${t('relation.analysis.method')}</label>
             <select class="matrix-method-select pivot-select">
-              <option value="pearson">Pearson</option>
-              <option value="spearman">Spearman</option>
-              <option value="kendall">Kendall</option>
+              <option value="pearson" data-i18n="relation.analysis.pearson">${t('relation.analysis.pearson')}</option>
+              <option value="spearman" data-i18n="relation.analysis.spearman">${t('relation.analysis.spearman')}</option>
+              <option value="kendall" data-i18n="relation.analysis.kendall">${t('relation.analysis.kendall')}</option>
             </select>
           </div>
-          <button class="btn-calculate-matrix btn btn-primary btn-sm">Calculate</button>
+          <button class="btn-calculate-matrix btn btn-primary btn-sm" data-i18n="relation.analysis.calculate">${t('relation.analysis.calculate')}</button>
         </div>
         <div class="matrix-result"></div>
       </div>
 
       <div class="analysis-subtab-content analysis-clustering" style="display: none;">
         <div class="diagram-info">
-          <p class="diagram-description">This diagram uses <strong>t-SNE</strong> (t-Distributed Stochastic Neighbor Embedding) to visualize data similarity. Similar rows cluster together, while dissimilar rows are placed further apart. Each circle represents a row, colored by cluster assignment. <strong>Recommended clusters:</strong> Use 3-10 clusters for most datasets. A common rule is sqrt(n/2) where n is the number of rows. Too few clusters may oversimplify patterns; too many may create noise.</p>
+          <p class="diagram-description"><span data-i18n="relation.analysis.tsne_description">${t('relation.analysis.tsne_description')}</span> <strong data-i18n="relation.analysis.tsne_recommended">${t('relation.analysis.tsne_recommended')}</strong></p>
         </div>
         <div class="diagram-config">
           <div class="diagram-config-row">
-            <label>Clusters:</label>
+            <label data-i18n="relation.analysis.clusters">${t('relation.analysis.clusters')}</label>
             <input type="number" class="tsne-clusters pivot-select" value="5" min="2" max="20" style="width: 80px;">
-            <span class="diagram-field-help">Number of color groups. Range: 2-20. Recommended: sqrt(n/2) where n is the number of rows.</span>
+            <span class="diagram-field-help" data-i18n="relation.analysis.clusters_help">${t('relation.analysis.clusters_help')}</span>
           </div>
           <div class="diagram-config-row">
-            <label>Perplexity:</label>
+            <label data-i18n="relation.analysis.perplexity">${t('relation.analysis.perplexity')}</label>
             <input type="number" class="tsne-perplexity pivot-select" value="30" min="5" max="100" style="width: 80px;">
-            <span class="diagram-field-help">Balance between local and global structure. Range: 5-100. Typical: 5-50. Lower values focus on local clusters, higher values preserve global structure.</span>
+            <span class="diagram-field-help" data-i18n="relation.analysis.perplexity_help">${t('relation.analysis.perplexity_help')}</span>
           </div>
           <div class="diagram-config-row">
-            <label>Iterations:</label>
+            <label data-i18n="relation.analysis.iterations">${t('relation.analysis.iterations')}</label>
             <input type="number" class="tsne-iterations pivot-select" value="500" min="100" max="2000" step="100" style="width: 100px;">
-            <span class="diagram-field-help">Number of optimization steps. Range: 100-2000. More iterations produce more stable results but take longer.</span>
+            <span class="diagram-field-help" data-i18n="relation.analysis.iterations_help">${t('relation.analysis.iterations_help')}</span>
           </div>
-          <button class="btn-run-clustering btn btn-primary btn-sm">Run t-SNE</button>
-          <button class="btn-clusters-as-column btn btn-outline btn-sm" disabled>Clusters as Column</button>
-          <span class="tsne-progress" style="display: none;">Calculating...</span>
+          <button class="btn-run-clustering btn btn-primary btn-sm" data-i18n="relation.analysis.run_tsne">${t('relation.analysis.run_tsne')}</button>
+          <button class="btn-clusters-as-column btn btn-outline btn-sm" disabled data-i18n="relation.analysis.clusters_column">${t('relation.analysis.clusters_column')}</button>
+          <span class="tsne-progress" style="display: none;" data-i18n="relation.analysis.calculating">${t('relation.analysis.calculating')}</span>
         </div>
         <div class="diagram-container">
           <canvas class="diagram-canvas" width="800" height="600"></canvas>
@@ -23390,27 +23390,27 @@ function initRelationInstance(container, relationData, options = {}) {
       <div class="analysis-subtab-content analysis-multivariate" style="display: none;">
         <div class="multivariate-config">
           <div class="multivariate-config-row">
-            <label>Method:</label>
+            <label data-i18n="relation.analysis.method">${t('relation.analysis.method')}</label>
             <select class="multivariate-method-select pivot-select">
-              <option value="pca">PCA (Principal Component Analysis)</option>
-              <option value="factor">Factor Analysis</option>
-              <option value="canonical">Canonical Correlation</option>
-              <option value="manova">MANOVA</option>
+              <option value="pca" data-i18n="relation.analysis.pca">${t('relation.analysis.pca')}</option>
+              <option value="factor" data-i18n="relation.analysis.factor">${t('relation.analysis.factor')}</option>
+              <option value="canonical" data-i18n="relation.analysis.canonical">${t('relation.analysis.canonical')}</option>
+              <option value="manova" data-i18n="relation.analysis.manova">${t('relation.analysis.manova')}</option>
             </select>
           </div>
           <div class="multivariate-config-row pca-components-row">
-            <label>Components:</label>
+            <label data-i18n="relation.analysis.components">${t('relation.analysis.components')}</label>
             <input type="number" class="multivariate-components pivot-select" value="2" min="1" max="10" style="width: 80px;">
           </div>
           <div class="multivariate-column-selector">
-            <label>Columns:</label>
+            <label data-i18n="relation.analysis.columns_label">${t('relation.analysis.columns_label')}</label>
             <div class="mv-col-actions">
-              <button class="btn btn-xs btn-outline mv-select-all" data-testid="btn-mv-select-all">Select All</button>
-              <button class="btn btn-xs btn-outline mv-unselect-all" data-testid="btn-mv-unselect-all">Unselect All</button>
+              <button class="btn btn-xs btn-outline mv-select-all" data-testid="btn-mv-select-all" data-i18n="relation.analysis.select_all">${t('relation.analysis.select_all')}</button>
+              <button class="btn btn-xs btn-outline mv-unselect-all" data-testid="btn-mv-unselect-all" data-i18n="relation.analysis.unselect_all">${t('relation.analysis.unselect_all')}</button>
             </div>
             <div class="mv-col-checkboxes"></div>
           </div>
-          <button class="btn-run-multivariate btn btn-primary btn-sm">Run Analysis</button>
+          <button class="btn-run-multivariate btn btn-primary btn-sm" data-i18n="relation.analysis.run_analysis">${t('relation.analysis.run_analysis')}</button>
         </div>
         <div class="multivariate-result"></div>
       </div>
@@ -24373,7 +24373,7 @@ function runCanonicalCorrelation(st, resultEl, mvView) {
 
   const RxxInv = mvMatInverse(Rxx);
   const RyyInv = mvMatInverse(Ryy);
-  if (!RxxInv || !RyyInv) { resultEl.innerHTML = '<p class="text-muted-foreground">Singular correlation matrix. Cannot compute canonical correlations.</p>'; return; }
+  if (!RxxInv || !RyyInv) { resultEl.innerHTML = '<p class="text-muted-foreground">' + t('relation.analysis.singular_matrix') + '</p>'; return; }
 
   const M = mvMatMul(mvMatMul(RxxInv, Rxy), mvMatMul(RyyInv, Ryx));
   const { eigenvalues } = mvPowerIteration(M, px, 300);
