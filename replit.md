@@ -45,7 +45,9 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Operation Log**: All data-mutating operations are logged for future replay/undo.
 - **Columns Visible System**: Controls column visibility, width, and display order.
 - **Derived Columns**: System for creating new columns based on date, time, float rounding, string metrics, and hierarchy derivations.
-- **Hierarchy Navigation**: Breadcrumb trail for hierarchical data.
+- **Hierarchy Navigation**: Breadcrumb trail for hierarchical data. Parent row in hierarchy view resolves lookup columns.
+- **Column Dependencies**: `columnDependencies` map tracks which columns depend on which source columns. When a source field changes in edit/new forms, dependent lookup columns are automatically recalculated. Built at relation initialization and rebuilt on column structure changes.
+- **HIERARCHY Lookup Path**: Lookup columns can use `HIERARCHY.ColumnName` paths to resolve values from parent rows via `hierarchy_column`. Supports recursive navigation (e.g., `HIERARCHY.HIERARCHY.Name` for grandparent).
 - **Structure View**: Displays all relation columns as an editable meta-table with order, name, kind, display name, short name, multiple columns. Supports kind conversion.
 - **Multi-Input Component**: `buildMultiInput` renders a reusable list of same-type values.
 - **Advanced Search**: Full relational algebra-style query builder accessible from the column menu. Features a pipeline architecture for filters, set operations, join operations, and group by with aggregations.

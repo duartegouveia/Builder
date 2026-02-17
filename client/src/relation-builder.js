@@ -1610,8 +1610,8 @@ const PRODUCT_BRANDS_JSON = {
     "ParentID": "int",
     "Parent": {
       "attribute_kind": ["lookup"],
-      "name": "Name",
-      "short_name": "Name",
+      "name": "ParentName",
+      "short_name": "Parent",
       "lookup": {
         "path": "HIERARCHY.Name",
         "editable": false
@@ -2155,8 +2155,101 @@ function createRelationState() {
     options: {},
     rel_options: { ...DEFAULT_REL_OPTIONS, uiState: deserializeUiState({ ...DEFAULT_UI_STATE }) },
     // Runtime-only properties (not persisted)
-    cardsResizeObserver: null
+    cardsResizeObserver: null,
+    columnDependencies: {}
   };
+}
+
+function buildColumnDependencies(st) {
+  const deps = {};
+  for (let colIdx = 0; colIdx < st.columnNames.length; colIdx++) {
+    const att = getAtt(st, colIdx);
+    if (!isLookupAtt(att)) continue;
+    const lookupCfg = getLookupConfig(att);
+    if (!lookupCfg || !lookupCfg.path) continue;
+    const segments = lookupCfg.path.split('.');
+    const firstSeg = segments[0];
+    let sourceColName = null;
+    if (firstSeg === 'HIERARCHY') {
+      sourceColName = st.rel_options.hierarchy_column || null;
+    } else {
+      if (st.columnNames.includes(firstSeg)) {
+        sourceColName = firstSeg;
+      }
+    }
+    if (sourceColName) {
+      if (!deps[sourceColName]) deps[sourceColName] = [];
+      if (!deps[sourceColName].includes(colIdx)) {
+        deps[sourceColName].push(colIdx);
+      }
+    }
+  }
+  st.columnDependencies = deps;
+}
+
+function initLookupDependencyListeners(container, st, row) {
+  const deps = st.columnDependencies;
+  if (!deps || Object.keys(deps).length === 0) return;
+
+  for (const [sourceColName, dependentColIndices] of Object.entries(deps)) {
+    const sourceColIdx = st.columnNames.indexOf(sourceColName);
+    if (sourceColIdx < 0) continue;
+    const sourceInput = container.querySelector(`[data-col="${sourceColIdx}"]`);
+    if (!sourceInput) continue;
+
+    const handler = () => {
+      const type = st.columnTypes[sourceColIdx];
+      let newVal;
+      if (type === 'boolean') {
+        newVal = sourceInput.checked;
+      } else if (type === 'int') {
+        newVal = sourceInput.value === '' ? null : parseInt(sourceInput.value);
+      } else if (type === 'float') {
+        newVal = sourceInput.value === '' ? null : parseFloat(sourceInput.value);
+      } else {
+        newVal = sourceInput.value === '' ? null : sourceInput.value;
+      }
+
+      let rowIdx = st.relation.items.indexOf(row);
+      const isNewRow = rowIdx < 0;
+      const origVal = row[sourceColIdx];
+      row[sourceColIdx] = newVal;
+
+      if (isNewRow) {
+        st.relation.items.push(row);
+        rowIdx = st.relation.items.length - 1;
+      }
+
+      for (const depColIdx of dependentColIndices) {
+        const depAtt = getAtt(st, depColIdx);
+        if (!isLookupAtt(depAtt)) continue;
+        const lookupCfg = getLookupConfig(depAtt);
+        const resolved = resolveLookupPath(st, rowIdx, lookupCfg.path);
+        const resolvedValue = resolved.value;
+        const resolvedType = resolved.targetType || 'string';
+
+        const lookupField = container.querySelector(`[data-lookup-col="${depColIdx}"]`);
+        if (lookupField) {
+          const valueEl = lookupField.querySelector('.row-field-value');
+          if (valueEl) {
+            valueEl.innerHTML = formatValueForViewDisplay(resolvedValue, resolvedType, st, depColIdx);
+          }
+          const inputEl = lookupField.querySelector(`[data-col="${depColIdx}"]`);
+          if (inputEl) {
+            inputEl.value = resolvedValue != null ? resolvedValue : '';
+          }
+        }
+      }
+
+      if (isNewRow) {
+        st.relation.items.pop();
+      }
+      row[sourceColIdx] = origVal;
+    };
+
+    sourceInput.addEventListener('input', handler);
+    sourceInput.addEventListener('change', handler);
+  }
 }
 
 // Accessor: get uiState from state (with Set hydration)
@@ -2511,6 +2604,9 @@ function validateLookupPaths(relationName, columnNames, columns) {
     for (let s = 0; s < segments.length; s++) {
       const seg = segments[s];
       const isLast = s === segments.length - 1;
+      if (seg === 'HIERARCHY') {
+        continue;
+      }
       if (!currentColumns || !currentColumns[seg]) {
         console.error(`[Relation "${relationName}"] Lookup "${colName}": attribute "${seg}" not found in entity "${currentEntityName}" (path: "${lookupCfg.path}").`);
         break;
@@ -11276,8 +11372,16 @@ function renderTable(st = state) {
       th.style.textOverflow = 'ellipsis';
     }
     if (parentItem) {
-      const value = parentItem[colIdx];
-      th.appendChild(createInputForType(type, value, parentItemIdx, colIdx, false, st));
+      if (type === 'lookup' && isLookupAtt(colAtt)) {
+        const lookupCfg = getLookupConfig(colAtt);
+        const resolved = resolveLookupPath(st, parentItemIdx, lookupCfg.path);
+        const resolvedType = resolved.targetType || 'string';
+        const resolvedValue = resolved.value;
+        th.appendChild(createInputForType(resolvedType, resolvedValue, parentItemIdx, colIdx, false, st));
+      } else {
+        const value = parentItem[colIdx];
+        th.appendChild(createInputForType(type, value, parentItemIdx, colIdx, false, st));
+      }
     }
     parentRow.appendChild(th);
   });
@@ -15835,6 +15939,7 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
     container.innerHTML = generateRowFormattedContent(st, defaultRow, 'edit');
     initRelationFieldsInContainer(container, st, defaultRow, 'edit');
     initFileFieldsInContainer(container, st, defaultRow, 'edit');
+    initLookupDependencyListeners(container, st, defaultRow);
     
     const clearForm = () => {
       st.columnNames.forEach((name, colIdx) => {
@@ -16085,6 +16190,7 @@ function showRowEditDialog(st, rowIdx) {
     container.innerHTML = generateRowFormattedContent(st, row, 'edit');
     initRelationFieldsInContainer(container, st, row, 'edit');
     initFileFieldsInContainer(container, st, row, 'edit');
+    initLookupDependencyListeners(container, st, row);
     
     const idColIdx = st.columnTypes.findIndex(t => t === 'id');
     const rowId = idColIdx !== -1 ? row[idColIdx] : null;
@@ -22220,6 +22326,8 @@ function initRelationInstance(container, relationData, options = {}) {
     validateLookupPaths(relationData.name, instanceState.columnNames, relationData.columns);
   }
 
+  buildColumnDependencies(instanceState);
+
   // Store instance in both legacy map and new registry
   relationInstances.set(instanceState.uid, instanceState);
   registerRelation(instanceState);
@@ -23854,6 +23962,7 @@ function renderStructure(st = state) {
       st.columnNames = resolved.names;
       st.columnTypes = resolved.types;
       st.columnAtts = resolved.atts;
+      buildColumnDependencies(st);
       structureRows = buildStructureColumnRows(st);
       pendingChanges = {};
       render();
@@ -23877,6 +23986,7 @@ function renderStructure(st = state) {
         st.columnNames = resolved.names;
         st.columnTypes = resolved.types;
         st.columnAtts = resolved.atts;
+        buildColumnDependencies(st);
         structureRows = buildStructureColumnRows(st);
         selectedIdx = null;
         editingIdx = null;
@@ -24357,6 +24467,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
       st.columnNames = resolved.names;
       st.columnTypes = resolved.types;
       st.columnAtts = resolved.atts;
+      buildColumnDependencies(st);
       const newRows = buildStructureColumnRows(st);
       structureRows.length = 0;
       newRows.forEach(r => structureRows.push(r));
@@ -24468,6 +24579,7 @@ function applyAllStructureChanges(st, structureRows, pendingChanges) {
   st.columnNames = resolved.names;
   st.columnTypes = resolved.types;
   st.columnAtts = resolved.atts;
+  buildColumnDependencies(st);
 }
 
 function initDiagramView(st = state) {
