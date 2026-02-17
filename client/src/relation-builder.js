@@ -5262,6 +5262,11 @@ function checkRelationIntegrity(relation, path = 'root') {
         issues.push({ path, severity: 'error', msg: `rel_options.${arrKey} deve ser um array.` });
       }
     });
+    if (ro.hierarchy_show_column && typeof ro.hierarchy_show_column === 'string' && ro.hierarchy_show_column !== '') {
+      if (!columnNames.includes(ro.hierarchy_show_column)) {
+        issues.push({ path, severity: 'error', msg: `rel_options.hierarchy_show_column: coluna "${ro.hierarchy_show_column}" não existe na relação.` });
+      }
+    }
   }
 
   if (relation.options && typeof relation.options !== 'object') {
