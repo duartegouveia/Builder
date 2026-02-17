@@ -296,7 +296,12 @@ const DEFAULT_REL_OPTIONS = {
   show_cartesian_product: true,
   show_formatting: true,
   show_groupby: true,
-  kind_specific: true
+  kind_specific: true,
+  columns_visible: null,
+  sortCriteria: [],
+  filters: {},
+  formatting: {},
+  groupByColumns: []
 };
 
 function resolveSingleItemMode(raw) {
@@ -1508,7 +1513,8 @@ const PRODUCT_BRANDS_JSON = {
       "Url": 0,
       "ParentID": 0,
       "IntegrationID": 0
-    }
+    },
+    "sortCriteria": [{ "column": "Name", "direction": "asc" }]
   },
   "items": [
     ["1", "", "", "", "", "A"],
@@ -1821,6 +1827,18 @@ function initializeUiState(relation) {
   if (relation.rel_options.columns_visible && !relation.rel_options.uiState.columns_visible) {
     relation.rel_options.uiState.columns_visible = relation.rel_options.columns_visible;
   }
+  if (relation.rel_options.sortCriteria && relation.rel_options.sortCriteria.length > 0 && (!relation.rel_options.uiState.sortCriteria || relation.rel_options.uiState.sortCriteria.length === 0)) {
+    relation.rel_options.uiState.sortCriteria = relation.rel_options.sortCriteria;
+  }
+  if (relation.rel_options.filters && Object.keys(relation.rel_options.filters).length > 0 && (!relation.rel_options.uiState.filters || Object.keys(relation.rel_options.uiState.filters).length === 0)) {
+    relation.rel_options.uiState.filters = relation.rel_options.filters;
+  }
+  if (relation.rel_options.formatting && Object.keys(relation.rel_options.formatting).length > 0 && (!relation.rel_options.uiState.formatting || Object.keys(relation.rel_options.uiState.formatting).length === 0)) {
+    relation.rel_options.uiState.formatting = relation.rel_options.formatting;
+  }
+  if (relation.rel_options.groupByColumns && relation.rel_options.groupByColumns.length > 0 && (!relation.rel_options.uiState.groupByColumns || relation.rel_options.uiState.groupByColumns.length === 0)) {
+    relation.rel_options.uiState.groupByColumns = relation.rel_options.groupByColumns;
+  }
   return relation;
 }
 
@@ -1938,13 +1956,29 @@ function getUiState(st) {
 function getSelectedRows(st) { return getUiState(st).selectedRows; }
 function setSelectedRows(st, value) { getUiState(st).selectedRows = value instanceof Set ? value : new Set(value); }
 function getSortCriteria(st) { return getUiState(st).sortCriteria; }
-function setSortCriteria(st, value) { getUiState(st).sortCriteria = value; }
+function setSortCriteria(st, value) {
+  getUiState(st).sortCriteria = value;
+  if (st.rel_options) st.rel_options.sortCriteria = value;
+  if (st.relation && st.relation.rel_options) st.relation.rel_options.sortCriteria = value;
+}
 function getFilters(st) { return getUiState(st).filters; }
-function setFilters(st, value) { getUiState(st).filters = value; }
+function setFilters(st, value) {
+  getUiState(st).filters = value;
+  if (st.rel_options) st.rel_options.filters = value;
+  if (st.relation && st.relation.rel_options) st.relation.rel_options.filters = value;
+}
 function getFormatting(st) { return getUiState(st).formatting; }
-function setFormatting(st, value) { getUiState(st).formatting = value; }
+function setFormatting(st, value) {
+  getUiState(st).formatting = value;
+  if (st.rel_options) st.rel_options.formatting = value;
+  if (st.relation && st.relation.rel_options) st.relation.rel_options.formatting = value;
+}
 function getGroupByColumns(st) { return getUiState(st).groupByColumns; }
-function setGroupByColumns(st, value) { getUiState(st).groupByColumns = value; }
+function setGroupByColumns(st, value) {
+  getUiState(st).groupByColumns = value;
+  if (st.rel_options) st.rel_options.groupByColumns = value;
+  if (st.relation && st.relation.rel_options) st.relation.rel_options.groupByColumns = value;
+}
 function getGroupedData(st) { return getUiState(st).groupedData; }
 function setGroupedData(st, value) { getUiState(st).groupedData = value; }
 function getExpandedGroups(st) { return getUiState(st).expandedGroups; }
@@ -9212,17 +9246,136 @@ function cleanColumnsFull(columns) {
   return result;
 }
 
+function resolveRelOptionsNamedReferences(st) {
+  const colNames = st.columnNames;
+  if (!colNames || !st.rel_options) return;
+  const nameToIdx = {};
+  colNames.forEach((name, idx) => { nameToIdx[name] = idx; });
+
+  const resolve = (criteria) => {
+    if (!Array.isArray(criteria)) return criteria;
+    return criteria.map(c => {
+      if (typeof c.column === 'string' && c.column in nameToIdx) {
+        return { ...c, column: nameToIdx[c.column] };
+      }
+      return c;
+    });
+  };
+
+  const resolveKeyedObj = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (key in nameToIdx) {
+        result[nameToIdx[key]] = value;
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  };
+
+  const resolveArray = (arr) => {
+    if (!Array.isArray(arr)) return arr;
+    return arr.map(c => (typeof c === 'string' && c in nameToIdx) ? nameToIdx[c] : c);
+  };
+
+  if (st.rel_options.sortCriteria && st.rel_options.sortCriteria.length > 0) {
+    st.rel_options.sortCriteria = resolve(st.rel_options.sortCriteria);
+  }
+  if (st.rel_options.filters && Object.keys(st.rel_options.filters).length > 0) {
+    st.rel_options.filters = resolveKeyedObj(st.rel_options.filters);
+  }
+  if (st.rel_options.formatting && Object.keys(st.rel_options.formatting).length > 0) {
+    st.rel_options.formatting = resolveKeyedObj(st.rel_options.formatting);
+  }
+  if (st.rel_options.groupByColumns && st.rel_options.groupByColumns.length > 0) {
+    st.rel_options.groupByColumns = resolveArray(st.rel_options.groupByColumns);
+  }
+
+  const ui = getUiState(st);
+  if (ui.sortCriteria && ui.sortCriteria.length > 0) {
+    ui.sortCriteria = resolve(ui.sortCriteria);
+  }
+  if (ui.filters && Object.keys(ui.filters).length > 0) {
+    ui.filters = resolveKeyedObj(ui.filters);
+  }
+  if (ui.formatting && Object.keys(ui.formatting).length > 0) {
+    ui.formatting = resolveKeyedObj(ui.formatting);
+  }
+  if (ui.groupByColumns && ui.groupByColumns.length > 0) {
+    ui.groupByColumns = resolveArray(ui.groupByColumns);
+  }
+}
+
+function unresolveRelOptionsNamedReferences(relOptions, colNames) {
+  if (!relOptions || !colNames) return;
+  const idxToName = {};
+  colNames.forEach((name, idx) => { idxToName[idx] = name; });
+
+  if (relOptions.sortCriteria && Array.isArray(relOptions.sortCriteria)) {
+    relOptions.sortCriteria = relOptions.sortCriteria.map(c => {
+      if (typeof c.column === 'number' && c.column in idxToName) {
+        return { ...c, column: idxToName[c.column] };
+      }
+      return c;
+    });
+  }
+
+  const unresolveKeyedObj = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const idx = parseInt(key);
+      if (!isNaN(idx) && idx in idxToName) {
+        result[idxToName[idx]] = value;
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  };
+
+  if (relOptions.filters && Object.keys(relOptions.filters).length > 0) {
+    relOptions.filters = unresolveKeyedObj(relOptions.filters);
+  }
+  if (relOptions.formatting && Object.keys(relOptions.formatting).length > 0) {
+    relOptions.formatting = unresolveKeyedObj(relOptions.formatting);
+  }
+  if (relOptions.groupByColumns && Array.isArray(relOptions.groupByColumns)) {
+    relOptions.groupByColumns = relOptions.groupByColumns.map(c =>
+      (typeof c === 'number' && c in idxToName) ? idxToName[c] : c
+    );
+  }
+}
+
+function prepareRelationForOutput(relation) {
+  const relOpts = relation.rel_options;
+  if (relOpts) {
+    if (relOpts.filters && typeof relOpts.filters === 'object') {
+      relOpts.filters = serializeFilters(relOpts.filters);
+    }
+    if (relOpts.uiState && relOpts.uiState.filters && typeof relOpts.uiState.filters === 'object') {
+      relOpts.uiState.filters = serializeFilters(relOpts.uiState.filters);
+    }
+  }
+}
+
 function outputRelationState(st) {
+  prepareRelationForOutput(st.relation);
   const output = JSON.parse(JSON.stringify(st.relation));
   cleanRelationOutput(output);
+  if (output.rel_options) unresolveRelOptionsNamedReferences(output.rel_options, st.columnNames);
   if (output.columns) output.columns = cleanColumnsCompact(output.columns);
   const jsonString = JSON.stringify(output, null, 2);
   outputToConsoleAndElements(jsonString);
 }
 
 function outputRelationStateFull(st) {
+  prepareRelationForOutput(st.relation);
   const output = JSON.parse(JSON.stringify(st.relation));
   cleanRelationOutputFull(output);
+  if (output.rel_options) unresolveRelOptionsNamedReferences(output.rel_options, st.columnNames);
   if (output.columns) output.columns = cleanColumnsFull(output.columns);
   const jsonString = JSON.stringify(output, null, 2);
   outputToConsoleAndElements(jsonString);
@@ -21694,8 +21847,14 @@ function initRelationInstance(container, relationData, options = {}) {
     cardinality_min: parsedRelOptions.cardinality_min ?? DEFAULT_REL_OPTIONS.cardinality_min,
     cardinality_max: parsedRelOptions.cardinality_max ?? DEFAULT_REL_OPTIONS.cardinality_max,
     columns_visible: parsedRelOptions.columns_visible ?? null,
+    sortCriteria: parsedRelOptions.sortCriteria ?? [],
+    filters: parsedRelOptions.filters ?? {},
+    formatting: parsedRelOptions.formatting ?? {},
+    groupByColumns: parsedRelOptions.groupByColumns ?? [],
     uiState: deserializeUiState(parsedRelOptions.uiState || { ...DEFAULT_UI_STATE })
   };
+
+  resolveRelOptionsNamedReferences(instanceState);
 
   const gvoI = instanceState.rel_options.general_view_options;
   const hasCorrI = gvoI.indexOf('Correlation');
@@ -21718,6 +21877,10 @@ function initRelationInstance(container, relationData, options = {}) {
   const itemCount = (relationData.items || []).length;
   setFilteredIndices(instanceState, [...Array(itemCount).keys()]);
   setSortedIndices(instanceState, [...getFilteredIndices(instanceState)]);
+  
+  if (getSortCriteria(instanceState).length > 0) {
+    applySorting(instanceState);
+  }
   
   if (relationData.name && Object.keys(all_entities).length > 0) {
     validateAssociationCounterparts(relationData.name, instanceState.columnNames, relationData.columns);
