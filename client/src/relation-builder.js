@@ -7671,6 +7671,14 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
     
+    if (Array.isArray(value)) {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly';
+      span.innerHTML = value.map(v => escapeHtml(String(v ?? ''))).join('<br>');
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
     const span = document.createElement('span');
     span.className = 'relation-cell-readonly';
     if (type === 'textarea') {
