@@ -1591,7 +1591,8 @@ const PRODUCT_CATEGORY_JSON = {
   "columns": {
     "id": "id",
     "external_ref": "string",
-    "name": "string"
+    "name": "string",
+    "parent": "string"
   },
   "options": {
     "relation.single_item_mode": [ "dialog", "right", "bottom" ]
@@ -1610,18 +1611,22 @@ const PRODUCT_CATEGORY_JSON = {
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [
-    ['1','1','Dog Food'],
-    ['2','2','Cat Food'],
-    ['3','3','Vegetarian Food'],
-    ['4','4','Chocolate'],
-    ['5','5','Cereals'],
-    ['6','6','Cofee and Beverages'],
-    ['7','7','Milk and Deserts'],
-    ['8','8','Clinical Nutricion'],
-    ['9','9','Cooking'],
-    ['10','10','Cofee machines'],
-    ['11','11','Child nutrition'],
-    ['12','12','Proteins and Vitamins']
+    ['1','1','Pet Food',''],
+    ['2','2','Human Food',''],
+    ['3','3','Dog Food','1'],
+    ['4','4','Cat Food','1'],
+    ['5','5','Vegetarian Food','2'],
+    ['6','6','Chocolate','2'],
+    ['7','7','Cereals','2'],
+    ['8','8','Cofee and Beverages','2'],
+    ['9','9','Milk and Deserts','2'],
+    ['10','10','Clinical Nutricion','2'],
+    ['11','11','Cooking','2'],
+    ['12','12','Cofee machines','8'],
+    ['13','13','Child nutrition','10'],
+    ['14','14','Proteins and Vitamins','10'],
+    ['15','15','Dry Dog Food','3'],
+    ['16','16','Wet Dog Food','3']
   ]
 };
 
@@ -10546,18 +10551,13 @@ function renderTable(st = state) {
     headerRow.appendChild(th);
   });
   
-  // Parent row (above header, no click handlers) - for hierarchy navigation
-  const parentRow = document.createElement('tr');
-  parentRow.className = 'relation-parent-row' + (shouldShowHierarchy(st) ? '' : ' hidden');
-  
-  // Find the parent record based on currentHierarchyValue
+  // --- Hierarchy: Breadcrumb row + Parent data row ---
+  const showHierarchy = shouldShowHierarchy(st);
   const currentHierarchyVal = getCurrentHierarchyValue(st);
   const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
   let parentItem = null;
   let parentItemIdx = -1;
-  
-  // Only look for parent if currentHierarchyValue is not empty
   if (currentHierarchyVal !== '' && idColIdx >= 0) {
     for (let i = 0; i < st.relation.items.length; i++) {
       const itemId = st.relation.items[i][idColIdx];
@@ -10568,45 +10568,20 @@ function renderTable(st = state) {
       }
     }
   }
-  
-  // Determine if up button should be disabled
   const upButtonDisabled = currentHierarchyVal === '' || currentHierarchyVal === hierarchyRootVal;
-  
-  // Select column - empty
-  const parentSelectTh = document.createElement('th');
-  parentSelectTh.className = 'relation-th-parent' + (st.rel_options.show_multicheck ? '' : ' hidden');
-  parentRow.appendChild(parentSelectTh);
-  
-  // Ops column - up button here
-  const parentOpsTh = document.createElement('th');
-  parentOpsTh.className = 'relation-th-parent';
-  const btnParentUp = document.createElement('button');
-  btnParentUp.className = 'btn-parent-up' + (upButtonDisabled ? ' disabled' : '');
-  btnParentUp.title = upButtonDisabled ? 'Already at root level' : 'Move to the upper level';
-  btnParentUp.textContent = '↑';
-  btnParentUp.dataset.testid = 'button-parent-up';
-  btnParentUp.disabled = upButtonDisabled;
-  parentOpsTh.appendChild(btnParentUp);
-  parentRow.appendChild(parentOpsTh);
-  
-  // Index column - always empty
-  const parentIndexTh = document.createElement('th');
-  parentIndexTh.className = 'relation-th-parent' + (st.rel_options.show_natural_order ? '' : ' hidden');
-  parentRow.appendChild(parentIndexTh);
-  
-  // Breadcrumb trail - spans all remaining data columns
   const visibleDataCols = visibleColIndices.filter(idx => !getGroupByColumns(st).includes(idx));
   const hiddenIdCount = visibleDataCols.filter(idx => st.columnTypes[idx] === 'id' && !st.rel_options.show_id).length;
-  const breadcrumbColspan = visibleDataCols.length - hiddenIdCount;
-  
+
+  // Row 1: Breadcrumb navigation bar (full-width, above everything)
+  const breadcrumbRow = document.createElement('tr');
+  breadcrumbRow.className = 'hierarchy-breadcrumb-row' + (showHierarchy ? '' : ' hidden');
+  const totalColspan = (st.rel_options.show_multicheck ? 1 : 0) + 1 + (st.rel_options.show_natural_order ? 1 : 0) + visibleDataCols.length - hiddenIdCount;
   const breadcrumbTh = document.createElement('th');
-  breadcrumbTh.className = 'relation-th-parent hierarchy-breadcrumb-cell';
-  breadcrumbTh.colSpan = breadcrumbColspan;
-  
+  breadcrumbTh.className = 'hierarchy-breadcrumb-cell';
+  breadcrumbTh.colSpan = totalColspan;
   const breadcrumbContainer = document.createElement('div');
   breadcrumbContainer.className = 'hierarchy-breadcrumb-bar';
   breadcrumbContainer.dataset.testid = 'hierarchy-breadcrumb';
-  
   const hierPath = buildHierarchyPath(st);
   hierPath.forEach((segment, segIdx) => {
     if (segIdx > 0) {
@@ -10630,14 +10605,12 @@ function renderTable(st = state) {
     });
     breadcrumbContainer.appendChild(segSpan);
   });
-  
   const infoBadge = document.createElement('span');
   infoBadge.className = 'info-badge hierarchy-info-badge';
   infoBadge.textContent = 'ⓘ';
   infoBadge.title = '#N1 = direct children at this level, #N2 = total descendants (all levels below). Click a segment to navigate.';
   infoBadge.dataset.testid = 'hierarchy-info-badge';
   breadcrumbContainer.appendChild(infoBadge);
-  
   const showAllLabel = document.createElement('label');
   showAllLabel.className = 'hierarchy-show-all-label';
   const showAllCb = document.createElement('input');
@@ -10650,21 +10623,62 @@ function renderTable(st = state) {
   showAllText.textContent = ' Show all descendants';
   showAllLabel.appendChild(showAllText);
   breadcrumbContainer.appendChild(showAllLabel);
-  
   breadcrumbTh.appendChild(breadcrumbContainer);
-  parentRow.appendChild(breadcrumbTh);
-  
-  // Hidden id columns still need placeholders
-  visibleDataCols.forEach((idx) => {
-    const type = st.columnTypes[idx];
+  breadcrumbRow.appendChild(breadcrumbTh);
+  thead.appendChild(breadcrumbRow);
+
+  // Row 2: Parent data row (up button + parent record values aligned with table columns)
+  const isAtRoot = currentHierarchyVal === '' || currentHierarchyVal === hierarchyRootVal;
+  const showParentRow = showHierarchy && !isAtRoot;
+  const parentRow = document.createElement('tr');
+  parentRow.className = 'relation-parent-row' + (showParentRow ? '' : ' hidden');
+
+  const parentSelectTh = document.createElement('th');
+  parentSelectTh.className = 'relation-th-parent' + (st.rel_options.show_multicheck ? '' : ' hidden');
+  parentRow.appendChild(parentSelectTh);
+
+  const parentOpsTh = document.createElement('th');
+  parentOpsTh.className = 'relation-th-parent';
+  const btnParentUp = document.createElement('button');
+  btnParentUp.className = 'btn-parent-up' + (upButtonDisabled ? ' disabled' : '');
+  btnParentUp.title = upButtonDisabled ? 'Already at root level' : 'Move to the upper level';
+  btnParentUp.textContent = '↑';
+  btnParentUp.dataset.testid = 'button-parent-up';
+  btnParentUp.disabled = upButtonDisabled;
+  parentOpsTh.appendChild(btnParentUp);
+  parentRow.appendChild(parentOpsTh);
+
+  const parentIndexTh = document.createElement('th');
+  parentIndexTh.className = 'relation-th-parent' + (st.rel_options.show_natural_order ? '' : ' hidden');
+  if (parentItem && parentItemIdx >= 0) {
+    parentIndexTh.textContent = parentItemIdx + 1;
+  }
+  parentRow.appendChild(parentIndexTh);
+
+  visibleDataCols.forEach((colIdx) => {
+    if (getGroupByColumns(st).includes(colIdx)) return;
+    const th = document.createElement('th');
+    th.className = 'relation-th-parent relation-th-parent-data';
+    const type = st.columnTypes[colIdx];
+    const colAtt = getAtt(st, colIdx);
     const isHiddenId = type === 'id' && !st.rel_options.show_id;
-    if (isHiddenId) {
-      const th = document.createElement('th');
-      th.className = 'relation-th-parent hidden';
-      parentRow.appendChild(th);
+    const isHiddenAtt = colAtt && colAtt.visible === false;
+    if (isHiddenId || isHiddenAtt) th.classList.add('hidden');
+    const colWidth = getColumnWidth(st, colIdx);
+    if (colWidth > 0) {
+      th.style.width = colWidth + 'px';
+      th.style.minWidth = colWidth + 'px';
+      th.style.maxWidth = colWidth + 'px';
+      th.style.overflow = 'hidden';
+      th.style.textOverflow = 'ellipsis';
     }
+    if (parentItem) {
+      const value = parentItem[colIdx];
+      th.appendChild(createInputForType(type, value, parentItemIdx, colIdx, false, st));
+    }
+    parentRow.appendChild(th);
   });
-  
+
   thead.appendChild(parentRow);
   thead.appendChild(headerRow);
   table.appendChild(thead);

@@ -885,9 +885,20 @@
   padding: 2px;
 }
 
+.hierarchy-breadcrumb-row {
+  background: var(--primary-50, #eff6ff);
+  border-bottom: 1px solid var(--border);
+}
+
+.hierarchy-breadcrumb-row > th {
+  padding: 4px 8px;
+  font-weight: normal;
+  border-bottom: 1px solid var(--border);
+  background: var(--primary-50, #eff6ff);
+}
+
 .relation-parent-row {
   background: #d8f2da;
-  height: 32px;
   font-weight: normal;
 }
 
@@ -896,6 +907,22 @@
   border-bottom: 1px solid var(--border);
   font-weight: normal;
   background: #d8f2da;
+  vertical-align: middle;
+}
+
+.relation-table th.relation-th-parent-data {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.relation-table th.relation-th-parent-data input,
+.relation-table th.relation-th-parent-data select,
+.relation-table th.relation-th-parent-data textarea {
+  pointer-events: none;
+  opacity: 0.85;
+  background: transparent;
+  border-color: transparent;
 }
 
 .relation-table thead .relation-th-select input[type="checkbox"] {
@@ -5776,7 +5803,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 
 /* Hierarchy Breadcrumb Trail */
 .hierarchy-breadcrumb-cell {
-  padding: 4px 8px !important;
+  padding: 4px 8px;
 }
 
 .hierarchy-breadcrumb-bar {
