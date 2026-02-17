@@ -276,6 +276,7 @@ const DEFAULT_REL_OPTIONS = {
   show_stats: true,
   show_hierarchy: false,
   hierarchy_column: 'parent',
+  hierarchy_show_column: '',
   hierarchy_root_value: '',
   hierarchy_initial_value: null,
   cardinality_min: 0,
