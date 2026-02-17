@@ -3076,7 +3076,7 @@ function buildHierarchyPath(st) {
   const showColIdx = showCol ? st.columnNames.indexOf(showCol) : -1;
   const labelColIdx = showColIdx >= 0 ? showColIdx : st.columnTypes.findIndex((t, i) => i !== idColIdx && (t === 'string' || t === 'textarea'));
   const path = [];
-  path.push({ value: hierarchyRootVal, label: 'Root' });
+  path.push({ value: hierarchyRootVal, label: t('relation.hierarchy.root') });
   if (currentVal === hierarchyRootVal || currentVal === '') {
     return path;
   }
@@ -6283,7 +6283,7 @@ function showImportDialog(st) {
         currentTable.rows.forEach(row => lines.push(row.map(c => c == null ? '' : c).join('\t')));
         textArea.value = lines.join('\n');
       }
-      editTextBtn.textContent = 'Atualizar da Edição';
+      editTextBtn.textContent = t('relation.assoc.update_from_edit');
     } else {
       const lines = textArea.value.split('\n').filter(l => l.trim());
       if (lines.length > 0) {
@@ -6294,7 +6294,7 @@ function showImportDialog(st) {
         buildMapping(currentTable);
       }
       stepText.style.display = 'none';
-      editTextBtn.textContent = 'Editar Texto';
+      editTextBtn.textContent = t('relation.assoc.edit_text');
     }
   });
 
@@ -6666,7 +6666,7 @@ function invertSelection(pageOnly = false, st = state) {
 function removeSelectedRows(st = state, skipConfirm = false) {
   if (getSelectedRows(st).size === 0) return;
   
-  if (!skipConfirm && !confirm(`Remove ${getSelectedRows(st).size} selected rows from the data?`)) return;
+  if (!skipConfirm && !confirm(tf('relation.confirm.remove_selected', {count: getSelectedRows(st).size}))) return;
   
   // Get sorted indices to remove (descending to preserve indices)
   const indicesToRemove = [...getSelectedRows(st)].sort((a, b) => b - a);
@@ -6690,7 +6690,7 @@ function removeUnselectedRows(st = state) {
   if (getSelectedRows(st).size === 0) return;
   
   const unselectedCount = getSortedIndices(st).length - getSelectedRows(st).size;
-  if (!confirm(`Remove ${unselectedCount} unselected rows from the data? Only ${getSelectedRows(st).size} selected rows will remain.`)) return;
+  if (!confirm(tf('relation.confirm.remove_unselected', {unselected: unselectedCount, selected: getSelectedRows(st).size}))) return;
   
   const selectedIndices = [...getSelectedRows(st)].sort((a, b) => a - b);
   const allIndices = new Set(selectedIndices);
@@ -6772,8 +6772,8 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
       if (editable) {
         const selectBtn = document.createElement('button');
         selectBtn.className = 'assoc-select-btn';
-        selectBtn.textContent = 'Select';
-        selectBtn.title = 'Select associated entity';
+        selectBtn.textContent = t('relation.common.select');
+        selectBtn.title = t('relation.assoc.select_entity');
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           openAssociationSelect(rowIdx, colIdx, st, actualRow, rebuildCell);
@@ -6810,7 +6810,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
       if (!labelText) {
         labelText = singleCounterpart ? '#' + fk : entity + ' #' + fk;
       }
-      titleText = 'Entity: ' + entity + ', ID: ' + fk;
+      titleText = t('relation.assoc.entity_prefix') + entity + ', ID: ' + fk;
       const label = document.createElement('span');
       label.className = 'assoc-link-label';
       label.textContent = labelText;
@@ -6820,7 +6820,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
         const clearBtn = document.createElement('button');
         clearBtn.className = 'assoc-clear-btn';
         clearBtn.textContent = '\u00D7';
-        clearBtn.title = 'Remove association';
+        clearBtn.title = t('relation.assoc.remove_association');
         clearBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           removeAssociationRecord(rowIdx, colIdx, 0, st);
@@ -6834,7 +6834,7 @@ function buildAssociationCell(value, rowIdx, colIdx, editable, st, rowRef) {
     btn.className = 'relation-cell-btn';
     const count = items.length;
     btn.innerHTML = `📋 ${count}`;
-    btn.title = `View nested relation (${count} rows)`;
+    btn.title = tf('relation.assoc.view_nested', {count: count});
     btn.dataset.row = rowIdx;
     btn.dataset.col = colIdx;
     wrapper.appendChild(btn);
@@ -6897,7 +6897,7 @@ function buildMultiInput(values, baseType, editable, onChange) {
         const keyInput = document.createElement('input');
         keyInput.type = 'text';
         keyInput.className = 'multi-input-field multi-input-key';
-        keyInput.placeholder = 'key';
+        keyInput.placeholder = t('relation.assoc.key_placeholder');
         keyInput.value = val?.key || '';
         keyInput.disabled = !editable;
         keyInput.addEventListener('input', () => {
@@ -6907,7 +6907,7 @@ function buildMultiInput(values, baseType, editable, onChange) {
         const labelInput = document.createElement('input');
         labelInput.type = 'text';
         labelInput.className = 'multi-input-field multi-input-label';
-        labelInput.placeholder = 'label';
+        labelInput.placeholder = t('relation.assoc.label_placeholder');
         labelInput.value = val?.label || '';
         labelInput.disabled = !editable;
         labelInput.addEventListener('input', () => {
@@ -6977,7 +6977,7 @@ function buildMultiInput(values, baseType, editable, onChange) {
         removeBtn.type = 'button';
         removeBtn.className = 'multi-input-remove';
         removeBtn.innerHTML = '✕';
-        removeBtn.title = 'Remover';
+        removeBtn.title = t('relation.multi.remove');
         removeBtn.addEventListener('click', () => {
           arr.splice(idx, 1);
           renderEntries();
@@ -7048,8 +7048,8 @@ function buildPointerCell(value, rowIdx, colIdx, editable, st, rowRef) {
       if (editable) {
         const selectBtn = document.createElement('button');
         selectBtn.className = 'assoc-select-btn';
-        selectBtn.textContent = 'Select';
-        selectBtn.title = 'Select target entity';
+        selectBtn.textContent = t('relation.common.select');
+        selectBtn.title = t('relation.assoc.select_target');
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           openPointerSelect(rowIdx, colIdx, st, actualRow, rebuildCell);
@@ -7063,13 +7063,13 @@ function buildPointerCell(value, rowIdx, colIdx, editable, st, rowRef) {
       const label = document.createElement('span');
       label.className = 'assoc-link-label';
       label.textContent = entity + ' #' + fk;
-      label.title = 'Entity: ' + entity + ', ID: ' + fk;
+      label.title = t('relation.assoc.entity_prefix') + entity + ', ID: ' + fk;
       wrapper.appendChild(label);
       if (editable) {
         const clearBtn = document.createElement('button');
         clearBtn.className = 'assoc-clear-btn';
         clearBtn.textContent = '\u00D7';
-        clearBtn.title = 'Remove pointer';
+        clearBtn.title = t('relation.assoc.remove_pointer');
         clearBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           removePointerRecord(rowIdx, colIdx, 0, st);
@@ -7083,7 +7083,7 @@ function buildPointerCell(value, rowIdx, colIdx, editable, st, rowRef) {
     btn.className = 'relation-cell-btn';
     const count = items.length;
     btn.innerHTML = `📋 ${count}`;
-    btn.title = `View pointer references (${count} rows)`;
+    btn.title = tf('relation.assoc.view_pointers', {count: count});
     btn.dataset.row = rowIdx;
     btn.dataset.col = colIdx;
     wrapper.appendChild(btn);
@@ -7109,7 +7109,7 @@ function openPointerSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
 
   openSelectOneDialog(st, {
     relationData: targetJson,
-    title: 'Select from ' + targetName + ' (' + (targetJson.items || []).length + ' registos)',
+    title: tf('relation.assoc.select_from', {name: targetName, count: (targetJson.items || []).length}),
     onSelect: (selectedId) => {
       if (selectedId !== null && selectedId !== undefined) {
         addPointerRecord(rowIdx, colIdx, targetName, String(selectedId), st, rowRef);
@@ -7706,7 +7706,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       btn.className = 'relation-cell-btn';
       const count = value?.items?.length || 0;
       btn.innerHTML = '📎 ' + count;
-      btn.title = 'View files (' + count + ')';
+      btn.title = tf('relation.assoc.view_files', {count: count});
       btn.dataset.row = rowIdx;
       btn.dataset.col = colIdx;
       wrapper.appendChild(btn);
@@ -7828,7 +7828,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     
     const emptyOpt = document.createElement('option');
     emptyOpt.value = '';
-    emptyOpt.textContent = '— Select —';
+    emptyOpt.textContent = t('relation.common.select_placeholder');
     select.appendChild(emptyOpt);
     
     for (const [key, html] of Object.entries(colOptions)) {
@@ -8220,7 +8220,7 @@ function buildCriterionRow(st, criterion, onChange, onRemove) {
     inp.setAttribute('data-testid', 'adv-criterion-value');
     inp.value = criterion.value != null ? criterion.value : '';
     if (op === 'in_list' || op === 'not_in_list') {
-      inp.placeholder = 'val1, val2, ...';
+      inp.placeholder = t('relation.advsearch.val_placeholder');
     }
     inp.addEventListener('input', () => {
       criterion.value = inp.value;
@@ -8249,7 +8249,7 @@ function buildCriterionRow(st, criterion, onChange, onRemove) {
 
   const notBtn = document.createElement('button');
   notBtn.className = 'not-toggle' + (criterion.not ? ' active' : '');
-  notBtn.textContent = 'NOT';
+  notBtn.textContent = t('relation.advsearch.not');
   notBtn.setAttribute('data-testid', 'adv-criterion-not');
   notBtn.addEventListener('click', () => {
     criterion.not = !criterion.not;
@@ -8670,17 +8670,17 @@ function showSaveSearchDialog(existingNames, onSave) {
 
   const title = document.createElement('div');
   title.style.cssText = 'font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:12px;';
-  title.textContent = 'Save Search';
+  title.textContent = t('relation.advsearch.save_title');
 
   const label = document.createElement('label');
   label.style.cssText = 'font-size:12px;color:var(--muted-foreground,#888);display:block;margin-bottom:4px;';
-  label.textContent = 'Search name:';
+  label.textContent = t('relation.advsearch.search_name');
 
   const input = document.createElement('input');
   input.type = 'text';
   input.style.cssText = 'width:100%;box-sizing:border-box;padding:6px 8px;font-size:13px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--card,#fff);color:var(--foreground);font-family:inherit;';
   input.setAttribute('data-testid', 'save-search-name-input');
-  input.placeholder = 'Enter a unique name';
+  input.placeholder = t('relation.advsearch.enter_name');
 
   const error = document.createElement('div');
   error.style.cssText = 'font-size:11px;color:#e53e3e;margin-top:4px;min-height:16px;';
@@ -8690,12 +8690,12 @@ function showSaveSearchDialog(existingNames, onSave) {
 
   const cancelBtn = document.createElement('button');
   cancelBtn.className = 'adv-btn';
-  cancelBtn.textContent = 'Cancel';
+  cancelBtn.textContent = t('relation.filter.cancel_btn');
   cancelBtn.setAttribute('data-testid', 'save-search-cancel');
 
   const saveBtn = document.createElement('button');
   saveBtn.className = 'adv-btn adv-btn-primary';
-  saveBtn.textContent = 'Save';
+  saveBtn.textContent = t('relation.objecteditor.save_title');
   saveBtn.setAttribute('data-testid', 'save-search-confirm');
 
   function close() { overlay.remove(); }
@@ -8706,12 +8706,12 @@ function showSaveSearchDialog(existingNames, onSave) {
   saveBtn.addEventListener('click', () => {
     const name = input.value.trim();
     if (!name) {
-      error.textContent = 'Name cannot be empty.';
+      error.textContent = t('relation.advsearch.name_empty');
       input.focus();
       return;
     }
     if (existingNames.some(n => n.toLowerCase() === name.toLowerCase())) {
-      error.textContent = 'A search with this name already exists. Choose a different name.';
+      error.textContent = t('relation.advsearch.name_exists');
       input.focus();
       return;
     }
@@ -8767,7 +8767,7 @@ function showAdvancedSearchPanel(st) {
 
     const label = document.createElement('span');
     label.className = 'group-label';
-    label.textContent = 'Filter Group ' + (gIdx + 1);
+    label.textContent = tf('relation.advsearch.filter_group', {}) + ' ' + (gIdx + 1);
 
     const logicBtn = document.createElement('button');
     logicBtn.className = 'logic-btn ' + (group.logic === 'and' ? 'logic-and' : 'logic-or');
@@ -8812,7 +8812,7 @@ function showAdvancedSearchPanel(st) {
     groupFooter.className = 'adv-search-group-footer';
     const addCritBtn = document.createElement('button');
     addCritBtn.className = 'btn-add-criterion';
-    addCritBtn.textContent = '+ Add Criterion';
+    addCritBtn.textContent = t('relation.advsearch.add_criterion');
     addCritBtn.setAttribute('data-testid', 'adv-add-criterion-' + gIdx);
     addCritBtn.addEventListener('click', () => {
       group.criteria.push({ col: 0, op: getOperatorsForType(st.columnTypes[0] || 'string')[0].value, value: '', value2: '', not: false });
@@ -8830,7 +8830,7 @@ function showAdvancedSearchPanel(st) {
     sel.className = 'adv-op-select';
     const emptyOpt = document.createElement('option');
     emptyOpt.value = '';
-    emptyOpt.textContent = '— Select relation —';
+    emptyOpt.textContent = t('relation.advsearch.select_relation');
     sel.appendChild(emptyOpt);
     Object.keys(all_entities).forEach(name => {
       const opt = document.createElement('option');
@@ -8856,7 +8856,7 @@ function showAdvancedSearchPanel(st) {
     header.className = 'adv-search-group-header adv-op-header adv-op-header-set';
     const label = document.createElement('span');
     label.className = 'group-label';
-    label.textContent = '⊕ Set Operation';
+    label.textContent = t('relation.advsearch.set_operation');
     const removeBtn = document.createElement('button');
     removeBtn.className = 'btn-remove-group';
     removeBtn.textContent = '✕';
@@ -8871,13 +8871,13 @@ function showAdvancedSearchPanel(st) {
     const row1 = document.createElement('div');
     row1.className = 'adv-op-field';
     const lbl1 = document.createElement('label');
-    lbl1.textContent = 'Operation:';
+    lbl1.textContent = t('relation.advsearch.operation');
     const opSel = document.createElement('select');
     opSel.className = 'adv-op-select';
     ['union', 'intersection', 'difference'].forEach(v => {
       const o = document.createElement('option');
       o.value = v;
-      o.textContent = v.charAt(0).toUpperCase() + v.slice(1);
+      o.textContent = t('relation.advsearch.' + v);
       if (op.setOp === v) o.selected = true;
       opSel.appendChild(o);
     });
@@ -8889,7 +8889,7 @@ function showAdvancedSearchPanel(st) {
     const row2 = document.createElement('div');
     row2.className = 'adv-op-field';
     const lbl2 = document.createElement('label');
-    lbl2.textContent = 'With Relation:';
+    lbl2.textContent = t('relation.advsearch.with_relation');
     row2.appendChild(lbl2);
     row2.appendChild(buildRelationSelect(op, 'withRelation', () => {
       rebuildSetInfo();
@@ -8909,8 +8909,8 @@ function showAdvancedSearchPanel(st) {
         const info = document.createElement('span');
         info.className = 'adv-op-info-text';
         info.textContent = shared.length > 0
-          ? 'Shared columns: ' + shared.join(', ') + ' (' + shared.length + ')'
-          : 'No shared columns found.';
+          ? tf('relation.advsearch.shared_columns', {cols: shared.join(', '), count: shared.length})
+          : t('relation.advsearch.no_shared_columns');
         infoDiv.appendChild(info);
       }
     }
@@ -8929,7 +8929,7 @@ function showAdvancedSearchPanel(st) {
     header.className = 'adv-search-group-header adv-op-header adv-op-header-join';
     const label = document.createElement('span');
     label.className = 'group-label';
-    label.textContent = '⋈ Join';
+    label.textContent = t('relation.advsearch.join');
     const removeBtn = document.createElement('button');
     removeBtn.className = 'btn-remove-group';
     removeBtn.textContent = '✕';
@@ -8944,13 +8944,13 @@ function showAdvancedSearchPanel(st) {
     const row1 = document.createElement('div');
     row1.className = 'adv-op-field';
     const lbl1 = document.createElement('label');
-    lbl1.textContent = 'Join Type:';
+    lbl1.textContent = t('relation.advsearch.join_type');
     const jtSel = document.createElement('select');
     jtSel.className = 'adv-op-select';
-    [['inner', 'Inner'], ['left', 'Left'], ['right', 'Right'], ['cross', 'Cross']].forEach(([v, t]) => {
+    [['inner', 'relation.advsearch.inner'], ['left', 'relation.advsearch.left'], ['right', 'relation.advsearch.right'], ['cross', 'relation.advsearch.cross']].forEach(([v, tKey]) => {
       const o = document.createElement('option');
       o.value = v;
-      o.textContent = t;
+      o.textContent = t(tKey);
       if (op.joinType === v) o.selected = true;
       jtSel.appendChild(o);
     });
@@ -8962,7 +8962,7 @@ function showAdvancedSearchPanel(st) {
     const row2 = document.createElement('div');
     row2.className = 'adv-op-field';
     const lbl2 = document.createElement('label');
-    lbl2.textContent = 'With Relation:';
+    lbl2.textContent = t('relation.advsearch.with_relation');
     row2.appendChild(lbl2);
     row2.appendChild(buildRelationSelect(op, 'withRelation', () => {
       rebuildJoinMappings();
@@ -8985,7 +8985,7 @@ function showAdvancedSearchPanel(st) {
 
       const mappingLabel = document.createElement('div');
       mappingLabel.className = 'adv-op-field-label';
-      mappingLabel.textContent = 'Column Mappings:';
+      mappingLabel.textContent = t('relation.advsearch.column_mappings');
       mappingContainer.appendChild(mappingLabel);
 
       op.onColumns.forEach((mapping, mIdx) => {
@@ -9039,7 +9039,7 @@ function showAdvancedSearchPanel(st) {
 
       const addMappingBtn = document.createElement('button');
       addMappingBtn.className = 'btn-add-criterion';
-      addMappingBtn.textContent = '+ Add Mapping';
+      addMappingBtn.textContent = t('relation.advsearch.add_mapping');
       addMappingBtn.addEventListener('click', () => {
         op.onColumns.push({ left: 0, right: 0 });
         persistState();
@@ -9049,7 +9049,7 @@ function showAdvancedSearchPanel(st) {
 
       const autoBtn = document.createElement('button');
       autoBtn.className = 'btn-add-criterion';
-      autoBtn.textContent = '⚡ Auto-detect';
+      autoBtn.textContent = t('relation.advsearch.auto_detect');
       autoBtn.setAttribute('data-testid', 'adv-join-autodetect-' + gIdx);
       autoBtn.addEventListener('click', () => {
         const detectedMappings = autoDetectJoinColumns(st, op.withRelation);
@@ -9126,7 +9126,7 @@ function showAdvancedSearchPanel(st) {
     header.className = 'adv-search-group-header adv-op-header adv-op-header-groupby';
     const label = document.createElement('span');
     label.className = 'group-label';
-    label.textContent = 'Σ Group By';
+    label.textContent = t('relation.advsearch.group_by');
     const removeBtn = document.createElement('button');
     removeBtn.className = 'btn-remove-group';
     removeBtn.textContent = '✕';
@@ -9141,7 +9141,7 @@ function showAdvancedSearchPanel(st) {
     const gcSection = document.createElement('div');
     gcSection.className = 'adv-op-field';
     const gcLabel = document.createElement('label');
-    gcLabel.textContent = 'Group Columns:';
+    gcLabel.textContent = t('relation.advsearch.group_columns');
     gcSection.appendChild(gcLabel);
 
     const gcCheckboxes = document.createElement('div');
@@ -9171,7 +9171,7 @@ function showAdvancedSearchPanel(st) {
     const aggSection = document.createElement('div');
     aggSection.className = 'adv-op-field';
     const aggLabel = document.createElement('label');
-    aggLabel.textContent = 'Aggregations:';
+    aggLabel.textContent = t('relation.advsearch.aggregations');
     aggSection.appendChild(aggLabel);
 
     const aggContainer = document.createElement('div');
@@ -9210,7 +9210,7 @@ function showAdvancedSearchPanel(st) {
         const asInput = document.createElement('input');
         asInput.type = 'text';
         asInput.className = 'adv-op-input';
-        asInput.placeholder = 'Label';
+        asInput.placeholder = t('relation.advsearch.label_placeholder');
         asInput.value = agg.as || '';
         asInput.addEventListener('input', () => { agg.as = asInput.value; persistState(); });
 
@@ -9232,7 +9232,7 @@ function showAdvancedSearchPanel(st) {
 
       const addAggBtn = document.createElement('button');
       addAggBtn.className = 'btn-add-criterion';
-      addAggBtn.textContent = '+ Add Aggregation';
+      addAggBtn.textContent = t('relation.advsearch.add_aggregation');
       addAggBtn.addEventListener('click', () => {
         op.aggregations.push({ col: 0, fn: 'count', as: '' });
         persistState();
@@ -9246,7 +9246,7 @@ function showAdvancedSearchPanel(st) {
     const havingSection = document.createElement('div');
     havingSection.className = 'adv-op-field';
     const havingLabel = document.createElement('label');
-    havingLabel.textContent = 'Having (filter on aggregated values):';
+    havingLabel.textContent = t('relation.advsearch.having_label');
     havingSection.appendChild(havingLabel);
 
     if (!op.having) op.having = { logic: 'and', criteria: [] };
@@ -9297,7 +9297,7 @@ function showAdvancedSearchPanel(st) {
         const valInput = document.createElement('input');
         valInput.type = 'number';
         valInput.className = 'adv-op-input';
-        valInput.placeholder = 'Value';
+        valInput.placeholder = t('relation.advsearch.value_placeholder');
         valInput.value = hc.value || '';
         valInput.addEventListener('input', () => { hc.value = valInput.value; persistState(); });
 
@@ -9318,7 +9318,7 @@ function showAdvancedSearchPanel(st) {
           const val2Input = document.createElement('input');
           val2Input.type = 'number';
           val2Input.className = 'adv-op-input';
-          val2Input.placeholder = 'Value 2';
+          val2Input.placeholder = t('relation.advsearch.value2_placeholder');
           val2Input.value = hc.value2 || '';
           val2Input.addEventListener('input', () => { hc.value2 = val2Input.value; persistState(); });
           hRow.appendChild(val2Input);
@@ -9326,7 +9326,7 @@ function showAdvancedSearchPanel(st) {
 
         const notBtn = document.createElement('button');
         notBtn.className = 'not-toggle' + (hc.not ? ' active' : '');
-        notBtn.textContent = 'NOT';
+        notBtn.textContent = t('relation.advsearch.not');
         notBtn.addEventListener('click', () => { hc.not = !hc.not; persistState(); rebuildHaving(); });
         hRow.appendChild(notBtn);
 
@@ -9336,7 +9336,7 @@ function showAdvancedSearchPanel(st) {
 
       const addHavingBtn = document.createElement('button');
       addHavingBtn.className = 'btn-add-criterion';
-      addHavingBtn.textContent = '+ Add Having Criterion';
+      addHavingBtn.textContent = t('relation.advsearch.add_having');
       addHavingBtn.addEventListener('click', () => {
         const defaultLabel = op.aggregations.length > 0 ? (op.aggregations[0].as || op.aggregations[0].fn + '_' + st.columnNames[op.aggregations[0].col]) : '';
         op.having.criteria.push({ col: defaultLabel, op: 'gt', value: '', value2: '', not: false });
@@ -9361,7 +9361,7 @@ function showAdvancedSearchPanel(st) {
     if (pipeline.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'adv-search-empty';
-      empty.textContent = 'No operations. Click "＋ Add Operation" to begin.';
+      empty.textContent = t('relation.advsearch.no_operations');
       pipelineContainer.appendChild(empty);
     }
 
@@ -9402,7 +9402,7 @@ function showAdvancedSearchPanel(st) {
 
     const header = document.createElement('div');
     header.className = 'saved-header';
-    header.textContent = 'Saved Searches';
+    header.textContent = t('relation.advsearch.saved_searches');
     savedSection.appendChild(header);
 
     const list = document.createElement('div');
@@ -9422,7 +9422,7 @@ function showAdvancedSearchPanel(st) {
       modeSpan.textContent = s.mode;
 
       const loadBtn = document.createElement('button');
-      loadBtn.textContent = 'Load';
+      loadBtn.textContent = t('relation.advsearch.load');
       loadBtn.setAttribute('data-testid', 'adv-load-search-' + s.name);
       loadBtn.addEventListener('click', () => {
         const loaded = loadAdvancedSearch(st, s.name);
@@ -9443,7 +9443,7 @@ function showAdvancedSearchPanel(st) {
 
       const delBtn = document.createElement('button');
       delBtn.className = 'btn-delete-saved';
-      delBtn.textContent = 'Delete';
+      delBtn.textContent = t('relation.advsearch.delete_btn');
       delBtn.setAttribute('data-testid', 'adv-delete-search-' + s.name);
       delBtn.addEventListener('click', () => {
         deleteAdvancedSearch(st, s.name);
@@ -9469,16 +9469,16 @@ function showAdvancedSearchPanel(st) {
     modeToggle.className = 'adv-search-mode-toggle';
 
     const modeLabel = document.createElement('label');
-    modeLabel.textContent = 'Mode:';
+    modeLabel.textContent = t('relation.advsearch.mode');
 
     const subBtn = document.createElement('button');
     subBtn.className = 'mode-btn' + (mode === 'subtractive' ? ' active' : '');
-    subBtn.textContent = 'Subtractive (AND)';
+    subBtn.textContent = t('relation.advsearch.mode_and');
     subBtn.setAttribute('data-testid', 'adv-mode-subtractive');
 
     const addBtn = document.createElement('button');
     addBtn.className = 'mode-btn' + (mode === 'additive' ? ' active' : '');
-    addBtn.textContent = 'Additive (OR)';
+    addBtn.textContent = t('relation.advsearch.mode_or');
     addBtn.setAttribute('data-testid', 'adv-mode-additive');
 
     subBtn.addEventListener('click', () => {
@@ -9515,7 +9515,7 @@ function showAdvancedSearchPanel(st) {
 
     const addOpBtn = document.createElement('button');
     addOpBtn.className = 'adv-btn';
-    addOpBtn.textContent = '＋ Add Operation';
+    addOpBtn.textContent = t('relation.advsearch.add_operation');
     addOpBtn.setAttribute('data-testid', 'adv-add-operation');
 
     const addOpMenu = document.createElement('div');
@@ -9523,10 +9523,10 @@ function showAdvancedSearchPanel(st) {
     addOpMenu.style.display = 'none';
 
     const menuItems = [
-      { label: '＋ Filter Group', type: 'filter', testid: 'adv-add-group' },
-      { label: '⊕ Set Operation', type: 'set', testid: 'adv-add-set' },
-      { label: '⋈ Join', type: 'join', testid: 'adv-add-join' },
-      { label: 'Σ Group By', type: 'groupby', testid: 'adv-add-groupby' }
+      { label: t('relation.advsearch.add_filter_group'), type: 'filter', testid: 'adv-add-group' },
+      { label: t('relation.advsearch.set_operation'), type: 'set', testid: 'adv-add-set' },
+      { label: t('relation.advsearch.join'), type: 'join', testid: 'adv-add-join' },
+      { label: t('relation.advsearch.group_by'), type: 'groupby', testid: 'adv-add-groupby' }
     ];
 
     menuItems.forEach(mi => {
@@ -9567,7 +9567,7 @@ function showAdvancedSearchPanel(st) {
 
     const executeBtn = document.createElement('button');
     executeBtn.className = 'adv-btn adv-btn-primary';
-    executeBtn.textContent = '▶ Execute';
+    executeBtn.textContent = t('relation.advsearch.execute');
     executeBtn.setAttribute('data-testid', 'adv-execute');
     executeBtn.addEventListener('click', () => {
       const validPipeline = pipeline.filter(g => (g.type && g.type !== 'filter') || (g.criteria && g.criteria.length > 0));
@@ -9582,7 +9582,7 @@ function showAdvancedSearchPanel(st) {
 
     const clearBtn = document.createElement('button');
     clearBtn.className = 'adv-btn';
-    clearBtn.textContent = '✕ Clear';
+    clearBtn.textContent = t('relation.advsearch.clear');
     clearBtn.setAttribute('data-testid', 'adv-clear');
     clearBtn.addEventListener('click', () => {
       pipeline = [];
@@ -9592,7 +9592,7 @@ function showAdvancedSearchPanel(st) {
 
     const resetBtn = document.createElement('button');
     resetBtn.className = 'adv-btn';
-    resetBtn.textContent = '↺ Reset Filters';
+    resetBtn.textContent = t('relation.advsearch.reset_filters');
     resetBtn.setAttribute('data-testid', 'adv-reset');
     resetBtn.addEventListener('click', () => {
       pipeline = [];
@@ -9607,7 +9607,7 @@ function showAdvancedSearchPanel(st) {
 
     const saveBtn = document.createElement('button');
     saveBtn.className = 'adv-btn';
-    saveBtn.textContent = '💾 Save Search';
+    saveBtn.textContent = t('relation.advsearch.save_search');
     saveBtn.setAttribute('data-testid', 'adv-save');
     saveBtn.addEventListener('click', () => {
       const existingNames = (st.rel_options.savedSearches || []).map(s => s.name);
@@ -9620,7 +9620,7 @@ function showAdvancedSearchPanel(st) {
 
     const applyBtn = document.createElement('button');
     applyBtn.className = 'adv-btn adv-btn-primary';
-    applyBtn.textContent = '✔ Apply';
+    applyBtn.textContent = t('relation.advsearch.apply');
     applyBtn.setAttribute('data-testid', 'adv-apply');
     applyBtn.addEventListener('click', () => {
       persistState();
@@ -10399,7 +10399,7 @@ function openChooseManyDialog(st) {
   const showAlreadyExistsFeedback = () => {
     const feedbackEl = dialog.querySelector('.choose-many-accordion-header[data-accordion="target"] .cm-feedback');
     if (!feedbackEl) return;
-    feedbackEl.textContent = '— já existe na lista';
+    feedbackEl.textContent = t('relation.misc.already_in_list');
     feedbackEl.classList.remove('hidden');
     clearTimeout(feedbackEl._timer);
     feedbackEl._timer = setTimeout(() => feedbackEl.classList.add('hidden'), 2000);
@@ -11536,7 +11536,7 @@ function renderTable(st = state) {
     const direct = countDirectChildren(st, segment.value);
     const total = countAllDescendants(st, segment.value);
     segSpan.textContent = segment.label + ' ' + direct + '>' + total;
-    segSpan.title = segment.label + ': ' + direct + ' direct children, ' + total + ' total descendants';
+    segSpan.title = tf('relation.hierarchy.direct_children_total', {label: segment.label, direct: direct, total: total});
     segSpan.style.cursor = 'pointer';
     segSpan.addEventListener('click', () => {
       setCurrentHierarchyValue(st, segment.value);
@@ -11616,7 +11616,7 @@ function renderTable(st = state) {
   showAllCb.dataset.testid = 'checkbox-show-all-descendants';
   showAllLabel.appendChild(showAllCb);
   const showAllText = document.createElement('span');
-  showAllText.textContent = ' Show all descendants';
+  showAllText.textContent = ' ' + t('relation.hierarchy.show_all_descendants');
   showAllLabel.appendChild(showAllText);
   breadcrumbContainer.appendChild(showAllLabel);
   breadcrumbTh.appendChild(breadcrumbContainer);
@@ -11637,7 +11637,7 @@ function renderTable(st = state) {
   parentOpsTh.className = 'relation-th-parent';
   const btnParentUp = document.createElement('button');
   btnParentUp.className = 'btn-parent-up' + (upButtonDisabled ? ' disabled' : '');
-  btnParentUp.title = upButtonDisabled ? 'Already at root level' : 'Move to the upper level';
+  btnParentUp.title = upButtonDisabled ? t('relation.hierarchy.at_root') : t('relation.hierarchy.move_up');
   btnParentUp.textContent = '↑';
   btnParentUp.dataset.testid = 'button-parent-up';
   btnParentUp.disabled = upButtonDisabled;
@@ -14121,31 +14121,31 @@ function showFilterValuesDialog(colIdx, st = state) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Filter: ${st.columnNames[colIdx]}</span>
+      <span>${tf('relation.filter.dialog_title', {name: st.columnNames[colIdx]})}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="filter-search-row">
       <input type="text" class="filter-search filter-input" placeholder="${t('relation.common.search')}" data-i18n-placeholder="relation.common.search">
-      <button class="btn btn-sm filter-search-btn">Find</button>
-      <button class="btn btn-sm filter-search-clear">Clear</button>
+      <button class="btn btn-sm filter-search-btn">${t('relation.filter.find_btn')}</button>
+      <button class="btn btn-sm filter-search-clear">${t('relation.filter.clear_btn')}</button>
     </div>
     <div class="filter-dialog-actions">
-      <button class="btn btn-sm filter-select-all">Select All</button>
-      <button class="btn btn-sm filter-select-none">Select None</button>
+      <button class="btn btn-sm filter-select-all">${t('relation.filter.select_all')}</button>
+      <button class="btn btn-sm filter-select-none">${t('relation.filter.select_none')}</button>
       <select class="filter-sort-select filter-sort">
-        <option value="natural">Natural Order</option>
-        <option value="asc">Ascending ↑</option>
-        <option value="desc">Descending ↓</option>
-        <option value="histogram-desc">Histogram ↓</option>
-        <option value="histogram-asc">Histogram ↑</option>
+        <option value="natural">${t('relation.filter.natural_order')}</option>
+        <option value="asc">${t('relation.filter.ascending')}</option>
+        <option value="desc">${t('relation.filter.descending')}</option>
+        <option value="histogram-desc">${t('relation.filter.histogram_desc')}</option>
+        <option value="histogram-asc">${t('relation.filter.histogram_asc')}</option>
       </select>
     </div>
     <div class="filter-values-list"></div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline filter-clear">Clear Column Filter</button>
-      <button class="btn btn-outline filter-clear-all">Clear All Filters</button>
-      <button class="btn btn-outline filter-cancel">Cancel</button>
-      <button class="btn btn-primary filter-apply">Apply</button>
+      <button class="btn btn-outline filter-clear">${t('relation.filter.clear_column')}</button>
+      <button class="btn btn-outline filter-clear-all">${t('relation.filter.clear_all')}</button>
+      <button class="btn btn-outline filter-cancel">${t('relation.filter.cancel_btn')}</button>
+      <button class="btn btn-primary filter-apply">${t('relation.filter.apply_btn')}</button>
     </div>
   `;
   
@@ -14318,36 +14318,36 @@ function showFilterComparisonDialog(colIdx, st = state) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Filter: ${name}</span>
+      <span>${tf('relation.filter.dialog_title', {name: name})}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="filter-comparison-form">
       <div class="filter-form-row">
-        <label>Operator:</label>
+        <label>${t('relation.filter.operator')}</label>
         <select class="filter-comparison-op filter-select">
-          <option value="eq" ${currentComparison === 'eq' ? 'selected' : ''}>=  Equal</option>
-          <option value="neq" ${currentComparison === 'neq' ? 'selected' : ''}>≠  Not Equal</option>
-          <option value="gt" ${currentComparison === 'gt' ? 'selected' : ''}>>  Greater Than</option>
-          <option value="gte" ${currentComparison === 'gte' ? 'selected' : ''}>≥  Greater or Equal</option>
-          <option value="lt" ${currentComparison === 'lt' ? 'selected' : ''}><  Less Than</option>
-          <option value="lte" ${currentComparison === 'lte' ? 'selected' : ''}>≤  Less or Equal</option>
-          <option value="between" ${currentComparison === 'between' ? 'selected' : ''}>↔  Between</option>
+          <option value="eq" ${currentComparison === 'eq' ? 'selected' : ''}>${t('relation.filter.op_equal')}</option>
+          <option value="neq" ${currentComparison === 'neq' ? 'selected' : ''}>${t('relation.filter.op_not_equal')}</option>
+          <option value="gt" ${currentComparison === 'gt' ? 'selected' : ''}>${t('relation.filter.op_greater')}</option>
+          <option value="gte" ${currentComparison === 'gte' ? 'selected' : ''}>${t('relation.filter.op_greater_equal')}</option>
+          <option value="lt" ${currentComparison === 'lt' ? 'selected' : ''}>${t('relation.filter.op_less')}</option>
+          <option value="lte" ${currentComparison === 'lte' ? 'selected' : ''}>${t('relation.filter.op_less_equal')}</option>
+          <option value="between" ${currentComparison === 'between' ? 'selected' : ''}>${t('relation.filter.op_between')}</option>
         </select>
       </div>
       <div class="filter-form-row">
-        <label class="filter-value-label">Value:</label>
+        <label class="filter-value-label">${t('relation.filter.value_label')}</label>
         <input type="${inputType}" class="filter-comparison-value filter-input" value="${currentValue}" ${type === 'float' || type === 'range' ? 'step="0.001"' : ''}>
       </div>
       <div class="filter-form-row filter-value2-row" style="display: ${currentComparison === 'between' ? 'flex' : 'none'}">
-        <label>To:</label>
+        <label>${t('relation.filter.to_label')}</label>
         <input type="${inputType}" class="filter-comparison-value2 filter-input" value="${currentValue2}" ${type === 'float' || type === 'range' ? 'step="0.001"' : ''}>
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline filter-clear">Clear Column Filter</button>
-      <button class="btn btn-outline filter-clear-all">Clear All Filters</button>
-      <button class="btn btn-outline filter-cancel">Cancel</button>
-      <button class="btn btn-primary filter-apply">Apply</button>
+      <button class="btn btn-outline filter-clear">${t('relation.filter.clear_column')}</button>
+      <button class="btn btn-outline filter-clear-all">${t('relation.filter.clear_all')}</button>
+      <button class="btn btn-outline filter-cancel">${t('relation.filter.cancel_btn')}</button>
+      <button class="btn btn-primary filter-apply">${t('relation.filter.apply_btn')}</button>
     </div>
   `;
   
@@ -14376,7 +14376,7 @@ function showFilterComparisonDialog(colIdx, st = state) {
   opSelect.addEventListener('change', () => {
     const isBetween = opSelect.value === 'between';
     value2Row.style.display = isBetween ? 'flex' : 'none';
-    valueLabel.textContent = isBetween ? 'From:' : 'Value:';
+    valueLabel.textContent = isBetween ? t('relation.filter.from_label') : t('relation.filter.value_label');
     valueInput.focus();
   });
   
@@ -14431,33 +14431,33 @@ function showFilterTextCriteriaDialog(colIdx, st = state) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Filter: ${name}</span>
+      <span>${tf('relation.filter.dialog_title', {name: name})}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="filter-comparison-form">
       <div class="filter-form-row">
-        <label>Operator:</label>
+        <label>${t('relation.filter.operator')}</label>
         <select class="filter-text-op filter-select">
-          <option value="includes" ${currentOp === 'includes' ? 'selected' : ''}>includes</option>
-          <option value="equals" ${currentOp === 'equals' ? 'selected' : ''}>equal to</option>
-          <option value="startsWith" ${currentOp === 'startsWith' ? 'selected' : ''}>starts with</option>
-          <option value="endsWith" ${currentOp === 'endsWith' ? 'selected' : ''}>ends with</option>
-          <option value="regex" ${currentOp === 'regex' ? 'selected' : ''}>regular expression</option>
+          <option value="includes" ${currentOp === 'includes' ? 'selected' : ''}>${t('relation.filter.text_includes')}</option>
+          <option value="equals" ${currentOp === 'equals' ? 'selected' : ''}>${t('relation.filter.text_equal_to')}</option>
+          <option value="startsWith" ${currentOp === 'startsWith' ? 'selected' : ''}>${t('relation.filter.text_starts_with')}</option>
+          <option value="endsWith" ${currentOp === 'endsWith' ? 'selected' : ''}>${t('relation.filter.text_ends_with')}</option>
+          <option value="regex" ${currentOp === 'regex' ? 'selected' : ''}>${t('relation.filter.text_regex')}</option>
         </select>
       </div>
       <div class="filter-form-row">
-        <label class="filter-text-value-label">Text:</label>
-        <input type="text" class="filter-text-value filter-input" value="${currentValue.replace(/"/g, '&quot;')}" placeholder="Enter text...">
+        <label class="filter-text-value-label">${t('relation.filter.text_label')}</label>
+        <input type="text" class="filter-text-value filter-input" value="${currentValue.replace(/"/g, '&quot;')}" placeholder="${t('relation.filter.enter_text')}">
       </div>
       <div class="filter-form-row filter-case-row">
         <label></label>
         <label class="checkbox-label">
           <input type="checkbox" class="filter-case-sensitive" ${currentCaseSensitive ? 'checked' : ''}>
-          Case sensitive
+          ${t('relation.filter.case_sensitive')}
         </label>
       </div>
       <div class="filter-regex-help filter-regex-hint" style="display: ${currentOp === 'regex' ? 'block' : 'none'}">
-        <div class="regex-help-title">Special Codes:</div>
+        <div class="regex-help-title">${t('relation.filter.special_codes')}</div>
         <div class="regex-help-grid">
           <span class="regex-code">\\d</span><span>digit (0-9)</span>
           <span class="regex-code">\\D</span><span>non-digit</span>
@@ -14477,7 +14477,7 @@ function showFilterTextCriteriaDialog(colIdx, st = state) {
           <span class="regex-code">[^abc]</span><span>not a, b, or c</span>
           <span class="regex-code">(a|b)</span><span>a or b</span>
         </div>
-        <div class="regex-help-title" style="margin-top: 6px;">Examples:</div>
+        <div class="regex-help-title" style="margin-top: 6px;">${t('relation.filter.examples')}</div>
         <div class="regex-examples">
           <code>^[A-Z]</code> starts with uppercase<br>
           <code>\\d{3}-\\d{4}</code> phone like 123-4567<br>
@@ -14486,10 +14486,10 @@ function showFilterTextCriteriaDialog(colIdx, st = state) {
       </div>
     </div>
     <div class="filter-dialog-footer">
-      <button class="btn btn-outline filter-clear">Clear Column Filter</button>
-      <button class="btn btn-outline filter-clear-all">Clear All Filters</button>
-      <button class="btn btn-outline filter-cancel">Cancel</button>
-      <button class="btn btn-primary filter-apply">Apply</button>
+      <button class="btn btn-outline filter-clear">${t('relation.filter.clear_column')}</button>
+      <button class="btn btn-outline filter-clear-all">${t('relation.filter.clear_all')}</button>
+      <button class="btn btn-outline filter-cancel">${t('relation.filter.cancel_btn')}</button>
+      <button class="btn btn-primary filter-apply">${t('relation.filter.apply_btn')}</button>
     </div>
   `;
   
@@ -14519,7 +14519,7 @@ function showFilterTextCriteriaDialog(colIdx, st = state) {
   opSelect.addEventListener('change', () => {
     const isRegex = opSelect.value === 'regex';
     regexHint.style.display = isRegex ? 'block' : 'none';
-    valueLabel.textContent = isRegex ? 'Pattern:' : 'Text:';
+    valueLabel.textContent = isRegex ? t('relation.filter.pattern_label') : t('relation.filter.text_label');
     textInput.focus();
   });
   
@@ -15492,7 +15492,7 @@ function handleRowOperation(st, rowIdx, action) {
       showRowDeleteDialog(st, rowIdx);
       break;
     case 'delete-selected':
-      if (confirm(`Delete ${getSelectedRows(st).size} selected rows?`)) {
+      if (confirm(tf('relation.confirm.delete_selected', {count: getSelectedRows(st).size}))) {
         const deleteCount = getSelectedRows(st).size;
         const indices = [...getSelectedRows(st)].sort((a, b) => b - a);
         const deletedIds = indices.map(i => getRowId(st, st.relation.items[i]));
@@ -16129,7 +16129,7 @@ function buildObjectEditor(obj, editable, onChange, title) {
       delBtn.className = 'object-editor-delete-btn';
       delBtn.type = 'button';
       delBtn.innerHTML = '&times;';
-      delBtn.title = 'Remove';
+      delBtn.title = t('relation.objecteditor.remove_title');
       delBtn.addEventListener('click', () => {
         field.remove();
         collectValues();
@@ -16151,7 +16151,7 @@ function buildObjectEditor(obj, editable, onChange, title) {
     addBtn.className = 'object-editor-add-btn';
     addBtn.type = 'button';
     addBtn.textContent = '+';
-    addBtn.title = 'Add key/value';
+    addBtn.title = t('relation.objecteditor.add_title');
 
     const addRow = document.createElement('div');
     addRow.className = 'object-editor-add-row';
@@ -16160,18 +16160,18 @@ function buildObjectEditor(obj, editable, onChange, title) {
     const keyInput = document.createElement('input');
     keyInput.type = 'text';
     keyInput.className = 'relation-input input-size-medium';
-    keyInput.placeholder = 'key';
+    keyInput.placeholder = t('relation.objecteditor.key_placeholder');
 
     const valInput = document.createElement('input');
     valInput.type = 'text';
     valInput.className = 'relation-input input-size-long';
-    valInput.placeholder = 'value';
+    valInput.placeholder = t('relation.objecteditor.value_placeholder');
 
     const confirmBtn = document.createElement('button');
     confirmBtn.className = 'object-editor-confirm-btn';
     confirmBtn.type = 'button';
     confirmBtn.innerHTML = '&#10003;';
-    confirmBtn.title = 'Save';
+    confirmBtn.title = t('relation.objecteditor.save_title');
 
     addRow.appendChild(keyInput);
     addRow.appendChild(valInput);
@@ -16363,12 +16363,12 @@ function initFileFieldsInContainer(container, st, row, mode) {
         const fill = progressDiv.querySelector('.progress-fill');
         const text = progressDiv.querySelector('.file-upload-progress-text');
         fill.style.width = '30%';
-        text.textContent = 'A processar ' + files.length + ' ficheiro(s)...';
+        text.textContent = tf('relation.misc.processing_files', {count: files.length});
 
         processFilesForRelation(files, fileRel).then(updatedRel => {
           row[colIdx] = updatedRel;
           fill.style.width = '100%';
-          text.textContent = files.length + ' ficheiro(s) adicionado(s).';
+          text.textContent = tf('relation.misc.files_added', {count: files.length});
           showToast(tf('relation.toast.files_added', {count: files.length}), 'success');
 
           setTimeout(() => {
@@ -16389,7 +16389,7 @@ function initFileFieldsInContainer(container, st, row, mode) {
           renderFileGallery(fc, updatedRel, zone);
         }).catch(err => {
           fill.style.width = '0%';
-          text.textContent = 'Erro: ' + err.message;
+          text.textContent = t('relation.misc.error_prefix') + err.message;
           showToast(t('relation.toast.files_error'), 'error');
         });
       };
@@ -22319,7 +22319,7 @@ function runClustering(st = state) {
   const maxPoints = 500;
   
   if (n > maxPoints) {
-    if (!confirm('You have ' + n + ' rows. t-SNE with more than ' + maxPoints + ' points may be slow and freeze the browser. Continue anyway?')) {
+    if (!confirm(tf('relation.confirm.tsne_slow', {n: n, max: maxPoints}))) {
       return;
     }
   }
@@ -22390,7 +22390,7 @@ function runClustering(st = state) {
       learningRate: 200,
       onProgress: (iter, total) => {
         if (progressEl) {
-          progressEl.textContent = 't-SNE: ' + Math.round(iter / total * 100) + '%';
+          progressEl.textContent = tf('relation.misc.tsne_progress', {pct: Math.round(iter / total * 100)});
         }
       }
     });
@@ -22912,12 +22912,12 @@ function showDiagramPopup(node, clientX, clientY, st = state) {
   
   const header = document.createElement('div');
   header.className = 'diagram-popup-header';
-  header.textContent = 'Row ' + (rowIdx + 1) + ' ';
+  header.textContent = tf('relation.misc.row_n', {n: rowIdx + 1}) + ' ';
   
   const badge = document.createElement('span');
   badge.className = 'cluster-badge';
   badge.style.background = node.color;
-  badge.textContent = 'Cluster ' + (node.cluster + 1);
+  badge.textContent = tf('relation.misc.cluster_n', {n: node.cluster + 1});
   header.appendChild(badge);
   
   popup.appendChild(header);
@@ -22944,7 +22944,7 @@ function showDiagramPopup(node, clientX, clientY, st = state) {
       valueSpan.className += ' null-value';
       valueSpan.textContent = '';
     } else if (type === 'relation') {
-      valueSpan.textContent = '[Relation: ' + (value.items?.length || 0) + ' rows]';
+      valueSpan.textContent = tf('relation.misc.relation_rows', {count: value.items?.length || 0});
     } else if (typeof value === 'object') {
       valueSpan.textContent = JSON.stringify(value);
     } else if (type === 'textarea') {
@@ -24968,7 +24968,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
 
   if (!isAtt) {
     const convertBtn = document.createElement('button');
-    convertBtn.textContent = 'Convert to Att Object';
+    convertBtn.textContent = t('relation.misc.convert_att_object');
     convertBtn.className = 'structure-btn-apply';
     convertBtn.style.fontSize = '11px';
     convertBtn.addEventListener('click', () => {
@@ -25159,7 +25159,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
 
         if (currentKind === 'select' || currentKind === 'radio') {
           const optLabel = document.createElement('label');
-          optLabel.textContent = 'Options (key + label)';
+          optLabel.textContent = t('relation.misc.options_key_label');
           optLabel.style.cssText = 'font-size:11px;color:var(--muted-foreground,#888);font-weight:500;';
           body.appendChild(optLabel);
 
@@ -25192,7 +25192,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
           const targetInfo = document.createElement('div');
           targetInfo.style.cssText = 'font-size:11px;color:var(--muted-foreground,#888);';
           const pc = currentAtt?.pointer || {};
-          targetInfo.textContent = 'Targets: ' + (pc.targets ? pc.targets.map(t => t.target_entity).join(', ') : 'none');
+          targetInfo.textContent = t('relation.assoc.targets') + (pc.targets ? pc.targets.map(t => t.target_entity).join(', ') : 'none');
           body.appendChild(targetInfo);
         }
 
@@ -25200,7 +25200,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
           const assocInfo = document.createElement('div');
           assocInfo.style.cssText = 'font-size:11px;color:var(--muted-foreground,#888);';
           const ac = currentAtt?.association || {};
-          assocInfo.textContent = 'Counterparts: ' + (ac.counterparts ? ac.counterparts.join(', ') : 'none');
+          assocInfo.textContent = t('relation.assoc.counterparts') + (ac.counterparts ? ac.counterparts.join(', ') : 'none');
           body.appendChild(assocInfo);
         }
       }));
@@ -25218,13 +25218,13 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
       infoDiv.style.cssText = 'margin-top:8px;padding:6px 10px;border-radius:4px;font-size:12px;';
       if (!convInfo.possible) {
         infoDiv.className = 'structure-conversion-info impossible';
-        infoDiv.textContent = 'Conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + ' is not possible. Existing data will be set to null.';
+        infoDiv.textContent = tf('relation.misc.conversion_not_possible', {from: row.originalKind, to: pendingChanges[idx].kind});
       } else if (!convInfo.lossless) {
         infoDiv.className = 'structure-conversion-info lossy';
-        infoDiv.textContent = 'Conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + ' may lose precision.';
+        infoDiv.textContent = tf('relation.misc.conversion_lose_precision', {from: row.originalKind, to: pendingChanges[idx].kind});
       } else {
         infoDiv.className = 'structure-conversion-info lossless';
-        infoDiv.textContent = 'Lossless conversion from ' + row.originalKind + ' → ' + pendingChanges[idx].kind + '.';
+        infoDiv.textContent = tf('relation.misc.conversion_lossless', {from: row.originalKind, to: pendingChanges[idx].kind});
       }
       editor.appendChild(infoDiv);
     }
@@ -25234,7 +25234,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
 
     const applyBtn = document.createElement('button');
     applyBtn.className = 'structure-btn-apply';
-    applyBtn.textContent = 'Apply';
+    applyBtn.textContent = t('relation.filter.apply_btn');
     applyBtn.addEventListener('click', () => {
       applySingleStructureChange(idx, row, st, pendingChanges[idx]);
       pendingChanges[idx] = {};
@@ -25253,7 +25253,7 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
 
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'structure-btn-cancel';
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = t('relation.filter.cancel_btn');
     cancelBtn.addEventListener('click', () => {
       pendingChanges[idx] = {};
       reRender();
@@ -25653,7 +25653,7 @@ function renderSavedViewsList(st) {
       e.stopPropagation();
       const idx = parseInt(btn.dataset.savedIdx);
       if (idx >= 0 && idx < saved.length) {
-        if (confirm(`Eliminar vista "${saved[idx].name}"?`)) {
+        if (confirm(tf('relation.confirm.delete_view', {name: saved[idx].name}))) {
           deleteSavedView(st, saved[idx].name);
           showToast(t('relation.toast.view_deleted'), 'success');
         }
@@ -26225,6 +26225,12 @@ function init() {
     langSelector.addEventListener('change', (e) => {
       window.currentLang = e.target.value;
       localStorage.setItem('relation_lang', e.target.value);
+      if (window.applyTranslations) window.applyTranslations();
+      if (state && state.relation) {
+        renderViewTabs();
+        renderPagination(state);
+        renderTable(state);
+      }
     });
   }
 
