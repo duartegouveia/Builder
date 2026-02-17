@@ -2862,7 +2862,9 @@ function getAllDescendantValues(st, parentValue) {
   const idColIdx = st.columnNames.indexOf('ID') >= 0 ? st.columnNames.indexOf('ID') : st.columnNames.indexOf('id');
   if (idColIdx < 0) return new Set();
   const descendants = new Set();
-  const queue = [parentValue === null || parentValue === undefined ? '' : String(parentValue)];
+  const rootVal = parentValue === null || parentValue === undefined ? '' : String(parentValue);
+  descendants.add(rootVal);
+  const queue = [rootVal];
   const visited = new Set();
   while (queue.length > 0) {
     const current = queue.shift();
@@ -2872,14 +2874,15 @@ function getAllDescendantValues(st, parentValue) {
       const itemParentVal = getHierarchyParentId(st, item);
       if (itemParentVal === current) {
         const itemId = item[idColIdx] !== null && item[idColIdx] !== undefined ? String(item[idColIdx]) : '';
-        descendants.add(itemParentVal);
-        if (itemId && !visited.has(itemId)) {
-          queue.push(itemId);
+        if (itemId) {
+          descendants.add(itemId);
+          if (!visited.has(itemId)) {
+            queue.push(itemId);
+          }
         }
       }
     }
   }
-  descendants.add(parentValue === null || parentValue === undefined ? '' : String(parentValue));
   return descendants;
 }
 
