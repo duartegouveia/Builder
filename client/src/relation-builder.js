@@ -26349,6 +26349,13 @@ function init() {
 
     function objectToRelation(obj) {
       const rel = JSON.parse(JSON.stringify(relTemplate));
+
+      if (isI18nObject(obj)) {
+        rel.columns['i18n'] = 'i18n';
+        rel.items = [[obj]];
+        return rel;
+      }
+
       const keys = Object.keys(obj);
       const ta_kind = [];
       const rowValues = [];
