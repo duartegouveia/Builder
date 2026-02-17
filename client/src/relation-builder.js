@@ -16515,6 +16515,8 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
     const att = getAtt(st, idx);
     if (isAssociationAtt(att)) return createEmptyAssociationRelation();
     if (type === 'relation') return null;
+    if (type === 'i18n') return {};
+    if (type === 'object') return {};
     if (type === 'int' || type === 'float') return null;
     return null;
   });
@@ -16588,6 +16590,26 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
           }
           return;
         }
+        if (type === 'i18n') {
+          defaultRow[colIdx] = {};
+          const editor = container.querySelector(`.i18n-editor[data-col="${colIdx}"]`);
+          if (editor) {
+            editor.innerHTML = '';
+            const widget = buildI18nEditor({}, true, (newVal) => { defaultRow[colIdx] = newVal; });
+            editor.appendChild(widget);
+          }
+          return;
+        }
+        if (type === 'object') {
+          defaultRow[colIdx] = {};
+          const editor = container.querySelector(`.object-editor[data-col="${colIdx}"]`);
+          if (editor) {
+            editor.innerHTML = '';
+            const widget = buildObjectEditor({}, true, (newVal) => { defaultRow[colIdx] = newVal; });
+            editor.appendChild(widget);
+          }
+          return;
+        }
         const input = container.querySelector(`[data-col="${colIdx}"]`);
         if (input) {
           if (type === 'boolean') {
@@ -16615,6 +16637,8 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
         } else if (type === 'relation') {
           newRow[colIdx] = defaultRow[colIdx];
         } else if (type === 'file') {
+          newRow[colIdx] = defaultRow[colIdx];
+        } else if (type === 'i18n' || type === 'object') {
           newRow[colIdx] = defaultRow[colIdx];
         } else {
           const colAtt = getAtt(st, colIdx);
@@ -16864,6 +16888,7 @@ function showRowEditDialog(st, rowIdx) {
             const type = st.columnTypes[colIdx];
             if (type === 'id') return;
             if (type === 'relation' || type === 'file') return;
+            if (type === 'i18n' || type === 'object') return;
 
             const colAtt = getAtt(st, colIdx);
             if (isMultiBehavior(type, colAtt)) return;
