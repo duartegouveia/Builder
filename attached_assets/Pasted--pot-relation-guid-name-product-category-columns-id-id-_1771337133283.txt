@@ -1,0 +1,914 @@
+{
+  "pot": "relation",
+  "guid": "",
+  "name": "product_category",
+  "columns": {
+    "id": "id",
+    "external_ref": "string",
+    "name": "string",
+    "parent": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Pai",
+      "short_name": "Pai",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "product_category",
+            "counterpart_association_att": "childs",
+            "counterpart_display_atts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    },
+    "childs": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Filhos",
+      "visible": false,
+      "short_name": "Filhos",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 0,
+        "counterparts": [
+          {
+            "counterpart_entity": "product_category",
+            "counterpart_association_att": "parent",
+            "counterpart_display_atts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
+    ]
+  },
+  "rel_options": {
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_hierarchy": true,
+    "hierarchy_show_column": "name"
+  },
+  "items": [
+    [
+      "1",
+      "1",
+      "Pet Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "3"
+          ],
+          [
+            "-2",
+            "product_category",
+            "4"
+          ]
+        ]
+      }
+    ],
+    [
+      "2",
+      "2",
+      "Human Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "5"
+          ],
+          [
+            "-2",
+            "product_category",
+            "6"
+          ],
+          [
+            "-3",
+            "product_category",
+            "7"
+          ],
+          [
+            "-4",
+            "product_category",
+            "8"
+          ],
+          [
+            "-5",
+            "product_category",
+            "9"
+          ],
+          [
+            "-6",
+            "product_category",
+            "10"
+          ],
+          [
+            "-7",
+            "product_category",
+            "11"
+          ]
+        ]
+      }
+    ],
+    [
+      "3",
+      "3",
+      "Dog Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "1"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "15"
+          ],
+          [
+            "-2",
+            "product_category",
+            "16"
+          ]
+        ]
+      }
+    ],
+    [
+      "4",
+      "4",
+      "Cat Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "1"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "5",
+      "5",
+      "Vegetarian Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "6",
+      "6",
+      "Chocolate",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "7",
+      "7",
+      "Cereals",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "8",
+      "8",
+      "Cofee and Beverages",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "12"
+          ]
+        ]
+      }
+    ],
+    [
+      "9",
+      "9",
+      "Milk and Deserts",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "10",
+      "10",
+      "Clinical Nutricion",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "13"
+          ],
+          [
+            "-2",
+            "product_category",
+            "14"
+          ]
+        ]
+      }
+    ],
+    [
+      "11",
+      "11",
+      "Cooking",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "12",
+      "12",
+      "Cofee machines",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "8"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "13",
+      "13",
+      "Child nutrition",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "10"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "14",
+      "14",
+      "Proteins and Vitamins",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "10"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "15",
+      "15",
+      "Dry Dog Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "3"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      "16",
+      "16",
+      "Wet Dog Food",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "product_category",
+            "3"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ]
+  ],
+  "log": []
+}

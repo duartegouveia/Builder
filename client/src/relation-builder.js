@@ -1818,88 +1818,90 @@ const PRODUCT_FAMILIES_JSON = {
   "items": []
 };
 
-const PRODUCT_CATEGORY_JSON = (() => {
-  const _e = () => ({"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]});
-  const _p = (parentId) => { const r = _e(); if (parentId) r.items = [["-1","product_category",String(parentId)]]; return r; };
-  const _c = (childIds) => { const r = _e(); r.items = childIds.map((id, i) => [String(-(i+1)),"product_category",String(id)]); return r; };
-  return {
-    "pot": "relation",
-    "guid": "",
-    "name": "product_category",
-    "columns": {
-      "id": "id",
-      "external_ref": "string",
-      "name": "string",
-      "parent": {
-        "attribute_kind": ["association"],
-        "name": "Pai",
-        "short_name": "Pai",
-        "association": {
-          "cardinality_min": 0,
-          "cardinality_max": 1,
-          "counterparts": [
-            {
-              "counterpart_entity": "product_category",
-              "counterpart_association_att": "childs",
-              "counterpart_display_atts": ["name"]
-            }
-          ]
-        }
-      },
-      "childs": {
-        "attribute_kind": ["association"],
-        "name": "Filhos",
-        "visible": false,
-        "short_name": "Filhos",
-        "association": {
-          "cardinality_min": 0,
-          "cardinality_max": 0,
-          "counterparts": [
-            {
-              "counterpart_entity": "product_category",
-              "counterpart_association_att": "parent",
-              "counterpart_display_atts": ["name"]
-            }
-          ]
-        }
+const PRODUCT_CATEGORY_JSON = {
+  "pot": "relation",
+  "guid": "",
+  "name": "product_category",
+  "columns": {
+    "id": "id",
+    "external_ref": "string",
+    "name": "string",
+    "parent": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Pai",
+      "short_name": "Pai",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "product_category",
+            "counterpart_association_att": "childs",
+            "counterpart_display_atts": [
+              "name"
+            ]
+          }
+        ]
       }
     },
-    "options": {
-      "relation.single_item_mode": ["dialog", "right", "bottom"]
-    },
-    "rel_options": {
-      "editable": false,
-      "show_multicheck": true,
-      "show_natural_order": true,
-      "show_id": true,
-      "show_column_kind": true,
-      "show_stats": true,
-      "show_hierarchy": true,
-      "hierarchy_show_column": "name",
-      "hierarchy_root_value": "",
-      "single_item_mode": "dialog",
-      "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
-    },
-    "items": [
-      ["1", "1", "Pet Food", _p(""), _c(["3","4"])],
-      ["2", "2", "Human Food", _p(""), _c(["5","6","7","8","9","10","11"])],
-      ["3", "3", "Dog Food", _p("1"), _c(["15","16"])],
-      ["4", "4", "Cat Food", _p("1"), _c([])],
-      ["5", "5", "Vegetarian Food", _p("2"), _c([])],
-      ["6", "6", "Chocolate", _p("2"), _c([])],
-      ["7", "7", "Cereals", _p("2"), _c([])],
-      ["8", "8", "Cofee and Beverages", _p("2"), _c(["12"])],
-      ["9", "9", "Milk and Deserts", _p("2"), _c([])],
-      ["10", "10", "Clinical Nutricion", _p("2"), _c(["13","14"])],
-      ["11", "11", "Cooking", _p("2"), _c([])],
-      ["12", "12", "Cofee machines", _p("8"), _c([])],
-      ["13", "13", "Child nutrition", _p("10"), _c([])],
-      ["14", "14", "Proteins and Vitamins", _p("10"), _c([])],
-      ["15", "15", "Dry Dog Food", _p("3"), _c([])],
-      ["16", "16", "Wet Dog Food", _p("3"), _c([])]
+    "childs": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Filhos",
+      "visible": false,
+      "short_name": "Filhos",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 0,
+        "counterparts": [
+          {
+            "counterpart_entity": "product_category",
+            "counterpart_association_att": "parent",
+            "counterpart_display_atts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
     ]
-  };
-})();
+  },
+  "rel_options": {
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_hierarchy": true,
+    "hierarchy_show_column": "name"
+  }
+,
+  "items": [
+    ["1","1","Pet Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","3"],["-2","product_category","4"]]}],
+    ["2","2","Human Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","5"],["-2","product_category","6"],["-3","product_category","7"],["-4","product_category","8"],["-5","product_category","9"],["-6","product_category","10"],["-7","product_category","11"]]}],
+    ["3","3","Dog Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","1"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","15"],["-2","product_category","16"]]}],
+    ["4","4","Cat Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","1"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["5","5","Vegetarian Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["6","6","Chocolate",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["7","7","Cereals",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["8","8","Cofee and Beverages",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","12"]]}],
+    ["9","9","Milk and Deserts",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["10","10","Clinical Nutricion",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","13"],["-2","product_category","14"]]}],
+    ["11","11","Cooking",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","2"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["12","12","Cofee machines",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","8"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["13","13","Child nutrition",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","10"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["14","14","Proteins and Vitamins",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","10"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["15","15","Dry Dog Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","3"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}],
+    ["16","16","Wet Dog Food",{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","product_category","3"]]},{"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"show_column_kind":false,"show_stats":false,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[]}]
+  ],
+  "log": []
+};
 
 const ALL_PRODUCTS_JSON = {
   "pot": "relation",
