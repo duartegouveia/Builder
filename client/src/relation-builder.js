@@ -10475,12 +10475,12 @@ function openChooseManyDialog(st) {
 
 function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
   const multiOperationsMap = {
-    'Invert Page': { value: 'invert-page', icon: '↔', label: 'Invert Page' },
-    'Invert All': { value: 'invert-all', icon: '↔', label: 'Invert All' },
-    'Check All': { value: 'select-all', icon: '✓', label: 'Check All' },
-    'Uncheck All': { value: 'deselect-all', icon: '✗', label: 'Uncheck All' },
-    'Remove Checked': { value: 'remove-selected', icon: '✕', label: `Remove Checked (${selectedCount})`, needsSelection: true },
-    'Remove Unchecked': { value: 'remove-unselected', icon: '✕', label: `Remove Unchecked (${filteredCount - selectedCount})`, needsSelection: true },
+    'Invert Page': { value: 'invert-page', icon: '↔', label: t('relation.multiops.invert_page') },
+    'Invert All': { value: 'invert-all', icon: '↔', label: t('relation.multiops.invert_all') },
+    'Check All': { value: 'select-all', icon: '✓', label: t('relation.multiops.check_all') },
+    'Uncheck All': { value: 'deselect-all', icon: '✗', label: t('relation.multiops.uncheck_all') },
+    'Remove Checked': { value: 'remove-selected', icon: '✕', label: tf('relation.multiops.remove_checked', {count: selectedCount}), needsSelection: true },
+    'Remove Unchecked': { value: 'remove-unselected', icon: '✕', label: tf('relation.multiops.remove_unchecked', {count: filteredCount - selectedCount}), needsSelection: true },
     'Multi View': { value: 'multi-view', icon: '👁', label: tf('relation.multiops.multi_view', {count: selectedCount}), needsSelection: true },
     'Multi Edit': { value: 'multi-edit', icon: '✏️', label: tf('relation.multiops.multi_edit', {count: selectedCount}), needsSelection: true },
     'Group Edit': { value: 'group-edit', icon: '📝', label: tf('relation.multiops.group_edit', {count: selectedCount}), needsSelection: true },
@@ -11248,8 +11248,8 @@ function renderPagination(st = state) {
         <span class="pagination-total" data-i18n="relation.pagination.total">${totalRecords} ${t('relation.pagination.total')}</span>
         ${hasFilter ? `<span class="pagination-filtered" data-i18n="relation.pagination.filtered">${filteredRecords} ${t('relation.pagination.filtered')}</span>` : ''}
         <span class="pagination-selected${showMulticheck ? '' : ' hidden'}" data-i18n="relation.pagination.checked">${selectedRecords} ${t('relation.pagination.checked')}</span>
-        ${cardinalityMinUnmet ? `<span class="cardinality-warning cardinality-min-warning" title="Minimum ${cardinalityMin} records required">⚠ min ${cardinalityMin}</span>` : ''}
-        ${cardinalityMaxReached ? `<span class="cardinality-warning cardinality-max-warning" title="Maximum ${cardinalityMax} records reached">⚠ max ${cardinalityMax}</span>` : ''}
+        ${cardinalityMinUnmet ? `<span class="cardinality-warning cardinality-min-warning" title="${tf('relation.cardinality.min_required', {min: cardinalityMin})}">⚠ min ${cardinalityMin}</span>` : ''}
+        ${cardinalityMaxReached ? `<span class="cardinality-warning cardinality-max-warning" title="${tf('relation.cardinality.max_reached', {max: cardinalityMax})}">⚠ max ${cardinalityMax}</span>` : ''}
       </div>
       <div class="pagination-actions${showMulticheck && (st.rel_options.general_multi_options || []).length > 0 ? '' : ' hidden'}">
         <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>

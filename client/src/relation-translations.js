@@ -956,10 +956,10 @@ window.RELATION_TRANSLATIONS = {
   "relation.lineops.print": { pt: "Print", en: "Print", es: "Imprimir", fr: "Imprimer", it: "Stampa", de: "Drucken" },
 
   // ─── MULTI OPERATIONS ─────────────────────────────────────
-  "relation.multiops.invert_page": { pt: "Invert Page", en: "Invert Page", es: "Invertir Página", fr: "Inverser Page", it: "Inverti Pagina", de: "Seite invertieren" },
-  "relation.multiops.invert_all": { pt: "Invert All", en: "Invert All", es: "Invertir Todo", fr: "Inverser Tout", it: "Inverti Tutto", de: "Alle invertieren" },
-  "relation.multiops.check_all": { pt: "Check All", en: "Check All", es: "Marcar Todo", fr: "Tout Cocher", it: "Seleziona Tutto", de: "Alle markieren" },
-  "relation.multiops.uncheck_all": { pt: "Uncheck All", en: "Uncheck All", es: "Desmarcar Todo", fr: "Tout Décocher", it: "Deseleziona Tutto", de: "Alle abwählen" },
+  "relation.multiops.invert_page": { pt: "Inverter Página", en: "Invert Page", es: "Invertir Página", fr: "Inverser Page", it: "Inverti Pagina", de: "Seite invertieren" },
+  "relation.multiops.invert_all": { pt: "Inverter Todos", en: "Invert All", es: "Invertir Todo", fr: "Inverser Tout", it: "Inverti Tutto", de: "Alle invertieren" },
+  "relation.multiops.check_all": { pt: "Marcar Todos", en: "Check All", es: "Marcar Todo", fr: "Tout Cocher", it: "Seleziona Tutto", de: "Alle markieren" },
+  "relation.multiops.uncheck_all": { pt: "Desmarcar Todos", en: "Uncheck All", es: "Desmarcar Todo", fr: "Tout Décocher", it: "Deseleziona Tutto", de: "Alle abwählen" },
   "relation.multiops.remove_checked": { pt: "Remover Marcados ({count})", en: "Remove Checked ({count})", es: "Eliminar Marcados ({count})", fr: "Retirer les Cochés ({count})", it: "Rimuovi Selezionati ({count})", de: "Markierte entfernen ({count})" },
   "relation.multiops.remove_unchecked": { pt: "Remover Não Marcados ({count})", en: "Remove Unchecked ({count})", es: "Eliminar No Marcados ({count})", fr: "Retirer les Non-Cochés ({count})", it: "Rimuovi Non Selezionati ({count})", de: "Nicht Markierte entfernen ({count})" },
   "relation.multiops.multi_view_label": { pt: "Multi View ({count})", en: "Multi View ({count})", es: "Multi Vista ({count})", fr: "Vue Multiple ({count})", it: "Visualizzazione Multipla ({count})", de: "Mehrfachansicht ({count})" },
