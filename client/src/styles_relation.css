@@ -6371,7 +6371,7 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   padding: 4px 6px;
   border: 1px solid var(--border, #333);
   border-radius: 4px;
-  background: var(--input, #1a1a2e);
+  background: var(--bg-input, #fff);
   color: var(--foreground, #e0e0e0);
   font-size: 12px;
   font-family: inherit;

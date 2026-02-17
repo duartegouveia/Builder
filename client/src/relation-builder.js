@@ -5333,6 +5333,10 @@ function formatCellValue(value, type, colName, st) {
     return '<a href="mailto:' + escapeHtml(String(value)) + '">' + escapeHtml(String(value)) + '</a>';
   }
   
+  if (Array.isArray(value)) {
+    return value.map(v => escapeHtml(String(v ?? ''))).join('<br>');
+  }
+
   return String(value);
 }
 
@@ -15661,6 +15665,10 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
     return '<span class="string-value">📎 ' + count + ' files</span>';
   }
   
+  if (Array.isArray(value)) {
+    return value.map(v => `<span class="string-value">${escapeHtml(String(v ?? ''))}</span>`).join('<br>');
+  }
+
   return `<span class="string-value">${escapeHtml(String(value))}</span>`;
 }
 
