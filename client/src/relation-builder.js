@@ -2758,7 +2758,9 @@ function buildHierarchyPath(st) {
   const hierarchyRootVal = st.rel_options.hierarchy_root_value ?? '';
   const currentVal = getCurrentHierarchyValue(st);
   if (hierarchyColIdx < 0 || idColIdx < 0) return [];
-  const labelColIdx = st.columnTypes.findIndex((t, i) => i !== idColIdx && (t === 'string' || t === 'textarea'));
+  const showCol = st.rel_options.hierarchy_show_column;
+  const showColIdx = showCol ? st.columnNames.indexOf(showCol) : -1;
+  const labelColIdx = showColIdx >= 0 ? showColIdx : st.columnTypes.findIndex((t, i) => i !== idColIdx && (t === 'string' || t === 'textarea'));
   const path = [];
   path.push({ value: hierarchyRootVal, label: 'Root' });
   if (currentVal === hierarchyRootVal || currentVal === '') {
@@ -3283,6 +3285,7 @@ function parseRelation(jsonStr) {
       show_stats: parsedRelOptions.show_stats ?? DEFAULT_REL_OPTIONS.show_stats,
       show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
       hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
+      hierarchy_show_column: parsedRelOptions.hierarchy_show_column ?? DEFAULT_REL_OPTIONS.hierarchy_show_column,
       hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
       hierarchy_initial_value: parsedRelOptions.hierarchy_initial_value ?? DEFAULT_REL_OPTIONS.hierarchy_initial_value,
       single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
@@ -22073,6 +22076,7 @@ function initRelationInstance(container, relationData, options = {}) {
     show_stats: parsedRelOptions.show_stats ?? DEFAULT_REL_OPTIONS.show_stats,
     show_hierarchy: parsedRelOptions.show_hierarchy ?? DEFAULT_REL_OPTIONS.show_hierarchy,
     hierarchy_column: parsedRelOptions.hierarchy_column ?? DEFAULT_REL_OPTIONS.hierarchy_column,
+    hierarchy_show_column: parsedRelOptions.hierarchy_show_column ?? DEFAULT_REL_OPTIONS.hierarchy_show_column,
     hierarchy_root_value: parsedRelOptions.hierarchy_root_value ?? DEFAULT_REL_OPTIONS.hierarchy_root_value,
     hierarchy_initial_value: parsedRelOptions.hierarchy_initial_value ?? DEFAULT_REL_OPTIONS.hierarchy_initial_value,
     single_item_mode: parsedRelOptions.single_item_mode ?? DEFAULT_REL_OPTIONS.single_item_mode,
