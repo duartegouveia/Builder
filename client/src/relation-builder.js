@@ -15883,8 +15883,44 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
     const clearForm = () => {
       st.columnNames.forEach((name, colIdx) => {
         const type = st.columnTypes[colIdx];
+        if (type === 'id') return;
+        const att = getAtt(st, colIdx);
+        if (isAssociationAtt(att)) {
+          defaultRow[colIdx] = createEmptyAssociationRelation();
+          const relContainer = container.querySelector(`.row-field-relation-container[data-col="${colIdx}"]`);
+          if (relContainer) {
+            const config = getAssociationConfig(att);
+            const maxOne = config && config.cardinality_max === 1;
+            if (maxOne) {
+              const cell = buildAssociationCell(defaultRow[colIdx], -1, colIdx, true, st, defaultRow);
+              relContainer.innerHTML = '';
+              relContainer.appendChild(cell);
+            } else {
+              relContainer.innerHTML = '';
+              initRelationInstance(relContainer, defaultRow[colIdx], { showJsonEditor: false, isNested: true });
+            }
+          }
+          return;
+        }
+        if (isPointerAtt(att)) {
+          defaultRow[colIdx] = createEmptyPointerRelation();
+          const ptrContainer = container.querySelector(`.row-field-pointer-container[data-col="${colIdx}"]`);
+          if (ptrContainer) {
+            const config = getPointerConfig(att);
+            const maxOne = config && config.cardinality_max === 1;
+            if (maxOne) {
+              const cell = buildPointerCell(defaultRow[colIdx], -1, colIdx, true, st, defaultRow);
+              ptrContainer.innerHTML = '';
+              ptrContainer.appendChild(cell);
+            } else {
+              ptrContainer.innerHTML = '';
+              initRelationInstance(ptrContainer, defaultRow[colIdx], { showJsonEditor: false, isNested: true });
+            }
+          }
+          return;
+        }
         const input = container.querySelector(`[data-col="${colIdx}"]`);
-        if (input && type !== 'id') {
+        if (input) {
           if (type === 'boolean') {
             input.checked = false;
           } else if (input.tagName === 'SELECT') {
