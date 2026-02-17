@@ -1707,6 +1707,7 @@ const PRODUCT_FAMILIES_JSON = {
     "show_stats": true,
     "show_hierarchy": true,
     "hierarchy_column": "ParentID",
+    "hierarchy_show_column": "Name",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
     "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
