@@ -1607,14 +1607,36 @@ const PRODUCT_BRANDS_JSON = {
       }
     },
     "Url": "string",
-    "ParentID": "int",
-    "Parent": {
-      "attribute_kind": ["lookup"],
-      "name": "ParentName",
-      "short_name": "Parent",
-      "lookup": {
-        "path": "HIERARCHY.Name",
-        "editable": false
+    "parent": {
+      "attribute_kind": ["association"],
+      "name": "Pai",
+      "short_name": "Pai",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_product_brand",
+            "counterpart_association_att": "childs",
+            "counterpart_display_atts": []
+          }
+        ]
+      }
+    },
+    "childs": {
+      "attribute_kind": ["association"],
+      "name": "Filhos",
+      "short_name": "Filhos",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 0,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_product_brand",
+            "counterpart_association_att": "parent",
+            "counterpart_display_atts": []
+          }
+        ]
       }
     },
     "IntegrationID": "string"
@@ -1626,41 +1648,8 @@ const PRODUCT_BRANDS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_hierarchy": true,
-    "hierarchy_column": "ParentID",
-    "hierarchy_show_column": "Name",
-    "uiState": {
-      "currentView": "table",
-      "pageSize": 5,
-      "currentPage": 1,
-      "manualResizeHeight": null,
-      "cardsPageSize": 12,
-      "cardsCurrentPage": 1,
-      "selectedRows": [],
-      "highlightedRow": null,
-      "sortCriteria": [],
-      "filters": {},
-      "formatting": {},
-      "groupByColumns": [],
-      "groupedData": null,
-      "groupAllKeepVisible": false,
-      "expandedGroups": [],
-      "groupBySelectedValues": {},
-      "selectedColumns": [],
-      "pivotConfig": {
-        "rowColumn": null,
-        "colColumn": null,
-        "values": []
-      },
-      "diagramNodes": [],
-      "filteredIndices": [],
-      "sortedIndices": [],
-      "quickSearchText": "",
-      "currentHierarchyValue": null,
-      "showAllDescendants": false,
-      "columns_visible": null,
-      "analysisResult": null,
-      "advancedSearch": null
-    }
+    "hierarchy_column": "parent",
+    "hierarchy_show_column": "Name"
   },
   "items": [],
   "log": []
@@ -2170,12 +2159,8 @@ function buildColumnDependencies(st) {
     const segments = lookupCfg.path.split('.');
     const firstSeg = segments[0];
     let sourceColName = null;
-    if (firstSeg === 'HIERARCHY') {
-      sourceColName = st.rel_options.hierarchy_column || null;
-    } else {
-      if (st.columnNames.includes(firstSeg)) {
-        sourceColName = firstSeg;
-      }
+    if (st.columnNames.includes(firstSeg)) {
+      sourceColName = firstSeg;
     }
     if (sourceColName) {
       if (!deps[sourceColName]) deps[sourceColName] = [];
@@ -2604,9 +2589,6 @@ function validateLookupPaths(relationName, columnNames, columns) {
     for (let s = 0; s < segments.length; s++) {
       const seg = segments[s];
       const isLast = s === segments.length - 1;
-      if (seg === 'HIERARCHY') {
-        continue;
-      }
       if (!currentColumns || !currentColumns[seg]) {
         console.error(`[Relation "${relationName}"] Lookup "${colName}": attribute "${seg}" not found in entity "${currentEntityName}" (path: "${lookupCfg.path}").`);
         break;
@@ -2653,25 +2635,6 @@ function resolveLookupPath(st, rowIdx, path) {
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i];
     const isLast = i === segments.length - 1;
-
-    if (seg === 'HIERARCHY') {
-      const hierCol = currentEntity === st.relation ? st.rel_options.hierarchy_column : null;
-      if (!hierCol) return EMPTY;
-      const colNames = Object.keys(currentEntity.columns);
-      const hierColIdx = colNames.indexOf(hierCol);
-      if (hierColIdx < 0) return EMPTY;
-      const parentVal = currentRow[hierColIdx];
-      if (parentVal === null || parentVal === undefined || parentVal === '') return EMPTY;
-      const idColIdx = colNames.findIndex((n, ci) => {
-        const cd = currentEntity.columns[n];
-        return (typeof cd === 'string' && cd === 'id') || (typeof cd === 'object' && cd !== null && Array.isArray(cd.attribute_kind) && cd.attribute_kind.includes('id'));
-      });
-      if (idColIdx < 0) return EMPTY;
-      const parentRow = (currentEntity.items || []).find(r => String(r[idColIdx]) === String(parentVal));
-      if (!parentRow) return EMPTY;
-      currentRow = parentRow;
-      continue;
-    }
 
     const colNames = Object.keys(currentEntity.columns);
     const segColIdx = colNames.indexOf(seg);
@@ -2736,13 +2699,6 @@ function resolveLookupColumnDef(st, path) {
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i];
     const isLast = i === segments.length - 1;
-
-    if (seg === 'HIERARCHY') {
-      if (!st.rel_options.show_hierarchy || !st.rel_options.hierarchy_column) return EMPTY_DEF;
-      const hierColNames = Object.keys(currentEntity.columns);
-      if (!hierColNames.includes(st.rel_options.hierarchy_column)) return EMPTY_DEF;
-      continue;
-    }
 
     const colNames = Object.keys(currentEntity.columns);
     const segColIdx = colNames.indexOf(seg);
