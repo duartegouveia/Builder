@@ -5036,8 +5036,10 @@ function formatCellValue(value, type, colName, st) {
 
 // ─── Integrity Check ───────────────────────────────────────────────────
 const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select', 'password', 'email', 'tel', 'url', 'search', 'color', 'radio', 'file']);
-const KNOWN_REL_OPTIONS_KEYS = new Set(Object.keys(DEFAULT_REL_OPTIONS));
-const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved']);
+const KNOWN_ATTRIBUTE_KINDS = new Set(['association', 'lookup', 'pointer', 'range']);
+const KNOWN_ATT_KEYS = new Set(['attribute_kind', 'name', 'short_name', 'association', 'lookup', 'pointer', 'range', 'label', 'field_decoration', 'validation', 'visibility', 'readonly', 'layout', 'new_fast', 'kind', 'display_name', 'multiple']);
+const KNOWN_REL_OPTIONS_KEYS = new Set([...Object.keys(DEFAULT_REL_OPTIONS), 'uiState']);
+const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved', 'log']);
 
 function checkRelationIntegrity(relation, path = 'root') {
   const issues = [];
@@ -5074,12 +5076,30 @@ function checkRelationIntegrity(relation, path = 'root') {
 
   let hasId = false;
   columnKinds.forEach((kind, idx) => {
-    if (typeof kind !== 'string') {
-      issues.push({ path, severity: 'error', msg: `Coluna "${columnNames[idx]}": kind deve ser uma string, encontrado ${typeof kind}.` });
-    } else if (!KNOWN_COLUMN_KINDS.has(kind)) {
-      warnings.push({ path, severity: 'warning', msg: `Coluna "${columnNames[idx]}": kind desconhecido "${kind}".` });
+    const colName = columnNames[idx];
+    if (typeof kind === 'string') {
+      if (!KNOWN_COLUMN_KINDS.has(kind)) {
+        warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": kind desconhecido "${kind}".` });
+      }
+      if (kind === 'id') hasId = true;
+    } else if (typeof kind === 'object' && kind !== null && !Array.isArray(kind)) {
+      if (Array.isArray(kind.attribute_kind)) {
+        kind.attribute_kind.forEach(ak => {
+          if (!KNOWN_ATTRIBUTE_KINDS.has(ak)) {
+            warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": attribute_kind desconhecido "${ak}".` });
+          }
+        });
+        Object.keys(kind).forEach(attKey => {
+          if (!KNOWN_ATT_KEYS.has(attKey)) {
+            info.push({ path, severity: 'info', msg: `Coluna "${colName}": propriedade att desconhecida "${attKey}".` });
+          }
+        });
+      } else {
+        warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": objecto att sem "attribute_kind" válido.` });
+      }
+    } else {
+      issues.push({ path, severity: 'error', msg: `Coluna "${colName}": kind deve ser uma string ou um objecto att, encontrado ${typeof kind}.` });
     }
-    if (kind === 'id') hasId = true;
   });
 
   if (!hasId) {
@@ -5091,7 +5111,7 @@ function checkRelationIntegrity(relation, path = 'root') {
   } else {
     info.push({ path, severity: 'info', msg: `${relation.items.length} registos, ${numCols} colunas.` });
 
-    const idColIdx = columnNames.indexOf(columnNames.find((_, i) => columnKinds[i] === 'id'));
+    const idColIdx = columnNames.indexOf(columnNames.find((_, i) => resolveColumnKind(columnKinds[i]) === 'id'));
     const seenIds = new Set();
 
     relation.items.forEach((row, rowIdx) => {
@@ -5106,7 +5126,8 @@ function checkRelationIntegrity(relation, path = 'root') {
 
       row.forEach((cellValue, colIdx) => {
         if (colIdx >= numCols) return;
-        const kind = columnKinds[colIdx];
+        const kindRaw = columnKinds[colIdx];
+        const kind = resolveColumnKind(kindRaw);
         const colName = columnNames[colIdx];
         const cellPath = `${path} → registo #${rowIdx + 1} → "${colName}"`;
 
