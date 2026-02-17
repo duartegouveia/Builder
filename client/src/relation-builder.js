@@ -26403,6 +26403,74 @@ function init() {
       }
     }
   });
+
+  const btnRelToObj = el('.btn-rel-to-obj');
+  btnRelToObj?.addEventListener('click', () => {
+    let rel;
+    try {
+      rel = JSON.parse(textarea.value);
+    } catch (e) {
+      alert('Erro: O conteúdo da textarea não é JSON válido.\n' + e.message);
+      return;
+    }
+
+    if (!rel || typeof rel !== 'object' || rel.pot !== 'relation') {
+      alert('Erro: O conteúdo da textarea deve ser uma Relation válida (com pot:"relation").');
+      return;
+    }
+
+    function relationToObject(relation) {
+      if (!relation || !relation.columns || !relation.items || relation.items.length === 0) {
+        return {};
+      }
+      const colNames = Object.keys(relation.columns);
+      const colTypes = colNames.map(k => relation.columns[k]);
+      const row = relation.items[0];
+      const obj = {};
+
+      colNames.forEach((key, i) => {
+        if (key === 'id') return;
+        const type = typeof colTypes[i] === 'string' ? colTypes[i] : (colTypes[i]?.kind || 'string');
+        const value = row[i];
+
+        if (type === 'i18n') {
+          obj[key] = value && typeof value === 'object' ? value : {};
+        } else if (type === 'object') {
+          obj[key] = value && typeof value === 'object' ? value : {};
+        } else if (type === 'relation' && value && typeof value === 'object' && value.pot === 'relation') {
+          obj[key] = relationToObject(value);
+        } else if (type.startsWith('multi_') && Array.isArray(value)) {
+          obj[key] = value;
+        } else if (type === 'boolean') {
+          obj[key] = value === true;
+        } else if (type === 'int') {
+          obj[key] = value !== null && value !== undefined ? parseInt(value) : null;
+        } else if (type === 'float') {
+          obj[key] = value !== null && value !== undefined ? parseFloat(value) : null;
+        } else {
+          obj[key] = value;
+        }
+      });
+
+      return obj;
+    }
+
+    const resultObj = relationToObject(rel);
+    textarea.value = JSON.stringify(resultObj, null, 2);
+
+    const previewPanel = document.querySelector('.json-preview-panel');
+    if (previewPanel) {
+      const oldUid = previewPanel.dataset.relationUid;
+      if (oldUid) {
+        const oldClass = 'relation_' + oldUid;
+        previewPanel.classList.remove(oldClass, 'relation-instance');
+        relationInstances.delete(oldUid);
+        unregisterRelation(oldUid);
+      }
+      previewPanel.innerHTML = '';
+      previewPanel.dataset.relationUid = '';
+    }
+  });
   
   // Menu item event listeners - close dropdown on click
   document.querySelectorAll('.nav-dropdown-item').forEach(item => {
