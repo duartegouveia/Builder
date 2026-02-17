@@ -1589,6 +1589,7 @@ const PRODUCT_BRANDS_JSON = {
   "name": "company_product_brand",
   "columns": {
     "ID": "id",
+    "Name": "string",
     "OwnerID": {
       "attribute_kind": ["association"],
       "name": "Pertence a",
@@ -1607,8 +1608,7 @@ const PRODUCT_BRANDS_JSON = {
     },
     "Url": "string",
     "ParentID": "int",
-    "IntegrationID": "string",
-    "Name": "string"
+    "IntegrationID": "string"
   },
   "options": {
     "relation.single_item_mode": ["dialog", "right", "bottom"]
@@ -1617,7 +1617,8 @@ const PRODUCT_BRANDS_JSON = {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_hierarchy": true,
-    "hierarchy_column": "ParentID"
+    "hierarchy_column": "ParentID",
+    "hierarchy_show_column": "Name"
   },
   "items": [],
   "log": []
