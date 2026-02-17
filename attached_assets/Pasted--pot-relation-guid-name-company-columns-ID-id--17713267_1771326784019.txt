@@ -1,0 +1,129 @@
+{
+  "pot": "relation",
+  "guid": "",
+  "name": "company",
+  "columns": {
+    "ID": "id",
+    "Name": "string",
+    "InternalID": "string",
+    "Street": "string",
+    "City": "string",
+    "PostalCode": "string",
+    "Country": "string",
+    "TaxNumber": "string",
+    "GLNCode": "string",
+    "Inactive": "boolean",
+    "IntegrationCode": "string",
+    "LookupCompanyType": {
+      "attribute_kind": [
+        "lookup"
+      ],
+      "name": ">Company Type",
+      "short_name": "CType",
+      "lookup": {
+        "path": "CompanyTypeID.Name",
+        "editable": true
+      }
+    },
+    "CompanyTypeID": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Company Type",
+      "short_name": "Type",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_type",
+            "counterpart_association_att": "references"
+          }
+        ]
+      }
+    },
+    "CompanyTypeName": {
+      "attribute_kind": [
+        "lookup"
+      ],
+      "name": "Nome do Tipo",
+      "short_name": "Tipo",
+      "lookup": {
+        "path": "CompanyTypeID.Name",
+        "editable": true
+      }
+    },
+    "StateID": "int",
+    "LastUpdated": "datetime",
+    "Ownership": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Dono de",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": null,
+        "counterparts": [
+          {
+            "counterpart_entity": "product",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_brand",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_family",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_specie",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_catalog",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_catalog_conversion",
+            "counterpart_association_att": "PartnerID"
+          },
+          {
+            "counterpart_entity": "pricelist",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "pricelist_partner",
+            "counterpart_association_att": "PartnerID"
+          },
+          {
+            "counterpart_entity": "admin_data_management",
+            "counterpart_association_att": "ClientCompanyID"
+          },
+          {
+            "counterpart_entity": "stock_import",
+            "counterpart_association_att": "OwnerID"
+          }
+        ]
+      }
+    }
+	
+  },
+  "options": {
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
+    ]
+  },
+  "rel_options": {
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_hierarchy": true
+  },
+  "items": [
+  ],
+  "log": [
+  ]
+}

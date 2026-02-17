@@ -1865,7 +1865,12 @@ const ALL_COMPANIES_JSON = {
       "association": {
         "cardinality_min": 0,
         "cardinality_max": 1,
-        "counterparts": [{"counterpart_entity": "company_type", "counterpart_association_att": "references"}]
+        "counterparts": [
+          {
+            "counterpart_entity": "company_type",
+            "counterpart_association_att": "references"
+          }
+        ]
       }
     },
     "CompanyTypeName": {
@@ -1878,25 +1883,69 @@ const ALL_COMPANIES_JSON = {
       }
     },
     "StateID": "int",
-    "LastUpdated": "datetime"
+    "LastUpdated": "datetime",
+    "Ownership": {
+      "attribute_kind": ["association"],
+      "name": "Dono de",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": null,
+        "counterparts": [
+          {
+            "counterpart_entity": "product",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_brand",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_family",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_specie",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_catalog",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "company_product_catalog_conversion",
+            "counterpart_association_att": "PartnerID"
+          },
+          {
+            "counterpart_entity": "pricelist",
+            "counterpart_association_att": "OwnerID"
+          },
+          {
+            "counterpart_entity": "pricelist_partner",
+            "counterpart_association_att": "PartnerID"
+          },
+          {
+            "counterpart_entity": "admin_data_management",
+            "counterpart_association_att": "ClientCompanyID"
+          },
+          {
+            "counterpart_entity": "stock_import",
+            "counterpart_association_att": "OwnerID"
+          }
+        ]
+      }
+    }
   },
   "options": {
-    "relation.single_item_mode": [ "dialog", "right", "bottom" ]
+    "relation.single_item_mode": ["dialog", "right", "bottom"]
   },
   "rel_options": {
     "show_multicheck": true,
     "show_natural_order": true,
     "show_hierarchy": true
   },
-  "items": [
-    [-1, "Company 1", null, null, null, null, null, null, null, false, null, null, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false,"show_multicheck":false,"show_natural_order":false,"show_id":true,"show_column_kind":false,"show_stats":false,"cardinality_min":0,"cardinality_max":null,"general_view_options":[],"general_always_visible_options":[],"general_line_options":[],"general_multi_options":[]},"items":[["-1","company_type","-2"]]}, null, null, null],
-    [-2, "Company 2", null, null, null, null, null, null, null, false, null, null, null, null, null, null],
-    [-3, "Company 3", null, null, null, null, null, null, null, false, null, null, null, null, null, null]
-  ],
-  "log": [
-    {"pot":"relation_op","timestamp":"2026-02-15T12:18:32.179Z","op":"association_add","id":"-1","column":"CompanyTypeID","counterpart":"company_type","counterpartId":"-2"},
-    {"pot":"relation_op","timestamp":"2026-02-15T12:18:41.046Z","op":"edit_row","id":-1,"changes":{"LastUpdated":{"new":null}},"lookup_changes":[{"path":"CompanyTypeID.Name","old":"Company Type B","new":null}]}
-  ]
+  "items": [],
+  "log": []
 };
 
 // Default uiState (UI state stored inside rel_options.uiState, persisted in JSON)
