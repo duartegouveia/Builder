@@ -1,0 +1,1889 @@
+{
+  "pot": "relation",
+  "guid": "",
+  "name": "company_product_brand",
+  "columns": {
+    "ID": "id",
+    "Name": "string",
+    "parent": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Pai",
+      "short_name": "Pai",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_product_brand",
+            "counterpart_association_att": "childs",
+            "counterpart_display_atts": [
+              "Name"
+            ]
+          }
+        ]
+      }
+    },
+    "childs": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Filhos",
+      "visible": false,
+      "short_name": "Filhos",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 0,
+        "counterparts": [
+          {
+            "counterpart_entity": "company_product_brand",
+            "counterpart_association_att": "parent",
+            "counterpart_display_atts": [
+              "Name"
+            ]
+          }
+        ]
+      }
+    },
+    "Url": "string",
+    "IntegrationID": "string",
+    "OwnerID": {
+      "attribute_kind": [
+        "association"
+      ],
+      "name": "Pertence a",
+      "short_name": "Dono",
+      "association": {
+        "cardinality_min": 0,
+        "cardinality_max": 1,
+        "counterparts": [
+          {
+            "counterpart_entity": "company",
+            "counterpart_association_att": "Ownership",
+            "counterpart_display_atts": [
+              "Name"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "relation.single_item_mode": [
+      "dialog",
+      "right",
+      "bottom"
+    ]
+  },
+  "rel_options": {
+    "show_multicheck": true,
+    "show_natural_order": true,
+    "show_hierarchy": true,
+    "hierarchy_show_column": "Name"
+  },
+  "items": [
+    [
+      -1,
+      "Brand A",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-4"
+          ],
+          [
+            "-2",
+            "company_product_brand",
+            "-5"
+          ],
+          [
+            "-3",
+            "company_product_brand",
+            "-6"
+          ]
+        ],
+        "log": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -2,
+      "Brand B",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-7"
+          ],
+          [
+            "-2",
+            "company_product_brand",
+            "-8"
+          ]
+        ],
+        "log": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -3,
+      "Brand C",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-9"
+          ]
+        ]
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -4,
+      "Brand AA",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-1"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-10"
+          ],
+          [
+            "-2",
+            "company_product_brand",
+            "-11"
+          ]
+        ]
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -5,
+      "Brand AB",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-1"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -6,
+      "Brand AC",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-1"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -7,
+      "Brand BA",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -8,
+      "Brand BB",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-2"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -9,
+      "Brand CA",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-3"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -10,
+      "Brand AAA",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-4"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ],
+    [
+      -11,
+      "Brand AAB",
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": [
+          [
+            "-1",
+            "company_product_brand",
+            "-4"
+          ]
+        ]
+      },
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      },
+      null,
+      null,
+      {
+        "pot": "relation",
+        "guid": "",
+        "name": "",
+        "columns": {
+          "id": "id",
+          "entity": "string",
+          "foreign_key": "string"
+        },
+        "rel_options": {
+          "show_column_kind": false,
+          "show_stats": false,
+          "general_view_options": [],
+          "general_always_visible_options": [],
+          "general_line_options": [],
+          "general_multi_options": []
+        },
+        "items": []
+      }
+    ]
+  ],
+  "log": [
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:45:18.710Z",
+      "op": "add_row",
+      "record": {
+        "ID": -1,
+        "Name": "Brand A",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [],
+          "log": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:45:29.438Z",
+      "op": "add_row",
+      "record": {
+        "ID": -2,
+        "Name": "Brand B",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [],
+          "log": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:48:55.721Z",
+      "op": "add_row",
+      "record": {
+        "ID": -3,
+        "Name": "Brand C",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-9"
+            ]
+          ]
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:49:06.378Z",
+      "op": "add_row",
+      "record": {
+        "ID": -4,
+        "Name": "Brand AA",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-1"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-10"
+            ],
+            [
+              "-2",
+              "company_product_brand",
+              "-11"
+            ]
+          ]
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:49:16.786Z",
+      "op": "add_row",
+      "record": {
+        "ID": -5,
+        "Name": "Brand AB",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-1"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:49:54.061Z",
+      "op": "add_row",
+      "record": {
+        "ID": -6,
+        "Name": "Brand AC",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-1"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:50:06.564Z",
+      "op": "add_row",
+      "record": {
+        "ID": -7,
+        "Name": "Brand BA",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-2"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:50:20.462Z",
+      "op": "add_row",
+      "record": {
+        "ID": -8,
+        "Name": "Brand BB",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-2"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:50:34.625Z",
+      "op": "add_row",
+      "record": {
+        "ID": -9,
+        "Name": "Brand CA",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-3"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:50:52.763Z",
+      "op": "add_row",
+      "record": {
+        "ID": -10,
+        "Name": "Brand AAA",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-4"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    },
+    {
+      "pot": "relation_op",
+      "timestamp": "2026-02-17T13:51:13.175Z",
+      "op": "add_row",
+      "record": {
+        "ID": -11,
+        "Name": "Brand AAB",
+        "parent": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": [
+            [
+              "-1",
+              "company_product_brand",
+              "-4"
+            ]
+          ]
+        },
+        "childs": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        },
+        "Url": null,
+        "IntegrationID": null,
+        "OwnerID": {
+          "pot": "relation",
+          "guid": "",
+          "name": "",
+          "columns": {
+            "id": "id",
+            "entity": "string",
+            "foreign_key": "string"
+          },
+          "rel_options": {
+            "editable": false,
+            "show_multicheck": false,
+            "show_natural_order": false,
+            "show_id": true,
+            "show_column_kind": false,
+            "show_stats": false,
+            "cardinality_min": 0,
+            "cardinality_max": null,
+            "general_view_options": [],
+            "general_always_visible_options": [],
+            "general_line_options": [],
+            "general_multi_options": []
+          },
+          "items": []
+        }
+      }
+    }
+  ]
+}
