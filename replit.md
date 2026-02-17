@@ -74,6 +74,19 @@ The Virtual Keyboard offers comprehensive Unicode character input:
 - **Autocomplete Dictionary**: Language-specific word suggestions.
 - **Responsiveness**: Optimized for mobile.
 
+### Internationalization (i18n) System
+The Relation Builder supports 6 languages: Portuguese (pt, default), English (en), Spanish (es), French (fr), Italian (it), German (de).
+
+**Architecture:**
+- `client/src/relation-translations.js` — Contains `RELATION_TRANSLATIONS` object with 600+ keys covering all UI text, plus `window.t(key)`, `window.tf(key, vars)`, and `window.applyTranslations()` functions.
+- Translation fallback chain: `currentLang → en → pt → key`
+- `tf()` supports `{variable}` placeholder substitution
+- `applyTranslations()` does surgical DOM updates via `data-i18n` attributes without rebuilding the DOM
+- Language selector persists choice to `localStorage` key `relation_lang`
+- Language change triggers `applyTranslations()` + re-renders view tabs, pagination, and table
+
+**Key namespaces:** `relation.common.*`, `relation.view.*`, `relation.pagination.*`, `relation.rowops.*`, `relation.toast.*`, `relation.colmenu.*`, `relation.dialog.*`, `relation.filter.*`, `relation.sort.*`, `relation.derive.*`, `relation.binning.*`, `relation.stats.*`, `relation.analysis.*`, `relation.pivot.*`, `relation.ai.*`, `relation.saved.*`, `relation.structure.*`, `relation.export.*`, `relation.import.*`, `relation.multiops.*`, `relation.confirm.*`
+
 ## External Dependencies
 
 - **mathjs**: Used for mathematical expression parsing, evaluation, and symbolic differentiation.
