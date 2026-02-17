@@ -16024,24 +16024,12 @@ function buildObjectEditor(obj, editable, onChange, title) {
   }
 
   const entries = obj && typeof obj === 'object' ? Object.entries(obj) : [];
-  if (entries.length === 0) {
-    const empty = document.createElement('span');
-    empty.className = 'object-editor-empty';
-    empty.textContent = '{ }';
-    wrapper.appendChild(empty);
-    return wrapper;
-  }
   const container = document.createElement('div');
-  container.className = 'object-editor-fields';
-  if (entries.length <= 5) {
-    container.classList.add('object-editor-horizontal');
-  } else {
-    container.classList.add('object-editor-vertical');
-  }
+  container.className = 'object-editor-fields object-editor-vertical';
 
   function collectValues() {
     const result = {};
-    wrapper.querySelectorAll(':scope > .object-editor-fields > .object-editor-field').forEach(field => {
+    container.querySelectorAll(':scope > .object-editor-field').forEach(field => {
       const key = field.dataset.key;
       const gatherer = field._gatherValue;
       if (key && gatherer) result[key] = gatherer();
@@ -16049,7 +16037,15 @@ function buildObjectEditor(obj, editable, onChange, title) {
     if (onChange) onChange(result);
   }
 
-  entries.forEach(([key, value]) => {
+  function getExistingKeys() {
+    const keys = [];
+    container.querySelectorAll(':scope > .object-editor-field').forEach(f => {
+      if (f.dataset.key) keys.push(f.dataset.key);
+    });
+    return keys;
+  }
+
+  function buildFieldRow(key, value) {
     const field = document.createElement('div');
     field.className = 'object-editor-field';
     field.dataset.key = key;
@@ -16128,10 +16124,95 @@ function buildObjectEditor(obj, editable, onChange, title) {
     }
 
     field.appendChild(valueContainer);
-    container.appendChild(field);
+
+    if (editable) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'object-editor-delete-btn';
+      delBtn.type = 'button';
+      delBtn.innerHTML = '&times;';
+      delBtn.title = 'Remove';
+      delBtn.addEventListener('click', () => {
+        field.remove();
+        collectValues();
+      });
+      field.appendChild(delBtn);
+    }
+
+    return field;
+  }
+
+  entries.forEach(([key, value]) => {
+    container.appendChild(buildFieldRow(key, value));
   });
 
   wrapper.appendChild(container);
+
+  if (editable) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'object-editor-add-btn';
+    addBtn.type = 'button';
+    addBtn.textContent = '+';
+    addBtn.title = 'Add key/value';
+
+    const addRow = document.createElement('div');
+    addRow.className = 'object-editor-add-row';
+    addRow.style.display = 'none';
+
+    const keyInput = document.createElement('input');
+    keyInput.type = 'text';
+    keyInput.className = 'relation-input input-size-medium';
+    keyInput.placeholder = 'key';
+
+    const valInput = document.createElement('input');
+    valInput.type = 'text';
+    valInput.className = 'relation-input input-size-long';
+    valInput.placeholder = 'value';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'object-editor-confirm-btn';
+    confirmBtn.type = 'button';
+    confirmBtn.innerHTML = '&#10003;';
+    confirmBtn.title = 'Save';
+
+    addRow.appendChild(keyInput);
+    addRow.appendChild(valInput);
+    addRow.appendChild(confirmBtn);
+
+    addBtn.addEventListener('click', () => {
+      addRow.style.display = addRow.style.display === 'none' ? 'flex' : 'none';
+      if (addRow.style.display !== 'none') {
+        keyInput.value = '';
+        valInput.value = '';
+        keyInput.focus();
+      }
+    });
+
+    function confirmAdd() {
+      const newKey = keyInput.value.trim();
+      if (!newKey) {
+        showToast('Key cannot be empty.', 'error');
+        return;
+      }
+      if (getExistingKeys().includes(newKey)) {
+        showToast('Key "' + newKey + '" already exists.', 'error');
+        return;
+      }
+      const newVal = valInput.value;
+      container.appendChild(buildFieldRow(newKey, newVal));
+      collectValues();
+      keyInput.value = '';
+      valInput.value = '';
+      addRow.style.display = 'none';
+    }
+
+    confirmBtn.addEventListener('click', confirmAdd);
+    keyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); valInput.focus(); } });
+    valInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmAdd(); } });
+
+    wrapper.appendChild(addRow);
+    wrapper.appendChild(addBtn);
+  }
+
   return wrapper;
 }
 

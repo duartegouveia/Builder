@@ -7552,29 +7552,23 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
 }
 .object-editor-fields {
   display: flex;
-  gap: 6px;
-}
-.object-editor-fields.object-editor-vertical {
   flex-direction: column;
-}
-.object-editor-fields.object-editor-horizontal {
-  flex-direction: row;
-  flex-wrap: wrap;
+  gap: 6px;
 }
 .object-editor-field {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 6px;
   min-width: 0;
-}
-.object-editor-fields.object-editor-horizontal .object-editor-field {
-  flex: 1;
-  min-width: 80px;
 }
 .object-editor-label {
   font-weight: 600;
   font-size: 11px;
   color: var(--text-secondary, #666);
+  min-width: 60px;
+  padding-top: 5px;
+  flex-shrink: 0;
+  word-break: break-all;
 }
 .object-editor-field input,
 .object-editor-field select {
@@ -7587,13 +7581,72 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   box-sizing: border-box;
 }
 .object-editor-value {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 .object-editor-value .object-editor-wrapper {
   margin-top: 2px;
 }
 .object-editor-value .i18n-editor-wrapper {
   margin-top: 2px;
+}
+.object-editor-delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #999);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  border-radius: 3px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.object-editor-delete-btn:hover {
+  color: var(--danger-color, #dc3545);
+  background: var(--bg-hover, #f0f0f0);
+}
+.object-editor-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-color, #4a90d9);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  line-height: 1;
+  padding: 0;
+}
+.object-editor-add-btn:hover {
+  background: var(--primary-hover, #357abd);
+}
+.object-editor-add-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.object-editor-confirm-btn {
+  background: none;
+  border: 1px solid var(--primary-color, #4a90d9);
+  color: var(--primary-color, #4a90d9);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.object-editor-confirm-btn:hover {
+  background: var(--primary-color, #4a90d9);
+  color: #fff;
 }
 .object-editor-empty {
   color: var(--text-secondary, #999);
