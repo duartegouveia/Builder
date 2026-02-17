@@ -5937,7 +5937,7 @@ function showExportDialog(st) {
     const { items, columnNames, columnKinds } = getExportItems(st, scope);
 
     if (items.length === 0) {
-      showToast('Não há registos para exportar.', 'warning');
+      showToast(t('relation.toast.no_records_export'), 'warning');
       return;
     }
 
@@ -5952,7 +5952,7 @@ function showExportDialog(st) {
         filename = `${relationName}.${ext}`;
         mimeType = getMimeType(format);
       } catch (_) {
-        showToast('Erro ao carregar template.', 'error');
+        showToast(t('relation.toast.template_error'), 'error');
         return;
       }
     } else {
@@ -5985,7 +5985,7 @@ function showExportDialog(st) {
       openInNewTab(content, mimeType);
     }
 
-    showToast(`Exportados ${items.length} registos em formato ${format.toUpperCase()}.`, 'success');
+    showToast(tf('relation.toast.exported', {count: items.length, format: format.toUpperCase()}), 'success');
     closeDialog();
   });
 }
@@ -6142,17 +6142,17 @@ function showImportDialog(st) {
       } else if (ext === 'html' || ext === 'htm') {
         parsedTables = parseHTMLFile(text);
       } else if (ext === 'xlsx') {
-        showToast('Formato .xlsx (Excel binário) não é suportado. Guarde como .xls (XML) ou .csv.', 'error');
+        showToast(t('relation.toast.xlsx_not_supported'), 'error');
         return;
       } else if (ext === 'xls') {
         parsedTables = parseExcelXML(text);
       } else {
-        showToast(`Formato .${ext} não suportado.`, 'error');
+        showToast(tf('relation.toast.format_not_supported', {ext}), 'error');
         return;
       }
 
       if (parsedTables.length === 0) {
-        showToast('Nenhuma tabela encontrada no ficheiro.', 'warning');
+        showToast(t('relation.toast.no_tables_found'), 'warning');
         return;
       }
 
@@ -6170,7 +6170,7 @@ function showImportDialog(st) {
 
       selectTable(0);
     } catch (err) {
-      showToast('Erro ao processar ficheiro: ' + err.message, 'error');
+      showToast(tf('relation.toast.file_error', {msg: err.message}), 'error');
     }
   }
 
@@ -6341,7 +6341,7 @@ function showImportDialog(st) {
     });
     const importedRecords = st.relation.items.slice(-newItemsCount).map(row => buildRowRecord(st, row));
     logOperation(st, { op: 'import', count: newItemsCount, column_mapping: importedMapping, records: importedRecords });
-    showToast(`Importados ${newItemsCount} registos.`, 'success');
+    showToast(tf('relation.toast.imported', {count: newItemsCount}), 'success');
     renderTable(st);
     closeDialog();
   });
@@ -6683,7 +6683,7 @@ function removeSelectedRows(st = state, skipConfirm = false) {
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
-  showToast(removedCount + ' registos removidos.', 'success');
+  showToast(tf('relation.toast.records_deleted', {count: removedCount}), 'success');
 }
 
 function removeUnselectedRows(st = state) {
@@ -6704,7 +6704,7 @@ function removeUnselectedRows(st = state) {
   setCurrentPage(st, 1);
   renderTable(st);
   updateJsonOutput(st);
-  showToast(unselectedCount + ' registos não assinalados removidos.', 'success');
+  showToast(tf('relation.toast.records_deleted', {count: unselectedCount}), 'success');
 }
 
 // Render functions
@@ -7096,14 +7096,14 @@ function openPointerSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
   const att = getAtt(st, colIdx);
   const config = getPointerConfig(att);
   if (!config || !config.targets || config.targets.length === 0) {
-    showToast('No target entities configured for this pointer.', 'error');
+    showToast(t('relation.toast.no_target_entities'), 'error');
     return;
   }
   const targetDef = config.targets[0];
   const targetName = targetDef.target_entity;
   const targetJson = all_entities[targetName];
   if (!targetJson) {
-    showToast('Target entity "' + targetName + '" not found in registry.', 'error');
+    showToast(tf('relation.toast.target_not_found', {name: targetName}), 'error');
     return;
   }
 
@@ -7135,7 +7135,7 @@ function addPointerRecord(rowIdx, colIdx, targetName, targetId, st, rowRef) {
 
   const isDuplicate = ptrRelation.items.some(item => item[1] === targetName && item[2] === targetId);
   if (isDuplicate) {
-    showToast('Reference to ' + targetName + ' #' + targetId + ' already exists.', 'warning');
+    showToast(tf('relation.toast.ref_exists', {name: targetName, id: targetId}), 'warning');
     return;
   }
 
@@ -7154,7 +7154,7 @@ function addPointerRecord(rowIdx, colIdx, targetName, targetId, st, rowRef) {
     renderTable(st);
     updateJsonOutput(st);
   }
-  showToast('Pointer to ' + targetName + ' #' + targetId + ' created.', 'success');
+  showToast(tf('relation.toast.pointer_created', {name: targetName, id: targetId}), 'success');
 }
 
 function removePointerRecord(rowIdx, colIdx, ptrItemIdx, st) {
@@ -7177,14 +7177,14 @@ function removePointerRecord(rowIdx, colIdx, ptrItemIdx, st) {
   });
   renderTable(st);
   updateJsonOutput(st);
-  showToast('Pointer to ' + targetName + ' #' + targetId + ' removed.', 'success');
+  showToast(tf('relation.toast.pointer_removed', {name: targetName, id: targetId}), 'success');
 }
 
 function openAssociationSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
   const att = getAtt(st, colIdx);
   const config = getAssociationConfig(att);
   if (!config || !config.counterparts || config.counterparts.length === 0) {
-    showToast('No counterpart entities configured for this association.', 'error');
+    showToast(t('relation.toast.no_counterpart'), 'error');
     return;
   }
   const counterpartDef = config.counterparts[0];
@@ -7192,7 +7192,7 @@ function openAssociationSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
   const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
   const counterpartJson = all_entities[counterpartName];
   if (!counterpartJson) {
-    showToast('Counterpart entity "' + counterpartName + '" not found in registry.', 'error');
+    showToast(tf('relation.toast.counterpart_not_found', {name: counterpartName}), 'error');
     return;
   }
 
@@ -7240,7 +7240,7 @@ function addAssociationBidirectional(rowIdx, colIdx, counterpartName, counterpar
     renderTable(st);
     updateJsonOutput(st);
   }
-  showToast('Association created with ' + counterpartName + ' #' + counterpartId, 'success');
+  showToast(tf('relation.toast.assoc_created', {name: counterpartName, id: counterpartId}), 'success');
 }
 
 function removeAssociationRecord(rowIdx, colIdx, assocItemIdx, st) {
@@ -7277,7 +7277,7 @@ function removeAssociationRecord(rowIdx, colIdx, assocItemIdx, st) {
   });
   renderTable(st);
   updateJsonOutput(st);
-  showToast('Association with ' + counterpartName + ' #' + counterpartId + ' removed.', 'success');
+  showToast(tf('relation.toast.assoc_removed', {name: counterpartName, id: counterpartId}), 'success');
 }
 
 function syncCounterpartAssociation(counterpartName, counterpartRowId, myEntityName, myRowId, action, counterpartAttName) {
@@ -7331,7 +7331,7 @@ function handleAssocAddFromToolbar(nestedSt, mode) {
   if (!pa) return;
   const config = pa.config;
   if (!config || !config.counterparts || config.counterparts.length === 0) {
-    showToast('No counterpart entities configured for this association.', 'error');
+    showToast(t('relation.toast.no_counterpart'), 'error');
     return;
   }
 
@@ -7442,7 +7442,7 @@ function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
   const counterpartAttName = typeof counterpartDef === 'object' ? counterpartDef.counterpart_association_att : null;
   const counterpartJson = all_entities[counterpartName];
   if (!counterpartJson) {
-    showToast('Counterpart entity "' + counterpartName + '" not found in registry.', 'error');
+    showToast(tf('relation.toast.counterpart_not_found', {name: counterpartName}), 'error');
     return;
   }
 
@@ -7555,11 +7555,11 @@ function rebuildAssociations(nestedSt, pa, counterpartName, counterpartAttName, 
     updateJsonOutput(parentSt);
     renderTable(nestedSt);
     if (toRemove.length > 0 && toAdd.length > 0) {
-      showToast('Associações atualizadas: +' + toAdd.length + ' / -' + toRemove.length, 'success');
+      showToast(tf('relation.toast.assoc_updated', {added: toAdd.length, removed: toRemove.length}), 'success');
     } else if (toAdd.length > 0) {
-      showToast(toAdd.length + ' associação(ões) adicionada(s)', 'success');
+      showToast(tf('relation.toast.assoc_updated', {added: toAdd.length, removed: 0}), 'success');
     } else {
-      showToast(toRemove.length + ' associação(ões) removida(s)', 'success');
+      showToast(tf('relation.toast.assoc_updated', {added: 0, removed: toRemove.length}), 'success');
     }
   }
 }
@@ -8051,7 +8051,7 @@ function matchesFormattingCondition(value, condition, type) {
 // Build search input HTML for table/cards views
 function buildSearchInputHtml() {
   return `<div class="quick-search-wrapper">
-    <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
+    <input type="text" class="quick-search-input" placeholder="${t('relation.common.search')}" data-i18n-placeholder="relation.common.search" data-testid="input-quick-search">
     <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
   </div>`;
 }
@@ -9057,9 +9057,9 @@ function showAdvancedSearchPanel(st) {
           op.onColumns = detectedMappings;
           persistState();
           rebuildJoinMappings();
-          showToast('Detected ' + detectedMappings.length + ' column mapping(s).', 'info');
+          showToast(tf('relation.toast.mappings_detected', {count: detectedMappings.length}), 'info');
         } else {
-          showToast('No matching columns detected automatically.', 'warning');
+          showToast(t('relation.toast.no_mappings'), 'warning');
         }
       });
       btnRow.appendChild(autoBtn);
@@ -9437,7 +9437,7 @@ function showAdvancedSearchPanel(st) {
           }
           persistState();
           rebuildPipeline(body);
-          showToast('Search "' + s.name + '" loaded.', 'info');
+          showToast(tf('relation.toast.search_loaded', {name: s.name}), 'info');
         }
       });
 
@@ -9448,7 +9448,7 @@ function showAdvancedSearchPanel(st) {
       delBtn.addEventListener('click', () => {
         deleteAdvancedSearch(st, s.name);
         rebuildSavedSection(body);
-        showToast('Search "' + s.name + '" deleted.', 'info');
+        showToast(tf('relation.toast.search_deleted', {name: s.name}), 'info');
       });
 
       item.appendChild(nameSpan);
@@ -9577,7 +9577,7 @@ function showAdvancedSearchPanel(st) {
       if (tableWrapper) tableWrapper.style.display = '';
       renderTable(st);
       updateJsonOutput(st);
-      showToast('Advanced Search: ' + resultIndices.length + ' of ' + st.relation.items.length + ' rows match.', 'info');
+      showToast(tf('relation.toast.search_results', {matched: resultIndices.length, total: st.relation.items.length}), 'info');
     });
 
     const clearBtn = document.createElement('button');
@@ -9602,7 +9602,7 @@ function showAdvancedSearchPanel(st) {
       if (tableWrapper) tableWrapper.style.display = '';
       renderTable(st);
       updateJsonOutput(st);
-      showToast('All advanced search filters cleared.', 'info');
+      showToast(t('relation.toast.search_cleared'), 'info');
     });
 
     const saveBtn = document.createElement('button');
@@ -9614,7 +9614,7 @@ function showAdvancedSearchPanel(st) {
       showSaveSearchDialog(existingNames, (chosenName) => {
         saveAdvancedSearch(st, chosenName, pipeline, mode);
         rebuildSavedSection(body);
-        showToast('Search "' + chosenName + '" saved.', 'info');
+        showToast(tf('relation.toast.search_saved', {name: chosenName}), 'info');
       });
     });
 
@@ -9632,7 +9632,7 @@ function showAdvancedSearchPanel(st) {
       renderTable(st);
       updateJsonOutput(st);
       clearDetailPanel(st);
-      showToast('Advanced Search applied: ' + resultIndices.length + ' of ' + st.relation.items.length + ' rows match.', 'info');
+      showToast(tf('relation.toast.search_applied', {matched: resultIndices.length, total: st.relation.items.length}), 'info');
     });
 
     actions.appendChild(applyBtn);
@@ -9679,24 +9679,24 @@ function showAdvancedSearchPanel(st) {
 
 function buildAlwaysVisibleOptionsHtml(options, st) {
   const alwaysVisibleOperationsMap = {
-    'View': { value: 'view-row', icon: '👁', label: 'View' },
-    'Edit': { value: 'edit-row', icon: '✏️', label: 'Edit' },
-    'Copy': { value: 'copy-row', icon: '📋', label: 'Copy' },
-    'New': { value: 'new-row', icon: '➕', label: 'New' },
-    'New Fast': { value: 'new-fast-row', icon: '⚡', label: 'New Fast' },
-    'Delete': { value: 'delete-row', icon: '🗑️', label: 'Delete' },
-    'Paper Form': { value: 'paper-form-row', icon: '📄', label: 'Paper Form' },
-    'Print': { value: 'print-row', icon: '🖨️', label: 'Print' },
-    'Select One': { value: 'select-one', icon: '☝', label: 'Select One' },
-    'Select Many': { value: 'select-many', icon: '☑', label: 'Select Many' },
-    'Choose Many': { value: 'choose-many', icon: '🔘', label: 'Choose Many' },
-    'Import from File': { value: 'import-file', icon: '📥', label: 'Import from File' },
-    'Export to file': { value: 'export-file', icon: '📤', label: 'Export to file' },
-    'Advanced Search': { value: 'advanced-search', icon: '🔎', label: 'Advanced Search' },
-    'Remove Duplicates': { value: 'remove-duplicates', icon: '🔄', label: 'Remove Duplicates' },
-    'Integrity Check': { value: 'integrity-check', icon: '🔍', label: 'Integrity Check' },
-    'Output State': { value: 'output-state', icon: '📋', label: 'Output State' },
-    'Output State Full': { value: 'output-state-full', icon: '📋', label: 'Output State Full' }
+    'View': { value: 'view-row', icon: '👁', label: t('relation.rowops.view') },
+    'Edit': { value: 'edit-row', icon: '✏️', label: t('relation.rowops.edit') },
+    'Copy': { value: 'copy-row', icon: '📋', label: t('relation.rowops.copy') },
+    'New': { value: 'new-row', icon: '➕', label: t('relation.rowops.new') },
+    'New Fast': { value: 'new-fast-row', icon: '⚡', label: t('relation.rowops.new_fast') },
+    'Delete': { value: 'delete-row', icon: '🗑️', label: t('relation.rowops.delete') },
+    'Paper Form': { value: 'paper-form-row', icon: '📄', label: t('relation.rowops.paper_form') },
+    'Print': { value: 'print-row', icon: '🖨️', label: t('relation.rowops.print') },
+    'Select One': { value: 'select-one', icon: '☝', label: t('relation.rowops.select_one') },
+    'Select Many': { value: 'select-many', icon: '☑', label: t('relation.rowops.select_many') },
+    'Choose Many': { value: 'choose-many', icon: '🔘', label: t('relation.rowops.choose_many') },
+    'Import from File': { value: 'import-file', icon: '📥', label: t('relation.rowops.import_file') },
+    'Export to file': { value: 'export-file', icon: '📤', label: t('relation.rowops.export_file') },
+    'Advanced Search': { value: 'advanced-search', icon: '🔎', label: t('relation.rowops.advanced_search') },
+    'Remove Duplicates': { value: 'remove-duplicates', icon: '🔄', label: t('relation.rowops.remove_duplicates') },
+    'Integrity Check': { value: 'integrity-check', icon: '🔍', label: t('relation.rowops.integrity_check') },
+    'Output State': { value: 'output-state', icon: '📋', label: t('relation.rowops.output_state') },
+    'Output State Full': { value: 'output-state-full', icon: '📋', label: t('relation.rowops.output_state_full') }
   };
   
   const maxReached = st ? isCardinalityMaxReached(st) : false;
@@ -9711,7 +9711,7 @@ function buildAlwaysVisibleOptionsHtml(options, st) {
     .join('\n        ');
   
   return `<select class="always-visible-actions">
-    <option value="" disabled selected>Actions...</option>
+    <option value="" disabled selected>${t('relation.rowops.actions')}</option>
     ${optionsHtml}
   </select>`;
 }
@@ -9723,7 +9723,7 @@ function handleAlwaysVisibleAction(st, action) {
   const rowIdx = highlightedRow !== null ? highlightedRow : 0;
   
   if (CARDINALITY_BLOCKED_ALWAYS_VISIBLE.has(action) && isCardinalityMaxReached(st)) {
-    showToast(`Maximum ${st.rel_options.cardinality_max} records reached.`, 'warning');
+    showToast(tf('relation.cardinality.max_reached', {max: st.rel_options.cardinality_max}), 'warning');
     return;
   }
   
@@ -9748,7 +9748,7 @@ function handleAlwaysVisibleAction(st, action) {
     if (st.relation.items.length > 0) {
       handleRowOperation(st, rowIdx, action);
     } else {
-      showToast('Nenhum registo para imprimir.', 'warning');
+      showToast(t('relation.toast.no_records_print'), 'warning');
     }
     return;
   }
@@ -9780,7 +9780,7 @@ function handleAlwaysVisibleAction(st, action) {
   // Export to file
   if (action === 'export-file') {
     if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
-      showToast('Nenhum registo para exportar.', 'warning');
+      showToast(t('relation.toast.no_records_export'), 'warning');
       return;
     }
     showExportDialog(st);
@@ -9817,7 +9817,7 @@ function handleAlwaysVisibleAction(st, action) {
     setSortedIndices(st, [...getFilteredIndices(st)]);
     logOperation(st, { op: 'remove_duplicates', removed: removedCount, removed_ids: removedDupIds });
     renderTable(st);
-    showToast(`Removed ${removedCount} duplicate row(s). ${uniqueItems.length} unique rows remain.`, removedCount > 0 ? 'success' : 'info');
+    showToast(tf('relation.toast.duplicates_removed', {removed: removedCount, remaining: uniqueItems.length}), removedCount > 0 ? 'success' : 'info');
     return;
   }
 
@@ -10167,7 +10167,7 @@ function setupSelectionSearch(dialog, instanceSt) {
 function selectionSearchHtml() {
   return `<div class="selection-search-bar">
     <div class="quick-search-wrapper">
-      <input type="text" class="selection-search-input quick-search-input" placeholder="Search..." data-testid="input-selection-search">
+      <input type="text" class="selection-search-input quick-search-input" placeholder="${t('relation.common.search')}" data-i18n-placeholder="relation.common.search" data-testid="input-selection-search">
       <button class="selection-search-clear quick-search-clear" title="Clear search" data-testid="button-clear-selection-search">✕</button>
     </div>
   </div>`;
@@ -10743,7 +10743,7 @@ function getInitialPanelPositions(numPanels, totalChecked) {
 
 function showMultiViewDialog(st) {
   const checkedIndices = Array.from(getSelectedRows(st));
-  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  if (checkedIndices.length < 2) { showToast(t('relation.toast.select_2_records'), 'warning'); return; }
   let numPanels = Math.min(2, checkedIndices.length);
   let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
 
@@ -10778,7 +10778,7 @@ function showMultiViewDialog(st) {
 
 function showMultiEditDialog(st) {
   const checkedIndices = Array.from(getSelectedRows(st));
-  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  if (checkedIndices.length < 2) { showToast(t('relation.toast.select_2_records'), 'warning'); return; }
   let numPanels = Math.min(2, checkedIndices.length);
   let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
 
@@ -10830,7 +10830,7 @@ function showMultiEditDialog(st) {
       });
       renderTable(st);
       outputRelationState(st);
-      showToast(`${saved} registos gravados.`, 'success');
+      showToast(tf('relation.toast.records_saved', {count: saved}), 'success');
       if (closeHandler) closeHandler();
     });
   }, 0);
@@ -10906,7 +10906,7 @@ function showGroupEditDialog(st) {
       const body = wrapper.querySelector('.detail-panel-body, .popup-content-body');
       if (!body) return;
       const checkedFields = body.querySelectorAll('.ge-field-check:checked');
-      if (checkedFields.length === 0) { showToast('Nenhum campo selecionado.', 'warning'); return; }
+      if (checkedFields.length === 0) { showToast(t('relation.toast.no_field_selected'), 'warning'); return; }
       let updated = 0;
       checkedFields.forEach(cb => {
         const colIdx = parseInt(cb.dataset.col);
@@ -10935,7 +10935,7 @@ function showGroupEditDialog(st) {
       });
       renderTable(st);
       outputRelationState(st);
-      showToast(`${checkedFields.length} campo(s) atualizados em ${checkedIndices.length} registos.`, 'success');
+      showToast(tf('relation.toast.fields_updated', {fields: checkedFields.length, records: checkedIndices.length}), 'success');
       if (closeHandler) closeHandler();
     });
   }, 0);
@@ -10956,7 +10956,7 @@ function buildFieldHistogram(st, checkedIndices, colIdx) {
 
 function showMergeDialog(st) {
   const checkedIndices = Array.from(getSelectedRows(st));
-  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos para fundir.', 'warning'); return; }
+  if (checkedIndices.length < 2) { showToast(t('relation.toast.select_2_merge'), 'warning'); return; }
   let numPanels = Math.min(2, checkedIndices.length);
   let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
   const mergeState = { radioSelections: {} };
@@ -11055,7 +11055,7 @@ function showMergeDialog(st) {
       logOperation(st, { op: 'merge', merged_count: indicesToRemove.length, target_id: mergedIntoId, merged_ids: mergedIds, result: mergedResult });
       renderTable(st);
       outputRelationState(st);
-      showToast(`Registos fundidos com sucesso.`, 'success');
+      showToast(t('relation.toast.merge_success'), 'success');
       if (closeHandler) closeHandler();
     });
   }, 0);
@@ -11121,7 +11121,7 @@ function generateMergePanelContent(st, row, rowIdx, mergeState, panelIdx) {
 
 function showMultiCopyDialog(st) {
   const checkedIndices = Array.from(getSelectedRows(st));
-  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  if (checkedIndices.length < 2) { showToast(t('relation.toast.select_2_records'), 'warning'); return; }
   let numPanels = Math.min(2, checkedIndices.length);
   let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
 
@@ -11171,7 +11171,7 @@ function showMultiCopyDialog(st) {
       logOperation(st, { op: 'multi_copy', count: totalCopied, copies_per_source: count, source_ids: copiedSourceIds });
       renderTable(st);
       outputRelationState(st);
-      showToast(`${totalCopied} cópias geradas.`, 'success');
+      showToast(tf('relation.toast.copies_generated', {count: totalCopied}), 'success');
       if (closeHandler) closeHandler();
     });
   }, 0);
@@ -11179,7 +11179,7 @@ function showMultiCopyDialog(st) {
 
 function showMultiDeleteDialog(st) {
   const checkedIndices = Array.from(getSelectedRows(st));
-  if (checkedIndices.length < 2) { showToast('Selecione pelo menos 2 registos.', 'warning'); return; }
+  if (checkedIndices.length < 2) { showToast(t('relation.toast.select_2_records'), 'warning'); return; }
   let numPanels = Math.min(2, checkedIndices.length);
   let panelPositions = getInitialPanelPositions(numPanels, checkedIndices.length);
 
@@ -11211,7 +11211,7 @@ function showMultiDeleteDialog(st) {
     wrapper.querySelector('.mp-delete-all')?.addEventListener('click', () => {
       showConfirmDialog(`Tem a certeza que pretende eliminar ${checkedIndices.length} registos?`, () => {
         removeSelectedRows(st, true);
-        showToast(`${checkedIndices.length} registos eliminados.`, 'success');
+        showToast(tf('relation.toast.records_deleted', {count: checkedIndices.length}), 'success');
         if (closeHandler) closeHandler();
       }, { confirmText: 'Eliminar Todos' });
     });
@@ -11245,15 +11245,15 @@ function renderPagination(st = state) {
   paginationContainer.innerHTML = `
     <div class="pagination-left">
       <div class="pagination-info">
-        <span class="pagination-total">${totalRecords} total</span>
-        ${hasFilter ? `<span class="pagination-filtered">${filteredRecords} filtered</span>` : ''}
-        <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedRecords} checked</span>
+        <span class="pagination-total" data-i18n="relation.pagination.total">${totalRecords} ${t('relation.pagination.total')}</span>
+        ${hasFilter ? `<span class="pagination-filtered" data-i18n="relation.pagination.filtered">${filteredRecords} ${t('relation.pagination.filtered')}</span>` : ''}
+        <span class="pagination-selected${showMulticheck ? '' : ' hidden'}" data-i18n="relation.pagination.checked">${selectedRecords} ${t('relation.pagination.checked')}</span>
         ${cardinalityMinUnmet ? `<span class="cardinality-warning cardinality-min-warning" title="Minimum ${cardinalityMin} records required">⚠ min ${cardinalityMin}</span>` : ''}
         ${cardinalityMaxReached ? `<span class="cardinality-warning cardinality-max-warning" title="Maximum ${cardinalityMax} records reached">⚠ max ${cardinalityMax}</span>` : ''}
       </div>
       <div class="pagination-actions${showMulticheck && (st.rel_options.general_multi_options || []).length > 0 ? '' : ' hidden'}">
         <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
-          <option value="" disabled selected>Checked Actions...</option>
+          <option value="" disabled selected data-i18n="relation.pagination.checked_actions">${t('relation.pagination.checked_actions')}</option>
           ${buildMultiOptionsHtml(st, selectedRecords, filteredRecords)}
         </select>
       </div>
@@ -11261,12 +11261,12 @@ function renderPagination(st = state) {
     <div class="pagination-right">
       <div class="pagination-size">
         <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
-          <option value="5" ${getPageSize(st) === 5 ? 'selected' : ''}>5 per page</option>
-          <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10 per page</option>
-          <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20 per page</option>
-          <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50 per page</option>
-          <option value="100" ${getPageSize(st) === 100 ? 'selected' : ''}>100 per page</option>
-          <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''}>All</option>
+          <option value="5" ${getPageSize(st) === 5 ? 'selected' : ''}>5 ${t('relation.pagination.per_page')}</option>
+          <option value="10" ${getPageSize(st) === 10 ? 'selected' : ''}>10 ${t('relation.pagination.per_page')}</option>
+          <option value="20" ${getPageSize(st) === 20 ? 'selected' : ''}>20 ${t('relation.pagination.per_page')}</option>
+          <option value="50" ${getPageSize(st) === 50 ? 'selected' : ''}>50 ${t('relation.pagination.per_page')}</option>
+          <option value="100" ${getPageSize(st) === 100 ? 'selected' : ''}>100 ${t('relation.pagination.per_page')}</option>
+          <option value="all" ${getPageSize(st) === 'all' ? 'selected' : ''} data-i18n="relation.pagination.all">${t('relation.pagination.all')}</option>
         </select>
       </div>
       <div class="pagination-nav">
@@ -11274,7 +11274,7 @@ function renderPagination(st = state) {
         <button class="btn-page btn-prev" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>⟨</button>
         <span class="page-indicator">
           <input type="number" class="page-input" value="${currentPage}" min="${hasResults ? 1 : 0}" max="${totalPages}" ${!hasResults ? 'disabled' : ''} />
-          <span>of ${totalPages}</span>
+          <span data-i18n="relation.pagination.of">${t('relation.pagination.of')} ${totalPages}</span>
         </span>
         <button class="btn-page btn-next" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩</button>
         <button class="btn-page btn-last" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>⟩⟩</button>
@@ -12545,7 +12545,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         setCurrentPage(st, 1);
         renderTable(st);
-        showToast('Filtro Top/Bottom/Middle N aplicado.', 'success');
+        showToast(t('relation.toast.filter_topn'), 'success');
       }
       return;
     }
@@ -12558,7 +12558,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         setCurrentPage(st, 1);
         renderTable(st);
-        showToast('Filtro percentual aplicado.', 'success');
+        showToast(t('relation.toast.filter_percent'), 'success');
       }
       return;
     }
@@ -12572,7 +12572,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         menu.remove();
         setCurrentPage(st, 1);
         renderTable(st);
-        showToast('Filtro de outliers aplicado.', 'success');
+        showToast(t('relation.toast.filter_outlier'), 'success');
       }
       return;
     }
@@ -12580,7 +12580,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
       applyColorBinning(colIdx, st);
       menu.remove();
       renderTable(st);
-      showToast('Coluna criada a partir de cores.', 'success');
+      showToast(t('relation.toast.created_from_colors'), 'success');
       return;
     }
     if (action === 'apply-binning') {
@@ -12591,7 +12591,7 @@ function showColumnMenu(colIdx, x, y, st = state) {
         applyBinning(colIdx, bins, method, st);
         menu.remove();
         renderTable(st);
-        showToast('Binning aplicado com sucesso.', 'success');
+        showToast(t('relation.toast.binning_applied'), 'success');
       }
       return;
     }
@@ -12757,7 +12757,7 @@ function showColumnsVisibilityDialog(st) {
     logOperation(st, { op: 'columns_visible', columns_visible: getColumnsVisible(st) });
     overlay.remove();
     renderTable(st);
-    showToast('Visibilidade das colunas atualizada.', 'success');
+    showToast(t('relation.toast.columns_visibility'), 'success');
   });
 }
 
@@ -12769,17 +12769,17 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'sort-asc':
       setSortCriteria(st, [{ column: colIdx, direction: 'asc' }]);
       logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'asc', options: { caseInsensitive: true, accentInsensitive: true, punctuationInsensitive: true, parseNumbers: true } });
-      showToast('Ordenação ascendente aplicada a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.sort_asc', {col: st.columnNames[colIdx]}), 'success');
       break;
     case 'sort-desc':
       setSortCriteria(st, [{ column: colIdx, direction: 'desc' }]);
       logOperation(st, { op: 'sort', column: st.columnNames[colIdx], direction: 'desc', options: { caseInsensitive: true, accentInsensitive: true, punctuationInsensitive: true, parseNumbers: true } });
-      showToast('Ordenação descendente aplicada a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.sort_desc', {col: st.columnNames[colIdx]}), 'success');
       break;
     case 'sort-clear':
       setSortCriteria(st, getSortCriteria(st).filter(c => c.column !== colIdx));
       logOperation(st, { op: 'sort_clear', column: st.columnNames[colIdx] });
-      showToast('Ordenação removida de "' + st.columnNames[colIdx] + '".', 'info');
+      showToast(tf('relation.toast.sort_cleared', {col: st.columnNames[colIdx]}), 'info');
       break;
     case 'filter-values':
       showFilterValuesDialog(colIdx, st);
@@ -12793,17 +12793,17 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'filter-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { nullOnly: true } };
       logOperation(st, { op: 'filter_null', column: st.columnNames[colIdx] });
-      showToast('Filtro "Only Null" aplicado a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.filter_null', {col: st.columnNames[colIdx]}), 'success');
       break;
     case 'filter-not-null':
       getFilters(st)[colIdx] = { type: 'criteria', criteria: { notNull: true } };
       logOperation(st, { op: 'filter_not_null', column: st.columnNames[colIdx] });
-      showToast('Filtro "Not Null" aplicado a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.filter_not_null', {col: st.columnNames[colIdx]}), 'success');
       break;
     case 'filter-clear':
       delete getFilters(st)[colIdx];
       logOperation(st, { op: 'filter_clear', column: st.columnNames[colIdx] });
-      showToast('Filtro removido de "' + st.columnNames[colIdx] + '".', 'info');
+      showToast(tf('relation.toast.filter_cleared', {col: st.columnNames[colIdx]}), 'info');
       break;
     case 'format-databar':
       showDataBarColorDialog(colIdx, st);
@@ -12811,7 +12811,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
     case 'format-color-scale':
       applyColorScale(colIdx, st);
       logOperation(st, { op: 'format_color_scale', column: st.columnNames[colIdx] });
-      showToast('Escala de cores aplicada a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.color_scale_applied', {col: st.columnNames[colIdx]}), 'success');
       break;
     case 'format-icon-set':
       showIconSetDialog(colIdx, st);
@@ -12824,34 +12824,34 @@ function handleColumnMenuAction(colIdx, action, st = state) {
         delete st.relation.colored_items[colName];
       }
       logOperation(st, { op: 'format_clear', column: st.columnNames[colIdx] });
-      showToast('Formatação removida de "' + st.columnNames[colIdx] + '".', 'info');
+      showToast(tf('relation.toast.format_cleared', {col: st.columnNames[colIdx]}), 'info');
       break;
     case 'toggle-group':
       toggleGroupBy(colIdx, st);
       logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx], group_by_columns: getGroupByColumns(st).map(c => st.columnNames[c]), selected_values: Object.fromEntries(Object.entries(getGroupBySelectedValues(st)).map(([k, v]) => [st.columnNames[parseInt(k)] || k, v])) });
-      showToast('Agrupamento alterado para "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.group_changed', {col: st.columnNames[colIdx]}), 'success');
       return;
     case 'group-all':
       groupByAllColumns(st);
       logOperation(st, { op: 'group_all', group_by_columns: getGroupByColumns(st).map(c => st.columnNames[c]) });
-      showToast('Agrupamento por todas as colunas aplicado.', 'success');
+      showToast(t('relation.toast.group_all'), 'success');
       return;
     case 'clear-groups':
       setGroupByColumns(st, []);
       setGroupBySelectedValues(st, {});
       getUiState(st).groupAllKeepVisible = false;
       logOperation(st, { op: 'clear_groups' });
-      showToast('Todos os agrupamentos removidos.', 'info');
+      showToast(t('relation.toast.groups_cleared'), 'info');
       break;
     case 'expand-relation':
       expandRelationColumn(colIdx, st);
       logOperation(st, { op: 'expand_relation', column: st.columnNames[colIdx] });
-      showToast('Produto cartesiano (ALL) aplicado a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.cartesian_all', {col: st.columnNames[colIdx]}), 'success');
       return;
     case 'expand-relation-this':
       expandRelationColumnThis(colIdx, st);
       logOperation(st, { op: 'expand_relation_this', column: st.columnNames[colIdx] });
-      showToast('Produto cartesiano (THIS) aplicado a "' + st.columnNames[colIdx] + '".', 'success');
+      showToast(tf('relation.toast.cartesian_this', {col: st.columnNames[colIdx]}), 'success');
       return;
     case 'row-number': {
       let newColName = 'row_number';
@@ -12873,7 +12873,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'row_number', column_created: newColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + newColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: newColName}), 'success');
       break;
     }
     case 'rank': {
@@ -12907,7 +12907,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'rank', column: name, column_created: rankColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + rankColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: rankColName}), 'success');
       break;
     }
     case 'dense-rank': {
@@ -12941,7 +12941,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'dense_rank', column: name, column_created: denseColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + denseColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: denseColName}), 'success');
       break;
     }
     // === Derived Columns: Date ===
@@ -12990,7 +12990,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: deriveName, source_column: st.columnNames[colIdx], column_created: deriveColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + deriveColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: deriveColName}), 'success');
       return;
     }
     // === Derived Columns: Time ===
@@ -13036,7 +13036,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: tDeriveName, source_column: st.columnNames[colIdx], column_created: tColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + tColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: tColName}), 'success');
       return;
     }
     case 'derive-ampm': {
@@ -13067,7 +13067,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'ampm', source_column: st.columnNames[colIdx], column_created: ampmColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + ampmColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: ampmColName}), 'success');
       return;
     }
     // === Derived Columns: Float rounding ===
@@ -13096,7 +13096,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'round', source_column: st.columnNames[colIdx], column_created: roundColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + roundColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: roundColName}), 'success');
       return;
     }
     // === Derived Columns: String metrics ===
@@ -13119,7 +13119,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'length', source_column: st.columnNames[colIdx], column_created: lenColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + lenColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: lenColName}), 'success');
       return;
     }
     case 'derive-bytes': {
@@ -13141,7 +13141,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'bytes', source_column: st.columnNames[colIdx], column_created: bytesColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + bytesColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: bytesColName}), 'success');
       return;
     }
     case 'derive-flesch-ease': {
@@ -13170,7 +13170,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'flesch_ease', source_column: st.columnNames[colIdx], column_created: feColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + feColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: feColName}), 'success');
       return;
     }
     case 'derive-flesch-kincaid': {
@@ -13199,7 +13199,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'flesch_kincaid', source_column: st.columnNames[colIdx], column_created: fkColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + fkColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: fkColName}), 'success');
       return;
     }
     case 'derive-sentences': {
@@ -13222,7 +13222,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'derive', type: 'sentences', source_column: st.columnNames[colIdx], column_created: sentColName });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna "' + sentColName + '" criada.', 'success');
+      showToast(tf('relation.toast.column_created', {col: sentColName}), 'success');
       return;
     }
     case 'derive-hierarchy-ascendants': {
@@ -13272,7 +13272,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       logOperation(st, { op: 'hide_column', column: st.columnNames[colIdx] });
       closeAllMenus();
       renderTable(st);
-      showToast('Coluna ocultada.', 'success');
+      showToast(t('relation.toast.column_hidden'), 'success');
       return;
     }
     case 'hide-selected-cols': {
@@ -13292,7 +13292,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       getSelectedColumns(st).clear();
       closeAllMenus();
       renderTable(st);
-      showToast('Colunas selecionadas ocultadas.', 'success');
+      showToast(t('relation.toast.columns_hidden'), 'success');
       return;
     }
     case 'format-active-filter':
@@ -13302,13 +13302,13 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       const removedColName = st.columnNames[colIdx];
       logOperation(st, { op: 'remove_column', column: removedColName });
       removeColumn(colIdx, st);
-      showToast('Coluna "' + removedColName + '" removida.', 'success');
+      showToast(tf('relation.toast.column_removed', {col: removedColName}), 'success');
       break;
     }
     case 'remove-selected-cols':
       logOperation(st, { op: 'remove_selected_columns' });
       removeSelectedColumns(st);
-      showToast('Colunas selecionadas removidas.', 'success');
+      showToast(t('relation.toast.columns_removed'), 'success');
       break;
   }
   
@@ -13873,7 +13873,7 @@ const ICON_SETS = [
 function showIconSetDialog(colIdx, st = state) {
   const stats = calculateStatistics(colIdx, st);
   if (stats.min === undefined || stats.max === undefined) {
-    showToast('Icon sets require numeric columns with values', 'warning');
+    showToast(t('relation.toast.icon_set_numeric'), 'warning');
     return;
   }
 
@@ -14125,7 +14125,7 @@ function showFilterValuesDialog(colIdx, st = state) {
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="filter-search-row">
-      <input type="text" class="filter-search filter-input" placeholder="Search...">
+      <input type="text" class="filter-search filter-input" placeholder="${t('relation.common.search')}" data-i18n-placeholder="relation.common.search">
       <button class="btn btn-sm filter-search-btn">Find</button>
       <button class="btn btn-sm filter-search-clear">Clear</button>
     </div>
@@ -15473,7 +15473,7 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
 
 function handleRowOperation(st, rowIdx, action) {
   if (CARDINALITY_BLOCKED_LINE.has(action) && isCardinalityMaxReached(st)) {
-    showToast(`Maximum ${st.rel_options.cardinality_max} records reached.`, 'warning');
+    showToast(tf('relation.toast.max_records', {max: st.rel_options.cardinality_max}), 'warning');
     return;
   }
   switch (action) {
@@ -15504,7 +15504,7 @@ function handleRowOperation(st, rowIdx, action) {
         setSortedIndices(st, [...getFilteredIndices(st)]);
         logOperation(st, { op: 'delete_selected', count: deleteCount, ids: deletedIds, records: deletedRecords });
         renderTable(st);
-        showToast(deleteCount + ' registos eliminados.', 'success');
+        showToast(tf('relation.toast.records_deleted', {count: deleteCount}), 'success');
       }
       break;
     case 'new-fast-row':
@@ -16190,11 +16190,11 @@ function buildObjectEditor(obj, editable, onChange, title) {
     function confirmAdd() {
       const newKey = keyInput.value.trim();
       if (!newKey) {
-        showToast('Key cannot be empty.', 'error');
+        showToast(t('relation.objecteditor.key_empty'), 'error');
         return;
       }
       if (getExistingKeys().includes(newKey)) {
-        showToast('Key "' + newKey + '" already exists.', 'error');
+        showToast(t('relation.objecteditor.key_exists'), 'error');
         return;
       }
       const newVal = valInput.value;
@@ -16370,7 +16370,7 @@ function initFileFieldsInContainer(container, st, row, mode) {
           row[colIdx] = updatedRel;
           fill.style.width = '100%';
           text.textContent = files.length + ' ficheiro(s) adicionado(s).';
-          showToast(files.length + ' ficheiro(s) adicionado(s).', 'success');
+          showToast(tf('relation.toast.files_added', {count: files.length}), 'success');
 
           setTimeout(() => {
             progressDiv.style.display = 'none';
@@ -16391,7 +16391,7 @@ function initFileFieldsInContainer(container, st, row, mode) {
         }).catch(err => {
           fill.style.width = '0%';
           text.textContent = 'Erro: ' + err.message;
-          showToast('Erro ao processar ficheiros.', 'error');
+          showToast(t('relation.toast.files_error'), 'error');
         });
       };
 
@@ -16574,7 +16574,7 @@ function showRowCopyDialog(st, rowIdx) {
           logOperation(st, { op: 'copy_row', source_id: getRowId(st, row), copies: count, source_record: buildRowRecord(st, row) });
           renderTable(st);
           closeRowOperationPanel(st);
-          showToast(count + ' cópia(s) gerada(s).', 'success');
+          showToast(tf('relation.toast.copies_generated', {count}), 'success');
         });
       }
     }, 0);
@@ -16595,7 +16595,7 @@ function showRowDeleteDialog(st, rowIdx) {
     logOperation(st, { op: 'delete_row', id: deleteId, record: deleteRecord });
     renderTable(st);
     outputRelationState(st);
-    showToast('Registo eliminado.', 'success');
+    showToast(t('relation.toast.record_deleted'), 'success');
   }, { confirmText: 'Eliminar' });
 }
 
@@ -16803,12 +16803,12 @@ function showRowNewDialog(st, rowIdx, mode = 'new') {
           saveRecord();
           outputRelationState(st);
           closeRowOperationPanel(st);
-          showToast('Registo criado.', 'success');
+          showToast(t('relation.toast.record_created'), 'success');
         });
         footer.querySelector('.save-and-new')?.addEventListener('click', () => {
           saveRecord();
           outputRelationState(st);
-          showToast('Registo criado. Formulário limpo para novo registo.', 'success');
+          showToast(t('relation.toast.record_created_form'), 'success');
           clearForm();
           const idColIdx = st.columnTypes.findIndex(t => t === 'id');
           if (idColIdx !== -1) {
@@ -16971,7 +16971,7 @@ function showRowEditDialog(st, rowIdx) {
           }
           
           if (targetRowIdx === -1) {
-            showToast('Registo não encontrado.', 'error');
+            showToast(t('relation.toast.record_not_found'), 'error');
             return;
           }
           
@@ -17048,7 +17048,7 @@ function showRowEditDialog(st, rowIdx) {
           renderTable(st);
           outputRelationState(st);
           closeRowOperationPanel(st);
-          showToast('Registo gravado.', 'success');
+          showToast(t('relation.toast.record_saved'), 'success');
         });
       }
     }, 0);
@@ -17444,7 +17444,7 @@ function applyAIFilter(conditions, st = state) {
   setCurrentPage(st, 1);
   applyFilters(st);
   renderTable(st);
-  showToast('AI filter applied');
+  showToast(t('relation.toast.ai_filter'));
 }
 
 // View tab icons SVG definitions
@@ -17480,7 +17480,9 @@ function renderViewTabs() {
     btn.className = 'view-tab' + (idx === 0 ? ' active' : '');
     btn.dataset.view = viewKey;
     btn.dataset.testid = 'tab-' + viewKey;
-    btn.innerHTML = (VIEW_TAB_ICONS[viewKey] || '') + ' ' + (VIEW_DISPLAY_NAMES[viewKey] || viewName);
+    const i18nKey = 'relation.view.' + viewKey;
+    const label = t(i18nKey) || VIEW_DISPLAY_NAMES[viewKey] || viewName;
+    btn.innerHTML = (VIEW_TAB_ICONS[viewKey] || '') + ' <span data-i18n="' + i18nKey + '">' + label + '</span>';
     
     btn.addEventListener('click', () => {
       switchView(viewKey);
@@ -17507,7 +17509,7 @@ function renderViewTabs() {
     searchWrapper.className = 'quick-search-wrapper';
     searchWrapper.style.cssText = searchActionsDisplay;
     searchWrapper.innerHTML = `
-      <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
+      <input type="text" class="quick-search-input" placeholder="${t('relation.common.search')}" data-i18n-placeholder="relation.common.search" data-testid="input-quick-search">
       <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
     `;
     tabsRight.appendChild(searchWrapper);
@@ -17566,7 +17568,8 @@ function renderViewTabs() {
     const badgeDisplay = initialView === 'table' ? '' : 'display: none;';
     const badgeSpan = document.createElement('span');
     badgeSpan.className = 'keyboard-help-badge';
-    badgeSpan.title = 'Keyboard Shortcuts';
+    badgeSpan.title = t('relation.shortcuts.help_badge');
+    badgeSpan.dataset.i18nTitle = 'relation.shortcuts.help_badge';
     badgeSpan.dataset.testid = 'button-help-keyboard';
     badgeSpan.style.cssText = badgeDisplay;
     badgeSpan.textContent = 'ℹ';
@@ -17928,16 +17931,16 @@ function renderCardsView(st = state) {
 
   let navHtml = '<div class="cards-left">';
   navHtml += '<div class="cards-info">';
-  navHtml += '<span class="cards-info-total">' + totalRecords + ' total</span>';
+  navHtml += '<span class="cards-info-total" data-i18n="relation.pagination.total">' + totalRecords + ' ' + t('relation.pagination.total') + '</span>';
   if (hasFilter) {
-    navHtml += '<span class="cards-info-filtered">' + filteredRecords + ' filtered</span>';
+    navHtml += '<span class="cards-info-filtered" data-i18n="relation.pagination.filtered">' + filteredRecords + ' ' + t('relation.pagination.filtered') + '</span>';
   }
-  navHtml += '<span class="cards-info-selected' + (showMulticheck ? '' : ' hidden') + '">' + selectedRecords + ' checked</span>';
+  navHtml += '<span class="cards-info-selected' + (showMulticheck ? '' : ' hidden') + '" data-i18n="relation.pagination.checked">' + selectedRecords + ' ' + t('relation.pagination.checked') + '</span>';
   navHtml += '</div>';
   const hasMultiOpts = (st.rel_options.general_multi_options || []).length > 0;
   navHtml += '<div class="cards-actions' + (showMulticheck && hasMultiOpts ? '' : ' hidden') + '">';
   navHtml += '<select class="cards-selection-actions">';
-  navHtml += '<option value="" disabled selected>Checked Actions...</option>';
+  navHtml += '<option value="" disabled selected data-i18n="relation.pagination.checked_actions">' + t('relation.pagination.checked_actions') + '</option>';
   navHtml += buildMultiOptionsHtml(st, selectedCount, filteredCount);
   navHtml += '</select>';
   navHtml += '</div>';
@@ -17946,13 +17949,13 @@ function renderCardsView(st = state) {
   navHtml += '<div class="cards-right">';
   navHtml += '<select class="cards-page-size">';
   pageSizeOptions.forEach(size => {
-    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(st) === size ? 'selected' : '') + '>' + size + ' per card</option>';
+    navHtml += '<option value="' + size + '" ' + (getCardsPageSize(st) === size ? 'selected' : '') + '>' + size + ' ' + t('relation.pagination.per_card') + '</option>';
   });
   navHtml += '</select>';
   navHtml += '<div class="cards-pagination">';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-first" ' + (getCardsCurrentPage(st) <= 1 ? 'disabled' : '') + '>⟨⟨</button>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-prev" ' + (getCardsCurrentPage(st) <= 1 ? 'disabled' : '') + '>⟨</button>';
-  navHtml += '<span>Page ' + getCardsCurrentPage(st) + ' of ' + totalPages + '</span>';
+  navHtml += '<span data-i18n="relation.pagination.page">' + t('relation.pagination.page') + ' ' + getCardsCurrentPage(st) + ' ' + t('relation.pagination.of') + ' ' + totalPages + '</span>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-next" ' + (getCardsCurrentPage(st) >= totalPages ? 'disabled' : '') + '>⟩</button>';
   navHtml += '<button class="btn btn-outline btn-sm" data-action="cards-last" ' + (getCardsCurrentPage(st) >= totalPages ? 'disabled' : '') + '>⟩⟩</button>';
   navHtml += '</div>';
@@ -19592,7 +19595,7 @@ function downloadPivotChart(st, format) {
   const chartPanel = st.container ? st.container.querySelector('.pivot-chart-panel') : el('.pivot-chart-panel');
   if (!chartPanel) return;
   const canvas = chartPanel.querySelector('.pivot-chart-canvas');
-  if (!canvas) { showToast('No chart to download', 'warning'); return; }
+  if (!canvas) { showToast(t('relation.toast.no_chart'), 'warning'); return; }
 
   if (format === 'png') {
     const link = document.createElement('a');
@@ -19609,7 +19612,7 @@ function downloadPivotChart(st, format) {
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     } catch (e) {
-      showToast('Error generating GIF: ' + e.message, 'error');
+      showToast(tf('relation.toast.gif_error', {msg: e.message}), 'error');
     }
   }
 }
@@ -22498,7 +22501,7 @@ function addClustersAsColumn(st = state) {
   });
   
   logOperation(st, { op: 'clusters_as_column', columns: colDefs.map(d => d.name), num_clusters: new Set(nodes.map(n => n.cluster)).size });
-  showToast('Columns "cluster", "cluster_x", "cluster_y" ' + (anyNew ? 'added' : 'updated'));
+  showToast(t('relation.toast.clusters_updated'));
 }
 
 // K-means clustering algorithm
@@ -23134,7 +23137,7 @@ function initRelationInstance(container, relationData, options = {}) {
   // Build search input HTML - always show for association nested relations even if no table/cards view
   const forceSearch = !!parentAssociation;
   const searchHtml = (showSearchAndActions || forceSearch) ? `<div class="quick-search-wrapper" style="${searchActionsDisplay}">
-    <input type="text" class="quick-search-input" placeholder="Search..." data-testid="input-quick-search">
+    <input type="text" class="quick-search-input" placeholder="${t('relation.common.search')}" data-i18n-placeholder="relation.common.search" data-testid="input-quick-search">
     <button class="quick-search-clear" title="Clear search" data-testid="button-clear-search">✕</button>
   </div>` : '';
   
@@ -23152,7 +23155,7 @@ function initRelationInstance(container, relationData, options = {}) {
     ? `<div class="always-visible-wrapper" style="${searchActionsDisplay}">${buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions, instanceState)}</div>` 
     : '';
   
-  const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="Keyboard Shortcuts" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
+  const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="${t('relation.shortcuts.help_badge')}" data-i18n-title="relation.shortcuts.help_badge" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
   const hasRightContent = searchHtml || assocButtonsHtml || alwaysVisibleSelectHtml || badgeHtml;
   
   const hasViewTabs = viewOptions.length > 0;
@@ -23164,7 +23167,9 @@ function initRelationInstance(container, relationData, options = {}) {
         ${viewOptions.map((view, idx) => {
           const viewKey = view.toLowerCase();
           const icon = VIEW_TAB_ICONS[viewKey] || '';
-          return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} ${VIEW_DISPLAY_NAMES[viewKey] || view}</button>`;
+          const i18nKey = 'relation.view.' + viewKey;
+          const label = t(i18nKey) || VIEW_DISPLAY_NAMES[viewKey] || view;
+          return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} <span data-i18n="${i18nKey}">${label}</span></button>`;
         }).join('')}
       </div>` : ''}
       ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${assocButtonsHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
@@ -24724,7 +24729,7 @@ function renderStructure(st = state) {
       if (!newName || !newName.trim()) return;
       const name = newName.trim();
       if (st.relation.columns[name]) {
-        showToast('Column "' + name + '" already exists.', 'warning');
+        showToast(tf('relation.toast.column_exists', {col: name}), 'warning');
         return;
       }
       st.relation.columns[name] = 'string';
@@ -24739,7 +24744,7 @@ function renderStructure(st = state) {
       render();
       renderTable(st);
       updateJsonOutput(st);
-      showToast('Column "' + name + '" added.', 'success');
+      showToast(tf('relation.toast.column_added', {col: name}), 'success');
     });
     toolbar.appendChild(newBtn);
 
@@ -24766,7 +24771,7 @@ function renderStructure(st = state) {
         render();
         renderTable(st);
         updateJsonOutput(st);
-        showToast('Column deleted.', 'success');
+        showToast(t('relation.toast.column_struct_deleted'), 'success');
       });
       toolbar.appendChild(delBtn);
 
@@ -24795,7 +24800,7 @@ function renderStructure(st = state) {
         render();
         renderTable(st);
         updateJsonOutput(st);
-        showToast('All changes applied.', 'success');
+        showToast(t('relation.toast.changes_applied'), 'success');
       });
       toolbar.appendChild(applyAllBtn);
 
@@ -25483,7 +25488,7 @@ function initSavedView(st = state) {
       });
       nameInput.value = '';
       renderSavedViewsList(st);
-      showToast('Vista guardada.', 'success');
+      showToast(t('relation.toast.view_saved'), 'success');
     });
   }
 
@@ -25527,7 +25532,7 @@ function restoreSavedSnapshot(st, savedEntry) {
   if (type === 'log') {
     if (snapshot.log) {
       st.relation.log = JSON.parse(JSON.stringify(snapshot.log));
-      showToast(`Log restaurado: ${snapshot.log.length} operações`, 'info');
+      showToast(tf('relation.toast.log_restored', {count: snapshot.log.length}), 'info');
     }
   }
 
@@ -25628,7 +25633,7 @@ function renderSavedViewsList(st) {
       const idx = parseInt(item.dataset.savedIdx);
       if (idx >= 0 && idx < saved.length) {
         restoreSavedSnapshot(st, saved[idx]);
-        showToast('Vista restaurada.', 'success');
+        showToast(t('relation.toast.view_restored'), 'success');
       }
     });
   });
@@ -25639,7 +25644,7 @@ function renderSavedViewsList(st) {
       const idx = parseInt(btn.dataset.savedIdx);
       if (idx >= 0 && idx < saved.length) {
         restoreSavedSnapshot(st, saved[idx]);
-        showToast('Vista restaurada.', 'success');
+        showToast(t('relation.toast.view_restored'), 'success');
       }
     });
   });
@@ -25651,7 +25656,7 @@ function renderSavedViewsList(st) {
       if (idx >= 0 && idx < saved.length) {
         if (confirm(`Eliminar vista "${saved[idx].name}"?`)) {
           deleteSavedView(st, saved[idx].name);
-          showToast('Vista eliminada.', 'success');
+          showToast(t('relation.toast.view_deleted'), 'success');
         }
       }
     });
@@ -25733,18 +25738,18 @@ function renderPaginationWithState(st, paginationDiv) {
   const showMulticheck = st.rel_options.show_multicheck;
   
   paginationDiv.innerHTML = `
-    <span class="pagination-info">${totalItems} rows</span>
-    <span class="pagination-selected${showMulticheck ? '' : ' hidden'}">${selectedCount} checked</span>
+    <span class="pagination-info" data-i18n="relation.pagination.rows">${totalItems} ${t('relation.pagination.rows')}</span>
+    <span class="pagination-selected${showMulticheck ? '' : ' hidden'}" data-i18n="relation.pagination.checked">${selectedCount} ${t('relation.pagination.checked')}</span>
     <select class="page-size-select" ${!hasResults ? 'disabled' : ''}>
       <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
       <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
       <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
       <option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option>
-      <option value="all" ${pageSize === 'all' ? 'selected' : ''}>All</option>
+      <option value="all" ${pageSize === 'all' ? 'selected' : ''} data-i18n="relation.pagination.all">${t('relation.pagination.all')}</option>
     </select>
     <button class="btn btn-sm page-btn" data-action="first" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>«</button>
     <button class="btn btn-sm page-btn" data-action="prev" ${!hasResults || currentPage === 1 ? 'disabled' : ''}>‹</button>
-    <span class="page-info">Página ${currentPage} de ${totalPages}</span>
+    <span class="page-info" data-i18n="relation.pagination.page">${t('relation.pagination.page')} ${currentPage} ${t('relation.pagination.of')} ${totalPages}</span>
     <button class="btn btn-sm page-btn" data-action="next" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>›</button>
     <button class="btn btn-sm page-btn" data-action="last" ${!hasResults || currentPage >= totalPages ? 'disabled' : ''}>»</button>
   `;

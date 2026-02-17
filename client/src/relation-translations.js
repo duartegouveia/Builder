@@ -276,6 +276,10 @@ window.RELATION_TRANSLATIONS = {
   "relation.pagination.all": { pt: "Todos", en: "All", es: "Todos", fr: "Tous", it: "Tutti", de: "Alle" },
   "relation.pagination.loading": { pt: "A carregar...", en: "Loading...", es: "Cargando...", fr: "Chargement...", it: "Caricamento...", de: "Laden..." },
   "relation.pagination.no_data": { pt: "Sem dados para apresentar", en: "No data to display", es: "Sin datos para mostrar", fr: "Aucune donnée à afficher", it: "Nessun dato da visualizzare", de: "Keine Daten anzuzeigen" },
+  "relation.pagination.rows": { pt: "linhas", en: "rows", es: "filas", fr: "lignes", it: "righe", de: "Zeilen" },
+  "relation.pagination.page": { pt: "Página", en: "Page", es: "Página", fr: "Page", it: "Pagina", de: "Seite" },
+  "relation.pagination.per_card": { pt: "por card", en: "per card", es: "por tarjeta", fr: "par carte", it: "per scheda", de: "pro Karte" },
+  "relation.pagination.checked_actions": { pt: "Ações de Marcados...", en: "Checked Actions...", es: "Acciones de Marcados...", fr: "Actions Cochés...", it: "Azioni Selezionati...", de: "Markierte Aktionen..." },
 
   // ─── HIERARCHY ────────────────────────────────────────────
   "relation.hierarchy.root": { pt: "Raiz", en: "Root", es: "Raíz", fr: "Racine", it: "Radice", de: "Wurzel" },
@@ -798,9 +802,38 @@ window.RELATION_TRANSLATIONS = {
   "relation.color.contrast": { pt: "Contraste {ratio}:1 ({level})", en: "Contrast {ratio}:1 ({level})", es: "Contraste {ratio}:1 ({level})", fr: "Contraste {ratio}:1 ({level})", it: "Contrasto {ratio}:1 ({level})", de: "Kontrast {ratio}:1 ({level})" },
 };
 
-// Translation function
+// Translation function — returns translated string for key
 window.t = function(key) {
   const entry = window.RELATION_TRANSLATIONS[key];
   if (!entry) return key;
   return entry[window.currentLang] || entry['en'] || entry['pt'] || key;
+};
+
+// Translation function with placeholder substitution — tf('key', {count: 5, name: 'X'})
+window.tf = function(key, vars) {
+  let text = window.t(key);
+  if (vars && typeof vars === 'object') {
+    Object.keys(vars).forEach(k => {
+      text = text.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+    });
+  }
+  return text;
+};
+
+// Surgical DOM update — updates all elements with data-i18n without rebuilding the DOM
+window.applyTranslations = function(root) {
+  const scope = root || document;
+  scope.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const attr = el.dataset.i18nAttr;
+    const vars = el.dataset.i18nVars ? JSON.parse(el.dataset.i18nVars) : null;
+    const text = vars ? window.tf(key, vars) : window.t(key);
+    if (attr) {
+      el.setAttribute(attr, text);
+    } else if (el.dataset.i18nHtml !== undefined) {
+      el.innerHTML = text;
+    } else {
+      el.textContent = text;
+    }
+  });
 };
