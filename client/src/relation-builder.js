@@ -10481,12 +10481,12 @@ function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
     'Uncheck All': { value: 'deselect-all', icon: '✗', label: t('relation.multiops.uncheck_all') },
     'Remove Checked': { value: 'remove-selected', icon: '✕', label: tf('relation.multiops.remove_checked', {count: selectedCount}), needsSelection: true },
     'Remove Unchecked': { value: 'remove-unselected', icon: '✕', label: tf('relation.multiops.remove_unchecked', {count: filteredCount - selectedCount}), needsSelection: true },
-    'Multi View': { value: 'multi-view', icon: '👁', label: tf('relation.multiops.multi_view', {count: selectedCount}), needsSelection: true },
-    'Multi Edit': { value: 'multi-edit', icon: '✏️', label: tf('relation.multiops.multi_edit', {count: selectedCount}), needsSelection: true },
-    'Group Edit': { value: 'group-edit', icon: '📝', label: tf('relation.multiops.group_edit', {count: selectedCount}), needsSelection: true },
-    'Merge': { value: 'merge', icon: '🔗', label: tf('relation.multiops.merge', {count: selectedCount}), needsSelection: true },
-    'Multi Copy': { value: 'multi-copy', icon: '📋', label: tf('relation.multiops.multi_copy', {count: selectedCount}), needsSelection: true },
-    'Multi Delete': { value: 'multi-delete', icon: '🗑️', label: tf('relation.multiops.multi_delete', {count: selectedCount}), needsSelection: true }
+    'Multi View': { value: 'multi-view', icon: '👁', label: tf('relation.multiops.multi_view_label', {count: selectedCount}), needsSelection: true },
+    'Multi Edit': { value: 'multi-edit', icon: '✏️', label: tf('relation.multiops.multi_edit_label', {count: selectedCount}), needsSelection: true },
+    'Group Edit': { value: 'group-edit', icon: '📝', label: tf('relation.multiops.group_edit_label', {count: selectedCount}), needsSelection: true },
+    'Merge': { value: 'merge', icon: '🔗', label: tf('relation.multiops.merge_label', {count: selectedCount}), needsSelection: true },
+    'Multi Copy': { value: 'multi-copy', icon: '📋', label: tf('relation.multiops.multi_copy_label', {count: selectedCount}), needsSelection: true },
+    'Multi Delete': { value: 'multi-delete', icon: '🗑️', label: tf('relation.multiops.multi_delete_label', {count: selectedCount}), needsSelection: true }
   };
   
   const multiOptions = st.rel_options.general_multi_options || DEFAULT_REL_OPTIONS.general_multi_options;
