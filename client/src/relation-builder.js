@@ -4183,13 +4183,13 @@ function generateFrequencyTableHTML(stats, colName) {
   let html = `<table class="freq-table">
     <thead>
       <tr>
-        <th>Value</th>
+        <th>${t('relation.stats.freq_value')}</th>
         <th>n</th>
         <th>%</th>
-        <th>Cum↓ n</th>
-        <th>Cum↓ %</th>
-        <th>Cum↑ n</th>
-        <th>Cum↑ %</th>
+        <th>${t('relation.stats.freq_cum_down_n')}</th>
+        <th>${t('relation.stats.freq_cum_down_pct')}</th>
+        <th>${t('relation.stats.freq_cum_up_n')}</th>
+        <th>${t('relation.stats.freq_cum_up_pct')}</th>
       </tr>
     </thead>
     <tbody>`;
@@ -4253,13 +4253,13 @@ function generateBooleanFrequencyTableHTML(stats) {
   let html = `<table class="freq-table">
     <thead>
       <tr>
-        <th>Value</th>
+        <th>${t('relation.stats.freq_value')}</th>
         <th>n</th>
         <th>%</th>
-        <th>Cum↓ n</th>
-        <th>Cum↓ %</th>
-        <th>Cum↑ n</th>
-        <th>Cum↑ %</th>
+        <th>${t('relation.stats.freq_cum_down_n')}</th>
+        <th>${t('relation.stats.freq_cum_down_pct')}</th>
+        <th>${t('relation.stats.freq_cum_up_n')}</th>
+        <th>${t('relation.stats.freq_cum_up_pct')}</th>
       </tr>
     </thead>
     <tbody>`;
@@ -4343,43 +4343,43 @@ function generateStatsExplanationsHTML(type) {
   let explanations = [];
   
   // Common explanations
-  explanations.push({ term: 'Total Records', def: 'Total number of rows in the dataset.' });
-  explanations.push({ term: 'Non-null / Null', def: 'Count of rows with/without values. Nulls may indicate missing data.' });
+  explanations.push({ term: t('relation.stats.explain_total_records'), def: t('relation.stats.explain_total_records_desc') });
+  explanations.push({ term: t('relation.stats.explain_non_null'), def: t('relation.stats.explain_non_null_desc') });
   
   if (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time' || type === 'relation') {
-    explanations.push({ term: 'Min / Max', def: 'Smallest and largest values in the data.' });
-    explanations.push({ term: 'Range', def: 'Difference between maximum and minimum values.' });
-    explanations.push({ term: 'Mean (μ)', def: 'Arithmetic average: sum of all values divided by count. Sensitive to outliers.' });
-    explanations.push({ term: 'Median', def: 'Middle value when data is sorted. 50% of values are below, 50% above. Robust to outliers.' });
-    explanations.push({ term: 'Mode', def: 'Most frequently occurring value(s). A dataset can have multiple modes.' });
-    explanations.push({ term: 'Std Dev (σ)', def: 'Standard deviation measures how spread out values are from the mean. Low σ = values clustered near mean.' });
-    explanations.push({ term: 'Variance (σ²)', def: 'Square of standard deviation. Same interpretation but in squared units.' });
-    explanations.push({ term: 'Q1 (25%)', def: 'First quartile: 25% of values are below this point.' });
-    explanations.push({ term: 'Q3 (75%)', def: 'Third quartile: 75% of values are below this point.' });
-    explanations.push({ term: 'IQR', def: 'Interquartile range (Q3-Q1). Contains the middle 50% of values. Used to detect outliers.' });
-    explanations.push({ term: 'Outliers', def: 'Values below Q1-1.5×IQR or above Q3+1.5×IQR. Unusual but not extreme.' });
-    explanations.push({ term: 'Far Outliers', def: 'Values below Q1-3×IQR or above Q3+3×IQR. Potentially erroneous or exceptional data.' });
-    explanations.push({ term: 'Skewness', def: 'Measures asymmetry. Positive = tail extends right (more low values). Negative = tail extends left. Zero = symmetric.' });
-    explanations.push({ term: 'Kurtosis', def: 'Measures "tailedness". High = more outliers. Low = fewer outliers. Normal distribution has kurtosis ≈ 0.' });
+    explanations.push({ term: t('relation.stats.explain_min_max'), def: t('relation.stats.explain_min_max_desc') });
+    explanations.push({ term: t('relation.stats.explain_range'), def: t('relation.stats.explain_range_desc') });
+    explanations.push({ term: t('relation.stats.explain_mean'), def: t('relation.stats.explain_mean_desc') });
+    explanations.push({ term: t('relation.stats.explain_median'), def: t('relation.stats.explain_median_desc') });
+    explanations.push({ term: t('relation.stats.explain_mode'), def: t('relation.stats.explain_mode_desc') });
+    explanations.push({ term: t('relation.stats.explain_stddev'), def: t('relation.stats.explain_stddev_desc') });
+    explanations.push({ term: t('relation.stats.explain_variance'), def: t('relation.stats.explain_variance_desc') });
+    explanations.push({ term: t('relation.stats.explain_q1'), def: t('relation.stats.explain_q1_desc') });
+    explanations.push({ term: t('relation.stats.explain_q3'), def: t('relation.stats.explain_q3_desc') });
+    explanations.push({ term: t('relation.stats.explain_iqr'), def: t('relation.stats.explain_iqr_desc') });
+    explanations.push({ term: t('relation.stats.explain_outliers'), def: t('relation.stats.explain_outliers_desc') });
+    explanations.push({ term: t('relation.stats.explain_far_outliers'), def: t('relation.stats.explain_far_outliers_desc') });
+    explanations.push({ term: t('relation.stats.explain_skewness'), def: t('relation.stats.explain_skewness_desc') });
+    explanations.push({ term: t('relation.stats.explain_kurtosis'), def: t('relation.stats.explain_kurtosis_desc') });
   }
   
   if (type === 'select' || type === 'radio' || type === 'boolean') {
-    explanations.push({ term: 'Categories', def: 'Number of unique values/options in the data.' });
-    explanations.push({ term: 'Mode', def: 'Most frequently occurring category.' });
-    explanations.push({ term: 'Mode Count', def: 'How many times the mode appears.' });
-    explanations.push({ term: 'Variation Ratio', def: 'Proportion of values that are NOT the mode. 0 = all same value. Higher = more dispersed.' });
-    explanations.push({ term: 'Entropy H(X)', def: 'Measures uncertainty/disorder. 0 = all values identical. Higher = more evenly distributed.' });
-    explanations.push({ term: 'Max Entropy', def: 'Maximum possible entropy if all categories were equally likely.' });
-    explanations.push({ term: 'Normalized Entropy', def: 'Entropy divided by max entropy. 0 to 1 scale. 1 = perfectly uniform distribution.' });
-    explanations.push({ term: 'Gini-Simpson', def: 'Probability that two random values are different. 0 = all same. Higher = more diverse.' });
-    explanations.push({ term: 'IQV', def: 'Index of Qualitative Variation. Normalized Gini-Simpson. 0 = no variation. 1 = maximum variation.' });
+    explanations.push({ term: t('relation.stats.explain_categories'), def: t('relation.stats.explain_categories_desc') });
+    explanations.push({ term: t('relation.stats.explain_mode_cat'), def: t('relation.stats.explain_mode_cat_desc') });
+    explanations.push({ term: t('relation.stats.explain_mode_count'), def: t('relation.stats.explain_mode_count_desc') });
+    explanations.push({ term: t('relation.stats.explain_variation_ratio'), def: t('relation.stats.explain_variation_ratio_desc') });
+    explanations.push({ term: t('relation.stats.explain_entropy'), def: t('relation.stats.explain_entropy_desc') });
+    explanations.push({ term: t('relation.stats.explain_max_entropy'), def: t('relation.stats.explain_max_entropy_desc') });
+    explanations.push({ term: t('relation.stats.explain_normalized_entropy'), def: t('relation.stats.explain_normalized_entropy_desc') });
+    explanations.push({ term: t('relation.stats.explain_gini_simpson'), def: t('relation.stats.explain_gini_simpson_desc') });
+    explanations.push({ term: t('relation.stats.explain_iqv'), def: t('relation.stats.explain_iqv_desc') });
   }
   
   if (type === 'string' || type === 'textarea') {
-    explanations.push({ term: 'Unique Values', def: 'Number of distinct text values.' });
-    explanations.push({ term: 'Length Statistics', def: 'Statistics based on character count of each text value.' });
+    explanations.push({ term: t('relation.stats.explain_unique_values'), def: t('relation.stats.explain_unique_values_desc') });
+    explanations.push({ term: t('relation.stats.explain_length_stats'), def: t('relation.stats.explain_length_stats_desc') });
     if (type === 'textarea') {
-      explanations.push({ term: 'Line Statistics', def: 'Statistics based on number of lines in each text value.' });
+      explanations.push({ term: t('relation.stats.explain_line_stats'), def: t('relation.stats.explain_line_stats_desc') });
     }
   }
   
@@ -4471,19 +4471,19 @@ function generateBoxPlotSVG(stats) {
   const annotationStyle = 'font-size="8" fill="#666"';
   
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerHighY}" x2="${labelX - 5}" y2="${whiskerHighY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR (Q3−Q1)</text>`;
+  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>${t('relation.stats.boxplot_upper')}</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${q3Y}" x2="${labelX - 5}" y2="${q3Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${q3Y + 3}" ${annotationStyle}>Q3 (75%)</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${medianY}" x2="${labelX - 5}" y2="${medianY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>Median (50%)</text>`;
+  svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>${t('relation.stats.boxplot_median')}</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${q1Y}" x2="${labelX - 5}" y2="${q1Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${q1Y + 3}" ${annotationStyle}>Q1 (25%)</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerLowY}" x2="${labelX - 5}" y2="${whiskerLowY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR (Q3−Q1)</text>`;
+  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>${t('relation.stats.boxplot_lower')}</text>`;
   
   stats.outliers.forEach(val => {
     const y = scaleY(val);
@@ -4497,8 +4497,8 @@ function generateBoxPlotSVG(stats) {
     svg += `<line x1="${boxX + boxWidth/2 - 2}" y1="${y + 2}" x2="${boxX + boxWidth/2 + 2}" y2="${y - 2}" stroke="#dc3545" stroke-width="1.5"/>`;
   });
   
-  svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Points</text>`;
-  svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Box</text>`;
+  svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">${t('relation.stats.boxplot_points')}</text>`;
+  svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">${t('relation.stats.boxplot_box')}</text>`;
   
   svg += `</svg>`;
   
@@ -4570,17 +4570,17 @@ function generateSkewnessSVG(skewness) {
   svg += `</svg>`;
   
   // Interpretation
-  let interpretation = 'Symmetric';
-  if (skewness > 0.5) interpretation = 'Right-skewed (positive)';
-  else if (skewness < -0.5) interpretation = 'Left-skewed (negative)';
+  let interpretation = t('relation.stats.symmetric');
+  if (skewness > 0.5) interpretation = t('relation.stats.right_skewed');
+  else if (skewness < -0.5) interpretation = t('relation.stats.left_skewed');
   
   return `
     <div class="shape-chart">
-      <div class="shape-chart-title">Skewness: ${skewness.toFixed(3)}</div>
+      <div class="shape-chart-title">${t('relation.stats.skewness_title')}: ${skewness.toFixed(3)}</div>
       ${svg}
       <div class="shape-chart-legend">
-        <span class="legend-line legend-normal-line"></span> Normal (0)
-        <span class="legend-line legend-data-line"></span> Data
+        <span class="legend-line legend-normal-line"></span> ${t('relation.stats.legend_normal')} (0)
+        <span class="legend-line legend-data-line"></span> ${t('relation.stats.legend_data')}
       </div>
       <div class="shape-interpretation">${interpretation}</div>
     </div>
@@ -4634,17 +4634,17 @@ function generateKurtosisSVG(kurtosis) {
   svg += `</svg>`;
   
   // Interpretation
-  let interpretation = 'Mesokurtic (normal)';
-  if (excessKurtosis > 1) interpretation = 'Leptokurtic (heavy tails)';
-  else if (excessKurtosis < -1) interpretation = 'Platykurtic (light tails)';
+  let interpretation = t('relation.stats.mesokurtic');
+  if (excessKurtosis > 1) interpretation = t('relation.stats.leptokurtic');
+  else if (excessKurtosis < -1) interpretation = t('relation.stats.platykurtic');
   
   return `
     <div class="shape-chart">
-      <div class="shape-chart-title">Kurtosis: ${kurtosis.toFixed(3)} (excess: ${excessKurtosis.toFixed(3)})</div>
+      <div class="shape-chart-title">${t('relation.stats.kurtosis_title')}: ${kurtosis.toFixed(3)} (${t('relation.stats.excess')}: ${excessKurtosis.toFixed(3)})</div>
       ${svg}
       <div class="shape-chart-legend">
-        <span class="legend-line legend-normal-line"></span> Normal (3)
-        <span class="legend-line legend-data-line"></span> Data
+        <span class="legend-line legend-normal-line"></span> ${t('relation.stats.legend_normal')} (3)
+        <span class="legend-line legend-data-line"></span> ${t('relation.stats.legend_data')}
       </div>
       <div class="shape-interpretation">${interpretation}</div>
     </div>
@@ -4728,19 +4728,19 @@ function generateDateTimeBoxPlotSVG(stats, type) {
   const annotationStyle = 'font-size="8" fill="#666"';
   
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerHighY}" x2="${labelX - 5}" y2="${whiskerHighY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>Upper: Q3+1.5×IQR (Q3−Q1)</text>`;
+  svg += `<text x="${labelX}" y="${whiskerHighY + 3}" ${annotationStyle}>${t('relation.stats.boxplot_upper')}</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${q3Y}" x2="${labelX - 5}" y2="${q3Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${q3Y + 3}" ${annotationStyle}>Q3 (75%)</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${medianY}" x2="${labelX - 5}" y2="${medianY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>Median (50%)</text>`;
+  svg += `<text x="${labelX}" y="${medianY + 3}" ${annotationStyle}>${t('relation.stats.boxplot_median')}</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${q1Y}" x2="${labelX - 5}" y2="${q1Y}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
   svg += `<text x="${labelX}" y="${q1Y + 3}" ${annotationStyle}>Q1 (25%)</text>`;
   
   svg += `<line x1="${boxX + boxWidth}" y1="${whiskerLowY}" x2="${labelX - 5}" y2="${whiskerLowY}" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>`;
-  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>Lower: Q1−1.5×IQR (Q3−Q1)</text>`;
+  svg += `<text x="${labelX}" y="${whiskerLowY + 3}" ${annotationStyle}>${t('relation.stats.boxplot_lower')}</text>`;
   
   // Outliers
   stats.outliers.forEach(val => {
@@ -4754,8 +4754,8 @@ function generateDateTimeBoxPlotSVG(stats, type) {
   });
   
   // Labels
-  svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Points</text>`;
-  svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">Box</text>`;
+  svg += `<text x="${scatterX}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">${t('relation.stats.boxplot_points')}</text>`;
+  svg += `<text x="${boxX + boxWidth/2}" y="${height - 8}" text-anchor="middle" font-size="9" fill="#888">${t('relation.stats.boxplot_box')}</text>`;
   
   svg += `</svg>`;
   
@@ -7198,7 +7198,7 @@ function openAssociationSelect(rowIdx, colIdx, st, rowRef, onCellRebuild) {
 
   openSelectOneDialog(st, {
     relationData: counterpartJson,
-    title: 'Select from ' + counterpartName + ' (' + (counterpartJson.items || []).length + ' registos)',
+    title: tf('relation.dialog.select_from', {name: counterpartName, count: (counterpartJson.items || []).length}),
     onSelect: (selectedId) => {
       if (selectedId !== null && selectedId !== undefined) {
         addAssociationBidirectional(rowIdx, colIdx, counterpartName, String(selectedId), counterpartAttName, st, rowRef);
@@ -7359,7 +7359,7 @@ function showCounterpartPicker(counterparts, onSelect) {
 
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Choose Entity</span>
+      <span>${t('relation.dialog.choose_entity')}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="popup-content-body" style="padding:12px;">
@@ -7469,7 +7469,7 @@ function performAssocAdd(nestedSt, pa, counterpartDef, mode) {
     }
     openSelectOneDialog(nestedSt, {
       relationData: filteredJson,
-      title: 'Associar Um de ' + counterpartName + ' (' + filteredJson.items.length + ' disponíveis)',
+      title: tf('relation.dialog.associate_from', {name: counterpartName, count: filteredJson.items.length}),
       onSelect: (selectedId) => {
         if (selectedId !== null && selectedId !== undefined) {
           addAssociationBidirectional(parentRowIdx, parentColIdx, counterpartName, String(selectedId), counterpartAttName, parentSt, parentRow);
@@ -8100,26 +8100,26 @@ function filterByQuickSearch(st, indices) {
 
 function getOperatorsForType(type) {
   const common = [
-    { value: 'is_null', label: 'is null' },
-    { value: 'is_not_null', label: 'is not null' },
-    { value: 'in_list', label: 'in list' },
-    { value: 'not_in_list', label: 'not in list' }
+    { value: 'is_null', label: t('relation.filter.op_is_null') },
+    { value: 'is_not_null', label: t('relation.filter.op_is_not_null') },
+    { value: 'in_list', label: t('relation.filter.op_in_list') },
+    { value: 'not_in_list', label: t('relation.filter.op_not_in_list') }
   ];
   if (type === 'boolean') {
     return [
-      { value: 'is_true', label: 'is true' },
-      { value: 'is_false', label: 'is false' },
-      { value: 'is_null', label: 'is null' }
+      { value: 'is_true', label: t('relation.filter.op_is_true') },
+      { value: 'is_false', label: t('relation.filter.op_is_false') },
+      { value: 'is_null', label: t('relation.filter.op_is_null') }
     ];
   }
   if (type === 'string' || type === 'textarea' || type === 'select') {
     return [
-      { value: 'equals', label: 'equals' },
-      { value: 'not_equals', label: 'not equals' },
-      { value: 'contains', label: 'contains' },
-      { value: 'starts_with', label: 'starts with' },
-      { value: 'ends_with', label: 'ends with' },
-      { value: 'regex', label: 'regex' },
+      { value: 'equals', label: t('relation.filter.op_equals') },
+      { value: 'not_equals', label: t('relation.filter.op_not_equals') },
+      { value: 'contains', label: t('relation.filter.op_contains') },
+      { value: 'starts_with', label: t('relation.filter.op_starts_with') },
+      { value: 'ends_with', label: t('relation.filter.op_ends_with') },
+      { value: 'regex', label: t('relation.filter.op_regex') },
       ...common
     ];
   }
@@ -8131,7 +8131,7 @@ function getOperatorsForType(type) {
       { value: 'gte', label: '≥' },
       { value: 'lt', label: '<' },
       { value: 'lte', label: '≤' },
-      { value: 'between', label: 'between' },
+      { value: 'between', label: t('relation.filter.op_between') },
       ...common
     ];
   }
@@ -8143,12 +8143,12 @@ function getOperatorsForType(type) {
       { value: 'gte', label: '≥' },
       { value: 'lt', label: '<' },
       { value: 'lte', label: '≤' },
-      { value: 'between', label: 'between' },
+      { value: 'between', label: t('relation.filter.op_between') },
       ...common
     ];
   }
   return [
-    { value: 'equals', label: 'equals' },
+    { value: 'equals', label: t('relation.filter.op_equals') },
     ...common
   ];
 }
@@ -9285,10 +9285,10 @@ function showAdvancedSearchPanel(st) {
 
         const opSel = document.createElement('select');
         opSel.className = 'adv-op-select';
-        [['eq', '='], ['neq', '≠'], ['gt', '>'], ['gte', '≥'], ['lt', '<'], ['lte', '≤'], ['between', 'Between']].forEach(([v, t]) => {
+        [['eq', '='], ['neq', '≠'], ['gt', '>'], ['gte', '≥'], ['lt', '<'], ['lte', '≤'], ['between', t('relation.filter.op_between')]].forEach(([v, lbl]) => {
           const o = document.createElement('option');
           o.value = v;
-          o.textContent = t;
+          o.textContent = lbl;
           if (hc.op === v) o.selected = true;
           opSel.appendChild(o);
         });
@@ -10962,7 +10962,7 @@ function showMergeDialog(st) {
   const mergeState = { radioSelections: {} };
 
   const panelCountOptions = [2, 3, 4].map(n =>
-    `<option value="${n}" ${n === numPanels ? 'selected' : ''} ${checkedIndices.length < n ? 'disabled' : ''}>${n} panels</option>`
+    `<option value="${n}" ${n === numPanels ? 'selected' : ''} ${checkedIndices.length < n ? 'disabled' : ''}>${n} ${t('relation.multiops.panels')}</option>`
   ).join('');
 
   const footerHtml = `
@@ -11559,41 +11559,41 @@ function renderTable(st = state) {
     const dialog = document.createElement('div');
     dialog.className = 'hierarchy-help-dialog';
     dialog.innerHTML = `
-      <h3>Hierarchy Navigation</h3>
+      <h3>${t('relation.hierarchy.title')}</h3>
       <div class="hierarchy-help-section">
         <div class="hierarchy-help-item">
           <span class="hierarchy-help-icon">🗂️</span>
           <div>
-            <strong>What is a hierarchy?</strong>
-            <p>This data is organized in a tree structure where each item can have child items. You are viewing one level of the tree at a time.</p>
+            <strong>${t('relation.hierarchy.what_is')}</strong>
+            <p>${t('relation.hierarchy.what_is_desc')}</p>
           </div>
         </div>
         <div class="hierarchy-help-item">
           <span class="hierarchy-help-icon">📍</span>
           <div>
-            <strong>Breadcrumbs</strong>
-            <p>The path above the table shows your current location in the tree. Each segment shows: <code>Name N₁ &gt; N₂</code> where <strong>N₁</strong> = direct children and <strong>N₂</strong> = total descendants across all levels below. Click any segment to jump back to that level.</p>
+            <strong>${t('relation.hierarchy.breadcrumbs')}</strong>
+            <p>${t('relation.hierarchy.breadcrumbs_desc')}</p>
           </div>
         </div>
         <div class="hierarchy-help-item">
           <span class="hierarchy-help-icon">⬇️</span>
           <div>
-            <strong>Drilling down</strong>
-            <p>Double-click on any row that has children to navigate into it and see its child items.</p>
+            <strong>${t('relation.hierarchy.drilling_down')}</strong>
+            <p>${t('relation.hierarchy.drilling_down_desc')}</p>
           </div>
         </div>
         <div class="hierarchy-help-item">
           <span class="hierarchy-help-icon">⬆️</span>
           <div>
-            <strong>Going up</strong>
-            <p>Use the <strong>↑</strong> button in the green parent row to go back up one level, or click a breadcrumb segment to jump directly to that level.</p>
+            <strong>${t('relation.hierarchy.going_up')}</strong>
+            <p>${t('relation.hierarchy.going_up_desc')}</p>
           </div>
         </div>
         <div class="hierarchy-help-item">
           <span class="hierarchy-help-icon">👁️</span>
           <div>
-            <strong>Show all descendants</strong>
-            <p>When this checkbox is checked, the table shows <em>all</em> items below the current level (children, grandchildren, etc.), not just direct children. Uncheck it to see only immediate children.</p>
+            <strong>${t('relation.hierarchy.show_all')}</strong>
+            <p>${t('relation.hierarchy.show_all_desc')}</p>
           </div>
         </div>
       </div>
@@ -14978,7 +14978,7 @@ function showDataBarColorDialog(colIdx, st = state) {
   
   dialog.innerHTML = `
     <div class="color-palette-header">
-      <span>Choose Color for Data Bar</span>
+      <span>${t('relation.dialog.choose_color_databar')}</span>
       <span class="info-badge" title="Contrast calculated per WCAG 2.1 (Web Content Accessibility Guidelines).\nMetric: Contrast Ratio = (L1 + 0.05) / (L2 + 0.05), where L = relative luminance.\nText color is white on dark backgrounds, black on light backgrounds.\nMinimum levels: AA = 4.5:1 (normal text), AA Large = 3:1 (large text).\nRecommended: AAA = 7:1 (normal text), AAA Large = 4.5:1 (large text).\nThe &quot;T&quot; indicator shows white text will be used on that color.">ⓘ</span>
       <button class="btn-close-dialog">✕</button>
     </div>
@@ -15027,7 +15027,7 @@ function showActiveFilterColorDialog(colIdx, st = state) {
   
   dialog.innerHTML = `
     <div class="color-palette-header">
-      <span>Choose Color for Current Results</span>
+      <span>${t('relation.dialog.choose_color_results')}</span>
       <span class="info-badge" title="Contrast calculated per WCAG 2.1 (Web Content Accessibility Guidelines).\nMetric: Contrast Ratio = (L1 + 0.05) / (L2 + 0.05), where L = relative luminance.\nText color is white on dark backgrounds, black on light backgrounds.\nMinimum levels: AA = 4.5:1 (normal text), AA Large = 3:1 (large text).\nRecommended: AAA = 7:1 (normal text), AAA Large = 4.5:1 (large text).\nThe &quot;T&quot; indicator shows white text will be used on that color.">ⓘ</span>
       <button class="btn-close-dialog">✕</button>
     </div>
@@ -15326,11 +15326,11 @@ function showGroupColumnsDialog(st = state) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Group Columns into Relation</span>
+      <span>${t('relation.dialog.group_columns')}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="group-cols-content">
-      <p>Selected columns: <strong>${colNames}</strong></p>
+      <p>${t('relation.dialog.selected_columns')}: <strong>${colNames}</strong></p>
       <label>New relation column name:</label>
       <input type="text" class="group-col-name relation-input" value="nested_data" />
     </div>
@@ -16449,7 +16449,7 @@ function renderFileGallery(container, fileRel, insertBefore) {
     if (totalPages > 1) {
       html += '<div class="file-gallery-pagination">';
       html += '<button class="btn btn-outline btn-sm gallery-prev" ' + (currentPage <= 1 ? 'disabled' : '') + '>⟨</button>';
-      html += '<span>Página ' + currentPage + ' de ' + totalPages + '</span>';
+      html += '<span>' + t('relation.pagination.page') + ' ' + currentPage + ' ' + t('relation.pagination.of') + ' ' + totalPages + '</span>';
       html += '<button class="btn btn-outline btn-sm gallery-next" ' + (currentPage >= totalPages ? 'disabled' : '') + '>⟩</button>';
       html += '</div>';
     }
@@ -17072,7 +17072,7 @@ function showNestedRelationDialog(rowIdx, colIdx, st = state) {
   const isAssoc = isAssociationAtt(att);
   const title = isAssoc
     ? `${getAttDisplayName(st, colIdx)} (${nestedRelation.items?.length || 0} registos)`
-    : `Sub-Relation (${nestedRelation.items?.length || 0} rows)`;
+    : tf('relation.dialog.sub_relation', {count: nestedRelation.items?.length || 0});
   
   const instanceOptions = { showJsonEditor: false, isNested: true };
   if (isAssoc) {
@@ -17108,7 +17108,7 @@ function openNestedRelationDialog(relationData) {
   
   dialog.innerHTML = `
     <div class="filter-dialog-header">
-      <span>Sub-Relation (${relationData.items?.length || 0} rows)</span>
+      <span>${tf('relation.dialog.sub_relation', {count: relationData.items?.length || 0})}</span>
       <button class="btn-close-dialog">✕</button>
     </div>
     <div class="nested-relation-content">
@@ -17603,14 +17603,14 @@ function showKeyboardHelpTooltip(e) {
   keyboardHelpTooltipEl.className = 'keyboard-help-tooltip-fixed';
   keyboardHelpTooltipEl.dataset.testid = 'text-keyboard-shortcuts';
   keyboardHelpTooltipEl.innerHTML = `
-    <strong>Atalhos de teclado e rato</strong><br>
-    <b>Right-click</b> — menu de contexto da coluna<br>
-    <b>Shift+click</b> — ordenar por várias colunas<br>
-    <b>Ctrl+click</b> — selecionar colunas<br>
-    <b>TAB / SHIFT+TAB</b> — avançar / recuar entre campos de input<br>
-    <b>↑ ↓</b> — navegar entre opções em menus e listas<br>
-    <b>Enter</b> — confirmar opção selecionada<br>
-    <b>Escape</b> — fechar menu ou diálogo ativo
+    <strong>${t('relation.common.keyboard_shortcuts_title')}</strong><br>
+    <b>Right-click</b> — ${t('relation.common.shortcut_rightclick')}<br>
+    <b>Shift+click</b> — ${t('relation.common.shortcut_shiftclick')}<br>
+    <b>Ctrl+click</b> — ${t('relation.common.shortcut_ctrlclick')}<br>
+    <b>TAB / SHIFT+TAB</b> — ${t('relation.common.shortcut_tab')}<br>
+    <b>↑ ↓</b> — ${t('relation.common.shortcut_arrows')}<br>
+    <b>Enter</b> — ${t('relation.common.shortcut_enter')}<br>
+    <b>Escape</b> — ${t('relation.common.shortcut_escape')}
   `;
   
   document.body.appendChild(keyboardHelpTooltipEl);
@@ -17664,7 +17664,7 @@ function renderGroupByPanel(st = state) {
   const groupInfo = document.createElement('div');
   groupInfo.className = 'group-by-indicator';
   
-  let groupHtml = '<span>Grouped by:</span>';
+  let groupHtml = '<span>' + t('relation.common.grouped_by') + ':</span>';
   getGroupByColumns(st).forEach(colIdx => {
     const colName = st.columnNames[colIdx];
     const uniqueValues = getUniqueValuesForColumn(colIdx, st);
@@ -20827,21 +20827,21 @@ function testNormality(values) {
         stat: jbStat,
         pValue: jbPValue,
         isNormal: jbNormal,
-        when: 'Large samples (n>30). Based on skewness and kurtosis.'
+        when: t('relation.analysis.when_jarque_bera')
       },
       {
         name: "D'Agostino-Pearson",
         stat: dpK2,
         pValue: dpPValue,
         isNormal: dpNormal,
-        when: 'Medium to large samples (n>20). Omnibus test combining skewness and kurtosis.'
+        when: t('relation.analysis.when_dagostino')
       },
       {
         name: 'Shapiro-Wilk',
         stat: swW,
         pValue: swPValue,
         isNormal: swNormal,
-        when: 'Small samples (n<50). Most powerful test for normality.'
+        when: t('relation.analysis.when_shapiro_wilk')
       }
     ],
     isNormal,
@@ -20857,45 +20857,45 @@ function renderNormalityPanel(xValues, yValues, xName, yName) {
   
   let html = '<div class="normality-panel">';
   html += '<div class="normality-header">Normality Analysis</div>';
-  html += '<div class="normality-note">Pearson correlation assumes both variables are normally distributed.</div>';
+  html += '<div class="normality-note">' + t('relation.analysis.normality_assumes') + '</div>';
   
   // X variable
   html += '<div class="normality-var">';
   html += '<div class="normality-var-name">' + escapeHtml(xName) + '</div>';
-  html += '<div class="normality-stats">Skewness: ' + xNorm.skewness.toFixed(3) + ' | Kurtosis: ' + xNorm.kurtosis.toFixed(3) + '</div>';
-  html += '<table class="normality-table"><tr><th>Test</th><th>Statistic</th><th>p-value</th><th>Normal?</th><th>Best for</th></tr>';
-  xNorm.tests.forEach(t => {
-    const cls = t.isNormal ? 'norm-pass' : 'norm-fail';
-    const recommended = t.name === xNorm.recommendation ? ' (recommended)' : '';
-    html += '<tr class="' + cls + '"><td>' + t.name + recommended + '</td><td>' + t.stat.toFixed(4) + '</td><td>' + t.pValue.toFixed(4) + '</td><td>' + (t.isNormal ? '✓' : '✗') + '</td><td>' + t.when + '</td></tr>';
+  html += '<div class="normality-stats">' + t('relation.stats.skewness_title') + ': ' + xNorm.skewness.toFixed(3) + ' | ' + t('relation.stats.kurtosis_title') + ': ' + xNorm.kurtosis.toFixed(3) + '</div>';
+  html += '<table class="normality-table"><tr><th>' + t('relation.analysis.normality_table_test') + '</th><th>' + t('relation.analysis.normality_table_stat') + '</th><th>' + t('relation.analysis.normality_table_pvalue') + '</th><th>' + t('relation.analysis.normality_table_normal') + '</th><th>' + t('relation.analysis.normality_table_best_for') + '</th></tr>';
+  xNorm.tests.forEach(tt => {
+    const cls = tt.isNormal ? 'norm-pass' : 'norm-fail';
+    const recommended = tt.name === xNorm.recommendation ? ' ' + t('relation.analysis.normality_recommended') : '';
+    html += '<tr class="' + cls + '"><td>' + tt.name + recommended + '</td><td>' + tt.stat.toFixed(4) + '</td><td>' + tt.pValue.toFixed(4) + '</td><td>' + (tt.isNormal ? '✓' : '✗') + '</td><td>' + tt.when + '</td></tr>';
   });
   html += '</table>';
   html += '<div class="normality-conclusion ' + (xNorm.isNormal ? 'norm-pass' : 'norm-fail') + '">';
-  html += xNorm.isNormal ? '✓ Data appears normally distributed' : '✗ Data may not be normally distributed';
+  html += xNorm.isNormal ? t('relation.analysis.data_normal') : t('relation.analysis.data_not_normal');
   html += '</div></div>';
   
   // Y variable
   html += '<div class="normality-var">';
   html += '<div class="normality-var-name">' + escapeHtml(yName) + '</div>';
-  html += '<div class="normality-stats">Skewness: ' + yNorm.skewness.toFixed(3) + ' | Kurtosis: ' + yNorm.kurtosis.toFixed(3) + '</div>';
-  html += '<table class="normality-table"><tr><th>Test</th><th>Statistic</th><th>p-value</th><th>Normal?</th><th>Best for</th></tr>';
-  yNorm.tests.forEach(t => {
-    const cls = t.isNormal ? 'norm-pass' : 'norm-fail';
-    const recommended = t.name === yNorm.recommendation ? ' (recommended)' : '';
-    html += '<tr class="' + cls + '"><td>' + t.name + recommended + '</td><td>' + t.stat.toFixed(4) + '</td><td>' + t.pValue.toFixed(4) + '</td><td>' + (t.isNormal ? '✓' : '✗') + '</td><td>' + t.when + '</td></tr>';
+  html += '<div class="normality-stats">' + t('relation.stats.skewness_title') + ': ' + yNorm.skewness.toFixed(3) + ' | ' + t('relation.stats.kurtosis_title') + ': ' + yNorm.kurtosis.toFixed(3) + '</div>';
+  html += '<table class="normality-table"><tr><th>' + t('relation.analysis.normality_table_test') + '</th><th>' + t('relation.analysis.normality_table_stat') + '</th><th>' + t('relation.analysis.normality_table_pvalue') + '</th><th>' + t('relation.analysis.normality_table_normal') + '</th><th>' + t('relation.analysis.normality_table_best_for') + '</th></tr>';
+  yNorm.tests.forEach(tt => {
+    const cls = tt.isNormal ? 'norm-pass' : 'norm-fail';
+    const recommended = tt.name === yNorm.recommendation ? ' ' + t('relation.analysis.normality_recommended') : '';
+    html += '<tr class="' + cls + '"><td>' + tt.name + recommended + '</td><td>' + tt.stat.toFixed(4) + '</td><td>' + tt.pValue.toFixed(4) + '</td><td>' + (tt.isNormal ? '✓' : '✗') + '</td><td>' + tt.when + '</td></tr>';
   });
   html += '</table>';
   html += '<div class="normality-conclusion ' + (yNorm.isNormal ? 'norm-pass' : 'norm-fail') + '">';
-  html += yNorm.isNormal ? '✓ Data appears normally distributed' : '✗ Data may not be normally distributed';
+  html += yNorm.isNormal ? t('relation.analysis.data_normal') : t('relation.analysis.data_not_normal');
   html += '</div></div>';
   
   // Overall conclusion
   const bothNormal = xNorm.isNormal && yNorm.isNormal;
   html += '<div class="normality-overall ' + (bothNormal ? 'norm-pass' : 'norm-fail') + '">';
   if (bothNormal) {
-    html += '<strong>Conclusion:</strong> Both variables appear normally distributed. Pearson correlation is appropriate.';
+    html += '<strong>' + t('relation.analysis.conclusion') + '</strong> ' + t('relation.analysis.conclusion_normal');
   } else {
-    html += '<strong>Conclusion:</strong> One or both variables may not be normally distributed. Consider using Spearman or Kendall correlation instead.';
+    html += '<strong>' + t('relation.analysis.conclusion') + '</strong> ' + t('relation.analysis.conclusion_not_normal');
   }
   html += '</div>';
   html += '</div>';
@@ -20956,22 +20956,22 @@ function renderPearsonCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-label">Pearson Correlation (r)</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + r.toFixed(4) + '</div>';
   html += '<div class="correlation-label">' + strength + ' ' + (r > 0 ? 'positive' : r < 0 ? 'negative' : '') + ' correlation</div>';
-  html += '<div class="correlation-label">n = ' + n + ' pairs | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
+  html += '<div class="correlation-label">n = ' + n + ' ' + t('relation.analysis.pairs') + ' | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
   
   // Sample size warning
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Consider using Kendall\'s Tau for more robust results</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_sample_kendall') + '</div>';
   }
   
   // Outlier warning
   if (outlierCount > 0) {
     const outlierPct = ((outlierCount / n) * 100).toFixed(1);
-    html += '<div class="correlation-warning">⚠️ ' + outlierCount + ' outliers detected (' + outlierPct + '%): Consider using Spearman for robust analysis</div>';
+    html += '<div class="correlation-warning">' + tf('relation.analysis.warn_outliers_spearman', {count: outlierCount, pct: outlierPct}) + '</div>';
   }
   
   // Linearity indicator
   if (rSquared < 0.5 && absR > 0.3) {
-    html += '<div class="correlation-warning">⚠️ Low R² suggests non-linear relationship: Consider Spearman (monotonic) or transform data</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_low_r2') + '</div>';
   }
   
   html += renderNormalityPanel(xValues, yValues, st.columnNames[xIdx], st.columnNames[yIdx]);
@@ -21101,10 +21101,10 @@ function renderSpearmanCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-note">Spearman measures monotonic (rank-based) relationship. More robust to outliers than Pearson.</div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Kendall\'s Tau may be more appropriate</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_sample_tau') + '</div>';
   }
   if (outlierCount > 0) {
-    html += '<div class="correlation-warning">ℹ️ ' + outlierCount + ' potential outliers detected (marked in red) - Spearman is robust to these</div>';
+    html += '<div class="correlation-warning">' + tf('relation.analysis.warn_outliers_info', {count: outlierCount}) + '</div>';
   }
   
   // SVG scatter plot
@@ -21203,14 +21203,14 @@ function renderKendallCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-label">Kendall\'s Tau (τ)</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + tau.toFixed(4) + '</div>';
   html += '<div class="correlation-label">' + strength + ' ' + (tau > 0 ? 'positive' : tau < 0 ? 'negative' : '') + ' correlation</div>';
-  html += '<div class="correlation-label">n = ' + n + ' pairs | Concordant: ' + concordant + ' | Discordant: ' + discordant + '</div>';
+  html += '<div class="correlation-label">n = ' + n + ' ' + t('relation.analysis.pairs') + ' | ' + t('relation.analysis.concordant') + ': ' + concordant + ' | ' + t('relation.analysis.discordant') + ': ' + discordant + '</div>';
   html += '<div class="correlation-note">Kendall\'s Tau is recommended for small samples (n&lt;30) and ordinal data. Robust to outliers.</div>';
   
   if (n >= 30) {
-    html += '<div class="correlation-warning">ℹ️ Large sample (n≥30): Pearson or Spearman may be more efficient</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_large_sample') + '</div>';
   }
   if (outlierCount > 0) {
-    html += '<div class="correlation-warning">⚠️ ' + outlierCount + ' outliers detected (marked in red below)</div>';
+    html += '<div class="correlation-warning">' + tf('relation.analysis.warn_outliers_detected', {count: outlierCount}) + '</div>';
   }
   
   // SVG scatter plot
@@ -21299,10 +21299,10 @@ function renderPointBiserialCorrelation(pairs, xIdx, yIdx, binaryIdx, numericIdx
   html += '<div class="correlation-note">Point-Biserial measures association between a binary variable and a continuous variable.</div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Results may have limited statistical power</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_sample_power') + '</div>';
   }
   if (Math.min(n0, n1) < 5) {
-    html += '<div class="correlation-warning">⚠️ Unbalanced groups: One group has fewer than 5 observations</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_unbalanced') + '</div>';
   }
   
   // Box plot visualization
@@ -21374,18 +21374,18 @@ function renderPhiCorrelation(pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-note">Phi coefficient measures association between two binary variables. Equivalent to Pearson for 2×2 tables.</div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Results may have limited statistical power</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_sample_power') + '</div>';
   }
   const minCell = Math.min(a, b, c, d);
   if (minCell < 5) {
-    html += '<div class="correlation-warning">⚠️ Some cells have fewer than 5 observations: Consider Fisher\'s exact test</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_fisher') + '</div>';
   }
   
   html += '<table class="phi-table">';
-  html += '<tr><th></th><th>' + escapeHtml(st.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(st.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
+  html += '<tr><th></th><th>' + escapeHtml(st.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(st.columnNames[yIdx]) + '=0</th><th>' + t('relation.pivot.total') + '</th></tr>';
   html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a + b) + '</td></tr>';
   html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c + d) + '</td></tr>';
-  html += '<tr><th>Total</th><td>' + (a + c) + '</td><td>' + (b + d) + '</td><td>' + n + '</td></tr>';
+  html += '<tr><th>' + t('relation.pivot.total') + '</th><td>' + (a + c) + '</td><td>' + (b + d) + '</td><td>' + n + '</td></tr>';
   html += '</table>';
   html += '</div>';
   
@@ -21405,10 +21405,10 @@ function renderCramersV(v, n, xIdx, yIdx, xCategories, yCategories, st = state) 
   const colorClass = v >= 0.3 ? 'correlation-positive' : v >= 0.1 ? 'correlation-neutral' : 'correlation-neutral';
   
   let html = '<div class="correlation-chart">';
-  html += '<div class="correlation-label">Cramér\'s V (categorical association)</div>';
+  html += '<div class="correlation-label">' + t('relation.analysis.cramers_v_label') + '</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + v.toFixed(4) + '</div>';
-  html += '<div class="correlation-label">' + strength + ' association</div>';
-  html += '<div class="correlation-label">n = ' + n + ' pairs | ' + xCategories + ' × ' + yCategories + ' categories</div>';
+  html += '<div class="correlation-label">' + strength + ' ' + t('relation.analysis.association') + '</div>';
+  html += '<div class="correlation-label">n = ' + n + ' ' + t('relation.analysis.pairs') + ' | ' + xCategories + ' × ' + yCategories + ' ' + t('relation.analysis.categories') + '</div>';
   
   // Visual bar for Cramér's V (0 to 1)
   const width = 300;
@@ -21937,24 +21937,24 @@ function renderPearsonCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="correlation-label">Pearson Correlation (r)</div>';
   html += '<div class="correlation-value ' + colorClass + '">' + r.toFixed(4) + '</div>';
   html += '<div class="correlation-label">' + strength + ' ' + (r > 0 ? 'positive' : r < 0 ? 'negative' : '') + ' correlation</div>';
-  html += '<div class="correlation-label">n = ' + n + ' pairs | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
+  html += '<div class="correlation-label">n = ' + n + ' ' + t('relation.analysis.pairs') + ' | R² = ' + (rSquared * 100).toFixed(1) + '%</div>';
   
   html += '<div class="stat-explanations">';
   html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
-  html += '<dt>r (Pearson coefficient)</dt><dd>Measures linear relationship between two variables. Ranges from -1 (perfect negative) to +1 (perfect positive). 0 means no linear relationship.</dd>';
-  html += '<dt>R² (Coefficient of determination)</dt><dd>Percentage of variance in Y explained by X. R²=70% means 70% of Y\'s variation can be predicted from X.</dd>';
-  html += '<dt>n (Sample size)</dt><dd>Number of valid data pairs used in the calculation.</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_r') + '</dt><dd>' + t('relation.analysis.glossary_r_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_r2') + '</dt><dd>' + t('relation.analysis.glossary_r2_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_n') + '</dt><dd>' + t('relation.analysis.glossary_n_desc') + '</dd>';
   html += '</dl></details></div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample (n&lt;30): Consider Kendall\'s Tau</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_kendall') + '</div>';
   }
   if (outlierCount > 0) {
-    html += '<div class="correlation-warning">⚠️ ' + outlierCount + ' outliers detected: Consider Spearman</div>';
+    html += '<div class="correlation-warning">' + tf('relation.analysis.warn_outliers_spearman_short', {count: outlierCount}) + '</div>';
   }
   if (rSquared < 0.5 && absR > 0.3) {
-    html += '<div class="correlation-warning">⚠️ Low R²: Consider Spearman or transform data</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_low_r2_short') + '</div>';
   }
   
   html += renderNormalityPanel(xValues, yValues, st.columnNames[xIdx], st.columnNames[yIdx]);
@@ -22034,12 +22034,12 @@ function renderSpearmanCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
   html += '<dt>ρ (Spearman\'s rho)</dt><dd>Measures monotonic relationship (both variables move in the same direction, not necessarily at a constant rate). Based on ranks, not actual values. Ranges from -1 to +1.</dd>';
-  html += '<dt>Monotonic relationship</dt><dd>When one variable increases, the other consistently increases (or decreases). Unlike Pearson, works for curved relationships as long as they are consistently increasing or decreasing.</dd>';
-  html += '<dt>Robust to outliers</dt><dd>Extreme values have less impact because the calculation uses ranks instead of actual values.</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_monotonic') + '</dt><dd>' + t('relation.analysis.glossary_monotonic_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_robust') + '</dt><dd>' + t('relation.analysis.glossary_robust_desc') + '</dd>';
   html += '</dl></details></div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample: Kendall\'s Tau may be more appropriate</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_tau_short') + '</div>';
   }
   
   const width = 350, height = 250, padding = 35;
@@ -22097,14 +22097,14 @@ function renderKendallCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="stat-explanations">';
   html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
-  html += '<dt>τ (Kendall\'s Tau)</dt><dd>Measures association based on concordant and discordant pairs. Ranges from -1 to +1. More robust than Spearman for small samples.</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_tau') + '</dt><dd>' + t('relation.analysis.glossary_tau_desc') + '</dd>';
   html += '<dt>Concordant pairs</dt><dd>Two observations where if one has a higher X, it also has a higher Y (or both lower). They "agree" on the direction.</dd>';
   html += '<dt>Discordant pairs</dt><dd>Two observations where one has higher X but lower Y (or vice versa). They "disagree" on the direction.</dd>';
-  html += '<dt>Formula</dt><dd>τ = (Concordant - Discordant) / Total pairs. τ=1 means all pairs agree; τ=-1 means all disagree.</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_formula') + '</dt><dd>' + t('relation.analysis.glossary_tau_formula') + '</dd>';
   html += '</dl></details></div>';
   
   if (n >= 30) {
-    html += '<div class="correlation-warning">ℹ️ Large sample: Pearson or Spearman may be more efficient</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_large_sample_short') + '</div>';
   }
   
   const width = 350, height = 250, padding = 35;
@@ -22166,16 +22166,16 @@ function renderPointBiserialCorrelationTo(container, pairs, xIdx, yIdx, binaryId
   html += '<div class="stat-explanations">';
   html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
-  html += '<dt>r<sub>pb</sub> (Point-Biserial)</dt><dd>Measures correlation between a binary variable (0/1) and a continuous variable. Ranges from -1 to +1. Equivalent to Pearson for this special case.</dd>';
-  html += '<dt>μ (Mean)</dt><dd>Average value of the numeric variable for each group. μ₀ is the mean for group 0, μ₁ for group 1.</dd>';
-  html += '<dt>Group 0 / Group 1</dt><dd>The two categories of the binary variable. The diagram shows the distribution of numeric values for each group.</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_rpb') + '</dt><dd>' + t('relation.analysis.glossary_rpb_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_mean') + '</dt><dd>' + t('relation.analysis.glossary_mean_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_groups') + '</dt><dd>' + t('relation.analysis.glossary_groups_desc') + '</dd>';
   html += '</dl></details></div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample: Limited statistical power</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_power') + '</div>';
   }
   if (Math.min(n0, n1) < 5) {
-    html += '<div class="correlation-warning">⚠️ Unbalanced groups</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_unbalanced_short') + '</div>';
   }
   
   const width = 350, height = 150, padding = 50;
@@ -22227,23 +22227,23 @@ function renderPhiCorrelationTo(container, pairs, xIdx, yIdx, st = state) {
   html += '<div class="stat-explanations">';
   html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
-  html += '<dt>φ (Phi coefficient)</dt><dd>Measures association between two binary (yes/no) variables. Ranges from -1 to +1. Positive means both tend to be true/false together; negative means they tend to be opposite.</dd>';
-  html += '<dt>Contingency table</dt><dd>2×2 table showing the count of observations for each combination of values. Cell "a" = both true, "d" = both false, "b" and "c" = one true and one false.</dd>';
-  html += '<dt>Formula</dt><dd>φ = (ad - bc) / √[(a+b)(c+d)(a+c)(b+d)]</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_phi') + '</dt><dd>' + t('relation.analysis.glossary_phi_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_contingency') + '</dt><dd>' + t('relation.analysis.glossary_contingency_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_formula') + '</dt><dd>' + t('relation.analysis.glossary_phi_formula') + '</dd>';
   html += '</dl></details></div>';
   
   if (n < 30) {
-    html += '<div class="correlation-warning">⚠️ Small sample</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_small_sample_short') + '</div>';
   }
   if (Math.min(a, b, c, d) < 5) {
-    html += '<div class="correlation-warning">⚠️ Some cells have &lt;5 observations</div>';
+    html += '<div class="correlation-warning">' + t('relation.analysis.warn_fisher_short') + '</div>';
   }
   
   html += '<table class="phi-table">';
-  html += '<tr><th></th><th>' + escapeHtml(st.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(st.columnNames[yIdx]) + '=0</th><th>Total</th></tr>';
+  html += '<tr><th></th><th>' + escapeHtml(st.columnNames[yIdx]) + '=1</th><th>' + escapeHtml(st.columnNames[yIdx]) + '=0</th><th>' + t('relation.pivot.total') + '</th></tr>';
   html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=1</th><td>' + a + '</td><td>' + b + '</td><td>' + (a+b) + '</td></tr>';
   html += '<tr><th>' + escapeHtml(st.columnNames[xIdx]) + '=0</th><td>' + c + '</td><td>' + d + '</td><td>' + (c+d) + '</td></tr>';
-  html += '<tr><th>Total</th><td>' + (a+c) + '</td><td>' + (b+d) + '</td><td>' + n + '</td></tr>';
+  html += '<tr><th>' + t('relation.pivot.total') + '</th><td>' + (a+c) + '</td><td>' + (b+d) + '</td><td>' + n + '</td></tr>';
   html += '</table></div>';
   
   container.innerHTML = html;
@@ -22283,10 +22283,10 @@ function renderCramersVTo(container, contingency, total, xIdx, yIdx, xCategories
   html += '<div class="stat-explanations">';
   html += '<details><summary>' + t('relation.stats.what_do_values_mean') + '</summary>';
   html += '<dl class="stat-definitions">';
-  html += '<dt>V (Cramér\'s V)</dt><dd>Measures association between two categorical variables with any number of categories. Ranges from 0 (no association) to 1 (perfect association). Cannot be negative.</dd>';
-  html += '<dt>χ² (Chi-squared)</dt><dd>Measures how much the observed frequencies differ from expected frequencies (if variables were independent). Higher χ² = stronger association.</dd>';
-  html += '<dt>Categories</dt><dd>Number of unique values in each variable. A 3×4 contingency table has 3 categories in one variable and 4 in the other.</dd>';
-  html += '<dt>Formula</dt><dd>V = √(χ² / (n × min(r-1, c-1))) where r and c are the number of rows/columns.</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_cramers_v') + '</dt><dd>' + t('relation.analysis.glossary_cramers_v_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_chi2') + '</dt><dd>' + t('relation.analysis.glossary_chi2_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_categories') + '</dt><dd>' + t('relation.analysis.glossary_categories_desc') + '</dd>';
+  html += '<dt>' + t('relation.analysis.glossary_formula') + '</dt><dd>' + t('relation.analysis.glossary_cramers_formula') + '</dd>';
   html += '</dl></details></div>';
   
   const width = 300, barHeight = 30;
@@ -24197,7 +24197,7 @@ function runPCA(st, resultEl, nComponents) {
 
   const totalVariance = eigenvalues.reduce((s, v) => s + Math.max(0, v), 0) || 1;
   let html = '<div class="multivariate-section"><h4>Eigenvalues & Variance Explained</h4>';
-  html += '<table class="multivariate-summary-table"><thead><tr><th>Component</th><th>Eigenvalue</th><th>% Variance</th><th>Cumulative %</th></tr></thead><tbody>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>' + t('relation.analysis.pca_component') + '</th><th>' + t('relation.analysis.pca_eigenvalue') + '</th><th>' + t('relation.analysis.pca_variance_pct') + '</th><th>' + t('relation.analysis.pca_cumulative_pct') + '</th></tr></thead><tbody>';
   let cumulative = 0;
   for (let i = 0; i < Math.min(nComp, p); i++) {
     const pct = (Math.max(0, eigenvalues[i]) / totalVariance) * 100;
@@ -24206,7 +24206,7 @@ function runPCA(st, resultEl, nComponents) {
   }
   html += '</tbody></table></div>';
 
-  html += '<div class="multivariate-section"><h4>Scree Plot</h4><div class="scree-plot">';
+  html += '<div class="multivariate-section"><h4>' + t('relation.analysis.pca_scree_plot') + '</h4><div class="scree-plot">';
   const svgW = 400, svgH = 200, barW = Math.min(50, (svgW - 40) / p);
   const maxEv = Math.max(...eigenvalues.map(v => Math.max(0, v)), 0.001);
   html += '<svg width="' + svgW + '" height="' + svgH + '" style="border:1px solid var(--border-color,#e0e0e0);border-radius:4px;">';
@@ -24220,8 +24220,8 @@ function runPCA(st, resultEl, nComponents) {
   }
   html += '</svg></div></div>';
 
-  html += '<div class="multivariate-section"><h4>Loading Matrix (Eigenvectors)</h4>';
-  html += '<table class="loading-matrix"><thead><tr><th>Variable</th>';
+  html += '<div class="multivariate-section"><h4>' + t('relation.analysis.pca_loading_matrix') + '</h4>';
+  html += '<table class="loading-matrix"><thead><tr><th>' + t('relation.analysis.pca_variable') + '</th>';
   for (let i = 0; i < nComp; i++) html += '<th>PC' + (i + 1) + '</th>';
   html += '</tr></thead><tbody>';
   for (let j = 0; j < p; j++) {
@@ -24237,7 +24237,7 @@ function runPCA(st, resultEl, nComponents) {
   html += '</tbody></table></div>';
 
   if (nComp >= 2 && rows.length > 0) {
-    html += '<div class="multivariate-section"><h4>2D Component Scatter Plot</h4>';
+    html += '<div class="multivariate-section"><h4>' + t('relation.analysis.pca_scatter_2d') + '</h4>';
     const scores = standardized.map(row => {
       const pc1 = row.reduce((s, v, j) => s + v * eigenvectors[0][j], 0);
       const pc2 = row.reduce((s, v, j) => s + v * eigenvectors[1][j], 0);
@@ -24302,9 +24302,9 @@ function runFactorAnalysis(st, resultEl, nFactors) {
   }
 
   let html = '<div class="multivariate-section"><h4>Factor Loadings</h4>';
-  html += '<table class="loading-matrix"><thead><tr><th>Variable</th>';
-  for (let f = 0; f < nF; f++) html += '<th>Factor ' + (f + 1) + '</th>';
-  html += '<th>Communality</th></tr></thead><tbody>';
+  html += '<table class="loading-matrix"><thead><tr><th>' + t('relation.analysis.pca_variable') + '</th>';
+  for (let f = 0; f < nF; f++) html += '<th>' + t('relation.analysis.factor_label') + ' ' + (f + 1) + '</th>';
+  html += '<th>' + t('relation.analysis.communality') + '</th></tr></thead><tbody>';
   for (let j = 0; j < p; j++) {
     html += '<tr><td style="text-align:left;font-weight:600;">' + escapeHtml(numCols[j].name) + '</td>';
     for (let f = 0; f < nF; f++) {
@@ -24317,10 +24317,10 @@ function runFactorAnalysis(st, resultEl, nFactors) {
   }
   html += '</tbody></table></div>';
 
-  html += '<div class="multivariate-section"><h4>Eigenvalues</h4>';
-  html += '<table class="multivariate-summary-table"><thead><tr><th>Factor</th><th>Eigenvalue</th></tr></thead><tbody>';
+  html += '<div class="multivariate-section"><h4>' + t('relation.analysis.pca_eigenvalues') + '</h4>';
+  html += '<table class="multivariate-summary-table"><thead><tr><th>' + t('relation.analysis.factor_label') + '</th><th>' + t('relation.analysis.pca_eigenvalue') + '</th></tr></thead><tbody>';
   for (let f = 0; f < nF; f++) {
-    html += '<tr><td>Factor ' + (f + 1) + '</td><td>' + eigenvalues[f].toFixed(4) + '</td></tr>';
+    html += '<tr><td>' + t('relation.analysis.factor_label') + ' ' + (f + 1) + '</td><td>' + eigenvalues[f].toFixed(4) + '</td></tr>';
   }
   html += '</tbody></table></div>';
 
@@ -24479,8 +24479,8 @@ function runMANOVA(st, resultEl, mvView) {
 
   let html = '<div class="multivariate-section"><h4>MANOVA Summary</h4>';
   html += '<table class="multivariate-summary-table"><thead><tr><th>Statistic</th><th>Value</th><th>Description</th></tr></thead><tbody>';
-  html += '<tr><td>Wilks\' Lambda (Λ)</td><td>' + wilksLambda.toFixed(6) + '</td><td>Closer to 0 = stronger group differences</td></tr>';
-  html += '<tr><td>Pillai\'s Trace</td><td>' + pillaisTrace.toFixed(6) + '</td><td>Higher values = stronger group differences</td></tr>';
+  html += '<tr><td>' + t('relation.analysis.wilks_lambda') + '</td><td>' + wilksLambda.toFixed(6) + '</td><td>' + t('relation.analysis.wilks_closer') + '</td></tr>';
+  html += '<tr><td>' + t('relation.analysis.pillai_trace') + '</td><td>' + pillaisTrace.toFixed(6) + '</td><td>' + t('relation.analysis.pillai_higher') + '</td></tr>';
   html += '<tr><td>Number of groups</td><td>' + k + '</td><td></td></tr>';
   html += '<tr><td>Total N</td><td>' + N + '</td><td></td></tr>';
   html += '<tr><td>df (between)</td><td>' + dfB + '</td><td></td></tr>';
@@ -26038,14 +26038,14 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
   const maxReached = isCardinalityMaxReached(st);
   
   const lineOperationsMap = {
-    'View': { action: 'view-row', icon: '👁', label: 'View' },
-    'Edit': { action: 'edit-row', icon: '✏️', label: 'Edit' },
-    'Copy': { action: 'copy-row', icon: '📋', label: 'Copy' },
-    'New': { action: 'new-row', icon: '➕', label: 'New' },
-    'New Fast': { action: 'new-fast-row', icon: '⚡', label: 'New Fast' },
-    'Delete': { action: 'delete-row', icon: '🗑️', label: 'Delete' },
-    'Paper Form': { action: 'paper-form-row', icon: '📄', label: 'Paper Form' },
-    'Print': { action: 'print-row', icon: '🖨️', label: 'Print' }
+    'View': { action: 'view-row', icon: '👁', label: t('relation.lineops.view') },
+    'Edit': { action: 'edit-row', icon: '✏️', label: t('relation.lineops.edit') },
+    'Copy': { action: 'copy-row', icon: '📋', label: t('relation.lineops.copy') },
+    'New': { action: 'new-row', icon: '➕', label: t('relation.lineops.new') },
+    'New Fast': { action: 'new-fast-row', icon: '⚡', label: t('relation.lineops.new_fast') },
+    'Delete': { action: 'delete-row', icon: '🗑️', label: t('relation.lineops.delete') },
+    'Paper Form': { action: 'paper-form-row', icon: '📄', label: t('relation.lineops.paper_form') },
+    'Print': { action: 'print-row', icon: '🖨️', label: t('relation.lineops.print') }
   };
   
   const lineOptions = st.rel_options.general_line_options || DEFAULT_REL_OPTIONS.general_line_options;
@@ -26060,12 +26060,12 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
     .join('\n    ');
   
   menu.innerHTML = `
-    <div class="column-menu-header">Row ${rowIdx + 1}</div>
+    <div class="column-menu-header">${tf('relation.dialog.row_number', {index: rowIdx + 1})}</div>
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
-        <div class="column-menu-title">Checked (${getSelectedRows(st).size} rows)</div>
-        <button class="column-menu-item" data-action="delete-selected">🗑️ Remove Checked</button>
+        <div class="column-menu-title">${tf('relation.multiops.checked_rows', {count: getSelectedRows(st).size})}</div>
+        <button class="column-menu-item" data-action="delete-selected">🗑️ ${t('relation.multiops.remove_checked')}</button>
       </div>
     ` : ''}
   `;
