@@ -406,6 +406,9 @@ window.RELATION_TRANSLATIONS = {
   "relation.ai.voice_input": { pt: "Entrada por voz", en: "Voice input", es: "Entrada por voz", fr: "Saisie vocale", it: "Input vocale", de: "Spracheingabe" },
   "relation.ai.mic_denied": { pt: "Acesso ao microfone negado. Permita o acesso ao microfone para usar entrada por voz.", en: "Microphone access denied. Please allow microphone access to use voice input.", es: "Acceso al micrófono denegado. Permita el acceso al micrófono para usar la entrada por voz.", fr: "Accès au microphone refusé. Veuillez autoriser l'accès au microphone pour la saisie vocale.", it: "Accesso al microfono negato. Consenti l'accesso al microfono per usare l'input vocale.", de: "Mikrofonzugriff verweigert. Bitte erlauben Sie den Mikrofonzugriff für die Spracheingabe." },
   "relation.ai.voice_unsupported": { pt: "Entrada por voz não suportada neste browser. Use Chrome ou Edge.", en: "Voice input is not supported in this browser. Please use Chrome or Edge.", es: "La entrada por voz no es compatible con este navegador. Use Chrome o Edge.", fr: "La saisie vocale n'est pas supportée dans ce navigateur. Utilisez Chrome ou Edge.", it: "L'input vocale non è supportato in questo browser. Usa Chrome o Edge.", de: "Spracheingabe wird in diesem Browser nicht unterstützt. Bitte verwenden Sie Chrome oder Edge." },
+  "relation.ai.filter_suggestion": { pt: "Sugestão de filtro:", en: "Filter suggestion:", es: "Sugerencia de filtro:", fr: "Suggestion de filtre :", it: "Suggerimento filtro:", de: "Filtervorschlag:" },
+  "relation.ai.apply_filter": { pt: "Aplicar Filtro", en: "Apply Filter", es: "Aplicar Filtro", fr: "Appliquer le filtre", it: "Applica Filtro", de: "Filter anwenden" },
+  "relation.ai.no_response": { pt: "Sem resposta", en: "No response", es: "Sin respuesta", fr: "Aucune réponse", it: "Nessuna risposta", de: "Keine Antwort" },
 
   // ─── PIVOT VIEW ───────────────────────────────────────────
   "relation.pivot.rows": { pt: "Linhas:", en: "Rows:", es: "Filas:", fr: "Lignes :", it: "Righe:", de: "Zeilen:" },
@@ -1481,5 +1484,9 @@ window.applyTranslations = function(root) {
     } else {
       el.textContent = text;
     }
+  });
+  scope.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    el.placeholder = window.t(key);
   });
 };

@@ -17331,7 +17331,7 @@ async function askAI(question, st = state) {
   
   // Check for empty items
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
-    responseDiv.innerHTML = '<p class="text-muted-foreground">Não existem dados para analisar com IA.</p>';
+    responseDiv.innerHTML = '<p class="text-muted-foreground">' + t('relation.ai.no_data') + '</p>';
     return;
   }
   
@@ -17355,10 +17355,10 @@ async function askAI(question, st = state) {
     
     if (result.type === 'filter' && result.conditions) {
       responseDiv.innerHTML = `
-        <div>${result.description || 'Filter suggestion:'}</div>
+        <div>${result.description || t('relation.ai.filter_suggestion')}</div>
         <div class="ai-filter-result">
           <span>Filter: ${result.conditions.map(c => `${c.column} ${c.operator} ${c.value ?? ''}`).join(' AND ')}</span>
-          <button class="btn-apply-ai-filter">Apply Filter</button>
+          <button class="btn-apply-ai-filter">${t('relation.ai.apply_filter')}</button>
         </div>
       `;
       
@@ -23444,7 +23444,7 @@ function initRelationInstance(container, relationData, options = {}) {
           </button>
         </div>
         <div class="ai-input-row">
-          <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}">
+          <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}" data-i18n-placeholder="relation.ai.placeholder">
           <button class="btn-ai-ask btn btn-primary btn-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </button>
@@ -25670,7 +25670,7 @@ async function askAIWithState(question, st = state) {
   const responseContainer = st.container ? st.container.querySelector('.ai-response') : el('.ai-response');
   if (!responseContainer) return;
   
-  responseContainer.innerHTML = '<p class="text-muted-foreground">Analyzing...</p>';
+  responseContainer.innerHTML = '<p class="text-muted-foreground">' + t('relation.ai.analyzing') + '</p>';
   
   try {
     const context = {
@@ -25688,7 +25688,7 @@ async function askAIWithState(question, st = state) {
     if (!response.ok) throw new Error('AI request failed');
     
     const result = await response.json();
-    responseContainer.innerHTML = '<div class="ai-result">' + escapeHtml(result.answer || result.response || 'No response') + '</div>';
+    responseContainer.innerHTML = '<div class="ai-result">' + escapeHtml(result.answer || result.response || t('relation.ai.no_response')) + '</div>';
   } catch (error) {
     responseContainer.innerHTML = '<p class="text-error">Error: ' + escapeHtml(error.message) + '</p>';
   }
