@@ -18037,7 +18037,7 @@ function getCategoricalOrNumericColumns(st = state) {
   const cols = [];
   st.columnNames.forEach((name, idx) => {
     const type = st.columnTypes[idx];
-    if (['boolean', 'string', 'select', 'int', 'float', 'date', 'datetime', 'time'].includes(type)) {
+    if (['id', 'boolean', 'string', 'select', 'int', 'float', 'date', 'datetime', 'time'].includes(type)) {
       cols.push({ idx, name, type });
     }
   });
@@ -19638,7 +19638,7 @@ function initCorrelationConfig(st = state) {
   
   let options = '<option value="">' + t('relation.analysis.select_column_placeholder') + '</option>';
   cols.forEach(c => {
-    const typeLabel = ['int', 'float'].includes(c.type) ? t('relation.analysis.numeric') : 
+    const typeLabel = ['id', 'int', 'float'].includes(c.type) ? t('relation.analysis.numeric') : 
                       ['boolean', 'string', 'select'].includes(c.type) ? t('relation.analysis.categorical') : t('relation.analysis.temporal');
     options += '<option value="' + c.idx + '">' + escapeHtml(c.name) + ' (' + typeLabel + ')</option>';
   });
@@ -19798,15 +19798,15 @@ function calculateCorrelation(st = state) {
   const xType = st.columnTypes[xIdx];
   const yType = st.columnTypes[yIdx];
   
-  const isNumericX = ['int', 'float'].includes(xType);
-  const isNumericY = ['int', 'float'].includes(yType);
+  const isNumericX = ['id', 'int', 'float'].includes(xType);
+  const isNumericY = ['id', 'int', 'float'].includes(yType);
   const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
   const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
   const corrResultEl = corrView.querySelector('.correlation-result');
   
   function toNumeric(val, type) {
     if (val === null) return null;
-    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
+    if (['id', 'int', 'float'].includes(type)) return typeof val === 'number' ? val : (val !== null ? parseFloat(val) : null);
     if (['date', 'datetime'].includes(type)) {
       const d = new Date(val);
       return isNaN(d.getTime()) ? null : d.getTime();
@@ -21438,7 +21438,7 @@ function analyzeAllPairs(st = state) {
   // Check for empty items
   if (!st.relation || !st.relation.items || st.relation.items.length === 0 || getSortedIndices(st).length < 2) {
     if (corrResultEl) {
-      corrResultEl.innerHTML = '<p class="text-muted-foreground text-center py-8">Não existem dados suficientes para análise de correlações.</p>';
+      corrResultEl.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.analysis.no_data_corr') + '</p>';
     }
     return;
   }
@@ -21448,20 +21448,22 @@ function analyzeAllPairs(st = state) {
   
   const validCols = [];
   st.columnTypes.forEach((type, idx) => {
-    if (['int', 'float', 'date', 'datetime', 'time', 'boolean', 'string', 'select'].includes(type)) {
+    if (['id', 'int', 'float', 'date', 'datetime', 'time', 'boolean', 'string', 'select'].includes(type)) {
       validCols.push(idx);
     }
   });
   
   if (validCols.length < 2) {
-    alert('Need at least 2 columns for correlation analysis');
+    if (corrResultEl) {
+      corrResultEl.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.analysis.need_2_cols') + '</p>';
+    }
     return;
   }
   
   // Helper to convert values
   function toNumeric(val, type) {
     if (val === null) return null;
-    if (['int', 'float'].includes(type)) return typeof val === 'number' ? val : null;
+    if (['id', 'int', 'float'].includes(type)) return typeof val === 'number' ? val : (val !== null ? parseFloat(val) : null);
     if (['date', 'datetime'].includes(type)) {
       const d = new Date(val);
       return isNaN(d.getTime()) ? null : d.getTime();
@@ -21483,8 +21485,8 @@ function analyzeAllPairs(st = state) {
       const xType = st.columnTypes[xIdx];
       const yType = st.columnTypes[yIdx];
       
-      const isNumericX = ['int', 'float'].includes(xType);
-      const isNumericY = ['int', 'float'].includes(yType);
+      const isNumericX = ['id', 'int', 'float'].includes(xType);
+      const isNumericY = ['id', 'int', 'float'].includes(yType);
       const isTemporalX = ['date', 'datetime', 'time'].includes(xType);
       const isTemporalY = ['date', 'datetime', 'time'].includes(yType);
       const isBinaryX = xType === 'boolean';
