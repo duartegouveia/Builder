@@ -449,6 +449,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.analysis.canonical": { pt: "Correlação Canónica", en: "Canonical Correlation", es: "Correlación Canónica", fr: "Corrélation Canonique", it: "Correlazione Canonica", de: "Kanonische Korrelation" },
   "relation.analysis.components": { pt: "Componentes:", en: "Components:", es: "Componentes:", fr: "Composantes :", it: "Componenti:", de: "Komponenten:" },
   "relation.analysis.run_analysis": { pt: "Executar Análise", en: "Run Analysis", es: "Ejecutar Análisis", fr: "Exécuter l'Analyse", it: "Esegui Analisi", de: "Analyse ausführen" },
+  "relation.analysis.multivariate_intro": { pt: "Selecione um método e configure os parâmetros, depois clique em Executar Análise para realizar a análise multivariada.", en: "Select a method and configure parameters, then click Run Analysis to perform multivariate analysis.", es: "Seleccione un método y configure los parámetros, luego haga clic en Ejecutar Análisis para realizar el análisis multivariado.", fr: "Sélectionnez une méthode et configurez les paramètres, puis cliquez sur Exécuter l'Analyse pour effectuer l'analyse multivariée.", it: "Seleziona un metodo e configura i parametri, poi clicca Esegui Analisi per effettuare l'analisi multivariata.", de: "Wählen Sie eine Methode und konfigurieren Sie die Parameter, dann klicken Sie auf Analyse ausführen, um die multivariate Analyse durchzuführen." },
   "relation.analysis.not_enough_data": { pt: "Dados insuficientes.", en: "Not enough data pairs.", es: "Datos insuficientes.", fr: "Données insuffisantes.", it: "Dati insufficienti.", de: "Nicht genügend Datenpaare." },
   "relation.analysis.not_enough_corr": { pt: "Dados insuficientes para correlação", en: "Not enough data pairs for correlation", es: "Datos insuficientes para correlación", fr: "Données insuffisantes pour la corrélation", it: "Dati insufficienti per la correlazione", de: "Nicht genügend Datenpaare für Korrelation" },
   "relation.analysis.no_data_corr": { pt: "Não existem dados suficientes para análise de correlações.", en: "Not enough data for correlation analysis.", es: "No hay datos suficientes para análisis de correlaciones.", fr: "Données insuffisantes pour l'analyse de corrélation.", it: "Dati insufficienti per l'analisi delle correlazioni.", de: "Nicht genügend Daten für Korrelationsanalyse." },
@@ -530,7 +531,7 @@ window.RELATION_TRANSLATIONS = {
 
   // ─── VIEW TABS ────────────────────────────────────────────
   "relation.view.table": { pt: "Tabela", en: "Table", es: "Tabla", fr: "Tableau", it: "Tabella", de: "Tabelle" },
-  "relation.view.cards": { pt: "Cards", en: "Cards", es: "Tarjetas", fr: "Cartes", it: "Schede", de: "Karten" },
+  "relation.view.cards": { pt: "Cartões", en: "Cards", es: "Tarjetas", fr: "Cartes", it: "Schede", de: "Karten" },
   "relation.view.pivot": { pt: "Pivot", en: "Pivot", es: "Pivot", fr: "Pivot", it: "Pivot", de: "Pivot" },
   "relation.view.analysis": { pt: "Análise", en: "Analysis", es: "Análisis", fr: "Analyse", it: "Analisi", de: "Analyse" },
   "relation.view.ai": { pt: "IA", en: "AI", es: "IA", fr: "IA", it: "IA", de: "KI" },
@@ -963,14 +964,14 @@ window.RELATION_TRANSLATIONS = {
   "relation.dialog.remove_checked": { pt: "🗑️ Remover Marcados", en: "🗑️ Remove Checked", es: "🗑️ Eliminar Marcados", fr: "🗑️ Retirer les Cochés", it: "🗑️ Rimuovi Selezionati", de: "🗑️ Markierte entfernen" },
 
   // ─── LINE OPERATIONS ──────────────────────────────────────
-  "relation.lineops.view": { pt: "View", en: "View", es: "Ver", fr: "Voir", it: "Visualizza", de: "Anzeigen" },
-  "relation.lineops.edit": { pt: "Edit", en: "Edit", es: "Editar", fr: "Modifier", it: "Modifica", de: "Bearbeiten" },
-  "relation.lineops.copy": { pt: "Copy", en: "Copy", es: "Copiar", fr: "Copier", it: "Copia", de: "Kopieren" },
-  "relation.lineops.new": { pt: "New", en: "New", es: "Nuevo", fr: "Nouveau", it: "Nuovo", de: "Neu" },
-  "relation.lineops.new_fast": { pt: "New Fast", en: "New Fast", es: "Nuevo Rápido", fr: "Nouveau Rapide", it: "Nuovo Rapido", de: "Schnell Neu" },
-  "relation.lineops.delete": { pt: "Delete", en: "Delete", es: "Eliminar", fr: "Supprimer", it: "Elimina", de: "Löschen" },
-  "relation.lineops.paper_form": { pt: "Paper Form", en: "Paper Form", es: "Formulario", fr: "Formulaire", it: "Modulo", de: "Formular" },
-  "relation.lineops.print": { pt: "Print", en: "Print", es: "Imprimir", fr: "Imprimer", it: "Stampa", de: "Drucken" },
+  "relation.lineops.view": { pt: "Ver", en: "View", es: "Ver", fr: "Voir", it: "Visualizza", de: "Anzeigen" },
+  "relation.lineops.edit": { pt: "Editar", en: "Edit", es: "Editar", fr: "Modifier", it: "Modifica", de: "Bearbeiten" },
+  "relation.lineops.copy": { pt: "Copiar", en: "Copy", es: "Copiar", fr: "Copier", it: "Copia", de: "Kopieren" },
+  "relation.lineops.new": { pt: "Novo", en: "New", es: "Nuevo", fr: "Nouveau", it: "Nuovo", de: "Neu" },
+  "relation.lineops.new_fast": { pt: "Novo Rápido", en: "New Fast", es: "Nuevo Rápido", fr: "Nouveau Rapide", it: "Nuovo Veloce", de: "Schnell Neu" },
+  "relation.lineops.delete": { pt: "Eliminar", en: "Delete", es: "Eliminar", fr: "Supprimer", it: "Elimina", de: "Löschen" },
+  "relation.lineops.paper_form": { pt: "Formulário Papel", en: "Paper Form", es: "Formulario Papel", fr: "Formulaire Papier", it: "Modulo Cartaceo", de: "Papierformular" },
+  "relation.lineops.print": { pt: "Imprimir", en: "Print", es: "Imprimir", fr: "Imprimer", it: "Stampa", de: "Drucken" },
 
   // ─── MULTI OPERATIONS ─────────────────────────────────────
   "relation.multiops.invert_page": { pt: "Inverter Página", en: "Invert Page", es: "Invertir Página", fr: "Inverser Page", it: "Inverti Pagina", de: "Seite invertieren" },

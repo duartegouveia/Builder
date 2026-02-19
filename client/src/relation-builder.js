@@ -16318,10 +16318,10 @@ function initFileFieldsInContainer(container, st, row, mode) {
         initRelationInstance(relDiv, fileRel, { showJsonEditor: false, isNested: true });
         renderFileGallery(fc, fileRel);
       } else {
-        fc.innerHTML = '<span class="null-value">Sem ficheiros</span>';
+        fc.innerHTML = '<span class="null-value">' + t('relation.file.no_files') + '</span>';
       }
     } else if (mode === 'new-fast') {
-      fc.innerHTML = '<span class="null-value">Upload indisponível no modo rápido</span>';
+      fc.innerHTML = '<span class="null-value">' + t('relation.file.upload_unavailable') + '</span>';
     } else {
       if (fileRel.items && fileRel.items.length > 0) {
         const relDiv = document.createElement('div');
@@ -16334,7 +16334,7 @@ function initFileFieldsInContainer(container, st, row, mode) {
 
       const zone = document.createElement('div');
       zone.className = 'file-upload-zone';
-      zone.innerHTML = '<span class="upload-icon">📁</span><span class="upload-text">Arraste ficheiros ou <strong>clique para selecionar</strong></span>';
+      zone.innerHTML = '<span class="upload-icon">📁</span><span class="upload-text">' + t('relation.file.drag_or_click') + '</span>';
 
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
@@ -17467,7 +17467,11 @@ function renderViewTabs() {
   // Clear existing tabs
   viewTabs.innerHTML = '';
   
-  const viewOptions = state.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
+  let viewOptions = state.rel_options.general_view_options || DEFAULT_REL_OPTIONS.general_view_options;
+  
+  if (state.rel_options.show_hierarchy) {
+    viewOptions = viewOptions.filter(v => v.toLowerCase() !== 'cards');
+  }
   
   // Create left section for tabs
   const tabsLeft = document.createElement('div');
@@ -23921,7 +23925,7 @@ function initMultivariateView(st = state) {
   if (!mvView) return;
   const mvResult = mvView.querySelector('.multivariate-result');
   if (mvResult && !mvResult.innerHTML.trim()) {
-    mvResult.innerHTML = '<p class="text-muted-foreground text-center py-8">Select a method and configure parameters, then click Run Analysis to perform multivariate analysis.</p>';
+    mvResult.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.analysis.multivariate_intro') + '</p>';
   }
   const runBtn = mvView.querySelector('.btn-run-multivariate');
   if (runBtn) {
