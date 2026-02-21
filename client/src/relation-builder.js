@@ -24493,12 +24493,7 @@ function initRelationInstance(container, relationData, options = {}) {
             <div style="flex:1;"></div>
             <label style="font-size:11px;font-weight:600;color:var(--text-muted);">${t('relation.ai.model_label')}</label>
             <select class="ai-model-select" data-testid="select-ai-model" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-primary);">
-              <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
-              <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
-              <option value="gpt-4.1">GPT-4.1</option>
-              <option value="gpt-5.1">GPT-5.1</option>
-              <option value="o3-mini">o3-mini</option>
-              <option value="o4-mini">o4-mini</option>
+              <option value="gpt-4.1-mini">GPT-4.1 Mini (OpenAI)</option>
             </select>
           </div>
           <div class="ai-input-row">
@@ -27201,11 +27196,62 @@ function addAiHistoryEntry(st, question, answer, engine) {
   renderAiHistoryRelation(st);
 }
 
+let _aiModelsCache = null;
+let _aiModelsFetchPromise = null;
+
+function fetchAIModels() {
+  if (_aiModelsCache) return Promise.resolve(_aiModelsCache);
+  if (_aiModelsFetchPromise) return _aiModelsFetchPromise;
+  _aiModelsFetchPromise = fetch('/api/ai/models')
+    .then(r => r.json())
+    .then(data => {
+      _aiModelsCache = data;
+      _aiModelsFetchPromise = null;
+      return data;
+    })
+    .catch(() => {
+      _aiModelsFetchPromise = null;
+      return { models: [{ id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', company: 'OpenAI' }], grouped: { 'OpenAI': [{ id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', company: 'OpenAI' }] } };
+    });
+  return _aiModelsFetchPromise;
+}
+
+function populateModelSelect(selectEl) {
+  if (!selectEl || selectEl._modelsPopulated) return;
+  selectEl._modelsPopulated = true;
+  const saved = localStorage.getItem('relation_ai_model') || 'gpt-4.1-mini';
+  fetchAIModels().then(data => {
+    if (!data || !data.grouped) return;
+    selectEl.innerHTML = '';
+    for (const [company, models] of Object.entries(data.grouped)) {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = company;
+      for (const m of models) {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name;
+        if (m.id === saved) opt.selected = true;
+        optgroup.appendChild(opt);
+      }
+      selectEl.appendChild(optgroup);
+    }
+    if (!selectEl.querySelector(`option[value="${saved}"]`)) {
+      selectEl.value = selectEl.options[0]?.value || 'gpt-4.1-mini';
+    }
+    selectEl.addEventListener('change', () => {
+      localStorage.setItem('relation_ai_model', selectEl.value);
+    });
+  });
+}
+
 function initAIView(st = state) {
   const aiView = st.container ? st.container.querySelector('.view-ai') : el('.view-ai');
   if (!aiView) return;
 
   if (!st.relation.ai_prompts) st.relation.ai_prompts = [];
+
+  const modelSelect = aiView.querySelector('.ai-model-select');
+  populateModelSelect(modelSelect);
 
   const responseDiv = aiView.querySelector('.ai-response');
   if (responseDiv && !responseDiv.innerHTML.trim()) {

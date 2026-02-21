@@ -8,6 +8,76 @@ const openai = new OpenAI({
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
+const openrouter = new OpenAI({
+  apiKey: process.env.AI_INTEGRATIONS_OPENROUTER_API_KEY,
+  baseURL: process.env.AI_INTEGRATIONS_OPENROUTER_BASE_URL,
+});
+
+const OPENAI_MODELS = [
+  { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', company: 'OpenAI', provider: 'openai' },
+  { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', company: 'OpenAI', provider: 'openai' },
+  { id: 'gpt-4.1', name: 'GPT-4.1', company: 'OpenAI', provider: 'openai' },
+  { id: 'o3-mini', name: 'o3-mini', company: 'OpenAI', provider: 'openai' },
+  { id: 'o4-mini', name: 'o4-mini', company: 'OpenAI', provider: 'openai' },
+];
+
+const OPENROUTER_CURATED_MODELS = [
+  { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4', company: 'Anthropic', provider: 'openrouter' },
+  { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku', company: 'Anthropic', provider: 'openrouter' },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', company: 'Google', provider: 'openrouter' },
+  { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', company: 'Google', provider: 'openrouter' },
+  { id: 'meta-llama/llama-4-maverick', name: 'Llama 4 Maverick', company: 'Meta', provider: 'openrouter' },
+  { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', company: 'Meta', provider: 'openrouter' },
+  { id: 'deepseek/deepseek-chat-v3-0324', name: 'DeepSeek V3', company: 'DeepSeek', provider: 'openrouter' },
+  { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1', company: 'DeepSeek', provider: 'openrouter' },
+  { id: 'mistralai/mistral-medium-3', name: 'Mistral Medium 3', company: 'Mistral', provider: 'openrouter' },
+  { id: 'mistralai/mistral-small-3.1-24b-instruct', name: 'Mistral Small 3.1', company: 'Mistral', provider: 'openrouter' },
+  { id: 'qwen/qwen3-235b-a22b', name: 'Qwen3 235B', company: 'Qwen', provider: 'openrouter' },
+  { id: 'x-ai/grok-3-mini', name: 'Grok 3 Mini', company: 'xAI', provider: 'openrouter' },
+];
+
+let cachedModels = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 3600000;
+
+function getAvailableModels() {
+  const now = Date.now();
+  if (cachedModels && (now - cacheTimestamp) < CACHE_TTL) {
+    return cachedModels;
+  }
+
+  const models = [];
+
+  if (process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+    models.push(...OPENAI_MODELS);
+  }
+
+  if (process.env.AI_INTEGRATIONS_OPENROUTER_API_KEY) {
+    models.push(...OPENROUTER_CURATED_MODELS);
+  }
+
+  cachedModels = models;
+  cacheTimestamp = now;
+  return models;
+}
+
+function getClientForModel(modelId) {
+  const models = getAvailableModels();
+  const model = models.find(m => m.id === modelId);
+  if (!model) {
+    return { client: openai, provider: 'openai' };
+  }
+  if (model.provider === 'openrouter') {
+    return { client: openrouter, provider: 'openrouter' };
+  }
+  return { client: openai, provider: 'openai' };
+}
+
+function isReasoningModel(modelId) {
+  return modelId.startsWith('o3') || modelId.startsWith('o4') ||
+         modelId.includes('deepseek-r1');
+}
+
 export async function registerRoutes(httpServer, app) {
 
   app.get("/api/docs", (req, res) => {
@@ -91,8 +161,22 @@ export async function registerRoutes(httpServer, app) {
       res.status(500).json({ error: "Failed to read template" });
     }
   });
+
+  app.get("/api/ai/models", (req, res) => {
+    try {
+      const models = getAvailableModels();
+      const grouped = {};
+      for (const m of models) {
+        if (!grouped[m.company]) grouped[m.company] = [];
+        grouped[m.company].push({ id: m.id, name: m.name, company: m.company, provider: m.provider });
+      }
+      res.json({ models, grouped });
+    } catch (error) {
+      console.error("Models list error:", error);
+      res.status(500).json({ error: "Failed to fetch models" });
+    }
+  });
   
-  // AI Analysis endpoint for Relation Builder
   app.post("/api/ai/analyze", async (req, res) => {
     try {
       const { question, relation, model } = req.body;
@@ -101,15 +185,15 @@ export async function registerRoutes(httpServer, app) {
         return res.status(400).json({ error: "Question and relation data are required" });
       }
       
-      const allowedModels = ['gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-5.1', 'o3-mini', 'o4-mini'];
-      const selectedModel = allowedModels.includes(model) ? model : 'gpt-4.1-mini';
+      const availableModels = getAvailableModels();
+      const modelIds = availableModels.map(m => m.id);
+      const selectedModel = modelIds.includes(model) ? model : 'gpt-4.1-mini';
+      const { client } = getClientForModel(selectedModel);
       
-      // Prepare data summary for context
       const columns = Object.keys(relation.columns || {});
       const types = relation.columns || {};
       const rowCount = relation.items?.length || 0;
       
-      // Sample data (first 50 rows max for context)
       const sampleRows = (relation.items || []).slice(0, 50);
       const dataSample = sampleRows.map((row, idx) => {
         const obj = {};
@@ -146,31 +230,32 @@ If the question is asking for analysis or information, respond with:
 
 Always respond with valid JSON. For the "text" field, use HTML formatting to make the response readable.`;
 
-      const isReasoningModel = selectedModel.startsWith('o3') || selectedModel.startsWith('o4');
+      const reasoning = isReasoningModel(selectedModel);
       const requestParams = {
         model: selectedModel,
-        messages: isReasoningModel
+        messages: reasoning
           ? [{ role: "user", content: systemPrompt + "\n\nUser question: " + question }]
           : [
               { role: "system", content: systemPrompt },
               { role: "user", content: question }
             ],
-        max_completion_tokens: 2048,
       };
-      if (!isReasoningModel) {
+      if (reasoning) {
+        requestParams.max_completion_tokens = 2048;
+      } else {
+        requestParams.max_tokens = 2048;
         requestParams.response_format = { type: "json_object" };
       }
-      const response = await openai.chat.completions.create(requestParams);
+      const response = await client.chat.completions.create(requestParams);
       
       let content = response.choices[0]?.message?.content || '{"type": "answer", "text": "Unable to analyze data."}';
-      // Strip markdown code fences if present (reasoning models may wrap JSON)
       content = content.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
       const result = JSON.parse(content);
       
       res.json(result);
     } catch (error) {
       console.error("AI Analysis error:", error);
-      res.status(500).json({ error: "Failed to analyze data" });
+      res.status(500).json({ error: "Failed to analyze data: " + (error.message || '') });
     }
   });
   
