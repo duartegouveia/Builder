@@ -1585,7 +1585,7 @@ const PRICELIST_PRODUCTS_JSON = {
 const ALL_PRICELISTS_JSON = {
   "pot": "relation",
   "guid": "",
-  "name": "pricelist",
+  "name": "all_pricelist",
   "columns": {
     "ID": "id",
     "OwnerID": {
@@ -1949,7 +1949,7 @@ const PRODUCT_CATEGORY_JSON = {
 const ALL_PRODUCTS_JSON = {
   "pot": "relation",
   "guid": "",
-  "name": "product",
+  "name": "all_product",
   "columns": {
     "ID": "id",
     "OwnerID": {
@@ -27399,24 +27399,6 @@ function init() {
     ['menu-distributor', DISTRIBUTOR_JSON],
     ['menu-all-stocks', ALL_STOCKS_JSON]
   ];
-  menuMapping.forEach(([testId, jsonData]) => {
-    const menuItem = document.querySelector('[data-testid="' + testId + '"]');
-    menuItem?.addEventListener('click', (e) => {
-      e.preventDefault();
-      loadRelationFromEntity(jsonData);
-    });
-  });
-
-  const _firstNavItem = document.querySelector('.nav-item');
-  if (_firstNavItem) {
-    const _firstSub = _firstNavItem.querySelector('.nav-dropdown-item');
-    if (_firstSub) {
-      const _tid = _firstSub.getAttribute('data-testid');
-      const _m = menuMapping.find(([id]) => id === _tid);
-      if (_m) loadRelationFromEntity(_m[1]);
-    }
-  }
-  
   const ALL_ENTITY_JSONS = [
     PRODUCTS_JSON, CATEGORIES_JSON, STOCKS_JSON, PRICELISTS_JSON,
     USERS_JSON, AUDITLOG_JSON, COMPANY_TYPES_JSON, ALL_STOCKS_JSON,
@@ -27436,6 +27418,24 @@ function init() {
       all_entities[json.name] = json;
     }
   });
+
+  menuMapping.forEach(([testId, jsonData]) => {
+    const menuItem = document.querySelector('[data-testid="' + testId + '"]');
+    menuItem?.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadRelationFromEntity(jsonData);
+    });
+  });
+
+  const _firstNavItem = document.querySelector('.nav-item');
+  if (_firstNavItem) {
+    const _firstSub = _firstNavItem.querySelector('.nav-dropdown-item');
+    if (_firstSub) {
+      const _tid = _firstSub.getAttribute('data-testid');
+      const _m = menuMapping.find(([id]) => id === _tid);
+      if (_m) loadRelationFromEntity(_m[1]);
+    }
+  }
   
   btnParse?.addEventListener('click', () => {
     const val = textarea.value.trim();
