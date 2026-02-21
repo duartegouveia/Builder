@@ -8288,6 +8288,10 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
     font-size: 10px !important;
     padding: 2px 6px !important;
   }
+
+  .page-input {
+    width: 2.5em !important;
+  }
 }
 
 .i18n-editor {
