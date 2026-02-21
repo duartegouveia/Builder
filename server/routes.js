@@ -95,11 +95,14 @@ export async function registerRoutes(httpServer, app) {
   // AI Analysis endpoint for Relation Builder
   app.post("/api/ai/analyze", async (req, res) => {
     try {
-      const { question, relation } = req.body;
+      const { question, relation, model } = req.body;
       
       if (!question || !relation) {
         return res.status(400).json({ error: "Question and relation data are required" });
       }
+      
+      const allowedModels = ['gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-5.1', 'o3-mini', 'o4-mini'];
+      const selectedModel = allowedModels.includes(model) ? model : 'gpt-4.1-mini';
       
       // Prepare data summary for context
       const columns = Object.keys(relation.columns || {});
@@ -143,17 +146,25 @@ If the question is asking for analysis or information, respond with:
 
 Always respond with valid JSON. For the "text" field, use HTML formatting to make the response readable.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4.1-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: question }
-        ],
+      const isReasoningModel = selectedModel.startsWith('o3') || selectedModel.startsWith('o4');
+      const requestParams = {
+        model: selectedModel,
+        messages: isReasoningModel
+          ? [{ role: "user", content: systemPrompt + "\n\nUser question: " + question }]
+          : [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: question }
+            ],
         max_completion_tokens: 2048,
-        response_format: { type: "json_object" }
-      });
+      };
+      if (!isReasoningModel) {
+        requestParams.response_format = { type: "json_object" };
+      }
+      const response = await openai.chat.completions.create(requestParams);
       
-      const content = response.choices[0]?.message?.content || '{"type": "answer", "text": "Unable to analyze data."}';
+      let content = response.choices[0]?.message?.content || '{"type": "answer", "text": "Unable to analyze data."}';
+      // Strip markdown code fences if present (reasoning models may wrap JSON)
+      content = content.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
       const result = JSON.parse(content);
       
       res.json(result);

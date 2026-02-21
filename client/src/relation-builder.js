@@ -4329,6 +4329,8 @@ function showSortPanelDialog(st) {
       listEl.innerHTML = `<div class="sort-panel-empty">${t('relation.sort.no_criteria')}</div>`;
       return;
     }
+    const showId = st.rel_options.show_id;
+    const showKind = st.rel_options.show_column_kind;
     listEl.innerHTML = criteria.map((c, idx) => {
       const opts = c.options || {};
       const colType = st.columnTypes[c.column];
@@ -4339,7 +4341,12 @@ function showSortPanelDialog(st) {
         <div class="sort-panel-row" draggable="true" data-sort-idx="${idx}" data-testid="sort-panel-row-${idx}">
           <span class="cv-drag-handle" style="cursor:grab;margin-right:6px;">☰</span>
           <select class="sort-panel-col-select" data-sort-idx="${idx}" data-testid="sort-panel-col-${idx}">
-            ${st.columnNames.map((n, i) => `<option value="${i}" ${i === c.column ? 'selected' : ''}>${n} (${st.columnTypes[i]})</option>`).join('')}
+            ${st.columnNames.map((n, i) => {
+              if (st.columnTypes[i] === 'id' && !showId) return '';
+              const displayName = getAttDisplayName(st, i);
+              const kindSuffix = showKind ? ' (' + st.columnTypes[i] + ')' : '';
+              return `<option value="${i}" ${i === c.column ? 'selected' : ''}>${displayName}${kindSuffix}</option>`;
+            }).join('')}
           </select>
           <select class="sort-panel-dir-select" data-sort-idx="${idx}" data-testid="sort-panel-dir-${idx}">
             <option value="asc" ${c.direction === 'asc' ? 'selected' : ''}>ASC ↑</option>
@@ -4347,11 +4354,11 @@ function showSortPanelDialog(st) {
           </select>
           <button class="btn btn-outline sort-panel-remove" data-sort-idx="${idx}" title="${t('relation.sort.remove_criterion')}" style="padding:2px 6px;font-size:12px;" data-testid="sort-panel-remove-${idx}">✕</button>
           <div class="sort-panel-options" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;width:100%;">
-            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-case" data-sort-idx="${idx}" ${opts.caseInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-case-${idx}"> Case Insensitive</label>
-            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-accent" data-sort-idx="${idx}" ${opts.accentInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-accent-${idx}"> Accent Insensitive</label>
-            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-punct" data-sort-idx="${idx}" ${opts.punctuationInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-punct-${idx}"> Punctuation Insensitive</label>
-            <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-num" data-sort-idx="${idx}" ${opts.parseNumbers !== false ? 'checked' : ''} data-testid="sort-opt-num-${idx}"> Parse Numbers</label>
-            <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-nulls-first" data-sort-idx="${idx}" ${opts.nullsFirst ? 'checked' : ''} data-testid="sort-opt-nulls-first-${idx}"> Nulls First</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-case" data-sort-idx="${idx}" ${opts.caseInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-case-${idx}"> ${t('relation.sort.case_insensitive')}</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-accent" data-sort-idx="${idx}" ${opts.accentInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-accent-${idx}"> ${t('relation.sort.accent_insensitive')}</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;${disabledStyle}"><input type="checkbox" class="sort-opt-punct" data-sort-idx="${idx}" ${opts.punctuationInsensitive !== false ? 'checked' : ''} ${disabledAttr} data-testid="sort-opt-punct-${idx}"> ${t('relation.sort.punct_insensitive')}</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-num" data-sort-idx="${idx}" ${opts.parseNumbers !== false ? 'checked' : ''} data-testid="sort-opt-num-${idx}"> ${t('relation.sort.parse_numbers')}</label>
+            <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="sort-opt-nulls-first" data-sort-idx="${idx}" ${opts.nullsFirst ? 'checked' : ''} data-testid="sort-opt-nulls-first-${idx}"> ${t('relation.sort.nulls_first')}</label>
           </div>
         </div>`;
     }).join('');
@@ -4448,6 +4455,7 @@ function showSortPanelDialog(st) {
   dialog.innerHTML = `
     <div class="export-dialog-header">
       <h3>${t('relation.sort.title')}</h3>
+      <span class="info-badge sort-info-badge" style="cursor:pointer;margin-left:auto;margin-right:8px;font-size:14px;" data-testid="sort-info-badge">ⓘ</span>
       <button class="btn btn-outline export-close">✕</button>
     </div>
     <div class="export-dialog-body" style="padding:12px;">
@@ -4473,11 +4481,42 @@ function showSortPanelDialog(st) {
   dialog.querySelector('.export-close').addEventListener('click', closeDialog);
   dialog.querySelector('.export-cancel').addEventListener('click', closeDialog);
 
+  dialog.querySelector('.sort-info-badge').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const existing = document.querySelector('.sort-help-overlay');
+    if (existing) existing.remove();
+    const helpOverlay = document.createElement('div');
+    helpOverlay.className = 'hierarchy-help-overlay sort-help-overlay';
+    const helpDialog = document.createElement('div');
+    helpDialog.className = 'hierarchy-help-dialog';
+    helpDialog.style.maxWidth = '560px';
+    helpDialog.innerHTML = `
+      <h3>${t('relation.sort.info_title')}</h3>
+      <div class="hierarchy-help-section">
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">📊</span><div><p>${t('relation.sort.info_purpose')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">↕️</span><div><p>${t('relation.sort.info_asc_desc')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">🔢</span><div><p>${t('relation.sort.info_multi_criteria')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">☰</span><div><p>${t('relation.sort.info_drag_drop')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">Aa</span><div><p>${t('relation.sort.info_case')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">éè</span><div><p>${t('relation.sort.info_accent')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">.,!</span><div><p>${t('relation.sort.info_punct')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">#</span><div><p>${t('relation.sort.info_parse_num')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">∅</span><div><p>${t('relation.sort.info_nulls')}</p></div></div>
+        <div class="hierarchy-help-item"><span class="hierarchy-help-icon">⚠️</span><div><p>${t('relation.sort.info_disabled_note')}</p></div></div>
+      </div>
+      <button class="btn-close-dialog">${t('relation.hierarchy.got_it')}</button>
+    `;
+    helpOverlay.appendChild(helpDialog);
+    helpOverlay.addEventListener('click', (ev) => { if (ev.target === helpOverlay) helpOverlay.remove(); });
+    helpDialog.querySelector('.btn-close-dialog').addEventListener('click', () => helpOverlay.remove());
+    document.body.appendChild(helpOverlay);
+  });
+
   dialog.querySelector('.sort-panel-add').addEventListener('click', () => {
     const usedCols = new Set(criteria.map(c => c.column));
     let nextCol = 0;
     for (let i = 0; i < st.columnNames.length; i++) {
-      if (!usedCols.has(i)) { nextCol = i; break; }
+      if (!usedCols.has(i) && !(st.columnTypes[i] === 'id' && !st.rel_options.show_id)) { nextCol = i; break; }
     }
     criteria.push({
       column: nextCol,
@@ -18198,6 +18237,9 @@ async function askAI(question, st = state) {
     return;
   }
   
+  const modelSelect = aiView ? aiView.querySelector('.ai-model-select') : el('.ai-model-select');
+  const selectedModel = modelSelect ? modelSelect.value : 'gpt-4.1-mini';
+  
   responseDiv.innerHTML = '';
   responseDiv.classList.add('loading');
   
@@ -18207,7 +18249,8 @@ async function askAI(question, st = state) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question,
-        relation: st.relation
+        relation: st.relation,
+        model: selectedModel
       })
     });
     
@@ -18229,17 +18272,17 @@ async function askAI(question, st = state) {
         applyAIFilter(result.conditions, st);
       });
       const filterDesc = result.description || result.conditions.map(c => `${c.column} ${c.operator} ${c.value ?? ''}`).join(' AND ');
-      addAiHistoryEntry(st, question, filterDesc, 'gpt-4.1-mini');
+      addAiHistoryEntry(st, question, filterDesc, selectedModel);
     } else if (result.type === 'answer') {
       let html = result.text || '';
       if (!/<[a-z][\s\S]*>/i.test(html)) {
         html = html.replace(/\n/g, '<br>');
       }
       responseDiv.innerHTML = `<div class="ai-response-content">${html}</div>`;
-      addAiHistoryEntry(st, question, html, 'gpt-4.1-mini');
+      addAiHistoryEntry(st, question, html, selectedModel);
     } else {
       responseDiv.innerHTML = `<div>${JSON.stringify(result)}</div>`;
-      addAiHistoryEntry(st, question, JSON.stringify(result), 'gpt-4.1-mini');
+      addAiHistoryEntry(st, question, JSON.stringify(result), selectedModel);
     }
   } catch (error) {
     responseDiv.classList.remove('loading');
@@ -24405,6 +24448,17 @@ function initRelationInstance(container, relationData, options = {}) {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
             </button>
           </div>
+          <div class="ai-model-row" style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+            <label style="font-size:11px;font-weight:600;color:var(--text-muted);">${t('relation.ai.model_label')}</label>
+            <select class="ai-model-select" data-testid="select-ai-model" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);">
+              <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+              <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+              <option value="gpt-4.1">GPT-4.1</option>
+              <option value="gpt-5.1">GPT-5.1</option>
+              <option value="o3-mini">o3-mini</option>
+              <option value="o4-mini">o4-mini</option>
+            </select>
+          </div>
           <div class="ai-save-prompt-row">
             <select class="ai-prompt-scope-select" data-testid="select-ai-prompt-scope">
               <option value="everyone">${t('relation.ai.scope_everyone')}</option>
@@ -26764,7 +26818,7 @@ function ensureAiHistoryRelation(st) {
         show_stats: false,
         cardinality_min: 0,
         cardinality_max: null,
-        general_view_options: ['Table'],
+        general_view_options: [],
         general_always_visible_options: ['Select One', 'Select Many'],
         general_line_options: ['View', 'Delete'],
         general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Multi View', 'Multi Delete']
