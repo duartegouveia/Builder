@@ -26731,11 +26731,26 @@ function ensureAiHistoryRelation(st) {
       title: { pt: 'Histórico IA', en: 'AI History', es: 'Historial IA', fr: 'Historique IA', it: 'Cronologia IA', de: 'KI-Verlauf' },
       columns: {
         id: 'id',
-        datetime: 'datetime',
-        engine: 'string',
-        user: 'string',
-        question: 'textarea',
-        answer: 'html'
+        datetime: {
+          attribute_kind: ['datetime'],
+          name: { pt: 'Data/Hora', en: 'Date/Time', es: 'Fecha/Hora', fr: 'Date/Heure', it: 'Data/Ora', de: 'Datum/Uhrzeit' }
+        },
+        engine: {
+          attribute_kind: ['text'],
+          name: { pt: 'Motor', en: 'Engine', es: 'Motor', fr: 'Moteur', it: 'Motore', de: 'Engine' }
+        },
+        user: {
+          attribute_kind: ['text'],
+          name: { pt: 'Utilizador', en: 'User', es: 'Usuario', fr: 'Utilisateur', it: 'Utente', de: 'Benutzer' }
+        },
+        question: {
+          attribute_kind: ['textarea'],
+          name: { pt: 'Pergunta', en: 'Question', es: 'Pregunta', fr: 'Question', it: 'Domanda', de: 'Frage' }
+        },
+        answer: {
+          attribute_kind: ['html'],
+          name: { pt: 'Resposta', en: 'Answer', es: 'Respuesta', fr: 'Réponse', it: 'Risposta', de: 'Antwort' }
+        }
       },
       rel_options: {
         editable: false,
