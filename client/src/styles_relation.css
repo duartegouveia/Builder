@@ -1,6 +1,14 @@
 /* ===== Relation Builder Specific Styles ===== */
 /* Styles for the Relation Builder page (relation.html) */
 
+/* Reduce overall page padding for relation builder */
+body .min-h-screen.bg-background.p-4 {
+  padding: 0.5rem 0.5rem;
+}
+body .min-h-screen .max-w-3xl {
+  max-width: 100%;
+}
+
 /* Hidden class for conditional visibility */
 .hidden {
   display: none !important;
@@ -5736,13 +5744,13 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 
 /* Show/Hide Columns Dialog */
 .cv-columns-list {
-  max-height: none;
+  max-height: 55vh;
   overflow-y: auto;
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 6px;
   margin: 8px 0;
   flex: 1;
-  min-height: 0;
+  min-height: 200px;
 }
 .cv-columns-header {
   display: flex;
@@ -6149,7 +6157,7 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 10000;
+  z-index: 100002;
   display: flex;
   align-items: center;
   justify-content: center;

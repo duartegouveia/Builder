@@ -4358,8 +4358,8 @@ function showSortPanelDialog(st) {
 
   const dialog = document.createElement('div');
   dialog.className = 'export-dialog';
-  dialog.style.maxWidth = '600px';
-  dialog.style.minWidth = '450px';
+  dialog.style.maxWidth = '700px';
+  dialog.style.minWidth = '500px';
 
   function renderCriteriaList() {
     const listEl = dialog.querySelector('.sort-panel-list');
@@ -13542,17 +13542,20 @@ function showColumnsVisibilityDialog(st) {
   
   const dialog = document.createElement('div');
   dialog.className = 'confirm-dialog';
-  dialog.style.maxWidth = '500px';
-  dialog.style.maxHeight = '80vh';
+  dialog.style.maxWidth = '640px';
+  dialog.style.maxHeight = '85vh';
   
   const currentCV = getColumnsVisible(st);
+  const showId = st.rel_options.show_id !== false;
+  const showKind = st.rel_options.show_column_kind !== false;
+  const lang = window.currentLang || 'pt';
   const allCols = st.columnNames.map((name, idx) => ({
     name,
     type: st.columnTypes[idx],
     idx,
     visible: isColumnVisible(st, idx),
     width: getColumnWidth(st, idx)
-  }));
+  })).filter(col => !(col.type === 'id' && !showId));
   
   const orderedCols = [];
   if (currentCV && Object.keys(currentCV).length > 0) {
@@ -13567,22 +13570,34 @@ function showColumnsVisibilityDialog(st) {
     orderedCols.push(...allCols);
   }
   
+  function getColLabel(col) {
+    const att = getAtt(st, col.idx);
+    if (att && att.name) {
+      const label = getI18nText(att.name, lang);
+      if (label) return label;
+    }
+    return col.name;
+  }
+  
   let listHtml = '';
   orderedCols.forEach((col, displayIdx) => {
+    const label = getColLabel(col);
+    const kindHtml = showKind ? ` <small>(${col.type})</small>` : '';
     listHtml += `
       <div class="cv-row" draggable="true" data-col-name="${col.name}" data-col-idx="${col.idx}">
         <span class="cv-drag-handle">☰</span>
         <label class="cv-checkbox-label">
           <input type="checkbox" class="cv-checkbox" ${col.visible ? 'checked' : ''} data-col-name="${col.name}">
-          <span>${col.name} <small>(${col.type})</small></span>
+          <span>${label}${kindHtml}</span>
         </label>
         <input type="number" class="cv-width-input" value="${col.width}" min="0" max="1000" step="10" data-col-name="${col.name}" title="${t('relation.colmenu.width_px')}">
       </div>`;
   });
   
   dialog.innerHTML = `
-    <div class="confirm-dialog-content">
+    <div class="confirm-dialog-content" style="position:relative;">
       <h3>${t('relation.colmenu.show_hide_title')}</h3>
+      <button class="btn btn-outline cv-close-btn" style="position:absolute;top:10px;right:10px;padding:2px 8px;font-size:16px;line-height:1;border:none;background:none;cursor:pointer;color:var(--text-secondary);">✕</button>
       <div class="cv-actions-bar">
         <button class="btn btn-sm cv-select-all">${t('relation.colmenu.select_all_btn')}</button>
         <button class="btn btn-sm cv-deselect-all">${t('relation.colmenu.deselect_all_btn')}</button>
@@ -13649,6 +13664,7 @@ function showColumnsVisibilityDialog(st) {
   });
   
   dialog.querySelector('.cv-cancel').addEventListener('click', () => overlay.remove());
+  dialog.querySelector('.cv-close-btn').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   
   dialog.querySelector('.cv-apply').addEventListener('click', () => {
