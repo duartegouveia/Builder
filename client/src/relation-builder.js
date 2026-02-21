@@ -25851,6 +25851,14 @@ function buildRelOptionsPanel(st, reRender) {
     const open = body.style.display !== 'none';
     body.style.display = open ? 'none' : '';
     header.querySelector('.rel-options-toggle-icon').textContent = open ? '▶' : '▼';
+    requestAnimationFrame(() => {
+      if (open) {
+        const table = panel.closest('.structure-panel')?.querySelector('.structure-columns-table');
+        if (table) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   });
 
   const ro = st.rel_options;
