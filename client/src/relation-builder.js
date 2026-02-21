@@ -12440,7 +12440,7 @@ function renderTable(st = state) {
           </div>
         </div>
       </div>
-      <button class="btn-close-dialog" data-testid="hierarchy-help-close">Got it</button>
+      <button class="btn-close-dialog" data-testid="hierarchy-help-close">${t('relation.hierarchy.got_it')}</button>
     `;
     overlay.appendChild(dialog);
     overlay.addEventListener('click', (ev) => {
