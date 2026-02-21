@@ -8093,6 +8093,100 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
     font-size: 0.625rem !important;
     padding: 2px 6px !important;
   }
+
+  .relation h2 {
+    font-size: 12px !important;
+  }
+
+  .column-menu,
+  .row-ops-menu,
+  .filter-dialog,
+  .bin-intervals-popup,
+  .binning-help-dialog,
+  .stats-panel,
+  .confirm-dialog,
+  .confirm-dialog-overlay .confirm-dialog,
+  .assoc-select-modal,
+  .color-palette-dialog,
+  .diagram-popup,
+  .group-cols-dialog,
+  .hierarchy-help-overlay,
+  .nested-relation-dialog,
+  .nested-relation-overlay .nested-relation-dialog,
+  .rel-options-panel,
+  .keyboard-help-tooltip-fixed {
+    max-width: calc(100vw - 16px) !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+  }
+
+  .filter-dialog,
+  .bin-intervals-popup,
+  .binning-help-dialog,
+  .stats-panel,
+  .confirm-dialog,
+  .assoc-select-modal,
+  .color-palette-dialog,
+  .diagram-popup,
+  .group-cols-dialog,
+  .nested-relation-dialog,
+  .rel-options-panel {
+    font-size: 0.625rem !important;
+  }
+
+  .filter-dialog button,
+  .filter-dialog select,
+  .filter-dialog input,
+  .filter-dialog label,
+  .filter-dialog span,
+  .bin-intervals-popup button,
+  .bin-intervals-popup span,
+  .bin-intervals-popup td,
+  .bin-intervals-popup th,
+  .binning-help-dialog button,
+  .binning-help-dialog span,
+  .binning-help-dialog h3,
+  .stats-panel button,
+  .stats-panel span,
+  .stats-panel td,
+  .stats-panel th,
+  .assoc-select-modal button,
+  .assoc-select-modal select,
+  .assoc-select-modal input,
+  .assoc-select-modal span,
+  .assoc-select-modal td,
+  .assoc-select-modal th,
+  .color-palette-dialog button,
+  .diagram-popup button,
+  .diagram-popup span,
+  .group-cols-dialog button,
+  .group-cols-dialog select,
+  .group-cols-dialog input,
+  .group-cols-dialog label,
+  .group-cols-dialog span,
+  .nested-relation-dialog button,
+  .nested-relation-dialog select,
+  .nested-relation-dialog input,
+  .nested-relation-dialog span,
+  .nested-relation-dialog td,
+  .nested-relation-dialog th,
+  .row-ops-menu button,
+  .row-ops-menu span,
+  .row-ops-menu a {
+    font-size: 0.625rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .filter-dialog h3,
+  .binning-help-dialog h3,
+  .stats-panel h3,
+  .group-cols-dialog h3,
+  .assoc-select-modal h3,
+  .confirm-dialog h3,
+  .filter-dialog .filter-dialog-header,
+  .bin-intervals-popup .bin-popup-header {
+    font-size: 12px !important;
+  }
 }
 
 .i18n-editor {
@@ -8381,7 +8475,7 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   border-color: var(--primary, #4361ee);
 }
 .rel-options-default-tag {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-secondary, #999);
   background: var(--row-hover, #f0f0f0);
   padding: 1px 5px;
@@ -8412,7 +8506,7 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   height: 13px;
 }
 .rel-options-item-default {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--primary, #4361ee);
   margin-left: 2px;
   opacity: 0.6;
@@ -8420,6 +8514,72 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 
 /* ===== Dark Mode Overrides ===== */
 /* Override hardcoded colors for [data-theme="dark"] */
+
+/* --- Global Dark Mode Text Color --- */
+[data-theme="dark"],
+[data-theme="dark"] body,
+[data-theme="dark"] #app {
+  color: #cdd6f4;
+}
+
+[data-theme="dark"] .relation,
+[data-theme="dark"] .relation *,
+[data-theme="dark"] .column-menu,
+[data-theme="dark"] .column-menu *,
+[data-theme="dark"] .row-ops-menu,
+[data-theme="dark"] .row-ops-menu *,
+[data-theme="dark"] .filter-dialog,
+[data-theme="dark"] .filter-dialog *,
+[data-theme="dark"] .confirm-dialog,
+[data-theme="dark"] .confirm-dialog *,
+[data-theme="dark"] .bin-intervals-popup,
+[data-theme="dark"] .bin-intervals-popup *,
+[data-theme="dark"] .binning-help-dialog,
+[data-theme="dark"] .binning-help-dialog *,
+[data-theme="dark"] .stats-panel,
+[data-theme="dark"] .stats-panel *,
+[data-theme="dark"] .assoc-select-modal,
+[data-theme="dark"] .assoc-select-modal *,
+[data-theme="dark"] .color-palette-dialog,
+[data-theme="dark"] .color-palette-dialog *,
+[data-theme="dark"] .diagram-popup,
+[data-theme="dark"] .diagram-popup *,
+[data-theme="dark"] .group-cols-dialog,
+[data-theme="dark"] .group-cols-dialog *,
+[data-theme="dark"] .nested-relation-dialog,
+[data-theme="dark"] .nested-relation-dialog *,
+[data-theme="dark"] .rel-options-panel,
+[data-theme="dark"] .rel-options-panel *,
+[data-theme="dark"] .dialog-overlay,
+[data-theme="dark"] .dialog-overlay *,
+[data-theme="dark"] .hierarchy-help-overlay,
+[data-theme="dark"] .hierarchy-help-overlay *,
+[data-theme="dark"] .toast-container,
+[data-theme="dark"] .toast-container * {
+  color: #cdd6f4;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  color: #cdd6f4;
+  background: #313244;
+  border-color: #45475a;
+}
+
+[data-theme="dark"] button {
+  color: #cdd6f4;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #6c7086;
+}
+
+[data-theme="dark"] option {
+  color: #cdd6f4;
+  background: #1e1e2e;
+}
 
 /* --- Table Elements --- */
 [data-theme="dark"] .relation-table th {
