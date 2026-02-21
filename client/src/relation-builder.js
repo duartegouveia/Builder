@@ -5384,9 +5384,6 @@ function getVisibleColumns(st = state) {
 }
 
 
-
-
-
 // Relation type functions
 function formatCellValue(value, type, colName, st) {
   if (value === null || value === undefined) return '';
@@ -26950,11 +26947,11 @@ function init() {
     relationContainer.classList.add('relation_' + state.uid);
   }
   
-  const textarea = el('.relation-json');
-  const btnGenerate = el('.btn-generate-demo');
-  const btnParse = el('.btn-parse-relation');
-  const btnAiAsk = el('.btn-ai-ask');
-  const aiQuestion = el('.ai-question');
+  const textarea = document.querySelector('.relation-json');
+  const btnGenerate = document.querySelector('.btn-generate-demo');
+  const btnParse = document.querySelector('.btn-parse-relation');
+  const btnAiAsk = document.querySelector('.btn-ai-ask');
+  const aiQuestion = document.querySelector('.ai-question');
 
   const jsonSection = document.querySelector('.relation-json-section');
   const jsonToggleHeader = document.querySelector('[data-testid="json-section-toggle"]');
@@ -26983,42 +26980,42 @@ function init() {
     textarea.value = JSON.stringify(demo, null, 2);
   });
   
-  const btnLoadProducts = el('.btn-load-products');
+  const btnLoadProducts = document.querySelector('.btn-load-products');
   btnLoadProducts?.addEventListener('click', () => {
     loadRelationFromEntity(PRODUCTS_JSON);
   });
   
-  const btnLoadCategories = el('.btn-load-categories');
+  const btnLoadCategories = document.querySelector('.btn-load-categories');
   btnLoadCategories?.addEventListener('click', () => {
     loadRelationFromEntity(CATEGORIES_JSON);
   });
   
-  const btnLoadStocks = el('.btn-load-stocks');
+  const btnLoadStocks = document.querySelector('.btn-load-stocks');
   btnLoadStocks?.addEventListener('click', () => {
     loadRelationFromEntity(STOCKS_JSON);
   });
   
-  const btnLoadPriceLists = el('.btn-load-pricelists');
+  const btnLoadPriceLists = document.querySelector('.btn-load-pricelists');
   btnLoadPriceLists?.addEventListener('click', () => {
     loadRelationFromEntity(PRICELISTS_JSON);
   });
   
-  const btnSimpleObj = el('.btn-simple-obj');
+  const btnSimpleObj = document.querySelector('.btn-simple-obj');
   btnSimpleObj?.addEventListener('click', () => {
     textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5"}';
   });
   
-  const btnArrayObj = el('.btn-array-obj');
+  const btnArrayObj = document.querySelector('.btn-array-obj');
   btnArrayObj?.addEventListener('click', () => {
     textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":[11,12,11,13,14,15]}';
   });
   
-  const btnObjectObj = el('.btn-object-obj');
+  const btnObjectObj = document.querySelector('.btn-object-obj');
   btnObjectObj?.addEventListener('click', () => {
     textarea.value = '{"a":"string","b":true,"c":"15","d":"15.5","e":{"aa":"string","bb":true,"cc":"15","dd":"15.5"}}';
   });
   
-  const btnI18n = el('.btn-i18n');
+  const btnI18n = document.querySelector('.btn-i18n');
   btnI18n?.addEventListener('click', () => {
     textarea.value = JSON.stringify({
       "a": "campo a",
@@ -27031,7 +27028,7 @@ function init() {
     }, null, 2);
   });
   
-  const btnAttributeObj = el('.btn-attribute-obj');
+  const btnAttributeObj = document.querySelector('.btn-attribute-obj');
   btnAttributeObj?.addEventListener('click', () => {
     textarea.value = JSON.stringify({
       "attribute_kind": ["text"],
@@ -27088,7 +27085,7 @@ function init() {
     }, null, 2);
   });
   
-  const btnRelObj = el('.btn-rel-obj');
+  const btnRelObj = document.querySelector('.btn-rel-obj');
   btnRelObj?.addEventListener('click', () => {
     textarea.value = JSON.stringify({
   "pot": "relation",
@@ -27120,7 +27117,7 @@ function init() {
 }, null, 2);
   });
   
-  const btnObjToRel = el('.btn-obj-to-rel');
+  const btnObjToRel = document.querySelector('.btn-obj-to-rel');
   btnObjToRel?.addEventListener('click', () => {
     const relTemplate = {
       "pot": "relation",
@@ -27282,7 +27279,7 @@ function init() {
     }
   });
 
-  const btnRelToObj = el('.btn-rel-to-obj');
+  const btnRelToObj = document.querySelector('.btn-rel-to-obj');
   btnRelToObj?.addEventListener('click', () => {
     let rel;
     try {
@@ -27441,7 +27438,7 @@ function init() {
     }
   });
 
-  const btnCleanLog = el('.btn-clean-log');
+  const btnCleanLog = document.querySelector('.btn-clean-log');
   btnCleanLog?.addEventListener('click', () => {
     if (state && state.relation && state.relation.log) {
       state.relation.log = [];
@@ -27449,7 +27446,7 @@ function init() {
     }
   });
 
-  const btnNewRelation = el('.btn-new-relation');
+  const btnNewRelation = document.querySelector('.btn-new-relation');
   btnNewRelation?.addEventListener('click', () => {
     const newRel = {
       pot: 'relation',
@@ -27460,9 +27457,10 @@ function init() {
       items: [],
       log: []
     };
-    textarea.value = JSON.stringify(newRel, null, 2);
     createMainRelationInstance(newRel);
+    textarea.value = JSON.stringify(state.relation, null, 2);
   });
+
 
   // Create or update the main relation instance
   function updateRelationTitleH2() {
@@ -27603,7 +27601,7 @@ function init() {
   setupResizeHandle();
   
   // Voice input button
-  const btnVoice = el('.btn-ai-voice');
+  const btnVoice = document.querySelector('.btn-ai-voice');
   let recognition = null;
   
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
