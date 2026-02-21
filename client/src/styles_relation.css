@@ -3755,7 +3755,8 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 
 .correlation-section .correlation-section-header {
   flex-shrink: 0;
-  margin-top: 25px;
+  margin-top: 0;
+  margin-bottom: 0;
   align-self: center;
 }
 
@@ -3768,6 +3769,7 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 .correlation-section .correlation-section-desc {
   flex: 1;
   margin-bottom: 0;
+  align-self: center;
 }
 
 .correlation-section-header {
@@ -3786,8 +3788,14 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 
 .correlation-actions {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
   margin-top: var(--space-2);
+}
+
+.correlation-section .correlation-actions {
+  margin-top: 0;
+  align-self: center;
 }
 
 .normality-panel {
