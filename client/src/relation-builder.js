@@ -18279,9 +18279,9 @@ function switchView(viewName) {
   } else if (viewName === 'ai') {
     // AI view is always ready
   } else if (viewName === 'saved') {
-    // Saved view placeholder - future feature
+    renderSaved(state);
   } else if (viewName === 'structure') {
-    // Structure view - empty panel for now
+    renderStructure(state);
   }
 }
 
@@ -20142,7 +20142,7 @@ function initCorrelationConfig(st = state) {
   }
   
   // Add event listener for Help button
-  const helpBtn = corrView.querySelector('.btn-corr-help');
+  const helpBtn = corrView.querySelector('.analysis-help-badge');
   if (helpBtn) {
     const newBtn = helpBtn.cloneNode(true);
     helpBtn.parentNode.replaceChild(newBtn, helpBtn);
@@ -23779,7 +23779,7 @@ function initRelationInstance(container, relationData, options = {}) {
             </div>
             <div class="correlation-actions">
               <button class="btn-calculate-corr btn btn-primary btn-sm" data-i18n="relation.analysis.calculate">${t('relation.analysis.calculate')}</button>
-              <button class="btn-corr-help btn btn-outline btn-sm">?</button>
+              <span class="analysis-help-badge" title="${t('relation.analysis.help_title') || 'Help'}" data-testid="button-analysis-help">ℹ</span>
             </div>
           </div>
           <div class="correlation-section">
@@ -27568,7 +27568,7 @@ function init() {
   
   // Correlation events
   el('.btn-calculate-corr')?.addEventListener('click', () => calculateCorrelation());
-  el('.btn-corr-help')?.addEventListener('click', () => {
+  el('.analysis-help-badge')?.addEventListener('click', () => {
     const helpDiv = el('.correlation-help');
     if (helpDiv) {
       helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
