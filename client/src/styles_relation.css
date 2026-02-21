@@ -6915,6 +6915,22 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 .structure-btn-cancel:hover {
   background: var(--border);
 }
+.structure-att-panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 0 4px;
+  border-top: 2px solid var(--primary, #6366f1);
+  justify-content: flex-end;
+}
+.structure-att-panel-actions button {
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+}
 .structure-row-actions {
   display: flex;
   gap: 4px;
@@ -6949,6 +6965,25 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 }
 .structure-row-cancel:hover {
   background: #fecaca;
+}
+.structure-row-detail {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: inherit;
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.structure-row-detail:hover {
+  background: #c7d2fe;
 }
 .structure-toolbar {
   display: flex;

@@ -1124,6 +1124,9 @@ window.RELATION_TRANSLATIONS = {
   // ─── STRUCTURE — HARDCODED STRINGS ─────────────────────────
   "relation.structure.no_relation_loaded": { pt: "Sem relation carregada.", en: "No relation loaded.", es: "Sin relación cargada.", fr: "Aucune relation chargée.", it: "Nessuna relazione caricata.", de: "Keine Relation geladen." },
   "relation.structure.new_column_btn": { pt: "+ Nova Coluna", en: "+ New Column", es: "+ Nueva Columna", fr: "+ Nouvelle Colonne", it: "+ Nuova Colonna", de: "+ Neue Spalte" },
+  "relation.structure.panel_save": { pt: "Gravar", en: "Save", es: "Guardar", fr: "Enregistrer", it: "Salva", de: "Speichern" },
+  "relation.structure.panel_cancel": { pt: "Cancelar", en: "Cancel", es: "Cancelar", fr: "Annuler", it: "Annulla", de: "Abbrechen" },
+  "relation.structure.open_detail": { pt: "Detalhe", en: "Detail", es: "Detalle", fr: "Détail", it: "Dettaglio", de: "Detail" },
   "relation.structure.column_name_prompt_label": { pt: "Nome da coluna:", en: "Column name:", es: "Nombre de la columna:", fr: "Nom de la colonne :", it: "Nome della colonna:", de: "Spaltenname:" },
   "relation.structure.delete_column_btn": { pt: "Eliminar Coluna", en: "Delete Column", es: "Eliminar Columna", fr: "Supprimer la Colonne", it: "Elimina Colonna", de: "Spalte löschen" },
   "relation.structure.delete_col_confirm": { pt: "Eliminar coluna \"{col}\"? Todos os dados desta coluna serão perdidos.", en: "Delete column \"{col}\"? All data in this column will be lost.", es: "¿Eliminar columna \"{col}\"? Todos los datos de esta columna se perderán.", fr: "Supprimer la colonne \"{col}\" ? Toutes les données de cette colonne seront perdues.", it: "Eliminare la colonna \"{col}\"? Tutti i dati di questa colonna andranno persi.", de: "Spalte \"{col}\" löschen? Alle Daten in dieser Spalte gehen verloren." },

@@ -5720,7 +5720,6 @@ function getVisibleColumns(st = state) {
     .filter((_, idx) => keepVisible || !getGroupByColumns(st).includes(idx));
 }
 
-
 // Relation type functions
 function formatCellValue(value, type, colName, st) {
   if (value === null || value === undefined) return '';
@@ -25716,6 +25715,7 @@ function renderStructure(st = state) {
   let editingIdx = null;
   let pendingChanges = {};
   let detailIdx = null;
+  let detailSnapshot = null;
 
   function applyRowChanges(rowIdx) {
     const rowChanges = pendingChanges[rowIdx];
@@ -26049,8 +26049,36 @@ function renderStructure(st = state) {
           editingIdx = null;
           render();
         });
+        const detailRowBtn = document.createElement('button');
+        detailRowBtn.className = 'structure-row-detail';
+        detailRowBtn.title = t('relation.structure.open_detail') || 'Detail';
+        detailRowBtn.textContent = '▼';
+        detailRowBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (detailIdx === idx) {
+            detailIdx = null;
+            detailSnapshot = null;
+          } else {
+            detailIdx = idx;
+            const snapRow = structureRows[idx];
+            detailSnapshot = {
+              att: snapRow.att ? JSON.parse(JSON.stringify(snapRow.att)) : null,
+              pendingAtt: pendingChanges[idx]?.att ? JSON.parse(JSON.stringify(pendingChanges[idx].att)) : null,
+              pendingKind: pendingChanges[idx]?.kind || null,
+              pendingConvert: pendingChanges[idx]?.convertToAtt || false
+            };
+          }
+          render();
+          if (detailIdx !== null) {
+            requestAnimationFrame(() => {
+              const editor = structurePanel.querySelector('.structure-att-editor');
+              if (editor) editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+          }
+        });
         tdActions.appendChild(saveRowBtn);
         tdActions.appendChild(cancelRowBtn);
+        tdActions.appendChild(detailRowBtn);
         tr.appendChild(tdActions);
       } else {
         const tdOrder2 = document.createElement('td');
@@ -26073,6 +26101,37 @@ function renderStructure(st = state) {
         tr.appendChild(tdMulti2);
 
         const tdActions2 = document.createElement('td');
+        tdActions2.className = 'structure-row-actions';
+        const detailRowBtn2 = document.createElement('button');
+        detailRowBtn2.className = 'structure-row-detail';
+        detailRowBtn2.title = t('relation.structure.open_detail') || 'Detail';
+        detailRowBtn2.textContent = '▼';
+        detailRowBtn2.addEventListener('click', (e) => {
+          e.stopPropagation();
+          editingIdx = idx;
+          selectedIdx = idx;
+          if (detailIdx === idx) {
+            detailIdx = null;
+            detailSnapshot = null;
+          } else {
+            detailIdx = idx;
+            const snapRow = structureRows[idx];
+            detailSnapshot = {
+              att: snapRow.att ? JSON.parse(JSON.stringify(snapRow.att)) : null,
+              pendingAtt: pendingChanges[idx]?.att ? JSON.parse(JSON.stringify(pendingChanges[idx].att)) : null,
+              pendingKind: pendingChanges[idx]?.kind || null,
+              pendingConvert: pendingChanges[idx]?.convertToAtt || false
+            };
+          }
+          render();
+          if (detailIdx !== null) {
+            requestAnimationFrame(() => {
+              const editor = structurePanel.querySelector('.structure-att-editor');
+              if (editor) editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+          }
+        });
+        tdActions2.appendChild(detailRowBtn2);
         tr.appendChild(tdActions2);
       }
 
@@ -26091,6 +26150,13 @@ function renderStructure(st = state) {
         selectedIdx = idx;
         editingIdx = idx;
         detailIdx = idx;
+        const snapRow = structureRows[idx];
+        detailSnapshot = {
+          att: snapRow.att ? JSON.parse(JSON.stringify(snapRow.att)) : null,
+          pendingAtt: pendingChanges[idx]?.att ? JSON.parse(JSON.stringify(pendingChanges[idx].att)) : null,
+          pendingKind: pendingChanges[idx]?.kind || null,
+          pendingConvert: pendingChanges[idx]?.convertToAtt || false
+        };
         render();
         requestAnimationFrame(() => {
           const editor = structurePanel.querySelector('.structure-att-editor');
@@ -26113,7 +26179,60 @@ function renderStructure(st = state) {
     structurePanel.appendChild(bottomToolbar);
 
     if (detailIdx !== null && detailIdx < structureRows.length) {
-      const editorEl = renderColumnEditor(structureRows[detailIdx], detailIdx, st, structureRows, pendingChanges, render);
+      const onPanelSave = () => {
+        const hasAnyChanges = pendingChanges[detailIdx] && (
+          pendingChanges[detailIdx].kind || pendingChanges[detailIdx].att ||
+          pendingChanges[detailIdx].convertToAtt
+        );
+        if (hasAnyChanges) {
+          applySingleStructureChange(detailIdx, structureRows[detailIdx], st, pendingChanges[detailIdx]);
+          pendingChanges[detailIdx] = {};
+          const resolved = resolveAttColumns(st.relation.columns);
+          st.columnNames = resolved.names;
+          st.columnTypes = resolved.types;
+          st.columnAtts = resolved.atts;
+          buildColumnDependencies(st);
+          const newRows = buildStructureColumnRows(st);
+          structureRows.length = 0;
+          newRows.forEach(r => structureRows.push(r));
+          renderTable(st);
+          updateJsonOutput(st);
+          showToast(t('relation.toast.changes_applied'), 'success');
+        }
+        detailIdx = null;
+        detailSnapshot = null;
+        render();
+      };
+
+      const onPanelCancel = () => {
+        if (detailSnapshot) {
+          const row = structureRows[detailIdx];
+          if (detailSnapshot.att) {
+            st.relation.columns[row.name] = JSON.parse(JSON.stringify(detailSnapshot.att));
+          }
+          if (detailSnapshot.pendingAtt) {
+            if (!pendingChanges[detailIdx]) pendingChanges[detailIdx] = {};
+            pendingChanges[detailIdx].att = JSON.parse(JSON.stringify(detailSnapshot.pendingAtt));
+          } else {
+            if (pendingChanges[detailIdx]) delete pendingChanges[detailIdx].att;
+          }
+          if (detailSnapshot.pendingKind) {
+            if (!pendingChanges[detailIdx]) pendingChanges[detailIdx] = {};
+            pendingChanges[detailIdx].kind = detailSnapshot.pendingKind;
+          } else {
+            if (pendingChanges[detailIdx]) delete pendingChanges[detailIdx].kind;
+          }
+          if (!detailSnapshot.pendingConvert) {
+            if (pendingChanges[detailIdx]) delete pendingChanges[detailIdx].convertToAtt;
+          }
+        } else {
+          pendingChanges[detailIdx] = {};
+        }
+        detailIdx = null;
+        detailSnapshot = null;
+        render();
+      };
+      const editorEl = renderColumnEditor(structureRows[detailIdx], detailIdx, st, structureRows, pendingChanges, render, onPanelSave, onPanelCancel);
       structurePanel.appendChild(editorEl);
     }
   }
@@ -26121,7 +26240,7 @@ function renderStructure(st = state) {
   render();
 }
 
-function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRender) {
+function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRender, onPanelSave, onPanelCancel) {
   const editor = document.createElement('div');
   editor.className = 'structure-att-editor';
 
@@ -26376,61 +26495,44 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
   }
 
   const kindChanged = pendingChanges[idx]?.kind && pendingChanges[idx].kind !== row.originalKind;
-  const attChanged = pendingChanges[idx]?.att && Object.keys(pendingChanges[idx].att).length > 0;
-  const hasChanges = kindChanged || attChanged || pendingChanges[idx]?.convertToAtt;
 
-  if (hasChanges) {
-    if (kindChanged) {
-      const convInfo = canConvertKind(row.originalKind, pendingChanges[idx].kind);
-      const infoDiv = document.createElement('div');
-      infoDiv.style.cssText = 'margin-top:8px;padding:6px 10px;border-radius:4px;font-size:12px;';
-      if (!convInfo.possible) {
-        infoDiv.className = 'structure-conversion-info impossible';
-        infoDiv.textContent = tf('relation.misc.conversion_not_possible', {from: row.originalKind, to: pendingChanges[idx].kind});
-      } else if (!convInfo.lossless) {
-        infoDiv.className = 'structure-conversion-info lossy';
-        infoDiv.textContent = tf('relation.misc.conversion_lose_precision', {from: row.originalKind, to: pendingChanges[idx].kind});
-      } else {
-        infoDiv.className = 'structure-conversion-info lossless';
-        infoDiv.textContent = tf('relation.misc.conversion_lossless', {from: row.originalKind, to: pendingChanges[idx].kind});
-      }
-      editor.appendChild(infoDiv);
+  if (kindChanged) {
+    const convInfo = canConvertKind(row.originalKind, pendingChanges[idx].kind);
+    const infoDiv = document.createElement('div');
+    infoDiv.style.cssText = 'margin-top:8px;padding:6px 10px;border-radius:4px;font-size:12px;';
+    if (!convInfo.possible) {
+      infoDiv.className = 'structure-conversion-info impossible';
+      infoDiv.textContent = tf('relation.misc.conversion_not_possible', {from: row.originalKind, to: pendingChanges[idx].kind});
+    } else if (!convInfo.lossless) {
+      infoDiv.className = 'structure-conversion-info lossy';
+      infoDiv.textContent = tf('relation.misc.conversion_lose_precision', {from: row.originalKind, to: pendingChanges[idx].kind});
+    } else {
+      infoDiv.className = 'structure-conversion-info lossless';
+      infoDiv.textContent = tf('relation.misc.conversion_lossless', {from: row.originalKind, to: pendingChanges[idx].kind});
     }
-
-    const actions = document.createElement('div');
-    actions.className = 'structure-actions';
-
-    const applyBtn = document.createElement('button');
-    applyBtn.className = 'structure-btn-apply';
-    applyBtn.textContent = t('relation.filter.apply_btn');
-    applyBtn.addEventListener('click', () => {
-      applySingleStructureChange(idx, row, st, pendingChanges[idx]);
-      pendingChanges[idx] = {};
-      const resolved = resolveAttColumns(st.relation.columns);
-      st.columnNames = resolved.names;
-      st.columnTypes = resolved.types;
-      st.columnAtts = resolved.atts;
-      buildColumnDependencies(st);
-      const newRows = buildStructureColumnRows(st);
-      structureRows.length = 0;
-      newRows.forEach(r => structureRows.push(r));
-      reRender();
-      renderTable(st);
-      updateJsonOutput(st);
-    });
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'structure-btn-cancel';
-    cancelBtn.textContent = t('relation.filter.cancel_btn');
-    cancelBtn.addEventListener('click', () => {
-      pendingChanges[idx] = {};
-      reRender();
-    });
-
-    actions.appendChild(applyBtn);
-    actions.appendChild(cancelBtn);
-    editor.appendChild(actions);
+    editor.appendChild(infoDiv);
   }
+
+  const panelActions = document.createElement('div');
+  panelActions.className = 'structure-att-panel-actions';
+
+  const panelSaveBtn = document.createElement('button');
+  panelSaveBtn.className = 'structure-btn-apply';
+  panelSaveBtn.innerHTML = '✓ ' + t('relation.structure.panel_save');
+  panelSaveBtn.addEventListener('click', () => {
+    if (typeof onPanelSave === 'function') onPanelSave();
+  });
+
+  const panelCancelBtn = document.createElement('button');
+  panelCancelBtn.className = 'structure-btn-cancel';
+  panelCancelBtn.innerHTML = '✗ ' + t('relation.structure.panel_cancel');
+  panelCancelBtn.addEventListener('click', () => {
+    if (typeof onPanelCancel === 'function') onPanelCancel();
+  });
+
+  panelActions.appendChild(panelSaveBtn);
+  panelActions.appendChild(panelCancelBtn);
+  editor.appendChild(panelActions);
 
   return editor;
 }
@@ -28204,7 +28306,6 @@ function init() {
     textarea.value = JSON.stringify(state.relation, null, 2);
   });
 
-
   // Create or update the main relation instance
   function updateRelationTitleH2() {
     const h2 = document.getElementById('relation-title-h2');
@@ -28297,7 +28398,6 @@ function init() {
     // Store uid for cleanup
     secondContainer.dataset.relationUid = secondState.uid;
   }
-  
   
   // Pivot table events
   el('.btn-add-pivot-value')?.addEventListener('click', () => {
