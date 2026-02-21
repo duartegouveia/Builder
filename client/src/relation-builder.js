@@ -24687,16 +24687,23 @@ function initInstanceEventListeners(st) {
 function switchViewForInstance(st, view) {
   setCurrentView(st, view);
   const container = st.container;
+  const mainPanel = container.querySelector(':scope > .relation-flex-wrapper > .relation-main-panel');
+  const scope = mainPanel || container;
 
   const tableWrapper = container.querySelector('.relation-table-wrapper');
   if (tableWrapper) tableWrapper.style.display = '';
   clearDetailPanel(st);
   
-  // Hide all view wrappers (using .view-content class pattern)
-  container.querySelectorAll('.view-content').forEach(w => w.style.display = 'none');
+  // Hide all view wrappers belonging to THIS instance only (not nested relations)
+  scope.querySelectorAll('.view-content').forEach(w => {
+    if (!isInsideNestedRelation(w, scope)) w.style.display = 'none';
+  });
   
-  // Show the selected view
-  const viewWrapper = container.querySelector(`.view-${view}`);
+  // Show the selected view (only the one belonging to THIS instance)
+  let viewWrapper = null;
+  scope.querySelectorAll(`.view-${view}`).forEach(w => {
+    if (!viewWrapper && !isInsideNestedRelation(w, scope)) viewWrapper = w;
+  });
   if (viewWrapper) {
     viewWrapper.style.display = 'block';
   }
