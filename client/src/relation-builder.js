@@ -26199,9 +26199,14 @@ function renderStructure(st = state) {
           updateJsonOutput(st);
           showToast(t('relation.toast.changes_applied'), 'success');
         }
+        const savedIdx = detailIdx;
         detailIdx = null;
         detailSnapshot = null;
         render();
+        requestAnimationFrame(() => {
+          const rows = structurePanel.querySelectorAll('.structure-columns-table tbody tr');
+          if (rows[savedIdx]) rows[savedIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
       };
 
       const onPanelCancel = () => {
