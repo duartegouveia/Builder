@@ -7936,14 +7936,91 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 }
 
 @media (max-width: 480px) {
+  .relation {
+    font-size: 0.625rem !important;
+  }
+
+  .relation button,
+  .relation select,
+  .relation input,
+  .relation textarea,
+  .relation label,
+  .relation th,
+  .relation td,
+  .relation a,
+  .relation span,
+  .relation p,
+  .relation li,
+  .relation option,
+  .relation .view-tab,
+  .relation .nav-btn,
+  .relation .quick-search-input,
+  .relation .selection-actions-select,
+  .relation .pagination-info,
+  .relation .pagination-btn,
+  .relation .page-size-select,
+  .relation .stats-value,
+  .relation .stats-label,
+  .relation .filter-tag,
+  .relation .sort-tag,
+  .relation .toast-message,
+  .relation .dialog-label,
+  .relation .dialog-input,
+  .relation .structure-cell,
+  .relation .accordion-header,
+  .relation .ai-message,
+  .relation .pivot-cell,
+  .relation .saved-view-item,
+  .relation .analysis-value,
+  .relation .card-field-label,
+  .relation .card-field-value,
+  .relation .breadcrumb-item,
+  .relation .operation-log-entry,
+  .relation .bin-label,
+  .relation .cond-format-rule {
+    font-size: 0.625rem !important;
+  }
+
+  .relation button,
+  .relation .view-tab,
+  .relation .nav-btn,
+  .relation .pagination-btn,
+  .relation .filter-tag,
+  .relation .sort-tag,
+  .relation .adv-btn,
+  .relation .saved-view-item,
+  .relation .breadcrumb-item {
+    padding: 2px 6px !important;
+  }
+
+  .relation select,
+  .relation .selection-actions-select,
+  .relation .page-size-select {
+    padding: 2px 6px !important;
+  }
+
+  .relation input,
+  .relation .quick-search-input,
+  .relation .dialog-input {
+    padding: 2px 6px !important;
+  }
+
+  .relation textarea,
+  .relation .relation-json-textarea {
+    padding: 4px 6px !important;
+    min-height: 80px;
+  }
+
+  .relation th,
+  .relation td,
+  .relation .structure-cell,
+  .relation .pivot-cell {
+    padding: 2px 4px !important;
+  }
+
   .main-nav-menu {
     padding: 2px;
     gap: 1px;
-  }
-
-  .nav-btn {
-    padding: 2px 6px;
-    font-size: 0.6875rem;
   }
 
   .nav-btn::after {
@@ -7952,19 +8029,8 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
     border-top-width: 3px;
   }
 
-  .view-tab {
-    padding: 2px 6px;
-    font-size: 0.625rem;
-  }
-
-  .relation-json-textarea {
-    min-height: 80px;
-    font-size: 0.6875rem;
-    padding: var(--space-2);
-  }
-
   .adv-search-criterion {
-    font-size: 11px;
+    font-size: 0.625rem !important;
   }
 
   .adv-search-criterion select,
@@ -7973,17 +8039,59 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   .adv-search-criterion input[type="date"],
   .adv-search-criterion input[type="datetime-local"],
   .adv-search-criterion input[type="time"] {
-    font-size: 11px;
-    padding: 2px 4px;
+    font-size: 0.625rem !important;
+    padding: 2px 6px !important;
   }
 
   .adv-search-actions .adv-btn {
-    padding: 3px 8px;
-    font-size: 10px;
+    padding: 2px 6px !important;
+    font-size: 0.625rem !important;
   }
 
   .confirm-dialog {
     padding: 16px 20px;
+    font-size: 0.625rem !important;
+  }
+
+  .confirm-dialog button {
+    padding: 2px 6px !important;
+    font-size: 0.625rem !important;
+  }
+
+  .column-menu {
+    font-size: 0.625rem !important;
+  }
+
+  .column-menu button,
+  .column-menu select,
+  .column-menu input,
+  .column-menu label {
+    font-size: 0.625rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .rel-options-panel {
+    font-size: 0.625rem !important;
+  }
+
+  .rel-options-panel label,
+  .rel-options-panel input,
+  .rel-options-panel select,
+  .rel-options-panel button {
+    font-size: 0.625rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .dialog-overlay .dialog-content {
+    font-size: 0.625rem !important;
+  }
+
+  .dialog-overlay .dialog-content button,
+  .dialog-overlay .dialog-content select,
+  .dialog-overlay .dialog-content input,
+  .dialog-overlay .dialog-content label {
+    font-size: 0.625rem !important;
+    padding: 2px 6px !important;
   }
 }
 
