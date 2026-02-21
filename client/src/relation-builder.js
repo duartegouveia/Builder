@@ -365,7 +365,7 @@ const DEFAULT_REL_OPTIONS = {
   label_field_top_down: true,
   OnDoubleClickAction: 'view',
   general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
-  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State', 'Output State Full'],
+  general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State', 'Output State Full', 'Relation JSON'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge'],
   show_filter_comparison: true,
@@ -10158,7 +10158,8 @@ function buildAlwaysVisibleOptionsHtml(options, st) {
     'Remove Duplicates': { value: 'remove-duplicates', icon: '🔄', label: t('relation.rowops.remove_duplicates') },
     'Integrity Check': { value: 'integrity-check', icon: '🔍', label: t('relation.rowops.integrity_check') },
     'Output State': { value: 'output-state', icon: '📋', label: t('relation.rowops.output_state') },
-    'Output State Full': { value: 'output-state-full', icon: '📋', label: t('relation.rowops.output_state_full') }
+    'Output State Full': { value: 'output-state-full', icon: '📋', label: t('relation.rowops.output_state_full') },
+    'Relation JSON': { value: 'relation-json-toggle', icon: '{ }', label: t('relation.rowops.relation_json') }
   };
   
   const maxReached = st ? isCardinalityMaxReached(st) : false;
@@ -10202,6 +10203,21 @@ function handleAlwaysVisibleAction(st, action) {
 
   if (action === 'output-state-full') {
     outputRelationStateFull(st);
+    return;
+  }
+
+  if (action === 'relation-json-toggle') {
+    const jsonSec = document.querySelector('.relation-json-section');
+    if (jsonSec) {
+      const isHidden = jsonSec.style.display === 'none';
+      jsonSec.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        const body = jsonSec.querySelector('.json-section-body');
+        const arrow = jsonSec.querySelector('.json-toggle-arrow');
+        if (body) body.style.display = 'block';
+        if (arrow) arrow.innerHTML = '&#9660;';
+      }
+    }
     return;
   }
 
@@ -23636,13 +23652,19 @@ function initRelationInstance(container, relationData, options = {}) {
     </div>`;
   }
   
+  // Build New button HTML (blue + button)
+  const hasNewOption = alwaysVisibleOptions.includes('New') || alwaysVisibleOptions.includes('New Fast');
+  const newButtonHtml = (showSearchAndActions && hasNewOption)
+    ? `<button class="btn btn-primary btn-sm btn-new-quick" title="${t('relation.rowops.new')}" data-testid="button-new-quick" style="${searchActionsDisplay}">+</button>`
+    : '';
+
   // Build actions select HTML
   const alwaysVisibleSelectHtml = (showSearchAndActions && alwaysVisibleOptions.length > 0) 
     ? `<div class="always-visible-wrapper" style="${searchActionsDisplay}">${buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions, instanceState)}</div>` 
     : '';
   
   const badgeHtml = hasTableView ? `<span class="keyboard-help-badge" title="${t('relation.shortcuts.help_badge')}" data-i18n-title="relation.shortcuts.help_badge" data-testid="button-help-keyboard" style="${badgeDisplay}">ℹ</span>` : '';
-  const hasRightContent = searchHtml || assocButtonsHtml || alwaysVisibleSelectHtml || badgeHtml;
+  const hasRightContent = searchHtml || assocButtonsHtml || newButtonHtml || alwaysVisibleSelectHtml || badgeHtml;
   
   const hasViewTabs = viewOptions.length > 0;
   const viewTabsStyle = hasViewTabs || hasRightContent ? 'margin-bottom: 1rem;' : 'display: none;';
@@ -23658,7 +23680,7 @@ function initRelationInstance(container, relationData, options = {}) {
           return `<button class="view-tab${idx === 0 ? ' active' : ''}" data-view="${viewKey}" data-testid="tab-${viewKey}">${icon} <span data-i18n="${i18nKey}">${label}</span></button>`;
         }).join('')}
       </div>` : ''}
-      ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${assocButtonsHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
+      ${hasRightContent ? `<div class="view-tabs-right">${searchHtml}${assocButtonsHtml}${newButtonHtml}${alwaysVisibleSelectHtml}${badgeHtml}</div>` : ''}
     </div>
     
     <div class="view-table view-content">
@@ -24033,6 +24055,13 @@ function initInstanceEventListeners(st) {
       const action = e.target.value;
       e.target.value = ''; // Reset to placeholder
       handleAlwaysVisibleAction(st, action);
+    });
+  }
+
+  const newQuickBtn = container.querySelector('.btn-new-quick');
+  if (newQuickBtn) {
+    newQuickBtn.addEventListener('click', () => {
+      handleRowOperation(st, -1, 'new-row');
     });
   }
   
@@ -27230,7 +27259,30 @@ function init() {
       alert('Parse error: ' + result.error);
     }
   });
-  
+
+  const btnCleanLog = el('.btn-clean-log');
+  btnCleanLog?.addEventListener('click', () => {
+    if (state && state.relation && state.relation.log) {
+      state.relation.log = [];
+      showToast(t('relation.toast.log_cleaned') || 'Log cleaned', 'info');
+    }
+  });
+
+  const btnNewRelation = el('.btn-new-relation');
+  btnNewRelation?.addEventListener('click', () => {
+    const newRel = {
+      pot: 'relation',
+      guid: '',
+      name: '',
+      columns: { id: 'id' },
+      rel_options: JSON.parse(JSON.stringify(DEFAULT_REL_OPTIONS)),
+      items: [],
+      log: []
+    };
+    textarea.value = JSON.stringify(newRel, null, 2);
+    createMainRelationInstance(newRel);
+  });
+
   // Create or update the main relation instance
   function updateRelationTitleH2() {
     const h2 = document.getElementById('relation-title-h2');

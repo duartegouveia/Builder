@@ -238,6 +238,17 @@
   color: var(--accent-foreground);
 }
 
+.json-section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.json-header-actions {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+}
+
 /* JSON Editor Layout */
 .json-editor-wrapper {
   display: flex;
@@ -3029,6 +3040,27 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   gap: var(--space-2);
   position: relative;
   z-index: 100;
+}
+
+.btn-new-quick {
+  background: var(--primary, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 8px;
+  cursor: pointer;
+  min-width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-new-quick:hover {
+  background: var(--primary-hover, #1d4ed8);
 }
 
 .quick-search-wrapper {

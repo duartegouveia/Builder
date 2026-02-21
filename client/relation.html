@@ -121,10 +121,14 @@
 
         <section class="space-y-4 relation-json-section" style="display: none;">
           <div class="card">
-            <div class="card-header" style="cursor: pointer;" data-testid="json-section-toggle">
+            <div class="card-header json-section-header-row" style="cursor: pointer;" data-testid="json-section-toggle">
               <h3 class="card-title">
                 <span class="json-toggle-arrow">&#9654;</span> Relation JSON
               </h3>
+              <div class="json-header-actions" onclick="event.stopPropagation();">
+                <button class="btn btn-outline btn-sm btn-clean-log" data-testid="button-clean-log">Clean Log</button>
+                <button class="btn btn-outline btn-sm btn-new-relation" data-testid="button-new-relation">New Relation</button>
+              </div>
             </div>
             <div class="json-section-body" style="display: none;">
               <div class="card-header" style="border-top: 1px solid var(--border); padding-top: 0.5rem;">
