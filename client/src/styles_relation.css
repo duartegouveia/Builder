@@ -2864,18 +2864,12 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   overflow-y: auto;
   margin-bottom: var(--space-3);
   padding: var(--space-3);
-  background: var(--white);
+  background: var(--slate-50, #f8fafc);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--foreground);
-}
-
-.ai-response:empty::before {
-  content: "Ask questions about your data, e.g.: 'What is the average age?', 'Show only active items', 'How many items have price > 100?'";
-  color: var(--muted-foreground);
-  font-style: italic;
 }
 
 .ai-response.loading {
@@ -3435,6 +3429,35 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 .analysis-help-badge:hover {
   background: var(--primary);
   color: var(--primary-foreground, white);
+}
+
+.pivot-header-row,
+.analysis-subtab-header-row,
+.ai-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.pivot-help-panel,
+.analysis-help-panel,
+.ai-help-panel {
+  background: var(--blue-50);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--slate-700);
+  flex: 1;
+}
+
+.pivot-help-panel p,
+.analysis-help-panel p,
+.ai-help-panel p {
+  margin: 0;
 }
 
 /* Pivot Table */
@@ -6909,6 +6932,38 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 .structure-columns-table td input[type="checkbox"] {
   width: 16px;
   height: 16px;
+  margin: 0 auto;
+  display: block;
+}
+.structure-drag-cell {
+  width: 30px;
+  text-align: center;
+  padding: 0 !important;
+}
+.structure-drag-handle {
+  cursor: grab;
+  color: var(--muted-foreground, #888);
+  font-size: 14px;
+  user-select: none;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.structure-drag-handle:hover {
+  opacity: 1;
+}
+.structure-columns-table tbody tr.dragging {
+  opacity: 0.4;
+}
+.structure-columns-table tbody tr.drag-over {
+  border-top: 2px solid var(--primary, #4a90d9);
+}
+.structure-inline-name {
+  font-weight: 600;
+}
+.structure-toolbar-bottom {
+  border-top: 1px solid var(--border, #333);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
 }
 .structure-columns-table td select optgroup {
   font-weight: 600;

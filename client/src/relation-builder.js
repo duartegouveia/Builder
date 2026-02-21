@@ -23704,6 +23704,12 @@ function initRelationInstance(container, relationData, options = {}) {
     </div>
     
     <div class="view-pivot view-content" style="display: none;">
+      <div class="pivot-header-row">
+        <span class="analysis-help-badge pivot-help-badge" title="${t('relation.pivot.help_text')}" data-testid="button-pivot-help">ℹ</span>
+        <div class="pivot-help-panel" style="display: none;">
+          <p data-i18n="relation.pivot.help_text">${t('relation.pivot.help_text')}</p>
+        </div>
+      </div>
       <div class="pivot-no-data-msg" style="display:none;"></div>
       <div class="pivot-config">
         <div class="pivot-config-row">
@@ -23853,6 +23859,12 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-matrix" style="display: none;">
+        <div class="analysis-subtab-header-row">
+          <span class="analysis-help-badge matrix-help-badge" title="${t('relation.analysis.matrix_help_text')}" data-testid="button-matrix-help">ℹ</span>
+          <div class="analysis-help-panel matrix-help-panel" style="display: none;">
+            <p data-i18n="relation.analysis.matrix_help_text">${t('relation.analysis.matrix_help_text')}</p>
+          </div>
+        </div>
         <div class="matrix-config">
           <div class="matrix-config-row">
             <label data-i18n="relation.analysis.type">${t('relation.analysis.type')}</label>
@@ -23875,8 +23887,11 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-clustering" style="display: none;">
-        <div class="diagram-info">
-          <p class="diagram-description"><span data-i18n="relation.analysis.tsne_description">${t('relation.analysis.tsne_description')}</span> <strong data-i18n="relation.analysis.tsne_recommended">${t('relation.analysis.tsne_recommended')}</strong></p>
+        <div class="analysis-subtab-header-row">
+          <span class="analysis-help-badge clustering-help-badge" title="${t('relation.analysis.clustering_help_text')}" data-testid="button-clustering-help">ℹ</span>
+          <div class="analysis-help-panel clustering-help-panel" style="display: none;">
+            <p data-i18n="relation.analysis.clustering_help_text">${t('relation.analysis.clustering_help_text')}</p>
+          </div>
         </div>
         <div class="diagram-config">
           <div class="diagram-config-row">
@@ -23904,6 +23919,12 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-multivariate" style="display: none;">
+        <div class="analysis-subtab-header-row">
+          <span class="analysis-help-badge multivariate-help-badge" title="${t('relation.analysis.multivariate_help_text')}" data-testid="button-multivariate-help">ℹ</span>
+          <div class="analysis-help-panel multivariate-help-panel" style="display: none;">
+            <p data-i18n="relation.analysis.multivariate_help_text">${t('relation.analysis.multivariate_help_text')}</p>
+          </div>
+        </div>
         <div class="multivariate-config">
           <div class="multivariate-config-row">
             <label data-i18n="relation.analysis.method">${t('relation.analysis.method')}</label>
@@ -23934,8 +23955,14 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-ai view-content" style="display: none;">
       <div class="ai-panel-inline">
+        <div class="ai-header-row">
+          <span class="analysis-help-badge ai-help-badge" title="${t('relation.ai.help_text')}" data-testid="button-ai-help">ℹ</span>
+          <div class="ai-help-panel" style="display: none;">
+            <p data-i18n="relation.ai.help_text">${t('relation.ai.help_text')}</p>
+          </div>
+        </div>
         <div class="ai-saved-prompts-section">
-          <label class="ai-section-label">${t('relation.ai.saved_prompts')}</label>
+          <label class="ai-section-label" data-i18n="relation.ai.saved_prompts">${t('relation.ai.saved_prompts')}</label>
           <div class="ai-prompts-list"></div>
         </div>
         <div class="ai-input-section">
@@ -25215,7 +25242,7 @@ function buildKindSelect(currentKind, onChange) {
     if (simpleKinds.includes(resolved) && k !== 'association') return;
     const opt = document.createElement('option');
     opt.value = resolved;
-    opt.textContent = k + ' → ' + resolved;
+    opt.textContent = k;
     if (resolved === currentKind && !simpleKinds.includes(currentKind)) opt.selected = true;
     grpAtt.appendChild(opt);
   });
@@ -25223,9 +25250,10 @@ function buildKindSelect(currentKind, onChange) {
 
   const grpExtra = document.createElement('optgroup');
   grpExtra.label = t('relation.structure.extended_types');
-  const extraKinds = ['password', 'email', 'tel', 'url', 'search', 'file', 'range', 'pointer', 'association', 'lookup', 'button', 'gps', 'html', 'multi_text', 'qr_code', 'tabsheet', 'object', 'group'];
+  const extraKinds = ['password', 'email', 'tel', 'url', 'search', 'file', 'range', 'pointer', 'association', 'lookup', 'button', 'gps', 'html', 'qr_code', 'tabsheet', 'object', 'group'];
   extraKinds.forEach(k => {
     if (simpleKinds.includes(k)) return;
+    if (k.startsWith('multi_')) return;
     const opt = document.createElement('option');
     opt.value = k;
     opt.textContent = k;
@@ -25262,22 +25290,27 @@ function renderStructure(st = state) {
     });
   }
 
+  function buildDragHandle() {
+    const handle = document.createElement('span');
+    handle.className = 'structure-drag-handle';
+    handle.textContent = '⠿';
+    handle.title = t('relation.structure.drag_to_reorder') || 'Drag to reorder';
+    return handle;
+  }
+
   function render() {
     structurePanel.innerHTML = '';
 
     const toolbar = document.createElement('div');
     toolbar.className = 'structure-toolbar';
 
-    const newBtn = document.createElement('button');
-    newBtn.className = 'structure-btn-new';
-    newBtn.textContent = t('relation.structure.new_column_btn');
-    newBtn.addEventListener('click', () => {
-      const newName = prompt(t('relation.structure.column_name_prompt_label'));
-      if (!newName || !newName.trim()) return;
-      const name = newName.trim();
-      if (st.relation.columns[name]) {
-        showToast(tf('relation.toast.column_exists', {col: name}), 'warning');
-        return;
+    function addNewColumn() {
+      let baseName = 'new_column';
+      let name = baseName;
+      let counter = 1;
+      while (st.relation.columns[name]) {
+        name = baseName + '_' + counter;
+        counter++;
       }
       st.relation.columns[name] = 'string';
       st.relation.items.forEach(item => { item[name] = ''; });
@@ -25288,11 +25321,23 @@ function renderStructure(st = state) {
       buildColumnDependencies(st);
       structureRows = buildStructureColumnRows(st);
       pendingChanges = {};
+      const newIdx = structureRows.findIndex(r => r.name === name);
+      selectedIdx = newIdx;
+      editingIdx = newIdx;
       render();
       renderTable(st);
       updateJsonOutput(st);
       showToast(tf('relation.toast.column_added', {col: name}), 'success');
-    });
+      requestAnimationFrame(() => {
+        const rows = structurePanel.querySelectorAll('.structure-columns-table tbody tr');
+        if (rows[newIdx]) rows[newIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+
+    const newBtn = document.createElement('button');
+    newBtn.className = 'structure-btn-new';
+    newBtn.textContent = t('relation.structure.new_column_btn');
+    newBtn.addEventListener('click', addNewColumn);
     toolbar.appendChild(newBtn);
 
     if (selectedIdx !== null) {
@@ -25388,7 +25433,7 @@ function renderStructure(st = state) {
     const table = document.createElement('table');
     table.className = 'structure-columns-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th style="width:40px">#</th><th>' + t('relation.structure.th_name') + '</th><th>' + t('relation.structure.th_kind') + '</th><th>' + t('relation.structure.th_display_name') + '</th><th>' + t('relation.structure.th_short_name') + '</th><th style="width:55px">' + t('relation.structure.th_multiple') + '</th></tr>';
+    thead.innerHTML = '<tr><th style="width:30px"></th><th style="width:40px">#</th><th>' + t('relation.structure.th_name') + '</th><th>' + t('relation.structure.th_kind') + '</th><th>' + t('relation.structure.th_display_name') + '</th><th>' + t('relation.structure.th_short_name') + '</th><th style="width:55px">' + t('relation.structure.th_multiple') + '</th></tr>';
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
@@ -25399,6 +25444,62 @@ function renderStructure(st = state) {
       const tr = document.createElement('tr');
       if (isSelected) tr.classList.add('selected');
       tr.style.cursor = 'pointer';
+      tr.draggable = true;
+      tr.dataset.idx = idx;
+
+      const tdDrag = document.createElement('td');
+      tdDrag.className = 'structure-drag-cell';
+      tdDrag.appendChild(buildDragHandle());
+      tr.appendChild(tdDrag);
+
+      tr.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(idx));
+        tr.classList.add('dragging');
+      });
+      tr.addEventListener('dragend', () => tr.classList.remove('dragging'));
+      tr.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        tr.classList.add('drag-over');
+      });
+      tr.addEventListener('dragleave', () => tr.classList.remove('drag-over'));
+      tr.addEventListener('drop', (e) => {
+        e.preventDefault();
+        tr.classList.remove('drag-over');
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+        const toIdx = idx;
+        if (fromIdx === toIdx || isNaN(fromIdx)) return;
+        const fromRow = structureRows[fromIdx];
+        const toRow = structureRows[toIdx];
+        if (!fromRow || !toRow) return;
+        const fromName = fromRow.name;
+        const colNames = Object.keys(st.relation.columns);
+        const fromColIdx = colNames.indexOf(fromName);
+        const toColIdx = colNames.indexOf(toRow.name);
+        if (fromColIdx === -1 || toColIdx === -1) return;
+        const reordered = [...colNames];
+        reordered.splice(fromColIdx, 1);
+        const insertAt = reordered.indexOf(toRow.name);
+        reordered.splice(insertAt >= 0 ? insertAt : toColIdx, 0, fromName);
+        const newColumns = {};
+        reordered.forEach(name => { newColumns[name] = st.relation.columns[name]; });
+        st.relation.columns = newColumns;
+        const resolved = resolveAttColumns(st.relation.columns);
+        st.columnNames = resolved.names;
+        st.columnTypes = resolved.types;
+        st.columnAtts = resolved.atts;
+        buildColumnDependencies(st);
+        structureRows = buildStructureColumnRows(st);
+        pendingChanges = {};
+        selectedIdx = null;
+        editingIdx = null;
+        detailIdx = null;
+        render();
+        renderTable(st);
+        updateJsonOutput(st);
+        showToast(t('relation.toast.columns_reordered'), 'success');
+      });
 
       if (isEditing) {
         const tdOrder = document.createElement('td');
@@ -25415,7 +25516,24 @@ function renderStructure(st = state) {
         tr.appendChild(tdOrder);
 
         const tdName = document.createElement('td');
-        tdName.innerHTML = '<strong>' + escapeHtml(row.name) + '</strong>';
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = changes.newName || row.name;
+        nameInput.className = 'structure-inline-name';
+        nameInput.addEventListener('input', () => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newName = nameInput.value;
+        });
+        nameInput.addEventListener('blur', () => {
+          let val = nameInput.value.trim();
+          if (!val) { nameInput.value = row.name; return; }
+          const otherNames = structureRows.filter((r, i) => i !== idx).map(r => r.name);
+          while (otherNames.includes(val)) { val += '_'; }
+          nameInput.value = val;
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newName = val;
+        });
+        tdName.appendChild(nameInput);
         tr.appendChild(tdName);
 
         const tdKind = document.createElement('td');
@@ -25463,13 +25581,24 @@ function renderStructure(st = state) {
         tdMulti.appendChild(multiCheck);
         tr.appendChild(tdMulti);
       } else {
-        tr.innerHTML =
-          '<td>' + row.order + '</td>' +
-          '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
-          '<td><span class="structure-kind-badge ' + (row.isAtt ? 'kind-att' : '') + '">' + escapeHtml(changes.kind || row.kind) + (row.isAtt ? ' (att)' : '') + '</span></td>' +
-          '<td>' + escapeHtml(changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName) + '</td>' +
-          '<td>' + escapeHtml(changes.newShortName !== undefined ? changes.newShortName : row.shortName) + '</td>' +
-          '<td>' + ((changes.newMultiple !== undefined ? changes.newMultiple : row.att?.multiple) ? '✓' : '') + '</td>';
+        const tdOrder2 = document.createElement('td');
+        tdOrder2.textContent = row.order;
+        tr.appendChild(tdOrder2);
+        const tdName2 = document.createElement('td');
+        tdName2.innerHTML = '<strong>' + escapeHtml(changes.newName || row.name) + '</strong>';
+        tr.appendChild(tdName2);
+        const tdKind2 = document.createElement('td');
+        tdKind2.innerHTML = '<span class="structure-kind-badge ' + (row.isAtt ? 'kind-att' : '') + '">' + escapeHtml(changes.kind || row.kind) + (row.isAtt ? ' (att)' : '') + '</span>';
+        tr.appendChild(tdKind2);
+        const tdDisp2 = document.createElement('td');
+        tdDisp2.textContent = changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName;
+        tr.appendChild(tdDisp2);
+        const tdShort2 = document.createElement('td');
+        tdShort2.textContent = changes.newShortName !== undefined ? changes.newShortName : row.shortName;
+        tr.appendChild(tdShort2);
+        const tdMulti2 = document.createElement('td');
+        tdMulti2.textContent = (changes.newMultiple !== undefined ? changes.newMultiple : row.att?.multiple) ? '✓' : '';
+        tr.appendChild(tdMulti2);
       }
 
       tr.addEventListener('click', (e) => {
@@ -25485,12 +25614,25 @@ function renderStructure(st = state) {
         editingIdx = idx;
         detailIdx = idx;
         render();
+        requestAnimationFrame(() => {
+          const editor = structurePanel.querySelector('.structure-att-editor');
+          if (editor) editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
       });
 
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
     structurePanel.appendChild(table);
+
+    const bottomToolbar = document.createElement('div');
+    bottomToolbar.className = 'structure-toolbar structure-toolbar-bottom';
+    const newBtnBottom = document.createElement('button');
+    newBtnBottom.className = 'structure-btn-new';
+    newBtnBottom.textContent = t('relation.structure.new_column_btn');
+    newBtnBottom.addEventListener('click', addNewColumn);
+    bottomToolbar.appendChild(newBtnBottom);
+    structurePanel.appendChild(bottomToolbar);
 
     if (detailIdx !== null && detailIdx < structureRows.length) {
       const editorEl = renderColumnEditor(structureRows[detailIdx], detailIdx, st, structureRows, pendingChanges, render);
@@ -25861,6 +26003,24 @@ function applySingleStructureChange(idx, row, st, changes) {
     }
     st.relation.columns[colName].multiple = changes.newMultiple;
   }
+
+  if (changes.newName && changes.newName !== colName) {
+    const newName = changes.newName.trim();
+    if (newName && !st.relation.columns[newName]) {
+      const newColumns = {};
+      for (const [k, v] of Object.entries(st.relation.columns)) {
+        if (k === colName) newColumns[newName] = v;
+        else newColumns[k] = v;
+      }
+      st.relation.columns = newColumns;
+      st.relation.items.forEach(item => {
+        if (colName in item) {
+          item[newName] = item[colName];
+          delete item[colName];
+        }
+      });
+    }
+  }
 }
 
 function applyAllStructureChanges(st, structureRows, pendingChanges) {
@@ -25936,7 +26096,7 @@ function renderAiPromptsList(st) {
   const prompts = st.relation.ai_prompts;
 
   if (prompts.length === 0) {
-    listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.select_prompt')}</p>`;
+    listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.no_saved_prompts')}</p>`;
     return;
   }
 
@@ -25944,7 +26104,7 @@ function renderAiPromptsList(st) {
   const items = prompts.filter(p => p.scope === 'everyone' || (p.scope === 'you' && p.user === currentUser));
 
   if (items.length === 0) {
-    listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.select_prompt')}</p>`;
+    listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.no_saved_prompts')}</p>`;
     return;
   }
 
@@ -26051,6 +26211,11 @@ function initAIView(st = state) {
   if (!aiView) return;
 
   if (!st.relation.ai_prompts) st.relation.ai_prompts = [];
+
+  const responseDiv = aiView.querySelector('.ai-response');
+  if (responseDiv && !responseDiv.innerHTML.trim()) {
+    responseDiv.innerHTML = '<p class="text-muted-foreground" style="font-style:italic;" data-i18n="relation.ai.response_placeholder">' + t('relation.ai.response_placeholder') + '</p>';
+  }
 
   renderAiPromptsList(st);
 
@@ -27601,6 +27766,22 @@ function init() {
       helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
     }
   });
+
+  function setupHelpBadge(badgeSelector, panelSelector) {
+    const badge = document.querySelector(badgeSelector);
+    if (badge) {
+      badge.addEventListener('click', () => {
+        const panel = document.querySelector(panelSelector);
+        if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+  }
+  setupHelpBadge('.pivot-help-badge', '.pivot-help-panel');
+  setupHelpBadge('.matrix-help-badge', '.matrix-help-panel');
+  setupHelpBadge('.clustering-help-badge', '.clustering-help-panel');
+  setupHelpBadge('.multivariate-help-badge', '.multivariate-help-panel');
+  setupHelpBadge('.ai-help-badge', '.ai-help-panel');
+
   el('.btn-corr-all')?.addEventListener('click', () => analyzeAllPairs());
   
   // Diagram events
