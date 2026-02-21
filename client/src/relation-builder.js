@@ -3476,6 +3476,65 @@ function generateDemoRelation() {
       multiple: true,
       suffix: 'pts'
     },
+    full_date: {
+      attribute_kind: ['date'],
+      kind: 'datetime',
+      name: { pt: 'Data Completa', en: 'Full Date', es: 'Fecha Completa', fr: 'Date Complète', it: 'Data Completa', de: 'Volles Datum' },
+      short_name: { pt: 'DtCompl', en: 'FullDt' },
+      date: {
+        calendar_s: [
+          {
+            calendar: 'gregorian',
+            title: { pt: 'Gregoriano', en: 'Gregorian', es: 'Gregoriano', fr: 'Grégorien', it: 'Gregoriano', de: 'Gregorianisch' },
+            active: true,
+            min_unit: 'year',
+            max_unit: 'second'
+          },
+          {
+            calendar: 'gregorian_swatchbeats',
+            title: { pt: 'Gregoriano (Swatch Beats)', en: 'Gregorian (Swatch Beats)', es: 'Gregoriano (Swatch Beats)', fr: 'Grégorien (Swatch Beats)', it: 'Gregoriano (Swatch Beats)', de: 'Gregorianisch (Swatch Beats)' },
+            active: true,
+            min_unit: 'year',
+            max_unit: 'centibeat'
+          },
+          {
+            calendar: 'chinese',
+            title: { pt: 'Chinês', en: 'Chinese', es: 'Chino', fr: 'Chinois', it: 'Cinese', de: 'Chinesisch' },
+            active: true,
+            min_unit: 'cycle',
+            max_unit: 'second'
+          },
+          {
+            calendar: 'japanese',
+            title: { pt: 'Japonês', en: 'Japanese', es: 'Japonés', fr: 'Japonais', it: 'Giapponese', de: 'Japanisch' },
+            active: true,
+            min_unit: 'era',
+            max_unit: 'second'
+          },
+          {
+            calendar: 'hijri',
+            title: { pt: 'Hijri (Islâmico)', en: 'Hijri (Islamic)', es: 'Hijri (Islámico)', fr: 'Hijri (Islamique)', it: 'Hijri (Islamico)', de: 'Hijri (Islamisch)' },
+            active: true,
+            min_unit: 'year',
+            max_unit: 'second'
+          },
+          {
+            calendar: 'rumi',
+            title: { pt: 'Rumi (Otomano)', en: 'Rumi (Ottoman)', es: 'Rumi (Otomano)', fr: 'Roumi (Ottoman)', it: 'Rumi (Ottomano)', de: 'Rumi (Osmanisch)' },
+            active: true,
+            min_unit: 'year',
+            max_unit: 'second'
+          },
+          {
+            calendar: 'french_republican',
+            title: { pt: 'Republicano Francês', en: 'French Republican', es: 'Republicano Francés', fr: 'Républicain Français', it: 'Repubblicano Francese', de: 'Französisch Republikanisch' },
+            active: true,
+            min_unit: 'year',
+            max_unit: 'decimal_second'
+          }
+        ]
+      }
+    },
     orders: 'relation',
     tags: 'relation'
   };
@@ -3560,6 +3619,23 @@ function generateDemoRelation() {
       
       if (resolvedType === 'range' && colName === 'priority') {
         return Math.round(Math.random() * 10 * 10) / 10;
+      }
+      
+      if (isAttObject(type) && Array.isArray(type.attribute_kind) && type.attribute_kind.includes('date') && type.date && Array.isArray(type.date.calendar_s)) {
+        const d = new Date(Date.now() - Math.floor(Math.random() * 365 * 2 * 24 * 60 * 60 * 1000));
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const hour = d.getHours();
+        const minute = d.getMinutes();
+        const second = d.getSeconds();
+        const jdn = gregorianToJDN(year, month, day);
+        const timeFrac = (hour + minute / 60 + second / 3600) / 24;
+        return {
+          numeric: jdn + timeFrac,
+          calendar: 'gregorian',
+          components: { year, month, day, hour, minute, second }
+        };
       }
       
       if (resolvedType === 'pointer' && colName === 'ref_company_type') {
@@ -3917,6 +3993,11 @@ function compareValues(a, b, type, options) {
     return (a ? 1 : 0) - (b ? 1 : 0);
   }
   if (type === 'date' || type === 'datetime' || type === 'time') {
+    const numA = getAttDateNumeric(a);
+    const numB = getAttDateNumeric(b);
+    if (numA !== null && numB !== null) return numA - numB;
+    if (numA !== null) return -1;
+    if (numB !== null) return 1;
     return String(a).localeCompare(String(b));
   }
   return buildCollator(options).compare(String(a), String(b));
@@ -4861,8 +4942,11 @@ function calculateStatistics(colIdx, st = state) {
       stats.range = stats.max - stats.min;
     }
   } else if (type === 'date' || type === 'datetime' || type === 'time') {
+    const isAttDate = isAttDateColumn(colIdx, st);
     let nums;
-    if (type === 'time') {
+    if (isAttDate) {
+      nums = values.map(v => getAttDateNumeric(v)).filter(n => n !== null && !isNaN(n));
+    } else if (type === 'time') {
       nums = values.map(v => {
         const parts = String(v).split(':').map(Number);
         if (parts.length >= 2) {
@@ -4880,17 +4964,19 @@ function calculateStatistics(colIdx, st = state) {
     if (nums.length > 0) {
       nums.sort((a, b) => a - b);
       
-      const formatValue = (ms) => {
-        if (type === 'time') {
-          const totalSec = Math.floor(ms / 1000);
+      const formatValue = (val) => {
+        if (isAttDate) {
+          return numericToGregorianDisplay(val);
+        } else if (type === 'time') {
+          const totalSec = Math.floor(val / 1000);
           const h = Math.floor(totalSec / 3600);
           const m = Math.floor((totalSec % 3600) / 60);
           const s = totalSec % 60;
           return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         } else if (type === 'date') {
-          return new Date(ms).toISOString().split('T')[0];
+          return new Date(val).toISOString().split('T')[0];
         } else {
-          return new Date(ms).toISOString().replace('T', ' ').slice(0, 19);
+          return new Date(val).toISOString().replace('T', ' ').slice(0, 19);
         }
       };
       
@@ -4904,7 +4990,9 @@ function calculateStatistics(colIdx, st = state) {
       stats.median = formatValue(medianMs);
       
       const rangeMs = Math.max(...nums) - Math.min(...nums);
-      if (type === 'time') {
+      if (isAttDate) {
+        stats.range = `${rangeMs.toFixed(1)} days`;
+      } else if (type === 'time') {
         stats.range = formatValue(rangeMs);
       } else {
         const rangeDays = rangeMs / (1000 * 60 * 60 * 24);
@@ -4916,7 +5004,9 @@ function calculateStatistics(colIdx, st = state) {
       stats.variance = variance;
       stats.stdDev = Math.sqrt(variance);
       
-      if (type === 'time') {
+      if (isAttDate) {
+        stats.stdDevFormatted = `${stats.stdDev.toFixed(2)} days`;
+      } else if (type === 'time') {
         stats.stdDevFormatted = formatValue(stats.stdDev);
       } else {
         const stdDevDays = stats.stdDev / (1000 * 60 * 60 * 24);
@@ -4928,11 +5018,14 @@ function calculateStatistics(colIdx, st = state) {
       stats.q1 = formatValue(q1Ms);
       stats.q3 = formatValue(q3Ms);
       const iqrMs = q3Ms - q1Ms;
-      if (type === 'time') {
+      if (isAttDate) {
+        stats.iqr = `${iqrMs.toFixed(1)} days`;
+      } else if (type === 'time') {
         stats.iqr = formatValue(iqrMs);
       } else {
         stats.iqr = `${(iqrMs / (1000 * 60 * 60 * 24)).toFixed(1)} days`;
       }
+      stats.isAttDate = isAttDate;
       
       stats.allNumericValues = nums;
       stats.numMin = Math.min(...nums);
@@ -4960,10 +5053,20 @@ function calculateStatistics(colIdx, st = state) {
       stats.kurtosis = stats.variance > 0 ? (m4 / Math.pow(stats.variance, 2)) : 0;
       
       const freq = {};
-      values.forEach(v => freq[v] = (freq[v] || 0) + 1);
-      const maxFreq = Math.max(...Object.values(freq));
-      stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq);
-      stats.modeCount = maxFreq;
+      if (isAttDate) {
+        values.forEach(v => {
+          const n = getAttDateNumeric(v);
+          if (n !== null) freq[n] = (freq[n] || 0) + 1;
+        });
+        const maxFreq = Math.max(...Object.values(freq));
+        stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq).map(k => numericToGregorianDisplay(parseFloat(k)));
+        stats.modeCount = maxFreq;
+      } else {
+        values.forEach(v => freq[v] = (freq[v] || 0) + 1);
+        const maxFreq = Math.max(...Object.values(freq));
+        stats.mode = Object.keys(freq).filter(k => freq[k] === maxFreq);
+        stats.modeCount = maxFreq;
+      }
     }
   } else if (type === 'select' || type === 'radio') {
     const freq = {};
@@ -5648,18 +5751,28 @@ function checkRelationIntegrity(relation, path = 'root') {
       warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": attribute_kind "date" sem configuração "date".` });
       return;
     }
-    const calendarId = dateCfg.calendar || 'gregorian';
-    const calDef = CALENDAR_DEFINITIONS.find(c => c.id === calendarId);
-    if (!calDef) {
-      issues.push({ path, severity: 'error', msg: `Coluna "${colName}": calendário desconhecido "${calendarId}".` });
+    if (!Array.isArray(dateCfg.calendar_s) || dateCfg.calendar_s.length === 0) {
+      warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": "date.calendar_s" deve ser um array não vazio de calendários.` });
       return;
     }
-    if (dateCfg.min_unit || dateCfg.max_unit) {
-      const consistency = checkCalendarConsistency(calendarId, dateCfg.min_unit || 'year', dateCfg.max_unit || 'millisecond');
-      if (!consistency.valid) {
-        issues.push({ path, severity: 'error', msg: `Coluna "${colName}": ${consistency.reason}` });
+    dateCfg.calendar_s.forEach((calEntry, cIdx) => {
+      const calId = calEntry.calendar;
+      if (!calId) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}" calendar_s[${cIdx}]: "calendar" em falta.` });
+        return;
       }
-    }
+      const calDef = CALENDAR_DEFINITIONS[calId];
+      if (!calDef) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}" calendar_s[${cIdx}]: calendário desconhecido "${calId}".` });
+        return;
+      }
+      if (calEntry.min_unit || calEntry.max_unit) {
+        const consistency = checkCalendarConsistency(calId, calEntry.min_unit || 'year', calEntry.max_unit || 'millisecond');
+        if (!consistency.valid) {
+          issues.push({ path, severity: 'error', msg: `Coluna "${colName}" calendar_s[${cIdx}] (${calId}): ${consistency.reason}` });
+        }
+      }
+    });
   });
 
   return { issues, warnings, info };
@@ -6914,129 +7027,166 @@ function getColumnDateConfig(colIdx, st) {
   const colName = st.columnNames[colIdx];
   const colDef = st.relation.columns[colName];
   if (typeof colDef === 'object' && colDef !== null && Array.isArray(colDef.attribute_kind) && colDef.attribute_kind.includes('date')) {
-    return colDef.date || {};
+    return colDef.date || null;
   }
   return null;
 }
 
-function buildCalendarDateInput(value, dateCfg, editable, onChange) {
-  const calendarId = dateCfg.calendar || 'gregorian';
-  const minUnit = dateCfg.min_unit || 'year';
-  const maxUnit = dateCfg.max_unit || 'millisecond';
-  const calDef = CALENDAR_DEFINITIONS.find(c => c.id === calendarId);
-  
-  if (canUseNativeDateInput(calendarId, minUnit, maxUnit)) {
-    const input = document.createElement('input');
-    if (maxUnit === 'day' || maxUnit === 'weekday') {
-      input.type = 'date';
-    } else if (maxUnit === 'month') {
-      input.type = 'month';
-    } else if (maxUnit === 'week') {
-      input.type = 'week';
-    } else if (minUnit === 'hour' || minUnit === 'minute' || minUnit === 'second') {
-      input.type = 'time';
-    } else {
-      input.type = 'datetime-local';
-      if (maxUnit === 'millisecond') input.step = '0.001';
+function isAttDateColumn(colIdx, st) {
+  if (!st || !st.relation || !st.relation.columns) return false;
+  const colName = st.columnNames[colIdx];
+  const colDef = st.relation.columns[colName];
+  return typeof colDef === 'object' && colDef !== null && Array.isArray(colDef.attribute_kind) && colDef.attribute_kind.includes('date') && colDef.date && Array.isArray(colDef.date.calendar_s);
+}
+
+function getAttDateNumeric(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'number') return val;
+  if (typeof val === 'object' && val.numeric !== undefined) return val.numeric;
+  if (typeof val === 'string') {
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      const jdn = gregorianToJDN(d.getFullYear(), d.getMonth() + 1, d.getDate());
+      const timeFrac = (d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600) / 24;
+      return jdn + timeFrac;
     }
-    if (value) input.value = value;
-    input.disabled = !editable;
-    input.addEventListener('input', () => { if (onChange) onChange(input.value); });
-    return input;
+  }
+  return null;
+}
+
+function numericToGregorianDisplay(numeric) {
+  if (numeric === null || numeric === undefined || isNaN(numeric)) return '';
+  const jdn = Math.floor(numeric);
+  const frac = numeric - jdn;
+  const greg = jdnToGregorian(jdn);
+  const totalSeconds = Math.round(frac * 86400);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return `${greg.year}-${String(greg.month).padStart(2, '0')}-${String(greg.day).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function componentsToNumeric(calendarId, components) {
+  if (!components) return null;
+  const jdn = calendarToJDN(calendarId, components);
+  if (jdn === null) return null;
+  const h = components.hour || components.decimal_hour || 0;
+  const m = components.minute || components.decimal_minute || 0;
+  const sec = components.second || components.decimal_second || 0;
+  const ms = components.millisecond || 0;
+  let timeFrac;
+  if (calendarId === 'french_republican') {
+    timeFrac = (h + m / 100 + sec / 10000) / 10;
+  } else if (calendarId === 'gregorian_swatchbeats') {
+    const beat = components.beat || 0;
+    const centibeat = components.centibeat || 0;
+    timeFrac = (beat + centibeat / 100) / 1000;
+  } else {
+    timeFrac = (h + m / 60 + (sec + ms / 1000) / 3600) / 24;
+  }
+  return jdn + timeFrac;
+}
+
+function buildCalendarPanel(calendarId, minUnit, maxUnit, components, editable, onComponentChange) {
+  const calDef = CALENDAR_DEFINITIONS[calendarId];
+  if (!calDef) {
+    const errSpan = document.createElement('span');
+    errSpan.textContent = t('relation.calendar.unknown_calendar') + ': ' + calendarId;
+    errSpan.style.color = 'var(--destructive, red)';
+    return errSpan;
+  }
+
+  const allUnits = calDef.units || [];
+  const excludeSet = new Set(calDef.exclude_units || []);
+
+  const filteredUnits = allUnits.filter(uid => {
+    if (excludeSet.has(uid)) return false;
+    const minIdx = allUnits.indexOf(minUnit);
+    const maxIdx = allUnits.indexOf(maxUnit);
+    const curIdx = allUnits.indexOf(uid);
+    if (minIdx === -1 || maxIdx === -1 || curIdx === -1) return false;
+    return curIdx >= minIdx && curIdx <= maxIdx;
+  });
+
+  if (filteredUnits.length === 0) {
+    const errSpan = document.createElement('span');
+    errSpan.textContent = t('relation.calendar.invalid_date');
+    errSpan.style.color = 'var(--destructive, red)';
+    return errSpan;
   }
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'calendar-date-composite';
-  wrapper.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center;';
-
-  const units = calDef ? calDef.units : [];
-  const minIdx = units.findIndex(u => u.id === minUnit);
-  const maxIdx = units.findIndex(u => u.id === maxUnit);
-  const activeUnits = units.slice(Math.max(0, minIdx), maxIdx >= 0 ? maxIdx + 1 : units.length);
-
-  let currentComponents = {};
-  if (value && typeof value === 'object') {
-    currentComponents = { ...value };
-  } else if (typeof value === 'string' && value) {
-    const parts = value.split(/[-T:\s.]/);
-    activeUnits.forEach((u, i) => {
-      if (parts[i] !== undefined) currentComponents[u.id] = parseInt(parts[i], 10);
-    });
-  }
-
+  wrapper.className = 'calendar-panel';
+  wrapper.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-end;';
+  const lang = window.currentLang || 'pt';
   const inputs = {};
-  activeUnits.forEach(unit => {
-    if (unit.id === 'weekday' && unit.auto) return;
+  const currentComponents = { ...components };
+
+  const timeUnitIds = new Set(['hour', 'minute', 'second', 'millisecond', 'beat', 'centibeat', 'decimal_hour', 'decimal_minute', 'decimal_second', 'timezone']);
+  const autoWeekday = filteredUnits.includes('weekday');
+
+  filteredUnits.forEach(uid => {
+    if (uid === 'weekday') return;
+    if (uid === 'timezone') return;
+
+    const unitTransKey = 'relation.calendar.' + uid;
+    const unitLabel = t(unitTransKey) !== unitTransKey ? t(unitTransKey) : uid;
 
     const label = document.createElement('label');
     label.style.cssText = 'display: flex; flex-direction: column; font-size: 11px; color: var(--muted-foreground);';
-    
-    const lang = window.currentLang || 'pt';
-    const unitLabel = unit.label && typeof unit.label === 'object' ? (unit.label[lang] || unit.label['en'] || unit.label['pt'] || unit.id) : (unit.label || unit.id);
     label.textContent = unitLabel;
 
     const inp = document.createElement('input');
     inp.type = 'number';
     inp.className = 'calendar-unit-input';
-    inp.style.cssText = 'width: ' + (unit.id === 'year' ? '70px' : unit.id === 'millisecond' ? '55px' : '45px') + '; padding: 2px 4px; font-size: 13px;';
-    
-    const range = getCalendarUnitRange(calendarId, unit.id, currentComponents);
-    if (range) {
-      inp.min = range.min;
-      inp.max = range.max;
-    }
-    
-    if (currentComponents[unit.id] !== undefined) {
-      inp.value = unit.id === 'millisecond' ? String(currentComponents[unit.id]).padStart(3, '0') : currentComponents[unit.id];
+    const w = (uid === 'year' || uid === 'cycle' || uid === 'era') ? '70px' : (uid === 'millisecond' || uid === 'centibeat') ? '55px' : '50px';
+    inp.style.cssText = 'width: ' + w + '; padding: 2px 4px; font-size: 13px; border: 1px solid var(--border); border-radius: 4px;';
+
+    const range = getCalendarUnitRange(calendarId, uid, currentComponents);
+    if (range) { inp.min = range.min; inp.max = range.max; }
+
+    if (currentComponents[uid] !== undefined && currentComponents[uid] !== null) {
+      inp.value = uid === 'millisecond' ? String(currentComponents[uid]).padStart(3, '0') : currentComponents[uid];
     }
     inp.disabled = !editable;
-    inp.addEventListener('input', () => {
-      currentComponents[unit.id] = inp.value === '' ? null : parseInt(inp.value, 10);
-      
-      activeUnits.forEach(otherUnit => {
-        if (otherUnit.id === 'weekday' && otherUnit.auto && currentComponents.year && currentComponents.month && currentComponents.day) {
-          const jdn = calendarToJDN(calendarId, currentComponents);
-          if (jdn !== null) {
-            const wd = weekdayFromJDN(jdn);
-            const wdSpan = wrapper.querySelector('.weekday-display');
-            if (wdSpan) {
-              const wdNames = otherUnit.names && otherUnit.names[lang] ? otherUnit.names[lang] : (otherUnit.names && otherUnit.names['en'] ? otherUnit.names['en'] : []);
-              wdSpan.textContent = wdNames[wd] || String(wd);
-            }
-          }
-        }
-      });
 
-      if (onChange) onChange({ ...currentComponents });
+    inp.addEventListener('input', () => {
+      currentComponents[uid] = inp.value === '' ? null : parseInt(inp.value, 10);
+      updateWeekday();
+      if (onComponentChange) onComponentChange({ ...currentComponents });
     });
 
-    inputs[unit.id] = inp;
+    inputs[uid] = inp;
     label.appendChild(inp);
     wrapper.appendChild(label);
   });
 
-  const weekdayUnit = activeUnits.find(u => u.id === 'weekday' && u.auto);
-  if (weekdayUnit) {
-    const wdLabel = document.createElement('span');
-    wdLabel.className = 'weekday-display';
-    wdLabel.style.cssText = 'font-size: 12px; color: var(--muted-foreground); padding-top: 14px;';
+  const wdSpan = document.createElement('span');
+  wdSpan.className = 'weekday-display';
+  wdSpan.style.cssText = 'font-size: 12px; color: var(--muted-foreground); padding-bottom: 2px;';
+  function updateWeekday() {
+    if (!autoWeekday) return;
     if (currentComponents.year && currentComponents.month && currentComponents.day) {
       const jdn = calendarToJDN(calendarId, currentComponents);
       if (jdn !== null) {
         const wd = weekdayFromJDN(jdn);
-        const lang = window.currentLang || 'pt';
-        const wdNames = weekdayUnit.names && weekdayUnit.names[lang] ? weekdayUnit.names[lang] : [];
-        wdLabel.textContent = wdNames[wd] || String(wd);
+        const wdNames = calDef.weekday_names && calDef.weekday_names[lang] ? calDef.weekday_names[lang] : (calDef.weekday_names && calDef.weekday_names['en'] ? calDef.weekday_names['en'] : null);
+        wdSpan.textContent = wdNames ? (wdNames[wd] || String(wd)) : '';
+      } else {
+        wdSpan.textContent = '';
       }
     }
-    wrapper.appendChild(wdLabel);
+  }
+  if (autoWeekday) {
+    updateWeekday();
+    wrapper.appendChild(wdSpan);
   }
 
-  if (calendarId !== 'gregorian' && calendarId !== 'gregorian_swatch') {
+  if (calendarId !== 'gregorian' && calendarId !== 'gregorian_swatchbeats') {
     const convSpan = document.createElement('span');
     convSpan.className = 'calendar-gregorian-equiv';
-    convSpan.style.cssText = 'font-size: 11px; color: var(--muted-foreground); margin-left: 8px; padding-top: 14px;';
-    const updateConv = () => {
+    convSpan.style.cssText = 'font-size: 11px; color: var(--muted-foreground); margin-left: 8px; padding-bottom: 2px;';
+    function updateConv() {
       const jdn = calendarToJDN(calendarId, currentComponents);
       if (jdn !== null) {
         const greg = jdnToGregorian(jdn);
@@ -7044,13 +7194,120 @@ function buildCalendarDateInput(value, dateCfg, editable, onChange) {
       } else {
         convSpan.textContent = '';
       }
-    };
+    }
     updateConv();
     Object.values(inputs).forEach(inp => inp.addEventListener('input', updateConv));
     wrapper.appendChild(convSpan);
   }
 
   return wrapper;
+}
+
+function buildCalendarDateInput(value, dateCfg, editable, onChange) {
+  const calendarList = Array.isArray(dateCfg.calendar_s) ? dateCfg.calendar_s : [];
+  const activeCalendars = calendarList.filter(c => c.active !== false);
+
+  if (activeCalendars.length === 0) {
+    const span = document.createElement('span');
+    span.textContent = t('relation.calendar.unknown_calendar');
+    span.style.color = 'var(--destructive, red)';
+    return span;
+  }
+
+  let dateObj = null;
+  if (value && typeof value === 'object' && value.numeric !== undefined) {
+    dateObj = value;
+  } else if (typeof value === 'number') {
+    const jdn = Math.floor(value);
+    const frac = value - jdn;
+    const greg = jdnToGregorian(jdn);
+    const totalSec = Math.round(frac * 86400);
+    dateObj = {
+      numeric: value,
+      calendar: 'gregorian',
+      components: { year: greg.year, month: greg.month, day: greg.day, hour: Math.floor(totalSec / 3600), minute: Math.floor((totalSec % 3600) / 60), second: totalSec % 60 }
+    };
+  }
+
+  const currentCalendarId = dateObj ? dateObj.calendar : activeCalendars[0].calendar;
+  const currentComponents = dateObj ? { ...(dateObj.components || {}) } : {};
+  let selectedCalendar = currentCalendarId;
+
+  if (activeCalendars.length === 1) {
+    const calEntry = activeCalendars[0];
+    const panel = buildCalendarPanel(calEntry.calendar, calEntry.min_unit || 'year', calEntry.max_unit || 'second', currentComponents, editable, (comps) => {
+      const numeric = componentsToNumeric(calEntry.calendar, comps);
+      if (onChange) onChange({ numeric, calendar: calEntry.calendar, components: comps });
+    });
+    return panel;
+  }
+
+  const outerWrapper = document.createElement('div');
+  outerWrapper.className = 'calendar-date-input-multi';
+  outerWrapper.style.cssText = 'display: flex; flex-direction: column; gap: 6px;';
+
+  const tabBar = document.createElement('div');
+  tabBar.className = 'calendar-tab-bar';
+  tabBar.style.cssText = 'display: flex; gap: 2px; flex-wrap: wrap;';
+
+  const panelContainer = document.createElement('div');
+  panelContainer.className = 'calendar-panel-container';
+
+  const lang = window.currentLang || 'pt';
+  let activeComps = { ...currentComponents };
+  let activeCalId = selectedCalendar;
+
+  function convertComponentsTo(targetCalId, srcCalId, srcComps) {
+    if (targetCalId === srcCalId) return { ...srcComps };
+    const jdn = calendarToJDN(srcCalId, srcComps);
+    if (jdn === null) return {};
+    const converted = jdnToCalendar(targetCalId, jdn);
+    const timeKeys = ['hour', 'minute', 'second', 'millisecond', 'beat', 'centibeat', 'decimal_hour', 'decimal_minute', 'decimal_second'];
+    timeKeys.forEach(k => { if (srcComps[k] !== undefined) converted[k] = srcComps[k]; });
+    return converted;
+  }
+
+  function renderActivePanel() {
+    panelContainer.innerHTML = '';
+    const calEntry = activeCalendars.find(c => c.calendar === activeCalId);
+    if (!calEntry) return;
+    const panel = buildCalendarPanel(calEntry.calendar, calEntry.min_unit || 'year', calEntry.max_unit || 'second', activeComps, editable, (comps) => {
+      activeComps = comps;
+      const numeric = componentsToNumeric(calEntry.calendar, comps);
+      if (onChange) onChange({ numeric, calendar: calEntry.calendar, components: comps });
+    });
+    panelContainer.appendChild(panel);
+  }
+
+  activeCalendars.forEach(calEntry => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'calendar-tab-btn' + (calEntry.calendar === activeCalId ? ' active' : '');
+    const title = calEntry.title && typeof calEntry.title === 'object' ? (calEntry.title[lang] || calEntry.title['en'] || calEntry.title['pt'] || calEntry.calendar) : calEntry.calendar;
+    btn.textContent = title;
+    btn.style.cssText = 'padding: 3px 8px; font-size: 11px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; background: ' + (calEntry.calendar === activeCalId ? 'var(--primary); color: var(--primary-foreground);' : 'var(--card); color: var(--foreground);');
+    btn.addEventListener('click', () => {
+      const newComps = convertComponentsTo(calEntry.calendar, activeCalId, activeComps);
+      activeCalId = calEntry.calendar;
+      activeComps = newComps;
+      tabBar.querySelectorAll('.calendar-tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'var(--card)';
+        b.style.color = 'var(--foreground)';
+      });
+      btn.classList.add('active');
+      btn.style.background = 'var(--primary)';
+      btn.style.color = 'var(--primary-foreground)';
+      renderActivePanel();
+    });
+    tabBar.appendChild(btn);
+  });
+
+  outerWrapper.appendChild(tabBar);
+  outerWrapper.appendChild(panelContainer);
+  renderActivePanel();
+
+  return outerWrapper;
 }
 
 function buildMultiInput(values, baseType, editable, onChange) {
@@ -7937,6 +8194,15 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
 
+    if (isAttDateColumn(colIdx, st)) {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly date-value';
+      const numeric = getAttDateNumeric(value);
+      span.textContent = numeric !== null ? numericToGregorianDisplay(numeric) : '—';
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
     const span = document.createElement('span');
     span.className = 'relation-cell-readonly';
     if (type === 'textarea') {
@@ -8056,6 +8322,23 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     editor.dataset.col = colIdx;
     editor.dataset.values = JSON.stringify(value && typeof value === 'object' ? value : {});
     wrapper.appendChild(editor);
+  } else if (isAttDateColumn(colIdx, st)) {
+    const dateCfg = getColumnDateConfig(colIdx, st);
+    if (dateCfg) {
+      const calInput = buildCalendarDateInput(value, dateCfg, editable, (newVal) => {
+        if (rowIdx >= 0 && st.relation.items[rowIdx]) {
+          st.relation.items[rowIdx][colIdx] = newVal;
+          logOperation(st, { op: 'edit', row: rowIdx, col: colIdx, value: newVal });
+        }
+      });
+      wrapper.appendChild(calInput);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly';
+      const numeric = getAttDateNumeric(value);
+      span.textContent = numeric !== null ? numericToGregorianDisplay(numeric) : '—';
+      wrapper.appendChild(span);
+    }
   } else {
     const input = document.createElement('input');
     input.type = getInputType(type);
@@ -8155,15 +8438,20 @@ function applyConditionalFormatting(value, colIdx, cell, rowIdx, st = state) {
         
         if (rule.style.dataBar && (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time')) {
           const stats = calculateStatistics(colIdx, st);
-          if (stats.min !== undefined && stats.max !== undefined && stats.max !== stats.min) {
+          const sMin = stats.numMin !== undefined ? stats.numMin : stats.min;
+          const sMax = stats.numMax !== undefined ? stats.numMax : stats.max;
+          if (sMin !== undefined && sMax !== undefined && sMax !== sMin) {
             let numValue = value;
-            if (type === 'date' || type === 'datetime') {
+            const attDateNum = getAttDateNumeric(value);
+            if (attDateNum !== null) {
+              numValue = attDateNum;
+            } else if (type === 'date' || type === 'datetime') {
               numValue = new Date(value).getTime();
             } else if (type === 'time') {
               const [h, m, s] = String(value).split(':').map(Number);
               numValue = (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
             }
-            const percent = ((numValue - stats.min) / (stats.max - stats.min)) * 100;
+            const percent = ((numValue - sMin) / (sMax - sMin)) * 100;
             cell.style.background = `linear-gradient(to right, ${rule.style.dataBar} ${percent}%, transparent ${percent}%)`;
           }
         }
@@ -15924,6 +16212,14 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
     return `<span class="id-value">${escapeHtml(String(value))}</span>`;
   }
   
+  if (type === 'date' && st && colIdx >= 0 && isAttDateColumn(colIdx, st)) {
+    const numeric = getAttDateNumeric(value);
+    if (numeric !== null) {
+      return `<span class="date-value">${escapeHtml(numericToGregorianDisplay(numeric))}</span>`;
+    }
+    return '—';
+  }
+
   if (type === 'int' || type === 'float' || type === 'range') {
     return `<span class="number-value">${value}</span>`;
   }
