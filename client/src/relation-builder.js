@@ -18250,11 +18250,20 @@ function switchView(viewName) {
     tab.classList.toggle('active', tab.dataset.view === viewName);
   });
   
-  // Show/hide keyboard help badge based on view (only show for table view)
+  // Show/hide search, new button, actions and help badge based on view (only for table/cards)
+  const isTableOrCards = viewName === 'table' || viewName === 'cards';
   const helpBadge = el('.keyboard-help-badge');
   if (helpBadge) {
     helpBadge.style.display = viewName === 'table' ? '' : 'none';
   }
+  const searchWrapper = el('.quick-search-wrapper');
+  if (searchWrapper) searchWrapper.style.display = isTableOrCards ? '' : 'none';
+  const newQuickBtn = el('.btn-new-quick');
+  if (newQuickBtn) newQuickBtn.style.display = isTableOrCards ? '' : 'none';
+  const actionsWrapper = el('.always-visible-wrapper');
+  if (actionsWrapper) actionsWrapper.style.display = isTableOrCards ? '' : 'none';
+  const assocBtns = el('.assoc-toolbar-buttons');
+  if (assocBtns) assocBtns.style.display = isTableOrCards ? '' : 'none';
   
   // Show/hide view content (scoped to relation container)
   elAll('.view-content').forEach(content => {
@@ -24127,6 +24136,10 @@ function switchViewForInstance(st, view) {
   const actionsWrapper = container.querySelector('.always-visible-wrapper');
   if (searchWrapper) searchWrapper.style.display = isTableOrCards ? '' : 'none';
   if (actionsWrapper) actionsWrapper.style.display = isTableOrCards ? '' : 'none';
+  const newQuickBtn = container.querySelector(".btn-new-quick");
+  if (newQuickBtn) newQuickBtn.style.display = isTableOrCards ? "" : "none";
+  const assocBtns = container.querySelector(".assoc-toolbar-buttons");
+  if (assocBtns) assocBtns.style.display = isTableOrCards ? "" : "none";
   
   // Render the view - use parametrized functions
   if (view === 'table') {
