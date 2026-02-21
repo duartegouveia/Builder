@@ -365,7 +365,7 @@ const DEFAULT_REL_OPTIONS = {
   single_item_mode: 'dialog',
   label_field_top_down: true,
   OnDoubleClickAction: 'view',
-  general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
+  general_view_options: ['Table', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
   general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State', 'Output State Full', 'Relation JSON'],
   general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
   general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge'],
@@ -465,10 +465,6 @@ const PRODUCTS_JSON = {
     "single_item_mode": "right",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ["1", "1", "PURINA DOG Chow Adulto", "Nestle", "PURINA", "7613036584307", 10, "1", {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","category","1"]]}, {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","2"]]}],
@@ -524,10 +520,6 @@ const CATEGORIES_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ['1','1','Dog Food', {"pot":"relation","guid":"","name":"","columns":{"id":"id","entity":"string","foreign_key":"string"},"rel_options":{"editable":false},"items":[["-1","product","1"]]}],
@@ -582,10 +574,6 @@ const STOCKS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ["1","30/9/2025","1","Pingo doce","1000","010","AZAMBUJA","2050-275","7613036584307","PURINA DOG Chow Adulto",23,0,"0521","25/10/2026","1"],
@@ -694,10 +682,6 @@ const PRICELISTS_JSON = {
     "single_item_mode": "dialog",
     "label_field_top_down": true,
     "OnDoubleClickAction": "view",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"],
-    "general_always_visible_options": ["New", "New Fast", "Advanced Search", "Paper Form", "Select One", "Select Many", "Choose Many", "Import from File", "Export to file", "Integrity Check", "Output State"],
-    "general_line_options": ["View", "Edit", "Copy", "New", "New Fast", "Delete", "Paper Form"],
-    "general_multi_options": ["Invert Page", "Invert All", "Remove Checked", "Remove Unchecked", "Multi View", "Multi Edit", "Multi Copy", "Multi Delete", "Group Edit", "Merge"]
   },
   "items": [
     ['1','1/1/2024','31/12/2024','2024','1',35.56],
@@ -773,7 +757,6 @@ const USERS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -806,7 +789,6 @@ const AUDITLOG_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -879,7 +861,6 @@ const ALL_STOCKS_JSON = {
     "editable": false,
     "show_stats": true,
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [
     ["1", "30/9/2025", "1", "Pingo doce", "1000", "010", "AZAMBUJA", "2050-275", "7613036584307", "PURINA DOG Chow Adulto", 23, 0, "0521", "25/10/2026", "1"],
@@ -994,7 +975,6 @@ const DISTRIBUTOR_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1044,7 +1024,6 @@ const ADMIN_DATA_MANAGEMENT_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1071,7 +1050,6 @@ const STOCK_IMPORTS_STATES_DETAILS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1098,7 +1076,6 @@ const STOCK_IMPORTS_STATES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1129,7 +1106,6 @@ const STOCK_IMPORTS_TYPES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1159,7 +1135,6 @@ const STOCK_IMPORTS_DETAILS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1215,7 +1190,6 @@ const STOCK_IMPORT_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": [],
   "log": []
@@ -1249,7 +1223,6 @@ const STOCK_WAREHOUSE_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1299,7 +1272,6 @@ const STOCK_HISTORIC_INVENTORY_DETAIL_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1346,7 +1318,6 @@ const STOCK_HISTORIC_INVENTORY_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1395,7 +1366,6 @@ const STOCK_INVENTORY_DETAIL_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1443,7 +1413,6 @@ const STOCK_INVENTORY_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1491,7 +1460,6 @@ const CATALOG_PRODUCT_CONVERSIONS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1538,7 +1506,6 @@ const PRODUCT_CATALOG_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1581,7 +1548,6 @@ const PRICELIST_PARTNER_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1612,7 +1578,6 @@ const PRICELIST_PRODUCTS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1659,7 +1624,6 @@ const ALL_PRICELISTS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1816,7 +1780,6 @@ const PRODUCT_SPECIES_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -1894,7 +1857,6 @@ const PRODUCT_FAMILIES_JSON = {
     "hierarchy_show_column": "Name",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -2059,7 +2021,6 @@ const ALL_PRODUCTS_JSON = {
     "hierarchy_column": "parent",
     "hierarchy_root_value": "",
     "single_item_mode": "dialog",
-    "general_view_options": ["Table", "Cards", "Pivot", "Analysis", "AI", "Saved", "Structure"]
   },
   "items": []
 };
@@ -3577,7 +3538,7 @@ function generateDemoRelation() {
     single_item_mode: 'dialog',
     label_field_top_down: true,
     OnDoubleClickAction: 'view',
-    general_view_options: ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
+    general_view_options: ['Table', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'],
     general_always_visible_options: ['New', 'New Fast', 'Advanced Search', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State'],
     general_line_options: ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'],
     general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge']
@@ -25999,7 +25960,7 @@ function ensureAiHistoryRelation(st) {
         show_stats: false,
         cardinality_min: 0,
         cardinality_max: null,
-        general_view_options: ['Table', 'Cards'],
+        general_view_options: ['Table'],
         general_always_visible_options: ['Select One', 'Select Many'],
         general_line_options: ['View', 'Delete'],
         general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Multi View', 'Multi Delete']

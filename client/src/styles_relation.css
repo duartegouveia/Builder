@@ -3042,24 +3042,29 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   z-index: 100;
 }
 
-.btn-new-quick {
+button.btn.btn-primary.btn-sm.btn-new-quick {
   background: var(--primary, #2563eb);
   color: #fff;
   border: none;
-  border-radius: var(--radius-sm, 4px);
-  font-size: 1.1rem;
-  font-weight: 700;
+  border-radius: 50% !important;
+  font-size: 0.8rem;
+  font-weight: 600;
   line-height: 1;
-  padding: 2px 8px;
+  padding: 0;
   cursor: pointer;
-  min-width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.75;
+  transition: opacity 0.15s, transform 0.15s;
 }
 
 .btn-new-quick:hover {
+  opacity: 1;
+  transform: scale(1.1);
   background: var(--primary-hover, #1d4ed8);
 }
 
