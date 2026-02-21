@@ -7,6 +7,8 @@ const all_entities = {};
 
 window.currentUserUTC = parseFloat(localStorage.getItem('relation_utc') || String(-(new Date().getTimezoneOffset()) / 60));
 window.currentUser = localStorage.getItem('relation_user') || 'DuarteGouveia';
+window.decimalSeparator = localStorage.getItem('relation_decimal_sep') || '.';
+window.thousandsSeparator = localStorage.getItem('relation_thousands_sep') || ',';
 
 const ALL_LANGUAGES = {
   pt: 'Português', en: 'English', es: 'Español', fr: 'Français', it: 'Italiano', de: 'Deutsch',
@@ -24542,6 +24544,14 @@ function updateMultivariateUI(st = state) {
       checkboxContainer.innerHTML = numCols.map(c =>
         `<label class="mv-col-checkbox-label"><input type="checkbox" class="mv-col-cb" data-col-idx="${c.idx}" checked> ${escapeHtml(c.name)}</label>`
       ).join('');
+      requestAnimationFrame(() => {
+        let maxW = 0;
+        checkboxContainer.querySelectorAll('.mv-col-checkbox-label').forEach(lbl => {
+          const w = lbl.scrollWidth;
+          if (w > maxW) maxW = w;
+        });
+        if (maxW > 0) checkboxContainer.style.setProperty('--mv-col-min-w', maxW + 'px');
+      });
     }
   }
 
@@ -27224,6 +27234,28 @@ function init() {
     userInput.addEventListener('input', (e) => {
       window.currentUser = e.target.value;
       localStorage.setItem('relation_user', e.target.value);
+    });
+  }
+
+  const decSepInput = document.getElementById('decimal-sep-input');
+  if (decSepInput) {
+    decSepInput.value = window.decimalSeparator;
+    decSepInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (val.length > 1) { e.target.value = val.slice(-1); }
+      window.decimalSeparator = e.target.value || '.';
+      localStorage.setItem('relation_decimal_sep', window.decimalSeparator);
+    });
+  }
+
+  const thousSepInput = document.getElementById('thousands-sep-input');
+  if (thousSepInput) {
+    thousSepInput.value = window.thousandsSeparator;
+    thousSepInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (val.length > 1) { e.target.value = val.slice(-1); }
+      window.thousandsSeparator = e.target.value || ',';
+      localStorage.setItem('relation_thousands_sep', window.thousandsSeparator);
     });
   }
 

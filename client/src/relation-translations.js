@@ -6,6 +6,8 @@ window.currentLang = 'pt';
 window.RELATION_TRANSLATIONS = {
 
   // ─── COMMON ───────────────────────────────────────────────
+  "relation.common.decimal_sep_label": { pt: "Dec", en: "Dec", es: "Dec", fr: "Déc", it: "Dec", de: "Dez" },
+  "relation.common.thousands_sep_label": { pt: "Mil", en: "Ths", es: "Mil", fr: "Mil", it: "Mig", de: "Tsd" },
   "relation.common.close": { pt: "Fechar", en: "Close", es: "Cerrar", fr: "Fermer", it: "Chiudi", de: "Schließen" },
   "relation.common.cancel": { pt: "Cancelar", en: "Cancel", es: "Cancelar", fr: "Annuler", it: "Annulla", de: "Abbrechen" },
   "relation.common.apply": { pt: "Aplicar", en: "Apply", es: "Aplicar", fr: "Appliquer", it: "Applica", de: "Anwenden" },

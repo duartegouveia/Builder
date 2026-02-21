@@ -6356,8 +6356,8 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   margin-bottom: 6px;
 }
 .mv-col-checkboxes {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--mv-col-min-w, 120px), 1fr));
   gap: 4px 12px;
   max-height: 120px;
   overflow-y: auto;
