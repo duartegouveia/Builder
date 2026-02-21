@@ -2863,6 +2863,45 @@ function elAll(selector, st = state) {
   return container.querySelectorAll(selector);
 }
 
+// Helper: query within main panel only (skips nested relation instances)
+// Uses a filter to exclude elements that are inside a nested relation container
+function elMain(selector, st = state) {
+  const container = getRelationContainer(st);
+  if (!container) return null;
+  const mainPanel = container.querySelector(':scope > .relation-flex-wrapper > .relation-main-panel');
+  const scope = mainPanel || container;
+  const all = scope.querySelectorAll(selector);
+  for (const node of all) {
+    if (!isInsideNestedRelation(node, scope)) return node;
+  }
+  return null;
+}
+
+function elAllMain(selector, st = state) {
+  const container = getRelationContainer(st);
+  if (!container) return [];
+  const mainPanel = container.querySelector(':scope > .relation-flex-wrapper > .relation-main-panel');
+  const scope = mainPanel || container;
+  const all = scope.querySelectorAll(selector);
+  const result = [];
+  for (const node of all) {
+    if (!isInsideNestedRelation(node, scope)) result.push(node);
+  }
+  return result;
+}
+
+function isInsideNestedRelation(node, stopAt) {
+  let parent = node.parentElement;
+  while (parent && parent !== stopAt) {
+    if (parent.classList.contains('ai-history-container')) return true;
+    for (const cls of parent.classList) {
+      if (cls.startsWith('relation_')) return true;
+    }
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
 // Helper function to get the detail panel for a relation instance
 function getDetailPanel(st = state) {
   return el('.relation-detail-panel', st);
@@ -18694,31 +18733,31 @@ function renderGroupByPanel(st = state) {
 function switchView(viewName) {
   setCurrentView(state, viewName);
   
-  // Update tab states (scoped to relation container)
-  elAll('.view-tab').forEach(tab => {
+  // Update tab states (scoped to main panel, skipping nested relations)
+  elAllMain('.view-tab').forEach(tab => {
     tab.classList.toggle('active', tab.dataset.view === viewName);
   });
   
   // Show/hide search, new button, actions and help badge based on view (only for table/cards)
   const isTableOrCards = viewName === 'table' || viewName === 'cards';
-  const helpBadge = el('.keyboard-help-badge');
+  const helpBadge = elMain('.keyboard-help-badge');
   if (helpBadge) {
     helpBadge.style.display = viewName === 'table' ? '' : 'none';
   }
-  const searchWrapper = el('.quick-search-wrapper');
+  const searchWrapper = elMain('.quick-search-wrapper');
   if (searchWrapper) searchWrapper.style.display = isTableOrCards ? '' : 'none';
-  const newQuickBtn = el('.btn-new-quick');
+  const newQuickBtn = elMain('.btn-new-quick');
   if (newQuickBtn) newQuickBtn.style.display = isTableOrCards ? '' : 'none';
-  const actionsWrapper = el('.always-visible-wrapper');
+  const actionsWrapper = elMain('.always-visible-wrapper');
   if (actionsWrapper) actionsWrapper.style.display = isTableOrCards ? '' : 'none';
-  const assocBtns = el('.assoc-toolbar-buttons');
+  const assocBtns = elMain('.assoc-toolbar-buttons');
   if (assocBtns) assocBtns.style.display = isTableOrCards ? '' : 'none';
   
-  // Show/hide view content (scoped to relation container)
-  elAll('.view-content').forEach(content => {
+  // Show/hide view content (scoped to main panel, skipping nested relations)
+  elAllMain('.view-content').forEach(content => {
     content.style.display = 'none';
   });
-  const viewEl = el('.view-' + viewName);
+  const viewEl = elMain('.view-' + viewName);
   if (viewEl) viewEl.style.display = 'block';
   
   // Render specific view content
@@ -24414,7 +24453,17 @@ function initRelationInstance(container, relationData, options = {}) {
           <p data-i18n="relation.ai.help_text">${t('relation.ai.help_text')}</p>
         </div>
         <div class="ai-saved-prompts-section">
-          <label class="ai-section-label" data-i18n="relation.ai.saved_prompts">${t('relation.ai.saved_prompts')}</label>
+          <div class="ai-section-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <label class="ai-section-label" data-i18n="relation.ai.saved_prompts" style="margin-bottom:0;">${t('relation.ai.saved_prompts')}</label>
+            <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
+              <input type="radio" name="ai-prompts-scope-filter" value="everyone" class="ai-prompts-scope-radio" checked data-testid="radio-ai-prompts-everyone">
+              <span data-i18n="relation.ai.scope_everyone">${t('relation.ai.scope_everyone')}</span>
+            </label>
+            <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
+              <input type="radio" name="ai-prompts-scope-filter" value="you" class="ai-prompts-scope-radio" data-testid="radio-ai-prompts-you">
+              <span data-i18n="relation.ai.scope_you">${t('relation.ai.scope_you')}</span>
+            </label>
+          </div>
           <div class="ai-prompts-list"></div>
         </div>
         <div class="ai-input-section">
@@ -24480,6 +24529,17 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-saved view-content" style="display: none;">
       <div class="saved-panel">
+        <div class="saved-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+          <label class="ai-section-label" data-i18n="relation.saved.saved_header" style="margin-bottom:0;">${t('relation.saved.saved_header')}</label>
+          <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
+            <input type="radio" name="saved-scope-filter" value="everyone" class="saved-scope-radio" checked data-testid="radio-saved-everyone">
+            <span data-i18n="relation.saved.scope_everyone_label">${t('relation.saved.scope_everyone_label')}</span>
+          </label>
+          <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
+            <input type="radio" name="saved-scope-filter" value="you" class="saved-scope-radio" data-testid="radio-saved-you">
+            <span data-i18n="relation.saved.scope_you_label">${t('relation.saved.scope_you_label')}</span>
+          </label>
+        </div>
         <div class="saved-views-list"></div>
         <div class="saved-form">
           <div class="saved-section-label" data-i18n="relation.saved.save_new_label">${t('relation.saved.save_new_label')}</div>
@@ -25757,9 +25817,7 @@ function buildKindSelect(currentKind, onChange) {
 }
 
 function renderStructure(st = state) {
-  const container = st.container || document.querySelector('.relation-container');
-  if (!container) return;
-  const structurePanel = container.querySelector('.structure-panel');
+  const structurePanel = st.container ? st.container.querySelector('.structure-panel') : elMain('.structure-panel');
   if (!structurePanel) return;
 
   if (!st.relation) {
@@ -26742,8 +26800,15 @@ function renderAiPromptsList(st) {
     return;
   }
 
+  const scopeRadio = aiView.querySelector('.ai-prompts-scope-radio:checked');
+  const scopeFilter = scopeRadio ? scopeRadio.value : 'everyone';
   const currentUser = window.currentUser || '';
-  const items = prompts.filter(p => p.scope === 'everyone' || (p.scope === 'you' && p.user === currentUser));
+  let items;
+  if (scopeFilter === 'you') {
+    items = prompts.filter(p => p.scope === 'you' && p.user === currentUser);
+  } else {
+    items = prompts.filter(p => p.scope === 'everyone');
+  }
 
   if (items.length === 0) {
     listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.no_saved_prompts')}</p>`;
@@ -26876,6 +26941,10 @@ function initAIView(st = state) {
 
   renderAiPromptsList(st);
 
+  aiView.querySelectorAll('.ai-prompts-scope-radio').forEach(radio => {
+    radio.addEventListener('change', () => renderAiPromptsList(st));
+  });
+
   const savePromptBtn = aiView.querySelector('.btn-ai-save-prompt');
   if (savePromptBtn) {
     const newBtn = savePromptBtn.cloneNode(true);
@@ -26972,7 +27041,7 @@ function initAIView(st = state) {
 }
 
 function initSavedView(st = state) {
-  const panel = st.container ? st.container.querySelector('.saved-panel') : el('.saved-panel');
+  const panel = st.container ? st.container.querySelector('.saved-panel') : elMain('.saved-panel');
   if (!panel) return;
 
   if (!st.relation.saved) st.relation.saved = [];
@@ -27030,6 +27099,10 @@ function initSavedView(st = state) {
   }
 
   renderSavedViewsList(st);
+
+  panel.querySelectorAll('.saved-scope-radio').forEach(radio => {
+    radio.addEventListener('change', () => renderSavedViewsList(st));
+  });
 }
 
 function createSavedSnapshot(st, type) {
@@ -27116,10 +27189,22 @@ function deleteSavedView(st, name) {
 }
 
 function renderSavedViewsList(st) {
-  const container = st.container ? st.container.querySelector('.saved-views-list') : el('.saved-views-list');
+  const container = st.container ? st.container.querySelector('.saved-views-list') : elMain('.saved-views-list');
   if (!container) return;
 
-  const saved = st.relation.saved || [];
+  const allSaved = st.relation.saved || [];
+  
+  const savedPanel = container.closest('.saved-panel');
+  const scopeRadio = savedPanel ? savedPanel.querySelector('.saved-scope-radio:checked') : null;
+  const scopeFilter = scopeRadio ? scopeRadio.value : 'everyone';
+  const currentUser = window.currentUser || '';
+  let saved;
+  if (scopeFilter === 'you') {
+    saved = allSaved.filter(s => s.scope === 'you' && s.user === currentUser);
+  } else {
+    saved = allSaved.filter(s => s.scope === 'everyone');
+  }
+  
   if (saved.length === 0) {
     container.innerHTML = '<p class="saved-empty-msg">' + t('relation.saved.no_saved_views') + '</p>';
     return;

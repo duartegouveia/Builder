@@ -1171,6 +1171,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.saved.type_records_label": { pt: "Registos", en: "Records", es: "Registros", fr: "Enregistrements", it: "Record", de: "Datensätze" },
   "relation.saved.type_both_label": { pt: "Todos", en: "All", es: "Todos", fr: "Tous", it: "Tutti", de: "Alle" },
   "relation.saved.type_log_label": { pt: "Log", en: "Log", es: "Log", fr: "Journal", it: "Log", de: "Protokoll" },
+  "relation.saved.saved_header": { pt: "Guardadas", en: "Saved", es: "Guardadas", fr: "Enregistrées", it: "Salvate", de: "Gespeichert" },
   "relation.saved.save_new_label": { pt: "Guardar Nova Vista", en: "Save New View", es: "Guardar Nueva Vista", fr: "Enregistrer Nouvelle Vue", it: "Salva Nuova Vista", de: "Neue Ansicht Speichern" },
   "relation.saved.select_at_least_one": { pt: "Selecione pelo menos uma opção (Formato, Registos ou Log).", en: "Select at least one option (Format, Records or Log).", es: "Seleccione al menos una opción (Formato, Registros o Log).", fr: "Sélectionnez au moins une option (Format, Enregistrements ou Journal).", it: "Seleziona almeno un'opzione (Formato, Record o Log).", de: "Wählen Sie mindestens eine Option (Format, Datensätze oder Protokoll)." },
   "relation.saved.scope_you_label": { pt: "Para Ti", en: "For You", es: "Para Ti", fr: "Pour Toi", it: "Per Te", de: "Für Dich" },
