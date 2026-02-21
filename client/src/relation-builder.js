@@ -27061,16 +27061,20 @@ function initSavedView(st = state) {
 
   const updateSaveBtnState = () => {
     const anyChecked = (chkFormat && chkFormat.checked) || (chkRecords && chkRecords.checked) || (chkLog && chkLog.checked);
+    const hasName = nameInput && nameInput.value.trim().length > 0;
+    const canSave = anyChecked && hasName;
     const btn = panel.querySelector('.btn-save-view');
     if (btn) {
-      btn.disabled = !anyChecked;
-      btn.style.opacity = anyChecked ? '' : '0.5';
-      btn.style.pointerEvents = anyChecked ? '' : 'none';
+      btn.disabled = !canSave;
+      btn.style.opacity = canSave ? '' : '0.5';
+      btn.style.pointerEvents = canSave ? '' : 'none';
     }
   };
   [chkFormat, chkRecords, chkLog].forEach(chk => {
     if (chk) chk.addEventListener('change', updateSaveBtnState);
   });
+  if (nameInput) nameInput.addEventListener('input', updateSaveBtnState);
+  updateSaveBtnState();
 
   if (saveBtn) {
     const newBtn = saveBtn.cloneNode(true);
@@ -27116,6 +27120,7 @@ function initSavedView(st = state) {
       const matchingRadio = panel.querySelector(`.saved-scope-radio[value="${savedScope}"]`);
       if (matchingRadio) matchingRadio.checked = true;
       renderSavedViewsList(st);
+      updateSaveBtnState();
       showToast(t('relation.toast.view_saved'), 'success');
     });
   }
