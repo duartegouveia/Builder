@@ -1,0 +1,25 @@
+Vamos agora focar na vista Relation.
+
+Esta lista de tipos está a ser implementada com uma relation?
+É que está a fazer-me falta as operações normais da relation, como a multipágina, as chamadas às operações, etc. Se não é uma relation pode passar a ser?
+
+Na lista de opções de um tipo de coluna, a lista está demasiado grande, estamos a precisar de usar um accordion,que deve abrir na secção correspondente ao tipo de coluna atual.
+
+O botão "Nova Coluna", deve existir, quer no topo, quer no fundo da lista de colunas. Ao criar uma nova coluna o scroll deve deslocar-se para a posição do novo elemento criado.
+
+Não faz sentido estar a pedir o nome da coluna numa dialog à parte, quando todos os dados da coluna são igualmente importantes.
+O nome da coluna deve poder ser editado inline, o que não pode deixar é ter duas colunas com o mesmo nome, mas isso pode ser resolvido ao sair do compo, acrescentando um _ ao nome introduzido que está duplicado.
+
+Está a fazer-me falta a possibilidade de reordenar as colunas com drag&drop.
+
+Numa linha seleccionada que está em modo edição, todos os campos devem estar visualmente alinhados pelo middle. A checkbox está ligeiramente acima.
+No caso da checkbox, que não é o caso normal, também deve estar alinhado ao centro, quando o normal é à esquerda.
+Estas opções deviam aplicar-se também para todas as relations em modo edit.
+
+Na lista de Tipo, nos que são att, faz-me confusão as setas -> com um nome à frente. Essa informação é relevante para implementação, mas para definição da estrutura não me parece necessário.
+
+Nos tipo att que começam por multi_, não faz sentido. Esses mesmos tipos devem existir sem multi_. Se por acaso o utilizador quiser acrescentar a opção multi, então faz clique na respetiva checkbox.
+
+Quando uma relation está em modo edit, falta um lugar mais claro para fazer o duploclique que faz abrir a respetiva operação predefinida.
+Pode ser que se a vista passar a ser a da relation passe a ser mais claro.
+Quando se faz um duploclique e o painel é aberto em "bottom" faz falta reposicional o scroll. 

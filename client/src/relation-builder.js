@@ -18529,19 +18529,39 @@ function initPivotConfig(st = state) {
   const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
   if (!pivotView) return;
   
-  // Check for empty items
+  const noDataMsg = pivotView.querySelector('.pivot-no-data-msg');
   const pivotContainer = pivotView.querySelector('.pivot-table-container');
-  if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
-    if (pivotContainer) {
-      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.pivot.no_data') + '</p>';
-    }
-    return;
-  }
-  
-  const cols = getCategoricalOrNumericColumns(st);
+  const hasData = st.relation && st.relation.items && st.relation.items.length > 0;
   
   const rowSelect = pivotView.querySelector('.pivot-rows');
   const colSelect = pivotView.querySelector('.pivot-cols');
+  const generateBtn = pivotView.querySelector('.btn-generate-pivot');
+  const addValueBtn = pivotView.querySelector('.btn-add-pivot-value');
+  
+  if (noDataMsg) {
+    if (!hasData) {
+      noDataMsg.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.pivot.no_data') + '</p>';
+      noDataMsg.style.display = '';
+    } else {
+      noDataMsg.style.display = 'none';
+    }
+  }
+  
+  if (!hasData) {
+    if (rowSelect) rowSelect.disabled = true;
+    if (colSelect) colSelect.disabled = true;
+    if (generateBtn) generateBtn.disabled = true;
+    if (addValueBtn) addValueBtn.disabled = true;
+    if (pivotContainer) pivotContainer.innerHTML = '';
+    return;
+  }
+  
+  if (rowSelect) rowSelect.disabled = false;
+  if (colSelect) colSelect.disabled = false;
+  if (generateBtn) generateBtn.disabled = false;
+  if (addValueBtn) addValueBtn.disabled = false;
+  
+  const cols = getCategoricalOrNumericColumns(st);
   
   if (!rowSelect || !colSelect) return;
   
@@ -18557,7 +18577,6 @@ function initPivotConfig(st = state) {
   renderPivotValuesConfig(st);
   
   // Add event listeners for Generate Pivot button
-  const generateBtn = pivotView.querySelector('.btn-generate-pivot');
   if (generateBtn) {
     const newBtn = generateBtn.cloneNode(true);
     generateBtn.parentNode.replaceChild(newBtn, generateBtn);
@@ -18565,7 +18584,6 @@ function initPivotConfig(st = state) {
   }
   
   // Add event listener for Add Value button
-  const addValueBtn = pivotView.querySelector('.btn-add-pivot-value');
   if (addValueBtn) {
     const newBtn = addValueBtn.cloneNode(true);
     addValueBtn.parentNode.replaceChild(newBtn, addValueBtn);
@@ -18896,11 +18914,7 @@ function computePivotData(st = state) {
 
 function generatePivotTable(st = state) {
   if (!st.relation || !st.relation.items || st.relation.items.length === 0) {
-    const pivotView = st.container ? st.container.querySelector('.view-pivot') : el('.view-pivot');
-    const pivotContainer = pivotView?.querySelector('.pivot-table-container');
-    if (pivotContainer) {
-      pivotContainer.innerHTML = '<p class="text-muted-foreground text-center py-8">' + t('relation.pivot.no_data') + '</p>';
-    }
+    initPivotConfig(st);
     return;
   }
 
@@ -23690,6 +23704,7 @@ function initRelationInstance(container, relationData, options = {}) {
     </div>
     
     <div class="view-pivot view-content" style="display: none;">
+      <div class="pivot-no-data-msg" style="display:none;"></div>
       <div class="pivot-config">
         <div class="pivot-config-row">
           <label data-i18n="relation.pivot.rows">${t('relation.pivot.rows')}</label>

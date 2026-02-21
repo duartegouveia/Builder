@@ -424,7 +424,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.pivot.chart_line": { pt: "Linha", en: "Line", es: "Línea", fr: "Ligne", it: "Linea", de: "Linie" },
   "relation.pivot.chart_area": { pt: "Área", en: "Area", es: "Área", fr: "Aire", it: "Area", de: "Fläche" },
   "relation.pivot.chart_pie": { pt: "Circular", en: "Pie", es: "Circular", fr: "Camembert", it: "Torta", de: "Kreis" },
-  "relation.pivot.no_data": { pt: "Não existem dados para gerar uma tabela pivot.", en: "No data available to generate a pivot table.", es: "No hay datos para generar una tabla pivot.", fr: "Aucune donnée disponible pour générer un tableau croisé.", it: "Nessun dato disponibile per generare una tabella pivot.", de: "Keine Daten verfügbar, um eine Pivot-Tabelle zu erstellen." },
+  "relation.pivot.no_data": { pt: "Não existem atualmente dados para gerar uma tabela/gráfico pivot.", en: "There is currently no data to generate a pivot table/chart.", es: "Actualmente no hay datos para generar una tabla/gráfico pivot.", fr: "Il n'y a actuellement aucune donnée pour générer un tableau/graphique croisé.", it: "Attualmente non ci sono dati per generare una tabella/grafico pivot.", de: "Derzeit sind keine Daten vorhanden, um eine Pivot-Tabelle/Diagramm zu erstellen." },
   "relation.pivot.select_dimension": { pt: "Selecione pelo menos uma dimensão (Linhas ou Colunas)", en: "Please select at least one dimension (Rows or Columns)", es: "Seleccione al menos una dimensión (Filas o Columnas)", fr: "Veuillez sélectionner au moins une dimension (Lignes ou Colonnes)", it: "Seleziona almeno una dimensione (Righe o Colonne)", de: "Bitte wählen Sie mindestens eine Dimension (Zeilen oder Spalten)" },
 
   // ─── ANALYSIS VIEW ────────────────────────────────────────
