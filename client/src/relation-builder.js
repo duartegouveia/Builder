@@ -26116,12 +26116,14 @@ function renderStructure(st = state) {
 
   function applyRowChanges(rowIdx) {
     const rowChanges = pendingChanges[rowIdx];
-    if (!rowChanges) { editingIdx = null; render(); return; }
+    if (!rowChanges) { editingIdx = null; detailIdx = null; detailSnapshot = null; render(); return; }
     const singlePending = { [rowIdx]: rowChanges };
     applyAllStructureChanges(st, structureRows, singlePending);
     delete pendingChanges[rowIdx];
     structureRows = buildStructureColumnRows(st);
     editingIdx = null;
+    detailIdx = null;
+    detailSnapshot = null;
     render();
     renderTable(st);
     updateJsonOutput(st);
@@ -26444,12 +26446,14 @@ function renderStructure(st = state) {
           e.stopPropagation();
           delete pendingChanges[idx];
           editingIdx = null;
+          detailIdx = null;
+          detailSnapshot = null;
           render();
         });
         const detailRowBtn = document.createElement('button');
-        detailRowBtn.className = 'structure-row-detail';
+        detailRowBtn.className = 'structure-row-detail' + (detailIdx === idx ? ' open' : '');
         detailRowBtn.title = t('relation.structure.open_detail') || 'Detail';
-        detailRowBtn.textContent = '▼';
+        detailRowBtn.textContent = detailIdx === idx ? '▼' : '▶';
         detailRowBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           if (detailIdx === idx) {
@@ -26500,9 +26504,9 @@ function renderStructure(st = state) {
         const tdActions2 = document.createElement('td');
         tdActions2.className = 'structure-row-actions';
         const detailRowBtn2 = document.createElement('button');
-        detailRowBtn2.className = 'structure-row-detail';
+        detailRowBtn2.className = 'structure-row-detail' + (detailIdx === idx ? ' open' : '');
         detailRowBtn2.title = t('relation.structure.open_detail') || 'Detail';
-        detailRowBtn2.textContent = '▼';
+        detailRowBtn2.textContent = detailIdx === idx ? '▼' : '▶';
         detailRowBtn2.addEventListener('click', (e) => {
           e.stopPropagation();
           editingIdx = idx;
