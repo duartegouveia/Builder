@@ -8530,6 +8530,14 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
 
+    if (type === 'html') {
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly html-rendered-value';
+      span.innerHTML = value || '—';
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
     const span = document.createElement('span');
     span.className = 'relation-cell-readonly';
     if (type === 'textarea') {
@@ -16610,6 +16618,10 @@ function formatValueForViewDisplay(value, type, st, colIdx) {
     return `<span class="number-value">${value}</span>`;
   }
   
+  if (type === 'html') {
+    return `<span class="html-rendered-value">${String(value)}</span>`;
+  }
+
   if (type === 'textarea') {
     return `<span class="multiline-value">${escapeHtml(String(value))}</span>`;
   }
@@ -17362,11 +17374,12 @@ function showRowViewDialog(st, rowIdx) {
   const row = st.relation.items[rowIdx];
   const title = t('relation.dialog.view_record');
   
-  const footerButtons = `
-    <button class="btn btn-outline btn-action" data-action="edit">${t('relation.dialog.edit_btn')}</button>
-    <button class="btn btn-outline btn-action" data-action="copy">${t('relation.dialog.copy_btn')}</button>
-    <button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">${t('relation.dialog.delete_btn')}</button>
-  `;
+  const lineOps = st.rel_options.general_line_options || [];
+  const footerParts = [];
+  if (lineOps.includes('Edit')) footerParts.push(`<button class="btn btn-outline btn-action" data-action="edit">${t('relation.dialog.edit_btn')}</button>`);
+  if (lineOps.includes('Copy')) footerParts.push(`<button class="btn btn-outline btn-action" data-action="copy">${t('relation.dialog.copy_btn')}</button>`);
+  if (lineOps.includes('Delete')) footerParts.push(`<button class="btn btn-outline btn-action btn-danger-outline" data-action="delete">${t('relation.dialog.delete_btn')}</button>`);
+  const footerButtons = footerParts.join('\n    ');
   
   showContentBasedOnMode(st, (container) => {
     container.innerHTML = generateRowFormattedContent(st, row, 'view');
