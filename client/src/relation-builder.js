@@ -24456,20 +24456,20 @@ function initRelationInstance(container, relationData, options = {}) {
           <div class="ai-section-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <label class="ai-section-label" data-i18n="relation.ai.saved_prompts" style="margin-bottom:0;">${t('relation.ai.saved_prompts')}</label>
             <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
-              <input type="radio" name="ai-prompts-scope-filter" value="everyone" class="ai-prompts-scope-radio" checked data-testid="radio-ai-prompts-everyone">
-              <span data-i18n="relation.ai.scope_everyone">${t('relation.ai.scope_everyone')}</span>
+              <input type="radio" name="ai-prompts-scope-filter-${instanceState.uid}" value="you" class="ai-prompts-scope-radio" checked data-testid="radio-ai-prompts-you">
+              <span data-i18n="relation.ai.scope_you">${t('relation.ai.scope_you')}</span>
             </label>
             <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
-              <input type="radio" name="ai-prompts-scope-filter" value="you" class="ai-prompts-scope-radio" data-testid="radio-ai-prompts-you">
-              <span data-i18n="relation.ai.scope_you">${t('relation.ai.scope_you')}</span>
+              <input type="radio" name="ai-prompts-scope-filter-${instanceState.uid}" value="everyone" class="ai-prompts-scope-radio" data-testid="radio-ai-prompts-everyone">
+              <span data-i18n="relation.ai.scope_everyone">${t('relation.ai.scope_everyone')}</span>
             </label>
           </div>
           <div class="ai-prompts-list"></div>
         </div>
         <div class="ai-input-section">
           <label class="ai-section-label">${t('relation.ai.new_question')}</label>
-          <div class="ai-voice-row">
-            <select class="voice-language pivot-select" title="${t('relation.ai.voice_lang_title')}">
+          <div class="ai-voice-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <select class="voice-language ai-inline-select" title="${t('relation.ai.voice_lang_title')}" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-primary);">
               <option value="pt-PT" selected>Português (PT)</option>
               <option value="pt-BR">Português (BR)</option>
               <option value="en-US">English (US)</option>
@@ -24490,16 +24490,9 @@ function initRelationInstance(container, relationData, options = {}) {
             <button class="btn-ai-voice btn btn-outline btn-sm" title="${t('relation.ai.voice_title')}">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
             </button>
-          </div>
-          <div class="ai-input-row">
-            <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}" data-i18n-placeholder="relation.ai.placeholder" data-testid="input-ai-question">
-            <button class="btn-ai-ask btn btn-primary btn-sm" data-testid="button-ai-ask">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-            </button>
-          </div>
-          <div class="ai-model-row" style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+            <div style="flex:1;"></div>
             <label style="font-size:11px;font-weight:600;color:var(--text-muted);">${t('relation.ai.model_label')}</label>
-            <select class="ai-model-select" data-testid="select-ai-model" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);">
+            <select class="ai-model-select" data-testid="select-ai-model" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-primary);">
               <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
               <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
               <option value="gpt-4.1">GPT-4.1</option>
@@ -24508,10 +24501,16 @@ function initRelationInstance(container, relationData, options = {}) {
               <option value="o4-mini">o4-mini</option>
             </select>
           </div>
-          <div class="ai-save-prompt-row">
-            <select class="ai-prompt-scope-select" data-testid="select-ai-prompt-scope">
-              <option value="everyone">${t('relation.ai.scope_everyone')}</option>
+          <div class="ai-input-row">
+            <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}" data-i18n-placeholder="relation.ai.placeholder" data-testid="input-ai-question">
+            <button class="btn-ai-ask btn btn-primary btn-sm" data-testid="button-ai-ask">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+          <div class="ai-save-prompt-row" style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+            <select class="ai-prompt-scope-select" data-testid="select-ai-prompt-scope" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-primary);">
               <option value="you">${t('relation.ai.scope_you')}</option>
+              <option value="everyone">${t('relation.ai.scope_everyone')}</option>
             </select>
             <button class="btn-ai-save-prompt btn btn-outline btn-sm" data-testid="button-ai-save-prompt">${t('relation.ai.save_prompt')}</button>
           </div>
@@ -24532,12 +24531,12 @@ function initRelationInstance(container, relationData, options = {}) {
         <div class="saved-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
           <label class="ai-section-label" data-i18n="relation.saved.saved_header" style="margin-bottom:0;">${t('relation.saved.saved_header')}</label>
           <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
-            <input type="radio" name="saved-scope-filter" value="everyone" class="saved-scope-radio" checked data-testid="radio-saved-everyone">
-            <span data-i18n="relation.saved.scope_everyone_label">${t('relation.saved.scope_everyone_label')}</span>
+            <input type="radio" name="saved-scope-filter-${instanceState.uid}" value="you" class="saved-scope-radio" checked data-testid="radio-saved-you">
+            <span data-i18n="relation.saved.scope_you_label">${t('relation.saved.scope_you_label')}</span>
           </label>
           <label class="radio-scope-label" style="font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;">
-            <input type="radio" name="saved-scope-filter" value="you" class="saved-scope-radio" data-testid="radio-saved-you">
-            <span data-i18n="relation.saved.scope_you_label">${t('relation.saved.scope_you_label')}</span>
+            <input type="radio" name="saved-scope-filter-${instanceState.uid}" value="everyone" class="saved-scope-radio" data-testid="radio-saved-everyone">
+            <span data-i18n="relation.saved.scope_everyone_label">${t('relation.saved.scope_everyone_label')}</span>
           </label>
         </div>
         <div class="saved-views-list"></div>
@@ -24545,8 +24544,8 @@ function initRelationInstance(container, relationData, options = {}) {
           <div class="saved-section-label" data-i18n="relation.saved.save_new_label">${t('relation.saved.save_new_label')}</div>
           <div class="saved-form-row">
             <input type="text" class="saved-name-input saved-name-input-sm" placeholder="${t('relation.saved.name_placeholder')}" maxlength="80" />
-            <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-format" checked /> ${t('relation.saved.type_format')}</label>
             <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-records" checked /> ${t('relation.saved.type_records')}</label>
+            <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-format" checked /> ${t('relation.saved.type_format')}</label>
             <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-log" checked /> ${t('relation.saved.type_log')}</label>
             <select class="saved-scope-select">
               <option value="you">${t('relation.saved.scope_you')}</option>
@@ -27053,6 +27052,19 @@ function initSavedView(st = state) {
   const scopeSelect = panel.querySelector('.saved-scope-select');
   const saveBtn = panel.querySelector('.btn-save-view');
 
+  const updateSaveBtnState = () => {
+    const anyChecked = (chkFormat && chkFormat.checked) || (chkRecords && chkRecords.checked) || (chkLog && chkLog.checked);
+    const btn = panel.querySelector('.btn-save-view');
+    if (btn) {
+      btn.disabled = !anyChecked;
+      btn.style.opacity = anyChecked ? '' : '0.5';
+      btn.style.pointerEvents = anyChecked ? '' : 'none';
+    }
+  };
+  [chkFormat, chkRecords, chkLog].forEach(chk => {
+    if (chk) chk.addEventListener('change', updateSaveBtnState);
+  });
+
   if (saveBtn) {
     const newBtn = saveBtn.cloneNode(true);
     saveBtn.parentNode.replaceChild(newBtn, saveBtn);
@@ -27093,6 +27105,9 @@ function initSavedView(st = state) {
       if (scope === 'you') entry.user = window.currentUser || '';
       st.relation.saved.push(entry);
       nameInput.value = '';
+      const savedScope = (scope === 'you') ? 'you' : 'everyone';
+      const matchingRadio = panel.querySelector(`.saved-scope-radio[value="${savedScope}"]`);
+      if (matchingRadio) matchingRadio.checked = true;
       renderSavedViewsList(st);
       showToast(t('relation.toast.view_saved'), 'success');
     });

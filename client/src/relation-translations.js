@@ -394,7 +394,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.assoc.select_from": { pt: "Selecionar de {name} ({count} registos)", en: "Select from {name} ({count} records)", es: "Seleccionar de {name} ({count} registros)", fr: "Sélectionner dans {name} ({count} enregistrements)", it: "Seleziona da {name} ({count} record)", de: "Auswählen aus {name} ({count} Datensätze)" },
 
   // ─── SAVED VIEWS ──────────────────────────────────────────
-  "relation.saved.empty_msg": { pt: "Sem vistas guardadas. Guarda uma configuração para a aceder aqui.", en: "No saved views. Save a configuration to access it here.", es: "Sin vistas guardadas. Guarda una configuración para acceder aquí.", fr: "Aucune vue enregistrée. Enregistrez une configuration pour y accéder ici.", it: "Nessuna vista salvata. Salva una configurazione per accedervi qui.", de: "Keine gespeicherten Ansichten. Speichern Sie eine Konfiguration, um hier darauf zuzugreifen." },
+  "relation.saved.empty_msg": { pt: "Sem configurações guardadas.", en: "No saved configurations.", es: "Sin configuraciones guardadas.", fr: "Aucune configuration enregistrée.", it: "Nessuna configurazione salvata.", de: "Keine gespeicherten Konfigurationen." },
   "relation.saved.type_format": { pt: "Formato", en: "Format", es: "Formato", fr: "Format", it: "Formato", de: "Format" },
   "relation.saved.type_records": { pt: "Registos", en: "Records", es: "Registros", fr: "Enregistrements", it: "Record", de: "Datensätze" },
   "relation.saved.type_all": { pt: "Todos", en: "All", es: "Todos", fr: "Tous", it: "Tutti", de: "Alle" },
@@ -944,7 +944,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.cards.no_data_cards": { pt: "Não existem dados para mostrar na vista de cards.", en: "No data to display in the cards view.", es: "No hay datos para mostrar en la vista de tarjetas.", fr: "Aucune donnée à afficher dans la vue cartes.", it: "Nessun dato da visualizzare nella vista schede.", de: "Keine Daten in der Kartenansicht anzuzeigen." },
 
   // Saved views
-  "relation.saved.no_views": { pt: "Sem vistas guardadas. Guarda uma configuração para a aceder aqui.", en: "No saved views. Save a configuration to access it here.", es: "Sin vistas guardadas. Guarda una configuración para acceder aquí.", fr: "Aucune vue enregistrée. Enregistrez une configuration pour y accéder ici.", it: "Nessuna vista salvata. Salva una configurazione per accedervi qui.", de: "Keine gespeicherten Ansichten. Speichern Sie eine Konfiguration, um hier darauf zuzugreifen." },
+  "relation.saved.no_views": { pt: "Sem configurações guardadas.", en: "No saved configurations.", es: "Sin configuraciones guardadas.", fr: "Aucune configuration enregistrée.", it: "Nessuna configurazione salvata.", de: "Keine gespeicherten Konfigurationen." },
   "relation.saved.view_in_dev": { pt: "Vista \"{view}\" - funcionalidade completa em desenvolvimento.", en: "View \"{view}\" - full functionality in development.", es: "Vista \"{view}\" - funcionalidad completa en desarrollo.", fr: "Vue \"{view}\" - fonctionnalité complète en développement.", it: "Vista \"{view}\" - funzionalità completa in sviluppo.", de: "Ansicht \"{view}\" - vollständige Funktionalität in Entwicklung." },
 
   // Table display
@@ -1172,7 +1172,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.saved.type_both_label": { pt: "Todos", en: "All", es: "Todos", fr: "Tous", it: "Tutti", de: "Alle" },
   "relation.saved.type_log_label": { pt: "Log", en: "Log", es: "Log", fr: "Journal", it: "Log", de: "Protokoll" },
   "relation.saved.saved_header": { pt: "Guardadas", en: "Saved", es: "Guardadas", fr: "Enregistrées", it: "Salvate", de: "Gespeichert" },
-  "relation.saved.save_new_label": { pt: "Guardar Nova Vista", en: "Save New View", es: "Guardar Nueva Vista", fr: "Enregistrer Nouvelle Vue", it: "Salva Nuova Vista", de: "Neue Ansicht Speichern" },
+  "relation.saved.save_new_label": { pt: "Guardar Nova Configuração", en: "Save New Configuration", es: "Guardar Nueva Configuración", fr: "Enregistrer Nouvelle Configuration", it: "Salva Nuova Configurazione", de: "Neue Konfiguration Speichern" },
   "relation.saved.select_at_least_one": { pt: "Selecione pelo menos uma opção (Formato, Registos ou Log).", en: "Select at least one option (Format, Records or Log).", es: "Seleccione al menos una opción (Formato, Registros o Log).", fr: "Sélectionnez au moins une option (Format, Enregistrements ou Journal).", it: "Seleziona almeno un'opzione (Formato, Record o Log).", de: "Wählen Sie mindestens eine Option (Format, Datensätze oder Protokoll)." },
   "relation.saved.scope_you_label": { pt: "Para Ti", en: "For You", es: "Para Ti", fr: "Pour Toi", it: "Per Te", de: "Für Dich" },
   "relation.saved.scope_everyone_label": { pt: "Para Todos", en: "For Everyone", es: "Para Todos", fr: "Pour Tous", it: "Per Tutti", de: "Für Alle" },
@@ -1180,7 +1180,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.saved.restore_btn": { pt: "Restaurar", en: "Restore", es: "Restaurar", fr: "Restaurer", it: "Ripristina", de: "Wiederherstellen" },
   "relation.saved.delete_btn": { pt: "Eliminar", en: "Delete", es: "Eliminar", fr: "Supprimer", it: "Elimina", de: "Löschen" },
   "relation.saved.view_exists_confirm": { pt: "A vista \"{name}\" já existe. Substituir?", en: "View \"{name}\" already exists. Replace?", es: "La vista \"{name}\" ya existe. ¿Reemplazar?", fr: "La vue \"{name}\" existe déjà. Remplacer ?", it: "La vista \"{name}\" esiste già. Sostituire?", de: "Die Ansicht \"{name}\" existiert bereits. Ersetzen?" },
-  "relation.saved.no_saved_views": { pt: "Sem vistas guardadas. Guarda uma configuração para a aceder aqui.", en: "No saved views. Save a configuration to access it here.", es: "Sin vistas guardadas. Guarda una configuración para acceder aquí.", fr: "Aucune vue sauvegardée. Enregistrez une configuration pour y accéder ici.", it: "Nessuna vista salvata. Salva una configurazione per accedervi qui.", de: "Keine gespeicherten Ansichten. Speichern Sie eine Konfiguration, um hier darauf zuzugreifen." },
+  "relation.saved.no_saved_views": { pt: "Sem configurações guardadas.", en: "No saved configurations.", es: "Sin configuraciones guardadas.", fr: "Aucune configuration enregistrée.", it: "Nessuna configurazione salvata.", de: "Keine gespeicherten Konfigurationen." },
 
   // ─── CARDS VIEW ────────────────────────────────────────────
   "relation.cards.no_data": { pt: "Não existem dados para mostrar na vista de cards.", en: "No data available to display in the cards view.", es: "No hay datos para mostrar en la vista de tarjetas.", fr: "Aucune donnée à afficher dans la vue cartes.", it: "Nessun dato disponibile da mostrare nella vista schede.", de: "Keine Daten zum Anzeigen in der Kartenansicht verfügbar." },
