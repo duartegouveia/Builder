@@ -12178,8 +12178,8 @@ function renderPagination(st = state) {
 function syncFooterColumnWidths(mainTable, footerTable) {
   // Wait for DOM to render, then sync widths
   requestAnimationFrame(() => {
-    // Select only header row th cells, not parent row (relation-parent-row) cells
-    const headerRow = mainTable.querySelector('thead tr:not(.relation-parent-row)');
+    // Select the actual header row (last tr in thead), skipping breadcrumb and parent rows
+    const headerRow = mainTable.querySelector('thead tr:last-child');
     const mainCells = headerRow ? headerRow.querySelectorAll('th') : [];
     const footerCells = footerTable.querySelectorAll('tfoot td');
     
