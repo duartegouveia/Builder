@@ -37,7 +37,7 @@ The Relation Builder provides an advanced data table interface with core functio
 - **State Management**: Centralized `relationsRegistry` with isolated, serializable UI state per instance, supporting persistence.
 - **Table Features**: Includes pagination, row selection, multi-column sorting, advanced filtering, conditional formatting, binning, and per-column statistics.
 - **Grouping and Nesting**: Supports column grouping, infinite relation nesting, and complex data hierarchies.
-- **AI Assistant**: Provides AI-powered data analysis and natural language queries via Replit AI Integrations.
+- **AI Assistant**: Provides AI-powered data analysis and natural language queries via multi-provider AI integration. Backend routes to OpenAI (direct) or OpenRouter (Anthropic, Google, Meta, DeepSeek, Mistral, Qwen, xAI) based on model selection. Models fetched dynamically from `/api/ai/models` with 1-hour server cache. Frontend model selector uses `<optgroup>` by company, persists selection in `localStorage` key `relation_ai_model`.
 - **View Tabs**: Offers Table, Cards, Pivot (with integrated charting and regression analysis), Analysis, AI, and Saved views.
 - **Data Operations**: Features include export to file (CSV, Excel, XML, HTML, PDF), import from file (CSV, TSV, JSON, XML, HTML, Excel XML) with intelligent column mapping, and an integrity check.
 - **Extended Column Kinds**: Supports specialized input types like password, email, tel, url, search, color, radio, and file (with drag-drop upload and image gallery).
