@@ -10178,6 +10178,10 @@ function handleAlwaysVisibleAction(st, action) {
         const arrow = jsonSec.querySelector('.json-toggle-arrow');
         if (body) body.style.display = 'block';
         if (arrow) arrow.innerHTML = '&#9660;';
+        setTimeout(() => jsonSec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      } else {
+        const container = getRelationContainer(st);
+        if (container) setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
       }
     }
     return;
