@@ -22814,7 +22814,7 @@ function runClustering(st = state) {
   
   const cols = [];
   st.columnTypes.forEach((type, idx) => {
-    if (['boolean', 'string', 'select', 'int', 'float'].includes(type)) {
+    if (['boolean', 'string', 'select', 'int', 'float', 'range'].includes(type)) {
       cols.push(idx);
     }
   });
@@ -22829,9 +22829,12 @@ function runClustering(st = state) {
     return cols.map(colIdx => {
       const val = row[colIdx];
       const type = st.columnTypes[colIdx];
-      if (val === null) return 0;
+      if (val == null) return 0;
       if (type === 'boolean') return val ? 1 : 0;
-      if (type === 'int' || type === 'float' || type === 'range') return val;
+      if (type === 'int' || type === 'float' || type === 'range') {
+        const num = Number(val);
+        return isFinite(num) ? num : 0;
+      }
       if (type === 'string' || type === 'select') {
         let hash = 0;
         const str = String(val);
@@ -22852,6 +22855,7 @@ function runClustering(st = state) {
     let mean = 0;
     for (let r = 0; r < nRows; r++) mean += data[r][c];
     mean /= nRows;
+    if (!isFinite(mean)) mean = 0;
     
     let variance = 0;
     for (let r = 0; r < nRows; r++) variance += (data[r][c] - mean) ** 2;
@@ -22860,6 +22864,7 @@ function runClustering(st = state) {
     
     for (let r = 0; r < nRows; r++) {
       data[r][c] = (data[r][c] - mean) / std;
+      if (!isFinite(data[r][c])) data[r][c] = 0;
     }
   }
   
@@ -22883,6 +22888,11 @@ function runClustering(st = state) {
     const width = canvas.width;
     const height = canvas.height;
     const padding = 40;
+    
+    for (let i = 0; i < result.length; i++) {
+      if (!isFinite(result[i][0])) result[i][0] = Math.random() * 2 - 1;
+      if (!isFinite(result[i][1])) result[i][1] = Math.random() * 2 - 1;
+    }
     
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     result.forEach(p => {
@@ -23194,7 +23204,9 @@ function tSNE(X, options = {}) {
         gains[i][d] = Math.max(gains[i][d], 0.01);
         
         Ymom[i][d] = momentum * Ymom[i][d] - learningRate * gains[i][d] * grads[i][d];
+        if (!isFinite(Ymom[i][d])) Ymom[i][d] = 0;
         Y[i][d] += Ymom[i][d];
+        if (!isFinite(Y[i][d])) Y[i][d] = Math.random() * 0.0001;
         
         prevGrads[i][d] = grads[i][d];
       }
