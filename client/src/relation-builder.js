@@ -25822,6 +25822,271 @@ function buildKindSelect(currentKind, onChange) {
   return select;
 }
 
+function buildRelOptionsPanel(st, reRender) {
+  const panel = document.createElement('div');
+  panel.className = 'rel-options-panel';
+
+  const header = document.createElement('div');
+  header.className = 'rel-options-header';
+  header.innerHTML = '<span class="rel-options-title">' + escapeHtml(t('relation.structure.rel_options_title')) + '</span><span class="rel-options-toggle-icon">▶</span>';
+  panel.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'rel-options-body';
+  body.style.display = 'none';
+  panel.appendChild(body);
+
+  header.addEventListener('click', () => {
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : '';
+    header.querySelector('.rel-options-toggle-icon').textContent = open ? '▶' : '▼';
+  });
+
+  const ro = st.rel_options;
+  const dro = DEFAULT_REL_OPTIONS;
+
+  function isDefault(key) {
+    const cur = ro[key];
+    const def = dro[key];
+    if (Array.isArray(cur) && Array.isArray(def)) return JSON.stringify(cur) === JSON.stringify(def);
+    return cur === def;
+  }
+
+  function defaultTag() {
+    const sp = document.createElement('span');
+    sp.className = 'rel-options-default-tag';
+    sp.textContent = t('relation.structure.ro_default_tag');
+    return sp;
+  }
+
+  function makeSection(titleKey) {
+    const sec = document.createElement('div');
+    sec.className = 'rel-options-section';
+    const h = document.createElement('div');
+    h.className = 'rel-options-section-title';
+    h.textContent = t(titleKey);
+    sec.appendChild(h);
+    return sec;
+  }
+
+  function makeToggleRow(labelKey, optKey) {
+    const row = document.createElement('label');
+    row.className = 'rel-options-row rel-options-toggle-row';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = !!ro[optKey];
+    chk.addEventListener('change', () => {
+      ro[optKey] = chk.checked;
+      st.relation.rel_options[optKey] = chk.checked;
+      tag.style.display = isDefault(optKey) ? '' : 'none';
+      renderTable(st);
+      updateJsonOutput(st);
+    });
+    row.appendChild(chk);
+    const lbl = document.createElement('span');
+    lbl.textContent = t(labelKey);
+    row.appendChild(lbl);
+    const tag = defaultTag();
+    if (!isDefault(optKey)) tag.style.display = 'none';
+    row.appendChild(tag);
+    return row;
+  }
+
+  function makeTextRow(labelKey, optKey, placeholder) {
+    const row = document.createElement('div');
+    row.className = 'rel-options-row rel-options-text-row';
+    const lbl = document.createElement('label');
+    lbl.textContent = t(labelKey);
+    row.appendChild(lbl);
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'rel-options-input';
+    inp.value = ro[optKey] != null ? String(ro[optKey]) : '';
+    inp.placeholder = placeholder || '';
+    inp.addEventListener('change', () => {
+      ro[optKey] = inp.value || '';
+      st.relation.rel_options[optKey] = ro[optKey];
+      tag.style.display = isDefault(optKey) ? '' : 'none';
+      renderTable(st);
+      updateJsonOutput(st);
+    });
+    row.appendChild(inp);
+    const tag = defaultTag();
+    if (!isDefault(optKey)) tag.style.display = 'none';
+    row.appendChild(tag);
+    return row;
+  }
+
+  function makeNumberRow(labelKey, optKey, opts = {}) {
+    const row = document.createElement('div');
+    row.className = 'rel-options-row rel-options-text-row';
+    const lbl = document.createElement('label');
+    lbl.textContent = t(labelKey);
+    row.appendChild(lbl);
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.className = 'rel-options-input';
+    inp.value = ro[optKey] != null ? String(ro[optKey]) : '';
+    inp.placeholder = opts.placeholder || t('relation.structure.ro_unlimited');
+    if (opts.min !== undefined) inp.min = String(opts.min);
+    inp.addEventListener('change', () => {
+      const val = inp.value.trim();
+      ro[optKey] = val === '' ? (opts.nullable ? null : 0) : parseInt(val);
+      st.relation.rel_options[optKey] = ro[optKey];
+      tag.style.display = isDefault(optKey) ? '' : 'none';
+      updateJsonOutput(st);
+    });
+    row.appendChild(inp);
+    const tag = defaultTag();
+    if (!isDefault(optKey)) tag.style.display = 'none';
+    row.appendChild(tag);
+    return row;
+  }
+
+  function makeSelectRow(labelKey, optKey, options) {
+    const row = document.createElement('div');
+    row.className = 'rel-options-row rel-options-text-row';
+    const lbl = document.createElement('label');
+    lbl.textContent = t(labelKey);
+    row.appendChild(lbl);
+    const sel = document.createElement('select');
+    sel.className = 'rel-options-input';
+    options.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.value;
+      opt.textContent = o.label;
+      if (String(ro[optKey]) === String(o.value)) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', () => {
+      ro[optKey] = sel.value;
+      st.relation.rel_options[optKey] = sel.value;
+      tag.style.display = isDefault(optKey) ? '' : 'none';
+      renderTable(st);
+      updateJsonOutput(st);
+    });
+    row.appendChild(sel);
+    const tag = defaultTag();
+    if (!isDefault(optKey)) tag.style.display = 'none';
+    row.appendChild(tag);
+    return row;
+  }
+
+  function makeChecklistSection(titleKey, optKey, allItems) {
+    const sec = document.createElement('div');
+    sec.className = 'rel-options-section';
+    const h = document.createElement('div');
+    h.className = 'rel-options-section-title';
+    h.textContent = t(titleKey);
+    const tag = defaultTag();
+    if (!isDefault(optKey)) tag.style.display = 'none';
+    h.appendChild(tag);
+    sec.appendChild(h);
+
+    const grid = document.createElement('div');
+    grid.className = 'rel-options-checklist';
+    const current = ro[optKey] || [];
+
+    allItems.forEach(item => {
+      const lbl = document.createElement('label');
+      lbl.className = 'rel-options-chk-item';
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.checked = current.includes(item);
+      chk.addEventListener('change', () => {
+        if (chk.checked) {
+          if (!ro[optKey].includes(item)) ro[optKey].push(item);
+        } else {
+          ro[optKey] = ro[optKey].filter(v => v !== item);
+        }
+        st.relation.rel_options[optKey] = [...ro[optKey]];
+        tag.style.display = isDefault(optKey) ? '' : 'none';
+        renderTable(st);
+        updateJsonOutput(st);
+      });
+      lbl.appendChild(chk);
+      const sp = document.createElement('span');
+      sp.textContent = item;
+      lbl.appendChild(sp);
+      const inDefault = dro[optKey].includes(item);
+      if (inDefault) {
+        const dTag = document.createElement('span');
+        dTag.className = 'rel-options-item-default';
+        dTag.textContent = '●';
+        dTag.title = t('relation.structure.ro_default_tag');
+        lbl.appendChild(dTag);
+      }
+      grid.appendChild(lbl);
+    });
+
+    sec.appendChild(grid);
+    return sec;
+  }
+
+  const secGeneral = makeSection('relation.structure.ro_general');
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_editable', 'editable'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_show_multicheck', 'show_multicheck'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_show_natural_order', 'show_natural_order'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_show_id', 'show_id'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_show_column_kind', 'show_column_kind'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_show_stats', 'show_stats'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_label_field_top_down', 'label_field_top_down'));
+  secGeneral.appendChild(makeToggleRow('relation.structure.ro_kind_specific', 'kind_specific'));
+  body.appendChild(secGeneral);
+
+  const secBehavior = makeSection('relation.structure.ro_behavior_section');
+  secBehavior.appendChild(makeSelectRow('relation.structure.ro_single_item_mode', 'single_item_mode', [
+    { value: 'dialog', label: 'Dialog' },
+    { value: 'right', label: 'Right Panel' },
+    { value: 'inline', label: 'Inline' }
+  ]));
+  secBehavior.appendChild(makeSelectRow('relation.structure.ro_double_click', 'OnDoubleClickAction', [
+    { value: 'view', label: 'View' },
+    { value: 'edit', label: 'Edit' },
+    { value: 'none', label: 'None' }
+  ]));
+  body.appendChild(secBehavior);
+
+  const secCardinality = makeSection('relation.structure.ro_cardinality_section');
+  secCardinality.appendChild(makeNumberRow('relation.structure.ro_cardinality_min', 'cardinality_min', { min: 0 }));
+  secCardinality.appendChild(makeNumberRow('relation.structure.ro_cardinality_max', 'cardinality_max', { nullable: true }));
+  body.appendChild(secCardinality);
+
+  const secHierarchy = makeSection('relation.structure.ro_hierarchy_section');
+  secHierarchy.appendChild(makeToggleRow('relation.structure.ro_show_hierarchy', 'show_hierarchy'));
+  secHierarchy.appendChild(makeTextRow('relation.structure.ro_hierarchy_column', 'hierarchy_column', 'parent'));
+  secHierarchy.appendChild(makeTextRow('relation.structure.ro_hierarchy_show_column', 'hierarchy_show_column', ''));
+  secHierarchy.appendChild(makeTextRow('relation.structure.ro_hierarchy_root_value', 'hierarchy_root_value', ''));
+  secHierarchy.appendChild(makeTextRow('relation.structure.ro_hierarchy_initial_value', 'hierarchy_initial_value', ''));
+  body.appendChild(secHierarchy);
+
+  const secFilters = makeSection('relation.structure.ro_filters_section');
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_filter_comparison', 'show_filter_comparison'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_filter_criteria', 'show_filter_criteria'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_filter_topn', 'show_filter_topn'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_filter_outliers', 'show_filter_outliers'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_binning', 'show_binning'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_derived_columns', 'show_derived_columns'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_cartesian_product', 'show_cartesian_product'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_formatting', 'show_formatting'));
+  secFilters.appendChild(makeToggleRow('relation.structure.ro_show_groupby', 'show_groupby'));
+  body.appendChild(secFilters);
+
+  const allViewOptions = ['Table', 'Cards', 'Pivot', 'Analysis', 'AI', 'Saved', 'Structure'];
+  body.appendChild(makeChecklistSection('relation.structure.ro_view_options', 'general_view_options', allViewOptions));
+
+  const allAlwaysVisible = ['New', 'New Fast', 'Advanced Search', 'Remove Duplicates', 'Paper Form', 'Select One', 'Select Many', 'Choose Many', 'Import from File', 'Export to file', 'Integrity Check', 'Output State', 'Output State Full', 'Relation JSON'];
+  body.appendChild(makeChecklistSection('relation.structure.ro_always_visible', 'general_always_visible_options', allAlwaysVisible));
+
+  const allLineActions = ['View', 'Edit', 'Copy', 'New', 'New Fast', 'Delete', 'Paper Form'];
+  body.appendChild(makeChecklistSection('relation.structure.ro_line_actions', 'general_line_options', allLineActions));
+
+  const allMultiActions = ['Invert Page', 'Invert All', 'Remove Checked', 'Remove Unchecked', 'Multi View', 'Multi Edit', 'Multi Copy', 'Multi Delete', 'Group Edit', 'Merge'];
+  body.appendChild(makeChecklistSection('relation.structure.ro_multi_actions', 'general_multi_options', allMultiActions));
+
+  return panel;
+}
+
 function renderStructure(st = state) {
   const structurePanel = st.container ? st.container.querySelector('.structure-panel') : elMain('.structure-panel');
   if (!structurePanel) return;
@@ -26298,6 +26563,8 @@ function renderStructure(st = state) {
     newBtnBottom.addEventListener('click', addNewColumn);
     bottomToolbar.appendChild(newBtnBottom);
     structurePanel.appendChild(bottomToolbar);
+
+    structurePanel.appendChild(buildRelOptionsPanel(st, render));
 
     if (detailIdx !== null && detailIdx < structureRows.length) {
       const onPanelSave = () => {
