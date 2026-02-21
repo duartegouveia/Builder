@@ -27380,6 +27380,16 @@ function init() {
       loadRelationFromEntity(jsonData);
     });
   });
+
+  const _firstNavItem = document.querySelector('.nav-item');
+  if (_firstNavItem) {
+    const _firstSub = _firstNavItem.querySelector('.nav-dropdown-item');
+    if (_firstSub) {
+      const _tid = _firstSub.getAttribute('data-testid');
+      const _m = menuMapping.find(([id]) => id === _tid);
+      if (_m) loadRelationFromEntity(_m[1]);
+    }
+  }
   
   const ALL_ENTITY_JSONS = [
     PRODUCTS_JSON, CATEGORIES_JSON, STOCKS_JSON, PRICELISTS_JSON,
@@ -27733,7 +27743,10 @@ function setupResizeHandle() {
   
   document.addEventListener('touchend', endResize);
 
-  loadRelationFromEntity(PRODUCTS_JSON);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
