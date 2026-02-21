@@ -18277,7 +18277,7 @@ function switchView(viewName) {
   } else if (viewName === 'analysis') {
     renderAnalysis(state);
   } else if (viewName === 'ai') {
-    // AI view is always ready
+    renderAI(state);
   } else if (viewName === 'saved') {
     renderSaved(state);
   } else if (viewName === 'structure') {
@@ -23704,11 +23704,9 @@ function initRelationInstance(container, relationData, options = {}) {
     </div>
     
     <div class="view-pivot view-content" style="display: none;">
-      <div class="pivot-header-row">
-        <span class="analysis-help-badge pivot-help-badge" title="${t('relation.pivot.help_text')}" data-testid="button-pivot-help">ℹ</span>
-        <div class="pivot-help-panel" style="display: none;">
-          <p data-i18n="relation.pivot.help_text">${t('relation.pivot.help_text')}</p>
-        </div>
+      <span class="analysis-help-badge analysis-panel-help-badge pivot-help-badge" title="${t('relation.pivot.help_text')}" data-testid="button-pivot-help">ℹ</span>
+      <div class="pivot-help-panel" style="display: none;">
+        <p data-i18n="relation.pivot.help_text">${t('relation.pivot.help_text')}</p>
       </div>
       <div class="pivot-no-data-msg" style="display:none;"></div>
       <div class="pivot-config">
@@ -23769,56 +23767,66 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-pairwise active">
+        <span class="analysis-help-badge analysis-panel-help-badge" title="${t('relation.analysis.help_title') || 'Help'}" data-testid="button-analysis-help">ℹ</span>
         <div class="correlation-config">
           <div class="correlation-section">
             <div class="correlation-section-header" data-i18n="relation.analysis.single_pair">${t('relation.analysis.single_pair')}</div>
-            <div class="correlation-config-row">
-              <label data-i18n="relation.analysis.column_x">${t('relation.analysis.column_x')}</label>
-              <select class="corr-col-x pivot-select"></select>
-            </div>
-            <div class="correlation-config-row">
-              <label data-i18n="relation.analysis.column_y">${t('relation.analysis.column_y')}</label>
-              <select class="corr-col-y pivot-select"></select>
-            </div>
-            <div class="correlation-config-row">
-              <label data-i18n="relation.analysis.method">${t('relation.analysis.method')}</label>
-              <select class="corr-method pivot-select">
-                <option value="auto" data-i18n="relation.analysis.method_auto">${t('relation.analysis.method_auto')}</option>
-                <option value="pearson" data-i18n="relation.analysis.method_pearson">${t('relation.analysis.method_pearson')}</option>
-                <option value="spearman" data-i18n="relation.analysis.method_spearman">${t('relation.analysis.method_spearman')}</option>
-                <option value="kendall" data-i18n="relation.analysis.method_kendall">${t('relation.analysis.method_kendall')}</option>
-                <option value="pointbiserial" data-i18n="relation.analysis.method_pointbiserial">${t('relation.analysis.method_pointbiserial')}</option>
-                <option value="phi" data-i18n="relation.analysis.method_phi">${t('relation.analysis.method_phi')}</option>
-                <option value="cramers" data-i18n="relation.analysis.method_cramers">${t('relation.analysis.method_cramers')}</option>
-                <option value="eta" data-i18n="relation.analysis.method_eta">${t('relation.analysis.method_eta')}</option>
-                <option value="mutual_info" data-i18n="relation.analysis.method_mutual_info">${t('relation.analysis.method_mutual_info')}</option>
-                <option value="distance_corr" data-i18n="relation.analysis.method_distance_corr">${t('relation.analysis.method_distance_corr')}</option>
-                <option value="polyserial" data-i18n="relation.analysis.method_polyserial">${t('relation.analysis.method_polyserial')}</option>
-                <option value="polychoric" data-i18n="relation.analysis.method_polychoric">${t('relation.analysis.method_polychoric')}</option>
-                <option value="tetrachoric" data-i18n="relation.analysis.method_tetrachoric">${t('relation.analysis.method_tetrachoric')}</option>
-                <option value="biserial" data-i18n="relation.analysis.method_biserial">${t('relation.analysis.method_biserial')}</option>
-                <option value="rank_biserial" data-i18n="relation.analysis.method_rank_biserial">${t('relation.analysis.method_rank_biserial')}</option>
-                <option value="somers_d" data-i18n="relation.analysis.method_somers_d">${t('relation.analysis.method_somers_d')}</option>
-                <option value="gamma" data-i18n="relation.analysis.method_gamma">${t('relation.analysis.method_gamma')}</option>
-                <option value="lambda" data-i18n="relation.analysis.method_lambda">${t('relation.analysis.method_lambda')}</option>
-                <option value="tau_c" data-i18n="relation.analysis.method_tau_c">${t('relation.analysis.method_tau_c')}</option>
-                <option value="uncertainty" data-i18n="relation.analysis.method_uncertainty">${t('relation.analysis.method_uncertainty')}</option>
-                <option value="hoeffding" data-i18n="relation.analysis.method_hoeffding">${t('relation.analysis.method_hoeffding')}</option>
-                <option value="blomqvist" data-i18n="relation.analysis.method_blomqvist">${t('relation.analysis.method_blomqvist')}</option>
-                <option value="chatterjee" data-i18n="relation.analysis.method_chatterjee">${t('relation.analysis.method_chatterjee')}</option>
-                <option value="cosine_sim" data-i18n="relation.analysis.method_cosine">${t('relation.analysis.method_cosine')}</option>
-                <option value="jaccard" data-i18n="relation.analysis.method_jaccard">${t('relation.analysis.method_jaccard')}</option>
-              </select>
-            </div>
-            <div class="correlation-actions">
-              <button class="btn-calculate-corr btn btn-primary btn-sm" data-i18n="relation.analysis.calculate">${t('relation.analysis.calculate')}</button>
-              <span class="analysis-help-badge" title="${t('relation.analysis.help_title') || 'Help'}" data-testid="button-analysis-help">ℹ</span>
+            <div class="correlation-section-fields">
+              <div class="correlation-config-row">
+                <label data-i18n="relation.analysis.column_x">${t('relation.analysis.column_x')}</label>
+                <select class="corr-col-x pivot-select"></select>
+              </div>
+              <div class="correlation-config-row">
+                <label data-i18n="relation.analysis.column_y">${t('relation.analysis.column_y')}</label>
+                <select class="corr-col-y pivot-select"></select>
+              </div>
+              <div class="correlation-config-row">
+                <label data-i18n="relation.analysis.method">${t('relation.analysis.method')}</label>
+                <select class="corr-method pivot-select">
+                  <option value="auto" data-i18n="relation.analysis.method_auto">${t('relation.analysis.method_auto')}</option>
+                  <option value="pearson" data-i18n="relation.analysis.method_pearson">${t('relation.analysis.method_pearson')}</option>
+                  <option value="spearman" data-i18n="relation.analysis.method_spearman">${t('relation.analysis.method_spearman')}</option>
+                  <option value="kendall" data-i18n="relation.analysis.method_kendall">${t('relation.analysis.method_kendall')}</option>
+                  <option value="pointbiserial" data-i18n="relation.analysis.method_pointbiserial">${t('relation.analysis.method_pointbiserial')}</option>
+                  <option value="phi" data-i18n="relation.analysis.method_phi">${t('relation.analysis.method_phi')}</option>
+                  <option value="cramers" data-i18n="relation.analysis.method_cramers">${t('relation.analysis.method_cramers')}</option>
+                  <option value="eta" data-i18n="relation.analysis.method_eta">${t('relation.analysis.method_eta')}</option>
+                  <option value="mutual_info" data-i18n="relation.analysis.method_mutual_info">${t('relation.analysis.method_mutual_info')}</option>
+                  <option value="distance_corr" data-i18n="relation.analysis.method_distance_corr">${t('relation.analysis.method_distance_corr')}</option>
+                  <option value="polyserial" data-i18n="relation.analysis.method_polyserial">${t('relation.analysis.method_polyserial')}</option>
+                  <option value="polychoric" data-i18n="relation.analysis.method_polychoric">${t('relation.analysis.method_polychoric')}</option>
+                  <option value="tetrachoric" data-i18n="relation.analysis.method_tetrachoric">${t('relation.analysis.method_tetrachoric')}</option>
+                  <option value="biserial" data-i18n="relation.analysis.method_biserial">${t('relation.analysis.method_biserial')}</option>
+                  <option value="rank_biserial" data-i18n="relation.analysis.method_rank_biserial">${t('relation.analysis.method_rank_biserial')}</option>
+                  <option value="somers_d" data-i18n="relation.analysis.method_somers_d">${t('relation.analysis.method_somers_d')}</option>
+                  <option value="gamma" data-i18n="relation.analysis.method_gamma">${t('relation.analysis.method_gamma')}</option>
+                  <option value="lambda" data-i18n="relation.analysis.method_lambda">${t('relation.analysis.method_lambda')}</option>
+                  <option value="tau_c" data-i18n="relation.analysis.method_tau_c">${t('relation.analysis.method_tau_c')}</option>
+                  <option value="uncertainty" data-i18n="relation.analysis.method_uncertainty">${t('relation.analysis.method_uncertainty')}</option>
+                  <option value="hoeffding" data-i18n="relation.analysis.method_hoeffding">${t('relation.analysis.method_hoeffding')}</option>
+                  <option value="blomqvist" data-i18n="relation.analysis.method_blomqvist">${t('relation.analysis.method_blomqvist')}</option>
+                  <option value="chatterjee" data-i18n="relation.analysis.method_chatterjee">${t('relation.analysis.method_chatterjee')}</option>
+                  <option value="cosine_sim" data-i18n="relation.analysis.method_cosine">${t('relation.analysis.method_cosine')}</option>
+                  <option value="jaccard" data-i18n="relation.analysis.method_jaccard">${t('relation.analysis.method_jaccard')}</option>
+                </select>
+              </div>
+              <div class="correlation-config-row">
+                <label>&nbsp;</label>
+                <button class="btn-calculate-corr btn btn-primary btn-sm" data-i18n="relation.analysis.calculate">${t('relation.analysis.calculate')}</button>
+              </div>
             </div>
           </div>
           <div class="correlation-section">
             <div class="correlation-section-header" data-i18n="relation.analysis.analyze_all_header">${t('relation.analysis.analyze_all_header')}</div>
-            <div class="correlation-section-desc" data-i18n="relation.analysis.analyze_all_desc">${t('relation.analysis.analyze_all_desc')}</div>
-            <button class="btn-corr-all btn btn-primary btn-sm" data-i18n="relation.analysis.analyze_all">${t('relation.analysis.analyze_all')}</button>
+            <div class="correlation-section-fields">
+              <div class="correlation-config-row">
+                <span class="correlation-section-desc" data-i18n="relation.analysis.analyze_all_desc">${t('relation.analysis.analyze_all_desc')}</span>
+              </div>
+              <div class="correlation-config-row">
+                <label>&nbsp;</label>
+                <button class="btn-corr-all btn btn-primary btn-sm" data-i18n="relation.analysis.analyze_all">${t('relation.analysis.analyze_all')}</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="correlation-help" style="display: none;">
@@ -23859,11 +23867,9 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-matrix" style="display: none;">
-        <div class="analysis-subtab-header-row">
-          <span class="analysis-help-badge matrix-help-badge" title="${t('relation.analysis.matrix_help_text')}" data-testid="button-matrix-help">ℹ</span>
-          <div class="analysis-help-panel matrix-help-panel" style="display: none;">
-            <p data-i18n="relation.analysis.matrix_help_text">${t('relation.analysis.matrix_help_text')}</p>
-          </div>
+        <span class="analysis-help-badge analysis-panel-help-badge matrix-help-badge" title="${t('relation.analysis.matrix_help_text')}" data-testid="button-matrix-help">ℹ</span>
+        <div class="analysis-help-panel matrix-help-panel" style="display: none;">
+          <p data-i18n="relation.analysis.matrix_help_text">${t('relation.analysis.matrix_help_text')}</p>
         </div>
         <div class="matrix-config">
           <div class="matrix-config-row">
@@ -23887,11 +23893,9 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-clustering" style="display: none;">
-        <div class="analysis-subtab-header-row">
-          <span class="analysis-help-badge clustering-help-badge" title="${t('relation.analysis.clustering_help_text')}" data-testid="button-clustering-help">ℹ</span>
-          <div class="analysis-help-panel clustering-help-panel" style="display: none;">
-            <p data-i18n="relation.analysis.clustering_help_text">${t('relation.analysis.clustering_help_text')}</p>
-          </div>
+        <span class="analysis-help-badge analysis-panel-help-badge clustering-help-badge" title="${t('relation.analysis.clustering_help_text')}" data-testid="button-clustering-help">ℹ</span>
+        <div class="analysis-help-panel clustering-help-panel" style="display: none;">
+          <p data-i18n="relation.analysis.clustering_help_text">${t('relation.analysis.clustering_help_text')}</p>
         </div>
         <div class="diagram-config">
           <div class="diagram-config-row">
@@ -23919,11 +23923,9 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-multivariate" style="display: none;">
-        <div class="analysis-subtab-header-row">
-          <span class="analysis-help-badge multivariate-help-badge" title="${t('relation.analysis.multivariate_help_text')}" data-testid="button-multivariate-help">ℹ</span>
-          <div class="analysis-help-panel multivariate-help-panel" style="display: none;">
-            <p data-i18n="relation.analysis.multivariate_help_text">${t('relation.analysis.multivariate_help_text')}</p>
-          </div>
+        <span class="analysis-help-badge analysis-panel-help-badge multivariate-help-badge" title="${t('relation.analysis.multivariate_help_text')}" data-testid="button-multivariate-help">ℹ</span>
+        <div class="analysis-help-panel multivariate-help-panel" style="display: none;">
+          <p data-i18n="relation.analysis.multivariate_help_text">${t('relation.analysis.multivariate_help_text')}</p>
         </div>
         <div class="multivariate-config">
           <div class="multivariate-config-row">
@@ -23955,11 +23957,9 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-ai view-content" style="display: none;">
       <div class="ai-panel-inline">
-        <div class="ai-header-row">
-          <span class="analysis-help-badge ai-help-badge" title="${t('relation.ai.help_text')}" data-testid="button-ai-help">ℹ</span>
-          <div class="ai-help-panel" style="display: none;">
-            <p data-i18n="relation.ai.help_text">${t('relation.ai.help_text')}</p>
-          </div>
+        <span class="analysis-help-badge analysis-panel-help-badge ai-help-badge" title="${t('relation.ai.help_text')}" data-testid="button-ai-help">ℹ</span>
+        <div class="ai-help-panel" style="display: none;">
+          <p data-i18n="relation.ai.help_text">${t('relation.ai.help_text')}</p>
         </div>
         <div class="ai-saved-prompts-section">
           <label class="ai-section-label" data-i18n="relation.ai.saved_prompts">${t('relation.ai.saved_prompts')}</label>
@@ -24017,15 +24017,14 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-saved view-content" style="display: none;">
       <div class="saved-panel">
+        <div class="saved-views-list"></div>
         <div class="saved-form">
+          <div class="saved-section-label" data-i18n="relation.saved.save_new_label">${t('relation.saved.save_new_label')}</div>
           <div class="saved-form-row">
-            <input type="text" class="saved-name-input" placeholder="${t('relation.saved.name_placeholder')}" maxlength="80" />
-            <select class="saved-type-select">
-              <option value="format">${t('relation.saved.type_format')}</option>
-              <option value="records">${t('relation.saved.type_records')}</option>
-              <option value="log">${t('relation.saved.type_log')}</option>
-              <option value="both">${t('relation.saved.type_all')}</option>
-            </select>
+            <input type="text" class="saved-name-input saved-name-input-sm" placeholder="${t('relation.saved.name_placeholder')}" maxlength="80" />
+            <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-format" checked /> ${t('relation.saved.type_format')}</label>
+            <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-records" checked /> ${t('relation.saved.type_records')}</label>
+            <label class="saved-checkbox-label"><input type="checkbox" class="saved-chk-log" checked /> ${t('relation.saved.type_log')}</label>
             <select class="saved-scope-select">
               <option value="you">${t('relation.saved.scope_you')}</option>
               <option value="everyone">${t('relation.saved.scope_everyone')}</option>
@@ -24036,7 +24035,6 @@ function initRelationInstance(container, relationData, options = {}) {
             </button>
           </div>
         </div>
-        <div class="saved-views-list"></div>
       </div>
     </div>
     
@@ -25238,6 +25236,7 @@ function buildKindSelect(currentKind, onChange) {
   const grpAtt = document.createElement('optgroup');
   grpAtt.label = t('relation.structure.att_kinds');
   attKinds.forEach(k => {
+    if (k.startsWith('multi_')) return;
     const resolved = ATT_KIND_MAP[k];
     if (simpleKinds.includes(resolved) && k !== 'association') return;
     const opt = document.createElement('option');
@@ -25282,6 +25281,20 @@ function renderStructure(st = state) {
   let editingIdx = null;
   let pendingChanges = {};
   let detailIdx = null;
+
+  function applyRowChanges(rowIdx) {
+    const rowChanges = pendingChanges[rowIdx];
+    if (!rowChanges) { editingIdx = null; render(); return; }
+    const singlePending = { [rowIdx]: rowChanges };
+    applyAllStructureChanges(st, structureRows, singlePending);
+    delete pendingChanges[rowIdx];
+    structureRows = buildStructureColumnRows(st);
+    editingIdx = null;
+    render();
+    renderTable(st);
+    updateJsonOutput(st);
+    showToast(t('relation.toast.changes_applied'), 'success');
+  }
 
   function hasPendingChanges() {
     return Object.keys(pendingChanges).some(k => {
@@ -25433,7 +25446,7 @@ function renderStructure(st = state) {
     const table = document.createElement('table');
     table.className = 'structure-columns-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th style="width:30px"></th><th style="width:40px">#</th><th>' + t('relation.structure.th_name') + '</th><th>' + t('relation.structure.th_kind') + '</th><th>' + t('relation.structure.th_display_name') + '</th><th>' + t('relation.structure.th_short_name') + '</th><th style="width:55px">' + t('relation.structure.th_multiple') + '</th></tr>';
+    thead.innerHTML = '<tr><th style="width:30px"></th><th style="width:40px">#</th><th>' + t('relation.structure.th_name') + '</th><th>' + t('relation.structure.th_kind') + '</th><th>' + t('relation.structure.th_display_name') + '</th><th>' + t('relation.structure.th_short_name') + '</th><th style="width:55px">' + t('relation.structure.th_multiple') + '</th><th style="width:60px"></th></tr>';
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
@@ -25580,6 +25593,30 @@ function renderStructure(st = state) {
         });
         tdMulti.appendChild(multiCheck);
         tr.appendChild(tdMulti);
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'structure-row-actions';
+        const saveRowBtn = document.createElement('button');
+        saveRowBtn.className = 'structure-row-save';
+        saveRowBtn.title = t('relation.structure.save_row') || 'Save';
+        saveRowBtn.textContent = '✓';
+        saveRowBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          applyRowChanges(idx);
+        });
+        const cancelRowBtn = document.createElement('button');
+        cancelRowBtn.className = 'structure-row-cancel';
+        cancelRowBtn.title = t('relation.structure.cancel_row') || 'Cancel';
+        cancelRowBtn.textContent = '✗';
+        cancelRowBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          delete pendingChanges[idx];
+          editingIdx = null;
+          render();
+        });
+        tdActions.appendChild(saveRowBtn);
+        tdActions.appendChild(cancelRowBtn);
+        tr.appendChild(tdActions);
       } else {
         const tdOrder2 = document.createElement('td');
         tdOrder2.textContent = row.order;
@@ -25599,10 +25636,16 @@ function renderStructure(st = state) {
         const tdMulti2 = document.createElement('td');
         tdMulti2.textContent = (changes.newMultiple !== undefined ? changes.newMultiple : row.att?.multiple) ? '✓' : '';
         tr.appendChild(tdMulti2);
+
+        const tdActions2 = document.createElement('td');
+        tr.appendChild(tdActions2);
       }
 
       tr.addEventListener('click', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
+        if (editingIdx !== null && editingIdx !== idx && pendingChanges[editingIdx]) {
+          applyRowChanges(editingIdx);
+        }
         selectedIdx = idx;
         editingIdx = idx;
         render();
@@ -26321,7 +26364,9 @@ function initSavedView(st = state) {
   if (!st.relation.saved) st.relation.saved = [];
 
   const nameInput = panel.querySelector('.saved-name-input');
-  const typeSelect = panel.querySelector('.saved-type-select');
+  const chkFormat = panel.querySelector('.saved-chk-format');
+  const chkRecords = panel.querySelector('.saved-chk-records');
+  const chkLog = panel.querySelector('.saved-chk-log');
   const scopeSelect = panel.querySelector('.saved-scope-select');
   const saveBtn = panel.querySelector('.btn-save-view');
 
@@ -26335,18 +26380,30 @@ function initSavedView(st = state) {
         setTimeout(() => nameInput.classList.remove('input-error'), 1500);
         return;
       }
+      const includeFormat = chkFormat ? chkFormat.checked : true;
+      const includeRecords = chkRecords ? chkRecords.checked : true;
+      const includeLog = chkLog ? chkLog.checked : true;
+      if (!includeFormat && !includeRecords && !includeLog) {
+        showToast(t('relation.saved.select_at_least_one'), 'warning');
+        return;
+      }
       const exists = st.relation.saved.find(s => s.name === name);
       if (exists) {
         if (!confirm(tf('relation.saved.view_exists_confirm', {name: name}))) return;
         st.relation.saved = st.relation.saved.filter(s => s.name !== name);
       }
-      const type = typeSelect.value;
       const scope = scopeSelect.value;
-      const snapshot = createSavedSnapshot(st, type);
+      const includes = { format: includeFormat, records: includeRecords, log: includeLog };
+      const snapshot = createSavedSnapshotMulti(st, includes);
+      const type = includeFormat && includeRecords && includeLog ? 'all' :
+                   includeFormat && includeRecords ? 'both' :
+                   includeFormat ? 'format' :
+                   includeRecords ? 'records' : 'log';
       const entry = {
         name,
         datetime: new Date().toISOString(),
         type,
+        includes,
         scope,
         data: JSON.stringify(snapshot)
       };
@@ -26376,11 +26433,30 @@ function createSavedSnapshot(st, type) {
   return snapshot;
 }
 
+function createSavedSnapshotMulti(st, includes) {
+  const snapshot = {};
+  if (includes.format) {
+    snapshot.uiState = serializeUiState(getUiState(st));
+    snapshot.columns = JSON.parse(JSON.stringify(st.relation.columns));
+  }
+  if (includes.records) {
+    snapshot.items = JSON.parse(JSON.stringify(st.relation.items));
+  }
+  if (includes.log) {
+    snapshot.log = JSON.parse(JSON.stringify(st.relation.log || []));
+  }
+  return snapshot;
+}
+
 function restoreSavedSnapshot(st, savedEntry) {
   const snapshot = JSON.parse(savedEntry.data);
   const type = savedEntry.type;
+  const inc = savedEntry.includes || {};
+  const restoreFormat = inc.format || type === 'format' || type === 'both' || type === 'all';
+  const restoreRecords = inc.records || type === 'records' || type === 'both' || type === 'all';
+  const restoreLog = inc.log || type === 'log' || type === 'all';
 
-  if (type === 'format' || type === 'both') {
+  if (restoreFormat) {
     if (snapshot.uiState) {
       st.rel_options.uiState = deserializeUiState(snapshot.uiState);
     }
@@ -26390,12 +26466,12 @@ function restoreSavedSnapshot(st, savedEntry) {
       st.columnTypes = Object.values(st.relation.columns);
     }
   }
-  if (type === 'records' || type === 'both') {
+  if (restoreRecords) {
     if (snapshot.items) {
       st.relation.items = JSON.parse(JSON.stringify(snapshot.items));
     }
   }
-  if (type === 'log') {
+  if (restoreLog) {
     if (snapshot.log) {
       st.relation.log = JSON.parse(JSON.stringify(snapshot.log));
       showToast(tf('relation.toast.log_restored', {count: snapshot.log.length}), 'info');
@@ -26435,14 +26511,36 @@ function renderSavedViewsList(st) {
     return;
   }
 
-  const typeLabels = { format: t('relation.saved.type_format_label'), records: t('relation.saved.type_records_label'), both: t('relation.saved.type_both_label'), log: t('relation.saved.type_log_label') };
+  const typeLabels = { format: t('relation.saved.type_format_label'), records: t('relation.saved.type_records_label'), both: t('relation.saved.type_both_label'), log: t('relation.saved.type_log_label'), all: t('relation.saved.type_both_label') };
   const scopeLabels = { you: t('relation.saved.scope_you_label'), everyone: t('relation.saved.scope_everyone_label') };
   const typeIcons = {
     format: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>',
     records: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>',
     both: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+    all: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
     log: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>'
   };
+
+  function getIncludesLabel(entry) {
+    if (entry.includes) {
+      const parts = [];
+      if (entry.includes.format) parts.push(t('relation.saved.type_format'));
+      if (entry.includes.records) parts.push(t('relation.saved.type_records'));
+      if (entry.includes.log) parts.push(t('relation.saved.type_log'));
+      return parts.join(' + ');
+    }
+    return typeLabels[entry.type] || entry.type;
+  }
+
+  function getIncludesIcon(entry) {
+    if (entry.includes) {
+      if (entry.includes.format && entry.includes.records) return typeIcons['both'];
+      if (entry.includes.format) return typeIcons['format'];
+      if (entry.includes.records) return typeIcons['records'];
+      return typeIcons['log'];
+    }
+    return typeIcons[entry.type] || '';
+  }
 
   let html = '<div class="saved-items">';
   saved.forEach((entry, idx) => {
@@ -26450,25 +26548,21 @@ function renderSavedViewsList(st) {
     const dateStr = d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const timeStr = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
     let extraMeta = '';
-    if (entry.type === 'log') {
-      try { extraMeta = ` (${(JSON.parse(entry.data).log || []).length} ops)`; } catch(e) {}
-    } else if (entry.type === 'records' || entry.type === 'both') {
+    const inc = entry.includes || {};
+    const hasLog = inc.log || entry.type === 'log' || entry.type === 'all';
+    const hasRecords = inc.records || entry.type === 'records' || entry.type === 'both' || entry.type === 'all';
+    const hasFormat = inc.format || entry.type === 'format' || entry.type === 'both' || entry.type === 'all';
+    if (hasLog) {
+      try { const logLen = (JSON.parse(entry.data).log || []).length; if (logLen > 0) extraMeta += ` (${logLen} ops)`; } catch(e) {}
+    }
+    if (hasRecords) {
       try {
         const parsed = JSON.parse(entry.data);
-        const itemCount = parsed.items ? parsed.items.length : (parsed.relation?.items?.length || 0);
-        const colCount = parsed.columns ? Object.keys(parsed.columns).length : (parsed.relation?.columns ? Object.keys(parsed.relation.columns).length : 0);
+        const itemCount = parsed.items ? parsed.items.length : 0;
+        const colCount = parsed.columns ? Object.keys(parsed.columns).length : 0;
         if (itemCount > 0) extraMeta += ` (${itemCount} rows`;
         if (colCount > 0) extraMeta += `, ${colCount} cols`;
         if (itemCount > 0 || colCount > 0) extraMeta += ')';
-      } catch(e) {}
-    } else if (entry.type === 'format') {
-      try {
-        const parsed = JSON.parse(entry.data);
-        const parts = [];
-        if (parsed.sorting && parsed.sorting.length > 0) parts.push(`${parsed.sorting.length} sort`);
-        if (parsed.filters && parsed.filters.length > 0) parts.push(`${parsed.filters.length} filter`);
-        if (parsed.columnsVisible) parts.push('cols');
-        if (parts.length > 0) extraMeta = ` (${parts.join(', ')})`;
       } catch(e) {}
     }
     html += `
@@ -26476,7 +26570,7 @@ function renderSavedViewsList(st) {
         <div class="saved-item-info">
           <span class="saved-item-name">${entry.name}</span>
           <span class="saved-item-meta">
-            ${typeIcons[entry.type] || ''} ${typeLabels[entry.type] || entry.type}${extraMeta}
+            ${getIncludesIcon(entry)} ${getIncludesLabel(entry)}${extraMeta}
             &middot; ${scopeLabels[entry.scope] || entry.scope}
             &middot; ${dateStr} ${timeStr}
           </span>
@@ -27760,7 +27854,7 @@ function init() {
   
   // Correlation events
   el('.btn-calculate-corr')?.addEventListener('click', () => calculateCorrelation());
-  el('.analysis-help-badge')?.addEventListener('click', () => {
+  el('.analysis-pairwise .analysis-panel-help-badge')?.addEventListener('click', () => {
     const helpDiv = el('.correlation-help');
     if (helpDiv) {
       helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
