@@ -8016,3 +8016,30 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   font-style: italic;
   font-size: 12px;
 }
+
+/* Number attribute kind */
+.number-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.number-input {
+  font-family: 'Consolas', 'Monaco', monospace;
+  text-align: right;
+}
+.number-input-invalid {
+  border-color: #e74c3c !important;
+  background-color: #fdf2f2 !important;
+}
+.number-error-display {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+  white-space: nowrap;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+.number-cell-display {
+  font-family: 'Consolas', 'Monaco', monospace;
+  text-align: right;
+  display: inline-block;
+  width: 100%;
+}

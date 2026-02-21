@@ -1506,6 +1506,25 @@ window.RELATION_TRANSLATIONS = {
   "relation.calendar.conversion_error": { pt: "Erro de conversão", en: "Conversion error", es: "Error de conversión", fr: "Erreur de conversion", it: "Errore di conversione", de: "Konvertierungsfehler" },
   "relation.calendar.unknown_calendar": { pt: "Calendário desconhecido", en: "Unknown calendar", es: "Calendario desconocido", fr: "Calendrier inconnu", it: "Calendario sconosciuto", de: "Unbekannter Kalender" },
   "relation.calendar.date_attr": { pt: "Data (calendário)", en: "Date (calendar)", es: "Fecha (calendario)", fr: "Date (calendrier)", it: "Data (calendario)", de: "Datum (Kalender)" },
+
+  "relation.number.value_not_integer": { pt: "Valor deve ser inteiro", en: "Value must be integer", es: "El valor debe ser entero", fr: "La valeur doit être entière", it: "Il valore deve essere intero", de: "Wert muss ganzzahlig sein" },
+  "relation.number.value_below_natural": { pt: "Deve ser natural (≥1)", en: "Must be natural (≥1)", es: "Debe ser natural (≥1)", fr: "Doit être naturel (≥1)", it: "Deve essere naturale (≥1)", de: "Muss natürlich sein (≥1)" },
+  "relation.number.value_negative": { pt: "Valor não pode ser negativo", en: "Value cannot be negative", es: "El valor no puede ser negativo", fr: "La valeur ne peut pas être négative", it: "Il valore non può essere negativo", de: "Wert darf nicht negativ sein" },
+  "relation.number.value_not_positive": { pt: "Valor deve ser positivo", en: "Value must be positive", es: "El valor debe ser positivo", fr: "La valeur doit être positive", it: "Il valore deve essere positivo", de: "Wert muss positiv sein" },
+  "relation.number.value_not_negative": { pt: "Valor deve ser negativo", en: "Value must be negative", es: "El valor debe ser negativo", fr: "La valeur doit être négative", it: "Il valore deve essere negativo", de: "Wert muss negativ sein" },
+  "relation.number.value_positive": { pt: "Valor não pode ser positivo", en: "Value cannot be positive", es: "El valor no puede ser positivo", fr: "La valeur ne peut pas être positive", it: "Il valore non può essere positivo", de: "Wert darf nicht positiv sein" },
+  "relation.number.value_below_min": { pt: "Valor abaixo do mínimo", en: "Value below minimum", es: "Valor por debajo del mínimo", fr: "Valeur en dessous du minimum", it: "Valore sotto il minimo", de: "Wert unter dem Minimum" },
+  "relation.number.value_above_max": { pt: "Valor acima do máximo", en: "Value above maximum", es: "Valor por encima del máximo", fr: "Valeur au-dessus du maximum", it: "Valore sopra il massimo", de: "Wert über dem Maximum" },
+  "relation.number.group": { pt: "Grupo numérico", en: "Number group", es: "Grupo numérico", fr: "Groupe numérique", it: "Gruppo numerico", de: "Zahlengruppe" },
+  "relation.number.decimal_units": { pt: "Casas decimais", en: "Decimal places", es: "Decimales", fr: "Décimales", it: "Decimali", de: "Dezimalstellen" },
+  "relation.number.step": { pt: "Passo", en: "Step", es: "Paso", fr: "Pas", it: "Passo", de: "Schritt" },
+  "relation.number.min": { pt: "Mínimo", en: "Minimum", es: "Mínimo", fr: "Minimum", it: "Minimo", de: "Minimum" },
+  "relation.number.max": { pt: "Máximo", en: "Maximum", es: "Máximo", fr: "Maximum", it: "Massimo", de: "Maximum" },
+  "relation.number.autoincrement": { pt: "Auto-incremento", en: "Auto-increment", es: "Auto-incremento", fr: "Auto-incrément", it: "Auto-incremento", de: "Auto-Inkrement" },
+  "relation.number.show_thousands": { pt: "Mostrar separador de milhares", en: "Show thousands separator", es: "Mostrar separador de miles", fr: "Afficher séparateur de milliers", it: "Mostra separatore migliaia", de: "Tausendertrennzeichen anzeigen" },
+  "relation.number.show_spin": { pt: "Mostrar botões de ajuste", en: "Show spin buttons", es: "Mostrar botones de ajuste", fr: "Afficher boutons de réglage", it: "Mostra pulsanti di regolazione", de: "Drehknöpfe anzeigen" },
+  "relation.number.associated_error": { pt: "Erro associado", en: "Associated error", es: "Error asociado", fr: "Erreur associée", it: "Errore associato", de: "Zugehöriger Fehler" },
+  "relation.number.continuous": { pt: "Contínuo", en: "Continuous", es: "Continuo", fr: "Continu", it: "Continuo", de: "Kontinuierlich" },
 };
 
 // Translation function — returns translated string for key

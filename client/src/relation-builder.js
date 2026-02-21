@@ -60,7 +60,7 @@ const ATT_KIND_MAP = {
   'checkbox': 'boolean',
   'color': 'color',
   'date': 'date',
-  'number': 'float',
+  'number': 'number',
   'password': 'password',
   'media': 'file',
   'radio_button': 'radio',
@@ -150,6 +150,307 @@ const DEFAULT_ATT = {
   multiple: false,
   association: null
 };
+
+const DEFAULT_NUMBER_CONFIG = {
+  group: 'R',
+  min: null,
+  max: null,
+  continuous: null,
+  step: null,
+  decimal_units: null,
+  autoincrement: false,
+  autoincrement_max: null,
+  show_thousands_separator: false,
+  show_spin_buttons: false,
+  associated_error: null
+};
+
+const NUMBER_GROUPS = ['N', 'N0', 'Z', 'Z+', 'Z-', 'Z0+', 'Z0-', 'Q', 'Q+', 'Q-', 'Q0+', 'Q0-', 'R', 'R+', 'R-', 'R0+', 'R0-', 'C'];
+
+function getNumberConfig(att) {
+  if (!att || !att.number) return { ...DEFAULT_NUMBER_CONFIG };
+  return { ...DEFAULT_NUMBER_CONFIG, ...att.number };
+}
+
+function isNumberContinuousDefault(group) {
+  if (!group) return true;
+  if (group.startsWith('N') || group.startsWith('Z')) return false;
+  return true;
+}
+
+function isNumberContinuous(cfg) {
+  if (cfg.continuous !== null && cfg.continuous !== undefined) return cfg.continuous;
+  return isNumberContinuousDefault(cfg.group);
+}
+
+function parseBaseNumber(str) {
+  str = str.trim();
+  if (!str) return null;
+  if (str.includes('/')) {
+    const parts = str.split('/');
+    if (parts.length === 2) {
+      const num = parseFloat(parts[0]);
+      const den = parseFloat(parts[1]);
+      if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+    }
+    return null;
+  }
+  if (str.startsWith('0x') || str.startsWith('0X')) {
+    const hex = str.substring(2);
+    if (hex.includes('.')) {
+      const hp = hex.split('.');
+      const intPart = parseInt(hp[0] || '0', 16);
+      let fracPart = 0;
+      if (hp[1]) {
+        for (let i = 0; i < hp[1].length; i++) {
+          const d = parseInt(hp[1][i], 16);
+          if (isNaN(d)) return null;
+          fracPart += d / Math.pow(16, i + 1);
+        }
+      }
+      return (str[0] === '-' ? -1 : 1) * (intPart + fracPart);
+    }
+    const v = parseInt(hex, 16);
+    return isNaN(v) ? null : v;
+  }
+  if (str.startsWith('0o') || str.startsWith('0O')) {
+    const oct = str.substring(2);
+    if (oct.includes('.')) {
+      const op = oct.split('.');
+      const intPart = parseInt(op[0] || '0', 8);
+      let fracPart = 0;
+      if (op[1]) {
+        for (let i = 0; i < op[1].length; i++) {
+          const d = parseInt(op[1][i], 8);
+          if (isNaN(d) || d >= 8) return null;
+          fracPart += d / Math.pow(8, i + 1);
+        }
+      }
+      return intPart + fracPart;
+    }
+    const v = parseInt(oct, 8);
+    return isNaN(v) ? null : v;
+  }
+  if (str.startsWith('0b') || str.startsWith('0B')) {
+    const bin = str.substring(2);
+    if (bin.includes('.')) {
+      const bp = bin.split('.');
+      const intPart = parseInt(bp[0] || '0', 2);
+      let fracPart = 0;
+      if (bp[1]) {
+        for (let i = 0; i < bp[1].length; i++) {
+          const d = parseInt(bp[1][i], 2);
+          if (isNaN(d) || d >= 2) return null;
+          fracPart += d / Math.pow(2, i + 1);
+        }
+      }
+      return intPart + fracPart;
+    }
+    const v = parseInt(bin, 2);
+    return isNaN(v) ? null : v;
+  }
+  const v = parseFloat(str);
+  return isNaN(v) ? null : v;
+}
+
+function parseComplexNumber(str) {
+  str = str.trim();
+  if (!str) return null;
+  const iIdx = str.indexOf('i');
+  if (iIdx === -1) {
+    const v = parseBaseNumber(str);
+    return v !== null ? { re: v, im: 0 } : null;
+  }
+  if (iIdx === str.length - 1) {
+    const before = str.substring(0, iIdx).trim();
+    const plusIdx = Math.max(before.lastIndexOf('+'), before.lastIndexOf('-'));
+    if (plusIdx > 0) {
+      const realStr = before.substring(0, plusIdx).trim();
+      const imagStr = before.substring(plusIdx).trim();
+      const re = parseBaseNumber(realStr);
+      const im = parseBaseNumber(imagStr || '1');
+      if (re !== null && im !== null) return { re, im };
+    }
+    const im = parseBaseNumber(before || '1');
+    if (im !== null) return { re: 0, im };
+  }
+  return null;
+}
+
+function parseNumberInput(inputStr, cfg) {
+  if (inputStr === null || inputStr === undefined || inputStr === '') {
+    return { input: '', value: null, error: null };
+  }
+  const raw = String(inputStr).trim();
+  if (!raw) return { input: raw, value: null, error: null };
+
+  const isComplex = cfg && cfg.group === 'C';
+  const hasAssocError = cfg && cfg.associated_error;
+
+  let mainPart = raw;
+  let errorPart = null;
+
+  if (hasAssocError) {
+    const errMatch = raw.match(/^(.+?)\s*(?:\+\-|\-\+)\s*(.+)$/);
+    if (errMatch) {
+      mainPart = errMatch[1].trim();
+      errorPart = errMatch[2].trim();
+    }
+  }
+
+  let value = null;
+  let error = null;
+
+  if (isComplex) {
+    const cVal = parseComplexNumber(mainPart);
+    if (cVal !== null) {
+      value = cVal;
+      if (errorPart) {
+        const cErr = parseComplexNumber(errorPart);
+        if (cErr !== null) error = cErr;
+      }
+    }
+  } else {
+    value = parseBaseNumber(mainPart);
+    if (errorPart) {
+      error = parseBaseNumber(errorPart);
+    }
+  }
+
+  if (value !== null && hasAssocError && cfg.associated_error !== 'input') {
+    if (typeof value === 'number') {
+      if (cfg.associated_error.endsWith('%')) {
+        const pct = parseFloat(cfg.associated_error) / 100;
+        error = Math.abs(value * pct);
+      } else {
+        const fixedErr = parseFloat(cfg.associated_error);
+        if (!isNaN(fixedErr) && fixedErr > 0) {
+          error = fixedErr;
+          value = Math.round(value / fixedErr) * fixedErr;
+        }
+      }
+    }
+  }
+
+  if (value !== null && cfg) {
+    if (cfg.step && typeof value === 'number') {
+      value = Math.round(value / cfg.step) * cfg.step;
+    }
+    if (cfg.decimal_units !== null && cfg.decimal_units !== undefined && typeof value === 'number') {
+      value = parseFloat(value.toFixed(cfg.decimal_units));
+    }
+  }
+
+  return { input: raw, value, error };
+}
+
+function formatNumberValue(numObj, cfg) {
+  if (!numObj || numObj.value === null || numObj.value === undefined) return '';
+  const isComplex = cfg && cfg.group === 'C';
+
+  function fmtNum(v) {
+    if (v === null || v === undefined) return '';
+    let s;
+    if (cfg && cfg.decimal_units !== null && cfg.decimal_units !== undefined) {
+      s = v.toFixed(cfg.decimal_units);
+    } else {
+      s = String(v);
+    }
+    const decSep = window.decimalSeparator || '.';
+    const thousSep = window.thousandsSeparator || ',';
+    if (cfg && cfg.show_thousands_separator) {
+      const parts = s.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousSep);
+      s = parts.join(decSep);
+    } else if (decSep !== '.') {
+      s = s.replace('.', decSep);
+    }
+    return s;
+  }
+
+  function fmtComplex(c) {
+    if (!c || typeof c !== 'object') return fmtNum(c);
+    const re = c.re || 0;
+    const im = c.im || 0;
+    if (im === 0) return fmtNum(re);
+    if (re === 0) return fmtNum(im) + 'i';
+    const sign = im >= 0 ? '+' : '';
+    return fmtNum(re) + sign + fmtNum(im) + 'i';
+  }
+
+  let result;
+  if (isComplex) {
+    result = fmtComplex(numObj.value);
+  } else {
+    result = fmtNum(numObj.value);
+  }
+
+  if (numObj.error !== null && numObj.error !== undefined) {
+    const errStr = isComplex ? fmtComplex(numObj.error) : fmtNum(numObj.error);
+    result += ' \u00B1 ' + errStr;
+  }
+
+  return result;
+}
+
+function validateNumberValue(numObj, cfg) {
+  if (!numObj || numObj.value === null) return [];
+  const errors = [];
+  const v = numObj.value;
+  const g = cfg.group || 'R';
+  const isComplex = g === 'C';
+
+  if (isComplex) {
+    return errors;
+  }
+
+  if (typeof v !== 'number') return errors;
+
+  if ((g.startsWith('N') || g === 'Z' || g.startsWith('Z')) && !Number.isInteger(v)) {
+    if (g.startsWith('N') || g.startsWith('Z')) {
+      errors.push('value_not_integer');
+    }
+  }
+
+  if (g === 'N' && v < 1) errors.push('value_below_natural');
+  if (g === 'N0' && v < 0) errors.push('value_negative');
+
+  if (g.includes('+') && !g.includes('0') && v <= 0) errors.push('value_not_positive');
+  if (g.includes('+') && g.includes('0') && v < 0) errors.push('value_negative');
+  if (g.includes('-') && !g.includes('0') && v >= 0) errors.push('value_not_negative');
+  if (g.includes('-') && g.includes('0') && v > 0) errors.push('value_positive');
+
+  if (cfg.min !== null && cfg.min !== undefined && v < cfg.min) errors.push('value_below_min');
+  if (cfg.max !== null && cfg.max !== undefined && v > cfg.max) errors.push('value_above_max');
+
+  return errors;
+}
+
+function getNumberAutoincrement(st, colIdx) {
+  const att = getAtt(st, colIdx);
+  if (!att) return null;
+  const cfg = getNumberConfig(att);
+  if (!cfg.autoincrement) return null;
+  let max = cfg.autoincrement_max || 0;
+  const colName = st.columnNames[colIdx];
+  if (st.relation && st.relation.items) {
+    for (const row of st.relation.items) {
+      const cellVal = row[colIdx];
+      const numVal = (cellVal && typeof cellVal === 'object' && cellVal.value !== undefined) ? cellVal.value : (typeof cellVal === 'number' ? cellVal : null);
+      if (numVal !== null && typeof numVal === 'number' && numVal > max) max = numVal;
+    }
+  }
+  const next = max + 1;
+  if (att.number) att.number.autoincrement_max = next;
+  else att.number = { ...DEFAULT_NUMBER_CONFIG, autoincrement_max: next };
+  return next;
+}
+
+function isNumberAttColumn(colIdx, st) {
+  if (!st || colIdx < 0) return false;
+  const type = st.columnTypes ? st.columnTypes[colIdx] : null;
+  return type === 'number';
+}
 
 function resolveColumnKind(colValue) {
   if (typeof colValue === 'string') return colValue;
@@ -2345,6 +2646,10 @@ function initLookupDependencyListeners(container, st, row) {
         newVal = sourceInput.value === '' ? null : parseInt(sourceInput.value);
       } else if (type === 'float') {
         newVal = sourceInput.value === '' ? null : parseFloat(sourceInput.value);
+      } else if (type === 'number') {
+        const att = getAtt(st, sourceColIdx);
+        const cfg = getNumberConfig(att);
+        newVal = sourceInput.value === '' ? null : parseNumberInput(sourceInput.value, cfg);
       } else {
         newVal = sourceInput.value;
       }
@@ -3232,6 +3537,10 @@ function generateRandomValue(type, nestedRelationSchema = null) {
         text += 'Line ' + (i + 1) + ': ' + generateRandomString(12) + '\n';
       }
       return text.trim();
+    case 'number': {
+      const val = parseFloat((Math.random() * 1000).toFixed(2));
+      return { input: String(val), value: val, error: null };
+    }
     case 'int':
       return Math.floor(Math.random() * 1000) - 500;
     case 'float':
@@ -3360,7 +3669,14 @@ function generateDemoRelation() {
       suffix: 'pontos',
       interface_width: 'short',
       recomended: true,
-      description: 'Pontuação acumulada'
+      description: 'Pontuação acumulada',
+      number: {
+        group: 'N0',
+        min: 0,
+        max: 10000,
+        show_thousands_separator: true,
+        decimal_units: 0
+      }
     },
     birth_date: 'date',
     created_at: {
@@ -3438,7 +3754,13 @@ function generateDemoRelation() {
       name: 'Pontuações',
       short_name: 'MPts',
       multiple: true,
-      suffix: 'pts'
+      suffix: 'pts',
+      number: {
+        group: 'R',
+        decimal_units: 2,
+        show_spin_buttons: true,
+        step: 0.5
+      }
     },
     full_date: {
       attribute_kind: ['date'],
@@ -3874,8 +4196,9 @@ function matchesCriteria(value, criteria, colIdx, st = state) {
     let compValue2 = criteria.value2;
     
     // Convert to comparable numbers
-    if (type === 'int' || type === 'float' || type === 'range') {
-      numValue = Number(value);
+    if (type === 'int' || type === 'float' || type === 'range' || type === 'number') {
+      if (type === 'number' && value && typeof value === 'object' && 'value' in value) numValue = value.value;
+      else numValue = Number(value);
       compValue = Number(compValue);
       if (compValue2 !== undefined) compValue2 = Number(compValue2);
     } else if (type === 'date' || type === 'datetime') {
@@ -3952,6 +4275,15 @@ function compareValues(a, b, type, options) {
   
   if (type === 'int' || type === 'float' || type === 'range') {
     return a - b;
+  }
+  if (type === 'number') {
+    const va = (a && typeof a === 'object' && 'value' in a) ? a.value : (typeof a === 'number' ? a : null);
+    const vb = (b && typeof b === 'object' && 'value' in b) ? b.value : (typeof b === 'number' ? b : null);
+    if (va === null && vb === null) return 0;
+    if (va === null) return nullsFirst ? -1 : 1;
+    if (vb === null) return nullsFirst ? 1 : -1;
+    if (typeof va === 'object' || typeof vb === 'object') return 0;
+    return va - vb;
   }
   if (type === 'boolean') {
     return (a ? 1 : 0) - (b ? 1 : 0);
@@ -4394,7 +4726,7 @@ function generateStatsExplanationsHTML(type) {
   explanations.push({ term: t('relation.stats.explain_total_records'), def: t('relation.stats.explain_total_records_desc') });
   explanations.push({ term: t('relation.stats.explain_non_null'), def: t('relation.stats.explain_non_null_desc') });
   
-  if (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time' || type === 'relation') {
+  if (type === 'int' || type === 'float' || type === 'range' || type === 'number' || type === 'date' || type === 'datetime' || type === 'time' || type === 'relation') {
     explanations.push({ term: t('relation.stats.explain_min_max'), def: t('relation.stats.explain_min_max_desc') });
     explanations.push({ term: t('relation.stats.explain_range'), def: t('relation.stats.explain_range_desc') });
     explanations.push({ term: t('relation.stats.explain_mean'), def: t('relation.stats.explain_mean_desc') });
@@ -4843,8 +5175,11 @@ function calculateStatistics(colIdx, st = state) {
     nullPercent: ((nullCount / total) * 100).toFixed(2)
   };
   
-  if (type === 'int' || type === 'float' || type === 'range') {
-    const nums = values.map(Number).filter(n => !isNaN(n));
+  if (type === 'int' || type === 'float' || type === 'range' || type === 'number') {
+    const nums = values.map(v => {
+      if (type === 'number' && v && typeof v === 'object' && 'value' in v) return typeof v.value === 'number' ? v.value : NaN;
+      return Number(v);
+    }).filter(n => !isNaN(n));
     if (nums.length > 0) {
       nums.sort((a, b) => a - b);
       
@@ -5422,6 +5757,18 @@ function formatCellValue(value, type, colName, st) {
     if (value === true) return '<span class="bool-display bool-display-true">✓</span>';
     if (value === false) return '<span class="bool-display bool-display-false">✗</span>';
     return '<span class="bool-display bool-display-null">—</span>';
+  }
+  if (type === 'number') {
+    const att = colIdx >= 0 ? getAtt(st, colIdx) : null;
+    const cfg = getNumberConfig(att);
+    if (value && typeof value === 'object' && 'value' in value) {
+      return '<span class="number-cell-display">' + escapeHtml(formatNumberValue(value, cfg)) + '</span>';
+    }
+    if (typeof value === 'number' || typeof value === 'string') {
+      const numObj = parseNumberInput(value, cfg);
+      return '<span class="number-cell-display">' + escapeHtml(formatNumberValue(numObj, cfg)) + '</span>';
+    }
+    return '';
   }
   if (type === 'textarea') {
     return `<span class="multiline-preview">${String(value).substring(0, 50)}${value.length > 50 ? '...' : ''}</span>`;
@@ -6462,6 +6809,9 @@ function convertValue(val, targetKind) {
     const cleaned = str.replace(/,/g, '.');
     const n = parseFloat(cleaned);
     return isNaN(n) ? str : n;
+  }
+  if (targetKind === 'number') {
+    return parseNumberInput(str, DEFAULT_NUMBER_CONFIG);
   }
   if (targetKind === 'boolean') {
     const lower = str.toLowerCase();
@@ -8155,6 +8505,23 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       return wrapper;
     }
 
+    if (type === 'number' || isNumberAttColumn(colIdx, st)) {
+      const att = getAtt(st, colIdx);
+      const cfg = getNumberConfig(att);
+      const span = document.createElement('span');
+      span.className = 'relation-cell-readonly number-cell-display';
+      if (value && typeof value === 'object' && 'value' in value) {
+        span.textContent = formatNumberValue(value, cfg) || '—';
+      } else if (typeof value === 'number' || typeof value === 'string') {
+        const numObj = parseNumberInput(value, cfg);
+        span.textContent = formatNumberValue(numObj, cfg) || '—';
+      } else {
+        span.textContent = '—';
+      }
+      wrapper.appendChild(span);
+      return wrapper;
+    }
+
     if (isAttDateColumn(colIdx, st)) {
       const span = document.createElement('span');
       span.className = 'relation-cell-readonly date-value';
@@ -8283,6 +8650,39 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
     editor.dataset.col = colIdx;
     editor.dataset.values = JSON.stringify(value && typeof value === 'object' ? value : {});
     wrapper.appendChild(editor);
+  } else if (type === 'number' || isNumberAttColumn(colIdx, st)) {
+    const att = getAtt(st, colIdx);
+    const cfg = getNumberConfig(att);
+    const numObj = (value && typeof value === 'object' && 'value' in value) ? value : parseNumberInput(value, cfg);
+    const inputDiv = document.createElement('div');
+    inputDiv.className = 'number-input-wrapper';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'number-input input-size-medium';
+    input.value = numObj.input || '';
+    input.placeholder = cfg.group || 'R';
+    input.dataset.row = rowIdx;
+    input.dataset.col = colIdx;
+    if (cfg.show_spin_buttons && isNumberContinuous(cfg)) {
+      input.type = 'number';
+      if (cfg.step) input.step = cfg.step;
+      if (cfg.min !== null) input.min = cfg.min;
+      if (cfg.max !== null) input.max = cfg.max;
+      input.value = numObj.value !== null ? numObj.value : '';
+    }
+    inputDiv.appendChild(input);
+    if (numObj.error !== null && numObj.error !== undefined) {
+      const errSpan = document.createElement('span');
+      errSpan.className = 'number-error-display';
+      errSpan.textContent = ' \u00B1 ' + (typeof numObj.error === 'object' ? formatNumberValue({ value: numObj.error, error: null }, cfg) : numObj.error);
+      inputDiv.appendChild(errSpan);
+    }
+    const validationErrors = validateNumberValue(numObj, cfg);
+    if (validationErrors.length > 0) {
+      input.classList.add('number-input-invalid');
+      input.title = validationErrors.map(e => t('relation.number.' + e) || e).join(', ');
+    }
+    wrapper.appendChild(inputDiv);
   } else if (isAttDateColumn(colIdx, st)) {
     const dateCfg = getColumnDateConfig(colIdx, st);
     if (dateCfg) {
@@ -8397,7 +8797,7 @@ function applyConditionalFormatting(value, colIdx, cell, rowIdx, st = state) {
         if (rule.style.fontWeight) cell.style.fontWeight = rule.style.fontWeight;
         if (rule.style.fontStyle) cell.style.fontStyle = rule.style.fontStyle;
         
-        if (rule.style.dataBar && (type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time')) {
+        if (rule.style.dataBar && (type === 'int' || type === 'float' || type === 'range' || type === 'number' || type === 'date' || type === 'datetime' || type === 'time')) {
           const stats = calculateStatistics(colIdx, st);
           const sMin = stats.numMin !== undefined ? stats.numMin : stats.min;
           const sMax = stats.numMax !== undefined ? stats.numMax : stats.max;
@@ -8546,7 +8946,7 @@ function getOperatorsForType(type) {
       ...common
     ];
   }
-  if (type === 'int' || type === 'float' || type === 'range') {
+  if (type === 'int' || type === 'float' || type === 'range' || type === 'number') {
     return [
       { value: 'eq', label: '=' },
       { value: 'neq', label: '≠' },
@@ -8578,7 +8978,7 @@ function getOperatorsForType(type) {
 
 function getInputTypeForColumn(type, op) {
   if (op === 'in_list' || op === 'not_in_list') return 'text';
-  if (type === 'int' || type === 'float' || type === 'range') return 'number';
+  if (type === 'int' || type === 'float' || type === 'range' || type === 'number') return 'number';
   if (type === 'date') return 'date';
   if (type === 'datetime') return 'datetime-local';
   if (type === 'time') return 'time';
@@ -11118,6 +11518,7 @@ function setupMergeRadioEvents(container, st, checkedIndices, panelPositions) {
       const input = editPanel.querySelector(`[data-col="${colIdx}"]`);
       if (!input) return;
       if (type === 'boolean') { input.checked = !!srcValue; }
+      else if (type === 'number') { input.value = (srcValue && typeof srcValue === 'object' && srcValue.input) ? srcValue.input : (srcValue !== null && srcValue !== undefined ? srcValue : ''); }
       else if (type === 'int' || type === 'float' || type === 'range') { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
       else if (input.tagName === 'SELECT') { input.value = srcValue !== null ? srcValue : ''; }
       else { input.value = srcValue !== null && srcValue !== undefined ? srcValue : ''; }
@@ -12755,10 +13156,10 @@ function showColumnMenu(colIdx, x, y, st = state) {
         <div class="accordion-header">${t('relation.colmenu.filter')} <span class="accordion-arrow">▶</span></div>
         <div class="accordion-content">
           <button class="column-menu-item" data-action="filter-values">${t('relation.colmenu.filter_values')}</button>
-          ${(type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_comparison ? `
+          ${(type === 'int' || type === 'float' || type === 'range' || type === 'number' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_comparison ? `
             <button class="column-menu-item" data-action="filter-comparison">${t('relation.colmenu.filter_comparison')}</button>
           ` : ''}
-          ${(type === 'int' || type === 'float' || type === 'range' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_topn ? `
+          ${(type === 'int' || type === 'float' || type === 'range' || type === 'number' || type === 'date' || type === 'datetime' || type === 'time') && st.rel_options.show_filter_topn ? `
             <div class="column-menu-item-inline" data-testid="filter-topn-row">
               <select class="filter-position-select" data-testid="select-filter-position">
                 <option value="top">${t('relation.colmenu.top')}</option>
@@ -17754,6 +18155,10 @@ function updateRelationFromInput(input) {
     value = parseInt(input.value) || 0;
   } else if (type === 'float' || type === 'range') {
     value = parseFloat(input.value) || 0;
+  } else if (type === 'number') {
+    const att = getAtt(state, colIdx);
+    const cfg = getNumberConfig(att);
+    value = parseNumberInput(input.value, cfg);
   } else if (type === 'datetime') {
     value = input.value.replace('T', ' ');
   } else if (type === 'select' || type === 'radio') {
@@ -25155,6 +25560,26 @@ function convertValueForKindChange(value, fromType, toType) {
   if (fromType === toType) return value;
 
   if (complexTypes.includes(fromType) || complexTypes.includes(toType)) return null;
+
+  if (toType === 'number') {
+    if (fromType === 'number') return value;
+    if (numericTypes.includes(fromType)) {
+      return { input: String(value), value: Number(value), error: null };
+    }
+    if (typeof value === 'boolean') return { input: value ? '1' : '0', value: value ? 1 : 0, error: null };
+    const parsed = parseNumberInput(String(value), DEFAULT_NUMBER_CONFIG);
+    return parsed.value !== null ? parsed : null;
+  }
+  if (fromType === 'number') {
+    const numVal = (value && typeof value === 'object' && 'value' in value) ? value.value : null;
+    if (numericTypes.includes(toType)) {
+      if (numVal === null || typeof numVal !== 'number') return null;
+      return toType === 'int' ? Math.round(numVal) : numVal;
+    }
+    if (toType === 'boolean') return numVal !== null && numVal !== 0;
+    if (stringTypes.includes(toType)) return numVal !== null ? String(numVal) : '';
+    return numVal;
+  }
 
   if (numericTypes.includes(toType)) {
     if (numericTypes.includes(fromType)) {
