@@ -64,6 +64,8 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Date Attribute Kind**: Columns with `attribute_kind: ['date']` support multi-calendar date input with configurable `calendar`, `min_unit`, and `max_unit`. Supports 7 calendar types: Gregorian, Gregorian Swatch Beats, Chinese, Japanese, Hijri, Rumi, French Republican. Uses native HTML inputs for standard Gregorian; composite inputs for other calendars with auto-weekday calculation and Gregorian equivalent display.
 - **Relation Title**: Relations support a `.title` i18n object (e.g., `{pt: "...", en: "..."}`) rendered as an H2 heading above the main instance. Falls back to `.name` if no title is set.
 - **Timezone Selector**: UTC timezone selector next to language selector, persisted in `localStorage` key `relation_utc`. Auto-detects browser timezone on first load. Available as `window.currentUserUTC`.
+- **Theme Toggle (Light/Dark Mode)**: Toggle button (☀️/🌙) next to UTC selector. Theme persisted in `localStorage` key `relation_theme`. Uses `data-theme="dark"` attribute on `<html>` element. CSS variables in `:root` define light mode; `[data-theme="dark"]` overrides define dark mode. FOUC prevented by inline script in `<head>`. Dark palette uses Catppuccin-inspired colors.
+- **AI Model Comparison**: The AI view's ℹ badge includes a dynamic section that calls `/api/ai/compare-models` to generate an AI-powered comparison table of all available models (release date, strengths, weaknesses, cost level). Uses separate endpoint from `/api/ai/analyze` and does NOT add to AI history. Results cached per language, cleared on language change via `languageChanged` event.
 
 ### Virtual Keyboard Features
 The Virtual Keyboard offers comprehensive Unicode character input:

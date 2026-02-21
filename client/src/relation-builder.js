@@ -28270,6 +28270,27 @@ function init() {
     });
   }
 
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    const savedTheme = localStorage.getItem('relation_theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '🌙';
+    }
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      if (current === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = '☀️';
+        localStorage.setItem('relation_theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('relation_theme', 'dark');
+      }
+    });
+  }
+
   const utcSelector = document.getElementById('utc-selector');
   if (utcSelector) {
     UTC_OFFSETS.forEach(tz => {
