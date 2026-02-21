@@ -6,6 +6,7 @@ const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'da
 const all_entities = {};
 
 window.currentUserUTC = parseFloat(localStorage.getItem('relation_utc') || String(-(new Date().getTimezoneOffset()) / 60));
+window.currentUser = localStorage.getItem('relation_user') || 'DuarteGouveia';
 
 const ALL_LANGUAGES = {
   pt: 'Português', en: 'English', es: 'Español', fr: 'Français', it: 'Italiano', de: 'Deutsch',
@@ -17856,10 +17857,18 @@ async function askAI(question, st = state) {
       responseDiv.querySelector('.btn-apply-ai-filter')?.addEventListener('click', () => {
         applyAIFilter(result.conditions, st);
       });
+      const filterDesc = result.description || result.conditions.map(c => `${c.column} ${c.operator} ${c.value ?? ''}`).join(' AND ');
+      addAiHistoryEntry(st, question, filterDesc, 'gpt-4.1-mini');
     } else if (result.type === 'answer') {
-      responseDiv.innerHTML = `<div>${result.text}</div>`;
+      let html = result.text || '';
+      if (!/<[a-z][\s\S]*>/i.test(html)) {
+        html = html.replace(/\n/g, '<br>');
+      }
+      responseDiv.innerHTML = `<div class="ai-response-content">${html}</div>`;
+      addAiHistoryEntry(st, question, html, 'gpt-4.1-mini');
     } else {
       responseDiv.innerHTML = `<div>${JSON.stringify(result)}</div>`;
+      addAiHistoryEntry(st, question, JSON.stringify(result), 'gpt-4.1-mini');
     }
   } catch (error) {
     responseDiv.classList.remove('loading');
@@ -23927,36 +23936,57 @@ function initRelationInstance(container, relationData, options = {}) {
     
     <div class="view-ai view-content" style="display: none;">
       <div class="ai-panel-inline">
-        <div class="ai-voice-row">
-          <select class="voice-language pivot-select" title="${t('relation.ai.voice_lang_title')}">
-            <option value="pt-PT" selected>Português (PT)</option>
-            <option value="pt-BR">Português (BR)</option>
-            <option value="en-US">English (US)</option>
-            <option value="en-GB">English (UK)</option>
-            <option value="es-ES">Español (ES)</option>
-            <option value="es-MX">Español (MX)</option>
-            <option value="fr-FR">Français</option>
-            <option value="de-DE">Deutsch</option>
-            <option value="it-IT">Italiano</option>
-            <option value="ja-JP">日本語</option>
-            <option value="zh-CN">中文 (简体)</option>
-            <option value="zh-TW">中文 (繁體)</option>
-            <option value="ru-RU">Русский</option>
-            <option value="ko-KR">한국어</option>
-            <option value="ar-SA">العربية</option>
-            <option value="hi-IN">हिन्दी</option>
-          </select>
-          <button class="btn-ai-voice btn btn-outline btn-sm" title="${t('relation.ai.voice_title')}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-          </button>
+        <div class="ai-saved-prompts-section">
+          <label class="ai-section-label">${t('relation.ai.saved_prompts')}</label>
+          <div class="ai-prompts-list"></div>
         </div>
-        <div class="ai-input-row">
-          <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}" data-i18n-placeholder="relation.ai.placeholder">
-          <button class="btn-ai-ask btn btn-primary btn-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-          </button>
+        <div class="ai-input-section">
+          <label class="ai-section-label">${t('relation.ai.new_question')}</label>
+          <div class="ai-voice-row">
+            <select class="voice-language pivot-select" title="${t('relation.ai.voice_lang_title')}">
+              <option value="pt-PT" selected>Português (PT)</option>
+              <option value="pt-BR">Português (BR)</option>
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="es-ES">Español (ES)</option>
+              <option value="es-MX">Español (MX)</option>
+              <option value="fr-FR">Français</option>
+              <option value="de-DE">Deutsch</option>
+              <option value="it-IT">Italiano</option>
+              <option value="ja-JP">日本語</option>
+              <option value="zh-CN">中文 (简体)</option>
+              <option value="zh-TW">中文 (繁體)</option>
+              <option value="ru-RU">Русский</option>
+              <option value="ko-KR">한국어</option>
+              <option value="ar-SA">العربية</option>
+              <option value="hi-IN">हिन्दी</option>
+            </select>
+            <button class="btn-ai-voice btn btn-outline btn-sm" title="${t('relation.ai.voice_title')}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+            </button>
+          </div>
+          <div class="ai-input-row">
+            <input type="text" class="ai-question ai-question-input" placeholder="${t('relation.ai.placeholder')}" data-i18n-placeholder="relation.ai.placeholder" data-testid="input-ai-question">
+            <button class="btn-ai-ask btn btn-primary btn-sm" data-testid="button-ai-ask">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+          <div class="ai-save-prompt-row">
+            <select class="ai-prompt-scope-select" data-testid="select-ai-prompt-scope">
+              <option value="everyone">${t('relation.ai.scope_everyone')}</option>
+              <option value="you">${t('relation.ai.scope_you')}</option>
+            </select>
+            <button class="btn-ai-save-prompt btn btn-outline btn-sm" data-testid="button-ai-save-prompt">${t('relation.ai.save_prompt')}</button>
+          </div>
         </div>
-        <div class="ai-response"></div>
+        <div class="ai-response-section">
+          <label class="ai-section-label">${t('relation.ai.response_label')}</label>
+          <div class="ai-response"></div>
+        </div>
+        <div class="ai-history-section">
+          <label class="ai-section-label">${t('relation.ai.history')}</label>
+          <div class="ai-history-container"></div>
+        </div>
       </div>
     </div>
     
@@ -25894,29 +25924,179 @@ function initDiagramView(st = state) {
   }
 }
 
+function renderAiPromptsList(st) {
+  const aiView = st.container ? st.container.querySelector('.view-ai') : el('.view-ai');
+  if (!aiView) return;
+  const listContainer = aiView.querySelector('.ai-prompts-list');
+  if (!listContainer) return;
+
+  if (!st.relation.ai_prompts) st.relation.ai_prompts = [];
+  const prompts = st.relation.ai_prompts;
+
+  if (prompts.length === 0) {
+    listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.select_prompt')}</p>`;
+    return;
+  }
+
+  const currentUser = window.currentUser || '';
+  const items = prompts.filter(p => p.scope === 'everyone' || (p.scope === 'you' && p.user === currentUser));
+
+  if (items.length === 0) {
+    listContainer.innerHTML = `<p class="text-muted-foreground" style="font-size: 0.8rem; margin: 0;">${t('relation.ai.select_prompt')}</p>`;
+    return;
+  }
+
+  listContainer.innerHTML = items.map((p, idx) => {
+    const origIdx = prompts.indexOf(p);
+    const scopeIcon = p.scope === 'you' ? '👤' : '🌐';
+    const escapedText = p.text.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    return `<div class="ai-prompt-item" data-idx="${origIdx}">
+      <span class="ai-prompt-scope-icon" title="${p.scope === 'you' ? t('relation.ai.scope_you') : t('relation.ai.scope_everyone')}">${scopeIcon}</span>
+      <span class="ai-prompt-text" title="${escapedText}">${escapedText}</span>
+      <button class="ai-prompt-delete" data-idx="${origIdx}" title="${t('relation.ai.prompt_deleted')}">✕</button>
+    </div>`;
+  }).join('');
+
+  listContainer.querySelectorAll('.ai-prompt-text').forEach(span => {
+    span.addEventListener('click', () => {
+      const input = aiView.querySelector('.ai-question');
+      if (input) input.value = span.title;
+    });
+  });
+
+  listContainer.querySelectorAll('.ai-prompt-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      st.relation.ai_prompts.splice(idx, 1);
+      renderAiPromptsList(st);
+      showToast(t('relation.ai.prompt_deleted'), 'info');
+    });
+  });
+}
+
+function ensureAiHistoryRelation(st) {
+  if (!st.relation.ai_history) {
+    st.relation.ai_history = {
+      pot: 'relation',
+      guid: '',
+      name: 'ai_history',
+      title: { pt: 'Histórico IA', en: 'AI History', es: 'Historial IA', fr: 'Historique IA', it: 'Cronologia IA', de: 'KI-Verlauf' },
+      columns: {
+        id: 'id',
+        datetime: 'datetime',
+        engine: 'string',
+        user: 'string',
+        question: 'textarea',
+        answer: 'html'
+      },
+      rel_options: {
+        editable: false,
+        show_multicheck: true,
+        show_natural_order: false,
+        show_id: false,
+        show_column_kind: false,
+        show_stats: false,
+        cardinality_min: 0,
+        cardinality_max: null,
+        general_view_options: ['Table', 'Cards'],
+        general_always_visible_options: ['Select One', 'Select Many'],
+        general_line_options: ['View', 'Delete'],
+        general_multi_options: ['Invert Page', 'Invert All', 'Remove Checked', 'Multi View', 'Multi Delete']
+      },
+      items: [],
+      log: []
+    };
+  }
+  return st.relation.ai_history;
+}
+
+function renderAiHistoryRelation(st) {
+  const aiView = st.container ? st.container.querySelector('.view-ai') : el('.view-ai');
+  if (!aiView) return;
+  const histContainer = aiView.querySelector('.ai-history-container');
+  if (!histContainer) return;
+
+  const histRel = ensureAiHistoryRelation(st);
+
+  const oldUid = histContainer.dataset.relationUid;
+  if (oldUid) {
+    relationInstances.delete(oldUid);
+    unregisterRelation(oldUid);
+  }
+  histContainer.innerHTML = '';
+
+  const clonedData = JSON.parse(JSON.stringify(histRel));
+  const histState = initRelationInstance(histContainer, clonedData, { showJsonEditor: false, isNested: true });
+  histContainer.dataset.relationUid = histState.uid;
+
+  st._aiHistoryState = histState;
+}
+
+function addAiHistoryEntry(st, question, answer, engine) {
+  const histRel = ensureAiHistoryRelation(st);
+  const nextId = histRel.items.length > 0
+    ? Math.min(...histRel.items.map(r => r[0])) - 1
+    : -1;
+  const now = new Date();
+  const dtStr = now.toISOString().replace('T', ' ').substring(0, 19);
+  histRel.items.push([nextId, dtStr, engine || 'gpt-4.1-mini', window.currentUser || '', question, answer]);
+  renderAiHistoryRelation(st);
+}
+
 function initAIView(st = state) {
   const aiView = st.container ? st.container.querySelector('.view-ai') : el('.view-ai');
   if (!aiView) return;
-  
+
+  if (!st.relation.ai_prompts) st.relation.ai_prompts = [];
+
+  renderAiPromptsList(st);
+
+  const savePromptBtn = aiView.querySelector('.btn-ai-save-prompt');
+  if (savePromptBtn) {
+    const newBtn = savePromptBtn.cloneNode(true);
+    savePromptBtn.parentNode.replaceChild(newBtn, savePromptBtn);
+    newBtn.addEventListener('click', () => {
+      const input = aiView.querySelector('.ai-question');
+      const text = input ? input.value.trim() : '';
+      if (!text) {
+        showToast(t('relation.ai.prompt_empty'), 'warning');
+        return;
+      }
+      const exists = st.relation.ai_prompts.some(p => p.text === text);
+      if (exists) {
+        showToast(t('relation.ai.prompt_exists'), 'warning');
+        return;
+      }
+      const scopeSelect = aiView.querySelector('.ai-prompt-scope-select');
+      const scope = scopeSelect ? scopeSelect.value : 'everyone';
+      const entry = { text, scope };
+      if (scope === 'you') entry.user = window.currentUser || '';
+      st.relation.ai_prompts.push(entry);
+      renderAiPromptsList(st);
+      showToast(t('relation.ai.prompt_saved'), 'success');
+    });
+  }
+
   const input = aiView.querySelector('.ai-question');
   const submitBtn = aiView.querySelector('.btn-ai-ask');
   const voiceBtn = aiView.querySelector('.btn-ai-voice');
   const languageSelect = aiView.querySelector('.voice-language');
-  
+
   if (input && submitBtn) {
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
-    
+
     const newSubmitBtn = submitBtn.cloneNode(true);
     submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
-    
+
     newSubmitBtn.addEventListener('click', () => {
       const question = newInput.value.trim();
       if (question) {
         askAI(question, st);
       }
     });
-    
+
     newInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const question = newInput.value.trim();
@@ -25925,31 +26105,31 @@ function initAIView(st = state) {
         }
       }
     });
-    
+
     if (voiceBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       const newVoiceBtn = voiceBtn.cloneNode(true);
       voiceBtn.parentNode.replaceChild(newVoiceBtn, voiceBtn);
-      
+
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       let recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      
+
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         const currentInput = aiView.querySelector('.ai-question');
         if (currentInput) currentInput.value = transcript;
         newVoiceBtn.classList.remove('recording');
       };
-      
+
       recognition.onerror = () => {
         newVoiceBtn.classList.remove('recording');
       };
-      
+
       recognition.onend = () => {
         newVoiceBtn.classList.remove('recording');
       };
-      
+
       newVoiceBtn.addEventListener('click', () => {
         if (newVoiceBtn.classList.contains('recording')) {
           recognition.stop();
@@ -25963,6 +26143,8 @@ function initAIView(st = state) {
       });
     }
   }
+
+  renderAiHistoryRelation(st);
 }
 
 function initSavedView(st = state) {
@@ -25994,13 +26176,15 @@ function initSavedView(st = state) {
       const type = typeSelect.value;
       const scope = scopeSelect.value;
       const snapshot = createSavedSnapshot(st, type);
-      st.relation.saved.push({
+      const entry = {
         name,
         datetime: new Date().toISOString(),
         type,
         scope,
         data: JSON.stringify(snapshot)
-      });
+      };
+      if (scope === 'you') entry.user = window.currentUser || '';
+      st.relation.saved.push(entry);
       nameInput.value = '';
       renderSavedViewsList(st);
       showToast(t('relation.toast.view_saved'), 'success');
@@ -26770,6 +26954,15 @@ function init() {
     utcSelector.addEventListener('change', (e) => {
       window.currentUserUTC = parseFloat(e.target.value);
       localStorage.setItem('relation_utc', e.target.value);
+    });
+  }
+
+  const userInput = document.getElementById('user-input');
+  if (userInput) {
+    userInput.value = window.currentUser;
+    userInput.addEventListener('input', (e) => {
+      window.currentUser = e.target.value;
+      localStorage.setItem('relation_user', e.target.value);
     });
   }
 

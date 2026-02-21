@@ -4146,6 +4146,127 @@ table.relation-table tbody tr.row-highlighted:hover .relation-select {
   margin-top: var(--space-2);
 }
 
+.ai-section-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--primary-700, #1d4ed8);
+  margin-bottom: var(--space-1, 4px);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ai-saved-prompts-section {
+  margin-bottom: var(--space-3, 12px);
+  padding-bottom: var(--space-3, 12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.ai-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.ai-prompt-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--white, #fff);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.15s;
+}
+
+.ai-prompt-item:hover {
+  background: var(--primary-50, #eff6ff);
+  border-color: var(--primary-200, #bfdbfe);
+}
+
+.ai-prompt-scope-icon {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.ai-prompt-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-prompt-delete {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.ai-prompt-delete:hover {
+  opacity: 1;
+  color: var(--error, #ef4444);
+}
+
+.ai-input-section {
+  margin-bottom: var(--space-3, 12px);
+}
+
+.ai-save-prompt-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  margin-top: var(--space-2, 8px);
+}
+
+.ai-save-prompt-row select {
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--white, #fff);
+}
+
+.ai-response-section {
+  margin-bottom: var(--space-3, 12px);
+}
+
+.ai-history-section {
+  margin-top: var(--space-4, 16px);
+  padding-top: var(--space-3, 12px);
+  border-top: 1px solid var(--border);
+}
+
+.ai-history-container {
+  min-height: 40px;
+}
+
+.ai-response-content h1,
+.ai-response-content h2,
+.ai-response-content h3,
+.ai-response-content h4 {
+  margin: 0.75em 0 0.25em 0;
+  font-weight: 600;
+}
+
+.ai-response-content h3 {
+  font-size: 1rem;
+}
+
+.ai-response-content h4 {
+  font-size: 0.9rem;
+}
+
 /* Voice button recording state */
 .btn.recording {
   animation: pulse-recording 1s infinite;
