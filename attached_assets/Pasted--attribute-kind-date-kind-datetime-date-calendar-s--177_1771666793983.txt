@@ -1,0 +1,71 @@
+{
+  attribute_kind: ['date'],
+  kind: 'datetime',
+  date: {
+    calendar_s: [
+      {
+        calendar: 'gregorian',
+        title: { pt: 'Gregoriano', en: 'Gregorian', es: 'Gregoriano', fr: 'Grégorien', it: 'Gregoriano', de: 'Gregorianisch' },
+        active: true,
+        min_unit: 'year',
+        max_unit: 'second'
+        // units:         ['century','decade','year','season','month','week','weekday','day','timezone','hour','minute','second','millisecond']
+        // exclude_units: ['century','decade','season','week','weekday']
+      },
+      {
+        calendar: 'gregorian_swatchbeats',
+        title: { pt: 'Gregoriano (Swatch Beats)', en: 'Gregorian (Swatch Beats)', es: 'Gregoriano (Swatch Beats)', fr: 'Grégorien (Swatch Beats)', it: 'Gregoriano (Swatch Beats)', de: 'Gregorianisch (Swatch Beats)' },
+        active: true,
+        min_unit: 'year',
+        max_unit: 'centibeat'
+        // units:         ['century','decade','year','season','month','week','weekday','day','beat','centibeat']
+        // exclude_units: ['century','decade','season','week','weekday']
+      },
+      {
+        calendar: 'chinese',
+        title: { pt: 'Chinês', en: 'Chinese', es: 'Chino', fr: 'Chinois', it: 'Cinese', de: 'Chinesisch' },
+        active: true,
+        min_unit: 'cycle',
+        max_unit: 'second'
+        // units:         ['cycle','year','month','day','timezone','hour','minute','second','millisecond']
+        // exclude_units: []
+      },
+      {
+        calendar: 'japanese',
+        title: { pt: 'Japonês', en: 'Japanese', es: 'Japonés', fr: 'Japonais', it: 'Giapponese', de: 'Japanisch' },
+        active: true,
+        min_unit: 'era',
+        max_unit: 'second'
+        // units:         ['era','year','month','week','weekday','day','timezone','hour','minute','second','millisecond']
+        // exclude_units: ['week','weekday']
+      },
+      {
+        calendar: 'hijri',
+        title: { pt: 'Hijri (Islâmico)', en: 'Hijri (Islamic)', es: 'Hijri (Islámico)', fr: 'Hijri (Islamique)', it: 'Hijri (Islamico)', de: 'Hijri (Islamisch)' },
+        active: true,
+        min_unit: 'year',
+        max_unit: 'second'
+        // units:         ['year','month','week','weekday','day','timezone','hour','minute','second','millisecond']
+        // exclude_units: ['week','weekday']
+      },
+      {
+        calendar: 'rumi',
+        title: { pt: 'Rumi (Otomano)', en: 'Rumi (Ottoman)', es: 'Rumi (Otomano)', fr: 'Roumi (Ottoman)', it: 'Rumi (Ottomano)', de: 'Rumi (Osmanisch)' },
+        active: true,
+        min_unit: 'year',
+        max_unit: 'second'
+        // units:         ['year','month','week','weekday','day','timezone','hour','minute','second','millisecond']
+        // exclude_units: ['week','weekday']
+      },
+      {
+        calendar: 'french_republican',
+        title: { pt: 'Republicano Francês', en: 'French Republican', es: 'Republicano Francés', fr: 'Républicain Français', it: 'Repubblicano Francese', de: 'Französisch Republikanisch' },
+        active: true,
+        min_unit: 'year',
+        max_unit: 'decimal_second'
+        // units:         ['year','month','decade_week','decade_day','day','timezone','decimal_hour','decimal_minute','decimal_second','millisecond']
+        // exclude_units: ['decade_week','decade_day']
+      }
+    ]
+  }
+}
