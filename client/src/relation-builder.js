@@ -24467,6 +24467,12 @@ function initRelationInstance(container, relationData, options = {}) {
         <span class="analysis-help-badge analysis-panel-help-badge ai-help-badge" title="${t('relation.ai.help_text')}" data-testid="button-ai-help">ℹ</span>
         <div class="ai-help-panel" style="display: none;">
           <p data-i18n="relation.ai.help_text">${t('relation.ai.help_text')}</p>
+          <hr class="ai-help-separator">
+          <div class="ai-dynamic-section">
+            <p class="ai-dynamic-notice"><span class="ai-dynamic-icon">⚡</span> <em data-i18n="relation.ai.dynamic_content_notice">${t('relation.ai.dynamic_content_notice')}</em></p>
+            <button class="btn btn-outline btn-sm btn-load-model-comparison" data-testid="button-load-model-comparison" data-i18n="relation.ai.load_model_comparison">${t('relation.ai.load_model_comparison')}</button>
+            <div class="ai-model-comparison-result"></div>
+          </div>
         </div>
         <div class="ai-saved-prompts-section">
           <div class="ai-section-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -28260,6 +28266,7 @@ function init() {
         renderPagination(state);
         renderTable(state);
       }
+      window.dispatchEvent(new Event('languageChanged'));
     });
   }
 
@@ -28962,6 +28969,69 @@ function init() {
   setupHelpBadge('.clustering-help-badge', '.clustering-help-panel');
   setupHelpBadge('.multivariate-help-badge', '.multivariate-help-panel');
   setupHelpBadge('.ai-help-badge', '.ai-help-panel');
+
+  const btnLoadComparison = document.querySelector('.btn-load-model-comparison');
+  if (btnLoadComparison) {
+    let comparisonCache = null;
+    let comparisonLangCache = null;
+    function resetComparisonState() {
+      const resultDiv = document.querySelector('.ai-model-comparison-result');
+      if (resultDiv) resultDiv.innerHTML = '';
+      comparisonCache = null;
+      comparisonLangCache = null;
+      btnLoadComparison.textContent = t('relation.ai.load_model_comparison');
+      btnLoadComparison.dataset.i18n = 'relation.ai.load_model_comparison';
+    }
+    window.addEventListener('languageChanged', resetComparisonState);
+    btnLoadComparison.addEventListener('click', async () => {
+      const resultDiv = document.querySelector('.ai-model-comparison-result');
+      if (!resultDiv) return;
+      const currentLang = window.currentLang || 'pt';
+      if (comparisonCache && comparisonLangCache === currentLang) {
+        resultDiv.innerHTML = comparisonCache;
+        btnLoadComparison.textContent = t('relation.ai.refresh_comparison');
+        btnLoadComparison.dataset.i18n = 'relation.ai.refresh_comparison';
+        return;
+      }
+      const modelSelect = document.querySelector('.ai-model-select');
+      const models = [];
+      if (modelSelect) {
+        const optgroups = modelSelect.querySelectorAll('optgroup');
+        optgroups.forEach(og => {
+          og.querySelectorAll('option').forEach(opt => {
+            models.push({ id: opt.value, name: opt.textContent, company: og.label });
+          });
+        });
+      }
+      if (models.length === 0) {
+        models.push({ id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', company: 'OpenAI' });
+      }
+      const useModel = modelSelect ? modelSelect.value : 'gpt-4.1-mini';
+      btnLoadComparison.disabled = true;
+      btnLoadComparison.textContent = t('relation.ai.loading_comparison');
+      resultDiv.innerHTML = '<div class="ai-comparison-loading"><div class="spinner-small"></div> <span>' + t('relation.ai.loading_comparison') + '</span></div>';
+      try {
+        const resp = await fetch('/api/ai/compare-models', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ models, language: currentLang, useModel })
+        });
+        const data = await resp.json();
+        if (data.error) throw new Error(data.error);
+        const safeHtml = (data.html || '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/on\w+\s*=/gi, '');
+        resultDiv.innerHTML = '<div class="ai-comparison-content">' + safeHtml + '</div>';
+        comparisonCache = resultDiv.innerHTML;
+        comparisonLangCache = currentLang;
+        btnLoadComparison.textContent = t('relation.ai.refresh_comparison');
+        btnLoadComparison.dataset.i18n = 'relation.ai.refresh_comparison';
+      } catch (err) {
+        resultDiv.innerHTML = '<p class="ai-comparison-error">' + t('relation.ai.comparison_error') + '</p>';
+        btnLoadComparison.textContent = t('relation.ai.load_model_comparison');
+        btnLoadComparison.dataset.i18n = 'relation.ai.load_model_comparison';
+      }
+      btnLoadComparison.disabled = false;
+    });
+  }
 
   el('.btn-corr-all')?.addEventListener('click', () => analyzeAllPairs());
   

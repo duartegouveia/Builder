@@ -259,5 +259,69 @@ Always respond with valid JSON. For the "text" field, use HTML formatting to mak
     }
   });
   
+  app.post("/api/ai/compare-models", async (req, res) => {
+    try {
+      const { models, language, useModel } = req.body;
+
+      if (!models || !Array.isArray(models) || models.length === 0) {
+        return res.status(400).json({ error: "Models list is required" });
+      }
+
+      const lang = language || 'en';
+      const availableModels = getAvailableModels();
+      const modelIds = availableModels.map(m => m.id);
+      const selectedModel = (useModel && modelIds.includes(useModel)) ? useModel : 'gpt-4.1-mini';
+      const { client } = getClientForModel(selectedModel);
+
+      const modelsList = models.map(m => `- ${m.name} (${m.company})`).join('\n');
+
+      const langMap = { pt: 'Portuguese', en: 'English', es: 'Spanish', fr: 'French', it: 'Italian', de: 'German' };
+      const langName = langMap[lang] || 'English';
+
+      const systemPrompt = `You are an AI technology expert. Respond ENTIRELY in ${langName}. Generate an HTML comparison of the following AI models. For each model, provide:
+1. Approximate release date
+2. Key strengths compared to competitors
+3. Key weaknesses compared to competitors
+4. Cost level (Low / Medium / High / Very High) relative to competitors
+
+Models to compare:
+${modelsList}
+
+Respond with ONLY valid JSON in this format:
+{
+  "html": "<div>...your HTML comparison content here...</div>"
+}
+
+Use a well-structured HTML table with <table>, <thead>, <tbody>, <tr>, <th>, <td> tags. Use <strong> for emphasis. Keep descriptions concise (1-2 sentences each). The table should have columns: Model, Company, Release Date, Strengths, Weaknesses, Cost Level. Do NOT include any markdown, only HTML inside the JSON.`;
+
+      const reasoning = isReasoningModel(selectedModel);
+      const requestParams = {
+        model: selectedModel,
+        messages: reasoning
+          ? [{ role: "user", content: systemPrompt }]
+          : [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: "Compare these AI models." }
+            ],
+      };
+      if (reasoning) {
+        requestParams.max_completion_tokens = 4096;
+      } else {
+        requestParams.max_tokens = 4096;
+        requestParams.response_format = { type: "json_object" };
+      }
+
+      const response = await client.chat.completions.create(requestParams);
+      let content = response.choices[0]?.message?.content || '{"html": ""}';
+      content = content.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+      const result = JSON.parse(content);
+
+      res.json({ html: result.html || '' });
+    } catch (error) {
+      console.error("AI Model Comparison error:", error);
+      res.status(500).json({ error: "Failed to compare models: " + (error.message || '') });
+    }
+  });
+
   return httpServer;
 }
