@@ -1,8 +1,11 @@
 import './styles.css';
+import { CALENDAR_DEFINITIONS, UTC_OFFSETS, CALENDAR_VALIDATION_MESSAGES, CALENDAR_DESCRIPTIONS, isGregorianLeapYear, gregorianDaysInMonth, gregorianDaysInYear, gregorianToJDN, jdnToGregorian, gregorianWeekday, weekdayFromJDN, isHijriLeapYear, hijriDaysInMonth, hijriToJDN, jdnToHijri, isJulianLeapYear, julianToJDN, jdnToJulian, rumiToJDN, jdnToRumi, isFrenchRepublicanLeapYear, frenchRepublicanToJDN, jdnToFrenchRepublican, chineseApproxToJDN, jdnToChineseApprox, getJapaneseEra, japaneseToJDN, jdnToJapanese, convertBetweenCalendars, calendarToJDN, jdnToCalendar, timeToFraction, fractionToTime, timeToSwatchBeats, swatchBeatsToTime, timeToDecimal, decimalToTime, applyTimezoneOffset, dateToNumericValue, numericValueToDate, validateDateComponents, getCalendarUnitRange, canUseNativeDateInput, checkCalendarConsistency, formatCalendarDate, getCalendarDescription } from './calendar-engine.js';
 
-const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select'];
+const COLUMN_TYPES = ['id', 'boolean', 'string', 'textarea', 'int', 'float', 'date', 'datetime', 'time', 'relation', 'select', 'color'];
 
 const all_entities = {};
+
+window.currentUserUTC = parseFloat(localStorage.getItem('relation_utc') || String(-(new Date().getTimezoneOffset()) / 60));
 
 const ALL_LANGUAGES = {
   pt: 'Português', en: 'English', es: 'Español', fr: 'Français', it: 'Italiano', de: 'Deutsch',
@@ -5405,10 +5408,10 @@ function formatCellValue(value, type, colName, st) {
 
 // ─── Integrity Check ───────────────────────────────────────────────────
 const KNOWN_COLUMN_KINDS = new Set(['id', 'string', 'int', 'float', 'boolean', 'textarea', 'relation', 'date', 'datetime', 'time', 'select', 'password', 'email', 'tel', 'url', 'search', 'color', 'radio', 'file', 'multi_text', 'multi_string', 'multi_int', 'multi_float', 'multi_boolean', 'multi_date', 'multi_datetime', 'multi_time', 'multi_select', 'multi_textarea', 'multi_email', 'multi_tel', 'multi_url', 'multi_color', 'multi_search']);
-const KNOWN_ATTRIBUTE_KINDS = new Set(['association', 'lookup', 'pointer', 'range']);
-const KNOWN_ATT_KEYS = new Set(['attribute_kind', 'name', 'short_name', 'association', 'lookup', 'pointer', 'range', 'label', 'field_decoration', 'validation', 'visibility', 'readonly', 'layout', 'new_fast', 'kind', 'display_name', 'multiple']);
+const KNOWN_ATTRIBUTE_KINDS = new Set(['association', 'lookup', 'pointer', 'range', 'date']);
+const KNOWN_ATT_KEYS = new Set(['attribute_kind', 'name', 'short_name', 'association', 'lookup', 'pointer', 'range', 'date', 'label', 'field_decoration', 'validation', 'visibility', 'readonly', 'layout', 'new_fast', 'kind', 'display_name', 'multiple']);
 const KNOWN_REL_OPTIONS_KEYS = new Set([...Object.keys(DEFAULT_REL_OPTIONS), 'uiState']);
-const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved', 'log']);
+const KNOWN_RELATION_KEYS = new Set(['pot', 'name', 'guid', 'columns', 'items', 'options', 'rel_options', 'saved', 'log', 'title']);
 
 function checkRelationIntegrity(relation, path = 'root') {
   const issues = [];
@@ -5631,6 +5634,33 @@ function checkRelationIntegrity(relation, path = 'root') {
   if (relation.options && typeof relation.options !== 'object') {
     warnings.push({ path, severity: 'warning', msg: '"options" deve ser um objecto.' });
   }
+
+  if (relation.title && typeof relation.title !== 'object') {
+    warnings.push({ path, severity: 'warning', msg: '"title" deve ser um objecto i18n (ex: {pt: "...", en: "..."}).' });
+  }
+
+  columnKinds.forEach((kind, idx) => {
+    if (typeof kind !== 'object' || kind === null || !Array.isArray(kind.attribute_kind)) return;
+    if (!kind.attribute_kind.includes('date')) return;
+    const colName = columnNames[idx];
+    const dateCfg = kind.date;
+    if (!dateCfg || typeof dateCfg !== 'object') {
+      warnings.push({ path, severity: 'warning', msg: `Coluna "${colName}": attribute_kind "date" sem configuração "date".` });
+      return;
+    }
+    const calendarId = dateCfg.calendar || 'gregorian';
+    const calDef = CALENDAR_DEFINITIONS.find(c => c.id === calendarId);
+    if (!calDef) {
+      issues.push({ path, severity: 'error', msg: `Coluna "${colName}": calendário desconhecido "${calendarId}".` });
+      return;
+    }
+    if (dateCfg.min_unit || dateCfg.max_unit) {
+      const consistency = checkCalendarConsistency(calendarId, dateCfg.min_unit || 'year', dateCfg.max_unit || 'millisecond');
+      if (!consistency.valid) {
+        issues.push({ path, severity: 'error', msg: `Coluna "${colName}": ${consistency.reason}` });
+      }
+    }
+  });
 
   return { issues, warnings, info };
 }
@@ -6877,6 +6907,150 @@ function getNextPointerId(pointerRelation) {
     });
   }
   return String(maxId + 1);
+}
+
+function getColumnDateConfig(colIdx, st) {
+  if (!st || !st.relation || !st.relation.columns) return null;
+  const colName = st.columnNames[colIdx];
+  const colDef = st.relation.columns[colName];
+  if (typeof colDef === 'object' && colDef !== null && Array.isArray(colDef.attribute_kind) && colDef.attribute_kind.includes('date')) {
+    return colDef.date || {};
+  }
+  return null;
+}
+
+function buildCalendarDateInput(value, dateCfg, editable, onChange) {
+  const calendarId = dateCfg.calendar || 'gregorian';
+  const minUnit = dateCfg.min_unit || 'year';
+  const maxUnit = dateCfg.max_unit || 'millisecond';
+  const calDef = CALENDAR_DEFINITIONS.find(c => c.id === calendarId);
+  
+  if (canUseNativeDateInput(calendarId, minUnit, maxUnit)) {
+    const input = document.createElement('input');
+    if (maxUnit === 'day' || maxUnit === 'weekday') {
+      input.type = 'date';
+    } else if (maxUnit === 'month') {
+      input.type = 'month';
+    } else if (maxUnit === 'week') {
+      input.type = 'week';
+    } else if (minUnit === 'hour' || minUnit === 'minute' || minUnit === 'second') {
+      input.type = 'time';
+    } else {
+      input.type = 'datetime-local';
+      if (maxUnit === 'millisecond') input.step = '0.001';
+    }
+    if (value) input.value = value;
+    input.disabled = !editable;
+    input.addEventListener('input', () => { if (onChange) onChange(input.value); });
+    return input;
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'calendar-date-composite';
+  wrapper.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center;';
+
+  const units = calDef ? calDef.units : [];
+  const minIdx = units.findIndex(u => u.id === minUnit);
+  const maxIdx = units.findIndex(u => u.id === maxUnit);
+  const activeUnits = units.slice(Math.max(0, minIdx), maxIdx >= 0 ? maxIdx + 1 : units.length);
+
+  let currentComponents = {};
+  if (value && typeof value === 'object') {
+    currentComponents = { ...value };
+  } else if (typeof value === 'string' && value) {
+    const parts = value.split(/[-T:\s.]/);
+    activeUnits.forEach((u, i) => {
+      if (parts[i] !== undefined) currentComponents[u.id] = parseInt(parts[i], 10);
+    });
+  }
+
+  const inputs = {};
+  activeUnits.forEach(unit => {
+    if (unit.id === 'weekday' && unit.auto) return;
+
+    const label = document.createElement('label');
+    label.style.cssText = 'display: flex; flex-direction: column; font-size: 11px; color: var(--muted-foreground);';
+    
+    const lang = window.currentLang || 'pt';
+    const unitLabel = unit.label && typeof unit.label === 'object' ? (unit.label[lang] || unit.label['en'] || unit.label['pt'] || unit.id) : (unit.label || unit.id);
+    label.textContent = unitLabel;
+
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.className = 'calendar-unit-input';
+    inp.style.cssText = 'width: ' + (unit.id === 'year' ? '70px' : unit.id === 'millisecond' ? '55px' : '45px') + '; padding: 2px 4px; font-size: 13px;';
+    
+    const range = getCalendarUnitRange(calendarId, unit.id, currentComponents);
+    if (range) {
+      inp.min = range.min;
+      inp.max = range.max;
+    }
+    
+    if (currentComponents[unit.id] !== undefined) {
+      inp.value = unit.id === 'millisecond' ? String(currentComponents[unit.id]).padStart(3, '0') : currentComponents[unit.id];
+    }
+    inp.disabled = !editable;
+    inp.addEventListener('input', () => {
+      currentComponents[unit.id] = inp.value === '' ? null : parseInt(inp.value, 10);
+      
+      activeUnits.forEach(otherUnit => {
+        if (otherUnit.id === 'weekday' && otherUnit.auto && currentComponents.year && currentComponents.month && currentComponents.day) {
+          const jdn = calendarToJDN(calendarId, currentComponents);
+          if (jdn !== null) {
+            const wd = weekdayFromJDN(jdn);
+            const wdSpan = wrapper.querySelector('.weekday-display');
+            if (wdSpan) {
+              const wdNames = otherUnit.names && otherUnit.names[lang] ? otherUnit.names[lang] : (otherUnit.names && otherUnit.names['en'] ? otherUnit.names['en'] : []);
+              wdSpan.textContent = wdNames[wd] || String(wd);
+            }
+          }
+        }
+      });
+
+      if (onChange) onChange({ ...currentComponents });
+    });
+
+    inputs[unit.id] = inp;
+    label.appendChild(inp);
+    wrapper.appendChild(label);
+  });
+
+  const weekdayUnit = activeUnits.find(u => u.id === 'weekday' && u.auto);
+  if (weekdayUnit) {
+    const wdLabel = document.createElement('span');
+    wdLabel.className = 'weekday-display';
+    wdLabel.style.cssText = 'font-size: 12px; color: var(--muted-foreground); padding-top: 14px;';
+    if (currentComponents.year && currentComponents.month && currentComponents.day) {
+      const jdn = calendarToJDN(calendarId, currentComponents);
+      if (jdn !== null) {
+        const wd = weekdayFromJDN(jdn);
+        const lang = window.currentLang || 'pt';
+        const wdNames = weekdayUnit.names && weekdayUnit.names[lang] ? weekdayUnit.names[lang] : [];
+        wdLabel.textContent = wdNames[wd] || String(wd);
+      }
+    }
+    wrapper.appendChild(wdLabel);
+  }
+
+  if (calendarId !== 'gregorian' && calendarId !== 'gregorian_swatch') {
+    const convSpan = document.createElement('span');
+    convSpan.className = 'calendar-gregorian-equiv';
+    convSpan.style.cssText = 'font-size: 11px; color: var(--muted-foreground); margin-left: 8px; padding-top: 14px;';
+    const updateConv = () => {
+      const jdn = calendarToJDN(calendarId, currentComponents);
+      if (jdn !== null) {
+        const greg = jdnToGregorian(jdn);
+        convSpan.textContent = `= ${greg.year}-${String(greg.month).padStart(2, '0')}-${String(greg.day).padStart(2, '0')} (Greg.)`;
+      } else {
+        convSpan.textContent = '';
+      }
+    };
+    updateConv();
+    Object.values(inputs).forEach(inp => inp.addEventListener('input', updateConv));
+    wrapper.appendChild(convSpan);
+  }
+
+  return wrapper;
 }
 
 function buildMultiInput(values, baseType, editable, onChange) {
@@ -26232,11 +26406,34 @@ function init() {
       window.currentLang = e.target.value;
       localStorage.setItem('relation_lang', e.target.value);
       if (window.applyTranslations) window.applyTranslations();
+      updateRelationTitleH2();
       if (state && state.relation) {
         renderViewTabs();
         renderPagination(state);
         renderTable(state);
       }
+    });
+  }
+
+  const utcSelector = document.getElementById('utc-selector');
+  if (utcSelector) {
+    UTC_OFFSETS.forEach(tz => {
+      const opt = document.createElement('option');
+      opt.value = String(tz.offset);
+      opt.textContent = `${tz.label} (${tz.name})`;
+      utcSelector.appendChild(opt);
+    });
+    const savedUtc = localStorage.getItem('relation_utc');
+    if (savedUtc !== null) {
+      utcSelector.value = savedUtc;
+    } else {
+      const autoOffset = -(new Date().getTimezoneOffset()) / 60;
+      const closest = UTC_OFFSETS.reduce((prev, curr) => Math.abs(curr.offset - autoOffset) < Math.abs(prev.offset - autoOffset) ? curr : prev);
+      utcSelector.value = String(closest.offset);
+    }
+    utcSelector.addEventListener('change', (e) => {
+      window.currentUserUTC = parseFloat(e.target.value);
+      localStorage.setItem('relation_utc', e.target.value);
     });
   }
 
@@ -26716,11 +26913,45 @@ function init() {
   });
   
   // Create or update the main relation instance
+  function updateRelationTitleH2() {
+    const h2 = document.getElementById('relation-title-h2');
+    if (!state || !state.relation) {
+      if (h2) h2.style.display = 'none';
+      return;
+    }
+    const rel = state.relation;
+    let titleText = '';
+    if (rel.title && typeof rel.title === 'object') {
+      const lang = window.currentLang || 'pt';
+      titleText = rel.title[lang] || rel.title['en'] || rel.title['pt'] || '';
+    }
+    if (!titleText && rel.name) {
+      titleText = rel.name;
+    }
+    if (!titleText) {
+      if (h2) h2.style.display = 'none';
+      return;
+    }
+    if (h2) {
+      h2.textContent = titleText;
+      h2.style.display = '';
+    } else {
+      const mainContainer = document.querySelector('.relation-main-instance');
+      if (mainContainer) {
+        const newH2 = document.createElement('h2');
+        newH2.id = 'relation-title-h2';
+        newH2.className = 'relation-title-h2';
+        newH2.textContent = titleText;
+        newH2.style.cssText = 'margin: 0 0 1rem 0; font-size: 1.5rem; font-weight: 600; color: var(--foreground);';
+        mainContainer.parentNode.insertBefore(newH2, mainContainer);
+      }
+    }
+  }
+
   function createMainRelationInstance(relationData) {
     const mainContainer = document.querySelector('.relation-main-instance');
     if (!mainContainer) return;
     
-    // Clear existing content and unregister old instance
     const oldUid = mainContainer.dataset.relationUid;
     if (oldUid) {
       relationInstances.delete(oldUid);
@@ -26728,24 +26959,20 @@ function init() {
     }
     mainContainer.innerHTML = '';
     
-    // Deep clone the relation data to avoid shared state
     const clonedData = JSON.parse(JSON.stringify(relationData));
     
-    // Initialize the main instance using the same code as all other instances
     const mainState = initRelationInstance(mainContainer, clonedData, { showJsonEditor: false, isNested: false });
     
-    // Store uid for cleanup
     mainContainer.dataset.relationUid = mainState.uid;
     
-    // Update the global state reference to point to the main instance
-    // This maintains backward compatibility with any code still using global state
     Object.assign(state, mainState);
     
-    // Sync all_entities with the live relation object from the main instance
     const name = mainState.relation && mainState.relation.name;
     if (name) {
       all_entities[name] = mainState.relation;
     }
+
+    updateRelationTitleH2();
   }
   
   // Create a second relation instance at the bottom of the body

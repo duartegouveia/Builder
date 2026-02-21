@@ -61,6 +61,9 @@ The Relation Builder provides an advanced data table interface with core functio
 - **Association Selection in New Dialogs**: Uses `openSelectOneDialog` with callback for unsaved rows.
 - **Dialog Overlay Safety**: Overlay click handlers prevent unintended dialog closures.
 - **Attribute Object (att) System**: Columns can be defined as simple type strings or complex att objects with configurable properties including kind resolution, display names, labels, field decoration, validation, visibility, readonly, layout, and new-fast mode.
+- **Date Attribute Kind**: Columns with `attribute_kind: ['date']` support multi-calendar date input with configurable `calendar`, `min_unit`, and `max_unit`. Supports 7 calendar types: Gregorian, Gregorian Swatch Beats, Chinese, Japanese, Hijri, Rumi, French Republican. Uses native HTML inputs for standard Gregorian; composite inputs for other calendars with auto-weekday calculation and Gregorian equivalent display.
+- **Relation Title**: Relations support a `.title` i18n object (e.g., `{pt: "...", en: "..."}`) rendered as an H2 heading above the main instance. Falls back to `.name` if no title is set.
+- **Timezone Selector**: UTC timezone selector next to language selector, persisted in `localStorage` key `relation_utc`. Auto-detects browser timezone on first load. Available as `window.currentUserUTC`.
 
 ### Virtual Keyboard Features
 The Virtual Keyboard offers comprehensive Unicode character input:
@@ -78,14 +81,14 @@ The Virtual Keyboard offers comprehensive Unicode character input:
 The Relation Builder supports 6 languages: Portuguese (pt, default), English (en), Spanish (es), French (fr), Italian (it), German (de).
 
 **Architecture:**
-- `client/src/relation-translations.js` — Contains `RELATION_TRANSLATIONS` object with 600+ keys covering all UI text, plus `window.t(key)`, `window.tf(key, vars)`, and `window.applyTranslations()` functions.
+- `client/src/relation-translations.js` — Contains `RELATION_TRANSLATIONS` object with 850+ keys covering all UI text, plus `window.t(key)`, `window.tf(key, vars)`, and `window.applyTranslations()` functions.
 - Translation fallback chain: `currentLang → en → pt → key`
 - `tf()` supports `{variable}` placeholder substitution
 - `applyTranslations()` does surgical DOM updates via `data-i18n` attributes without rebuilding the DOM
 - Language selector persists choice to `localStorage` key `relation_lang`
 - Language change triggers `applyTranslations()` + re-renders view tabs, pagination, and table
 
-**Key namespaces:** `relation.common.*`, `relation.view.*`, `relation.pagination.*`, `relation.rowops.*`, `relation.toast.*`, `relation.colmenu.*`, `relation.dialog.*`, `relation.filter.*`, `relation.sort.*`, `relation.derive.*`, `relation.binning.*`, `relation.stats.*`, `relation.analysis.*`, `relation.pivot.*`, `relation.ai.*`, `relation.saved.*`, `relation.structure.*`, `relation.export.*`, `relation.import.*`, `relation.multiops.*`, `relation.confirm.*`
+**Key namespaces:** `relation.common.*`, `relation.view.*`, `relation.pagination.*`, `relation.rowops.*`, `relation.toast.*`, `relation.colmenu.*`, `relation.dialog.*`, `relation.filter.*`, `relation.sort.*`, `relation.derive.*`, `relation.binning.*`, `relation.stats.*`, `relation.analysis.*`, `relation.pivot.*`, `relation.ai.*`, `relation.saved.*`, `relation.structure.*`, `relation.export.*`, `relation.import.*`, `relation.multiops.*`, `relation.confirm.*`, `relation.calendar.*`
 
 ## External Dependencies
 
