@@ -8328,7 +8328,7 @@ function createInputForType(type, value, rowIdx, colIdx, editable, st = state) {
       const calInput = buildCalendarDateInput(value, dateCfg, editable, (newVal) => {
         if (rowIdx >= 0 && st.relation.items[rowIdx]) {
           st.relation.items[rowIdx][colIdx] = newVal;
-          logOperation(st, { op: 'edit', row: rowIdx, col: colIdx, value: newVal });
+          logOperation(st, { op: 'inline_edit', id: getRowId(st, st.relation.items[rowIdx]), column: st.columnNames[colIdx], old: value, new: newVal });
         }
       });
       wrapper.appendChild(calInput);
@@ -13272,7 +13272,7 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       return;
     case 'format-color-scale':
       applyColorScale(colIdx, st);
-      logOperation(st, { op: 'format_color_scale', column: st.columnNames[colIdx] });
+      logOperation(st, { op: 'format_color_scale', column: st.columnNames[colIdx], colors: ['#f87171', '#fb923c', '#facc15', '#a3e635', '#4ade80'], steps: 5 });
       showToast(tf('relation.toast.color_scale_applied', {col: st.columnNames[colIdx]}), 'success');
       break;
     case 'format-icon-set':
@@ -13290,12 +13290,12 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       break;
     case 'toggle-group':
       toggleGroupBy(colIdx, st);
-      logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx], group_by_columns: getGroupByColumns(st).map(c => st.columnNames[c]), selected_values: Object.fromEntries(Object.entries(getGroupBySelectedValues(st)).map(([k, v]) => [st.columnNames[parseInt(k)] || k, v])) });
+      logOperation(st, { op: 'toggle_group', column: st.columnNames[colIdx] });
       showToast(tf('relation.toast.group_changed', {col: st.columnNames[colIdx]}), 'success');
       return;
     case 'group-all':
       groupByAllColumns(st);
-      logOperation(st, { op: 'group_all', group_by_columns: getGroupByColumns(st).map(c => st.columnNames[c]) });
+      logOperation(st, { op: 'group_all' });
       showToast(t('relation.toast.group_all'), 'success');
       return;
     case 'clear-groups':
@@ -13767,13 +13767,14 @@ function handleColumnMenuAction(colIdx, action, st = state) {
       showToast(tf('relation.toast.column_removed', {col: removedColName}), 'success');
       break;
     }
-    case 'remove-selected-cols':
-      logOperation(st, { op: 'remove_selected_columns' });
+    case 'remove-selected-cols': {
+      const removedSelCols = [...getSelectedColumns(st)].map(c => st.columnNames[c]);
+      logOperation(st, { op: 'remove_selected_columns', columns: removedSelCols });
       removeSelectedColumns(st);
       showToast(t('relation.toast.columns_removed'), 'success');
       break;
+    }
   }
-  
   setCurrentPage(st, 1);
   renderTable(st);
 }
@@ -15552,12 +15553,15 @@ function applyActiveFilterColor(colIdx, color, st = state) {
 }
 
 function toggleGroupBy(colIdx, st = state) {
-  const idx = getGroupByColumns(st).indexOf(colIdx);
+  const currentGroups = getGroupByColumns(st);
+  const idx = currentGroups.indexOf(colIdx);
   if (idx >= 0) {
-    getGroupByColumns(st).splice(idx, 1);
+    const newGroups = currentGroups.filter(i => i !== colIdx);
+    setGroupByColumns(st, newGroups);
     delete getGroupBySelectedValues(st)[colIdx];
   } else {
-    getGroupByColumns(st).push(colIdx);
+    currentGroups.push(colIdx);
+    setGroupByColumns(st, currentGroups);
   }
   getUiState(st).groupAllKeepVisible = false;
   setCurrentPage(st, 1);
@@ -15901,7 +15905,7 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
     .join('\n    ');
   
   menu.innerHTML = `
-    <div class="column-menu-header">${tf('relation.dialog.row_number', {index: rowIdx + 1})}</div>
+    <div class="column-menu-header">${t('relation.dialog.record')}</div>
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
@@ -16035,6 +16039,7 @@ function generateRowFormattedContent(st, row, mode = 'view') {
     const value = row[colIdx];
     const att = getAtt(st, colIdx);
     
+    if (type === 'id' && !st.rel_options.show_id) return;
     if (!isAttVisibleInOperation(st, colIdx, mode)) return;
     if (mode === 'new-fast' && att && !isAttIncludedInNewFast(st, colIdx) && type !== 'id') return;
     
@@ -16974,7 +16979,7 @@ function showRowViewDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = tf('relation.dialog.view_record', {index: rowIdx + 1});
+  const title = t('relation.dialog.view_record');
   
   const footerButtons = `
     <button class="btn btn-outline btn-action" data-action="edit">${t('relation.dialog.edit_btn')}</button>
@@ -17008,7 +17013,7 @@ function showRowCopyDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = tf('relation.dialog.copy_record', {index: rowIdx + 1});
+  const title = t('relation.dialog.copy_record');
   
   const footerButtons = `
     <input type="number" class="copy-count-input" min="1" value="1" style="width: 60px;">
@@ -17374,7 +17379,7 @@ function showRowPaperFormDialog(st, rowIdx) {
 function showRowPrintDialog(st, rowIdx) {
   closeAllMenus();
   const row = st.relation.items[rowIdx];
-  const title = `🖨️ ${tf('relation.dialog.print_record', {index: rowIdx + 1})}`;
+  const title = `🖨️ ${t('relation.dialog.print_record')}`;
   const footerButtons = `<button class="btn btn-primary print-record">${t('relation.dialog.print')}</button>`;
 
   showContentBasedOnMode(st, (container) => {
@@ -17401,7 +17406,7 @@ function showRowPrintDialog(st, rowIdx) {
               </style>
             </head>
             <body>
-              ${relationName ? `<h1>${escapeHtml(relationName)} - ${tf('relation.dialog.record_index', {index: rowIdx + 1})}</h1>` : `<h1>${tf('relation.dialog.record_index', {index: rowIdx + 1})}</h1>`}
+              ${relationName ? `<h1>${escapeHtml(relationName)} - ${t('relation.dialog.record_index')}</h1>` : `<h1>${t('relation.dialog.record_index')}</h1>`}
               ${printContent.innerHTML}
             </body>
             </html>
@@ -17418,7 +17423,7 @@ function showRowEditDialog(st, rowIdx) {
   closeAllMenus();
   
   const row = st.relation.items[rowIdx];
-  const title = tf('relation.dialog.edit_record', {index: rowIdx + 1});
+  const title = t('relation.dialog.edit_record');
   const footerButtons = `<button class="btn btn-primary save-record">${t('relation.common.save')}</button>`;
   
   showContentBasedOnMode(st, (container) => {
@@ -18190,6 +18195,8 @@ function renderGroupByPanel(st = state) {
   groupInfo.querySelector('.btn-clear-groups').addEventListener('click', () => {
     setGroupByColumns(st, []);
     setGroupBySelectedValues(st, {});
+    getUiState(st).groupAllKeepVisible = false;
+    logOperation(st, { op: 'clear_groups' });
     renderGroupByPanel(st);
     const currentView = getCurrentView(st);
     if (currentView === 'cards') {
@@ -18212,6 +18219,8 @@ function renderGroupByPanel(st = state) {
         getGroupBySelectedValues(st)[colIdx] = value;
       }
       
+      logOperation(st, { op: 'group_select_value', column: st.columnNames[colIdx], value: value === '__all__' ? null : (value === '__null__' ? null : value) });
+      
       setCurrentPage(st, 1);
       const currentView = getCurrentView(st);
       if (currentView === 'cards') {
@@ -18229,6 +18238,8 @@ function renderGroupByPanel(st = state) {
       const newGroups = currentGroups.filter(idx => idx !== colIdx);
       setGroupByColumns(st, newGroups);
       delete getGroupBySelectedValues(st)[colIdx];
+      getUiState(st).groupAllKeepVisible = false;
+      logOperation(st, { op: 'remove_group', column: st.columnNames[colIdx] });
       setCurrentPage(st, 1);
       renderGroupByPanel(st);
       const currentView = getCurrentView(st);
@@ -26536,7 +26547,7 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
     .join('\n    ');
   
   menu.innerHTML = `
-    <div class="column-menu-header">${tf('relation.dialog.row_number', {index: rowIdx + 1})}</div>
+    <div class="column-menu-header">${t('relation.dialog.record')}</div>
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
@@ -26744,6 +26755,18 @@ function init() {
   const btnParse = el('.btn-parse-relation');
   const btnAiAsk = el('.btn-ai-ask');
   const aiQuestion = el('.ai-question');
+
+  const jsonSection = document.querySelector('.relation-json-section');
+  const jsonToggleHeader = document.querySelector('[data-testid="json-section-toggle"]');
+  const jsonSectionBody = document.querySelector('.json-section-body');
+  const jsonToggleArrow = document.querySelector('.json-toggle-arrow');
+  if (jsonToggleHeader) {
+    jsonToggleHeader.addEventListener('click', () => {
+      const isOpen = jsonSectionBody.style.display !== 'none';
+      jsonSectionBody.style.display = isOpen ? 'none' : 'block';
+      jsonToggleArrow.innerHTML = isOpen ? '&#9654;' : '&#9660;';
+    });
+  }
   
   function loadRelationFromEntity(jsonData) {
     const name = jsonData && jsonData.name;
@@ -26751,7 +26774,7 @@ function init() {
     textarea.value = JSON.stringify(liveData, null, 2);
     if (liveData && liveData.pot === 'relation') {
       createMainRelationInstance(liveData);
-      createSecondRelationInstance(liveData);
+      // createSecondRelationInstance(liveData);
     }
   }
 
@@ -27202,7 +27225,7 @@ function init() {
     
     if (result.success) {
       createMainRelationInstance(result.data);
-      createSecondRelationInstance(result.data);
+      // createSecondRelationInstance(result.data);
     } else {
       alert('Parse error: ' + result.error);
     }
@@ -27503,6 +27526,8 @@ function setupResizeHandle() {
   }, { passive: true });
   
   document.addEventListener('touchend', endResize);
+
+  loadRelationFromEntity(PRODUCTS_JSON);
 }
 
 document.addEventListener('DOMContentLoaded', init);

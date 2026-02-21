@@ -114,60 +114,66 @@
         </nav>
 
         <section class="space-y-4">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Relation JSON</h3>
-              <div class="flex gap-2 flex-wrap">
-                <button class="btn-generate-demo btn btn-outline btn-sm gap-2" data-testid="button-generate-demo">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-                  Generate Demo
-                </button>
-                <button class="btn-load-products btn btn-outline btn-sm gap-2" data-testid="button-load-products">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                  Products_raw
-                </button>
-                <button class="btn-load-categories btn btn-outline btn-sm gap-2" data-testid="button-load-categories">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
-                  Categories
-                </button>
-                <button class="btn-load-stocks btn btn-outline btn-sm gap-2" data-testid="button-load-stocks">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
-                  Stocks_raw
-                </button>
-                <button class="btn-load-pricelists btn btn-outline btn-sm gap-2" data-testid="button-load-pricelists">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                  Price_list_raw
-                </button>
-                <button class="btn-parse-relation btn btn-primary btn-sm gap-2" data-testid="button-parse-relation">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                  Parse & Display
-                </button>
-              </div>
-              <div class="flex gap-2 flex-wrap obj-buttons-row" style="margin-top: 0.5rem;">
-                <button class="btn-simple-obj btn btn-outline btn-sm" data-testid="button-simple-obj">Simple Obj</button>
-                <button class="btn-array-obj btn btn-outline btn-sm" data-testid="button-array-obj">Array Obj</button>
-                <button class="btn-object-obj btn btn-outline btn-sm" data-testid="button-object-obj">Object Obj</button>
-                <button class="btn-i18n btn btn-outline btn-sm" data-testid="button-i18n">i18n</button>
-                <button class="btn-attribute-obj btn btn-outline btn-sm" data-testid="button-attribute-obj">Attribute Obj</button>
-                <button class="btn-rel-obj btn btn-outline btn-sm" data-testid="button-rel-obj">Rel Obj</button>
-                <button class="btn-obj-to-rel btn btn-primary btn-sm" data-testid="button-obj-to-rel">Obj->Rel</button>
-                <button class="btn-rel-to-obj btn btn-primary btn-sm" data-testid="button-rel-to-obj">Rel->Obj</button>
-              </div>
-            </div>
-            <div class="card-content">
-              <div class="json-editor-wrapper">
-                <div class="json-textarea-panel">
-                  <textarea class="relation-json relation-json-textarea output_textarea_json" data-testid="textarea-relation-json"></textarea>
-                </div>
-                <div class="json-preview-panel"></div>
-              </div>
-            </div>
+          <div class="relation-main-instance" data-testid="main-relation-container">
+            <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
           </div>
         </section>
 
-        <section class="space-y-4">
-          <div class="relation-main-instance" data-testid="main-relation-container">
-            <p class="text-muted-foreground text-center py-8">Generate demo data or paste JSON and click "Parse & Display"</p>
+        <section class="space-y-4 relation-json-section" style="display: none;">
+          <div class="card">
+            <div class="card-header" style="cursor: pointer;" data-testid="json-section-toggle">
+              <h3 class="card-title">
+                <span class="json-toggle-arrow">&#9654;</span> Relation JSON
+              </h3>
+            </div>
+            <div class="json-section-body" style="display: none;">
+              <div class="card-header" style="border-top: 1px solid var(--border); padding-top: 0.5rem;">
+                <div class="flex gap-2 flex-wrap">
+                  <button class="btn-generate-demo btn btn-outline btn-sm gap-2" data-testid="button-generate-demo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                    Generate Demo
+                  </button>
+                  <button class="btn-load-products btn btn-outline btn-sm gap-2" data-testid="button-load-products">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    Products_raw
+                  </button>
+                  <button class="btn-load-categories btn btn-outline btn-sm gap-2" data-testid="button-load-categories">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+                    Categories
+                  </button>
+                  <button class="btn-load-stocks btn btn-outline btn-sm gap-2" data-testid="button-load-stocks">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                    Stocks_raw
+                  </button>
+                  <button class="btn-load-pricelists btn btn-outline btn-sm gap-2" data-testid="button-load-pricelists">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Price_list_raw
+                  </button>
+                  <button class="btn-parse-relation btn btn-primary btn-sm gap-2" data-testid="button-parse-relation">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    Parse & Display
+                  </button>
+                </div>
+                <div class="flex gap-2 flex-wrap obj-buttons-row" style="margin-top: 0.5rem;">
+                  <button class="btn-simple-obj btn btn-outline btn-sm" data-testid="button-simple-obj">Simple Obj</button>
+                  <button class="btn-array-obj btn btn-outline btn-sm" data-testid="button-array-obj">Array Obj</button>
+                  <button class="btn-object-obj btn btn-outline btn-sm" data-testid="button-object-obj">Object Obj</button>
+                  <button class="btn-i18n btn btn-outline btn-sm" data-testid="button-i18n">i18n</button>
+                  <button class="btn-attribute-obj btn btn-outline btn-sm" data-testid="button-attribute-obj">Attribute Obj</button>
+                  <button class="btn-rel-obj btn btn-outline btn-sm" data-testid="button-rel-obj">Rel Obj</button>
+                  <button class="btn-obj-to-rel btn btn-primary btn-sm" data-testid="button-obj-to-rel">Obj->Rel</button>
+                  <button class="btn-rel-to-obj btn btn-primary btn-sm" data-testid="button-rel-to-obj">Rel->Obj</button>
+                </div>
+              </div>
+              <div class="card-content">
+                <div class="json-editor-wrapper">
+                  <div class="json-textarea-panel">
+                    <textarea class="relation-json relation-json-textarea output_textarea_json" data-testid="textarea-relation-json"></textarea>
+                  </div>
+                  <div class="json-preview-panel"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
         </div>
