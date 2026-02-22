@@ -20752,18 +20752,6 @@ function initCorrelationConfig(st = state) {
     newBtn.addEventListener('click', () => analyzeAllPairs(st));
   }
   
-  // Add event listener for Help button
-  const helpBtn = corrView.querySelector('.analysis-help-badge');
-  if (helpBtn) {
-    const newBtn = helpBtn.cloneNode(true);
-    helpBtn.parentNode.replaceChild(newBtn, helpBtn);
-    newBtn.addEventListener('click', () => {
-      const helpDiv = corrView.querySelector('.correlation-help');
-      if (helpDiv) {
-        helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
-      }
-    });
-  }
 }
 
 function corrHelperRank(arr) {
@@ -24364,7 +24352,41 @@ function initRelationInstance(container, relationData, options = {}) {
       </div>
 
       <div class="analysis-subtab-content analysis-pairwise active">
-        <span class="analysis-help-badge analysis-panel-help-badge" title="${t('relation.analysis.help_title') || 'Help'}" data-testid="button-analysis-help">ℹ</span>
+        <span class="analysis-help-badge analysis-panel-help-badge pairwise-help-badge" title="${t('relation.analysis.help_title') || 'Help'}" data-testid="button-analysis-help">ℹ</span>
+        <div class="analysis-help-panel correlation-help pairwise-help-panel" style="display: none;">
+          <p><strong data-i18n="relation.analysis.help_classic">${t('relation.analysis.help_classic')}</strong></p>
+          <ul>
+            <li data-i18n="relation.analysis.help_pearson">${t('relation.analysis.help_pearson')}</li>
+            <li data-i18n="relation.analysis.help_spearman">${t('relation.analysis.help_spearman')}</li>
+            <li data-i18n="relation.analysis.help_kendall">${t('relation.analysis.help_kendall')}</li>
+            <li data-i18n="relation.analysis.help_pointbiserial">${t('relation.analysis.help_pointbiserial')}</li>
+            <li data-i18n="relation.analysis.help_phi">${t('relation.analysis.help_phi')}</li>
+            <li data-i18n="relation.analysis.help_cramers">${t('relation.analysis.help_cramers')}</li>
+          </ul>
+          <p><strong data-i18n="relation.analysis.help_extended">${t('relation.analysis.help_extended')}</strong></p>
+          <ul>
+            <li data-i18n="relation.analysis.help_eta">${t('relation.analysis.help_eta')}</li>
+            <li data-i18n="relation.analysis.help_mutual_info">${t('relation.analysis.help_mutual_info')}</li>
+            <li data-i18n="relation.analysis.help_distance_corr">${t('relation.analysis.help_distance_corr')}</li>
+            <li data-i18n="relation.analysis.help_polyserial">${t('relation.analysis.help_polyserial')}</li>
+            <li data-i18n="relation.analysis.help_tetrachoric">${t('relation.analysis.help_tetrachoric')}</li>
+            <li data-i18n="relation.analysis.help_somers">${t('relation.analysis.help_somers')}</li>
+            <li data-i18n="relation.analysis.help_lambda">${t('relation.analysis.help_lambda')}</li>
+            <li data-i18n="relation.analysis.help_hoeffding">${t('relation.analysis.help_hoeffding')}</li>
+            <li data-i18n="relation.analysis.help_blomqvist">${t('relation.analysis.help_blomqvist')}</li>
+            <li data-i18n="relation.analysis.help_chatterjee">${t('relation.analysis.help_chatterjee')}</li>
+            <li data-i18n="relation.analysis.help_cosine">${t('relation.analysis.help_cosine')}</li>
+            <li data-i18n="relation.analysis.help_jaccard">${t('relation.analysis.help_jaccard')}</li>
+          </ul>
+          <p><strong data-i18n="relation.analysis.help_auto_detect">${t('relation.analysis.help_auto_detect')}</strong></p>
+          <ul>
+            <li data-i18n="relation.analysis.help_auto_both_binary">${t('relation.analysis.help_auto_both_binary')}</li>
+            <li data-i18n="relation.analysis.help_auto_binary_numeric">${t('relation.analysis.help_auto_binary_numeric')}</li>
+            <li data-i18n="relation.analysis.help_auto_numeric_small">${t('relation.analysis.help_auto_numeric_small')}</li>
+            <li data-i18n="relation.analysis.help_auto_numeric_large">${t('relation.analysis.help_auto_numeric_large')}</li>
+            <li data-i18n="relation.analysis.help_auto_categorical">${t('relation.analysis.help_auto_categorical')}</li>
+          </ul>
+        </div>
         <div class="correlation-config">
           <div class="correlation-section">
             <div class="correlation-section-header" data-i18n="relation.analysis.single_pair">${t('relation.analysis.single_pair')}</div>
@@ -24425,40 +24447,6 @@ function initRelationInstance(container, relationData, options = {}) {
               </div>
             </div>
           </div>
-        </div>
-        <div class="correlation-help" style="display: none;">
-          <p><strong data-i18n="relation.analysis.help_classic">${t('relation.analysis.help_classic')}</strong></p>
-          <ul>
-            <li data-i18n="relation.analysis.help_pearson">${t('relation.analysis.help_pearson')}</li>
-            <li data-i18n="relation.analysis.help_spearman">${t('relation.analysis.help_spearman')}</li>
-            <li data-i18n="relation.analysis.help_kendall">${t('relation.analysis.help_kendall')}</li>
-            <li data-i18n="relation.analysis.help_pointbiserial">${t('relation.analysis.help_pointbiserial')}</li>
-            <li data-i18n="relation.analysis.help_phi">${t('relation.analysis.help_phi')}</li>
-            <li data-i18n="relation.analysis.help_cramers">${t('relation.analysis.help_cramers')}</li>
-          </ul>
-          <p><strong data-i18n="relation.analysis.help_extended">${t('relation.analysis.help_extended')}</strong></p>
-          <ul>
-            <li data-i18n="relation.analysis.help_eta">${t('relation.analysis.help_eta')}</li>
-            <li data-i18n="relation.analysis.help_mutual_info">${t('relation.analysis.help_mutual_info')}</li>
-            <li data-i18n="relation.analysis.help_distance_corr">${t('relation.analysis.help_distance_corr')}</li>
-            <li data-i18n="relation.analysis.help_polyserial">${t('relation.analysis.help_polyserial')}</li>
-            <li data-i18n="relation.analysis.help_tetrachoric">${t('relation.analysis.help_tetrachoric')}</li>
-            <li data-i18n="relation.analysis.help_somers">${t('relation.analysis.help_somers')}</li>
-            <li data-i18n="relation.analysis.help_lambda">${t('relation.analysis.help_lambda')}</li>
-            <li data-i18n="relation.analysis.help_hoeffding">${t('relation.analysis.help_hoeffding')}</li>
-            <li data-i18n="relation.analysis.help_blomqvist">${t('relation.analysis.help_blomqvist')}</li>
-            <li data-i18n="relation.analysis.help_chatterjee">${t('relation.analysis.help_chatterjee')}</li>
-            <li data-i18n="relation.analysis.help_cosine">${t('relation.analysis.help_cosine')}</li>
-            <li data-i18n="relation.analysis.help_jaccard">${t('relation.analysis.help_jaccard')}</li>
-          </ul>
-          <p><strong data-i18n="relation.analysis.help_auto_detect">${t('relation.analysis.help_auto_detect')}</strong></p>
-          <ul>
-            <li data-i18n="relation.analysis.help_auto_both_binary">${t('relation.analysis.help_auto_both_binary')}</li>
-            <li data-i18n="relation.analysis.help_auto_binary_numeric">${t('relation.analysis.help_auto_binary_numeric')}</li>
-            <li data-i18n="relation.analysis.help_auto_numeric_small">${t('relation.analysis.help_auto_numeric_small')}</li>
-            <li data-i18n="relation.analysis.help_auto_numeric_large">${t('relation.analysis.help_auto_numeric_large')}</li>
-            <li data-i18n="relation.analysis.help_auto_categorical">${t('relation.analysis.help_auto_categorical')}</li>
-          </ul>
         </div>
         <div class="correlation-result"></div>
       </div>
@@ -24948,6 +24936,7 @@ function renderAnalysis(st = state) {
   setupPanelHelpBadge('.matrix-help-badge', '.matrix-help-panel');
   setupPanelHelpBadge('.clustering-help-badge', '.clustering-help-panel');
   setupPanelHelpBadge('.multivariate-help-badge', '.multivariate-help-panel');
+  setupPanelHelpBadge('.pairwise-help-badge', '.pairwise-help-panel');
 }
 
 function initMatrixView(st = state) {
