@@ -26412,7 +26412,7 @@ function renderStructure(st = state) {
     const table = document.createElement('table');
     table.className = 'structure-columns-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th style="width:30px"></th><th style="width:40px">#</th><th>' + t('relation.structure.th_name') + '</th><th>' + t('relation.structure.th_kind') + '</th><th>' + t('relation.structure.th_display_name') + '</th><th>' + t('relation.structure.th_short_name') + '</th><th style="width:55px">' + t('relation.structure.th_multiple') + '</th><th style="width:60px"></th></tr>';
+    thead.innerHTML = '<tr><th class="struct-col-drag" style="width:30px"></th><th class="struct-col-order" style="width:40px">#</th><th class="struct-col-name">' + t('relation.structure.th_name') + '</th><th class="struct-col-kind">' + t('relation.structure.th_kind') + '</th><th class="struct-col-display">' + t('relation.structure.th_display_name') + '</th><th class="struct-col-short">' + t('relation.structure.th_short_name') + '</th><th class="struct-col-multiple" style="width:55px">' + t('relation.structure.th_multiple') + '</th><th class="struct-col-actions" style="width:60px"></th></tr>';
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
@@ -26427,7 +26427,7 @@ function renderStructure(st = state) {
       tr.dataset.idx = idx;
 
       const tdDrag = document.createElement('td');
-      tdDrag.className = 'structure-drag-cell';
+      tdDrag.className = 'structure-drag-cell struct-col-drag';
       tdDrag.appendChild(buildDragHandle());
       tr.appendChild(tdDrag);
 
@@ -26480,8 +26480,11 @@ function renderStructure(st = state) {
         showToast(t('relation.toast.columns_reordered'), 'success');
       });
 
-      if (isEditing) {
+      const isMobileStructure = window.innerWidth <= 480;
+
+      if (isEditing && !isMobileStructure) {
         const tdOrder = document.createElement('td');
+        tdOrder.className = 'struct-col-order';
         const orderInput = document.createElement('input');
         orderInput.type = 'number';
         orderInput.min = '0';
@@ -26495,6 +26498,7 @@ function renderStructure(st = state) {
         tr.appendChild(tdOrder);
 
         const tdName = document.createElement('td');
+        tdName.className = 'struct-col-name';
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.value = changes.newName || row.name;
@@ -26516,6 +26520,7 @@ function renderStructure(st = state) {
         tr.appendChild(tdName);
 
         const tdKind = document.createElement('td');
+        tdKind.className = 'struct-col-kind';
         const currentKind = changes.kind || row.kind;
         const kindSel = buildKindSelect(currentKind, (val) => {
           if (!pendingChanges[idx]) pendingChanges[idx] = {};
@@ -26526,6 +26531,7 @@ function renderStructure(st = state) {
         tr.appendChild(tdKind);
 
         const tdDisplay = document.createElement('td');
+        tdDisplay.className = 'struct-col-display';
         const dispInput = document.createElement('input');
         dispInput.type = 'text';
         dispInput.value = changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName;
@@ -26538,6 +26544,7 @@ function renderStructure(st = state) {
         tr.appendChild(tdDisplay);
 
         const tdShort = document.createElement('td');
+        tdShort.className = 'struct-col-short';
         const shortInput = document.createElement('input');
         shortInput.type = 'text';
         shortInput.value = changes.newShortName !== undefined ? changes.newShortName : row.shortName;
@@ -26550,6 +26557,7 @@ function renderStructure(st = state) {
         tr.appendChild(tdShort);
 
         const tdMulti = document.createElement('td');
+        tdMulti.className = 'struct-col-multiple';
         const multiCheck = document.createElement('input');
         multiCheck.type = 'checkbox';
         multiCheck.checked = changes.newMultiple !== undefined ? changes.newMultiple : (row.att?.multiple || false);
@@ -26561,7 +26569,7 @@ function renderStructure(st = state) {
         tr.appendChild(tdMulti);
 
         const tdActions = document.createElement('td');
-        tdActions.className = 'structure-row-actions';
+        tdActions.className = 'structure-row-actions struct-col-actions';
         const saveRowBtn = document.createElement('button');
         saveRowBtn.className = 'structure-row-save';
         saveRowBtn.title = t('relation.structure.save_row') || 'Save';
@@ -26613,28 +26621,93 @@ function renderStructure(st = state) {
         tdActions.appendChild(cancelRowBtn);
         tdActions.appendChild(detailRowBtn);
         tr.appendChild(tdActions);
+      } else if (isEditing && isMobileStructure) {
+        const tdName = document.createElement('td');
+        tdName.className = 'struct-col-name';
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = changes.newName || row.name;
+        nameInput.className = 'structure-inline-name';
+        nameInput.addEventListener('input', () => {
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newName = nameInput.value;
+        });
+        nameInput.addEventListener('blur', () => {
+          let val = nameInput.value.trim();
+          if (!val) { nameInput.value = row.name; return; }
+          const otherNames = structureRows.filter((r, i) => i !== idx).map(r => r.name);
+          while (otherNames.includes(val)) { val += '_'; }
+          nameInput.value = val;
+          if (!pendingChanges[idx]) pendingChanges[idx] = {};
+          pendingChanges[idx].newName = val;
+        });
+        tdName.appendChild(nameInput);
+        tr.appendChild(tdName);
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'structure-row-actions struct-col-actions';
+        const saveRowBtn = document.createElement('button');
+        saveRowBtn.className = 'structure-row-save';
+        saveRowBtn.title = t('relation.structure.save_row') || 'Save';
+        saveRowBtn.textContent = '✓';
+        saveRowBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          applyRowChanges(idx);
+        });
+        const cancelRowBtn = document.createElement('button');
+        cancelRowBtn.className = 'structure-row-cancel';
+        cancelRowBtn.title = t('relation.structure.cancel_row') || 'Cancel';
+        cancelRowBtn.textContent = '✗';
+        cancelRowBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          delete pendingChanges[idx];
+          editingIdx = null;
+          detailIdx = null;
+          detailSnapshot = null;
+          render();
+        });
+        tdActions.appendChild(saveRowBtn);
+        tdActions.appendChild(cancelRowBtn);
+        tr.appendChild(tdActions);
+
+        if (detailIdx !== idx) {
+          detailIdx = idx;
+          const snapRow = structureRows[idx];
+          detailSnapshot = {
+            att: snapRow.att ? JSON.parse(JSON.stringify(snapRow.att)) : null,
+            pendingAtt: pendingChanges[idx]?.att ? JSON.parse(JSON.stringify(pendingChanges[idx].att)) : null,
+            pendingKind: pendingChanges[idx]?.kind || null,
+            pendingConvert: pendingChanges[idx]?.convertToAtt || false
+          };
+        }
       } else {
         const tdOrder2 = document.createElement('td');
+        tdOrder2.className = 'struct-col-order';
         tdOrder2.textContent = row.order;
         tr.appendChild(tdOrder2);
         const tdName2 = document.createElement('td');
+        tdName2.className = 'struct-col-name';
         tdName2.innerHTML = '<strong>' + escapeHtml(changes.newName || row.name) + '</strong>';
         tr.appendChild(tdName2);
         const tdKind2 = document.createElement('td');
+        tdKind2.className = 'struct-col-kind';
         tdKind2.innerHTML = '<span class="structure-kind-badge ' + (row.isAtt ? 'kind-att' : '') + '">' + escapeHtml(changes.kind || row.kind) + (row.isAtt ? ' (att)' : '') + '</span>';
         tr.appendChild(tdKind2);
         const tdDisp2 = document.createElement('td');
+        tdDisp2.className = 'struct-col-display';
         tdDisp2.textContent = changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName;
         tr.appendChild(tdDisp2);
         const tdShort2 = document.createElement('td');
+        tdShort2.className = 'struct-col-short';
         tdShort2.textContent = changes.newShortName !== undefined ? changes.newShortName : row.shortName;
         tr.appendChild(tdShort2);
         const tdMulti2 = document.createElement('td');
+        tdMulti2.className = 'struct-col-multiple';
         tdMulti2.textContent = (changes.newMultiple !== undefined ? changes.newMultiple : row.att?.multiple) ? '✓' : '';
         tr.appendChild(tdMulti2);
 
         const tdActions2 = document.createElement('td');
-        tdActions2.className = 'structure-row-actions';
+        tdActions2.className = 'structure-row-actions struct-col-actions';
         const detailRowBtn2 = document.createElement('button');
         detailRowBtn2.className = 'structure-row-detail' + (detailIdx === idx ? ' open' : '');
         detailRowBtn2.title = t('relation.structure.open_detail') || 'Detail';
@@ -26783,6 +26856,7 @@ function renderStructure(st = state) {
 function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRender, onPanelSave, onPanelCancel) {
   const editor = document.createElement('div');
   editor.className = 'structure-att-editor';
+  const isMobileEditor = window.innerWidth <= 480;
 
   const changes = pendingChanges[idx] || {};
   const currentKind = changes.kind || row.kind;
@@ -26792,6 +26866,76 @@ function renderColumnEditor(row, idx, st, structureRows, pendingChanges, reRende
   const title = document.createElement('div');
   title.style.cssText = 'font-weight:600;font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;';
   title.innerHTML = '<span>Column: ' + escapeHtml(row.name) + '</span>';
+
+  if (isMobileEditor) {
+    editor.appendChild(title);
+    const mobileFields = document.createElement('div');
+    mobileFields.className = 'structure-mobile-fields';
+
+    const makeField = (label, inputEl) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'structure-mobile-field';
+      const lbl = document.createElement('label');
+      lbl.textContent = label;
+      wrap.appendChild(lbl);
+      wrap.appendChild(inputEl);
+      return wrap;
+    };
+
+    const orderInput = document.createElement('input');
+    orderInput.type = 'number';
+    orderInput.min = '0';
+    orderInput.max = String(structureRows.length - 1);
+    orderInput.value = changes.newOrder !== undefined ? changes.newOrder : row.order;
+    orderInput.addEventListener('change', () => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].newOrder = parseInt(orderInput.value) || 0;
+    });
+    mobileFields.appendChild(makeField(t('relation.structure.th_order') || '#', orderInput));
+
+    const kindSel = buildKindSelect(currentKind, (val) => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].kind = val;
+      reRender();
+    });
+    mobileFields.appendChild(makeField(t('relation.structure.th_kind'), kindSel));
+
+    const dispInput = document.createElement('input');
+    dispInput.type = 'text';
+    dispInput.value = changes.newDisplayName !== undefined ? changes.newDisplayName : row.displayName;
+    dispInput.placeholder = row.name;
+    dispInput.addEventListener('input', () => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].newDisplayName = dispInput.value;
+    });
+    mobileFields.appendChild(makeField(t('relation.structure.th_display_name'), dispInput));
+
+    const shortInput = document.createElement('input');
+    shortInput.type = 'text';
+    shortInput.value = changes.newShortName !== undefined ? changes.newShortName : row.shortName;
+    shortInput.addEventListener('input', () => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].newShortName = shortInput.value;
+    });
+    mobileFields.appendChild(makeField(t('relation.structure.th_short_name'), shortInput));
+
+    const multiWrap = document.createElement('div');
+    multiWrap.className = 'structure-mobile-field';
+    const multiLabel = document.createElement('label');
+    multiLabel.textContent = t('relation.structure.th_multiple');
+    const multiCheck = document.createElement('input');
+    multiCheck.type = 'checkbox';
+    multiCheck.checked = changes.newMultiple !== undefined ? changes.newMultiple : (row.att?.multiple || false);
+    multiCheck.addEventListener('change', () => {
+      if (!pendingChanges[idx]) pendingChanges[idx] = {};
+      pendingChanges[idx].newMultiple = multiCheck.checked;
+    });
+    multiWrap.appendChild(multiLabel);
+    multiWrap.appendChild(multiCheck);
+    mobileFields.appendChild(multiWrap);
+
+    editor.appendChild(mobileFields);
+  }
 
   if (!isAtt) {
     const convertBtn = document.createElement('button');
