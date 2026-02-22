@@ -16422,7 +16422,6 @@ function showRowOperationsMenu(rowIdx, x, y, st = state) {
     .join('\n    ');
   
   menu.innerHTML = `
-    <div class="column-menu-header">${t('relation.dialog.record')}</div>
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
@@ -28213,7 +28212,6 @@ function showRowMenuForInstance(st, rowIdx, x, y) {
     .join('\n    ');
   
   menu.innerHTML = `
-    <div class="column-menu-header">${t('relation.dialog.record')}</div>
     ${lineButtonsHtml}
     ${hasSelection ? `
       <div class="column-menu-section">
