@@ -731,6 +731,7 @@ window.RELATION_TRANSLATIONS = {
   "relation.structure.header_display": { pt: "Nome de Exibição", en: "Display Name", es: "Nombre de Visualización", fr: "Nom d'Affichage", it: "Nome Visualizzazione", de: "Anzeigename" },
   "relation.structure.header_short": { pt: "Nome Curto", en: "Short Name", es: "Nombre Corto", fr: "Nom Court", it: "Nome Breve", de: "Kurzname" },
   "relation.structure.header_multiple": { pt: "Múltiplo", en: "Multiple", es: "Múltiple", fr: "Multiple", it: "Multiplo", de: "Mehrfach" },
+  "relation.structure.th_order": { pt: "Ordem", en: "Order", es: "Orden", fr: "Ordre", it: "Ordine", de: "Reihenfolge" },
   "relation.structure.conversion_from": { pt: "Conversão de ", en: "Conversion from ", es: "Conversión de ", fr: "Conversion de ", it: "Conversione da ", de: "Konvertierung von " },
   "relation.structure.lossless_conversion": { pt: "Conversão sem perda de ", en: "Lossless conversion from ", es: "Conversión sin pérdida de ", fr: "Conversion sans perte de ", it: "Conversione senza perdita da ", de: "Verlustfreie Konvertierung von " },
 
