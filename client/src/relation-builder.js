@@ -11393,7 +11393,7 @@ function openChooseManyDialog(st) {
   dialog.querySelector('.close-selection').addEventListener('click', outputAndClose);
 }
 
-function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
+function getMultiOperationsList(st, selectedCount = 0, filteredCount = 0) {
   const multiOperationsMap = {
     'Invert Page': { value: 'invert-page', icon: '↔', label: t('relation.multiops.invert_page') },
     'Invert All': { value: 'invert-all', icon: '↔', label: t('relation.multiops.invert_all') },
@@ -11418,10 +11418,28 @@ function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
       const op = multiOperationsMap[opt];
       const selectionDisabled = op.needsSelection && selectedCount === 0;
       const cardinalityDisabled = maxReached && CARDINALITY_BLOCKED_MULTI.has(op.value);
-      const disabled = selectionDisabled || cardinalityDisabled ? ' disabled' : '';
-      return `<option value="${op.value}"${disabled}>${op.icon} ${op.label}</option>`;
-    })
+      const disabled = selectionDisabled || cardinalityDisabled;
+      return { ...op, disabled };
+    });
+}
+
+function buildMultiOptionsHtml(st, selectedCount = 0, filteredCount = 0) {
+  return getMultiOperationsList(st, selectedCount, filteredCount)
+    .map(op => `<option value="${op.value}"${op.disabled ? ' disabled' : ''}>${op.icon} ${op.label}</option>`)
     .join('\n        ');
+}
+
+function buildMultiOptionsMenuHtml(st, selectedCount = 0, filteredCount = 0) {
+  const items = getMultiOperationsList(st, selectedCount, filteredCount);
+  const itemsHtml = items
+    .map(op => `<button class="column-menu-item" data-action="${op.value}" data-testid="button-multi-${op.value}"${op.disabled ? ' disabled' : ''}>${op.icon} ${op.label}</button>`)
+    .join('\n      ');
+  return `<div class="checked-actions-wrapper" data-testid="button-checked-actions">
+    <button class="checked-actions-trigger" data-testid="button-checked-trigger">${t('relation.pagination.checked_actions')} ▾</button>
+    <div class="checked-actions-menu">
+      ${itemsHtml}
+    </div>
+  </div>`;
 }
 
 // Handle multi-select actions (works for both Table and Cards views)
@@ -12173,10 +12191,7 @@ function renderPagination(st = state) {
         ${cardinalityMaxReached ? `<span class="cardinality-warning cardinality-max-warning" title="${tf('relation.cardinality.max_reached', {max: cardinalityMax})}">⚠ max ${cardinalityMax}</span>` : ''}
       </div>
       <div class="pagination-actions${showMulticheck && (st.rel_options.general_multi_options || []).length > 0 ? '' : ' hidden'}">
-        <select class="selection-actions selection-actions-select" ${!hasResults ? 'disabled' : ''}>
-          <option value="" disabled selected data-i18n="relation.pagination.checked_actions">${t('relation.pagination.checked_actions')}</option>
-          ${buildMultiOptionsHtml(st, selectedRecords, filteredRecords)}
-        </select>
+        ${buildMultiOptionsMenuHtml(st, selectedRecords, filteredRecords)}
       </div>
     </div>
     <div class="pagination-right">
@@ -12245,12 +12260,31 @@ function renderPagination(st = state) {
     }
   });
   
-  queryEl('.selection-actions')?.addEventListener('change', (e) => {
-    const action = e.target.value;
-    e.target.value = ''; // Reset to placeholder
-    
-    handleMultiAction(st, action);
-  });
+  const checkedTrigger = queryEl('.checked-actions-trigger');
+  const checkedMenu = queryEl('.checked-actions-menu');
+  if (checkedTrigger && checkedMenu) {
+    checkedTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = checkedMenu.classList.contains('open');
+      closeAllMenus();
+      if (!isOpen) {
+        const rect = checkedTrigger.getBoundingClientRect();
+        checkedMenu.style.position = 'fixed';
+        checkedMenu.style.top = rect.bottom + 'px';
+        checkedMenu.classList.add('open');
+        const menuW = checkedMenu.offsetWidth;
+        const vpW = window.innerWidth;
+        checkedMenu.style.left = Math.max(4, Math.min(rect.left, vpW - menuW - 4)) + 'px';
+      }
+    });
+    checkedMenu.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (btn && !btn.disabled) {
+        checkedMenu.classList.remove('open');
+        handleMultiAction(st, btn.dataset.action);
+      }
+    });
+  }
 }
 
 function syncFooterColumnWidths(mainTable, footerTable) {
@@ -15806,7 +15840,7 @@ function showStatisticsPanel(colIdx) {
 
 function closeAllMenus() {
   document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog:not(.selection-dialog), .group-cols-dialog, .color-palette-dialog').forEach(el => el.remove());
-  document.querySelectorAll('.always-visible-menu.open').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.always-visible-menu.open, .checked-actions-menu.open').forEach(el => el.classList.remove('open'));
 }
 
 function hasActiveFilter(st = state) {
@@ -18946,10 +18980,7 @@ function renderCardsView(st = state) {
   navHtml += '</div>';
   const hasMultiOpts = (st.rel_options.general_multi_options || []).length > 0;
   navHtml += '<div class="cards-actions' + (showMulticheck && hasMultiOpts ? '' : ' hidden') + '">';
-  navHtml += '<select class="cards-selection-actions">';
-  navHtml += '<option value="" disabled selected data-i18n="relation.pagination.checked_actions">' + t('relation.pagination.checked_actions') + '</option>';
-  navHtml += buildMultiOptionsHtml(st, selectedCount, filteredCount);
-  navHtml += '</select>';
+  navHtml += buildMultiOptionsMenuHtml(st, selectedCount, filteredCount);
   navHtml += '</div>';
   navHtml += '</div>';
 
@@ -19033,12 +19064,31 @@ function renderCardsView(st = state) {
     renderCardsView(st);
   });
   
-  cardsNavigation.querySelector('.cards-selection-actions')?.addEventListener('change', (e) => {
-    const action = e.target.value;
-    e.target.value = '';
-    
-    handleMultiAction(st, action, { pageIndices, allIndices: indices, renderFn: () => renderCardsView(st) });
-  });
+  const cardsCheckedTrigger = cardsNavigation.querySelector('.checked-actions-trigger');
+  const cardsCheckedMenu = cardsNavigation.querySelector('.checked-actions-menu');
+  if (cardsCheckedTrigger && cardsCheckedMenu) {
+    cardsCheckedTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = cardsCheckedMenu.classList.contains('open');
+      closeAllMenus();
+      if (!isOpen) {
+        const rect = cardsCheckedTrigger.getBoundingClientRect();
+        cardsCheckedMenu.style.position = 'fixed';
+        cardsCheckedMenu.style.top = rect.bottom + 'px';
+        cardsCheckedMenu.classList.add('open');
+        const menuW = cardsCheckedMenu.offsetWidth;
+        const vpW = window.innerWidth;
+        cardsCheckedMenu.style.left = Math.max(4, Math.min(rect.left, vpW - menuW - 4)) + 'px';
+      }
+    });
+    cardsCheckedMenu.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (btn && !btn.disabled) {
+        cardsCheckedMenu.classList.remove('open');
+        handleMultiAction(st, btn.dataset.action, { pageIndices, allIndices: indices, renderFn: () => renderCardsView(st) });
+      }
+    });
+  }
 }
 
 function getCategoricalOrNumericColumns(st = state) {

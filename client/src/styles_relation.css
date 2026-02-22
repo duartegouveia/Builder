@@ -3191,6 +3191,67 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   cursor: not-allowed;
 }
 
+.checked-actions-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.checked-actions-trigger {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.checked-actions-trigger:hover {
+  border-color: var(--primary);
+}
+
+.checked-actions-menu {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 180px;
+  max-width: 280px;
+  padding: 4px 0;
+}
+
+.checked-actions-menu.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.checked-actions-menu .column-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.checked-actions-menu .column-menu-item:hover {
+  background: var(--muted);
+}
+
+.checked-actions-menu .column-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .view-tab {
   display: flex;
   align-items: center;
@@ -8152,6 +8213,7 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   .column-menu,
   .row-ops-menu,
   .always-visible-menu,
+  .checked-actions-menu,
   .filter-dialog,
   .bin-intervals-popup,
   .binning-help-dialog,
@@ -9834,6 +9896,27 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   color: #cdd6f4;
 }
 [data-theme="dark"] .always-visible-menu .column-menu-item:hover {
+  background: #313244;
+}
+
+/* --- Checked Actions Menu --- */
+[data-theme="dark"] .checked-actions-trigger {
+  background: #313244;
+  color: #cdd6f4;
+  border-color: #45475a;
+}
+[data-theme="dark"] .checked-actions-trigger:hover {
+  border-color: #89b4fa;
+}
+[data-theme="dark"] .checked-actions-menu {
+  background: #1e1e2e;
+  border-color: #45475a;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+[data-theme="dark"] .checked-actions-menu .column-menu-item {
+  color: #cdd6f4;
+}
+[data-theme="dark"] .checked-actions-menu .column-menu-item:hover {
   background: #313244;
 }
 
