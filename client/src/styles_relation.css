@@ -3131,6 +3131,11 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 }
 
 .always-visible-actions {
+  position: relative;
+  display: inline-block;
+}
+
+.always-visible-trigger {
   padding: var(--space-1) var(--space-2);
   font-size: 0.75rem;
   border: 1px solid var(--border);
@@ -3138,18 +3143,52 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   background: var(--background);
   color: var(--foreground);
   cursor: pointer;
-  min-width: 100px;
-  max-width: 220px;
+  white-space: nowrap;
 }
 
-.always-visible-actions:hover {
+.always-visible-trigger:hover {
   border-color: var(--primary);
 }
 
-.always-visible-actions:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--ring);
+.always-visible-menu {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 180px;
+  max-width: 280px;
+  padding: 4px 0;
+}
+
+.always-visible-menu.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.always-visible-menu .column-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.always-visible-menu .column-menu-item:hover {
+  background: var(--muted);
+}
+
+.always-visible-menu .column-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .view-tab {
@@ -9777,10 +9816,24 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
 }
 
 /* --- Always Visible Actions --- */
-[data-theme="dark"] .always-visible-actions {
-  background: #1e1e2e;
+[data-theme="dark"] .always-visible-trigger {
+  background: #313244;
   color: #cdd6f4;
-  border-color: #313244;
+  border-color: #45475a;
+}
+[data-theme="dark"] .always-visible-trigger:hover {
+  border-color: #89b4fa;
+}
+[data-theme="dark"] .always-visible-menu {
+  background: #1e1e2e;
+  border-color: #45475a;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+[data-theme="dark"] .always-visible-menu .column-menu-item {
+  color: #cdd6f4;
+}
+[data-theme="dark"] .always-visible-menu .column-menu-item:hover {
+  background: #313244;
 }
 
 /* --- Saved Prompts --- */

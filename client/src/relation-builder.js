@@ -10600,19 +10600,21 @@ function buildAlwaysVisibleOptionsHtml(options, st) {
   
   const maxReached = st ? isCardinalityMaxReached(st) : false;
   
-  const optionsHtml = options
+  const itemsHtml = options
     .filter(opt => alwaysVisibleOperationsMap[opt])
     .map(opt => {
       const op = alwaysVisibleOperationsMap[opt];
       const disabled = maxReached && CARDINALITY_BLOCKED_ALWAYS_VISIBLE.has(op.value) ? ' disabled' : '';
-      return `<option value="${op.value}"${disabled}>${op.icon} ${op.label}</option>`;
+      return `<button class="column-menu-item" data-action="${op.value}" data-testid="button-av-${op.value}"${disabled}>${op.icon} ${op.label}</button>`;
     })
-    .join('\n        ');
+    .join('\n      ');
   
-  return `<select class="always-visible-actions">
-    <option value="" disabled selected>${t('relation.rowops.actions')}</option>
-    ${optionsHtml}
-  </select>`;
+  return `<div class="always-visible-actions" data-testid="button-always-visible-actions">
+    <button class="always-visible-trigger" data-testid="button-av-trigger">${t('relation.rowops.actions')} ▾</button>
+    <div class="always-visible-menu">
+      ${itemsHtml}
+    </div>
+  </div>`;
 }
 
 // Handle always-visible action (calls same row operations but without a specific row)
@@ -15804,6 +15806,7 @@ function showStatisticsPanel(colIdx) {
 
 function closeAllMenus() {
   document.querySelectorAll('.column-menu, .filter-dialog, .stats-panel, .row-ops-menu, .nested-relation-dialog:not(.selection-dialog), .group-cols-dialog, .color-palette-dialog').forEach(el => el.remove());
+  document.querySelectorAll('.always-visible-menu.open').forEach(el => el.classList.remove('open'));
 }
 
 function hasActiveFilter(st = state) {
@@ -18523,13 +18526,28 @@ function renderViewTabs() {
     selectWrapper.innerHTML = buildAlwaysVisibleOptionsHtml(alwaysVisibleOptions, state);
     tabsRight.appendChild(selectWrapper);
     
-    // Add event listener for the select (for main state only)
-    const select = selectWrapper.querySelector('.always-visible-actions');
-    if (select) {
-      select.addEventListener('change', (e) => {
-        const action = e.target.value;
-        e.target.value = '';
-        handleAlwaysVisibleAction(state, action);
+    const avTrigger = selectWrapper.querySelector('.always-visible-trigger');
+    const avMenu = selectWrapper.querySelector('.always-visible-menu');
+    if (avTrigger && avMenu) {
+      avTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = avMenu.classList.contains('open');
+        closeAllMenus();
+        if (!isOpen) {
+          const rect = avTrigger.getBoundingClientRect();
+          avMenu.style.position = 'fixed';
+          avMenu.style.top = rect.bottom + 'px';
+          avMenu.style.left = Math.max(0, rect.right - avMenu.offsetWidth) + 'px';
+          avMenu.classList.add('open');
+        }
+      });
+      avMenu.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (btn && !btn.disabled) {
+          const action = btn.dataset.action;
+          avMenu.classList.remove('open');
+          handleAlwaysVisibleAction(state, action);
+        }
       });
     }
   }
@@ -24640,14 +24658,33 @@ function initInstanceEventListeners(st) {
     badge.addEventListener('mouseleave', hideKeyboardHelpTooltip);
   }
   
-  // Always-visible options select event listener
-  const alwaysVisibleSelect = container.querySelector('.always-visible-actions');
-  if (alwaysVisibleSelect) {
-    alwaysVisibleSelect.addEventListener('change', (e) => {
-      const action = e.target.value;
-      e.target.value = ''; // Reset to placeholder
-      handleAlwaysVisibleAction(st, action);
-    });
+  // Always-visible options menu event listener
+  const avContainer = container.querySelector('.always-visible-actions');
+  if (avContainer) {
+    const avTrigger = avContainer.querySelector('.always-visible-trigger');
+    const avMenu = avContainer.querySelector('.always-visible-menu');
+    if (avTrigger && avMenu) {
+      avTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = avMenu.classList.contains('open');
+        closeAllMenus();
+        if (!isOpen) {
+          const rect = avTrigger.getBoundingClientRect();
+          avMenu.style.position = 'fixed';
+          avMenu.style.top = rect.bottom + 'px';
+          avMenu.style.left = Math.max(0, rect.right - avMenu.offsetWidth) + 'px';
+          avMenu.classList.add('open');
+        }
+      });
+      avMenu.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (btn && !btn.disabled) {
+          const action = btn.dataset.action;
+          avMenu.classList.remove('open');
+          handleAlwaysVisibleAction(st, action);
+        }
+      });
+    }
   }
 
   const newQuickBtn = container.querySelector('.btn-new-quick');
