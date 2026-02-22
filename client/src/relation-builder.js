@@ -12269,12 +12269,19 @@ function renderPagination(st = state) {
       closeAllMenus();
       if (!isOpen) {
         const rect = checkedTrigger.getBoundingClientRect();
+        const vpW = window.innerWidth;
+        const vpH = window.innerHeight;
         checkedMenu.style.position = 'fixed';
-        checkedMenu.style.top = rect.bottom + 'px';
+        checkedMenu.style.maxWidth = (vpW - 8) + 'px';
         checkedMenu.classList.add('open');
         const menuW = checkedMenu.offsetWidth;
-        const vpW = window.innerWidth;
+        const menuH = checkedMenu.offsetHeight;
         checkedMenu.style.left = Math.max(4, Math.min(rect.left, vpW - menuW - 4)) + 'px';
+        if (rect.bottom + menuH > vpH - 4) {
+          checkedMenu.style.top = Math.max(4, rect.top - menuH) + 'px';
+        } else {
+          checkedMenu.style.top = rect.bottom + 'px';
+        }
       }
     });
     checkedMenu.addEventListener('click', (e) => {
@@ -18569,12 +18576,19 @@ function renderViewTabs() {
         closeAllMenus();
         if (!isOpen) {
           const rect = avTrigger.getBoundingClientRect();
+          const vpW = window.innerWidth;
+          const vpH = window.innerHeight;
           avMenu.style.position = 'fixed';
-          avMenu.style.top = rect.bottom + 'px';
+          avMenu.style.maxWidth = (vpW - 8) + 'px';
           avMenu.classList.add('open');
           const menuW = avMenu.offsetWidth;
-          const vpW = window.innerWidth;
+          const menuH = avMenu.offsetHeight;
           avMenu.style.left = Math.max(4, Math.min(rect.right - menuW, vpW - menuW - 4)) + 'px';
+          if (rect.bottom + menuH > vpH - 4) {
+            avMenu.style.top = Math.max(4, rect.top - menuH) + 'px';
+          } else {
+            avMenu.style.top = rect.bottom + 'px';
+          }
         }
       });
       avMenu.addEventListener('click', (e) => {
@@ -19073,12 +19087,19 @@ function renderCardsView(st = state) {
       closeAllMenus();
       if (!isOpen) {
         const rect = cardsCheckedTrigger.getBoundingClientRect();
+        const vpW = window.innerWidth;
+        const vpH = window.innerHeight;
         cardsCheckedMenu.style.position = 'fixed';
-        cardsCheckedMenu.style.top = rect.bottom + 'px';
+        cardsCheckedMenu.style.maxWidth = (vpW - 8) + 'px';
         cardsCheckedMenu.classList.add('open');
         const menuW = cardsCheckedMenu.offsetWidth;
-        const vpW = window.innerWidth;
+        const menuH = cardsCheckedMenu.offsetHeight;
         cardsCheckedMenu.style.left = Math.max(4, Math.min(rect.left, vpW - menuW - 4)) + 'px';
+        if (rect.bottom + menuH > vpH - 4) {
+          cardsCheckedMenu.style.top = Math.max(4, rect.top - menuH) + 'px';
+        } else {
+          cardsCheckedMenu.style.top = rect.bottom + 'px';
+        }
       }
     });
     cardsCheckedMenu.addEventListener('click', (e) => {
@@ -24722,12 +24743,19 @@ function initInstanceEventListeners(st) {
         closeAllMenus();
         if (!isOpen) {
           const rect = avTrigger.getBoundingClientRect();
+          const vpW = window.innerWidth;
+          const vpH = window.innerHeight;
           avMenu.style.position = 'fixed';
-          avMenu.style.top = rect.bottom + 'px';
+          avMenu.style.maxWidth = (vpW - 8) + 'px';
           avMenu.classList.add('open');
           const menuW = avMenu.offsetWidth;
-          const vpW = window.innerWidth;
+          const menuH = avMenu.offsetHeight;
           avMenu.style.left = Math.max(4, Math.min(rect.right - menuW, vpW - menuW - 4)) + 'px';
+          if (rect.bottom + menuH > vpH - 4) {
+            avMenu.style.top = Math.max(4, rect.top - menuH) + 'px';
+          } else {
+            avMenu.style.top = rect.bottom + 'px';
+          }
         }
       });
       avMenu.addEventListener('click', (e) => {

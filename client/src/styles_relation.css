@@ -3222,6 +3222,9 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   min-width: 180px;
   max-width: 280px;
   padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .checked-actions-menu.open {
