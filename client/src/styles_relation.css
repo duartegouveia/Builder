@@ -7763,12 +7763,12 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   }
 
   .nav-dropdown {
-    position: fixed;
-    left: var(--space-2);
-    right: var(--space-2);
-    top: auto;
+    position: absolute;
+    left: 0;
+    top: 100%;
     min-width: auto;
     max-width: calc(100vw - 16px);
+    margin-top: 0;
   }
 
   .json-editor-wrapper {
@@ -8021,6 +8021,18 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   .main-nav-menu {
     padding: 2px;
     gap: 1px;
+  }
+
+  .nav-dropdown {
+    left: auto !important;
+    right: 0 !important;
+    max-width: calc(100vw - 8px) !important;
+    margin-top: 0 !important;
+    padding-top: 0.25rem !important;
+  }
+
+  .nav-item::after {
+    height: 0 !important;
   }
 
   .nav-btn::after {
