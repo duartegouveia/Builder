@@ -18537,8 +18537,10 @@ function renderViewTabs() {
           const rect = avTrigger.getBoundingClientRect();
           avMenu.style.position = 'fixed';
           avMenu.style.top = rect.bottom + 'px';
-          avMenu.style.left = Math.max(0, rect.right - avMenu.offsetWidth) + 'px';
           avMenu.classList.add('open');
+          const menuW = avMenu.offsetWidth;
+          const vpW = window.innerWidth;
+          avMenu.style.left = Math.max(4, Math.min(rect.right - menuW, vpW - menuW - 4)) + 'px';
         }
       });
       avMenu.addEventListener('click', (e) => {
@@ -24672,8 +24674,10 @@ function initInstanceEventListeners(st) {
           const rect = avTrigger.getBoundingClientRect();
           avMenu.style.position = 'fixed';
           avMenu.style.top = rect.bottom + 'px';
-          avMenu.style.left = Math.max(0, rect.right - avMenu.offsetWidth) + 'px';
           avMenu.classList.add('open');
+          const menuW = avMenu.offsetWidth;
+          const vpW = window.innerWidth;
+          avMenu.style.left = Math.max(4, Math.min(rect.right - menuW, vpW - menuW - 4)) + 'px';
         }
       });
       avMenu.addEventListener('click', (e) => {
