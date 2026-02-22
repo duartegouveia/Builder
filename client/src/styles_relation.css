@@ -9741,6 +9741,14 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   background: #1e1e2e;
   border-color: #313244;
 }
+[data-theme="dark"] .mv-col-checkbox-label {
+  color: #cdd6f4 !important;
+}
+[data-theme="dark"] .multivariate-column-selector > label,
+[data-theme="dark"] .multivariate-config-row label,
+[data-theme="dark"] .matrix-config-row label {
+  color: #a6adc8 !important;
+}
 
 /* --- Range Controls --- */
 [data-theme="dark"] .range-slider {
