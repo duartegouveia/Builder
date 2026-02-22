@@ -9142,6 +9142,46 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   border-color: #313244;
 }
 
+/* --- Dark Mode: Global Button Overrides --- */
+[data-theme="dark"] .btn-outline {
+  background: #313244 !important;
+  color: #cdd6f4 !important;
+  border-color: #45475a !important;
+}
+[data-theme="dark"] .btn-outline:hover:not(:disabled) {
+  background: #45475a !important;
+  color: #cdd6f4 !important;
+  border-color: #585b70 !important;
+}
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn.btn-primary {
+  background: #4a90d9 !important;
+  color: #fff !important;
+  border-color: #4a90d9 !important;
+}
+[data-theme="dark"] .btn-primary:hover:not(:disabled),
+[data-theme="dark"] .btn.btn-primary:hover:not(:disabled) {
+  background: #5a9ee6 !important;
+}
+[data-theme="dark"] .btn-default {
+  background: #4a90d9 !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .btn-secondary {
+  background: #313244 !important;
+  color: #cdd6f4 !important;
+  border-color: #45475a !important;
+}
+[data-theme="dark"] .btn-secondary:hover:not(:disabled) {
+  background: #45475a !important;
+}
+[data-theme="dark"] .btn-ghost {
+  color: #cdd6f4 !important;
+}
+[data-theme="dark"] .btn-ghost:hover:not(:disabled) {
+  background: #313244 !important;
+}
+
 /* --- Icon Set Dialog --- */
 [data-theme="dark"] .icon-set-dialog .dialog-close {
   color: #a6adc8;
