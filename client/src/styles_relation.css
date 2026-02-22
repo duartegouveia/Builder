@@ -8177,12 +8177,6 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
     padding: 2px 4px;
   }
 
-  .relation .always-visible-trigger,
-  .relation .checked-actions-trigger,
-  .relation .btn-row-ops {
-    padding-top: 6px;
-    padding-bottom: 6px;
-  }
 
   .relation h2 {
     font-size: 12px;
@@ -8433,9 +8427,11 @@ button.btn.btn-primary.btn-sm.btn-new-quick {
   body .row-ops-menu span,
   body .row-ops-menu a,
   body .row-ops-menu .column-menu-item,
-  body .row-ops-menu .column-menu-title {
+  body .row-ops-menu .column-menu-title,
+  body .always-visible-menu .column-menu-item,
+  body .checked-actions-menu .column-menu-item {
     font-size: 0.625rem;
-    padding: 2px 6px;
+    padding: 3px 6px;
     line-height: 1.3;
   }
 
