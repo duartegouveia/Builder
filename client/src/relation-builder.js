@@ -24885,6 +24885,17 @@ function renderCards(st = state) {
 
 function renderPivot(st = state) {
   initPivotConfig(st);
+  const container = st.container || document.querySelector(".relation-container");
+  if (container) {
+    const badge = container.querySelector(".pivot-help-badge");
+    if (badge && !badge._helpBound) {
+      badge._helpBound = true;
+      badge.addEventListener("click", () => {
+        const panel = container.querySelector(".pivot-help-panel");
+        if (panel) panel.style.display = panel.style.display === "none" ? "block" : "none";
+      });
+    }
+  }
 }
 
 function renderCorrelation(st = state) {
@@ -24923,6 +24934,20 @@ function renderAnalysis(st = state) {
   else if (activeSubtab === 'matrix') initMatrixView(st);
   else if (activeSubtab === 'clustering') initDiagramView(st);
   else if (activeSubtab === 'multivariate') initMultivariateView(st);
+
+  function setupPanelHelpBadge(badgeSel, panelSel) {
+    const badge = analysisView.querySelector(badgeSel);
+    if (badge && !badge._helpBound) {
+      badge._helpBound = true;
+      badge.addEventListener('click', () => {
+        const panel = analysisView.querySelector(panelSel);
+        if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+  }
+  setupPanelHelpBadge('.matrix-help-badge', '.matrix-help-panel');
+  setupPanelHelpBadge('.clustering-help-badge', '.clustering-help-panel');
+  setupPanelHelpBadge('.multivariate-help-badge', '.multivariate-help-panel');
 }
 
 function initMatrixView(st = state) {
@@ -25754,6 +25779,17 @@ function runMANOVA(st, resultEl, mvView) {
 
 function renderAI(st = state) {
   initAIView(st);
+  const container = st.container || document.querySelector(".relation-container");
+  if (container) {
+    const badge = container.querySelector(".ai-help-badge");
+    if (badge && !badge._helpBound) {
+      badge._helpBound = true;
+      badge.addEventListener("click", () => {
+        const panel = container.querySelector(".ai-help-panel");
+        if (panel) panel.style.display = panel.style.display === "none" ? "block" : "none";
+      });
+    }
+  }
 }
 
 function renderSaved(st = state) {
@@ -29230,27 +29266,7 @@ function init() {
   
   // Correlation events
   el('.btn-calculate-corr')?.addEventListener('click', () => calculateCorrelation());
-  el('.analysis-pairwise .analysis-panel-help-badge')?.addEventListener('click', () => {
-    const helpDiv = el('.correlation-help');
-    if (helpDiv) {
-      helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
-    }
-  });
 
-  function setupHelpBadge(badgeSelector, panelSelector) {
-    const badge = document.querySelector(badgeSelector);
-    if (badge) {
-      badge.addEventListener('click', () => {
-        const panel = document.querySelector(panelSelector);
-        if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-      });
-    }
-  }
-  setupHelpBadge('.pivot-help-badge', '.pivot-help-panel');
-  setupHelpBadge('.matrix-help-badge', '.matrix-help-panel');
-  setupHelpBadge('.clustering-help-badge', '.clustering-help-panel');
-  setupHelpBadge('.multivariate-help-badge', '.multivariate-help-panel');
-  setupHelpBadge('.ai-help-badge', '.ai-help-panel');
 
   const btnLoadComparison = document.querySelector('.btn-load-model-comparison');
   if (btnLoadComparison) {
